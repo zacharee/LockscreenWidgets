@@ -12,16 +12,16 @@ import android.view.LayoutInflater
 import android.view.WindowManager
 import android.view.accessibility.AccessibilityEvent
 import androidx.appcompat.view.ContextThemeWrapper
+import androidx.core.view.isVisible
 import androidx.recyclerview.widget.ItemTouchHelper
+import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.PagerSnapHelper
 import androidx.recyclerview.widget.RecyclerView
 import kotlinx.android.synthetic.main.widget_frame.view.*
 import tk.zwander.lockscreenwidgets.adapters.WidgetFrameAdapter
 import tk.zwander.lockscreenwidgets.host.WidgetHost
-import tk.zwander.lockscreenwidgets.util.PrefManager
-import tk.zwander.lockscreenwidgets.util.dpAsPx
-import tk.zwander.lockscreenwidgets.util.prefManager
-import tk.zwander.lockscreenwidgets.util.pxAsDp
+import tk.zwander.lockscreenwidgets.interfaces.OnSnapPositionChangeListener
+import tk.zwander.lockscreenwidgets.util.*
 import tk.zwander.systemuituner.lockscreenwidgets.R
 import kotlin.math.roundToInt
 import kotlin.math.sign
@@ -137,7 +137,7 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
             ItemTouchHelper(touchHelperCallback).attachToRecyclerView(this)
         }
 
-        adapter.updateWidgets(prefManager.currentWidgets)
+        adapter.updateWidgets(prefManager.currentWidgets.toList())
         prefManager.prefs.registerOnSharedPreferenceChangeListener(this)
         widgetHost.startListening()
 
@@ -171,6 +171,22 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
 
             updateOverlay()
         }
+        view.frame.onRemoveListener = {
+            (view.widgets_pager.layoutManager as LinearLayoutManager).apply {
+                val index = findFirstCompletelyVisibleItemPosition()
+                val item = adapter.widgets[index]
+                prefManager.currentWidgets = prefManager.currentWidgets.apply {
+                    remove(item)
+                }
+            }
+        }
+
+        view.widgets_pager.addOnScrollListener(SnapScrollListener(pagerSnapHelper, object : OnSnapPositionChangeListener {
+            override fun onSnapPositionChange(position: Int) {
+                view.frame.shouldShowRemove = position < adapter.widgets.size
+                view.remove.isVisible = view.frame.isInEditingMode && view.frame.shouldShowRemove
+            }
+        }))
 
         registerReceiver(screenStateReceiver, IntentFilter().apply {
             addAction(Intent.ACTION_SCREEN_OFF)
@@ -196,7 +212,7 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
                 if (updatedForMove) {
                     updatedForMove = false
                 } else {
-                    adapter.updateWidgets(prefManager.currentWidgets)
+                    adapter.updateWidgets(prefManager.currentWidgets.toList())
                 }
             }
             PrefManager.KEY_FRAME_WIDTH, PrefManager.KEY_FRAME_HEIGHT -> {

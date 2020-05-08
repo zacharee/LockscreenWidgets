@@ -57,6 +57,19 @@
         app:layout_constraintEnd_toEndOf="parent"
         />
 
+    <ImageView
+        android:id="@+id/remove"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
+        android:src="@drawable/ic_baseline_remove_circle_24"
+        android:visibility="gone"
+        android:clickable="true"
+        android:focusable="true"
+        android:tint="@android:color/holo_red_dark"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        />
+
     <View
         android:id="@+id/edit_outline"
         android:layout_width="match_parent"

@@ -2,6 +2,7 @@ package tk.zwander.lockscreenwidgets.adapters
 
 import android.appwidget.AppWidgetManager
 import android.content.Intent
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -27,9 +28,34 @@ class WidgetFrameAdapter(private val manager: AppWidgetManager, private val host
 
     val widgets = ArrayList<WidgetData>()
 
-    fun updateWidgets(newWidgets: Collection<WidgetData>) {
-        widgets.clear()
-        widgets.addAll(newWidgets)
+    fun updateWidgets(newWidgets: List<WidgetData>) {
+        if (widgets.isEmpty()) {
+            widgets.addAll(newWidgets)
+        } else {
+            val oldWidgets = widgets.toList()
+            this.widgets.clear()
+            this.widgets.addAll(newWidgets)
+
+            val result = DiffUtil.calculateDiff(object : DiffUtil.Callback() {
+                override fun areContentsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
+                    return oldWidgets[oldItemPosition].id == newWidgets[newItemPosition].id
+                }
+
+                override fun areItemsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
+                    return oldWidgets[oldItemPosition] == newWidgets[newItemPosition]
+                }
+
+                override fun getNewListSize(): Int {
+                    return newWidgets.size
+                }
+
+                override fun getOldListSize(): Int {
+                    return oldWidgets.size
+                }
+            }, true)
+
+            result.dispatchUpdatesTo(this)
+        }
     }
 
     override fun onMove(from: Int, to: Int): Boolean {

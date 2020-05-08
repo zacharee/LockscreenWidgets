@@ -18,10 +18,13 @@ class WidgetFrameView(context: Context, attrs: AttributeSet) : ConstraintLayout(
     var onMoveListener: ((velX: Float, velY: Float) -> Unit)? = null
     var onResizeListener: ((velX: Float, velY: Float) -> Unit)? = null
     var onInterceptListener: ((down: Boolean) -> Unit)? = null
+    var onRemoveListener: (() -> Unit)? = null
 
     private var maxPointerCount = 0
-    private var isInEditingMode = false
     private var alreadyIndicatedMoving = false
+
+    var isInEditingMode = false
+    var shouldShowRemove = true
 
     private val vibrator by lazy { context.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator }
 
@@ -31,6 +34,9 @@ class WidgetFrameView(context: Context, attrs: AttributeSet) : ConstraintLayout(
 
         move.setOnTouchListener(MoveTouchListener())
         expand.setOnTouchListener(ExpandTouchListener())
+        remove.setOnClickListener {
+            onRemoveListener?.invoke()
+        }
 
         if (context.prefManager.firstViewing) {
             hint_view.isVisible = true
@@ -81,6 +87,7 @@ class WidgetFrameView(context: Context, attrs: AttributeSet) : ConstraintLayout(
 
         move.isVisible = editing
         expand.isVisible = editing
+        remove.isVisible = editing && shouldShowRemove
         edit_outline.isVisible = editing
     }
 
