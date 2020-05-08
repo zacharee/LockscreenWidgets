@@ -31,6 +31,7 @@ class WidgetFrameAdapter(private val manager: AppWidgetManager, private val host
     fun updateWidgets(newWidgets: List<WidgetData>) {
         if (widgets.isEmpty()) {
             widgets.addAll(newWidgets)
+            notifyDataSetChanged()
         } else {
             val oldWidgets = widgets.toList()
             this.widgets.clear()
