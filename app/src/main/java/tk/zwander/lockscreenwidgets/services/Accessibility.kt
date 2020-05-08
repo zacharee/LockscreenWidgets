@@ -92,6 +92,14 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
                 }
             }
 
+            override fun getDragDirs(
+                recyclerView: RecyclerView,
+                viewHolder: RecyclerView.ViewHolder
+            ): Int {
+                return if (viewHolder is WidgetFrameAdapter.AddWidgetVH) 0
+                else super.getDragDirs(recyclerView, viewHolder)
+            }
+
             override fun onSelectedChanged(viewHolder: RecyclerView.ViewHolder?, actionState: Int) {
                 if (actionState != ItemTouchHelper.ACTION_STATE_IDLE) {
                     viewHolder?.itemView?.alpha = 0.5f
