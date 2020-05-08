@@ -18,6 +18,7 @@ class PrefManager private constructor(context: Context) : ContextWrapper(context
         const val KEY_FRAME_HEIGHT = "frame_height"
         const val KEY_POS_X = "position_x"
         const val KEY_POS_Y = "position_y"
+        const val KEY_FIRST_VIEWING = "first_viewing"
 
         private var instance: PrefManager? = null
 
@@ -69,14 +70,22 @@ class PrefManager private constructor(context: Context) : ContextWrapper(context
             putInt(KEY_POS_Y, value)
         }
 
+    var firstViewing: Boolean
+        get() = getBoolean(KEY_FIRST_VIEWING, true)
+        set(value) {
+            putBoolean(KEY_FIRST_VIEWING, value)
+        }
+
 
     fun getString(key: String, def: String? = null) = prefs.getString(key, def)
     fun getFloat(key: String, def: Float) = prefs.getFloat(key, def)
     fun getInt(key: String, def: Int) = prefs.getInt(key, def)
+    fun getBoolean(key: String, def: Boolean) = prefs.getBoolean(key, def)
 
     fun putString(key: String, value: String?) = prefs.edit { putString(key, value) }
     fun putFloat(key: String, value: Float) = prefs.edit { putFloat(key, value) }
     fun putInt(key: String, value: Int) = prefs.edit { putInt(key, value) }
+    fun putBoolean(key: String, value: Boolean) = prefs.edit { putBoolean(key, value) }
 
     fun getResourceFloat(@IntegerRes resource: Int): Float {
         return resources.getInteger(resource).toFloat()

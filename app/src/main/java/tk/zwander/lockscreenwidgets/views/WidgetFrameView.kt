@@ -12,6 +12,7 @@ import android.view.View
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.isVisible
 import kotlinx.android.synthetic.main.widget_frame.view.*
+import tk.zwander.lockscreenwidgets.util.prefManager
 
 class WidgetFrameView(context: Context, attrs: AttributeSet) : ConstraintLayout(context, attrs) {
     var onMoveListener: ((velX: Float, velY: Float) -> Unit)? = null
@@ -30,6 +31,10 @@ class WidgetFrameView(context: Context, attrs: AttributeSet) : ConstraintLayout(
 
         move.setOnTouchListener(MoveTouchListener())
         expand.setOnTouchListener(ExpandTouchListener())
+
+        if (context.prefManager.firstViewing) {
+            hint_view.isVisible = true
+        }
     }
 
     override fun onDetachedFromWindow() {

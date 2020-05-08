@@ -3,21 +3,33 @@
     android:id="@+id/frame"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:animateLayoutChanges="true"
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/widgets_pager"
+    <com.google.android.material.card.MaterialCardView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="horizontal"
-        android:scrollbarAlwaysDrawHorizontalTrack="true"
-        android:fadeScrollbars="false"
-        android:scrollbars="horizontal"
-        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-        tools:listitem="@layout/widget_page_holder"
-        />
+        android:background="@android:color/transparent"
+        android:animateLayoutChanges="false"
+        app:cardElevation="0dp"
+        app:cardCornerRadius="2dp"
+        app:cardBackgroundColor="@android:color/transparent">
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/widgets_pager"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="horizontal"
+            android:scrollbarAlwaysDrawHorizontalTrack="true"
+            android:fadeScrollbars="false"
+            android:scrollbars="horizontal"
+            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+            tools:listitem="@layout/widget_page_holder"
+            />
+
+    </com.google.android.material.card.MaterialCardView>
 
     <ImageView
         android:id="@+id/expand"
@@ -51,6 +63,12 @@
         android:layout_height="match_parent"
         android:background="@drawable/outline"
         android:visibility="gone"
+        />
+
+    <include
+        android:id="@+id/hint_view"
+        android:visibility="gone"
+        layout="@layout/widget_frame_hint"
         />
 
 </tk.zwander.lockscreenwidgets.views.WidgetFrameView>
