@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">Lockscreen Widgets</string>
+
+    <string name="content_desc_widget_image">Widget Image</string>
+
+    <string name="add_widget">Add Widget</string>
+    <string name="frame_width">Frame Width</string>
+    <string name="frame_height">Frame Height</string>
+</resources>

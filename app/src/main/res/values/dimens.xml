@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <integer name="def_frame_width">250</integer>
+    <integer name="def_frame_height">200</integer>
+</resources>

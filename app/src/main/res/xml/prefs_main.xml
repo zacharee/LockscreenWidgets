@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <tk.zwander.seekbarpreference.SeekBarPreference
+        android:title="@string/frame_width"
+        android:key="frame_width_opt"
+        app:units="dp"
+        app:scale="0.1"
+        />
+
+    <tk.zwander.seekbarpreference.SeekBarPreference
+        android:title="@string/frame_height"
+        android:key="frame_height_opt"
+        app:units="dp"
+        app:scale="0.1"
+        />
+
+</PreferenceScreen>
