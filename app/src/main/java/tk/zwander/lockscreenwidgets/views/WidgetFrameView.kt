@@ -16,9 +16,13 @@ import tk.zwander.lockscreenwidgets.util.prefManager
 
 class WidgetFrameView(context: Context, attrs: AttributeSet) : ConstraintLayout(context, attrs) {
     var onMoveListener: ((velX: Float, velY: Float) -> Unit)? = null
-    var onResizeListener: ((velX: Float, velY: Float) -> Unit)? = null
     var onInterceptListener: ((down: Boolean) -> Unit)? = null
     var onRemoveListener: (() -> Unit)? = null
+
+    var onLeftDragListener: ((velX: Float) -> Unit)? = null
+    var onRightDragListener: ((velX: Float) -> Unit)? = null
+    var onTopDragListener: ((velY: Float) -> Unit)? = null
+    var onBottomDragListener: ((velY: Float) -> Unit)? = null
 
     private var maxPointerCount = 0
     private var alreadyIndicatedMoving = false
@@ -33,10 +37,26 @@ class WidgetFrameView(context: Context, attrs: AttributeSet) : ConstraintLayout(
         super.onFinishInflate()
 
         move.setOnTouchListener(MoveTouchListener())
-        expand.setOnTouchListener(ExpandTouchListener())
         remove.setOnClickListener {
             onRemoveListener?.invoke()
         }
+
+        left_dragger.setOnTouchListener(ExpandTouchListener { velX, _ ->
+            onLeftDragListener?.invoke(velX)
+            onLeftDragListener != null
+        })
+        right_dragger.setOnTouchListener(ExpandTouchListener { velX, _ ->
+            onRightDragListener?.invoke(velX)
+            onRightDragListener != null
+        })
+        top_dragger.setOnTouchListener(ExpandTouchListener { _, velY ->
+            onTopDragListener?.invoke(velY)
+            onTopDragListener != null
+        })
+        bottom_dragger.setOnTouchListener(ExpandTouchListener { _, velY ->
+            onBottomDragListener?.invoke(velY)
+            onBottomDragListener != null
+        })
 
         if (context.prefManager.firstViewing) {
             hint_view.isVisible = true
@@ -85,10 +105,8 @@ class WidgetFrameView(context: Context, attrs: AttributeSet) : ConstraintLayout(
     private fun setEditMode(editing: Boolean) {
         isInEditingMode = editing
 
-        move.isVisible = editing
-        expand.isVisible = editing
+        edit_wrapper.isVisible = editing
         remove.isVisible = editing && shouldShowRemove
-        edit_outline.isVisible = editing
     }
 
     private fun vibrate() {
@@ -100,7 +118,7 @@ class WidgetFrameView(context: Context, attrs: AttributeSet) : ConstraintLayout(
         }
     }
 
-    inner class ExpandTouchListener : OnTouchListener {
+    inner class ExpandTouchListener(private val listener: ((velX: Float, velY: Float) -> Boolean)?) : OnTouchListener {
         private var prevExpandX = 0f
         private var prevExpandY = 0f
 
@@ -127,8 +145,7 @@ class WidgetFrameView(context: Context, attrs: AttributeSet) : ConstraintLayout(
                     prevExpandX = newX
                     prevExpandY = newY
 
-                    onResizeListener?.invoke(velX, velY)
-                    onResizeListener != null
+                    listener?.invoke(velX, velY) ?: false
                 }
                 else -> false
             }

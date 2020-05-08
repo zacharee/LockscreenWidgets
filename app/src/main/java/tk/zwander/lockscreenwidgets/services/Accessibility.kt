@@ -88,6 +88,7 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
                     if (it) {
                         updatedForMove = true
                         prefManager.currentWidgets = adapter.widgets.toHashSet()
+                        updatedForMove = false
                     }
                 }
             }
@@ -158,14 +159,34 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
 
             updateOverlay()
         }
-        view.frame.onResizeListener = { velX, velY ->
-            params.width += velX.toInt()
-            params.height += velY.toInt()
-
+        view.frame.onLeftDragListener = { velX ->
+            params.width -= velX.toInt()
             params.x += (velX / 2f).toInt()
-            params.y += (velY / 2f).toInt()
 
             prefManager.frameWidthDp = pxAsDp(params.width)
+
+            updateOverlay()
+        }
+        view.frame.onRightDragListener = { velX ->
+            params.width += velX.toInt()
+            params.x += (velX / 2f).toInt()
+
+            prefManager.frameWidthDp = pxAsDp(params.width)
+
+            updateOverlay()
+        }
+        view.frame.onTopDragListener = { velY ->
+            params.height -= velY.toInt()
+            params.y += (velY / 2f).toInt()
+
+            prefManager.frameHeightDp = pxAsDp(params.height)
+
+            updateOverlay()
+        }
+        view.frame.onBottomDragListener = { velY ->
+            params.height += velY.toInt()
+            params.y += (velY / 2f).toInt()
+
             prefManager.frameHeightDp = pxAsDp(params.height)
 
             updateOverlay()
@@ -217,9 +238,7 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
     override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
         when (key) {
             PrefManager.KEY_CURRENT_WIDGETS -> {
-                if (updatedForMove) {
-                    updatedForMove = false
-                } else {
+                if (!updatedForMove) {
                     adapter.updateWidgets(prefManager.currentWidgets.toList())
                 }
             }
