@@ -22,6 +22,10 @@
         <activity android:name="tk.zwander.lockscreenwidgets.activities.AddWidgetActivity"
             android:exported="false"
             />
+        <activity android:name="tk.zwander.lockscreenwidgets.activities.OnboardingActivity"
+            android:exported="false"
+            android:theme="@style/Theme.Intro"
+            />
 
         <service
             android:name="tk.zwander.lockscreenwidgets.services.Accessibility"

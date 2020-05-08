@@ -19,6 +19,7 @@ class PrefManager private constructor(context: Context) : ContextWrapper(context
         const val KEY_POS_X = "position_x"
         const val KEY_POS_Y = "position_y"
         const val KEY_FIRST_VIEWING = "first_viewing"
+        const val KEY_FIRST_RUN = "first_run"
 
         private var instance: PrefManager? = null
 
@@ -74,6 +75,12 @@ class PrefManager private constructor(context: Context) : ContextWrapper(context
         get() = getBoolean(KEY_FIRST_VIEWING, true)
         set(value) {
             putBoolean(KEY_FIRST_VIEWING, value)
+        }
+
+    var firstRun: Boolean
+        get() = getBoolean(KEY_FIRST_RUN, true)
+        set(value) {
+            putBoolean(KEY_FIRST_RUN, value)
         }
 
 

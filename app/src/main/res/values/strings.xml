@@ -3,6 +3,7 @@
 
     <string name="content_desc_widget_image">Widget Image</string>
     <string name="move_resize_hint">Tap the widget pager with two fingers to show the resize and move controls.</string>
+    <string name="accessibility_service_desc">Lockscreen Widgets requires an Accessibility Service to display on the lock screen. No data is collected, and no actions will be performed.</string>
 
     <string name="add_widget">Add Widget</string>
     <string name="grant">Grant</string>

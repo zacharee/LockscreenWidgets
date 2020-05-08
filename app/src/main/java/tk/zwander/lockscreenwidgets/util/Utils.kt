@@ -1,16 +1,23 @@
 package tk.zwander.lockscreenwidgets.util
 
+import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import android.provider.Settings
 import android.util.DisplayMetrics
 import android.util.TypedValue
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.SnapHelper
+import tk.zwander.lockscreenwidgets.services.Accessibility
 import kotlin.math.roundToInt
 
 val Context.prefManager: PrefManager
     get() = PrefManager.getInstance(this)
+
+val Context.isAccessibilityEnabled: Boolean
+    get() = Settings.Secure.getString(contentResolver, Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES)
+        ?.contains(ComponentName(this, Accessibility::class.java).flattenToString()) ?: false
 
 fun Context.dpAsPx(dpVal: Number) =
     TypedValue.applyDimension(
