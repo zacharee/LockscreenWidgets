@@ -203,7 +203,7 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
     }
 
     override fun onAccessibilityEvent(event: AccessibilityEvent) {
-        if (event.eventType == AccessibilityEvent.TYPE_WINDOWS_CHANGED) {
+        if (event.eventType == AccessibilityEvent.TYPE_WINDOWS_CHANGED || event.eventType == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED) {
             if (isLocked()) {
                 addOverlay()
             } else {
@@ -222,12 +222,6 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
                 } else {
                     adapter.updateWidgets(prefManager.currentWidgets.toList())
                 }
-            }
-            PrefManager.KEY_FRAME_WIDTH, PrefManager.KEY_FRAME_HEIGHT -> {
-//                params.width = dpAsPx(prefManager.frameWidthDp)
-//                params.height = dpAsPx(prefManager.frameHeightDp)
-//
-//                updateOverlay()
             }
         }
     }
