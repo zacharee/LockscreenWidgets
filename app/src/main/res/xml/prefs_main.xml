@@ -2,18 +2,32 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <tk.zwander.seekbarpreference.SeekBarPreference
-        android:title="@string/frame_width"
-        android:key="frame_width_opt"
-        app:units="dp"
-        app:scale="0.1"
+    <tk.zwander.lockscreenwidgets.prefs.LinkPreference
+        android:title="@string/main_screen_social_twitter"
+        android:summary="@string/main_screen_social_twitter_desc"
+        android:icon="@drawable/ic_baseline_twitter_24"
+        app:link="https://twitter.com/Wander1236"
         />
 
-    <tk.zwander.seekbarpreference.SeekBarPreference
-        android:title="@string/frame_height"
-        android:key="frame_height_opt"
-        app:units="dp"
-        app:scale="0.1"
+    <tk.zwander.lockscreenwidgets.prefs.LinkPreference
+        android:title="@string/main_screen_social_website"
+        android:summary="@string/main_screen_social_website_desc"
+        android:icon="@drawable/ic_baseline_earth_24"
+        app:link="https://zwander.dev"
+        />
+
+    <tk.zwander.lockscreenwidgets.prefs.LinkPreference
+        android:title="@string/main_screen_social_email"
+        android:summary="@string/main_screen_social_email_desc"
+        android:icon="@drawable/ic_baseline_email_24"
+        app:link_type="email"
+        />
+
+    <tk.zwander.lockscreenwidgets.prefs.LinkPreference
+        android:title="@string/main_screen_social_telegram"
+        android:summary="@string/main_screen_social_telegram_desc"
+        android:icon="@drawable/ic_baseline_telegram_24"
+        app:link="https://bit.ly/ZachareeTG"
         />
 
 </PreferenceScreen>

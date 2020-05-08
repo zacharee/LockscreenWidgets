@@ -5,6 +5,29 @@
     <string name="move_resize_hint">Tap the widget pager with two fingers to show the resize and move controls.</string>
 
     <string name="add_widget">Add Widget</string>
-    <string name="frame_width">Frame Width</string>
-    <string name="frame_height">Frame Height</string>
+    <string name="grant">Grant</string>
+
+    <string name="main_screen_social_twitter">Twitter</string>
+    <string name="main_screen_social_twitter_desc">Follow me on Twitter for updates about my apps and random development-related nonsense.</string>
+
+    <string name="main_screen_social_website">Website</string>
+    <string name="main_screen_social_website_desc">Check out my website if you\'re that bored.</string>
+
+    <string name="main_screen_social_email">Email</string>
+    <string name="main_screen_social_email_desc">Send me an email if you have a question or problem. Please include as much detail as possible. Just telling me \"it doesn\'t work\" just wastes everyone\'s time.</string>
+
+    <string name="main_screen_social_telegram">Telegram</string>
+    <string name="main_screen_social_telegram_desc">If email isn\'t your thing, you can ask your question in my Telegram server. Please mention which app you\'re using, as this server is for all of the ones I\'ve developed.</string>
+
+    <string name="intro_welcome_title">Welcome!</string>
+    <string name="intro_welcome_desc">Lockscreen Widgets is a simple app with a simple purpose: to bring back Android KitKat\'s lock screen widgets. Your widgets will show up in a simple paged slider on the lockscreen.</string>
+
+    <string name="intro_usage_title">Basic Usage</string>
+    <string name="intro_usage_desc">All interaction with Lockscreen Widgets happens straight from the lock screen. It\'s where you add and remove widgets, and also where you adjust the position and size of the widget frame itself. Tap the \"plus\" page to add a widget; press and hold to reorder widgets in the list; and tap anywhere on the frame with two fingers to move/resize the frame or remove the current widget.</string>
+
+    <string name="intro_accessibility_title">Accessibility</string>
+    <string name="intro_accessibility_desc">To be able to display on the lock screen, you\'ll need to activate Lockscreen Widgets\' Accessibility Service. This app doesn\'t collect any data from your screen.</string>
+
+    <string name="intro_done_title">All Done!</string>
+    <string name="intro_done_desc">That\'s it! Check your lock screen and you should now see the widget frame!</string>
 </resources>
