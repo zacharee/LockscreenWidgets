@@ -8,6 +8,7 @@ import android.content.*
 import android.database.ContentObserver
 import android.graphics.PixelFormat
 import android.net.Uri
+import android.os.PowerManager
 import android.provider.Settings
 import android.view.Gravity
 import android.view.LayoutInflater
@@ -31,6 +32,7 @@ import kotlin.math.sign
 class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferenceChangeListener {
     private val kgm by lazy { getSystemService(Context.KEYGUARD_SERVICE) as KeyguardManager }
     private val wm by lazy { getSystemService(Context.WINDOW_SERVICE) as WindowManager }
+    private val power by lazy { getSystemService(Context.POWER_SERVICE) as PowerManager }
 
     private val widgetManager by lazy { AppWidgetManager.getInstance(this) }
     private val widgetHost by lazy { WidgetHost(this, 1003) }
@@ -66,9 +68,11 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
         override fun onReceive(context: Context?, intent: Intent?) {
             when (intent?.action) {
                 Intent.ACTION_SCREEN_OFF -> {
+                    isScreenOn = false
                     removeOverlay()
                 }
                 Intent.ACTION_SCREEN_ON -> {
+                    isScreenOn = true
                     if (canShow()) {
                         addOverlay()
                     }
@@ -158,11 +162,13 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
 
     private var updatedForMove = false
     private var notificationCount = 0
+    private var isScreenOn = false
 
     @SuppressLint("ClickableViewAccessibility")
     override fun onCreate() {
         super.onCreate()
 
+        isScreenOn = power.isInteractive
         view.widgets_pager.apply {
             adapter = this@Accessibility.adapter
             setHasFixedSize(true)
@@ -302,5 +308,7 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
         } catch (e: Exception) {}
     }
 
-    private fun canShow() = kgm.isKeyguardLocked && (!prefManager.hideOnNotifications || notificationCount == 0)
+    private fun canShow() = kgm.isKeyguardLocked
+            && (!prefManager.hideOnNotifications || notificationCount == 0)
+            && isScreenOn
 }
