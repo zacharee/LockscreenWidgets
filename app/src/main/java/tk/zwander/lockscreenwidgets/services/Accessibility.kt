@@ -66,7 +66,7 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
                     removeOverlay()
                 }
                 Intent.ACTION_SCREEN_ON -> {
-                    if (isLocked()) {
+                    if (canShow()) {
                         addOverlay()
                     }
                 }
@@ -134,15 +134,17 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
 
     private val notificationCountListener = object : NotificationListener.NotificationCountListener() {
         override fun onUpdate(count: Int) {
+            notificationCount = count
             if (prefManager.hideOnNotifications && count > 0) {
                 removeOverlay()
-            } else if (isLocked()) {
+            } else if (canShow()) {
                 addOverlay()
             }
         }
     }
 
     private var updatedForMove = false
+    private var notificationCount = 0
 
     @SuppressLint("ClickableViewAccessibility")
     override fun onCreate() {
@@ -235,7 +237,7 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
 
     override fun onAccessibilityEvent(event: AccessibilityEvent) {
         if (event.eventType == AccessibilityEvent.TYPE_WINDOWS_CHANGED || event.eventType == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED) {
-            if (isLocked()) {
+            if (canShow()) {
                 addOverlay()
             } else {
                 removeOverlay()
@@ -285,5 +287,5 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
         } catch (e: Exception) {}
     }
 
-    private fun isLocked() = kgm.isKeyguardLocked
+    private fun canShow() = kgm.isKeyguardLocked && (!prefManager.hideOnNotifications || notificationCount == 0)
 }
