@@ -7,6 +7,7 @@
 
     <string name="add_widget">Add Widget</string>
     <string name="grant">Grant</string>
+    <string name="settings">Settings</string>
 
     <string name="main_screen_social_twitter">Twitter</string>
     <string name="main_screen_social_twitter_desc">Follow me on Twitter for updates about my apps and random development-related nonsense.</string>
@@ -20,6 +21,12 @@
     <string name="main_screen_social_telegram">Telegram</string>
     <string name="main_screen_social_telegram_desc">If email isn\'t your thing, you can ask your question in my Telegram server. Please mention which app you\'re using, as this server is for all of the ones I\'ve developed.</string>
 
+    <string name="settings_screen_opaque_background">Opaque Background</string>
+    <string name="settings_screen_opaque_backhround_desc">Make the background of the widget frame opaque, so transparent widgets can overlay lock screen elements.</string>
+
+    <string name="settings_screen_hide_when_notifications_shown">Hide when Showing Notifications</string>
+    <string name="settings_screen_hide_when_notifications_shown_desc">Hide the widget frame while there are notifications being shown. This requires the use of a Notification Listener Service. You don\'t have to grant this permission right now.</string>
+
     <string name="intro_welcome_title">Welcome!</string>
     <string name="intro_welcome_desc">Lockscreen Widgets is a simple app with a simple purpose: to bring back Android KitKat\'s lock screen widgets. Your widgets will show up in a simple paged slider on the lockscreen.</string>
 
@@ -28,6 +35,9 @@
 
     <string name="intro_accessibility_title">Accessibility</string>
     <string name="intro_accessibility_desc">To be able to display on the lock screen, you\'ll need to activate Lockscreen Widgets\' Accessibility Service. This app doesn\'t collect any data from your screen.</string>
+
+    <string name="intro_notification_listener_title">Notification Listener</string>
+    <string name="intro_notification_listener_desc">Lockscreen Widgets can hide the widget frame while there are notifications displayed. To do so, you\'ll need to enable the Notification Listener.</string>
 
     <string name="intro_done_title">All Done!</string>
     <string name="intro_done_desc">That\'s it! Check your lock screen and you should now see the widget frame!</string>

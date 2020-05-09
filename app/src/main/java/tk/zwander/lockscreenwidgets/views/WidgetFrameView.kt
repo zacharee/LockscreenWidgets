@@ -6,12 +6,14 @@ import android.os.Build
 import android.os.VibrationEffect
 import android.os.Vibrator
 import android.util.AttributeSet
-import android.util.Log
+import android.util.TypedValue
 import android.view.MotionEvent
 import android.view.View
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import kotlinx.android.synthetic.main.widget_frame.view.*
+import tk.zwander.lockscreenwidgets.R
 import tk.zwander.lockscreenwidgets.util.prefManager
 
 class WidgetFrameView(context: Context, attrs: AttributeSet) : ConstraintLayout(context, attrs) {
@@ -61,6 +63,8 @@ class WidgetFrameView(context: Context, attrs: AttributeSet) : ConstraintLayout(
         if (context.prefManager.firstViewing) {
             hint_view.isVisible = true
         }
+
+        updateFrameBackground()
     }
 
     override fun onDetachedFromWindow() {
@@ -70,7 +74,7 @@ class WidgetFrameView(context: Context, attrs: AttributeSet) : ConstraintLayout(
     }
 
     override fun dispatchTouchEvent(ev: MotionEvent): Boolean {
-        onTouch(ev, null)
+        onTouch(ev)
 
         maxPointerCount = ev.pointerCount
 
@@ -86,7 +90,18 @@ class WidgetFrameView(context: Context, attrs: AttributeSet) : ConstraintLayout(
         }
     }
 
-    private fun onTouch(event: MotionEvent, sup: ((event: MotionEvent) -> Boolean)? = null): Boolean {
+    fun updateFrameBackground() {
+        if (context.prefManager.opaqueFrame) {
+            frame_card.setCardBackgroundColor(TypedValue().run {
+                context.theme.resolveAttribute(R.attr.colorPrimarySurface, this, true)
+                data
+            })
+        } else {
+            frame_card.setBackgroundColor(ContextCompat.getColor(context, android.R.color.transparent))
+        }
+    }
+
+    private fun onTouch(event: MotionEvent): Boolean {
         return when (event.action) {
             MotionEvent.ACTION_DOWN -> {
                 onInterceptListener?.invoke(true)
@@ -98,7 +113,7 @@ class WidgetFrameView(context: Context, attrs: AttributeSet) : ConstraintLayout(
                 alreadyIndicatedMoving = false
                 false
             }
-            else -> sup?.invoke(event) ?: false
+            else -> false
         }
     }
 

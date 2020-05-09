@@ -14,8 +14,8 @@ import com.squareup.picasso.Picasso
 import com.squareup.picasso.Request
 import com.squareup.picasso.RequestHandler
 import kotlinx.android.synthetic.main.widget_item.view.*
+import tk.zwander.lockscreenwidgets.R
 import tk.zwander.lockscreenwidgets.data.WidgetListInfo
-import tk.zwander.systemuituner.lockscreenwidgets.R
 
 class WidgetAdapter(private val picasso: Picasso, private val selectionCallback: (provider: WidgetListInfo) -> Unit) :
     RecyclerView.Adapter<WidgetAdapter.WidgetVH>() {

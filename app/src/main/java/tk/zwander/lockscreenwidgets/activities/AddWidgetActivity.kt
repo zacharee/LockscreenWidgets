@@ -10,17 +10,16 @@ import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import android.view.View
-import android.view.WindowManager
 import androidx.appcompat.app.AppCompatActivity
 import kotlinx.android.synthetic.main.activity_add_widget.*
 import kotlinx.coroutines.*
+import tk.zwander.lockscreenwidgets.R
 import tk.zwander.lockscreenwidgets.adapters.AppAdapter
 import tk.zwander.lockscreenwidgets.data.AppInfo
 import tk.zwander.lockscreenwidgets.data.WidgetData
 import tk.zwander.lockscreenwidgets.data.WidgetListInfo
 import tk.zwander.lockscreenwidgets.host.WidgetHost
 import tk.zwander.lockscreenwidgets.util.prefManager
-import tk.zwander.systemuituner.lockscreenwidgets.R
 
 
 class AddWidgetActivity : AppCompatActivity(), CoroutineScope by MainScope() {

@@ -3,9 +3,9 @@ package tk.zwander.lockscreenwidgets.prefs
 import android.content.Context
 import android.util.AttributeSet
 import androidx.preference.Preference
+import tk.zwander.lockscreenwidgets.R
 import tk.zwander.lockscreenwidgets.util.launchEmail
 import tk.zwander.lockscreenwidgets.util.launchUrl
-import tk.zwander.systemuituner.lockscreenwidgets.R
 
 class LinkPreference(context: Context, attrs: AttributeSet) : Preference(context, attrs) {
     companion object {

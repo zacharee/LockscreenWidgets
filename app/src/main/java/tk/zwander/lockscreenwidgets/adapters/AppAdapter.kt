@@ -10,9 +10,9 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.SortedList
 import com.squareup.picasso.Picasso
 import kotlinx.android.synthetic.main.app_item.view.*
+import tk.zwander.lockscreenwidgets.R
 import tk.zwander.lockscreenwidgets.data.AppInfo
 import tk.zwander.lockscreenwidgets.data.WidgetListInfo
-import tk.zwander.systemuituner.lockscreenwidgets.R
 
 class AppAdapter(context: Context, private val selectionCallback: (provider: WidgetListInfo) -> Unit) : RecyclerView.Adapter<AppAdapter.AppVH>() {
     private val items = SortedList(AppInfo::class.java, object : SortedList.Callback<AppInfo>() {

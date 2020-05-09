@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="tk.zwander.systemuituner.lockscreenwidgets">
+    package="tk.zwander.lockscreenwidgets">
 
     <uses-permission android:name="android.permission.VIBRATE" />
 
@@ -26,6 +26,10 @@
             android:exported="false"
             android:theme="@style/Theme.Intro"
             />
+        <activity android:name="tk.zwander.lockscreenwidgets.activities.SettingsActivity"
+            android:exported="false"
+            android:label="@string/settings"
+            />
 
         <service
             android:name="tk.zwander.lockscreenwidgets.services.Accessibility"
@@ -37,6 +41,13 @@
             <meta-data
                 android:name="android.accessibilityservice"
                 android:resource="@xml/accessibility" />
+        </service>
+        <service android:name="tk.zwander.lockscreenwidgets.services.NotificationListener"
+            android:label="@string/app_name"
+            android:permission="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE">
+            <intent-filter>
+                <action android:name="android.service.notification.NotificationListenerService" />
+            </intent-filter>
         </service>
     </application>
 

@@ -6,7 +6,6 @@ import android.app.KeyguardManager
 import android.appwidget.AppWidgetManager
 import android.content.*
 import android.graphics.PixelFormat
-import android.util.Log
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.WindowManager
@@ -18,11 +17,11 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.PagerSnapHelper
 import androidx.recyclerview.widget.RecyclerView
 import kotlinx.android.synthetic.main.widget_frame.view.*
+import tk.zwander.lockscreenwidgets.R
 import tk.zwander.lockscreenwidgets.adapters.WidgetFrameAdapter
 import tk.zwander.lockscreenwidgets.host.WidgetHost
 import tk.zwander.lockscreenwidgets.interfaces.OnSnapPositionChangeListener
 import tk.zwander.lockscreenwidgets.util.*
-import tk.zwander.systemuituner.lockscreenwidgets.R
 import kotlin.math.roundToInt
 import kotlin.math.sign
 
@@ -74,8 +73,6 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
             }
         }
     }
-
-    private var updatedForMove = false
 
     private val touchHelperCallback by lazy {
         object : ItemTouchHelper.SimpleCallback(ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT, 0) {
@@ -134,6 +131,18 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
             override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {}
         }
     }
+
+    private val notificationCountListener = object : NotificationListener.NotificationCountListener() {
+        override fun onUpdate(count: Int) {
+            if (prefManager.hideOnNotifications && count > 0) {
+                removeOverlay()
+            } else if (isLocked()) {
+                addOverlay()
+            }
+        }
+    }
+
+    private var updatedForMove = false
 
     @SuppressLint("ClickableViewAccessibility")
     override fun onCreate() {
@@ -221,6 +230,7 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
             addAction(Intent.ACTION_SCREEN_OFF)
             addAction(Intent.ACTION_SCREEN_ON)
         })
+        notificationCountListener.register(this)
     }
 
     override fun onAccessibilityEvent(event: AccessibilityEvent) {
@@ -242,6 +252,9 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
                     adapter.updateWidgets(prefManager.currentWidgets.toList())
                 }
             }
+            PrefManager.KEY_OPAQUE_FRAME -> {
+                view.frame.updateFrameBackground()
+            }
         }
     }
 
@@ -251,6 +264,7 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
         prefManager.prefs.unregisterOnSharedPreferenceChangeListener(this)
         widgetHost.stopListening()
         unregisterReceiver(screenStateReceiver)
+        notificationCountListener.unregister(this)
     }
 
     private fun addOverlay() {

@@ -2,7 +2,7 @@ package tk.zwander.lockscreenwidgets.fragments
 
 import android.os.Bundle
 import androidx.preference.PreferenceFragmentCompat
-import tk.zwander.systemuituner.lockscreenwidgets.R
+import tk.zwander.lockscreenwidgets.R
 
 class MainPrefFragment : PreferenceFragmentCompat() {
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {

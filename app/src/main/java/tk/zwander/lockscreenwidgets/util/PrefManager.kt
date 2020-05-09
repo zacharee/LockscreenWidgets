@@ -1,6 +1,5 @@
 package tk.zwander.lockscreenwidgets.util
 
-import android.annotation.DimenRes
 import android.annotation.IntegerRes
 import android.content.Context
 import android.content.ContextWrapper
@@ -8,8 +7,8 @@ import androidx.core.content.edit
 import androidx.preference.PreferenceManager
 import com.google.gson.GsonBuilder
 import com.google.gson.reflect.TypeToken
+import tk.zwander.lockscreenwidgets.R
 import tk.zwander.lockscreenwidgets.data.WidgetData
-import tk.zwander.systemuituner.lockscreenwidgets.R
 
 class PrefManager private constructor(context: Context) : ContextWrapper(context) {
     companion object {
@@ -20,6 +19,8 @@ class PrefManager private constructor(context: Context) : ContextWrapper(context
         const val KEY_POS_Y = "position_y"
         const val KEY_FIRST_VIEWING = "first_viewing"
         const val KEY_FIRST_RUN = "first_run"
+        const val KEY_OPAQUE_FRAME = "opaque_frame_background"
+        const val KEY_HIDE_ON_NOTIFICATIONS = "hide_on_notifications"
 
         private var instance: PrefManager? = null
 
@@ -83,6 +84,17 @@ class PrefManager private constructor(context: Context) : ContextWrapper(context
             putBoolean(KEY_FIRST_RUN, value)
         }
 
+    var opaqueFrame: Boolean
+        get() = getBoolean(KEY_OPAQUE_FRAME, false)
+        set(value) {
+            putBoolean(KEY_OPAQUE_FRAME, value)
+        }
+
+    var hideOnNotifications: Boolean
+        get() = getBoolean(KEY_HIDE_ON_NOTIFICATIONS, false)
+        set(value) {
+            putBoolean(KEY_HIDE_ON_NOTIFICATIONS, value)
+        }
 
     fun getString(key: String, def: String? = null) = prefs.getString(key, def)
     fun getFloat(key: String, def: Float) = prefs.getFloat(key, def)

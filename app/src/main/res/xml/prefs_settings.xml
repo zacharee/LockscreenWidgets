@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <SwitchPreference
+        android:title="@string/settings_screen_opaque_background"
+        android:summary="@string/settings_screen_opaque_backhround_desc"
+        android:key="opaque_frame_background"
+        android:icon="@drawable/ic_baseline_opacity_24"
+        />
+
+    <SwitchPreference
+        android:title="@string/settings_screen_hide_when_notifications_shown"
+        android:summary="@string/settings_screen_hide_when_notifications_shown_desc"
+        android:key="hide_on_notifications"
+        android:icon="@drawable/ic_baseline_notifications_off_24"
+        />
+
+</PreferenceScreen>

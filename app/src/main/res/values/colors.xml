@@ -7,7 +7,8 @@
     <color name="slide_1">#9e47ff</color>
     <color name="slide_2">#3700b3</color>
     <color name="slide_3">#1976d2</color>
-    <color name="slide_4">#4caf50</color>
+    <color name="slide_4">#5e35b1</color>
+    <color name="slide_5">#4caf50</color>
 
     <color name="backdrop">#55000000</color>
 </resources>

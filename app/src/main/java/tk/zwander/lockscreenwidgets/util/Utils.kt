@@ -10,6 +10,7 @@ import android.util.TypedValue
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.SnapHelper
 import tk.zwander.lockscreenwidgets.services.Accessibility
+import tk.zwander.lockscreenwidgets.services.NotificationListener
 import kotlin.math.roundToInt
 
 val Context.prefManager: PrefManager
@@ -18,6 +19,13 @@ val Context.prefManager: PrefManager
 val Context.isAccessibilityEnabled: Boolean
     get() = Settings.Secure.getString(contentResolver, Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES)
         ?.contains(ComponentName(this, Accessibility::class.java).flattenToString()) ?: false
+
+val Context.isNotificationListenerActive: Boolean
+    get() = Settings.Secure.getString(contentResolver, "enabled_notification_listeners")
+        ?.run {
+            val cmp = ComponentName(this@isNotificationListenerActive, NotificationListener::class.java)
+            contains(cmp.flattenToString()) || contains(cmp.flattenToShortString())
+        } ?: false
 
 fun Context.dpAsPx(dpVal: Number) =
     TypedValue.applyDimension(

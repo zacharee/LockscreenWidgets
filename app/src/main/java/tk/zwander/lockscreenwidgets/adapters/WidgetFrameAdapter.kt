@@ -2,23 +2,20 @@ package tk.zwander.lockscreenwidgets.adapters
 
 import android.appwidget.AppWidgetManager
 import android.content.Intent
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.recyclerview.widget.AsyncListDiffer
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import kotlinx.android.synthetic.main.widget_page_holder.view.*
 import kotlinx.coroutines.*
+import tk.zwander.lockscreenwidgets.R
 import tk.zwander.lockscreenwidgets.activities.AddWidgetActivity
 import tk.zwander.lockscreenwidgets.data.WidgetData
 import tk.zwander.lockscreenwidgets.host.WidgetHost
 import tk.zwander.lockscreenwidgets.interfaces.ItemTouchHelperAdapter
-import tk.zwander.systemuituner.lockscreenwidgets.R
 import java.util.*
 import kotlin.collections.ArrayList
-import kotlin.collections.HashSet
 
 class WidgetFrameAdapter(private val manager: AppWidgetManager, private val host: WidgetHost) : RecyclerView.Adapter<RecyclerView.ViewHolder>(), ItemTouchHelperAdapter, CoroutineScope by MainScope() {
     companion object {
