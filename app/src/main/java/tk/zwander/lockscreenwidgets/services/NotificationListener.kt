@@ -1,5 +1,6 @@
 package tk.zwander.lockscreenwidgets.services
 
+import android.app.Notification
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
@@ -46,7 +47,7 @@ class NotificationListener : NotificationListenerService() {
 
     private fun sendUpdate() {
         val intent = Intent(ACTION_NEW_NOTIFICATION_COUNT)
-        intent.putExtra(EXTRA_NOTIFICATION_COUNT, activeNotifications.size)
+        intent.putExtra(EXTRA_NOTIFICATION_COUNT, activeNotifications.filter { it.notification.priority > Notification.PRIORITY_MIN }.size)
 
         LocalBroadcastManager.getInstance(this).sendBroadcast(intent)
     }
