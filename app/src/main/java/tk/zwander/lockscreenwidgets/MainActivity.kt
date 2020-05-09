@@ -22,7 +22,9 @@ class MainActivity : AppCompatActivity() {
 
         if (prefManager.firstRun || !isAccessibilityEnabled) {
             startActivityForResult(
-                Intent(this, OnboardingActivity::class.java),
+                Intent(this, OnboardingActivity::class.java).apply {
+                    putExtra(OnboardingActivity.EXTRA_RETROACTIVE_FOR_ACC, !isAccessibilityEnabled && !prefManager.firstRun)
+                },
                 REQ_INTRO
             )
         }

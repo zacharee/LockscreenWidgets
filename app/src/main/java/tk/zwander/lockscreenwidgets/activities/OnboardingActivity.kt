@@ -12,14 +12,16 @@ import tk.zwander.lockscreenwidgets.util.isNotificationListenerActive
 class OnboardingActivity : IntroActivity() {
     companion object {
         const val EXTRA_RETROACTIVE_FOR_NOTIF = "RETRO_FOR_NOTIF"
+        const val EXTRA_RETROACTIVE_FOR_ACC = "RETRO_FOR_ACC"
     }
 
     val retroForNotif by lazy { intent.getBooleanExtra(EXTRA_RETROACTIVE_FOR_NOTIF, false) }
+    val retroForAcc by lazy { intent.getBooleanExtra(EXTRA_RETROACTIVE_FOR_ACC, false) }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        if (!retroForNotif) {
+        if (!retroForNotif && !retroForAcc) {
             addSlide(
                 SimpleSlide.Builder()
                     .title(R.string.intro_welcome_title)
@@ -37,7 +39,9 @@ class OnboardingActivity : IntroActivity() {
                     .image(R.drawable.ic_baseline_gesture_two_tap)
                     .build()
             )
+        }
 
+        if (!retroForNotif) {
             addSlide(
                 object : SimpleSlide(
                     Builder()
@@ -58,26 +62,28 @@ class OnboardingActivity : IntroActivity() {
             )
         }
 
-        addSlide(
-            object : SimpleSlide(
-                Builder()
-                    .title(R.string.intro_notification_listener_title)
-                    .description(R.string.intro_notification_listener_desc)
-                    .background(R.color.slide_4)
-                    .image(R.drawable.ic_baseline_notifications_active_24)
-                    .buttonCtaLabel(R.string.grant)
-                    .buttonCtaClickListener {
-                        val notifIntent = Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS)
-                        startActivity(notifIntent)
+        if (!retroForAcc) {
+            addSlide(
+                object : SimpleSlide(
+                    Builder()
+                        .title(R.string.intro_notification_listener_title)
+                        .description(R.string.intro_notification_listener_desc)
+                        .background(R.color.slide_4)
+                        .image(R.drawable.ic_baseline_notifications_active_24)
+                        .buttonCtaLabel(R.string.grant)
+                        .buttonCtaClickListener {
+                            val notifIntent = Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS)
+                            startActivity(notifIntent)
+                        }
+                ) {
+                    override fun canGoForward(): Boolean {
+                        return !retroForNotif || isNotificationListenerActive
                     }
-            ) {
-                override fun canGoForward(): Boolean {
-                    return !retroForNotif || isNotificationListenerActive
                 }
-            }
-        )
+            )
+        }
 
-        if (!retroForNotif) {
+        if (!retroForNotif && !retroForAcc) {
             addSlide(
                 SimpleSlide.Builder()
                     .title(R.string.intro_done_title)
