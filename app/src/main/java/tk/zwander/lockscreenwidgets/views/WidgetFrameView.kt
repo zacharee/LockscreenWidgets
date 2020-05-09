@@ -97,7 +97,7 @@ class WidgetFrameView(context: Context, attrs: AttributeSet) : ConstraintLayout(
                 data
             })
         } else {
-            frame_card.setBackgroundColor(ContextCompat.getColor(context, android.R.color.transparent))
+            frame_card.setCardBackgroundColor(ContextCompat.getColor(context, android.R.color.transparent))
         }
     }
 
