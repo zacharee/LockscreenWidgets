@@ -5,7 +5,10 @@ import android.annotation.SuppressLint
 import android.app.KeyguardManager
 import android.appwidget.AppWidgetManager
 import android.content.*
+import android.database.ContentObserver
 import android.graphics.PixelFormat
+import android.net.Uri
+import android.provider.Settings
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.WindowManager
@@ -143,6 +146,16 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
         }
     }
 
+    private val nightModeListener = object : ContentObserver(null) {
+        override fun onChange(selfChange: Boolean, uri: Uri?) {
+            when (uri) {
+                Settings.Secure.getUriFor(Settings.Secure.UI_NIGHT_MODE) -> {
+                    adapter.notifyDataSetChanged()
+                }
+            }
+        }
+    }
+
     private var updatedForMove = false
     private var notificationCount = 0
 
@@ -233,6 +246,7 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
             addAction(Intent.ACTION_SCREEN_ON)
         })
         notificationCountListener.register(this)
+        contentResolver.registerContentObserver(Settings.Secure.getUriFor(Settings.Secure.UI_NIGHT_MODE), true, nightModeListener)
     }
 
     override fun onAccessibilityEvent(event: AccessibilityEvent) {
@@ -267,6 +281,7 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
         widgetHost.stopListening()
         unregisterReceiver(screenStateReceiver)
         notificationCountListener.unregister(this)
+        contentResolver.unregisterContentObserver(nightModeListener)
     }
 
     private fun addOverlay() {
