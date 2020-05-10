@@ -21,6 +21,7 @@ class PrefManager private constructor(context: Context) : ContextWrapper(context
         const val KEY_FIRST_RUN = "first_run"
         const val KEY_OPAQUE_FRAME = "opaque_frame_background"
         const val KEY_HIDE_ON_NOTIFICATIONS = "hide_on_notifications"
+        const val KEY_WIDGET_FRAME_ENABLED = "widget_frame_enabled"
 
         private var instance: PrefManager? = null
 
@@ -94,6 +95,12 @@ class PrefManager private constructor(context: Context) : ContextWrapper(context
         get() = getBoolean(KEY_HIDE_ON_NOTIFICATIONS, false)
         set(value) {
             putBoolean(KEY_HIDE_ON_NOTIFICATIONS, value)
+        }
+
+    var widgetFrameEnabled: Boolean
+        get() = getBoolean(KEY_WIDGET_FRAME_ENABLED, true)
+        set(value) {
+            putBoolean(KEY_WIDGET_FRAME_ENABLED, value)
         }
 
     fun getString(key: String, def: String? = null) = prefs.getString(key, def)

@@ -2,6 +2,14 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
 
     <SwitchPreference
+        android:title="@string/settings_screen_enabled"
+        android:summary="@string/settings_screen_enabled_desc"
+        android:key="widget_frame_enabled"
+        android:icon="@drawable/ic_baseline_power_settings_new_24"
+        android:defaultValue="true"
+        />
+
+    <SwitchPreference
         android:title="@string/settings_screen_opaque_background"
         android:summary="@string/settings_screen_opaque_backhround_desc"
         android:key="opaque_frame_background"

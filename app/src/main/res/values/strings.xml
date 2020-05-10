@@ -21,6 +21,9 @@
     <string name="main_screen_social_telegram">Telegram</string>
     <string name="main_screen_social_telegram_desc">If email isn\'t your thing, you can ask your question in my Telegram server. Please mention which app you\'re using, as this server is for all of the ones I\'ve developed.</string>
 
+    <string name="settings_screen_enabled">Enabled</string>
+    <string name="settings_screen_enabled_desc">Enable the widget frame on the lockscreen.</string>
+
     <string name="settings_screen_opaque_background">Opaque Background</string>
     <string name="settings_screen_opaque_backhround_desc">Make the background of the widget frame opaque, so transparent widgets can overlay lock screen elements.</string>
 

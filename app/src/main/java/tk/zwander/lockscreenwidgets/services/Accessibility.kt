@@ -275,6 +275,13 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
             PrefManager.KEY_OPAQUE_FRAME -> {
                 view.frame.updateFrameBackground()
             }
+            PrefManager.KEY_WIDGET_FRAME_ENABLED -> {
+                if (canShow()) {
+                    addOverlay()
+                } else {
+                    removeOverlay()
+                }
+            }
         }
     }
 
@@ -309,4 +316,5 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
     private fun canShow() = kgm.isKeyguardLocked
             && (!prefManager.hideOnNotifications || notificationCount == 0)
             && isScreenOn
+            && prefManager.widgetFrameEnabled
 }
