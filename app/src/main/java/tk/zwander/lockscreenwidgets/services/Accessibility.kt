@@ -232,10 +232,16 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
         }
         view.frame.onRemoveListener = {
             (view.widgets_pager.layoutManager as LinearLayoutManager).apply {
-                val index = findFirstCompletelyVisibleItemPosition()
-                val item = adapter.widgets[index]
+                val index = findFirstVisibleItemPosition()
+                val item = try {
+                    adapter.widgets[index]
+                } catch (e: IndexOutOfBoundsException) {
+                    null
+                }
                 prefManager.currentWidgets = prefManager.currentWidgets.apply {
-                    remove(item)
+                    if (item != null) {
+                        remove(item)
+                    }
                 }
             }
         }
