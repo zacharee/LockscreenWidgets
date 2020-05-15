@@ -77,6 +77,7 @@ class WidgetAdapter(private val picasso: Picasso, private val selectionCallback:
 
             val img = itemView.widget_image
 
+            picasso.cancelRequest(img)
             picasso
                 .load("${RemoteResourcesIconHandler.SCHEME}://${info.appInfo.packageName}/${info.previewImg}")
                 .resize(img.maxWidth, img.maxHeight)
@@ -110,7 +111,7 @@ class WidgetAdapter(private val picasso: Picasso, private val selectionCallback:
         override fun load(request: Request, networkPolicy: Int): Result? {
             val pName = request.uri.schemeSpecificPart
 
-            val img = pm.getApplicationIcon(pName).toBitmap()
+            val img = pm.getApplicationIcon(pName).mutate().toBitmap()
 
             return Result(img, Picasso.LoadedFrom.DISK)
         }
@@ -133,7 +134,8 @@ class WidgetAdapter(private val picasso: Picasso, private val selectionCallback:
             val pName = request.uri.host
             val id = pathSegments[0].toInt()
 
-            val img = pm.getResourcesForApplication(pName).getDrawable(id).toBitmap()
+            val img = pm.getResourcesForApplication(pName).getDrawable(id)
+                .mutate().toBitmap()
 
             return Result(img, Picasso.LoadedFrom.DISK)
         }

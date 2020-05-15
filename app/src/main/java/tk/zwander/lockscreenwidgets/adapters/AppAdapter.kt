@@ -86,6 +86,8 @@ class AppAdapter(context: Context, private val selectionCallback: (provider: Wid
                 adapter.addItem(it)
             }
 
+            picasso.cancelRequest(itemView.app_icon)
+
             picasso
                 .load(Uri.parse("${WidgetAdapter.AppIconRequestHandler.SCHEME}:${info.appInfo.packageName}"))
                 .fit()
