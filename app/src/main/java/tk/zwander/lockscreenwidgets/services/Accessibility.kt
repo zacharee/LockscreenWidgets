@@ -252,6 +252,7 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
                 view.remove.isVisible = view.frame.isInEditingMode && view.frame.shouldShowRemove
             }
         }))
+        view.frame.shouldShowRemove = pagerSnapHelper.getSnapPosition(view.widgets_pager) < adapter.widgets.size
 
         registerReceiver(screenStateReceiver, IntentFilter().apply {
             addAction(Intent.ACTION_SCREEN_OFF)
