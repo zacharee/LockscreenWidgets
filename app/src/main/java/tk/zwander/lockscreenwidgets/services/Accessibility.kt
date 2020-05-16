@@ -14,6 +14,7 @@ import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.WindowManager
 import android.view.accessibility.AccessibilityEvent
+import android.view.accessibility.AccessibilityWindowInfo
 import androidx.appcompat.view.ContextThemeWrapper
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.ItemTouchHelper
@@ -164,6 +165,7 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
     private var updatedForMove = false
     private var notificationCount = 0
     private var isScreenOn = false
+    private var currentPackage: String? = "com.android.systemui"
 
     @SuppressLint("ClickableViewAccessibility")
     override fun onCreate() {
@@ -274,6 +276,9 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
     }
 
     override fun onAccessibilityEvent(event: AccessibilityEvent) {
+        if (event.eventType == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED) {
+            currentPackage = findFirstNonAccOverlayWindow()?.root?.packageName?.toString()
+        }
         if (canShow()) {
             addOverlay()
         } else {
@@ -336,7 +341,17 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
 
     private fun canShow() =
         isScreenOn
+                && currentPackage == "com.android.systemui"
                 && (notificationCount == 0 || !prefManager.hideOnNotifications)
                 && prefManager.widgetFrameEnabled
                 && kgm.isKeyguardLocked
+
+    private fun findFirstNonAccOverlayWindow(): AccessibilityWindowInfo? {
+        windows.forEach {
+            if (it.type != AccessibilityWindowInfo.TYPE_ACCESSIBILITY_OVERLAY) {
+                return it
+            }
+        }
+        return null
+    }
 }
