@@ -139,16 +139,17 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
         }
     }
 
-    private val notificationCountListener = object : NotificationListener.NotificationCountListener() {
-        override fun onUpdate(count: Int) {
-            notificationCount = count
-            if (prefManager.hideOnNotifications && count > 0) {
-                removeOverlay()
-            } else if (canShow()) {
-                addOverlay()
+    private val notificationCountListener =
+        object : NotificationListener.NotificationCountListener() {
+            override fun onUpdate(count: Int) {
+                notificationCount = count
+                if (prefManager.hideOnNotifications && count > 0) {
+                    removeOverlay()
+                } else if (canShow()) {
+                    addOverlay()
+                }
             }
         }
-    }
 
     private val nightModeListener = object : ContentObserver(null) {
         override fun onChange(selfChange: Boolean, uri: Uri?) {
@@ -246,20 +247,30 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
             }
         }
 
-        view.widgets_pager.addOnScrollListener(SnapScrollListener(pagerSnapHelper, object : OnSnapPositionChangeListener {
-            override fun onSnapPositionChange(position: Int) {
-                view.frame.shouldShowRemove = position < adapter.widgets.size
-                view.remove.isVisible = view.frame.isInEditingMode && view.frame.shouldShowRemove
-            }
-        }))
-        view.frame.shouldShowRemove = pagerSnapHelper.getSnapPosition(view.widgets_pager) < adapter.widgets.size
+        view.widgets_pager.addOnScrollListener(
+            SnapScrollListener(
+                pagerSnapHelper,
+                object : OnSnapPositionChangeListener {
+                    override fun onSnapPositionChange(position: Int) {
+                        view.frame.shouldShowRemove = position < adapter.widgets.size
+                        view.remove.isVisible =
+                            view.frame.isInEditingMode && view.frame.shouldShowRemove
+                    }
+                })
+        )
+        view.frame.shouldShowRemove =
+            pagerSnapHelper.getSnapPosition(view.widgets_pager) < adapter.widgets.size
 
         registerReceiver(screenStateReceiver, IntentFilter().apply {
             addAction(Intent.ACTION_SCREEN_OFF)
             addAction(Intent.ACTION_SCREEN_ON)
         })
         notificationCountListener.register(this)
-        contentResolver.registerContentObserver(Settings.Secure.getUriFor(Settings.Secure.UI_NIGHT_MODE), true, nightModeListener)
+        contentResolver.registerContentObserver(
+            Settings.Secure.getUriFor(Settings.Secure.UI_NIGHT_MODE),
+            true,
+            nightModeListener
+        )
     }
 
     override fun onAccessibilityEvent(event: AccessibilityEvent) {
@@ -323,8 +334,9 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
         } catch (e: Exception) {}
     }
 
-    private fun canShow() = kgm.isKeyguardLocked
-            && (!prefManager.hideOnNotifications || notificationCount == 0)
-            && isScreenOn
-            && prefManager.widgetFrameEnabled
+    private fun canShow() =
+        isScreenOn
+                && (notificationCount == 0 || !prefManager.hideOnNotifications)
+                && prefManager.widgetFrameEnabled
+                && kgm.isKeyguardLocked
 }
