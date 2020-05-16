@@ -289,6 +289,9 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
                     removeOverlay()
                 }
             }
+            PrefManager.KEY_PAGE_INDICATOR_BEHAVIOR -> {
+                view.frame.updatePageIndicatorBehavior()
+            }
         }
     }
 

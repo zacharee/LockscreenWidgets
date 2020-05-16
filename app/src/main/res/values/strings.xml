@@ -30,6 +30,11 @@
     <string name="settings_screen_hide_when_notifications_shown">Hide when Showing Notifications</string>
     <string name="settings_screen_hide_when_notifications_shown_desc">Hide the widget frame while there are notifications being shown. This requires the use of a Notification Listener Service. You don\'t have to grant this permission right now.</string>
 
+    <string name="settings_screen_page_indicator_behavior">Page Indicator Behavior</string>
+    <string name="settings_screen_page_indicator_behavior_hidden">Always Hidden</string>
+    <string name="settings_screen_page_indicator_behavior_auto_hide">Auto-Hide</string>
+    <string name="settings_screen_page_indicator_behavior_shown">Always Shown</string>
+
     <string name="intro_welcome_title">Welcome!</string>
     <string name="intro_welcome_desc">Lockscreen Widgets is a simple app with a simple purpose: to bring back Android KitKat\'s lock screen widgets. Your widgets will show up in a simple paged slider on the lockscreen.</string>
 

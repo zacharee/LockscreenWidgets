@@ -22,6 +22,11 @@ class PrefManager private constructor(context: Context) : ContextWrapper(context
         const val KEY_OPAQUE_FRAME = "opaque_frame_background"
         const val KEY_HIDE_ON_NOTIFICATIONS = "hide_on_notifications"
         const val KEY_WIDGET_FRAME_ENABLED = "widget_frame_enabled"
+        const val KEY_PAGE_INDICATOR_BEHAVIOR = "page_indicator_behavior"
+
+        const val VALUE_PAGE_INDICATOR_BEHAVIOR_HIDDEN = 0
+        const val VALUE_PAGE_INDICATOR_BEHAVIOR_AUTO_HIDE = 1
+        const val VALUE_PAGE_INDICATOR_BEHAVIOR_SHOWN = 2
 
         private var instance: PrefManager? = null
 
@@ -101,6 +106,12 @@ class PrefManager private constructor(context: Context) : ContextWrapper(context
         get() = getBoolean(KEY_WIDGET_FRAME_ENABLED, true)
         set(value) {
             putBoolean(KEY_WIDGET_FRAME_ENABLED, value)
+        }
+
+    var pageIndicatorBehavior: Int
+        get() = getString(KEY_PAGE_INDICATOR_BEHAVIOR, VALUE_PAGE_INDICATOR_BEHAVIOR_AUTO_HIDE.toString())!!.toInt()
+        set(value) {
+            putString(KEY_PAGE_INDICATOR_BEHAVIOR, value.toString())
         }
 
     fun getString(key: String, def: String? = null) = prefs.getString(key, def)

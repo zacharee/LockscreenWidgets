@@ -9,11 +9,13 @@ import android.util.AttributeSet
 import android.util.TypedValue
 import android.view.MotionEvent
 import android.view.View
+import android.view.ViewConfiguration
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import kotlinx.android.synthetic.main.widget_frame.view.*
 import tk.zwander.lockscreenwidgets.R
+import tk.zwander.lockscreenwidgets.util.PrefManager
 import tk.zwander.lockscreenwidgets.util.prefManager
 
 class WidgetFrameView(context: Context, attrs: AttributeSet) : ConstraintLayout(context, attrs) {
@@ -64,6 +66,7 @@ class WidgetFrameView(context: Context, attrs: AttributeSet) : ConstraintLayout(
             hint_view.isVisible = true
         }
 
+        updatePageIndicatorBehavior()
         updateFrameBackground()
     }
 
@@ -98,6 +101,27 @@ class WidgetFrameView(context: Context, attrs: AttributeSet) : ConstraintLayout(
             })
         } else {
             frame_card.setCardBackgroundColor(ContextCompat.getColor(context, android.R.color.transparent))
+        }
+    }
+
+    fun updatePageIndicatorBehavior() {
+        widgets_pager.apply {
+            when (context.prefManager.pageIndicatorBehavior) {
+                PrefManager.VALUE_PAGE_INDICATOR_BEHAVIOR_HIDDEN -> {
+                    isHorizontalScrollBarEnabled = false
+                    isScrollbarFadingEnabled = false
+                }
+                PrefManager.VALUE_PAGE_INDICATOR_BEHAVIOR_AUTO_HIDE -> {
+                    isHorizontalScrollBarEnabled = true
+                    isScrollbarFadingEnabled = true
+                    scrollBarFadeDuration = ViewConfiguration.getScrollBarFadeDuration()
+                }
+                PrefManager.VALUE_PAGE_INDICATOR_BEHAVIOR_SHOWN -> {
+                    isHorizontalScrollBarEnabled = true
+                    scrollBarFadeDuration = 0
+                    isScrollbarFadingEnabled = false
+                }
+            }
         }
     }
 
