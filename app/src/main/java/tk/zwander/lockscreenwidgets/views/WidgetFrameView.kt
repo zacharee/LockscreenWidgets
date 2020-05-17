@@ -28,6 +28,8 @@ class WidgetFrameView(context: Context, attrs: AttributeSet) : ConstraintLayout(
     var onTopDragListener: ((velY: Float) -> Unit)? = null
     var onBottomDragListener: ((velY: Float) -> Unit)? = null
 
+    var attachmentStateListener: ((isAttached: Boolean) -> Unit)? = null
+
     private var maxPointerCount = 0
     private var alreadyIndicatedMoving = false
 
@@ -70,10 +72,17 @@ class WidgetFrameView(context: Context, attrs: AttributeSet) : ConstraintLayout(
         updateFrameBackground()
     }
 
+    override fun onAttachedToWindow() {
+        super.onAttachedToWindow()
+
+        attachmentStateListener?.invoke(false)
+    }
+
     override fun onDetachedFromWindow() {
         super.onDetachedFromWindow()
 
         setEditMode(false)
+        attachmentStateListener?.invoke(true)
     }
 
     override fun dispatchTouchEvent(ev: MotionEvent): Boolean {

@@ -181,7 +181,6 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
 
         adapter.updateWidgets(prefManager.currentWidgets.toList())
         prefManager.prefs.registerOnSharedPreferenceChangeListener(this)
-        widgetHost.startListening()
 
         view.frame.onMoveListener = { velX, velY ->
             params.x += velX.toInt()
@@ -246,6 +245,13 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
                         remove(item)
                     }
                 }
+            }
+        }
+        view.frame.attachmentStateListener = {
+            if (it) {
+                widgetHost.startListening()
+            } else {
+                widgetHost.stopListening()
             }
         }
 
@@ -315,7 +321,6 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
         super.onDestroy()
 
         prefManager.prefs.unregisterOnSharedPreferenceChangeListener(this)
-        widgetHost.stopListening()
         unregisterReceiver(screenStateReceiver)
         notificationCountListener.unregister(this)
         contentResolver.unregisterContentObserver(nightModeListener)
