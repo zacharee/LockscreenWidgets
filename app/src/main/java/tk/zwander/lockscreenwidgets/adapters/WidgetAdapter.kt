@@ -112,6 +112,7 @@ class WidgetAdapter(private val picasso: Picasso, private val selectionCallback:
             val pName = request.uri.schemeSpecificPart
 
             val img = pm.getApplicationIcon(pName).mutate().toBitmap()
+                .run { copy(config, false) }
 
             return Result(img, Picasso.LoadedFrom.DISK)
         }
@@ -135,7 +136,7 @@ class WidgetAdapter(private val picasso: Picasso, private val selectionCallback:
             val id = pathSegments[0].toInt()
 
             val img = pm.getResourcesForApplication(pName).getDrawable(id)
-                .mutate().toBitmap()
+                .mutate().toBitmap().run { copy(config, false) }
 
             return Result(img, Picasso.LoadedFrom.DISK)
         }
