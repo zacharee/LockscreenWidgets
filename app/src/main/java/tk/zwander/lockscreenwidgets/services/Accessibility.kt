@@ -8,8 +8,11 @@ import android.content.*
 import android.database.ContentObserver
 import android.graphics.PixelFormat
 import android.net.Uri
+import android.os.Handler
+import android.os.Looper
 import android.os.PowerManager
 import android.provider.Settings
+import android.util.Log
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.WindowManager
@@ -17,12 +20,14 @@ import android.view.accessibility.AccessibilityEvent
 import android.view.accessibility.AccessibilityWindowInfo
 import androidx.appcompat.view.ContextThemeWrapper
 import androidx.core.view.isVisible
+import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.PagerSnapHelper
 import androidx.recyclerview.widget.RecyclerView
 import kotlinx.android.synthetic.main.widget_frame.view.*
 import tk.zwander.lockscreenwidgets.R
+import tk.zwander.lockscreenwidgets.activities.RequestUnlockActivity
 import tk.zwander.lockscreenwidgets.adapters.WidgetFrameAdapter
 import tk.zwander.lockscreenwidgets.host.WidgetHost
 import tk.zwander.lockscreenwidgets.interfaces.OnSnapPositionChangeListener
@@ -31,12 +36,44 @@ import kotlin.math.roundToInt
 import kotlin.math.sign
 
 class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferenceChangeListener {
+    companion object {
+        const val ACTION_LOCKSCREEN_DISMISSED = "LOCKSCREEN_DISMISSED"
+    }
+
+    abstract class OnLockscreenDismissListener : BroadcastReceiver() {
+        final override fun onReceive(context: Context?, intent: Intent?) {
+            if (intent?.action == ACTION_LOCKSCREEN_DISMISSED) {
+                onDismissed()
+            }
+        }
+
+        fun register(context: Context) {
+            LocalBroadcastManager.getInstance(context)
+                .registerReceiver(this, IntentFilter(ACTION_LOCKSCREEN_DISMISSED))
+        }
+
+        fun unregister(context: Context) {
+            LocalBroadcastManager.getInstance(context)
+                .unregisterReceiver(this)
+        }
+
+        abstract fun onDismissed()
+    }
+
     private val kgm by lazy { getSystemService(Context.KEYGUARD_SERVICE) as KeyguardManager }
     private val wm by lazy { getSystemService(Context.WINDOW_SERVICE) as WindowManager }
     private val power by lazy { getSystemService(Context.POWER_SERVICE) as PowerManager }
 
     private val widgetManager by lazy { AppWidgetManager.getInstance(this) }
-    private val widgetHost by lazy { WidgetHost(this, 1003) }
+    private val widgetHost by lazy {
+        WidgetHost(this, 1003) {
+            Handler(Looper.getMainLooper()).postDelayed({
+                val intent = Intent(this, RequestUnlockActivity::class.java)
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                startActivity(intent)
+            }, 100)
+        }
+    }
 
     private val view by lazy {
         LayoutInflater.from(ContextThemeWrapper(this, R.style.AppTheme))
@@ -166,6 +203,7 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
     private var notificationCount = 0
     private var isScreenOn = false
     private var currentPackage: String? = "com.android.systemui"
+    private var wasOnKeyguard = false
 
     @SuppressLint("ClickableViewAccessibility")
     override fun onCreate() {
@@ -279,11 +317,23 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
             true,
             nightModeListener
         )
+
+        wasOnKeyguard = kgm.isKeyguardLocked
     }
 
     override fun onAccessibilityEvent(event: AccessibilityEvent) {
         if (event.eventType == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED) {
             currentPackage = findFirstNonAccOverlayWindow()?.root?.packageName?.toString()
+        }
+        if (event.eventType == AccessibilityEvent.TYPE_WINDOWS_CHANGED) {
+            val isOnKeyguard = kgm.isKeyguardLocked
+            if (isOnKeyguard != wasOnKeyguard) {
+                wasOnKeyguard = isOnKeyguard
+                if (!isOnKeyguard) {
+                    LocalBroadcastManager.getInstance(this)
+                        .sendBroadcast(Intent(ACTION_LOCKSCREEN_DISMISSED))
+                }
+            }
         }
         if (canShow()) {
             addOverlay()

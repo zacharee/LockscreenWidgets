@@ -3,6 +3,7 @@
     package="tk.zwander.lockscreenwidgets">
 
     <uses-permission android:name="android.permission.VIBRATE" />
+    <uses-permission android:name="android.permission.DISABLE_KEYGUARD" />
 
     <application
         android:allowBackup="true"
@@ -29,6 +30,10 @@
         <activity android:name="tk.zwander.lockscreenwidgets.activities.SettingsActivity"
             android:exported="false"
             android:label="@string/settings"
+            />
+        <activity android:name=".activities.RequestUnlockActivity"
+            android:exported="false"
+            android:excludeFromRecents="true"
             />
 
         <service

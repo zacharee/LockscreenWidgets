@@ -30,7 +30,7 @@ class AddWidgetActivity : AppCompatActivity(), CoroutineScope by MainScope() {
 
     private val kgm by lazy { getSystemService(Context.KEYGUARD_SERVICE) as KeyguardManager }
     private val widgetManager by lazy { AppWidgetManager.getInstance(this) }
-    private val widgetHost by lazy { WidgetHost(this, 1003) }
+    private val widgetHost by lazy { WidgetHost(this, 1003) {} }
 
     private val appWidgetManager by lazy { AppWidgetManager.getInstance(this) }
     private val adapter by lazy {
@@ -42,11 +42,9 @@ class AddWidgetActivity : AppCompatActivity(), CoroutineScope by MainScope() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            kgm.requestDismissKeyguard(this, null)
-        } else {
-            kgm.dismissKeyguard(this, null, null)
-        }
+        val intent = Intent(this, RequestUnlockActivity::class.java)
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        startActivity(intent)
 
         setContentView(R.layout.activity_add_widget)
 
