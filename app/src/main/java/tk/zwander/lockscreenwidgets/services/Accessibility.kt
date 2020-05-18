@@ -202,9 +202,9 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
     private var updatedForMove = false
     private var notificationCount = 0
     private var isScreenOn = false
-    private var currentPackage: String? = "com.android.systemui"
+    private var currentPackage: String? = null
     private var showingSecurityInput = false
-    private var showingLeftShortcut = false
+    private var showingLeftShortcut = true
     private var wasOnKeyguard = false
 
     @SuppressLint("ClickableViewAccessibility")
