@@ -5,9 +5,10 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.provider.Settings
-import android.util.DisplayMetrics
 import android.util.TypedValue
 import android.view.View
+import android.view.animation.AccelerateInterpolator
+import android.view.animation.DecelerateInterpolator
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.SnapHelper
 import tk.zwander.lockscreenwidgets.services.Accessibility
@@ -68,6 +69,7 @@ fun View.fadeAndScaleOut(endListener: () -> Unit) {
         .scaleX(0.95f)
         .scaleY(0.95f)
         .alpha(0f)
+        .setInterpolator(AccelerateInterpolator())
         .withEndAction {
             endListener()
         }
@@ -79,6 +81,7 @@ fun View.fadeAndScaleIn(endListener: () -> Unit) {
         .scaleX(1.0f)
         .scaleY(1.0f)
         .alpha(1f)
+        .setInterpolator(DecelerateInterpolator())
         .withEndAction {
             endListener()
         }
