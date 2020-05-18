@@ -400,9 +400,11 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
     }
 
     private fun removeOverlay() {
-        try {
-            wm.removeView(view)
-        } catch (e: Exception) {}
+        view.fadeAndScaleOut {
+            try {
+                wm.removeView(view)
+            } catch (e: Exception) {}
+        }
     }
 
     private fun canShow() =

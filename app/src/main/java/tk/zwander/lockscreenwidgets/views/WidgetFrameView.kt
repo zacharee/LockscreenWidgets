@@ -16,6 +16,7 @@ import androidx.core.view.isVisible
 import kotlinx.android.synthetic.main.widget_frame.view.*
 import tk.zwander.lockscreenwidgets.R
 import tk.zwander.lockscreenwidgets.util.PrefManager
+import tk.zwander.lockscreenwidgets.util.fadeAndScaleIn
 import tk.zwander.lockscreenwidgets.util.prefManager
 
 class WidgetFrameView(context: Context, attrs: AttributeSet) : ConstraintLayout(context, attrs) {
@@ -37,6 +38,12 @@ class WidgetFrameView(context: Context, attrs: AttributeSet) : ConstraintLayout(
     var shouldShowRemove = true
 
     private val vibrator by lazy { context.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator }
+
+    init {
+        scaleX = 0.95f
+        scaleY = 0.95f
+        alpha = 0f
+    }
 
     @SuppressLint("ClickableViewAccessibility")
     override fun onFinishInflate() {
@@ -74,6 +81,8 @@ class WidgetFrameView(context: Context, attrs: AttributeSet) : ConstraintLayout(
 
     override fun onAttachedToWindow() {
         super.onAttachedToWindow()
+
+        fadeAndScaleIn {}
 
         attachmentStateListener?.invoke(true)
     }

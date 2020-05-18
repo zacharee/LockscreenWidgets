@@ -7,6 +7,7 @@ import android.net.Uri
 import android.provider.Settings
 import android.util.DisplayMetrics
 import android.util.TypedValue
+import android.view.View
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.SnapHelper
 import tk.zwander.lockscreenwidgets.services.Accessibility
@@ -59,4 +60,26 @@ fun Context.launchEmail(to: String, subject: String) {
 
         startActivity(intent)
     } catch (e: Exception) {}
+}
+
+fun View.fadeAndScaleOut(endListener: () -> Unit) {
+    animate().cancel()
+    animate()
+        .scaleX(0.95f)
+        .scaleY(0.95f)
+        .alpha(0f)
+        .withEndAction {
+            endListener()
+        }
+}
+
+fun View.fadeAndScaleIn(endListener: () -> Unit) {
+    animate().cancel()
+    animate()
+        .scaleX(1.0f)
+        .scaleY(1.0f)
+        .alpha(1f)
+        .withEndAction {
+            endListener()
+        }
 }
