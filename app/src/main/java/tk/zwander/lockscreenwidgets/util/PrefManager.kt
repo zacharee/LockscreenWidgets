@@ -23,6 +23,8 @@ class PrefManager private constructor(context: Context) : ContextWrapper(context
         const val KEY_HIDE_ON_NOTIFICATIONS = "hide_on_notifications"
         const val KEY_WIDGET_FRAME_ENABLED = "widget_frame_enabled"
         const val KEY_PAGE_INDICATOR_BEHAVIOR = "page_indicator_behavior"
+        const val KEY_HIDE_ON_SECURITY_PAGE = "hide_on_security_page"
+        const val KEY_HIDE_ON_NOTIFICATION_SHADE = "hide_on_notification_shade"
 
         const val VALUE_PAGE_INDICATOR_BEHAVIOR_HIDDEN = 0
         const val VALUE_PAGE_INDICATOR_BEHAVIOR_AUTO_HIDE = 1
@@ -106,6 +108,18 @@ class PrefManager private constructor(context: Context) : ContextWrapper(context
         get() = getBoolean(KEY_WIDGET_FRAME_ENABLED, true)
         set(value) {
             putBoolean(KEY_WIDGET_FRAME_ENABLED, value)
+        }
+
+    var hideOnSecurityPage: Boolean
+        get() = getBoolean(KEY_HIDE_ON_SECURITY_PAGE, false)
+        set(value) {
+            putBoolean(KEY_HIDE_ON_SECURITY_PAGE, value)
+        }
+
+    var hideOnNotificationShade: Boolean
+        get() = getBoolean(KEY_HIDE_ON_NOTIFICATION_SHADE, false)
+        set(value) {
+            putBoolean(KEY_HIDE_ON_NOTIFICATION_SHADE, value)
         }
 
     var pageIndicatorBehavior: Int

@@ -12,7 +12,6 @@ import android.os.Handler
 import android.os.Looper
 import android.os.PowerManager
 import android.provider.Settings
-import android.util.Log
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.WindowManager
@@ -204,6 +203,7 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
     private var isScreenOn = false
     private var currentPackage: String? = "com.android.systemui"
     private var showingSecurityInput = false
+    private var showingLeftShortcut = false
     private var wasOnKeyguard = false
 
     @SuppressLint("ClickableViewAccessibility")
@@ -332,6 +332,7 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
                         || findAccessibilityNodeInfosByViewId("com.android.systemui:id/keyguard_password_view").find { it.isVisibleToUser } != null
                         || findAccessibilityNodeInfosByViewId("com.android.systemui:id/keyguard_sim_puk_view").find { it.isVisibleToUser } != null
             } == true
+            showingLeftShortcut = window?.root?.findAccessibilityNodeInfosByViewId("com.android.systemui:id/left_button")?.find { it.isVisibleToUser } != null
         }
         if (event.eventType == AccessibilityEvent.TYPE_WINDOWS_CHANGED) {
             val isOnKeyguard = kgm.isKeyguardLocked
@@ -405,7 +406,8 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
     private fun canShow() =
         isScreenOn
                 && currentPackage == "com.android.systemui"
-                && !showingSecurityInput
+                && (!showingSecurityInput || !prefManager.hideOnSecurityPage)
+                && (showingLeftShortcut || !prefManager.hideOnNotificationShade)
                 && (notificationCount == 0 || !prefManager.hideOnNotifications)
                 && prefManager.widgetFrameEnabled
                 && kgm.isKeyguardLocked

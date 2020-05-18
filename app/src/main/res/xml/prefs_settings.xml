@@ -23,6 +23,20 @@
         android:icon="@drawable/ic_baseline_notifications_off_24"
         />
 
+    <SwitchPreference
+        android:title="@string/settings_screen_hide_on_notification_shade"
+        android:summary="@string/settings_screen_hide_on_notification_shade_desc"
+        android:key="hide_on_notification_shade"
+        android:icon="@drawable/ic_baseline_clear_all_24"
+        />
+
+    <SwitchPreference
+        android:title="@string/settings_screen_hide_on_security_input"
+        android:summary="@string/settings_screen_hide_on_security_input_desc"
+        android:key="hide_on_security_page"
+        android:icon="@drawable/is_baseline_password_24"
+        />
+
     <tk.zwander.lockscreenwidgets.prefs.AutoSummaryListPreference
         android:title="@string/settings_screen_page_indicator_behavior"
         android:key="page_indicator_behavior"
