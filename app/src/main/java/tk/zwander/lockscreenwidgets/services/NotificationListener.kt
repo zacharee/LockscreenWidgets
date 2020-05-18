@@ -53,7 +53,7 @@ class NotificationListener : NotificationListenerService() {
 
     private fun sendUpdate() {
         val intent = Intent(ACTION_NEW_NOTIFICATION_COUNT)
-        intent.putExtra(EXTRA_NOTIFICATION_COUNT, activeNotifications.filter {
+        intent.putExtra(EXTRA_NOTIFICATION_COUNT, (activeNotifications ?: arrayOf()).filter {
             if (Build.VERSION.SDK_INT > Build.VERSION_CODES.N_MR1) {
                 val ranking = Ranking().apply { currentRanking.getRanking(it.key, this) }
                 ranking.importance > NotificationManager.IMPORTANCE_MIN
