@@ -75,14 +75,14 @@ class WidgetFrameView(context: Context, attrs: AttributeSet) : ConstraintLayout(
     override fun onAttachedToWindow() {
         super.onAttachedToWindow()
 
-        attachmentStateListener?.invoke(false)
+        attachmentStateListener?.invoke(true)
     }
 
     override fun onDetachedFromWindow() {
         super.onDetachedFromWindow()
 
         setEditMode(false)
-        attachmentStateListener?.invoke(true)
+        attachmentStateListener?.invoke(false)
     }
 
     override fun dispatchTouchEvent(ev: MotionEvent): Boolean {

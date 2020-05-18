@@ -1,13 +1,10 @@
 package tk.zwander.lockscreenwidgets.activities
 
 import android.app.Activity
-import android.app.KeyguardManager
 import android.appwidget.AppWidgetManager
 import android.appwidget.AppWidgetProviderInfo
 import android.content.ComponentName
-import android.content.Context
 import android.content.Intent
-import android.os.Build
 import android.os.Bundle
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
@@ -28,7 +25,6 @@ class AddWidgetActivity : AppCompatActivity(), CoroutineScope by MainScope() {
         const val CONFIG_CODE = 105
     }
 
-    private val kgm by lazy { getSystemService(Context.KEYGUARD_SERVICE) as KeyguardManager }
     private val widgetManager by lazy { AppWidgetManager.getInstance(this) }
     private val widgetHost by lazy { WidgetHost(this, 1003) {} }
 
@@ -67,17 +63,25 @@ class AddWidgetActivity : AppCompatActivity(), CoroutineScope by MainScope() {
 
         when (requestCode) {
             PERM_CODE -> {
-                if (resultCode == Activity.RESULT_OK) tryBindWidget(
-                    widgetManager.getAppWidgetInfo(data?.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, -1) ?: return)
-                )
+                val id = data?.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, -1) ?: return
+
+                if (resultCode == Activity.RESULT_OK) {
+                    tryBindWidget(
+                        widgetManager.getAppWidgetInfo(id)
+                    )
+                } else {
+                    widgetHost.deleteAppWidgetId(id)
+                }
             }
 
             CONFIG_CODE -> {
-                if (resultCode == Activity.RESULT_OK) {
-                    val id = data?.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, -1) ?: return
-                    if (id == -1) return
+                val id = data?.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, -1) ?: return
+                if (id == -1) return
 
+                if (resultCode == Activity.RESULT_OK) {
                     addNewWidget(id)
+                } else {
+                    widgetHost.deleteAppWidgetId(id)
                 }
             }
         }
@@ -89,7 +93,7 @@ class AddWidgetActivity : AppCompatActivity(), CoroutineScope by MainScope() {
         if (!canBind) getWidgetPermission(id, info.provider)
         else {
             if (info.configure != null && !prefManager.currentWidgets.map { it.id }.contains(id)) {
-                configureWidget(id, info.configure)
+                configureWidget(id)
             } else {
                 addNewWidget(id)
             }
@@ -103,12 +107,9 @@ class AddWidgetActivity : AppCompatActivity(), CoroutineScope by MainScope() {
         startActivityForResult(intent, PERM_CODE)
     }
 
-    private fun configureWidget(id: Int, configure: ComponentName) {
+    private fun configureWidget(id: Int) {
         try {
-            val intent = Intent(AppWidgetManager.ACTION_APPWIDGET_CONFIGURE)
-            intent.component = configure
-            intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, id)
-            startActivityForResult(intent, CONFIG_CODE)
+            widgetHost.startAppWidgetConfigureActivityForResult(this, id, 0, CONFIG_CODE, null)
         } catch (e: Exception) {
             addNewWidget(id)
         }

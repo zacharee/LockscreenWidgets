@@ -14,6 +14,7 @@ import tk.zwander.lockscreenwidgets.activities.AddWidgetActivity
 import tk.zwander.lockscreenwidgets.data.WidgetData
 import tk.zwander.lockscreenwidgets.host.WidgetHost
 import tk.zwander.lockscreenwidgets.interfaces.ItemTouchHelperAdapter
+import tk.zwander.lockscreenwidgets.util.pxAsDp
 import java.util.*
 import kotlin.collections.ArrayList
 
@@ -102,7 +103,13 @@ class WidgetFrameAdapter(private val manager: AppWidgetManager, private val host
                     }
 
                     removeAllViews()
-                    addView(withContext(Dispatchers.Main) { host.createView(itemView.context, data.id, widgetInfo) })
+                    addView(withContext(Dispatchers.Main) {
+                        host.createView(itemView.context, data.id, widgetInfo).apply {
+                            val width = context.pxAsDp(itemView.width).toInt()
+                            val height = context.pxAsDp(itemView.height).toInt()
+                            updateAppWidgetSize(null, width, height, width, height)
+                        }
+                    })
                 }
             }
         }

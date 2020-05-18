@@ -283,6 +283,7 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
                 prefManager.currentWidgets = prefManager.currentWidgets.apply {
                     if (item != null) {
                         remove(item)
+                        widgetHost.deleteAppWidgetId(item.id)
                     }
                 }
             }
