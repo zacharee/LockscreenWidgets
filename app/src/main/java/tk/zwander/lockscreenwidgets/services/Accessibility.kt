@@ -203,6 +203,7 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
     private var notificationCount = 0
     private var isScreenOn = false
     private var currentPackage: String? = "com.android.systemui"
+    private var showingSecurityInput = false
     private var wasOnKeyguard = false
 
     @SuppressLint("ClickableViewAccessibility")
@@ -323,7 +324,14 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
 
     override fun onAccessibilityEvent(event: AccessibilityEvent) {
         if (event.eventType == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED) {
-            currentPackage = findFirstNonAccOverlayWindow()?.root?.packageName?.toString()
+            val window = findFirstNonAccOverlayWindow()
+            currentPackage = window?.root?.packageName?.toString()
+            showingSecurityInput = window?.root?.run {
+                findAccessibilityNodeInfosByViewId("com.android.systemui:id/keyguard_pin_view").find { it.isVisibleToUser } != null
+                        || findAccessibilityNodeInfosByViewId("com.android.systemui:id/keyguard_pattern_view").find { it.isVisibleToUser } != null
+                        || findAccessibilityNodeInfosByViewId("com.android.systemui:id/keyguard_password_view").find { it.isVisibleToUser } != null
+                        || findAccessibilityNodeInfosByViewId("com.android.systemui:id/keyguard_sim_puk_view").find { it.isVisibleToUser } != null
+            } == true
         }
         if (event.eventType == AccessibilityEvent.TYPE_WINDOWS_CHANGED) {
             val isOnKeyguard = kgm.isKeyguardLocked
@@ -397,6 +405,7 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
     private fun canShow() =
         isScreenOn
                 && currentPackage == "com.android.systemui"
+                && !showingSecurityInput
                 && (notificationCount == 0 || !prefManager.hideOnNotifications)
                 && prefManager.widgetFrameEnabled
                 && kgm.isKeyguardLocked
