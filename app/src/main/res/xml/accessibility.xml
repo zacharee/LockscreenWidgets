@@ -5,7 +5,7 @@
     android:accessibilityFeedbackType="feedbackGeneric"
     android:canRequestTouchExplorationMode="false"
     android:canRetrieveWindowContent="true"
-    android:accessibilityFlags="flagRetrieveInteractiveWindows"
+    android:accessibilityFlags="flagRetrieveInteractiveWindows|flagReportViewIds"
     android:description="@string/accessibility_service_desc"
     xmlns:android="http://schemas.android.com/apk/res/android"
     />

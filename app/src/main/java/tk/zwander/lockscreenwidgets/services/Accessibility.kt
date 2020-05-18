@@ -16,6 +16,7 @@ import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.WindowManager
 import android.view.accessibility.AccessibilityEvent
+import android.view.accessibility.AccessibilityNodeInfo
 import android.view.accessibility.AccessibilityWindowInfo
 import androidx.appcompat.view.ContextThemeWrapper
 import androidx.core.view.isVisible
@@ -405,7 +406,7 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
 
     private fun canShow() =
         isScreenOn
-                && currentPackage == "com.android.systemui"
+                && (currentPackage == "com.android.systemui" || currentPackage == null)
                 && (!showingSecurityInput || !prefManager.hideOnSecurityPage)
                 && (showingLeftShortcut || !prefManager.hideOnNotificationShade)
                 && (notificationCount == 0 || !prefManager.hideOnNotifications)
@@ -414,10 +415,24 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
 
     private fun findFirstNonAccOverlayWindow(): AccessibilityWindowInfo? {
         windows.forEach {
-            if (it.type != AccessibilityWindowInfo.TYPE_ACCESSIBILITY_OVERLAY) {
+            if (it.type != AccessibilityWindowInfo.TYPE_ACCESSIBILITY_OVERLAY && it.type != -1) {
                 return it
             }
         }
         return null
+    }
+
+    private fun addAllNodesToList(parentNode: AccessibilityNodeInfo, list: ArrayList<AccessibilityNodeInfo>) {
+        list.add(parentNode)
+        for (i in 0 until parentNode.childCount) {
+            val child = parentNode.getChild(i)
+            if (child != null) {
+                if (child.childCount > 0) {
+                    addAllNodesToList(child, list)
+                } else {
+                    list.add(child)
+                }
+            }
+        }
     }
 }
