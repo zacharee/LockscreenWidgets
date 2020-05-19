@@ -12,6 +12,7 @@ import android.os.Handler
 import android.os.Looper
 import android.os.PowerManager
 import android.provider.Settings
+import android.util.Log
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.WindowManager
@@ -26,6 +27,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.PagerSnapHelper
 import androidx.recyclerview.widget.RecyclerView
 import kotlinx.android.synthetic.main.widget_frame.view.*
+import tk.zwander.lockscreenwidgets.App
 import tk.zwander.lockscreenwidgets.R
 import tk.zwander.lockscreenwidgets.activities.RequestUnlockActivity
 import tk.zwander.lockscreenwidgets.adapters.WidgetFrameAdapter
@@ -101,23 +103,6 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
     }
 
     private val pagerSnapHelper by lazy { PagerSnapHelper() }
-
-    private val screenStateReceiver = object : BroadcastReceiver() {
-        override fun onReceive(context: Context?, intent: Intent?) {
-            when (intent?.action) {
-                Intent.ACTION_SCREEN_OFF -> {
-                    isScreenOn = false
-                    removeOverlay()
-                }
-                Intent.ACTION_SCREEN_ON -> {
-                    isScreenOn = true
-                    if (canShow()) {
-                        addOverlay()
-                    }
-                }
-            }
-        }
-    }
 
     private val touchHelperCallback by lazy {
         object : ItemTouchHelper.SimpleCallback(ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT, 0) {
@@ -201,17 +186,18 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
 
     private var updatedForMove = false
     private var notificationCount = 0
-    private var isScreenOn = false
-    private var currentPackage: String? = null
     private var showingSecurityInput = false
-    private var showingLeftShortcut = true
-    private var wasOnKeyguard = false
+    private var onMainLockscreen = true
+    private var wasOnKeyguard = true
+    private var isRemovingAlready = false
+
+    private var currentSysUiLayer = 1
+    private var currentAppLayer = 0
 
     @SuppressLint("ClickableViewAccessibility")
     override fun onCreate() {
         super.onCreate()
 
-        isScreenOn = power.isInteractive
         view.widgets_pager.apply {
             adapter = this@Accessibility.adapter
             setHasFixedSize(true)
@@ -310,10 +296,6 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
         view.frame.shouldShowRemove =
             pagerSnapHelper.getSnapPosition(view.widgets_pager) < adapter.widgets.size
 
-        registerReceiver(screenStateReceiver, IntentFilter().apply {
-            addAction(Intent.ACTION_SCREEN_OFF)
-            addAction(Intent.ACTION_SCREEN_ON)
-        })
         notificationCountListener.register(this)
         contentResolver.registerContentObserver(
             Settings.Secure.getUriFor(Settings.Secure.UI_NIGHT_MODE),
@@ -325,17 +307,6 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
     }
 
     override fun onAccessibilityEvent(event: AccessibilityEvent) {
-        if (event.eventType == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED) {
-            val window = findFirstNonAccOverlayWindow()
-            currentPackage = window?.root?.packageName?.toString()
-            showingSecurityInput = window?.root?.run {
-                findAccessibilityNodeInfosByViewId("com.android.systemui:id/keyguard_pin_view").find { it.isVisibleToUser } != null
-                        || findAccessibilityNodeInfosByViewId("com.android.systemui:id/keyguard_pattern_view").find { it.isVisibleToUser } != null
-                        || findAccessibilityNodeInfosByViewId("com.android.systemui:id/keyguard_password_view").find { it.isVisibleToUser } != null
-                        || findAccessibilityNodeInfosByViewId("com.android.systemui:id/keyguard_sim_puk_view").find { it.isVisibleToUser } != null
-            } == true
-            showingLeftShortcut = window?.root?.findAccessibilityNodeInfosByViewId("com.android.systemui:id/left_button")?.find { it.isVisibleToUser } != null
-        }
         if (event.eventType == AccessibilityEvent.TYPE_WINDOWS_CHANGED) {
             val isOnKeyguard = kgm.isKeyguardLocked
             if (isOnKeyguard != wasOnKeyguard) {
@@ -346,6 +317,25 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
                 }
             }
         }
+
+        if (wasOnKeyguard) {
+            if (event.eventType == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED) {
+                val window = findSystemUiWindow()
+                currentAppLayer = findTopAppWindow()?.layer ?: -1
+                currentSysUiLayer = window?.layer ?: -1
+                showingSecurityInput = window?.root?.run {
+                    findAccessibilityNodeInfosByViewId("com.android.systemui:id/keyguard_pin_view").find { it.isVisibleToUser } != null
+                            || findAccessibilityNodeInfosByViewId("com.android.systemui:id/keyguard_pattern_view").find { it.isVisibleToUser } != null
+                            || findAccessibilityNodeInfosByViewId("com.android.systemui:id/keyguard_password_view").find { it.isVisibleToUser } != null
+                            || findAccessibilityNodeInfosByViewId("com.android.systemui:id/keyguard_sim_puk_view").find { it.isVisibleToUser } != null
+                } == true
+                onMainLockscreen = window?.root?.run {
+                    findAccessibilityNodeInfosByViewId("com.android.systemui:id/left_button")?.find { it.isVisibleToUser } != null
+                            || findAccessibilityNodeInfosByViewId("com.android.systemui:id/keyguard_indication_area")?.find { it.isVisibleToUser } != null
+                } == true
+            }
+        }
+
         if (canShow()) {
             addOverlay()
         } else {
@@ -382,7 +372,6 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
         super.onDestroy()
 
         prefManager.prefs.unregisterOnSharedPreferenceChangeListener(this)
-        unregisterReceiver(screenStateReceiver)
         notificationCountListener.unregister(this)
         contentResolver.unregisterContentObserver(nightModeListener)
     }
@@ -390,6 +379,7 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
     private fun addOverlay() {
         try {
             wm.addView(view, params)
+            isRemovingAlready = false
         } catch (e: Exception) {}
     }
 
@@ -400,28 +390,52 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
     }
 
     private fun removeOverlay() {
-        view.fadeAndScaleOut {
-            try {
-                wm.removeView(view)
-            } catch (e: Exception) {}
+        if (!isRemovingAlready) {
+            view.fadeAndScaleOut {
+                try {
+                    wm.removeView(view)
+                } catch (e: Exception) {}
+                isRemovingAlready = false
+            }
         }
     }
 
     private fun canShow() =
-        isScreenOn
-                && (currentPackage == "com.android.systemui" || currentPackage == null)
+        (wasOnKeyguard
+                && currentSysUiLayer > currentAppLayer
                 && (!showingSecurityInput || !prefManager.hideOnSecurityPage)
-                && (showingLeftShortcut || !prefManager.hideOnNotificationShade)
+                && (onMainLockscreen || !prefManager.hideOnNotificationShade)
                 && (notificationCount == 0 || !prefManager.hideOnNotifications)
                 && prefManager.widgetFrameEnabled
-                && kgm.isKeyguardLocked
-
-    private fun findFirstNonAccOverlayWindow(): AccessibilityWindowInfo? {
-        windows.forEach {
-            if (it.type != AccessibilityWindowInfo.TYPE_ACCESSIBILITY_OVERLAY && it.type != -1) {
-                return it
+                && power.isInteractive).also {
+            if (App.DEBUG) {
+                Log.e("LockscreenWidgets", "canShow: $it, " +
+                        "isScreenOn: ${power.isInteractive}, " +
+                        "wasOnKeyguard: $wasOnKeyguard, " +
+                        "currentSysUiLayer: $currentSysUiLayer, " +
+                        "currentAppLayer: $currentAppLayer, " +
+                        "showingSecurityInput: $showingSecurityInput, " +
+                        "onMainLockscreen: $onMainLockscreen, " +
+                        "notificationCount: $notificationCount, " +
+                        "widgetEnabled: ${prefManager.widgetFrameEnabled}")
             }
         }
+
+    private fun findSystemUiWindow(): AccessibilityWindowInfo? {
+        windows.forEach {
+            if (it.type == AccessibilityWindowInfo.TYPE_SYSTEM && it.root?.packageName == "com.android.systemui")
+                return it
+        }
+
+        return null
+    }
+
+    private fun findTopAppWindow(): AccessibilityWindowInfo? {
+        windows.forEach {
+            if (it.type == AccessibilityWindowInfo.TYPE_APPLICATION)
+                return it
+        }
+
         return null
     }
 
