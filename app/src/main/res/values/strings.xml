@@ -55,4 +55,7 @@
 
     <string name="intro_done_title">All Done!</string>
     <string name="intro_done_desc">That\'s it! Check your lock screen and you should now see the widget frame!</string>
+
+    <string name="configure_widget_error">Unable to configure the widget %s due to lack of permissions. Please contact the app developer or device manufacturer.</string>
+    <string name="bind_widget_error">Unable to bind the widget %s due to lack of permissions. Please contact the app developer or device manufacturer.</string>
 </resources>

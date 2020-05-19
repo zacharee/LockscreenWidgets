@@ -7,6 +7,7 @@ import android.content.ComponentName
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import kotlinx.android.synthetic.main.activity_add_widget.*
 import kotlinx.coroutines.*
@@ -25,7 +26,6 @@ class AddWidgetActivity : AppCompatActivity(), CoroutineScope by MainScope() {
         const val CONFIG_CODE = 105
     }
 
-    private val widgetManager by lazy { AppWidgetManager.getInstance(this) }
     private val widgetHost by lazy { WidgetHost(this, 1003) {} }
 
     private val appWidgetManager by lazy { AppWidgetManager.getInstance(this) }
@@ -67,7 +67,7 @@ class AddWidgetActivity : AppCompatActivity(), CoroutineScope by MainScope() {
 
                 if (resultCode == Activity.RESULT_OK) {
                     tryBindWidget(
-                        widgetManager.getAppWidgetInfo(id)
+                        appWidgetManager.getAppWidgetInfo(id)
                     )
                 } else {
                     widgetHost.deleteAppWidgetId(id)
@@ -88,7 +88,7 @@ class AddWidgetActivity : AppCompatActivity(), CoroutineScope by MainScope() {
     }
 
     private fun tryBindWidget(info: AppWidgetProviderInfo, id: Int = widgetHost.allocateAppWidgetId()) {
-        val canBind = widgetManager.bindAppWidgetIdIfAllowed(id, info.provider)
+        val canBind = appWidgetManager.bindAppWidgetIdIfAllowed(id, info.provider)
 
         if (!canBind) getWidgetPermission(id, info.provider)
         else {
@@ -111,6 +111,7 @@ class AddWidgetActivity : AppCompatActivity(), CoroutineScope by MainScope() {
         try {
             widgetHost.startAppWidgetConfigureActivityForResult(this, id, 0, CONFIG_CODE, null)
         } catch (e: Exception) {
+            Toast.makeText(this, resources.getString(R.string.configure_widget_error, appWidgetManager.getAppWidgetInfo(id).provider), Toast.LENGTH_LONG).show()
             addNewWidget(id)
         }
     }

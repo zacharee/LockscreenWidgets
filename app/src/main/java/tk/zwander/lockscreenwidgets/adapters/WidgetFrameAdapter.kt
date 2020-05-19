@@ -5,6 +5,7 @@ import android.content.Intent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import kotlinx.android.synthetic.main.widget_page_holder.view.*
@@ -14,6 +15,7 @@ import tk.zwander.lockscreenwidgets.activities.AddWidgetActivity
 import tk.zwander.lockscreenwidgets.data.WidgetData
 import tk.zwander.lockscreenwidgets.host.WidgetHost
 import tk.zwander.lockscreenwidgets.interfaces.ItemTouchHelperAdapter
+import tk.zwander.lockscreenwidgets.util.prefManager
 import tk.zwander.lockscreenwidgets.util.pxAsDp
 import java.util.*
 import kotlin.collections.ArrayList
@@ -103,13 +105,21 @@ class WidgetFrameAdapter(private val manager: AppWidgetManager, private val host
                     }
 
                     removeAllViews()
-                    addView(withContext(Dispatchers.Main) {
-                        host.createView(itemView.context, data.id, widgetInfo).apply {
-                            val width = context.pxAsDp(itemView.width).toInt()
-                            val height = context.pxAsDp(itemView.height).toInt()
-                            updateAppWidgetSize(null, width, height, width, height)
+                    try {
+                        addView(withContext(Dispatchers.Main) {
+                            host.createView(itemView.context, data.id, widgetInfo).apply {
+                                val width = context.pxAsDp(itemView.width).toInt()
+                                val height = context.pxAsDp(itemView.height).toInt()
+                                updateAppWidgetSize(null, width, height, width, height)
+                            }
+                        })
+                    } catch (e: SecurityException) {
+                        Toast.makeText(context, resources.getString(R.string.bind_widget_error, widgetInfo.provider), Toast.LENGTH_LONG).show()
+                        context.prefManager.currentWidgets = context.prefManager.currentWidgets.apply {
+                            remove(data)
+                            host.deleteAppWidgetId(data.id)
                         }
-                    })
+                    }
                 }
             }
         }
