@@ -1,5 +1,6 @@
 package tk.zwander.lockscreenwidgets.util
 
+import android.animation.AnimatorListenerAdapter
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
@@ -7,8 +8,12 @@ import android.net.Uri
 import android.provider.Settings
 import android.util.TypedValue
 import android.view.View
+import android.view.ViewConfiguration
 import android.view.animation.AccelerateInterpolator
+import android.view.animation.Animation
 import android.view.animation.DecelerateInterpolator
+import android.view.animation.TranslateAnimation
+import androidx.core.view.ViewConfigurationCompat
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.SnapHelper
 import tk.zwander.lockscreenwidgets.services.Accessibility
@@ -64,25 +69,28 @@ fun Context.launchEmail(to: String, subject: String) {
 }
 
 fun View.fadeAndScaleOut(endListener: () -> Unit) {
-    animate().cancel()
     animate()
         .scaleX(0.95f)
         .scaleY(0.95f)
-        .alpha(0f)
+        .alpha(0.01f)
         .setInterpolator(AccelerateInterpolator())
+        .setDuration(50L)
         .withEndAction {
+            alpha = 0f
             endListener()
         }
+        .start()
 }
 
 fun View.fadeAndScaleIn(endListener: () -> Unit) {
-    animate().cancel()
     animate()
         .scaleX(1.0f)
         .scaleY(1.0f)
         .alpha(1f)
+        .setDuration(50L)
         .setInterpolator(DecelerateInterpolator())
         .withEndAction {
             endListener()
         }
+        .start()
 }

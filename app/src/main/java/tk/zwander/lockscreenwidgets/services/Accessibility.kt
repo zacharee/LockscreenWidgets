@@ -224,7 +224,6 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
     private var onMainLockscreen = true
     private var wasOnKeyguard = true
     private var isScreenOn = true
-    private var isRemovingAlready = false
 
     private var currentSysUiLayer = 1
     private var currentAppLayer = 0
@@ -394,20 +393,20 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
                     //Some devices probably change these IDs, meaning this option won't work for everyone.
                     showingSecurityInput = sysUiWindows.map { it?.root }.run {
                         any { info ->
-                            info?.findAccessibilityNodeInfosByViewId("com.android.systemui:id/keyguard_pin_view")
-                                ?.find { it.isVisibleToUser } != null
-                                    || info?.findAccessibilityNodeInfosByViewId("com.android.systemui:id/keyguard_pattern_view")
-                                ?.find { it.isVisibleToUser } != null
-                                    || info?.findAccessibilityNodeInfosByViewId("com.android.systemui:id/keyguard_password_view")
-                                ?.find { it.isVisibleToUser } != null
-                                    || info?.findAccessibilityNodeInfosByViewId("com.android.systemui:id/keyguard_sim_puk_view")
-                                ?.find { it.isVisibleToUser } != null
-                                    || info?.findAccessibilityNodeInfosByViewId("com.android.systemui:id/lockPatternView")
-                                ?.find { it.isVisibleToUser } != null
-                                    || info?.findAccessibilityNodeInfosByViewId("com.android.systemui:id/passwordEntry")
-                                ?.find { it.isVisibleToUser } != null
-                                    || info?.findAccessibilityNodeInfosByViewId("com.android.systemui:id/pinEntry")
-                                ?.find { it.isVisibleToUser } != null
+                            (info?.findAccessibilityNodeInfosByViewId("com.android.systemui:id/keyguard_pin_view")
+                                ?.find { it.isVisibleToUser } != null).also { if (App.DEBUG) Log.e("LockscreenWidgets", "keyguard_pin_view $it") }
+                                    || (info?.findAccessibilityNodeInfosByViewId("com.android.systemui:id/keyguard_pattern_view")
+                                ?.find { it.isVisibleToUser } != null).also { if (App.DEBUG) Log.e("LockscreenWidgets", "keyguard_pin_view $it") }
+                                    || (info?.findAccessibilityNodeInfosByViewId("com.android.systemui:id/keyguard_password_view")
+                                ?.find { it.isVisibleToUser } != null).also { if (App.DEBUG) Log.e("LockscreenWidgets", "keyguard_pin_view $it") }
+                                    || (info?.findAccessibilityNodeInfosByViewId("com.android.systemui:id/keyguard_sim_puk_view")
+                                ?.find { it.isVisibleToUser } != null).also { if (App.DEBUG) Log.e("LockscreenWidgets", "keyguard_pin_view $it") }
+                                    || (info?.findAccessibilityNodeInfosByViewId("com.android.systemui:id/lockPatternView")
+                                ?.find { it.isVisibleToUser } != null).also { if (App.DEBUG) Log.e("LockscreenWidgets", "keyguard_pin_view $it") }
+                                    || (info?.findAccessibilityNodeInfosByViewId("com.android.systemui:id/passwordEntry")
+                                ?.find { it.isVisibleToUser } != null).also { if (App.DEBUG) Log.e("LockscreenWidgets", "keyguard_pin_view $it") }
+                                    || (info?.findAccessibilityNodeInfosByViewId("com.android.systemui:id/pinEntry")
+                                ?.find { it.isVisibleToUser } != null).also { if (App.DEBUG) Log.e("LockscreenWidgets", "keyguard_pin_view $it") }
                         }
                     } == true
                 }
@@ -472,27 +471,15 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
     }
 
     private fun addOverlay() {
-        try {
-            wm.addView(view, params)
-            isRemovingAlready = false
-        } catch (e: Exception) {}
+        view.frame.addWindow(wm, params)
     }
 
     private fun updateOverlay() {
-        try {
-            wm.updateViewLayout(view, params)
-        } catch (e: Exception) {}
+        view.frame.updateWindow(wm, params)
     }
 
     private fun removeOverlay() {
-        if (!isRemovingAlready) {
-            view.fadeAndScaleOut {
-                try {
-                    wm.removeView(view)
-                } catch (e: Exception) {}
-                isRemovingAlready = false
-            }
-        }
+        view.frame.removeWindow(wm)
     }
 
     /**

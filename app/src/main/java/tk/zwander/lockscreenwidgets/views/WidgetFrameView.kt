@@ -1,15 +1,18 @@
 package tk.zwander.lockscreenwidgets.views
 
+import android.animation.LayoutTransition
 import android.annotation.SuppressLint
 import android.content.Context
 import android.os.Build
 import android.os.VibrationEffect
 import android.os.Vibrator
 import android.util.AttributeSet
+import android.util.Log
 import android.util.TypedValue
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewConfiguration
+import android.view.WindowManager
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
@@ -17,6 +20,7 @@ import kotlinx.android.synthetic.main.widget_frame.view.*
 import tk.zwander.lockscreenwidgets.R
 import tk.zwander.lockscreenwidgets.util.PrefManager
 import tk.zwander.lockscreenwidgets.util.fadeAndScaleIn
+import tk.zwander.lockscreenwidgets.util.fadeAndScaleOut
 import tk.zwander.lockscreenwidgets.util.prefManager
 
 class WidgetFrameView(context: Context, attrs: AttributeSet) : ConstraintLayout(context, attrs) {
@@ -82,9 +86,13 @@ class WidgetFrameView(context: Context, attrs: AttributeSet) : ConstraintLayout(
     override fun onAttachedToWindow() {
         super.onAttachedToWindow()
 
-        fadeAndScaleIn {}
+        scaleX = 0.95f
+        scaleY = 0.95f
+        alpha = 0f
 
-        attachmentStateListener?.invoke(true)
+        fadeAndScaleIn {
+            attachmentStateListener?.invoke(true)
+        }
     }
 
     override fun onDetachedFromWindow() {
@@ -140,6 +148,26 @@ class WidgetFrameView(context: Context, attrs: AttributeSet) : ConstraintLayout(
                     isScrollbarFadingEnabled = false
                 }
             }
+        }
+    }
+
+    fun addWindow(wm: WindowManager, params: WindowManager.LayoutParams) {
+        try {
+            wm.addView(this, params)
+        } catch (e: Exception) {}
+    }
+
+    fun updateWindow(wm: WindowManager, params: WindowManager.LayoutParams) {
+        try {
+            wm.updateViewLayout(this, params)
+        } catch (e: Exception) {}
+    }
+
+    fun removeWindow(wm: WindowManager) {
+        fadeAndScaleOut {
+            try {
+                wm.removeView(this)
+            } catch (e: Exception) {}
         }
     }
 
