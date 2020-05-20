@@ -359,7 +359,7 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
             }
         }
 
-        //The below block can take over half a second to execute, so only run it
+        //The below block can (very rarely) take over half a second to execute, so only run it
         //if we actually need to (i.e. on the lock screen and screen is on).
         if (wasOnKeyguard && isScreenOn) {
             if (event.eventType == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED) {
@@ -374,22 +374,26 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
                 currentAppLayer = if (appIndex != -1) windows.size - appIndex else appIndex
                 currentSysUiLayer = if (sysUiIndex != -1) windows.size - sysUiIndex else sysUiIndex
 
-                //Used for "Hide On Security Input" so we know when the security input is actually showing.
-                //Some devices probably change these IDs, meaning this option won't work for everyone.
-                showingSecurityInput = window?.root?.run {
-                    findAccessibilityNodeInfosByViewId("com.android.systemui:id/keyguard_pin_view").find { it.isVisibleToUser } != null
-                            || findAccessibilityNodeInfosByViewId("com.android.systemui:id/keyguard_pattern_view").find { it.isVisibleToUser } != null
-                            || findAccessibilityNodeInfosByViewId("com.android.systemui:id/keyguard_password_view").find { it.isVisibleToUser } != null
-                            || findAccessibilityNodeInfosByViewId("com.android.systemui:id/keyguard_sim_puk_view").find { it.isVisibleToUser } != null
-                } == true
+                if (prefManager.hideOnSecurityPage) {
+                    //Used for "Hide On Security Input" so we know when the security input is actually showing.
+                    //Some devices probably change these IDs, meaning this option won't work for everyone.
+                    showingSecurityInput = window?.root?.run {
+                        findAccessibilityNodeInfosByViewId("com.android.systemui:id/keyguard_pin_view").find { it.isVisibleToUser } != null
+                                || findAccessibilityNodeInfosByViewId("com.android.systemui:id/keyguard_pattern_view").find { it.isVisibleToUser } != null
+                                || findAccessibilityNodeInfosByViewId("com.android.systemui:id/keyguard_password_view").find { it.isVisibleToUser } != null
+                                || findAccessibilityNodeInfosByViewId("com.android.systemui:id/keyguard_sim_puk_view").find { it.isVisibleToUser } != null
+                    } == true
+                }
 
-                //Used for "Hide When Notification Shade Shown" so we know when it's actually expanded.
-                //Some devices don't even have left shortcuts, so also check for keyguard_indication_area.
-                //Just like the showingSecurityInput check, this is probably unreliable for some devices.
-                onMainLockscreen = window?.root?.run {
-                    findAccessibilityNodeInfosByViewId("com.android.systemui:id/left_button")?.find { it.isVisibleToUser } != null
-                            || findAccessibilityNodeInfosByViewId("com.android.systemui:id/keyguard_indication_area")?.find { it.isVisibleToUser } != null
-                } == true
+                if (prefManager.hideOnNotificationShade) {
+                    //Used for "Hide When Notification Shade Shown" so we know when it's actually expanded.
+                    //Some devices don't even have left shortcuts, so also check for keyguard_indication_area.
+                    //Just like the showingSecurityInput check, this is probably unreliable for some devices.
+                    onMainLockscreen = window?.root?.run {
+                        findAccessibilityNodeInfosByViewId("com.android.systemui:id/left_button")?.find { it.isVisibleToUser } != null
+                                || findAccessibilityNodeInfosByViewId("com.android.systemui:id/keyguard_indication_area")?.find { it.isVisibleToUser } != null
+                    } == true
+                }
             }
         }
 
