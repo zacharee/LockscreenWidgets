@@ -37,11 +37,30 @@ import tk.zwander.lockscreenwidgets.util.*
 import kotlin.math.roundToInt
 import kotlin.math.sign
 
+/**
+ * This is where a lot of the magic happens.
+ * In Android 5.1+, there's a special overlay type: [WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY].
+ * Accessibility overlays can show over almost all other windows, including System UI, and therefore the keyguard/lock screen.
+ * To actually use this overlay type, we need an AccessibilityService.
+ *
+ * This service is also used to detect what's onscreen and respond appropriately. For instance, if the user
+ * has enabled the "Hide When Notification Shade Shown" option, we use our access to the screen content to
+ * check that the left lock screen shortcut is no longer visible, since it hides when the notification shade
+ * is shown.
+ */
 class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferenceChangeListener {
     companion object {
         const val ACTION_LOCKSCREEN_DISMISSED = "LOCKSCREEN_DISMISSED"
     }
 
+    /**
+     * On Android 8.0+, it's pretty easy to dismiss the lock screen with a simple API call.
+     * On earlier Android versions, it's not so easy, and we need a way to detect when the
+     * lock screen has successfully been dismissed.
+     *
+     * This is just a simple wrapper class around a BroadcastReceiver for [RequestUnlockActivity]
+     * to implement so it can receive the keyguard dismissal event we generate from this service.
+     */
     abstract class OnLockscreenDismissListener : BroadcastReceiver() {
         final override fun onReceive(context: Context?, intent: Intent?) {
             if (intent?.action == ACTION_LOCKSCREEN_DISMISSED) {
@@ -188,6 +207,11 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
         override fun onReceive(context: Context?, intent: Intent?) {
             when (intent?.action) {
                 Intent.ACTION_SCREEN_OFF -> {
+                    //If the device has some sort of AOD or ambient display, by the time we receive
+                    //an accessibility event and see that the display is off, it's usually too late
+                    //and the current screen content has "frozen," causing the widget frame to show
+                    //where it shouldn't. ACTION_SCREEN_OFF is called early enough that we can remove
+                    //the frame before it's frozen in place.
                     removeOverlay()
                 }
             }
@@ -318,6 +342,9 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
     }
 
     override fun onAccessibilityEvent(event: AccessibilityEvent) {
+        //This block here runs even when unlocked, but it only takes a millisecond at most,
+        //so it shouldn't be noticeable to the user. We use this to check the current keyguard
+        //state and, if applicable, send the keyguard dismissal broadcast.
         if (event.eventType == AccessibilityEvent.TYPE_WINDOWS_CHANGED) {
             val isOnKeyguard = kgm.isKeyguardLocked
             if (isOnKeyguard != wasOnKeyguard) {
@@ -329,6 +356,8 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
             }
         }
 
+        //The below block can take over half a second to execute, so only run it
+        //if we actually need to (i.e. on the lock screen).
         if (wasOnKeyguard) {
             if (event.eventType == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED) {
                 val window = findSystemUiWindow()
@@ -337,15 +366,23 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
                 val appIndex = windows.indexOf(appWindow)
                 val sysUiIndex = windows.indexOf(window)
 
+                //Generate "layer" values for the System UI window and for the topmost app window, if
+                //it exists.
                 currentAppLayer = if (appIndex != -1) windows.size - appIndex else appIndex
                 currentSysUiLayer = if (sysUiIndex != -1) windows.size - sysUiIndex else sysUiIndex
 
+                //Used for "Hide On Security Input" so we know when the security input is actually showing.
+                //Some devices probably change these IDs, meaning this option won't work for everyone.
                 showingSecurityInput = window?.root?.run {
                     findAccessibilityNodeInfosByViewId("com.android.systemui:id/keyguard_pin_view").find { it.isVisibleToUser } != null
                             || findAccessibilityNodeInfosByViewId("com.android.systemui:id/keyguard_pattern_view").find { it.isVisibleToUser } != null
                             || findAccessibilityNodeInfosByViewId("com.android.systemui:id/keyguard_password_view").find { it.isVisibleToUser } != null
                             || findAccessibilityNodeInfosByViewId("com.android.systemui:id/keyguard_sim_puk_view").find { it.isVisibleToUser } != null
                 } == true
+
+                //Used for "Hide When Notification Shade Shown" so we know when it's actually expanded.
+                //Some devices don't even have left shortcuts, so also check for keyguard_indication_area.
+                //Just like the showingSecurityInput check, this is probably unreliable for some devices.
                 onMainLockscreen = window?.root?.run {
                     findAccessibilityNodeInfosByViewId("com.android.systemui:id/left_button")?.find { it.isVisibleToUser } != null
                             || findAccessibilityNodeInfosByViewId("com.android.systemui:id/keyguard_indication_area")?.find { it.isVisibleToUser } != null
@@ -365,7 +402,9 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
     override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
         when (key) {
             PrefManager.KEY_CURRENT_WIDGETS -> {
+                //Make sure the adapter knows of any changes to the widget list
                 if (!updatedForMove) {
+                    //Only run the update if it wasn't generated by a reorder event
                     adapter.updateWidgets(prefManager.currentWidgets.toList())
                 }
             }
@@ -418,6 +457,20 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
         }
     }
 
+    /**
+     * Check if the widget frame should show onscreen. There are quite a few conditions for this.
+     * This method attempts to check those conditions in increasing order of intensiveness (check simple
+     * members first, then try SharedPreferences, then use IPC methods).
+     *
+     * The widget frame can only show if ALL of the following conditions are met:
+     * - [wasOnKeyguard] is true
+     * - [currentSysUiLayer] is greater than [currentAppLayer]
+     * - [showingSecurityInput] is false OR [PrefManager.hideOnSecurityPage] is false
+     * - [onMainLockscreen] is true OR [PrefManager.hideOnNotificationShade] is false
+     * - [notificationCount] is 0 (i.e. no notifications shown with priority > MIN) OR [PrefManager.hideOnNotifications] is false
+     * - [PrefManager.widgetFrameEnabled] is true (i.e. the widget frame is actually enabled)
+     * - [PowerManager.isInteractive] is true (i.e. the display is properly on: not in Doze or on the AOD)
+     */
     private fun canShow() =
         (wasOnKeyguard
                 && currentSysUiLayer > currentAppLayer
@@ -439,6 +492,11 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
             }
         }
 
+    /**
+     * Find the [AccessibilityWindowInfo] corresponding to System UI
+     *
+     * @return the System UI window if it exists onscreen
+     */
     private fun findSystemUiWindow(): AccessibilityWindowInfo? {
         windows.forEach {
             if (it.type == AccessibilityWindowInfo.TYPE_SYSTEM && it.root?.packageName == "com.android.systemui")
@@ -448,6 +506,12 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
         return null
     }
 
+    /**
+     * Find the [AccessibilityWindowInfo] corresponding to the current topmost app
+     * (the most recently-used one)
+     *
+     * @return the app window if it exists onscreen
+     */
     private fun findTopAppWindow(): AccessibilityWindowInfo? {
         windows.forEach {
             if (it.type == AccessibilityWindowInfo.TYPE_APPLICATION)
@@ -457,6 +521,7 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
         return null
     }
 
+    //Debug method, not currently used
     private fun addAllNodesToList(parentNode: AccessibilityNodeInfo, list: ArrayList<AccessibilityNodeInfo>) {
         list.add(parentNode)
         for (i in 0 until parentNode.childCount) {
