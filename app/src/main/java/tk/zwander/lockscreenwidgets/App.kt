@@ -5,7 +5,7 @@ import tk.zwander.unblacklister.disableApiBlacklist
 
 class App : Application() {
     companion object {
-        const val DEBUG = false
+        val DEBUG = BuildConfig.DEBUG
     }
 
     override fun onCreate() {

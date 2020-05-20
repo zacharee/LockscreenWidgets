@@ -363,11 +363,26 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
         //if we actually need to (i.e. on the lock screen and screen is on).
         if (wasOnKeyguard && isScreenOn) {
             if (event.eventType == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED) {
-                val window = findSystemUiWindow()
+                val sysUiWindows = findSystemUiWindows()
                 val appWindow = findTopAppWindow()
 
                 val appIndex = windows.indexOf(appWindow)
-                val sysUiIndex = windows.indexOf(window)
+                val sysUiIndex = windows.indexOf(sysUiWindows.firstOrNull())
+
+                if (App.DEBUG) {
+                    val nodes = ArrayList<AccessibilityNodeInfo>()
+                    val roots = sysUiWindows.map { it?.root }
+
+                    if (roots.isNotEmpty()) {
+                        roots.forEach {
+                            if (it != null) {
+                                addAllNodesToList(it, nodes)
+                            }
+                        }
+
+                        Log.e("LockscreenWidgets", nodes.filter { it.isVisibleToUser }.map { it.viewIdResourceName }.toString())
+                    }
+                }
 
                 //Generate "layer" values for the System UI window and for the topmost app window, if
                 //it exists.
@@ -377,11 +392,23 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
                 if (prefManager.hideOnSecurityPage) {
                     //Used for "Hide On Security Input" so we know when the security input is actually showing.
                     //Some devices probably change these IDs, meaning this option won't work for everyone.
-                    showingSecurityInput = window?.root?.run {
-                        findAccessibilityNodeInfosByViewId("com.android.systemui:id/keyguard_pin_view").find { it.isVisibleToUser } != null
-                                || findAccessibilityNodeInfosByViewId("com.android.systemui:id/keyguard_pattern_view").find { it.isVisibleToUser } != null
-                                || findAccessibilityNodeInfosByViewId("com.android.systemui:id/keyguard_password_view").find { it.isVisibleToUser } != null
-                                || findAccessibilityNodeInfosByViewId("com.android.systemui:id/keyguard_sim_puk_view").find { it.isVisibleToUser } != null
+                    showingSecurityInput = sysUiWindows.map { it?.root }.run {
+                        any { info ->
+                            info?.findAccessibilityNodeInfosByViewId("com.android.systemui:id/keyguard_pin_view")
+                                ?.find { it.isVisibleToUser } != null
+                                    || info?.findAccessibilityNodeInfosByViewId("com.android.systemui:id/keyguard_pattern_view")
+                                ?.find { it.isVisibleToUser } != null
+                                    || info?.findAccessibilityNodeInfosByViewId("com.android.systemui:id/keyguard_password_view")
+                                ?.find { it.isVisibleToUser } != null
+                                    || info?.findAccessibilityNodeInfosByViewId("com.android.systemui:id/keyguard_sim_puk_view")
+                                ?.find { it.isVisibleToUser } != null
+                                    || info?.findAccessibilityNodeInfosByViewId("com.android.systemui:id/lockPatternView")
+                                ?.find { it.isVisibleToUser } != null
+                                    || info?.findAccessibilityNodeInfosByViewId("com.android.systemui:id/passwordEntry")
+                                ?.find { it.isVisibleToUser } != null
+                                    || info?.findAccessibilityNodeInfosByViewId("com.android.systemui:id/pinEntry")
+                                ?.find { it.isVisibleToUser } != null
+                        }
                     } == true
                 }
 
@@ -389,9 +416,13 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
                     //Used for "Hide When Notification Shade Shown" so we know when it's actually expanded.
                     //Some devices don't even have left shortcuts, so also check for keyguard_indication_area.
                     //Just like the showingSecurityInput check, this is probably unreliable for some devices.
-                    onMainLockscreen = window?.root?.run {
-                        findAccessibilityNodeInfosByViewId("com.android.systemui:id/left_button")?.find { it.isVisibleToUser } != null
-                                || findAccessibilityNodeInfosByViewId("com.android.systemui:id/keyguard_indication_area")?.find { it.isVisibleToUser } != null
+                    onMainLockscreen = sysUiWindows.map { it?.root }.run {
+                        any { info ->
+                            (info?.findAccessibilityNodeInfosByViewId("com.android.systemui:id/left_button")?.find { it.isVisibleToUser } != null
+                                    || info?.findAccessibilityNodeInfosByViewId("com.android.systemui:id/keyguard_indication_area")?.find { it.isVisibleToUser } != null
+                                    || info?.findAccessibilityNodeInfosByViewId("com.android.systemui:id/emergency_call_button")?.find { it.isVisibleToUser } != null
+                                    || info?.findAccessibilityNodeInfosByViewId("com.android.systemui:id/settings_button")?.find { it.isVisibleToUser } == null)
+                        }
                     } == true
                 }
             }
@@ -504,13 +535,8 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
      *
      * @return the System UI window if it exists onscreen
      */
-    private fun findSystemUiWindow(): AccessibilityWindowInfo? {
-        windows.forEach {
-            if (it.type == AccessibilityWindowInfo.TYPE_SYSTEM && it.root?.packageName == "com.android.systemui")
-                return it
-        }
-
-        return null
+    private fun findSystemUiWindows(): List<AccessibilityWindowInfo?> {
+        return windows.filter { it.type == AccessibilityWindowInfo.TYPE_SYSTEM && it.root?.packageName == "com.android.systemui" }
     }
 
     /**
@@ -528,7 +554,7 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
         return null
     }
 
-    //Debug method, not currently used
+    //Debug method
     private fun addAllNodesToList(parentNode: AccessibilityNodeInfo, list: ArrayList<AccessibilityNodeInfo>) {
         list.add(parentNode)
         for (i in 0 until parentNode.childCount) {
