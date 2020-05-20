@@ -1,6 +1,9 @@
 package tk.zwander.lockscreenwidgets.util
 
+import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
+import android.animation.AnimatorSet
+import android.animation.ObjectAnimator
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
@@ -8,12 +11,6 @@ import android.net.Uri
 import android.provider.Settings
 import android.util.TypedValue
 import android.view.View
-import android.view.ViewConfiguration
-import android.view.animation.AccelerateInterpolator
-import android.view.animation.Animation
-import android.view.animation.DecelerateInterpolator
-import android.view.animation.TranslateAnimation
-import androidx.core.view.ViewConfigurationCompat
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.SnapHelper
 import tk.zwander.lockscreenwidgets.services.Accessibility
@@ -69,28 +66,37 @@ fun Context.launchEmail(to: String, subject: String) {
 }
 
 fun View.fadeAndScaleOut(endListener: () -> Unit) {
-    animate()
-        .scaleX(0.95f)
-        .scaleY(0.95f)
-        .alpha(0.01f)
-        .setInterpolator(AccelerateInterpolator())
-        .setDuration(50L)
-        .withEndAction {
-            alpha = 0f
-            endListener()
-        }
-        .start()
+    val animator = AnimatorSet().apply {
+        playTogether(
+            ObjectAnimator.ofFloat(this@fadeAndScaleOut, "scaleX", 1.0f, 0.95f),
+            ObjectAnimator.ofFloat(this@fadeAndScaleOut, "scaleY", 1.0f, 0.95f),
+            ObjectAnimator.ofFloat(this@fadeAndScaleOut, "alpha", 1.0f, 0f)
+        )
+        duration = 100L
+        addListener(object : AnimatorListenerAdapter() {
+            override fun onAnimationEnd(animation: Animator?) {
+                clearAnimation()
+                endListener()
+            }
+        })
+    }
+    animator.start()
 }
 
 fun View.fadeAndScaleIn(endListener: () -> Unit) {
-    animate()
-        .scaleX(1.0f)
-        .scaleY(1.0f)
-        .alpha(1f)
-        .setDuration(50L)
-        .setInterpolator(DecelerateInterpolator())
-        .withEndAction {
-            endListener()
-        }
-        .start()
+    val animator = AnimatorSet().apply {
+        playTogether(
+            ObjectAnimator.ofFloat(this@fadeAndScaleIn, "scaleX", 0.95f, 1.0f),
+            ObjectAnimator.ofFloat(this@fadeAndScaleIn, "scaleY", 0.95f, 1.0f),
+            ObjectAnimator.ofFloat(this@fadeAndScaleIn, "alpha", 0f, 1.0f)
+        )
+        duration = 100L
+        addListener(object : AnimatorListenerAdapter() {
+            override fun onAnimationEnd(animation: Animator?) {
+                clearAnimation()
+                endListener()
+            }
+        })
+    }
+    animator.start()
 }

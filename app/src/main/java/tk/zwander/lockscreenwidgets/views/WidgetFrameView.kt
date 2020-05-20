@@ -1,13 +1,11 @@
 package tk.zwander.lockscreenwidgets.views
 
-import android.animation.LayoutTransition
 import android.annotation.SuppressLint
 import android.content.Context
 import android.os.Build
 import android.os.VibrationEffect
 import android.os.Vibrator
 import android.util.AttributeSet
-import android.util.Log
 import android.util.TypedValue
 import android.view.MotionEvent
 import android.view.View
@@ -18,10 +16,7 @@ import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import kotlinx.android.synthetic.main.widget_frame.view.*
 import tk.zwander.lockscreenwidgets.R
-import tk.zwander.lockscreenwidgets.util.PrefManager
-import tk.zwander.lockscreenwidgets.util.fadeAndScaleIn
-import tk.zwander.lockscreenwidgets.util.fadeAndScaleOut
-import tk.zwander.lockscreenwidgets.util.prefManager
+import tk.zwander.lockscreenwidgets.util.*
 
 class WidgetFrameView(context: Context, attrs: AttributeSet) : ConstraintLayout(context, attrs) {
     var onMoveListener: ((velX: Float, velY: Float) -> Unit)? = null
@@ -43,15 +38,13 @@ class WidgetFrameView(context: Context, attrs: AttributeSet) : ConstraintLayout(
 
     private val vibrator by lazy { context.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator }
 
-    init {
-        scaleX = 0.95f
-        scaleY = 0.95f
-        alpha = 0f
-    }
-
     @SuppressLint("ClickableViewAccessibility")
     override fun onFinishInflate() {
         super.onFinishInflate()
+
+        frame_card.alpha = 0f
+        frame_card.scaleX = 0.95f
+        frame_card.scaleY = 0.95f
 
         move.setOnTouchListener(MoveTouchListener())
         remove.setOnClickListener {
@@ -86,11 +79,7 @@ class WidgetFrameView(context: Context, attrs: AttributeSet) : ConstraintLayout(
     override fun onAttachedToWindow() {
         super.onAttachedToWindow()
 
-        scaleX = 0.95f
-        scaleY = 0.95f
-        alpha = 0f
-
-        fadeAndScaleIn {
+        frame_card.fadeAndScaleIn {
             attachmentStateListener?.invoke(true)
         }
     }
@@ -164,7 +153,7 @@ class WidgetFrameView(context: Context, attrs: AttributeSet) : ConstraintLayout(
     }
 
     fun removeWindow(wm: WindowManager) {
-        fadeAndScaleOut {
+        frame_card.fadeAndScaleOut {
             try {
                 wm.removeView(this)
             } catch (e: Exception) {}
