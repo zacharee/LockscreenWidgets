@@ -321,8 +321,14 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
         if (wasOnKeyguard) {
             if (event.eventType == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED) {
                 val window = findSystemUiWindow()
-                currentAppLayer = findTopAppWindow()?.layer ?: -1
-                currentSysUiLayer = window?.layer ?: -1
+                val appWindow = findTopAppWindow()
+
+                val appIndex = windows.indexOf(appWindow)
+                val sysUiIndex = windows.indexOf(window)
+
+                currentAppLayer = if (appIndex != -1) windows.size - appIndex else appIndex
+                currentSysUiLayer = if (sysUiIndex != -1) windows.size - sysUiIndex else sysUiIndex
+
                 showingSecurityInput = window?.root?.run {
                     findAccessibilityNodeInfosByViewId("com.android.systemui:id/keyguard_pin_view").find { it.isVisibleToUser } != null
                             || findAccessibilityNodeInfosByViewId("com.android.systemui:id/keyguard_pattern_view").find { it.isVisibleToUser } != null
