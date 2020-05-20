@@ -223,6 +223,7 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
     private var showingSecurityInput = false
     private var onMainLockscreen = true
     private var wasOnKeyguard = true
+    private var isScreenOn = true
     private var isRemovingAlready = false
 
     private var currentSysUiLayer = 1
@@ -339,6 +340,7 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
         registerReceiver(screenStateReceiver, IntentFilter(Intent.ACTION_SCREEN_OFF))
 
         wasOnKeyguard = kgm.isKeyguardLocked
+        isScreenOn = power.isInteractive
     }
 
     override fun onAccessibilityEvent(event: AccessibilityEvent) {
@@ -346,6 +348,7 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
         //so it shouldn't be noticeable to the user. We use this to check the current keyguard
         //state and, if applicable, send the keyguard dismissal broadcast.
         if (event.eventType == AccessibilityEvent.TYPE_WINDOWS_CHANGED) {
+            isScreenOn = power.isInteractive
             val isOnKeyguard = kgm.isKeyguardLocked
             if (isOnKeyguard != wasOnKeyguard) {
                 wasOnKeyguard = isOnKeyguard
@@ -357,8 +360,8 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
         }
 
         //The below block can take over half a second to execute, so only run it
-        //if we actually need to (i.e. on the lock screen).
-        if (wasOnKeyguard) {
+        //if we actually need to (i.e. on the lock screen and screen is on).
+        if (wasOnKeyguard && isScreenOn) {
             if (event.eventType == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED) {
                 val window = findSystemUiWindow()
                 val appWindow = findTopAppWindow()
@@ -464,21 +467,21 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
      *
      * The widget frame can only show if ALL of the following conditions are met:
      * - [wasOnKeyguard] is true
+     * - [isScreenOn] is true (i.e. the display is properly on: not in Doze or on the AOD)
      * - [currentSysUiLayer] is greater than [currentAppLayer]
      * - [showingSecurityInput] is false OR [PrefManager.hideOnSecurityPage] is false
      * - [onMainLockscreen] is true OR [PrefManager.hideOnNotificationShade] is false
      * - [notificationCount] is 0 (i.e. no notifications shown with priority > MIN) OR [PrefManager.hideOnNotifications] is false
      * - [PrefManager.widgetFrameEnabled] is true (i.e. the widget frame is actually enabled)
-     * - [PowerManager.isInteractive] is true (i.e. the display is properly on: not in Doze or on the AOD)
      */
     private fun canShow() =
         (wasOnKeyguard
+                && isScreenOn
                 && currentSysUiLayer > currentAppLayer
                 && (!showingSecurityInput || !prefManager.hideOnSecurityPage)
                 && (onMainLockscreen || !prefManager.hideOnNotificationShade)
                 && (notificationCount == 0 || !prefManager.hideOnNotifications)
-                && prefManager.widgetFrameEnabled
-                && power.isInteractive).also {
+                && prefManager.widgetFrameEnabled).also {
             if (App.DEBUG) {
                 Log.e("LockscreenWidgets", "canShow: $it, " +
                         "isScreenOn: ${power.isInteractive}, " +
