@@ -361,7 +361,7 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
         //The below block can (very rarely) take over half a second to execute, so only run it
         //if we actually need to (i.e. on the lock screen and screen is on).
         if (wasOnKeyguard && isScreenOn) {
-            if (event.eventType == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED) {
+            if (event.eventType == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED || event.eventType == AccessibilityEvent.TYPE_WINDOWS_CHANGED) {
                 val sysUiWindows = findSystemUiWindows()
                 val appWindow = findTopAppWindow()
 
