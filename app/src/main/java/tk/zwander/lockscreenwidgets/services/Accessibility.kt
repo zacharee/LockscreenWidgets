@@ -184,6 +184,16 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
         }
     }
 
+    private val screenStateReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context?, intent: Intent?) {
+            when (intent?.action) {
+                Intent.ACTION_SCREEN_OFF -> {
+                    removeOverlay()
+                }
+            }
+        }
+    }
+
     private var updatedForMove = false
     private var notificationCount = 0
     private var showingSecurityInput = false
@@ -302,6 +312,7 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
             true,
             nightModeListener
         )
+        registerReceiver(screenStateReceiver, IntentFilter(Intent.ACTION_SCREEN_OFF))
 
         wasOnKeyguard = kgm.isKeyguardLocked
     }
@@ -380,6 +391,7 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
         prefManager.prefs.unregisterOnSharedPreferenceChangeListener(this)
         notificationCountListener.unregister(this)
         contentResolver.unregisterContentObserver(nightModeListener)
+        unregisterReceiver(screenStateReceiver)
     }
 
     private fun addOverlay() {
