@@ -5,6 +5,9 @@ import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
 import tk.zwander.lockscreenwidgets.R
 
+/**
+ * Manage the app's preferences
+ */
 class SettingsActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

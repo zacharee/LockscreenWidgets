@@ -19,7 +19,9 @@ import tk.zwander.lockscreenwidgets.data.WidgetListInfo
 import tk.zwander.lockscreenwidgets.host.WidgetHost
 import tk.zwander.lockscreenwidgets.util.prefManager
 
-
+/**
+ * Manage the widget add flow: selection, permissions, configurations, etc.
+ */
 class AddWidgetActivity : AppCompatActivity(), CoroutineScope by MainScope() {
     companion object {
         const val PERM_CODE = 104
@@ -109,6 +111,7 @@ class AddWidgetActivity : AppCompatActivity(), CoroutineScope by MainScope() {
 
     private fun configureWidget(id: Int) {
         try {
+            //Use the system API instead of ACTION_APPWIDGET_CONFIGURE to try to avoid some permissions issues
             widgetHost.startAppWidgetConfigureActivityForResult(this, id, 0, CONFIG_CODE, null)
         } catch (e: Exception) {
             Toast.makeText(this, resources.getString(R.string.configure_widget_error, appWidgetManager.getAppWidgetInfo(id).provider), Toast.LENGTH_LONG).show()

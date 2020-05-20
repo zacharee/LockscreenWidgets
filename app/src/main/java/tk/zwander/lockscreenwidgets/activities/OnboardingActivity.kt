@@ -9,6 +9,11 @@ import tk.zwander.lockscreenwidgets.R
 import tk.zwander.lockscreenwidgets.util.isAccessibilityEnabled
 import tk.zwander.lockscreenwidgets.util.isNotificationListenerActive
 
+/**
+ * The introduction for the app.
+ * Tell the user about how it works and request permissions.
+ * Also manage requesting permissions if they've been revoked.
+ */
 class OnboardingActivity : IntroActivity() {
     companion object {
         const val EXTRA_RETROACTIVE_FOR_NOTIF = "RETRO_FOR_NOTIF"
