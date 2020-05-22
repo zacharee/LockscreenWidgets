@@ -220,8 +220,8 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
 
     private var updatedForMove = false
     private var notificationCount = 0
-    private var showingSecurityInput = false
     private var onMainLockscreen = true
+    private var showingNotificationsPanel = false
     private var wasOnKeyguard = true
     private var isScreenOn = true
 
@@ -368,19 +368,15 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
                 val appIndex = windows.indexOf(appWindow)
                 val sysUiIndex = windows.indexOf(sysUiWindows.firstOrNull())
 
-                if (App.DEBUG) {
-                    val nodes = ArrayList<AccessibilityNodeInfo>()
-                    val roots = sysUiWindows.map { it?.root }
-
-                    if (roots.isNotEmpty()) {
-                        roots.forEach {
-                            if (it != null) {
-                                addAllNodesToList(it, nodes)
-                            }
-                        }
-
-                        Log.e("LockscreenWidgets", nodes.filter { it.isVisibleToUser }.map { it.viewIdResourceName }.toString())
+                val sysUiNodes = ArrayList<AccessibilityNodeInfo>()
+                sysUiWindows.map { it?.root }.forEach {
+                    if (it != null) {
+                        addAllNodesToList(it, sysUiNodes)
                     }
+                }
+
+                if (App.DEBUG) {
+                    Log.e("LockscreenWidgets", sysUiNodes.filter { it.isVisibleToUser }.map { it.viewIdResourceName }.toString())
                 }
 
                 //Generate "layer" values for the System UI window and for the topmost app window, if
@@ -389,40 +385,21 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
                 currentSysUiLayer = if (sysUiIndex != -1) windows.size - sysUiIndex else sysUiIndex
 
                 if (prefManager.hideOnSecurityPage) {
-                    //Used for "Hide On Security Input" so we know when the security input is actually showing.
-                    //Some devices probably change these IDs, meaning this option won't work for everyone.
-                    showingSecurityInput = sysUiWindows.map { it?.root }.run {
-                        any { info ->
-                            (info?.findAccessibilityNodeInfosByViewId("com.android.systemui:id/keyguard_pin_view")
-                                ?.find { it.isVisibleToUser } != null).also { if (App.DEBUG) Log.e("LockscreenWidgets", "keyguard_pin_view $it") }
-                                    || (info?.findAccessibilityNodeInfosByViewId("com.android.systemui:id/keyguard_pattern_view")
-                                ?.find { it.isVisibleToUser } != null).also { if (App.DEBUG) Log.e("LockscreenWidgets", "keyguard_pin_view $it") }
-                                    || (info?.findAccessibilityNodeInfosByViewId("com.android.systemui:id/keyguard_password_view")
-                                ?.find { it.isVisibleToUser } != null).also { if (App.DEBUG) Log.e("LockscreenWidgets", "keyguard_pin_view $it") }
-                                    || (info?.findAccessibilityNodeInfosByViewId("com.android.systemui:id/keyguard_sim_puk_view")
-                                ?.find { it.isVisibleToUser } != null).also { if (App.DEBUG) Log.e("LockscreenWidgets", "keyguard_pin_view $it") }
-                                    || (info?.findAccessibilityNodeInfosByViewId("com.android.systemui:id/lockPatternView")
-                                ?.find { it.isVisibleToUser } != null).also { if (App.DEBUG) Log.e("LockscreenWidgets", "keyguard_pin_view $it") }
-                                    || (info?.findAccessibilityNodeInfosByViewId("com.android.systemui:id/passwordEntry")
-                                ?.find { it.isVisibleToUser } != null).also { if (App.DEBUG) Log.e("LockscreenWidgets", "keyguard_pin_view $it") }
-                                    || (info?.findAccessibilityNodeInfosByViewId("com.android.systemui:id/pinEntry")
-                                ?.find { it.isVisibleToUser } != null).also { if (App.DEBUG) Log.e("LockscreenWidgets", "keyguard_pin_view $it") }
-                        }
-                    } == true
+                    onMainLockscreen = sysUiNodes.find {
+                        (it.viewIdResourceName == "com.android.systemui:id/notification_panel" && it.isVisibleToUser)
+                                || (it.viewIdResourceName == "com.android.systemui:id/left_button" && it.isVisibleToUser)
+                    } != null
                 }
 
                 if (prefManager.hideOnNotificationShade) {
                     //Used for "Hide When Notification Shade Shown" so we know when it's actually expanded.
                     //Some devices don't even have left shortcuts, so also check for keyguard_indication_area.
                     //Just like the showingSecurityInput check, this is probably unreliable for some devices.
-                    onMainLockscreen = sysUiWindows.map { it?.root }.run {
-                        any { info ->
-                            (info?.findAccessibilityNodeInfosByViewId("com.android.systemui:id/left_button")?.find { it.isVisibleToUser } != null
-                                    || info?.findAccessibilityNodeInfosByViewId("com.android.systemui:id/keyguard_indication_area")?.find { it.isVisibleToUser } != null
-                                    || info?.findAccessibilityNodeInfosByViewId("com.android.systemui:id/emergency_call_button")?.find { it.isVisibleToUser } != null
-                                    || info?.findAccessibilityNodeInfosByViewId("com.android.systemui:id/settings_button")?.find { it.isVisibleToUser } == null)
-                        }
-                    } == true
+                    showingNotificationsPanel = sysUiNodes.find {
+                        (it.viewIdResourceName == "com.android.systemui:id/quick_settings_panel" && it.isVisibleToUser)
+                                || (it.viewIdResourceName == "com.android.systemui:id/settings_button" && it.isVisibleToUser)
+                                || (it.viewIdResourceName == "com.android.systemui:id/tile_label" && it.isVisibleToUser)
+                    } != null
                 }
             }
         }
@@ -491,8 +468,8 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
      * - [wasOnKeyguard] is true
      * - [isScreenOn] is true (i.e. the display is properly on: not in Doze or on the AOD)
      * - [currentSysUiLayer] is greater than [currentAppLayer]
-     * - [showingSecurityInput] is false OR [PrefManager.hideOnSecurityPage] is false
-     * - [onMainLockscreen] is true OR [PrefManager.hideOnNotificationShade] is false
+     * - [onMainLockscreen] is true OR [showingNotificationsPanel] is true OR [PrefManager.hideOnSecurityPage] is false
+     * - [showingNotificationsPanel] is false OR [PrefManager.hideOnNotificationShade] is false
      * - [notificationCount] is 0 (i.e. no notifications shown with priority > MIN) OR [PrefManager.hideOnNotifications] is false
      * - [PrefManager.widgetFrameEnabled] is true (i.e. the widget frame is actually enabled)
      */
@@ -500,8 +477,8 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
         (wasOnKeyguard
                 && isScreenOn
                 && currentSysUiLayer > currentAppLayer
-                && (!showingSecurityInput || !prefManager.hideOnSecurityPage)
-                && (onMainLockscreen || !prefManager.hideOnNotificationShade)
+                && (onMainLockscreen || showingNotificationsPanel || !prefManager.hideOnSecurityPage)
+                && (!showingNotificationsPanel || !prefManager.hideOnNotificationShade)
                 && (notificationCount == 0 || !prefManager.hideOnNotifications)
                 && prefManager.widgetFrameEnabled).also {
             if (App.DEBUG) {
@@ -510,8 +487,8 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
                         "wasOnKeyguard: $wasOnKeyguard, " +
                         "currentSysUiLayer: $currentSysUiLayer, " +
                         "currentAppLayer: $currentAppLayer, " +
-                        "showingSecurityInput: $showingSecurityInput, " +
                         "onMainLockscreen: $onMainLockscreen, " +
+                        "showingNotificationsPanel: $showingNotificationsPanel, " +
                         "notificationCount: $notificationCount, " +
                         "widgetEnabled: ${prefManager.widgetFrameEnabled}")
             }
