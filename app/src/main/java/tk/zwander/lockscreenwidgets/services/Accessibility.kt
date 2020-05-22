@@ -563,8 +563,7 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
         if (prefManager.opacityMode == PrefManager.VALUE_OPACITY_MODE_MASKED) {
             try {
                 val fastW = wallpaper.fastDrawable
-                fastW.mutate()
-                    .apply {
+                fastW?.mutate()?.apply {
                         view.wallpaper_background.setImageDrawable(this)
                         view.wallpaper_background.scaleType = ImageView.ScaleType.MATRIX
                         view.wallpaper_background.imageMatrix = Matrix().apply {
