@@ -9,11 +9,13 @@
         android:defaultValue="true"
         />
 
-    <SwitchPreference
-        android:title="@string/settings_screen_opaque_background"
-        android:summary="@string/settings_screen_opaque_backhround_desc"
-        android:key="opaque_frame_background"
+    <tk.zwander.lockscreenwidgets.prefs.AutoSummaryListPreference
+        android:title="@string/settings_screen_opacity_mode"
+        android:key="opacity_mode"
         android:icon="@drawable/ic_baseline_opacity_24"
+        android:entries="@array/opacity_mode_names"
+        android:entryValues="@array/opacity_mode_values"
+        android:defaultValue="0"
         />
 
     <SwitchPreference

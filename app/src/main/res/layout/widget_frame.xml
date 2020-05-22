@@ -17,6 +17,12 @@
         app:cardCornerRadius="2dp"
         app:cardBackgroundColor="@android:color/transparent">
 
+        <ImageView
+            android:id="@+id/wallpaper_background"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            />
+
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/widgets_pager"
             android:layout_width="match_parent"

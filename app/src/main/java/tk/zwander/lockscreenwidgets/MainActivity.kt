@@ -1,6 +1,7 @@
 package tk.zwander.lockscreenwidgets
 
 import android.app.Activity
+import android.content.Context
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
@@ -22,11 +23,12 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
 
         if (prefManager.firstRun || !isAccessibilityEnabled) {
-            startActivityForResult(
-                Intent(this, OnboardingActivity::class.java).apply {
-                    putExtra(OnboardingActivity.EXTRA_RETROACTIVE_FOR_ACC, !isAccessibilityEnabled && !prefManager.firstRun)
-                },
-                REQ_INTRO
+            OnboardingActivity.startForResult(
+                this,
+                REQ_INTRO,
+                if (!isAccessibilityEnabled && !prefManager.firstRun)
+                    OnboardingActivity.RetroMode.ACCESSIBILITY
+                else OnboardingActivity.RetroMode.NONE
             )
         }
     }

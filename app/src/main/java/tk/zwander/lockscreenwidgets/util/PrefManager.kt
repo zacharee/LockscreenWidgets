@@ -19,7 +19,7 @@ class PrefManager private constructor(context: Context) : ContextWrapper(context
         const val KEY_POS_Y = "position_y"
         const val KEY_FIRST_VIEWING = "first_viewing"
         const val KEY_FIRST_RUN = "first_run"
-        const val KEY_OPAQUE_FRAME = "opaque_frame_background"
+        const val KEY_OPACITY_MODE = "opacity_mode"
         const val KEY_HIDE_ON_NOTIFICATIONS = "hide_on_notifications"
         const val KEY_WIDGET_FRAME_ENABLED = "widget_frame_enabled"
         const val KEY_PAGE_INDICATOR_BEHAVIOR = "page_indicator_behavior"
@@ -30,6 +30,10 @@ class PrefManager private constructor(context: Context) : ContextWrapper(context
         const val VALUE_PAGE_INDICATOR_BEHAVIOR_HIDDEN = 0
         const val VALUE_PAGE_INDICATOR_BEHAVIOR_AUTO_HIDE = 1
         const val VALUE_PAGE_INDICATOR_BEHAVIOR_SHOWN = 2
+
+        const val VALUE_OPACITY_MODE_TRANSPARENT = 0
+        const val VALUE_OPACITY_MODE_MASKED = 1
+        const val VALUE_OPACITY_MODE_OPAQUE = 2
 
         private var instance: PrefManager? = null
 
@@ -93,12 +97,6 @@ class PrefManager private constructor(context: Context) : ContextWrapper(context
             putBoolean(KEY_FIRST_RUN, value)
         }
 
-    var opaqueFrame: Boolean
-        get() = getBoolean(KEY_OPAQUE_FRAME, false)
-        set(value) {
-            putBoolean(KEY_OPAQUE_FRAME, value)
-        }
-
     var hideOnNotifications: Boolean
         get() = getBoolean(KEY_HIDE_ON_NOTIFICATIONS, false)
         set(value) {
@@ -133,6 +131,12 @@ class PrefManager private constructor(context: Context) : ContextWrapper(context
         get() = getString(KEY_PAGE_INDICATOR_BEHAVIOR, VALUE_PAGE_INDICATOR_BEHAVIOR_AUTO_HIDE.toString())!!.toInt()
         set(value) {
             putString(KEY_PAGE_INDICATOR_BEHAVIOR, value.toString())
+        }
+
+    var opacityMode: Int
+        get() = getString(KEY_OPACITY_MODE, VALUE_OPACITY_MODE_TRANSPARENT.toString())!!.toInt()
+        set(value) {
+            putString(KEY_OPACITY_MODE, value.toString())
         }
 
     fun getString(key: String, def: String? = null) = prefs.getString(key, def)

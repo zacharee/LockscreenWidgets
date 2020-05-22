@@ -1,6 +1,10 @@
 package tk.zwander.lockscreenwidgets.activities
 
+import android.app.Activity
+import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
 import com.heinrichreimersoftware.materialintro.app.IntroActivity
@@ -16,17 +20,40 @@ import tk.zwander.lockscreenwidgets.util.isNotificationListenerActive
  */
 class OnboardingActivity : IntroActivity() {
     companion object {
-        const val EXTRA_RETROACTIVE_FOR_NOTIF = "RETRO_FOR_NOTIF"
-        const val EXTRA_RETROACTIVE_FOR_ACC = "RETRO_FOR_ACC"
+        const val EXTRA_RETRO_MODE = "RETRO_MODE"
+
+        const val REQ_STORAGE_PERM = 100
+
+        fun start(context: Context, retroMode: RetroMode = RetroMode.NONE) {
+            val intent = Intent(context, OnboardingActivity::class.java)
+            intent.putExtra(EXTRA_RETRO_MODE, retroMode.toString())
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+
+            context.startActivity(intent)
+        }
+
+        fun startForResult(activity: Activity, code: Int, retroMode: RetroMode = RetroMode.NONE) {
+            val intent = Intent(activity, OnboardingActivity::class.java)
+            intent.putExtra(EXTRA_RETRO_MODE, retroMode.toString())
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+
+            activity.startActivityForResult(intent, code)
+        }
     }
 
-    val retroForNotif by lazy { intent.getBooleanExtra(EXTRA_RETROACTIVE_FOR_NOTIF, false) }
-    val retroForAcc by lazy { intent.getBooleanExtra(EXTRA_RETROACTIVE_FOR_ACC, false) }
+    enum class RetroMode {
+        ACCESSIBILITY,
+        NOTIFICATION,
+        STORAGE,
+        NONE
+    }
+
+    val retroMode by lazy { RetroMode.valueOf(intent.getStringExtra(EXTRA_RETRO_MODE) ?: RetroMode.NONE.toString()) }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        if (!retroForNotif && !retroForAcc) {
+        if (retroMode == RetroMode.NONE) {
             addSlide(
                 SimpleSlide.Builder()
                     .title(R.string.intro_welcome_title)
@@ -46,7 +73,7 @@ class OnboardingActivity : IntroActivity() {
             )
         }
 
-        if (!retroForNotif) {
+        if (retroMode == RetroMode.ACCESSIBILITY || retroMode == RetroMode.NONE) {
             addSlide(
                 object : SimpleSlide(
                     Builder()
@@ -67,7 +94,7 @@ class OnboardingActivity : IntroActivity() {
             )
         }
 
-        if (!retroForAcc) {
+        if (retroMode == RetroMode.NOTIFICATION || retroMode == RetroMode.NONE) {
             addSlide(
                 object : SimpleSlide(
                     Builder()
@@ -82,18 +109,41 @@ class OnboardingActivity : IntroActivity() {
                         }
                 ) {
                     override fun canGoForward(): Boolean {
-                        return !retroForNotif || isNotificationListenerActive
+                        return retroMode != RetroMode.NOTIFICATION || isNotificationListenerActive
                     }
                 }
             )
         }
 
-        if (!retroForNotif && !retroForAcc) {
+        if (retroMode == RetroMode.STORAGE) {
+            addSlide(
+                object : SimpleSlide(
+                    Builder()
+                        .title(R.string.intro_read_storage_title)
+                        .description(R.string.intro_read_storage_desc)
+                        .background(R.color.slide_5)
+                        .image(R.drawable.ic_baseline_sd_storage_24)
+                        .buttonCtaLabel(R.string.grant)
+                        .buttonCtaClickListener {
+                            if (Build.VERSION.SDK_INT > Build.VERSION_CODES.LOLLIPOP_MR1) {
+                                requestPermissions(arrayOf(android.Manifest.permission.READ_EXTERNAL_STORAGE), REQ_STORAGE_PERM)
+                            }
+                        }
+                ) {
+                    override fun canGoForward(): Boolean {
+                        return retroMode != RetroMode.STORAGE
+                                || checkCallingOrSelfPermission(android.Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED
+                    }
+                }
+            )
+        }
+
+        if (retroMode == RetroMode.NONE) {
             addSlide(
                 SimpleSlide.Builder()
                     .title(R.string.intro_done_title)
                     .description(R.string.intro_done_desc)
-                    .background(R.color.slide_5)
+                    .background(R.color.slide_6)
                     .image(R.drawable.ic_baseline_done_24)
                     .build()
             )

@@ -3,9 +3,11 @@ package tk.zwander.lockscreenwidgets.services
 import android.accessibilityservice.AccessibilityService
 import android.annotation.SuppressLint
 import android.app.KeyguardManager
+import android.app.WallpaperManager
 import android.appwidget.AppWidgetManager
 import android.content.*
 import android.database.ContentObserver
+import android.graphics.Matrix
 import android.graphics.PixelFormat
 import android.net.Uri
 import android.os.Handler
@@ -19,6 +21,7 @@ import android.view.WindowManager
 import android.view.accessibility.AccessibilityEvent
 import android.view.accessibility.AccessibilityNodeInfo
 import android.view.accessibility.AccessibilityWindowInfo
+import android.widget.ImageView
 import androidx.appcompat.view.ContextThemeWrapper
 import androidx.core.view.isVisible
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
@@ -84,6 +87,7 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
     private val kgm by lazy { getSystemService(Context.KEYGUARD_SERVICE) as KeyguardManager }
     private val wm by lazy { getSystemService(Context.WINDOW_SERVICE) as WindowManager }
     private val power by lazy { getSystemService(Context.POWER_SERVICE) as PowerManager }
+    private val wallpaper by lazy { getSystemService(Context.WALLPAPER_SERVICE) as WallpaperManager }
 
     private val widgetManager by lazy { AppWidgetManager.getInstance(this) }
     private val widgetHost by lazy {
@@ -115,8 +119,11 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
             y = prefManager.posY
 
             gravity = Gravity.CENTER
+
             flags =
-                WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
+                WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or
+                        WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN or
+                        WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS
             format = PixelFormat.RGBA_8888
         }
     }
@@ -248,10 +255,14 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
             params.x += velX.toInt()
             params.y += velY.toInt()
 
+            params.x = params.x
+            params.y = params.y
+
             prefManager.posX = params.x
             prefManager.posY = params.y
 
             updateOverlay()
+            updateWallpaperLayerIfNeeded()
         }
         view.frame.onLeftDragListener = { velX ->
             params.width -= velX.toInt()
@@ -312,6 +323,7 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
         }
         view.frame.attachmentStateListener = {
             if (it) {
+                updateWallpaperLayerIfNeeded()
                 widgetHost.startListening()
             } else {
                 widgetHost.stopListening()
@@ -432,8 +444,9 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
                     adapter.updateWidgets(prefManager.currentWidgets.toList())
                 }
             }
-            PrefManager.KEY_OPAQUE_FRAME -> {
+            PrefManager.KEY_OPACITY_MODE -> {
                 view.frame.updateFrameBackground()
+                updateWallpaperLayerIfNeeded()
             }
             PrefManager.KEY_WIDGET_FRAME_ENABLED -> {
                 if (canShow()) {
@@ -531,7 +544,6 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
         return null
     }
 
-    //Debug method
     private fun addAllNodesToList(parentNode: AccessibilityNodeInfo, list: ArrayList<AccessibilityNodeInfo>) {
         list.add(parentNode)
         for (i in 0 until parentNode.childCount) {
@@ -543,6 +555,41 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
                     list.add(child)
                 }
             }
+        }
+    }
+
+    @SuppressLint("MissingPermission")
+    private fun updateWallpaperLayerIfNeeded() {
+        if (prefManager.opacityMode == PrefManager.VALUE_OPACITY_MODE_MASKED) {
+            try {
+                val fastW = wallpaper.fastDrawable
+                fastW.mutate()
+                    .apply {
+                        view.wallpaper_background.setImageDrawable(this)
+                        view.wallpaper_background.scaleType = ImageView.ScaleType.MATRIX
+                        view.wallpaper_background.imageMatrix = Matrix().apply {
+                            val loc = view.locationOnScreen ?: intArrayOf(0, 0)
+
+                            val back = view.wallpaper_background
+                            val dwidth: Int = intrinsicWidth
+                            val dheight: Int = intrinsicHeight
+
+                            val vwidth: Int = back.width - back.paddingLeft - back.paddingRight
+                            val vheight: Int = back.height - back.paddingTop - back.paddingBottom
+
+                            val scaleX: Float = vheight.toFloat() / dheight.toFloat()
+                            val scaleY: Float = vwidth.toFloat() / dwidth.toFloat()
+
+                            setScale(scaleX, scaleY)
+                            setTranslate(
+                                -loc[0].toFloat(),
+                                -loc[1].toFloat()
+                            )
+                        }
+                    }
+            } catch (e: Exception) {}
+        } else {
+            view.wallpaper_background.setImageDrawable(null)
         }
     }
 }

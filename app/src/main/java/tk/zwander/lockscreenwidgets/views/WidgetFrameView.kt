@@ -121,7 +121,7 @@ class WidgetFrameView(context: Context, attrs: AttributeSet) : ConstraintLayout(
     }
 
     fun updateFrameBackground() {
-        if (context.prefManager.opaqueFrame) {
+        if (context.prefManager.opacityMode == PrefManager.VALUE_OPACITY_MODE_OPAQUE) {
             frame_card.setCardBackgroundColor(TypedValue().run {
                 context.theme.resolveAttribute(R.attr.colorPrimarySurface, this, true)
                 data

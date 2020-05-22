@@ -24,8 +24,10 @@
     <string name="settings_screen_enabled">Enabled</string>
     <string name="settings_screen_enabled_desc">Enable the widget frame on the lockscreen.</string>
 
-    <string name="settings_screen_opaque_background">Opaque Background</string>
-    <string name="settings_screen_opaque_backhround_desc">Make the background of the widget frame opaque, so transparent widgets can overlay lock screen elements.</string>
+    <string name="settings_screen_opacity_mode">Opacity Mode</string>
+    <string name="settings_screen_opacity_mode_transparent">Transparent</string>
+    <string name="settings_screen_opacity_mode_masked">Masked</string>
+    <string name="settings_screen_opacity_mode_opaque">Opaque</string>
 
     <string name="settings_screen_hide_when_notifications_shown">Hide when Showing Notifications</string>
     <string name="settings_screen_hide_when_notifications_shown_desc">Hide the widget frame while there are notifications being shown. This requires the use of a Notification Listener Service. You don\'t have to grant this permission right now.</string>
@@ -54,7 +56,10 @@
     <string name="intro_accessibility_desc">To be able to display on the lock screen, you\'ll need to activate Lockscreen Widgets\' Accessibility Service. This app doesn\'t collect any data from your screen.</string>
 
     <string name="intro_notification_listener_title">Notification Listener</string>
-    <string name="intro_notification_listener_desc">Lockscreen Widgets can hide the widget frame while there are notifications displayed. To do so, you\'ll need to enable the Notification Listener.</string>
+    <string name="intro_notification_listener_desc">Lockscreen Widgets can hide the widget frame while there are notifications displayed. To do so, you\'ll need to enable the Notification Listener. You don\'t have to grant this right now.</string>
+
+    <string name="intro_read_storage_title">Read External Storage</string>
+    <string name="intro_read_storage_desc">Lockscreen Widgets has a \"masking\" mode, where it will use your wallpaper as the widget frame background, causing it to seem transparent, while also being able to cover lock screen elements. To do this, Lockscreen Widgets needs permission to be able to read your device\'s storage. You don\'t have to grant this right now. If you\'re running Lollipop, this permission is already granted.</string>
 
     <string name="intro_done_title">All Done!</string>
     <string name="intro_done_desc">That\'s it! Check your lock screen and you should now see the widget frame!</string>
