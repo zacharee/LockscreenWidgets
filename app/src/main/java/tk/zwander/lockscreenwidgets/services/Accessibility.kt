@@ -213,6 +213,7 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
                     //where it shouldn't. ACTION_SCREEN_OFF is called early enough that we can remove
                     //the frame before it's frozen in place.
                     removeOverlay()
+                    isTempHide = false
                 }
             }
         }
