@@ -9,15 +9,14 @@ import android.content.*
 import android.database.ContentObserver
 import android.graphics.Matrix
 import android.graphics.PixelFormat
+import android.graphics.Point
 import android.net.Uri
 import android.os.Handler
 import android.os.Looper
 import android.os.PowerManager
 import android.provider.Settings
 import android.util.Log
-import android.view.Gravity
-import android.view.LayoutInflater
-import android.view.WindowManager
+import android.view.*
 import android.view.accessibility.AccessibilityEvent
 import android.view.accessibility.AccessibilityNodeInfo
 import android.view.accessibility.AccessibilityWindowInfo
@@ -358,7 +357,9 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
             true,
             nightModeListener
         )
-        registerReceiver(screenStateReceiver, IntentFilter(Intent.ACTION_SCREEN_OFF).apply { addAction(Intent.ACTION_SCREEN_ON) })
+        registerReceiver(
+            screenStateReceiver,
+            IntentFilter(Intent.ACTION_SCREEN_OFF).apply { addAction(Intent.ACTION_SCREEN_ON) })
 
         wasOnKeyguard = kgm.isKeyguardLocked
         isScreenOn = power.isInteractive
@@ -402,7 +403,11 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
                 }
 
                 if (App.DEBUG) {
-                    Log.e("LockscreenWidgets", sysUiNodes.filter { it.isVisibleToUser }.map { it.viewIdResourceName }.toString())
+                    Log.e(
+                        "LockscreenWidgets",
+                        sysUiNodes.filter { it.isVisibleToUser }.map { it.viewIdResourceName }
+                            .toString()
+                    )
                 }
 
                 //Generate "layer" values for the System UI window and for the topmost app window, if
@@ -513,16 +518,18 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
                 && (notificationCount == 0 || !prefManager.hideOnNotifications)
                 && prefManager.widgetFrameEnabled).also {
             if (App.DEBUG) {
-                Log.e("LockscreenWidgets", "canShow: $it, " +
-                        "isScreenOn: ${power.isInteractive}, " +
-                        "isTempHide: ${isTempHide}, " +
-                        "wasOnKeyguard: $wasOnKeyguard, " +
-                        "currentSysUiLayer: $currentSysUiLayer, " +
-                        "currentAppLayer: $currentAppLayer, " +
-                        "onMainLockscreen: $onMainLockscreen, " +
-                        "showingNotificationsPanel: $showingNotificationsPanel, " +
-                        "notificationCount: $notificationCount, " +
-                        "widgetEnabled: ${prefManager.widgetFrameEnabled}\n\n", Exception())
+                Log.e(
+                    "LockscreenWidgets", "canShow: $it, " +
+                            "isScreenOn: ${power.isInteractive}, " +
+                            "isTempHide: ${isTempHide}, " +
+                            "wasOnKeyguard: $wasOnKeyguard, " +
+                            "currentSysUiLayer: $currentSysUiLayer, " +
+                            "currentAppLayer: $currentAppLayer, " +
+                            "onMainLockscreen: $onMainLockscreen, " +
+                            "showingNotificationsPanel: $showingNotificationsPanel, " +
+                            "notificationCount: $notificationCount, " +
+                            "widgetEnabled: ${prefManager.widgetFrameEnabled}\n\n", Exception()
+                )
             }
         }
 
@@ -550,7 +557,10 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
         return null
     }
 
-    private fun addAllNodesToList(parentNode: AccessibilityNodeInfo, list: ArrayList<AccessibilityNodeInfo>) {
+    private fun addAllNodesToList(
+        parentNode: AccessibilityNodeInfo,
+        list: ArrayList<AccessibilityNodeInfo>
+    ) {
         list.add(parentNode)
         for (i in 0 until parentNode.childCount) {
             val child = parentNode.getChild(i)
@@ -569,30 +579,37 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
         if (prefManager.opacityMode == PrefManager.VALUE_OPACITY_MODE_MASKED) {
             try {
                 val fastW = wallpaper.fastDrawable
+
                 fastW?.mutate()?.apply {
-                        view.wallpaper_background.setImageDrawable(this)
-                        view.wallpaper_background.scaleType = ImageView.ScaleType.MATRIX
-                        view.wallpaper_background.imageMatrix = Matrix().apply {
-                            val loc = view.locationOnScreen ?: intArrayOf(0, 0)
+                    view.wallpaper_background.setImageDrawable(this)
+                    view.wallpaper_background.scaleType = ImageView.ScaleType.MATRIX
+                    view.wallpaper_background.imageMatrix = Matrix().apply {
+                        val realSize = Point().apply { wm.defaultDisplay.getRealSize(this) }
+                        val loc = view.locationOnScreen ?: intArrayOf(0, 0)
 
-                            val back = view.wallpaper_background
-                            val dwidth: Int = intrinsicWidth
-                            val dheight: Int = intrinsicHeight
+                        val back = view.wallpaper_background
+                        val dwidth: Int = intrinsicWidth
+                        val dheight: Int = intrinsicHeight
 
-                            val vwidth: Int = back.width - back.paddingLeft - back.paddingRight
-                            val vheight: Int = back.height - back.paddingTop - back.paddingBottom
+                        val wallpaperAdjustmentX = (dwidth - realSize.x) / 2f
+                        val wallpaperAdjustmentY = (dheight - realSize.y) / 2f
 
-                            val scaleX: Float = vheight.toFloat() / dheight.toFloat()
-                            val scaleY: Float = vwidth.toFloat() / dwidth.toFloat()
+                        val vwidth: Int = back.width - back.paddingLeft - back.paddingRight
+                        val vheight: Int = back.height - back.paddingTop - back.paddingBottom
 
-                            setScale(scaleX, scaleY)
-                            setTranslate(
-                                -loc[0].toFloat(),
-                                -loc[1].toFloat()
-                            )
-                        }
+                        val scaleX: Float = vwidth.toFloat() / dwidth.toFloat()
+                        val scaleY: Float = vheight.toFloat() / dheight.toFloat()
+
+                        setScale(scaleX, scaleY)
+                        setTranslate(
+                            -loc[0].toFloat() - wallpaperAdjustmentX,
+                            -loc[1].toFloat() - wallpaperAdjustmentY
+                        )
                     }
-            } catch (e: Exception) {}
+                } ?: view.wallpaper_background.setImageDrawable(null)
+            } catch (e: Exception) {
+                view.wallpaper_background.setImageDrawable(null)
+            }
         } else {
             view.wallpaper_background.setImageDrawable(null)
         }
