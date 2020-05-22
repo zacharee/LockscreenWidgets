@@ -222,6 +222,10 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
                     removeOverlay()
                     isTempHide = false
                 }
+                Intent.ACTION_SCREEN_ON -> {
+                    if (canShow())
+                        addOverlay()
+                }
             }
         }
     }
@@ -354,7 +358,7 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
             true,
             nightModeListener
         )
-        registerReceiver(screenStateReceiver, IntentFilter(Intent.ACTION_SCREEN_OFF))
+        registerReceiver(screenStateReceiver, IntentFilter(Intent.ACTION_SCREEN_OFF).apply { addAction(Intent.ACTION_SCREEN_ON) })
 
         wasOnKeyguard = kgm.isKeyguardLocked
         isScreenOn = power.isInteractive
@@ -471,7 +475,9 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
     }
 
     private fun addOverlay() {
-        view.frame.addWindow(wm, params)
+        mainHandler.postDelayed({
+            view.frame.addWindow(wm, params)
+        }, 100)
     }
 
     private fun updateOverlay() {
@@ -516,7 +522,7 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
                         "onMainLockscreen: $onMainLockscreen, " +
                         "showingNotificationsPanel: $showingNotificationsPanel, " +
                         "notificationCount: $notificationCount, " +
-                        "widgetEnabled: ${prefManager.widgetFrameEnabled}")
+                        "widgetEnabled: ${prefManager.widgetFrameEnabled}\n\n", Exception())
             }
         }
 

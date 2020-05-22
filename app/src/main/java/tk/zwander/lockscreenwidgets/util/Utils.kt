@@ -8,6 +8,8 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import android.os.Handler
+import android.os.Looper
 import android.provider.Settings
 import android.util.TypedValue
 import android.view.View
@@ -16,6 +18,8 @@ import androidx.recyclerview.widget.SnapHelper
 import tk.zwander.lockscreenwidgets.services.Accessibility
 import tk.zwander.lockscreenwidgets.services.NotificationListener
 import kotlin.math.roundToInt
+
+val mainHandler = Handler(Looper.getMainLooper())
 
 val Context.prefManager: PrefManager
     get() = PrefManager.getInstance(this)
