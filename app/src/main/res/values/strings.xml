@@ -41,6 +41,9 @@
     <string name="settings_screen_hide_on_security_input">Hide On Security Input</string>
     <string name="settings_screen_hide_on_security_input_desc">Try to hide the widget frame when the PIN/pattern/password input view is shown. This may not work on all devices.</string>
 
+    <string name="settings_screen_animate_show_hide">Animate Show/Hide</string>
+    <string name="settings_screen_animate_show_hide_desc">Animate the showing/hiding of the widget frame.</string>
+
     <string name="intro_welcome_title">Welcome!</string>
     <string name="intro_welcome_desc">Lockscreen Widgets is a simple app with a simple purpose: to bring back Android KitKat\'s lock screen widgets. Your widgets will show up in a simple paged slider on the lockscreen.</string>
 

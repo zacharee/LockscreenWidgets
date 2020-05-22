@@ -72,7 +72,7 @@ fun View.fadeAndScaleOut(endListener: () -> Unit) {
             ObjectAnimator.ofFloat(this@fadeAndScaleOut, "scaleY", 1.0f, 0.95f),
             ObjectAnimator.ofFloat(this@fadeAndScaleOut, "alpha", 1.0f, 0f)
         )
-        duration = 100L
+        duration = if (context.prefManager.animateShowHide) 100L else 0L
         addListener(object : AnimatorListenerAdapter() {
             override fun onAnimationEnd(animation: Animator?) {
                 clearAnimation()
@@ -90,7 +90,7 @@ fun View.fadeAndScaleIn(endListener: () -> Unit) {
             ObjectAnimator.ofFloat(this@fadeAndScaleIn, "scaleY", 0.95f, 1.0f),
             ObjectAnimator.ofFloat(this@fadeAndScaleIn, "alpha", 0f, 1.0f)
         )
-        duration = 100L
+        duration = if (context.prefManager.animateShowHide) 100L else 0L
         addListener(object : AnimatorListenerAdapter() {
             override fun onAnimationEnd(animation: Animator?) {
                 clearAnimation()

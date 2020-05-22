@@ -17,6 +17,14 @@
         />
 
     <SwitchPreference
+        android:title="@string/settings_screen_animate_show_hide"
+        android:summary="@string/settings_screen_animate_show_hide_desc"
+        android:key="animate_show_hide"
+        android:icon="@drawable/ic_baseline_animation_24"
+        android:defaultValue="true"
+        />
+
+    <SwitchPreference
         android:title="@string/settings_screen_hide_when_notifications_shown"
         android:summary="@string/settings_screen_hide_when_notifications_shown_desc"
         android:key="hide_on_notifications"
