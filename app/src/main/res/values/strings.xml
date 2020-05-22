@@ -2,7 +2,7 @@
     <string name="app_name">Lockscreen Widgets</string>
 
     <string name="content_desc_widget_image">Widget Image</string>
-    <string name="move_resize_hint">Tap the widget pager with two fingers to show the resize and move controls.</string>
+    <string name="gesture_hint">Tap the widget pager with two fingers to show the resize and move controls. Tap the widget pager with three fingers to temporarily hide it.</string>
     <string name="accessibility_service_desc">Lockscreen Widgets requires an Accessibility Service to display on the lock screen. No data is collected, and no actions will be performed.</string>
 
     <string name="add_widget">Add Widget</string>
@@ -45,7 +45,7 @@
     <string name="intro_welcome_desc">Lockscreen Widgets is a simple app with a simple purpose: to bring back Android KitKat\'s lock screen widgets. Your widgets will show up in a simple paged slider on the lockscreen.</string>
 
     <string name="intro_usage_title">Basic Usage</string>
-    <string name="intro_usage_desc">All interaction with Lockscreen Widgets happens straight from the lock screen. It\'s where you add and remove widgets, and also where you adjust the position and size of the widget frame itself. Tap the \"plus\" page to add a widget; press and hold to reorder widgets in the list; and tap anywhere on the frame with two fingers to move/resize the frame or remove the current widget.</string>
+    <string name="intro_usage_desc">Tap the \"plus\" page to add a widget, press and hold to reorder widgets in the list, and tap anywhere on the frame with two fingers to move/resize the frame or remove the current widget. You can also tap with three fingers to hide the widget frame until the screen is turned off and on again.</string>
 
     <string name="intro_accessibility_title">Accessibility</string>
     <string name="intro_accessibility_desc">To be able to display on the lock screen, you\'ll need to activate Lockscreen Widgets\' Accessibility Service. This app doesn\'t collect any data from your screen.</string>

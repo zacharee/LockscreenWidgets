@@ -28,6 +28,8 @@ class WidgetFrameView(context: Context, attrs: AttributeSet) : ConstraintLayout(
     var onTopDragListener: ((velY: Float) -> Unit)? = null
     var onBottomDragListener: ((velY: Float) -> Unit)? = null
 
+    var onTempHideListener: (() -> Unit)? = null
+
     var attachmentStateListener: ((isAttached: Boolean) -> Unit)? = null
 
     private var maxPointerCount = 0
@@ -94,18 +96,28 @@ class WidgetFrameView(context: Context, attrs: AttributeSet) : ConstraintLayout(
     override fun dispatchTouchEvent(ev: MotionEvent): Boolean {
         onTouch(ev)
 
-        maxPointerCount = ev.pointerCount
+        maxPointerCount = ev.pointerCount.run { if (this > maxPointerCount) this else maxPointerCount }
+
+        when (ev.action) {
+            MotionEvent.ACTION_UP -> {
+                when (maxPointerCount) {
+                    2 -> {
+                        setEditMode(!isInEditingMode)
+                    }
+                    3 -> {
+                        onTempHideListener?.invoke()
+                    }
+                }
+
+                maxPointerCount = 0
+            }
+        }
 
         return super.dispatchTouchEvent(ev)
     }
 
     override fun onInterceptTouchEvent(ev: MotionEvent): Boolean {
-        return (maxPointerCount > 1).also {
-            if (it) {
-                setEditMode(!isInEditingMode)
-                maxPointerCount = 0
-            }
-        }
+        return (maxPointerCount > 1)
     }
 
     fun updateFrameBackground() {

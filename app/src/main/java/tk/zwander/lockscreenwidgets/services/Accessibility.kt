@@ -224,6 +224,7 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
     private var showingNotificationsPanel = false
     private var wasOnKeyguard = true
     private var isScreenOn = true
+    private var isTempHide = false
 
     private var currentSysUiLayer = 1
     private var currentAppLayer = 0
@@ -315,6 +316,10 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
                 widgetHost.stopListening()
             }
         }
+        view.frame.onTempHideListener = {
+            isTempHide = true
+            removeOverlay()
+        }
 
         view.widgets_pager.addOnScrollListener(
             SnapScrollListener(
@@ -347,7 +352,11 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
         //so it shouldn't be noticeable to the user. We use this to check the current keyguard
         //state and, if applicable, send the keyguard dismissal broadcast.
         if (event.eventType == AccessibilityEvent.TYPE_WINDOWS_CHANGED) {
-            isScreenOn = power.isInteractive
+            val isScreenOn = power.isInteractive
+            if (this.isScreenOn != isScreenOn) {
+                isTempHide = false
+                this.isScreenOn = isScreenOn
+            }
             val isOnKeyguard = kgm.isKeyguardLocked
             if (isOnKeyguard != wasOnKeyguard) {
                 wasOnKeyguard = isOnKeyguard
@@ -467,6 +476,7 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
      * The widget frame can only show if ALL of the following conditions are met:
      * - [wasOnKeyguard] is true
      * - [isScreenOn] is true (i.e. the display is properly on: not in Doze or on the AOD)
+     * - [isTempHide] is false
      * - [currentSysUiLayer] is greater than [currentAppLayer]
      * - [onMainLockscreen] is true OR [showingNotificationsPanel] is true OR [PrefManager.hideOnSecurityPage] is false
      * - [showingNotificationsPanel] is false OR [PrefManager.hideOnNotificationShade] is false
@@ -476,6 +486,7 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
     private fun canShow() =
         (wasOnKeyguard
                 && isScreenOn
+                && !isTempHide
                 && currentSysUiLayer > currentAppLayer
                 && (onMainLockscreen || showingNotificationsPanel || !prefManager.hideOnSecurityPage)
                 && (!showingNotificationsPanel || !prefManager.hideOnNotificationShade)
@@ -484,6 +495,7 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
             if (App.DEBUG) {
                 Log.e("LockscreenWidgets", "canShow: $it, " +
                         "isScreenOn: ${power.isInteractive}, " +
+                        "isTempHide: ${isTempHide}, " +
                         "wasOnKeyguard: $wasOnKeyguard, " +
                         "currentSysUiLayer: $currentSysUiLayer, " +
                         "currentAppLayer: $currentAppLayer, " +
