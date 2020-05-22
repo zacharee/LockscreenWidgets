@@ -587,23 +587,16 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
                         val realSize = Point().apply { wm.defaultDisplay.getRealSize(this) }
                         val loc = view.locationOnScreen ?: intArrayOf(0, 0)
 
-                        val back = view.wallpaper_background
                         val dwidth: Int = intrinsicWidth
                         val dheight: Int = intrinsicHeight
 
                         val wallpaperAdjustmentX = (dwidth - realSize.x) / 2f
                         val wallpaperAdjustmentY = (dheight - realSize.y) / 2f
 
-                        val vwidth: Int = back.width - back.paddingLeft - back.paddingRight
-                        val vheight: Int = back.height - back.paddingTop - back.paddingBottom
-
-                        val scaleX: Float = vwidth.toFloat() / dwidth.toFloat()
-                        val scaleY: Float = vheight.toFloat() / dheight.toFloat()
-
-                        setScale(scaleX, scaleY)
                         setTranslate(
-                            -loc[0].toFloat() - wallpaperAdjustmentX,
-                            -loc[1].toFloat() - wallpaperAdjustmentY
+                            (-loc[0].toFloat() - wallpaperAdjustmentX),
+                            //TODO: LGUX 9 doesn't like this Y-translation for some reason
+                            (-loc[1].toFloat() - wallpaperAdjustmentY)
                         )
                     }
                 } ?: view.wallpaper_background.setImageDrawable(null)

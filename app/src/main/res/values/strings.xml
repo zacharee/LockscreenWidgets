@@ -26,7 +26,7 @@
 
     <string name="settings_screen_opacity_mode">Opacity Mode</string>
     <string name="settings_screen_opacity_mode_transparent">Transparent</string>
-    <string name="settings_screen_opacity_mode_masked">Masked</string>
+    <string name="settings_screen_opacity_mode_masked">Masked (EXPERIMENTAL!)</string>
     <string name="settings_screen_opacity_mode_opaque">Opaque</string>
 
     <string name="settings_screen_hide_when_notifications_shown">Hide when Showing Notifications</string>
