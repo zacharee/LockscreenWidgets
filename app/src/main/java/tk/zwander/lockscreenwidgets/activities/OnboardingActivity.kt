@@ -35,7 +35,6 @@ class OnboardingActivity : IntroActivity() {
         fun startForResult(activity: Activity, code: Int, retroMode: RetroMode = RetroMode.NONE) {
             val intent = Intent(activity, OnboardingActivity::class.java)
             intent.putExtra(EXTRA_RETRO_MODE, retroMode.toString())
-            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
 
             activity.startActivityForResult(intent, code)
         }
