@@ -26,6 +26,7 @@ class PrefManager private constructor(context: Context) : ContextWrapper(context
         const val KEY_HIDE_ON_SECURITY_PAGE = "hide_on_security_page"
         const val KEY_HIDE_ON_NOTIFICATION_SHADE = "hide_on_notification_shade"
         const val KEY_ANIMATE_SHOW_HIDE = "animate_show_hide"
+        const val KEY_CURRENT_PAGE = "current_page"
 
         const val VALUE_PAGE_INDICATOR_BEHAVIOR_HIDDEN = 0
         const val VALUE_PAGE_INDICATOR_BEHAVIOR_AUTO_HIDE = 1
@@ -83,6 +84,12 @@ class PrefManager private constructor(context: Context) : ContextWrapper(context
         get() = getInt(KEY_POS_Y, 0)
         set(value) {
             putInt(KEY_POS_Y, value)
+        }
+
+    var currentPage: Int
+        get() = getInt(KEY_CURRENT_PAGE, 0)
+        set(value) {
+            putInt(KEY_CURRENT_PAGE, value)
         }
 
     var firstViewing: Boolean

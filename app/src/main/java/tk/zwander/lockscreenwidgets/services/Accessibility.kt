@@ -346,9 +346,15 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
                         view.frame.shouldShowRemove = position < adapter.widgets.size
                         view.remove.isVisible =
                             view.frame.isInEditingMode && view.frame.shouldShowRemove
+                        prefManager.currentPage = position
                     }
                 })
         )
+        view.widgets_pager.layoutManager?.apply {
+            try {
+                scrollToPosition(prefManager.currentPage)
+            } catch (e: Exception) {}
+        }
         view.frame.shouldShowRemove =
             pagerSnapHelper.getSnapPosition(view.widgets_pager) < adapter.widgets.size
 

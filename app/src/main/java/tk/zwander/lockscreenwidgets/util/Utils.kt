@@ -13,7 +13,6 @@ import android.os.Looper
 import android.provider.Settings
 import android.util.TypedValue
 import android.view.View
-import android.view.accessibility.AccessibilityInteractionClient
 import android.view.accessibility.AccessibilityNodeInfo
 import android.view.accessibility.AccessibilityWindowInfo
 import androidx.recyclerview.widget.RecyclerView
