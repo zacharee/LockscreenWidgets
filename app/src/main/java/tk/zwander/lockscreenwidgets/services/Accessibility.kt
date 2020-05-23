@@ -18,6 +18,7 @@ import android.provider.Settings
 import android.util.Log
 import android.view.*
 import android.view.accessibility.AccessibilityEvent
+import android.view.accessibility.AccessibilityInteractionClient
 import android.view.accessibility.AccessibilityNodeInfo
 import android.view.accessibility.AccessibilityWindowInfo
 import android.widget.ImageView
@@ -539,7 +540,7 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
      * @return the System UI window if it exists onscreen
      */
     private fun findSystemUiWindows(): List<AccessibilityWindowInfo?> {
-        return windows.filter { it.type == AccessibilityWindowInfo.TYPE_SYSTEM && it.root?.packageName == "com.android.systemui" }
+        return windows.filter { it.type == AccessibilityWindowInfo.TYPE_SYSTEM && it.safeRoot?.packageName == "com.android.systemui" }
     }
 
     /**

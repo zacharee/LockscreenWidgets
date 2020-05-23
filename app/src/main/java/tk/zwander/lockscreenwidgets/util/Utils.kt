@@ -13,6 +13,9 @@ import android.os.Looper
 import android.provider.Settings
 import android.util.TypedValue
 import android.view.View
+import android.view.accessibility.AccessibilityInteractionClient
+import android.view.accessibility.AccessibilityNodeInfo
+import android.view.accessibility.AccessibilityWindowInfo
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.SnapHelper
 import tk.zwander.lockscreenwidgets.services.Accessibility
@@ -25,15 +28,25 @@ val Context.prefManager: PrefManager
     get() = PrefManager.getInstance(this)
 
 val Context.isAccessibilityEnabled: Boolean
-    get() = Settings.Secure.getString(contentResolver, Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES)
-        ?.contains(ComponentName(this, Accessibility::class.java).flattenToString()) ?: false
+    get() = Settings.Secure.getString(
+        contentResolver,
+        Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES
+    )?.contains(ComponentName(this, Accessibility::class.java).flattenToString()) ?: false
 
 val Context.isNotificationListenerActive: Boolean
     get() = Settings.Secure.getString(contentResolver, "enabled_notification_listeners")
         ?.run {
-            val cmp = ComponentName(this@isNotificationListenerActive, NotificationListener::class.java)
+            val cmp =
+                ComponentName(this@isNotificationListenerActive, NotificationListener::class.java)
             contains(cmp.flattenToString()) || contains(cmp.flattenToShortString())
         } ?: false
+
+val AccessibilityWindowInfo.safeRoot: AccessibilityNodeInfo?
+    get() = try {
+        root
+    } catch (e: NullPointerException) {
+        null
+    }
 
 fun Context.dpAsPx(dpVal: Number) =
     TypedValue.applyDimension(
