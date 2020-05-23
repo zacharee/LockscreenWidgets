@@ -439,6 +439,8 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
                                 || (it.viewIdResourceName == "com.android.systemui:id/tile_label" && it.isVisibleToUser)
                     } != null
                 }
+
+                sysUiNodes.forEach { it.recycle() }
             }
         }
 
@@ -546,7 +548,10 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
      * @return the System UI window if it exists onscreen
      */
     private fun findSystemUiWindows(): List<AccessibilityWindowInfo?> {
-        return windows.filter { it.type == AccessibilityWindowInfo.TYPE_SYSTEM && it.safeRoot?.packageName == "com.android.systemui" }
+        return windows.filter { it.type == AccessibilityWindowInfo.TYPE_SYSTEM && it.safeRoot.run {
+                this?.packageName == "com.android.systemui".also { this?.recycle() }
+            }
+        }
     }
 
     /**
