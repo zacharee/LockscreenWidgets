@@ -376,19 +376,17 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
         //This block here runs even when unlocked, but it only takes a millisecond at most,
         //so it shouldn't be noticeable to the user. We use this to check the current keyguard
         //state and, if applicable, send the keyguard dismissal broadcast.
-        if (event.eventType == AccessibilityEvent.TYPE_WINDOWS_CHANGED) {
-            val isScreenOn = power.isInteractive
-            if (this.isScreenOn != isScreenOn) {
-                isTempHide = false
-                this.isScreenOn = isScreenOn
-            }
-            val isOnKeyguard = kgm.isKeyguardLocked
-            if (isOnKeyguard != wasOnKeyguard) {
-                wasOnKeyguard = isOnKeyguard
-                if (!isOnKeyguard) {
-                    LocalBroadcastManager.getInstance(this)
-                        .sendBroadcast(Intent(ACTION_LOCKSCREEN_DISMISSED))
-                }
+        val isScreenOn = power.isInteractive
+        if (this.isScreenOn != isScreenOn) {
+            isTempHide = false
+            this.isScreenOn = isScreenOn
+        }
+        val isOnKeyguard = kgm.isKeyguardLocked
+        if (isOnKeyguard != wasOnKeyguard) {
+            wasOnKeyguard = isOnKeyguard
+            if (!isOnKeyguard) {
+                LocalBroadcastManager.getInstance(this)
+                    .sendBroadcast(Intent(ACTION_LOCKSCREEN_DISMISSED))
             }
         }
 
