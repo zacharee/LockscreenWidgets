@@ -28,6 +28,7 @@ import androidx.recyclerview.widget.*
 import kotlinx.android.synthetic.main.widget_frame.view.*
 import tk.zwander.lockscreenwidgets.App
 import tk.zwander.lockscreenwidgets.R
+import tk.zwander.lockscreenwidgets.activities.AddWidgetActivity
 import tk.zwander.lockscreenwidgets.activities.RequestUnlockActivity
 import tk.zwander.lockscreenwidgets.adapters.WidgetFrameAdapter
 import tk.zwander.lockscreenwidgets.host.WidgetHost
@@ -330,6 +331,12 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
             }
 
             updateOverlay()
+        }
+        view.frame.onAddListener = {
+            val intent = Intent(this, AddWidgetActivity::class.java)
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+
+            startActivity(intent)
         }
         view.frame.attachmentStateListener = {
             if (it) {

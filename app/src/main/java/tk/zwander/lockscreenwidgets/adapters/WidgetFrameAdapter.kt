@@ -79,11 +79,11 @@ class WidgetFrameAdapter(private val manager: AppWidgetManager, private val host
     }
 
     override fun getItemCount(): Int {
-        return widgets.size + 1
+        return if (widgets.size == 0) 1 else widgets.size
     }
 
     override fun getItemViewType(position: Int): Int {
-        return if (position == widgets.size) VIEW_TYPE_ADD
+        return if (widgets.size == 0) VIEW_TYPE_ADD
         else VIEW_TYPE_WIDGET
     }
 

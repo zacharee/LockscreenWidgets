@@ -21,6 +21,7 @@ import tk.zwander.lockscreenwidgets.util.*
 class WidgetFrameView(context: Context, attrs: AttributeSet) : ConstraintLayout(context, attrs) {
     var onMoveListener: ((velX: Float, velY: Float) -> Unit)? = null
     var onInterceptListener: ((down: Boolean) -> Unit)? = null
+    var onAddListener: (() -> Unit)? = null
 
     var onLeftDragListener: ((velX: Float) -> Unit)? = null
     var onRightDragListener: ((velX: Float) -> Unit)? = null
@@ -64,6 +65,9 @@ class WidgetFrameView(context: Context, attrs: AttributeSet) : ConstraintLayout(
             onBottomDragListener?.invoke(velY)
             onBottomDragListener != null
         })
+        add_widget.setOnClickListener {
+            onAddListener?.invoke()
+        }
 
         if (context.prefManager.firstViewing) {
             hint_view.isVisible = true
