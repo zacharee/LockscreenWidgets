@@ -156,7 +156,15 @@ class SnapToBlock internal constructor(
             }
         } else {
             // Scrolling toward top of data
-            snapPos = roundDownToBlockSize(firstVisiblePos)
+//            snapPos = roundDownToBlockSize(firstVisiblePos)
+            val firstCompletePosition: Int = layoutManager.findFirstCompletelyVisibleItemPosition()
+            snapPos = if (firstCompletePosition != RecyclerView.NO_POSITION
+                && firstCompletePosition % blockSize == 0
+            ) {
+                firstCompletePosition
+            } else {
+                roundDownToBlockSize(firstVisiblePos + blockSize)
+            }
             // Check to see if target view exists. If it doesn't, force a smooth scroll.
             // SnapHelper only snaps to existing views and will not scroll to a non-existant one.
             // If limiting fling to single block, then the following is not needed since the
