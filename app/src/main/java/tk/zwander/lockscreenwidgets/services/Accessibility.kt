@@ -18,17 +18,13 @@ import android.provider.Settings
 import android.util.Log
 import android.view.*
 import android.view.accessibility.AccessibilityEvent
-import android.view.accessibility.AccessibilityInteractionClient
 import android.view.accessibility.AccessibilityNodeInfo
 import android.view.accessibility.AccessibilityWindowInfo
 import android.widget.ImageView
 import androidx.appcompat.view.ContextThemeWrapper
 import androidx.core.view.isVisible
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
-import androidx.recyclerview.widget.ItemTouchHelper
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.PagerSnapHelper
-import androidx.recyclerview.widget.RecyclerView
+import androidx.recyclerview.widget.*
 import kotlinx.android.synthetic.main.widget_frame.view.*
 import tk.zwander.lockscreenwidgets.App
 import tk.zwander.lockscreenwidgets.R
@@ -581,6 +577,14 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
         return null
     }
 
+    /**
+     * Recursively add all [AccessibilityNodeInfo]s contained in a parent to a list.
+     * We use this instead of [AccessibilityNodeInfo.findAccessibilityNodeInfosByViewId]
+     * for performance and reliability reasons.
+     * @param parentNode the root [AccessibilityNodeInfo] whose children we want to add to
+     * a list. List will include this node as well.
+     * @param list the list that will contain the child nodes.
+     */
     private fun addAllNodesToList(
         parentNode: AccessibilityNodeInfo,
         list: ArrayList<AccessibilityNodeInfo>
