@@ -214,6 +214,10 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
         override fun onReceive(context: Context?, intent: Intent?) {
             when (intent?.action) {
                 Intent.ACTION_SCREEN_OFF -> {
+                    if (isDebug) {
+                        Log.e(App.DEBUG_LOG_TAG, "Screen off")
+                    }
+
                     //If the device has some sort of AOD or ambient display, by the time we receive
                     //an accessibility event and see that the display is off, it's usually too late
                     //and the current screen content has "frozen," causing the widget frame to show
@@ -221,8 +225,14 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
                     //the frame before it's frozen in place.
                     removeOverlay()
                     isTempHide = false
+                    isScreenOn = false
                 }
                 Intent.ACTION_SCREEN_ON -> {
+                    if (isDebug) {
+                        Log.e(App.DEBUG_LOG_TAG, "Screen on")
+                    }
+
+                    isScreenOn = true
                     if (canShow())
                         addOverlay()
                 }
@@ -390,6 +400,10 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
             }
         }
 
+        if (isDebug) {
+            Log.e(App.DEBUG_LOG_TAG, "Accessibility event: $event, isScreenOn: ${this.isScreenOn}, wasOnKeyguard: ${wasOnKeyguard}")
+        }
+
         //The below block can (very rarely) take over half a second to execute, so only run it
         //if we actually need to (i.e. on the lock screen and screen is on).
         if (wasOnKeyguard && isScreenOn) {
@@ -407,9 +421,9 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
                     }
                 }
 
-                if (App.DEBUG) {
+                if (isDebug) {
                     Log.e(
-                        "LockscreenWidgets",
+                        App.DEBUG_LOG_TAG,
                         sysUiNodes.filter { it.isVisibleToUser }.map { it.viewIdResourceName }
                             .toString()
                     )
@@ -524,10 +538,10 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
                 && (!showingNotificationsPanel || !prefManager.hideOnNotificationShade)
                 && (notificationCount == 0 || !prefManager.hideOnNotifications)
                 && prefManager.widgetFrameEnabled).also {
-            if (App.DEBUG) {
+            if (isDebug) {
                 Log.e(
-                    "LockscreenWidgets", "canShow: $it, " +
-                            "isScreenOn: ${power.isInteractive}, " +
+                    App.DEBUG_LOG_TAG, "canShow: $it, " +
+                            "isScreenOn: ${isScreenOn}, " +
                             "isTempHide: ${isTempHide}, " +
                             "wasOnKeyguard: $wasOnKeyguard, " +
                             "currentSysUiLayer: $currentSysUiLayer, " +

@@ -56,4 +56,11 @@
         android:defaultValue="1"
         />
 
+    <SwitchPreference
+        android:title="@string/settings_screen_debug_log"
+        android:summary="@string/settings_screen_debug_log_desc"
+        android:icon="@drawable/ic_baseline_short_text_24"
+        android:key="debug_log"
+        />
+
 </PreferenceScreen>

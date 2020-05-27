@@ -17,6 +17,7 @@ import android.view.accessibility.AccessibilityNodeInfo
 import android.view.accessibility.AccessibilityWindowInfo
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.SnapHelper
+import tk.zwander.lockscreenwidgets.BuildConfig
 import tk.zwander.lockscreenwidgets.services.Accessibility
 import tk.zwander.lockscreenwidgets.services.NotificationListener
 import kotlin.math.roundToInt
@@ -39,6 +40,9 @@ val Context.isNotificationListenerActive: Boolean
                 ComponentName(this@isNotificationListenerActive, NotificationListener::class.java)
             contains(cmp.flattenToString()) || contains(cmp.flattenToShortString())
         } ?: false
+
+val Context.isDebug: Boolean
+    get() = BuildConfig.DEBUG || prefManager.debugLog
 
 val AccessibilityWindowInfo.safeRoot: AccessibilityNodeInfo?
     get() = try {
