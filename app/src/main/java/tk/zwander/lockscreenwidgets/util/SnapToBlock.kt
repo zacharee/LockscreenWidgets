@@ -163,7 +163,7 @@ class SnapToBlock internal constructor(
             ) {
                 firstCompletePosition
             } else {
-                roundDownToBlockSize(firstVisiblePos + blockSize)
+                roundDownToBlockSize(firstVisiblePos)
             }
             // Check to see if target view exists. If it doesn't, force a smooth scroll.
             // SnapHelper only snaps to existing views and will not scroll to a non-existant one.

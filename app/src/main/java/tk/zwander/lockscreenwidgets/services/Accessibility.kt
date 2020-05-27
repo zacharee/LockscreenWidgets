@@ -158,7 +158,6 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
             override fun onSelectedChanged(viewHolder: RecyclerView.ViewHolder?, actionState: Int) {
                 if (actionState != ItemTouchHelper.ACTION_STATE_IDLE) {
                     viewHolder?.itemView?.alpha = 0.5f
-                    blockSnapHelper.attachToRecyclerView(null)
                     (viewHolder as WidgetFrameAdapter.WidgetVH?)?.run {
                         removeButtonShown = !removeButtonShown
                     }
@@ -174,7 +173,6 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
                 super.clearView(recyclerView, viewHolder)
 
                 viewHolder.itemView.alpha = 1.0f
-                blockSnapHelper.attachToRecyclerView(view.widgets_pager)
             }
 
             override fun interpolateOutOfBoundsScroll(
