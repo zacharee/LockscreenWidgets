@@ -21,7 +21,6 @@ import tk.zwander.lockscreenwidgets.util.*
 class WidgetFrameView(context: Context, attrs: AttributeSet) : ConstraintLayout(context, attrs) {
     var onMoveListener: ((velX: Float, velY: Float) -> Unit)? = null
     var onInterceptListener: ((down: Boolean) -> Unit)? = null
-    var onRemoveListener: (() -> Unit)? = null
 
     var onLeftDragListener: ((velX: Float) -> Unit)? = null
     var onRightDragListener: ((velX: Float) -> Unit)? = null
@@ -36,7 +35,6 @@ class WidgetFrameView(context: Context, attrs: AttributeSet) : ConstraintLayout(
     private var alreadyIndicatedMoving = false
 
     var isInEditingMode = false
-    var shouldShowRemove = true
 
     private val vibrator by lazy { context.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator }
 
@@ -49,9 +47,6 @@ class WidgetFrameView(context: Context, attrs: AttributeSet) : ConstraintLayout(
         frame_card.scaleY = 0.95f
 
         move.setOnTouchListener(MoveTouchListener())
-        remove.setOnClickListener {
-            onRemoveListener?.invoke()
-        }
 
         left_dragger.setOnTouchListener(ExpandTouchListener { velX, _ ->
             onLeftDragListener?.invoke(velX)
@@ -192,7 +187,6 @@ class WidgetFrameView(context: Context, attrs: AttributeSet) : ConstraintLayout(
         isInEditingMode = editing
 
         edit_wrapper.isVisible = editing
-        remove.isVisible = editing && shouldShowRemove
     }
 
     private fun vibrate() {

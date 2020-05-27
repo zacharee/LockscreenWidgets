@@ -1,11 +1,13 @@
 package tk.zwander.lockscreenwidgets.adapters
 
+import android.annotation.SuppressLint
 import android.appwidget.AppWidgetManager
 import android.content.Intent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.core.view.isVisible
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import kotlinx.android.synthetic.main.widget_page_holder.view.*
@@ -21,7 +23,7 @@ import tk.zwander.lockscreenwidgets.util.pxAsDp
 import java.util.*
 import kotlin.collections.ArrayList
 
-class WidgetFrameAdapter(private val manager: AppWidgetManager, private val host: WidgetHost) : RecyclerView.Adapter<RecyclerView.ViewHolder>(), ItemTouchHelperAdapter, CoroutineScope by MainScope() {
+class WidgetFrameAdapter(private val manager: AppWidgetManager, private val host: WidgetHost, private val onRemoveCallback: (WidgetData) -> Unit) : RecyclerView.Adapter<RecyclerView.ViewHolder>(), ItemTouchHelperAdapter, CoroutineScope by MainScope() {
     companion object {
         const val VIEW_TYPE_WIDGET = 0
         const val VIEW_TYPE_ADD = 1
@@ -97,9 +99,26 @@ class WidgetFrameAdapter(private val manager: AppWidgetManager, private val host
         }
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     inner class WidgetVH(view: View) : RecyclerView.ViewHolder(view) {
+        var removeButtonShown: Boolean
+            get() = itemView.remove_widget.isVisible
+            set(value) {
+                itemView.remove_widget.isVisible = value
+            }
+
+        init {
+            itemView.remove_widget.setOnClickListener {
+                val newPos = adapterPosition
+                if (newPos != -1) {
+                    onRemoveCallback(widgets[newPos])
+                    notifyItemRemoved(newPos)
+                }
+            }
+        }
+
         fun onBind(data: WidgetData) {
-            itemView.widget_holder.apply {
+            itemView.apply {
                 launch {
                     layoutParams = (layoutParams as ViewGroup.LayoutParams).apply {
                         width = calculateWidgetWidth()
@@ -109,20 +128,22 @@ class WidgetFrameAdapter(private val manager: AppWidgetManager, private val host
                         manager.getAppWidgetInfo(data.id)
                     }
 
-                    removeAllViews()
-                    try {
-                        addView(withContext(Dispatchers.Main) {
-                            host.createView(itemView.context, data.id, widgetInfo).apply {
-                                val width = context.pxAsDp(itemView.width).toInt()
-                                val height = context.pxAsDp(itemView.height).toInt()
-                                updateAppWidgetSize(null, width, height, width, height)
+                    widget_holder.apply {
+                        removeAllViews()
+                        try {
+                            addView(withContext(Dispatchers.Main) {
+                                host.createView(itemView.context, data.id, widgetInfo).apply {
+                                    val width = context.pxAsDp(itemView.width).toInt()
+                                    val height = context.pxAsDp(itemView.height).toInt()
+                                    updateAppWidgetSize(null, width, height, width, height)
+                                }
+                            })
+                        } catch (e: SecurityException) {
+                            Toast.makeText(context, resources.getString(R.string.bind_widget_error, widgetInfo.provider), Toast.LENGTH_LONG).show()
+                            context.prefManager.currentWidgets = context.prefManager.currentWidgets.apply {
+                                remove(data)
+                                host.deleteAppWidgetId(data.id)
                             }
-                        })
-                    } catch (e: SecurityException) {
-                        Toast.makeText(context, resources.getString(R.string.bind_widget_error, widgetInfo.provider), Toast.LENGTH_LONG).show()
-                        context.prefManager.currentWidgets = context.prefManager.currentWidgets.apply {
-                            remove(data)
-                            host.deleteAppWidgetId(data.id)
                         }
                     }
                 }
