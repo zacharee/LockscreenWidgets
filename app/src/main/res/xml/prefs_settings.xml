@@ -10,76 +10,88 @@
         android:defaultValue="true"
         />
 
-    <tk.zwander.lockscreenwidgets.prefs.AutoSummaryListPreference
-        android:title="@string/settings_screen_opacity_mode"
-        android:key="opacity_mode"
-        android:icon="@drawable/ic_baseline_opacity_24"
-        android:entries="@array/opacity_mode_names"
-        android:entryValues="@array/opacity_mode_values"
-        android:defaultValue="0"
-        />
-
-    <SwitchPreference
-        android:title="@string/settings_screen_animate_show_hide"
-        android:summary="@string/settings_screen_animate_show_hide_desc"
-        android:key="animate_show_hide"
-        android:icon="@drawable/ic_baseline_animation_24"
-        android:defaultValue="true"
-        />
-
-    <SwitchPreference
-        android:title="@string/settings_screen_hide_when_notifications_shown"
-        android:summary="@string/settings_screen_hide_when_notifications_shown_desc"
-        android:key="hide_on_notifications"
-        android:icon="@drawable/ic_baseline_notifications_off_24"
-        />
-
-    <SwitchPreference
-        android:title="@string/settings_screen_hide_on_notification_shade"
-        android:summary="@string/settings_screen_hide_on_notification_shade_desc"
-        android:key="hide_on_notification_shade"
-        android:icon="@drawable/ic_baseline_clear_all_24"
-        />
-
-    <SwitchPreference
-        android:title="@string/settings_screen_hide_on_security_input"
-        android:summary="@string/settings_screen_hide_on_security_input_desc"
-        android:key="hide_on_security_page"
-        android:icon="@drawable/is_baseline_password_24"
-        />
-
-    <tk.zwander.lockscreenwidgets.prefs.AutoSummaryListPreference
-        android:title="@string/settings_screen_page_indicator_behavior"
-        android:key="page_indicator_behavior"
-        android:icon="@drawable/ic_baseline_visibility_24"
-        android:entries="@array/page_indicator_behavior_names"
-        android:entryValues="@array/page_indicator_behavior_values"
-        android:defaultValue="1"
-        />
-
-    <tk.zwander.seekbarpreference.SeekBarPreference
-        android:title="@string/settings_screen_frame_col_count"
-        android:key="frame_col_count"
-        android:icon="@drawable/ic_baseline_numeric_24"
-        android:defaultValue="1"
-        app:minValue="1"
-        app:maxValue="5"
-        />
-
-    <tk.zwander.seekbarpreference.SeekBarPreference
-        android:title="@string/settings_screen_frame_row_count"
-        android:key="frame_row_count"
-        android:icon="@drawable/ic_baseline_numeric_24"
-        android:defaultValue="1"
-        app:minValue="1"
-        app:maxValue="5"
-        />
-
     <SwitchPreference
         android:title="@string/settings_screen_debug_log"
         android:summary="@string/settings_screen_debug_log_desc"
         android:icon="@drawable/ic_baseline_short_text_24"
         android:key="debug_log"
         />
+
+    <tk.zwander.collapsiblepreferencecategory.CollapsiblePreferenceCategoryNew
+        android:title="@string/category_appearance"
+        android:key="settings_appearance_category">
+
+        <tk.zwander.lockscreenwidgets.prefs.AutoSummaryListPreference
+            android:title="@string/settings_screen_opacity_mode"
+            android:key="opacity_mode"
+            android:icon="@drawable/ic_baseline_opacity_24"
+            android:entries="@array/opacity_mode_names"
+            android:entryValues="@array/opacity_mode_values"
+            android:defaultValue="0"
+            />
+
+        <tk.zwander.seekbarpreference.SeekBarPreference
+            android:title="@string/settings_screen_frame_col_count"
+            android:key="frame_col_count"
+            android:icon="@drawable/ic_baseline_view_column_24"
+            android:defaultValue="1"
+            app:minValue="1"
+            app:maxValue="5"
+            />
+
+        <tk.zwander.seekbarpreference.SeekBarPreference
+            android:title="@string/settings_screen_frame_row_count"
+            android:key="frame_row_count"
+            android:icon="@drawable/ic_baseline_view_row_24"
+            android:defaultValue="1"
+            app:minValue="1"
+            app:maxValue="5"
+            />
+
+    </tk.zwander.collapsiblepreferencecategory.CollapsiblePreferenceCategoryNew>
+
+    <tk.zwander.collapsiblepreferencecategory.CollapsiblePreferenceCategoryNew
+        android:title="@string/category_behavior"
+        android:key="settings_behavior_category">
+
+        <SwitchPreference
+            android:title="@string/settings_screen_animate_show_hide"
+            android:summary="@string/settings_screen_animate_show_hide_desc"
+            android:key="animate_show_hide"
+            android:icon="@drawable/ic_baseline_animation_24"
+            android:defaultValue="true"
+            />
+
+        <SwitchPreference
+            android:title="@string/settings_screen_hide_when_notifications_shown"
+            android:summary="@string/settings_screen_hide_when_notifications_shown_desc"
+            android:key="hide_on_notifications"
+            android:icon="@drawable/ic_baseline_notifications_off_24"
+            />
+
+        <SwitchPreference
+            android:title="@string/settings_screen_hide_on_notification_shade"
+            android:summary="@string/settings_screen_hide_on_notification_shade_desc"
+            android:key="hide_on_notification_shade"
+            android:icon="@drawable/ic_baseline_clear_all_24"
+            />
+
+        <SwitchPreference
+            android:title="@string/settings_screen_hide_on_security_input"
+            android:summary="@string/settings_screen_hide_on_security_input_desc"
+            android:key="hide_on_security_page"
+            android:icon="@drawable/is_baseline_password_24"
+            />
+
+        <tk.zwander.lockscreenwidgets.prefs.AutoSummaryListPreference
+            android:title="@string/settings_screen_page_indicator_behavior"
+            android:key="page_indicator_behavior"
+            android:icon="@drawable/ic_baseline_visibility_24"
+            android:entries="@array/page_indicator_behavior_names"
+            android:entryValues="@array/page_indicator_behavior_values"
+            android:defaultValue="1"
+            />
+
+    </tk.zwander.collapsiblepreferencecategory.CollapsiblePreferenceCategoryNew>
 
 </PreferenceScreen>

@@ -9,6 +9,9 @@
     <string name="grant">Grant</string>
     <string name="settings">Settings</string>
 
+    <string name="category_appearance">Appearance</string>
+    <string name="category_behavior">Behavior</string>
+
     <string name="main_screen_social_twitter">Twitter</string>
     <string name="main_screen_social_twitter_desc">Follow me on Twitter for updates about my apps and random development-related nonsense.</string>
 
