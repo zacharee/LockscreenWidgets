@@ -15,6 +15,7 @@ import tk.zwander.lockscreenwidgets.activities.AddWidgetActivity
 import tk.zwander.lockscreenwidgets.data.WidgetData
 import tk.zwander.lockscreenwidgets.host.WidgetHost
 import tk.zwander.lockscreenwidgets.interfaces.ItemTouchHelperAdapter
+import tk.zwander.lockscreenwidgets.util.calculateWidgetWidth
 import tk.zwander.lockscreenwidgets.util.prefManager
 import tk.zwander.lockscreenwidgets.util.pxAsDp
 import java.util.*
@@ -100,6 +101,10 @@ class WidgetFrameAdapter(private val manager: AppWidgetManager, private val host
         fun onBind(data: WidgetData) {
             itemView.widget_holder.apply {
                 launch {
+                    layoutParams = (layoutParams as ViewGroup.LayoutParams).apply {
+                        width = calculateWidgetWidth()
+                    }
+
                     val widgetInfo = withContext(Dispatchers.Main) {
                         manager.getAppWidgetInfo(data.id)
                     }

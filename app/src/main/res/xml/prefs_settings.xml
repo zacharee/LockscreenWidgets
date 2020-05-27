@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <SwitchPreference
         android:title="@string/settings_screen_enabled"
@@ -54,6 +55,24 @@
         android:entries="@array/page_indicator_behavior_names"
         android:entryValues="@array/page_indicator_behavior_values"
         android:defaultValue="1"
+        />
+
+    <tk.zwander.seekbarpreference.SeekBarPreference
+        android:title="@string/settings_screen_frame_col_count"
+        android:key="frame_col_count"
+        android:icon="@drawable/ic_baseline_numeric_24"
+        android:defaultValue="1"
+        app:minValue="1"
+        app:maxValue="5"
+        />
+
+    <tk.zwander.seekbarpreference.SeekBarPreference
+        android:title="@string/settings_screen_frame_row_count"
+        android:key="frame_row_count"
+        android:icon="@drawable/ic_baseline_numeric_24"
+        android:defaultValue="1"
+        app:minValue="1"
+        app:maxValue="5"
         />
 
     <SwitchPreference

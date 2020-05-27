@@ -13,8 +13,10 @@ import android.os.Looper
 import android.provider.Settings
 import android.util.TypedValue
 import android.view.View
+import android.view.ViewGroup
 import android.view.accessibility.AccessibilityNodeInfo
 import android.view.accessibility.AccessibilityWindowInfo
+import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.SnapHelper
 import tk.zwander.lockscreenwidgets.BuildConfig
@@ -119,4 +121,8 @@ fun View.fadeAndScaleIn(endListener: () -> Unit) {
         })
     }
     animator.start()
+}
+
+fun View.calculateWidgetWidth(): Int {
+    return context.dpAsPx(context.prefManager.frameWidthDp) / context.prefManager.frameColCount
 }

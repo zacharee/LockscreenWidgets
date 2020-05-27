@@ -49,6 +49,10 @@
     <string name="settings_screen_debug_log">Debug Logs</string>
     <string name="settings_screen_debug_log_desc">Turn this on to create verbose logs of Lockscreen Widgets\' state.</string>
 
+    <string name="settings_screen_frame_col_count">Columns per Page</string>
+
+    <string name="settings_screen_frame_row_count">Rows per Page</string>
+
     <string name="intro_welcome_title">Welcome!</string>
     <string name="intro_welcome_desc">Lockscreen Widgets is a simple app with a simple purpose: to bring back Android KitKat\'s lock screen widgets. Your widgets will show up in a simple paged slider on the lockscreen.</string>
 

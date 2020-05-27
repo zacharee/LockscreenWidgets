@@ -30,7 +30,7 @@
             android:orientation="horizontal"
             android:animateLayoutChanges="false"
             android:scrollbars="horizontal"
-            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+            app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
             tools:listitem="@layout/widget_page_holder"
             />
 

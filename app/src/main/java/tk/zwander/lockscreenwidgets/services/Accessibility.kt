@@ -31,7 +31,6 @@ import tk.zwander.lockscreenwidgets.R
 import tk.zwander.lockscreenwidgets.activities.RequestUnlockActivity
 import tk.zwander.lockscreenwidgets.adapters.WidgetFrameAdapter
 import tk.zwander.lockscreenwidgets.host.WidgetHost
-import tk.zwander.lockscreenwidgets.interfaces.OnSnapPositionChangeListener
 import tk.zwander.lockscreenwidgets.util.*
 import kotlin.math.roundToInt
 import kotlin.math.sign
@@ -125,6 +124,7 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
     }
 
     private val pagerSnapHelper by lazy { PagerSnapHelper() }
+    private val blockSnapHelper by lazy { SnapToBlock(1) }
 
     private val touchHelperCallback by lazy {
         object : ItemTouchHelper.SimpleCallback(ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT, 0) {
@@ -153,7 +153,8 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
             override fun onSelectedChanged(viewHolder: RecyclerView.ViewHolder?, actionState: Int) {
                 if (actionState != ItemTouchHelper.ACTION_STATE_IDLE) {
                     viewHolder?.itemView?.alpha = 0.5f
-                    pagerSnapHelper.attachToRecyclerView(null)
+//                    pagerSnapHelper.attachToRecyclerView(null)
+                    blockSnapHelper.attachToRecyclerView(null)
                 }
 
                 super.onSelectedChanged(viewHolder, actionState)
@@ -166,7 +167,8 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
                 super.clearView(recyclerView, viewHolder)
 
                 viewHolder.itemView.alpha = 1.0f
-                pagerSnapHelper.attachToRecyclerView(view.widgets_pager)
+//                pagerSnapHelper.attachToRecyclerView(view.widgets_pager)
+                blockSnapHelper.attachToRecyclerView(view.widgets_pager)
             }
 
             override fun interpolateOutOfBoundsScroll(
@@ -254,9 +256,12 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
         view.widgets_pager.apply {
             adapter = this@Accessibility.adapter
             setHasFixedSize(true)
-            pagerSnapHelper.attachToRecyclerView(this)
+//            pagerSnapHelper.attachToRecyclerView(this)
+            blockSnapHelper.attachToRecyclerView(this)
             ItemTouchHelper(touchHelperCallback).attachToRecyclerView(this)
         }
+
+        updateSpanCountAndOrientation()
 
         adapter.updateWidgets(prefManager.currentWidgets.toList())
         prefManager.prefs.registerOnSharedPreferenceChangeListener(this)
@@ -344,25 +349,23 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
             removeOverlay()
         }
 
-        view.widgets_pager.addOnScrollListener(
-            SnapScrollListener(
-                pagerSnapHelper,
-                object : OnSnapPositionChangeListener {
-                    override fun onSnapPositionChange(position: Int) {
-                        view.frame.shouldShowRemove = position < adapter.widgets.size
-                        view.remove.isVisible =
-                            view.frame.isInEditingMode && view.frame.shouldShowRemove
-                        prefManager.currentPage = position
-                    }
-                })
-        )
+        blockSnapHelper.setSnapBlockCallback(object : SnapToBlock.SnapBlockCallback {
+            override fun onBlockSnap(snapPosition: Int) {}
+
+            override fun onBlockSnapped(snapPosition: Int) {
+                view.frame.shouldShowRemove = snapPosition < adapter.widgets.size
+                view.remove.isVisible =
+                    view.frame.isInEditingMode && view.frame.shouldShowRemove
+                prefManager.currentPage = snapPosition
+            }
+        })
         view.widgets_pager.layoutManager?.apply {
             try {
                 scrollToPosition(prefManager.currentPage)
             } catch (e: Exception) {}
         }
-        view.frame.shouldShowRemove =
-            pagerSnapHelper.getSnapPosition(view.widgets_pager) < adapter.widgets.size
+//        view.frame.shouldShowRemove =
+//            pagerSnapHelper.getSnapPosition(view.widgets_pager) < adapter.widgets.size
 
         notificationCountListener.register(this)
         contentResolver.registerContentObserver(
@@ -397,7 +400,7 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
         }
 
         if (isDebug) {
-            Log.e(App.DEBUG_LOG_TAG, "Accessibility event: $event, isScreenOn: ${this.isScreenOn}, wasOnKeyguard: ${wasOnKeyguard}")
+            Log.e(App.DEBUG_LOG_TAG, "Accessibility event: $event, isScreenOn: ${this.isScreenOn}, wasOnKeyguard: $wasOnKeyguard")
         }
 
         //The below block can (very rarely) take over half a second to execute, so only run it
@@ -483,6 +486,11 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
             }
             PrefManager.KEY_PAGE_INDICATOR_BEHAVIOR -> {
                 view.frame.updatePageIndicatorBehavior()
+            }
+            PrefManager.KEY_FRAME_ROW_COUNT,
+                PrefManager.KEY_FRAME_COL_COUNT -> {
+                updateSpanCountAndOrientation()
+                adapter.notifyDataSetChanged()
             }
         }
     }
@@ -633,6 +641,17 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
             }
         } else {
             view.wallpaper_background.setImageDrawable(null)
+        }
+    }
+
+    private fun updateSpanCountAndOrientation() {
+        (view.widgets_pager.layoutManager as GridLayoutManager).apply {
+            val rowCount = prefManager.frameRowCount
+
+            this.spanCount = rowCount
+
+            blockSnapHelper.maxFlingBlocks = rowCount
+            blockSnapHelper.attachToRecyclerView(view.widgets_pager)
         }
     }
 }

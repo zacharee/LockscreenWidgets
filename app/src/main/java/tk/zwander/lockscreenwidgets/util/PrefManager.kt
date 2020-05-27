@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.ContextWrapper
 import androidx.core.content.edit
 import androidx.preference.PreferenceManager
+import androidx.recyclerview.widget.GridLayoutManager
 import com.google.gson.GsonBuilder
 import com.google.gson.reflect.TypeToken
 import tk.zwander.lockscreenwidgets.R
@@ -28,6 +29,8 @@ class PrefManager private constructor(context: Context) : ContextWrapper(context
         const val KEY_ANIMATE_SHOW_HIDE = "animate_show_hide"
         const val KEY_CURRENT_PAGE = "current_page"
         const val KEY_DEBUG_LOG = "debug_log"
+        const val KEY_FRAME_COL_COUNT = "frame_col_count"
+        const val KEY_FRAME_ROW_COUNT = "frame_row_count"
 
         const val VALUE_PAGE_INDICATOR_BEHAVIOR_HIDDEN = 0
         const val VALUE_PAGE_INDICATOR_BEHAVIOR_AUTO_HIDE = 1
@@ -151,6 +154,18 @@ class PrefManager private constructor(context: Context) : ContextWrapper(context
         get() = getString(KEY_OPACITY_MODE, VALUE_OPACITY_MODE_TRANSPARENT.toString())!!.toInt()
         set(value) {
             putString(KEY_OPACITY_MODE, value.toString())
+        }
+
+    var frameColCount: Int
+        get() = getInt(KEY_FRAME_COL_COUNT, 1)
+        set(value) {
+            putInt(KEY_FRAME_COL_COUNT, value)
+        }
+
+    var frameRowCount: Int
+        get() = getInt(KEY_FRAME_ROW_COUNT, 1)
+        set(value) {
+            putInt(KEY_FRAME_ROW_COUNT, value)
         }
 
     fun getString(key: String, def: String? = null) = prefs.getString(key, def)
