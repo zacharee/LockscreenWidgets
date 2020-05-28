@@ -12,6 +12,7 @@ import androidx.annotation.Nullable
 import androidx.core.view.ViewCompat
 import androidx.recyclerview.widget.*
 import kotlin.math.abs
+import kotlin.math.max
 
 //https://stackoverflow.com/questions/47514072/how-to-snap-recyclerview-items-so-that-every-x-items-would-be-considered-like-a
 class SnapToBlock internal constructor(
@@ -207,7 +208,7 @@ class SnapToBlock internal constructor(
     }
 
     private fun roundDownToBlockSize(trialPosition: Int): Int {
-        return trialPosition - trialPosition % blockSize
+        return trialPosition - trialPosition % max(1, blockSize)
     }
 
     private fun roundUpToBlockSize(trialPosition: Int): Int {
