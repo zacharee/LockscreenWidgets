@@ -54,11 +54,11 @@ class PrefManager private constructor(context: Context) : ContextWrapper(context
     val gson = GsonBuilder()
         .create()
 
-    var currentWidgets: ArraySet<WidgetData>
+    var currentWidgets: LinkedHashSet<WidgetData>
         get() = gson.fromJson(
             getString(KEY_CURRENT_WIDGETS),
-            object : TypeToken<ArraySet<WidgetData>>() {}.type
-        ) ?: ArraySet()
+            object : TypeToken<LinkedHashSet<WidgetData>>() {}.type
+        ) ?: LinkedHashSet()
         set(value) {
             putString(
                 KEY_CURRENT_WIDGETS,

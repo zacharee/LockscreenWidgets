@@ -141,7 +141,7 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
                 return adapter.onMove(viewHolder.adapterPosition, target.adapterPosition).also {
                     if (it) {
                         updatedForMove = true
-                        prefManager.currentWidgets = ArraySet(adapter.widgets)
+                        prefManager.currentWidgets = LinkedHashSet(adapter.widgets)
                         updatedForMove = false
                     }
                 }
