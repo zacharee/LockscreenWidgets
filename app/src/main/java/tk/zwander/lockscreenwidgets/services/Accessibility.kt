@@ -22,7 +22,7 @@ import android.view.accessibility.AccessibilityNodeInfo
 import android.view.accessibility.AccessibilityWindowInfo
 import android.widget.ImageView
 import androidx.appcompat.view.ContextThemeWrapper
-import androidx.core.view.isVisible
+import androidx.collection.ArraySet
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.recyclerview.widget.*
 import kotlinx.android.synthetic.main.widget_frame.view.*
@@ -141,7 +141,7 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
                 return adapter.onMove(viewHolder.adapterPosition, target.adapterPosition).also {
                     if (it) {
                         updatedForMove = true
-                        prefManager.currentWidgets = adapter.widgets.toHashSet()
+                        prefManager.currentWidgets = ArraySet(adapter.widgets)
                         updatedForMove = false
                     }
                 }
@@ -253,7 +253,7 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
     private var currentSysUiLayer = 1
     private var currentAppLayer = 0
 
-    @SuppressLint("ClickableViewAccessibility")
+    @SuppressLint("ClickableViewAccessibility", "NewApi")
     override fun onCreate() {
         super.onCreate()
 

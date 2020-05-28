@@ -3,9 +3,9 @@ package tk.zwander.lockscreenwidgets.util
 import android.annotation.IntegerRes
 import android.content.Context
 import android.content.ContextWrapper
+import androidx.collection.ArraySet
 import androidx.core.content.edit
 import androidx.preference.PreferenceManager
-import androidx.recyclerview.widget.GridLayoutManager
 import com.google.gson.GsonBuilder
 import com.google.gson.reflect.TypeToken
 import tk.zwander.lockscreenwidgets.R
@@ -54,11 +54,11 @@ class PrefManager private constructor(context: Context) : ContextWrapper(context
     val gson = GsonBuilder()
         .create()
 
-    var currentWidgets: HashSet<WidgetData>
+    var currentWidgets: ArraySet<WidgetData>
         get() = gson.fromJson(
             getString(KEY_CURRENT_WIDGETS),
-            object : TypeToken<HashSet<WidgetData>>() {}.type
-        ) ?: HashSet()
+            object : TypeToken<ArraySet<WidgetData>>() {}.type
+        ) ?: ArraySet()
         set(value) {
             putString(
                 KEY_CURRENT_WIDGETS,
