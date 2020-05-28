@@ -11,8 +11,8 @@ android {
         applicationId "tk.zwander.lockscreenwidgets"
         minSdkVersion 22
         targetSdkVersion 29
-        versionCode 12
-        versionName "1.4.0"
+        versionCode 13
+        versionName "1.4.1"
     }
 
     buildTypes {
