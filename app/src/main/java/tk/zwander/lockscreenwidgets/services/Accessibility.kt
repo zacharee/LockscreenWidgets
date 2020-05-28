@@ -3,38 +3,19 @@ package tk.zwander.lockscreenwidgets.services
 import android.accessibilityservice.AccessibilityService
 import android.annotation.SuppressLint
 import android.app.KeyguardManager
-import android.app.WallpaperManager
-import android.appwidget.AppWidgetManager
 import android.content.*
-import android.database.ContentObserver
-import android.graphics.Matrix
 import android.graphics.PixelFormat
-import android.graphics.Point
-import android.net.Uri
-import android.os.Handler
-import android.os.Looper
 import android.os.PowerManager
-import android.provider.Settings
 import android.util.Log
 import android.view.*
 import android.view.accessibility.AccessibilityEvent
 import android.view.accessibility.AccessibilityNodeInfo
 import android.view.accessibility.AccessibilityWindowInfo
-import android.widget.ImageView
-import androidx.appcompat.view.ContextThemeWrapper
-import androidx.collection.ArraySet
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
-import androidx.recyclerview.widget.*
 import kotlinx.android.synthetic.main.widget_frame.view.*
 import tk.zwander.lockscreenwidgets.App
-import tk.zwander.lockscreenwidgets.R
-import tk.zwander.lockscreenwidgets.activities.AddWidgetActivity
 import tk.zwander.lockscreenwidgets.activities.RequestUnlockActivity
-import tk.zwander.lockscreenwidgets.adapters.WidgetFrameAdapter
-import tk.zwander.lockscreenwidgets.host.WidgetHost
 import tk.zwander.lockscreenwidgets.util.*
-import kotlin.math.roundToInt
-import kotlin.math.sign
 
 /**
  * This is where a lot of the magic happens.
@@ -83,32 +64,8 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
     private val kgm by lazy { getSystemService(Context.KEYGUARD_SERVICE) as KeyguardManager }
     private val wm by lazy { getSystemService(Context.WINDOW_SERVICE) as WindowManager }
     private val power by lazy { getSystemService(Context.POWER_SERVICE) as PowerManager }
-    private val wallpaper by lazy { getSystemService(Context.WALLPAPER_SERVICE) as WallpaperManager }
 
-    private val widgetManager by lazy { AppWidgetManager.getInstance(this) }
-    private val widgetHost by lazy {
-        WidgetHost(this, 1003) {
-            Handler(Looper.getMainLooper()).postDelayed({
-                val intent = Intent(this, RequestUnlockActivity::class.java)
-                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                startActivity(intent)
-            }, 100)
-        }
-    }
-
-    private val view by lazy {
-        LayoutInflater.from(ContextThemeWrapper(this, R.style.AppTheme))
-            .inflate(R.layout.widget_frame, null)
-    }
-
-    private val adapter by lazy {
-        WidgetFrameAdapter(widgetManager, widgetHost) { item ->
-            prefManager.currentWidgets = prefManager.currentWidgets.apply {
-                remove(item)
-                widgetHost.deleteAppWidgetId(item.id)
-            }
-        }
-    }
+    private val delegate by lazy { WidgetFrameDelegate.getInstance(this) }
 
     private val params by lazy {
         WindowManager.LayoutParams().apply {
@@ -129,67 +86,6 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
         }
     }
 
-    private val blockSnapHelper by lazy { SnapToBlock(1) }
-
-    private val touchHelperCallback by lazy {
-        object : ItemTouchHelper.SimpleCallback(ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT, 0) {
-            override fun onMove(
-                recyclerView: RecyclerView,
-                viewHolder: RecyclerView.ViewHolder,
-                target: RecyclerView.ViewHolder
-            ): Boolean {
-                return adapter.onMove(viewHolder.adapterPosition, target.adapterPosition).also {
-                    if (it) {
-                        updatedForMove = true
-                        prefManager.currentWidgets = LinkedHashSet(adapter.widgets)
-                        updatedForMove = false
-                    }
-                }
-            }
-
-            override fun getDragDirs(
-                recyclerView: RecyclerView,
-                viewHolder: RecyclerView.ViewHolder
-            ): Int {
-                return if (viewHolder is WidgetFrameAdapter.AddWidgetVH) 0
-                else super.getDragDirs(recyclerView, viewHolder)
-            }
-
-            override fun onSelectedChanged(viewHolder: RecyclerView.ViewHolder?, actionState: Int) {
-                if (actionState != ItemTouchHelper.ACTION_STATE_IDLE) {
-                    viewHolder?.itemView?.alpha = 0.5f
-                    (viewHolder as WidgetFrameAdapter.WidgetVH?)?.run {
-                        removeButtonShown = !removeButtonShown
-                    }
-                }
-
-                super.onSelectedChanged(viewHolder, actionState)
-            }
-
-            override fun clearView(
-                recyclerView: RecyclerView,
-                viewHolder: RecyclerView.ViewHolder
-            ) {
-                super.clearView(recyclerView, viewHolder)
-
-                viewHolder.itemView.alpha = 1.0f
-            }
-
-            override fun interpolateOutOfBoundsScroll(
-                recyclerView: RecyclerView,
-                viewSize: Int,
-                viewSizeOutOfBounds: Int,
-                totalSize: Int,
-                msSinceStartScroll: Long
-            ): Int {
-                val direction = sign(viewSizeOutOfBounds.toFloat()).toInt()
-                return (viewSize * 0.01f * direction).roundToInt()
-            }
-
-            override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {}
-        }
-    }
-
     private val notificationCountListener =
         object : NotificationListener.NotificationCountListener() {
             override fun onUpdate(count: Int) {
@@ -201,16 +97,6 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
                 }
             }
         }
-
-    private val nightModeListener = object : ContentObserver(null) {
-        override fun onChange(selfChange: Boolean, uri: Uri?) {
-            when (uri) {
-                Settings.Secure.getUriFor(Settings.Secure.UI_NIGHT_MODE) -> {
-                    adapter.notifyDataSetChanged()
-                }
-            }
-        }
-    }
 
     private val screenStateReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
@@ -242,7 +128,6 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
         }
     }
 
-    private var updatedForMove = false
     private var notificationCount = 0
     private var onMainLockscreen = true
     private var showingNotificationsPanel = false
@@ -257,26 +142,11 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
     override fun onCreate() {
         super.onCreate()
 
-        view.widgets_pager.apply {
-            adapter = this@Accessibility.adapter
-            setHasFixedSize(true)
-            blockSnapHelper.attachToRecyclerView(this)
-            ItemTouchHelper(touchHelperCallback).attachToRecyclerView(this)
-        }
+        delegate.onCreate()
 
-        updateSpanCountAndOrientation()
-
-        adapter.updateWidgets(prefManager.currentWidgets.toList())
         prefManager.prefs.registerOnSharedPreferenceChangeListener(this)
 
-        blockSnapHelper.setSnapBlockCallback(object : SnapToBlock.SnapBlockCallback {
-            override fun onBlockSnap(snapPosition: Int) {}
-            override fun onBlockSnapped(snapPosition: Int) {
-                prefManager.currentPage = snapPosition
-            }
-        })
-
-        view.frame.onMoveListener = { velX, velY ->
+        delegate.view.frame.onMoveListener = { velX, velY ->
             params.x += velX.toInt()
             params.y += velY.toInt()
 
@@ -287,9 +157,9 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
             prefManager.posY = params.y
 
             updateOverlay()
-            updateWallpaperLayerIfNeeded()
+            delegate.updateWallpaperLayerIfNeeded()
         }
-        view.frame.onLeftDragListener = { velX ->
+        delegate.view.frame.onLeftDragListener = { velX ->
             params.width -= velX.toInt()
             params.x += (velX / 2f).toInt()
 
@@ -297,7 +167,7 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
 
             updateOverlay()
         }
-        view.frame.onRightDragListener = { velX ->
+        delegate.view.frame.onRightDragListener = { velX ->
             params.width += velX.toInt()
             params.x += (velX / 2f).toInt()
 
@@ -305,7 +175,7 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
 
             updateOverlay()
         }
-        view.frame.onTopDragListener = { velY ->
+        delegate.view.frame.onTopDragListener = { velY ->
             params.height -= velY.toInt()
             params.y += (velY / 2f).toInt()
 
@@ -313,7 +183,7 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
 
             updateOverlay()
         }
-        view.frame.onBottomDragListener = { velY ->
+        delegate.view.frame.onBottomDragListener = { velY ->
             params.height += velY.toInt()
             params.y += (velY / 2f).toInt()
 
@@ -321,7 +191,7 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
 
             updateOverlay()
         }
-        view.frame.onInterceptListener = { down ->
+        delegate.view.frame.onInterceptListener = { down ->
             if (down) {
                 params.flags = params.flags or WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON
             } else {
@@ -330,37 +200,13 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
 
             updateOverlay()
         }
-        view.frame.onAddListener = {
-            val intent = Intent(this, AddWidgetActivity::class.java)
-            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
 
-            startActivity(intent)
-        }
-        view.frame.attachmentStateListener = {
-            if (it) {
-                updateWallpaperLayerIfNeeded()
-                widgetHost.startListening()
-            } else {
-                widgetHost.stopListening()
-            }
-        }
-        view.frame.onTempHideListener = {
+        delegate.view.frame.onTempHideListener = {
             isTempHide = true
             removeOverlay()
         }
 
-        view.widgets_pager.layoutManager?.apply {
-            try {
-                scrollToPosition(prefManager.currentPage)
-            } catch (e: Exception) {}
-        }
-
         notificationCountListener.register(this)
-        contentResolver.registerContentObserver(
-            Settings.Secure.getUriFor(Settings.Secure.UI_NIGHT_MODE),
-            true,
-            nightModeListener
-        )
         registerReceiver(
             screenStateReceiver,
             IntentFilter(Intent.ACTION_SCREEN_OFF).apply { addAction(Intent.ACTION_SCREEN_ON) })
@@ -454,31 +300,12 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
 
     override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
         when (key) {
-            PrefManager.KEY_CURRENT_WIDGETS -> {
-                //Make sure the adapter knows of any changes to the widget list
-                if (!updatedForMove) {
-                    //Only run the update if it wasn't generated by a reorder event
-                    adapter.updateWidgets(prefManager.currentWidgets.toList())
-                }
-            }
-            PrefManager.KEY_OPACITY_MODE -> {
-                view.frame.updateFrameBackground()
-                updateWallpaperLayerIfNeeded()
-            }
             PrefManager.KEY_WIDGET_FRAME_ENABLED -> {
                 if (canShow()) {
                     addOverlay()
                 } else {
                     removeOverlay()
                 }
-            }
-            PrefManager.KEY_PAGE_INDICATOR_BEHAVIOR -> {
-                view.frame.updatePageIndicatorBehavior()
-            }
-            PrefManager.KEY_FRAME_ROW_COUNT,
-                PrefManager.KEY_FRAME_COL_COUNT -> {
-                updateSpanCountAndOrientation()
-                adapter.notifyDataSetChanged()
             }
         }
     }
@@ -488,22 +315,22 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
 
         prefManager.prefs.unregisterOnSharedPreferenceChangeListener(this)
         notificationCountListener.unregister(this)
-        contentResolver.unregisterContentObserver(nightModeListener)
         unregisterReceiver(screenStateReceiver)
+        delegate.onDestroy()
     }
 
     private fun addOverlay() {
         mainHandler.postDelayed({
-            view.frame.addWindow(wm, params)
+            delegate.view.frame.addWindow(wm, params)
         }, 100)
     }
 
     private fun updateOverlay() {
-        view.frame.updateWindow(wm, params)
+        delegate.view.frame.updateWindow(wm, params)
     }
 
     private fun removeOverlay() {
-        view.frame.removeWindow(wm)
+        delegate.view.frame.removeWindow(wm)
     }
 
     /**
@@ -598,48 +425,5 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
         }
     }
 
-    @SuppressLint("MissingPermission")
-    private fun updateWallpaperLayerIfNeeded() {
-        if (prefManager.opacityMode == PrefManager.VALUE_OPACITY_MODE_MASKED) {
-            try {
-                val fastW = wallpaper.fastDrawable
 
-                fastW?.mutate()?.apply {
-                    view.wallpaper_background.setImageDrawable(this)
-                    view.wallpaper_background.scaleType = ImageView.ScaleType.MATRIX
-                    view.wallpaper_background.imageMatrix = Matrix().apply {
-                        val realSize = Point().apply { wm.defaultDisplay.getRealSize(this) }
-                        val loc = view.locationOnScreen ?: intArrayOf(0, 0)
-
-                        val dwidth: Int = intrinsicWidth
-                        val dheight: Int = intrinsicHeight
-
-                        val wallpaperAdjustmentX = (dwidth - realSize.x) / 2f
-                        val wallpaperAdjustmentY = (dheight - realSize.y) / 2f
-
-                        setTranslate(
-                            (-loc[0].toFloat() - wallpaperAdjustmentX),
-                            //TODO: LGUX 9 doesn't like this Y-translation for some reason
-                            (-loc[1].toFloat() - wallpaperAdjustmentY)
-                        )
-                    }
-                } ?: view.wallpaper_background.setImageDrawable(null)
-            } catch (e: Exception) {
-                view.wallpaper_background.setImageDrawable(null)
-            }
-        } else {
-            view.wallpaper_background.setImageDrawable(null)
-        }
-    }
-
-    private fun updateSpanCountAndOrientation() {
-        (view.widgets_pager.layoutManager as GridLayoutManager).apply {
-            val rowCount = prefManager.frameRowCount
-
-            this.spanCount = rowCount
-
-            blockSnapHelper.maxFlingBlocks = rowCount
-            blockSnapHelper.attachToRecyclerView(view.widgets_pager)
-        }
-    }
 }
