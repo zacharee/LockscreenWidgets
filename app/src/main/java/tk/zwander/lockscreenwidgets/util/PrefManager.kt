@@ -31,6 +31,7 @@ class PrefManager private constructor(context: Context) : ContextWrapper(context
         const val KEY_DEBUG_LOG = "debug_log"
         const val KEY_FRAME_COL_COUNT = "frame_col_count"
         const val KEY_FRAME_ROW_COUNT = "frame_row_count"
+        const val KEY_SHOW_DEBUG_ID_VIEW = "show_debug_id_view"
 
         const val VALUE_PAGE_INDICATOR_BEHAVIOR_HIDDEN = 0
         const val VALUE_PAGE_INDICATOR_BEHAVIOR_AUTO_HIDE = 1
@@ -142,6 +143,12 @@ class PrefManager private constructor(context: Context) : ContextWrapper(context
         get() = getBoolean(KEY_DEBUG_LOG, false)
         set(value) {
             putBoolean(KEY_DEBUG_LOG, value)
+        }
+
+    var showDebugIdView: Boolean
+        get() = getBoolean(KEY_SHOW_DEBUG_ID_VIEW, false) && debugLog
+        set(value) {
+            putBoolean(KEY_SHOW_DEBUG_ID_VIEW, value)
         }
 
     var pageIndicatorBehavior: Int

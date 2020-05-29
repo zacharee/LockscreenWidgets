@@ -10,13 +10,6 @@
         android:defaultValue="true"
         />
 
-    <SwitchPreference
-        android:title="@string/settings_screen_debug_log"
-        android:summary="@string/settings_screen_debug_log_desc"
-        android:icon="@drawable/ic_baseline_short_text_24"
-        android:key="debug_log"
-        />
-
     <tk.zwander.collapsiblepreferencecategory.CollapsiblePreferenceCategoryNew
         android:title="@string/category_appearance"
         android:key="settings_appearance_category">
@@ -90,6 +83,27 @@
             android:entries="@array/page_indicator_behavior_names"
             android:entryValues="@array/page_indicator_behavior_values"
             android:defaultValue="1"
+            />
+
+    </tk.zwander.collapsiblepreferencecategory.CollapsiblePreferenceCategoryNew>
+
+    <tk.zwander.collapsiblepreferencecategory.CollapsiblePreferenceCategoryNew
+        android:title="@string/category_debug"
+        android:key="category_debug">
+
+        <SwitchPreference
+            android:title="@string/settings_screen_debug_log"
+            android:summary="@string/settings_screen_debug_log_desc"
+            android:icon="@drawable/ic_baseline_short_text_24"
+            android:key="debug_log"
+            />
+
+        <SwitchPreference
+            android:title="@string/settings_screen_show_debug_id_view"
+            android:summary="@string/settings_screen_show_debug_id_view_desc"
+            android:icon="@drawable/ic_baseline_short_text_24"
+            android:key="show_debug_id_view"
+            android:dependency="debug_log"
             />
 
     </tk.zwander.collapsiblepreferencecategory.CollapsiblePreferenceCategoryNew>

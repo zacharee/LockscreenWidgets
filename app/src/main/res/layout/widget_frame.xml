@@ -135,6 +135,12 @@
             layout="@layout/widget_frame_hint"
             />
 
+        <include
+            android:id="@+id/id_view"
+            android:visibility="gone"
+            layout="@layout/widget_frame_id_view"
+            />
+
     </com.google.android.material.card.MaterialCardView>
 
 </tk.zwander.lockscreenwidgets.views.WidgetFrameView>

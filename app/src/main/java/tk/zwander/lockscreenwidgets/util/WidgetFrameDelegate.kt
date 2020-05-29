@@ -149,6 +149,10 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
                 view.frame.updateFrameBackground()
                 updateWallpaperLayerIfNeeded()
             }
+            PrefManager.KEY_SHOW_DEBUG_ID_VIEW,
+                PrefManager.KEY_DEBUG_LOG -> {
+                view.frame.updateDebugIdViewVisibility()
+            }
         }
     }
 

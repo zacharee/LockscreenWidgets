@@ -15,7 +15,9 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import kotlinx.android.synthetic.main.widget_frame.view.*
+import kotlinx.android.synthetic.main.widget_frame_id_view.view.*
 import tk.zwander.lockscreenwidgets.R
+import tk.zwander.lockscreenwidgets.adapters.IDAdapter
 import tk.zwander.lockscreenwidgets.util.*
 
 class WidgetFrameView(context: Context, attrs: AttributeSet) : ConstraintLayout(context, attrs) {
@@ -73,6 +75,10 @@ class WidgetFrameView(context: Context, attrs: AttributeSet) : ConstraintLayout(
             hint_view.isVisible = true
         }
 
+        id_list.adapter = IDAdapter()
+        id_list.itemAnimator = null
+
+        updateDebugIdViewVisibility()
         updatePageIndicatorBehavior()
         updateFrameBackground()
     }
@@ -149,6 +155,14 @@ class WidgetFrameView(context: Context, attrs: AttributeSet) : ConstraintLayout(
                 }
             }
         }
+    }
+
+    fun setNewDebugIdItems(items: List<String>) {
+        (id_list.adapter as IDAdapter).setItems(items)
+    }
+
+    fun updateDebugIdViewVisibility() {
+        id_view.isVisible = context.prefManager.showDebugIdView
     }
 
     fun addWindow(wm: WindowManager, params: WindowManager.LayoutParams) {

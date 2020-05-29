@@ -260,6 +260,8 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
                         sysUiNodes.filter { it.isVisibleToUser }.map { it.viewIdResourceName }
                             .toString()
                     )
+
+                    delegate.view.frame.setNewDebugIdItems(sysUiNodes.mapNotNull { it.viewIdResourceName })
                 }
 
                 //Generate "layer" values for the System UI window and for the topmost app window, if
@@ -330,6 +332,9 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
     }
 
     private fun removeOverlay() {
+        if (isDebug) {
+            Log.e("LockscreenWidgetsDebug", "Removing overlay", Exception())
+        }
         delegate.view.frame.removeWindow(wm)
     }
 
