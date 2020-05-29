@@ -59,6 +59,9 @@
     <string name="settings_screen_show_debug_id_view">Show Debug ID View</string>
     <string name="settings_screen_show_debug_id_view_desc">Overlay the widget frame with a list of View IDs it detects on the current screen. Useful for debugging and finding IDs that can be used to detect various lock screen states.</string>
 
+    <string name="settings_screen_accessibility_event_delay">Accessibility Event Delay</string>
+    <string name="settings_screen_accessibility_event_delay_desc">Sets the delay between Accessibility Events that Lockscreen Widgets responds to. Shorter values mean the frame will respond faster to changes, at the potential cost of device performance and battery life.</string>
+
     <string name="intro_welcome_title">Welcome!</string>
     <string name="intro_welcome_desc">Lockscreen Widgets is a simple app with a simple purpose: to bring back Android KitKat\'s lock screen widgets. Your widgets will show up in a simple paged slider on the lockscreen.</string>
 

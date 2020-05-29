@@ -85,6 +85,17 @@
             android:defaultValue="1"
             />
 
+        <tk.zwander.seekbarpreference.SeekBarPreference
+            android:title="@string/settings_screen_accessibility_event_delay"
+            android:summary="@string/settings_screen_accessibility_event_delay_desc"
+            android:icon="@drawable/ic_baseline_timer_24"
+            android:key="accessibility_event_delay"
+            android:defaultValue="50"
+            app:minValue="0"
+            app:maxValue="5000"
+            app:units="ms"
+            />
+
     </tk.zwander.collapsiblepreferencecategory.CollapsiblePreferenceCategoryNew>
 
     <tk.zwander.collapsiblepreferencecategory.CollapsiblePreferenceCategoryNew

@@ -143,7 +143,6 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
         super.onCreate()
 
         delegate.onCreate()
-
         prefManager.prefs.registerOnSharedPreferenceChangeListener(this)
 
         delegate.view.frame.onMoveListener = { velX, velY ->
@@ -213,6 +212,12 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
 
         wasOnKeyguard = kgm.isKeyguardLocked
         isScreenOn = power.isInteractive
+    }
+
+    override fun onServiceConnected() {
+        serviceInfo = serviceInfo.apply {
+            notificationTimeout = prefManager.accessibilityEventDelay.toLong()
+        }
     }
 
     override fun onAccessibilityEvent(event: AccessibilityEvent) {
@@ -307,6 +312,11 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
                     addOverlay()
                 } else {
                     removeOverlay()
+                }
+            }
+            PrefManager.KEY_ACCESSIBILITY_EVENT_DELAY -> {
+                serviceInfo = serviceInfo.apply {
+                    notificationTimeout = prefManager.accessibilityEventDelay.toLong()
                 }
             }
         }

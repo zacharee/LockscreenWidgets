@@ -32,6 +32,7 @@ class PrefManager private constructor(context: Context) : ContextWrapper(context
         const val KEY_FRAME_COL_COUNT = "frame_col_count"
         const val KEY_FRAME_ROW_COUNT = "frame_row_count"
         const val KEY_SHOW_DEBUG_ID_VIEW = "show_debug_id_view"
+        const val KEY_ACCESSIBILITY_EVENT_DELAY = "accessibility_event_delay"
 
         const val VALUE_PAGE_INDICATOR_BEHAVIOR_HIDDEN = 0
         const val VALUE_PAGE_INDICATOR_BEHAVIOR_AUTO_HIDE = 1
@@ -95,6 +96,12 @@ class PrefManager private constructor(context: Context) : ContextWrapper(context
         get() = getInt(KEY_CURRENT_PAGE, 0)
         set(value) {
             putInt(KEY_CURRENT_PAGE, value)
+        }
+
+    var accessibilityEventDelay: Int
+        get() = getInt(KEY_ACCESSIBILITY_EVENT_DELAY, 50)
+        set(value) {
+            putInt(KEY_ACCESSIBILITY_EVENT_DELAY, value)
         }
 
     var firstViewing: Boolean
