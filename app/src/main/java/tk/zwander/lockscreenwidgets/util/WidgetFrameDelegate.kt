@@ -28,7 +28,7 @@ import tk.zwander.lockscreenwidgets.R
 import tk.zwander.lockscreenwidgets.activities.AddWidgetActivity
 import tk.zwander.lockscreenwidgets.activities.RequestUnlockActivity
 import tk.zwander.lockscreenwidgets.adapters.WidgetFrameAdapter
-import tk.zwander.lockscreenwidgets.host.WidgetHost
+import tk.zwander.lockscreenwidgets.host.WidgetHostCompat
 import kotlin.math.roundToInt
 import kotlin.math.sign
 
@@ -64,7 +64,7 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
     val wallpaper = getSystemService(Context.WALLPAPER_SERVICE) as WallpaperManager
     val wm = getSystemService(Context.WINDOW_SERVICE) as WindowManager
     val widgetManager = AppWidgetManager.getInstance(this)
-    val widgetHost = WidgetHost(this, 1003) {
+    val widgetHost = WidgetHostCompat.getInstance(this, 1003) {
         Handler(Looper.getMainLooper()).postDelayed({
             val intent = Intent(this, RequestUnlockActivity::class.java)
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)

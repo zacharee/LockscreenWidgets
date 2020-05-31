@@ -16,7 +16,7 @@ import tk.zwander.lockscreenwidgets.adapters.AppAdapter
 import tk.zwander.lockscreenwidgets.data.AppInfo
 import tk.zwander.lockscreenwidgets.data.WidgetData
 import tk.zwander.lockscreenwidgets.data.WidgetListInfo
-import tk.zwander.lockscreenwidgets.host.WidgetHost
+import tk.zwander.lockscreenwidgets.host.WidgetHostCompat
 import tk.zwander.lockscreenwidgets.util.prefManager
 
 /**
@@ -28,7 +28,7 @@ class AddWidgetActivity : AppCompatActivity(), CoroutineScope by MainScope() {
         const val CONFIG_CODE = 105
     }
 
-    private val widgetHost by lazy { WidgetHost(this, 1003) {} }
+    private val widgetHost by lazy { WidgetHostCompat.getInstance(this, 1003) }
 
     private val appWidgetManager by lazy { AppWidgetManager.getInstance(this) }
     private val adapter by lazy {

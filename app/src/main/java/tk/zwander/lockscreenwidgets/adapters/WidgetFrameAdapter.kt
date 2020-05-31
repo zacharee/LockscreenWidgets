@@ -11,7 +11,6 @@ import android.widget.Toast
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
-import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.android.synthetic.main.widget_page_holder.view.*
 import kotlinx.coroutines.*
 import tk.zwander.lockscreenwidgets.IRemoveConfirmCallback
@@ -19,7 +18,7 @@ import tk.zwander.lockscreenwidgets.R
 import tk.zwander.lockscreenwidgets.activities.AddWidgetActivity
 import tk.zwander.lockscreenwidgets.activities.RemoveWidgetDialogActivity
 import tk.zwander.lockscreenwidgets.data.WidgetData
-import tk.zwander.lockscreenwidgets.host.WidgetHost
+import tk.zwander.lockscreenwidgets.host.WidgetHostCompat
 import tk.zwander.lockscreenwidgets.interfaces.ItemTouchHelperAdapter
 import tk.zwander.lockscreenwidgets.observables.OnResizeObservable
 import tk.zwander.lockscreenwidgets.observables.RemoveButtonObservable
@@ -31,7 +30,7 @@ import kotlin.collections.ArrayList
 
 class WidgetFrameAdapter(
     private val manager: AppWidgetManager,
-    private val host: WidgetHost,
+    private val host: WidgetHostCompat,
     private val params: WindowManager.LayoutParams,
     private val onRemoveCallback: (WidgetData) -> Unit
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>(), ItemTouchHelperAdapter, CoroutineScope by MainScope() {

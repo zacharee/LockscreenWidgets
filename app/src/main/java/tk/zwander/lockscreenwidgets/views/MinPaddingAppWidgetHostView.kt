@@ -5,7 +5,7 @@ import android.appwidget.AppWidgetProviderInfo
 import android.content.Context
 import tk.zwander.lockscreenwidgets.util.dpAsPx
 
-class ZeroPaddingAppWidgetHostView(context: Context) : AppWidgetHostView(context) {
+class MinPaddingAppWidgetHostView(context: Context) : AppWidgetHostView(context) {
     override fun setAppWidget(appWidgetId: Int, info: AppWidgetProviderInfo?) {
         super.setAppWidget(appWidgetId, info)
 
