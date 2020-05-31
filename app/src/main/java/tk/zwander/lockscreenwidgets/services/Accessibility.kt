@@ -134,9 +134,6 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
                 params.x += velX.toInt()
                 params.y += velY.toInt()
 
-                params.x = params.x
-                params.y = params.y
-
                 prefManager.posX = params.x
                 prefManager.posY = params.y
 
