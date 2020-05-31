@@ -31,6 +31,7 @@ class WidgetFrameView(context: Context, attrs: AttributeSet) : ConstraintLayout(
     var onBottomDragListener: ((velY: Float) -> Unit)? = null
 
     var onTempHideListener: (() -> Unit)? = null
+    var onAfterResizeListener: (() -> Unit)? = null
 
     var attachmentStateListener: ((isAttached: Boolean) -> Unit)? = null
 
@@ -51,20 +52,32 @@ class WidgetFrameView(context: Context, attrs: AttributeSet) : ConstraintLayout(
 
         move.setOnTouchListener(MoveTouchListener())
 
-        left_dragger.setOnTouchListener(ExpandTouchListener { velX, _ ->
+        left_dragger.setOnTouchListener(ExpandTouchListener { velX, _, isUp ->
             onLeftDragListener?.invoke(velX)
+            if (isUp) {
+                onAfterResizeListener?.invoke()
+            }
             onLeftDragListener != null
         })
-        right_dragger.setOnTouchListener(ExpandTouchListener { velX, _ ->
+        right_dragger.setOnTouchListener(ExpandTouchListener { velX, _, isUp ->
             onRightDragListener?.invoke(velX)
+            if (isUp) {
+                onAfterResizeListener?.invoke()
+            }
             onRightDragListener != null
         })
-        top_dragger.setOnTouchListener(ExpandTouchListener { _, velY ->
+        top_dragger.setOnTouchListener(ExpandTouchListener { _, velY, isUp ->
             onTopDragListener?.invoke(velY)
+            if (isUp) {
+                onAfterResizeListener?.invoke()
+            }
             onTopDragListener != null
         })
-        bottom_dragger.setOnTouchListener(ExpandTouchListener { _, velY ->
+        bottom_dragger.setOnTouchListener(ExpandTouchListener { _, velY, isUp ->
             onBottomDragListener?.invoke(velY)
+            if (isUp) {
+                onAfterResizeListener?.invoke()
+            }
             onBottomDragListener != null
         })
         add_widget.setOnClickListener {
@@ -216,7 +229,7 @@ class WidgetFrameView(context: Context, attrs: AttributeSet) : ConstraintLayout(
         }
     }
 
-    inner class ExpandTouchListener(private val listener: ((velX: Float, velY: Float) -> Boolean)?) : OnTouchListener {
+    inner class ExpandTouchListener(private val listener: ((velX: Float, velY: Float, isUp: Boolean) -> Boolean)?) : OnTouchListener {
         private var prevExpandX = 0f
         private var prevExpandY = 0f
 
@@ -243,7 +256,11 @@ class WidgetFrameView(context: Context, attrs: AttributeSet) : ConstraintLayout(
                     prevExpandX = newX
                     prevExpandY = newY
 
-                    listener?.invoke(velX, velY) ?: false
+                    listener?.invoke(velX, velY, false) ?: false
+                }
+                MotionEvent.ACTION_UP -> {
+                    listener?.invoke(0f, 0f, true)
+                    false
                 }
                 else -> false
             }

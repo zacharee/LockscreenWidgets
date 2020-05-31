@@ -64,27 +64,7 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
     private val kgm by lazy { getSystemService(Context.KEYGUARD_SERVICE) as KeyguardManager }
     private val wm by lazy { getSystemService(Context.WINDOW_SERVICE) as WindowManager }
     private val power by lazy { getSystemService(Context.POWER_SERVICE) as PowerManager }
-
     private val delegate by lazy { WidgetFrameDelegate.getInstance(this) }
-
-    private val params by lazy {
-        WindowManager.LayoutParams().apply {
-            type = WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY
-            width = dpAsPx(prefManager.frameWidthDp)
-            height = dpAsPx(prefManager.frameHeightDp)
-
-            x = prefManager.posX
-            y = prefManager.posY
-
-            gravity = Gravity.CENTER
-
-            flags =
-                WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or
-                        WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN or
-                        WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS
-            format = PixelFormat.RGBA_8888
-        }
-    }
 
     private val notificationCountListener =
         object : NotificationListener.NotificationCountListener() {
@@ -145,64 +125,75 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
         delegate.onCreate()
         prefManager.prefs.registerOnSharedPreferenceChangeListener(this)
 
-        delegate.view.frame.onMoveListener = { velX, velY ->
-            params.x += velX.toInt()
-            params.y += velY.toInt()
-
-            params.x = params.x
-            params.y = params.y
-
-            prefManager.posX = params.x
-            prefManager.posY = params.y
-
-            updateOverlay()
-            delegate.updateWallpaperLayerIfNeeded()
-        }
-        delegate.view.frame.onLeftDragListener = { velX ->
-            params.width -= velX.toInt()
-            params.x += (velX / 2f).toInt()
-
-            prefManager.frameWidthDp = pxAsDp(params.width)
-
-            updateOverlay()
-        }
-        delegate.view.frame.onRightDragListener = { velX ->
-            params.width += velX.toInt()
-            params.x += (velX / 2f).toInt()
-
-            prefManager.frameWidthDp = pxAsDp(params.width)
-
-            updateOverlay()
-        }
-        delegate.view.frame.onTopDragListener = { velY ->
-            params.height -= velY.toInt()
-            params.y += (velY / 2f).toInt()
-
-            prefManager.frameHeightDp = pxAsDp(params.height)
-
-            updateOverlay()
-        }
-        delegate.view.frame.onBottomDragListener = { velY ->
-            params.height += velY.toInt()
-            params.y += (velY / 2f).toInt()
-
-            prefManager.frameHeightDp = pxAsDp(params.height)
-
-            updateOverlay()
-        }
-        delegate.view.frame.onInterceptListener = { down ->
-            if (down) {
-                params.flags = params.flags or WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON
-            } else {
-                params.flags = params.flags and WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON.inv()
+        delegate.apply {
+            view.frame.onAfterResizeListener = {
+                adapter.onResizeObservable.notifyObservers()
             }
 
-            updateOverlay()
-        }
+            view.frame.onMoveListener = { velX, velY ->
+                params.x += velX.toInt()
+                params.y += velY.toInt()
 
-        delegate.view.frame.onTempHideListener = {
-            isTempHide = true
-            removeOverlay()
+                params.x = params.x
+                params.y = params.y
+
+                prefManager.posX = params.x
+                prefManager.posY = params.y
+
+                updateOverlay()
+                delegate.updateWallpaperLayerIfNeeded()
+            }
+
+            view.frame.onLeftDragListener = { velX ->
+                params.width -= velX.toInt()
+                params.x += (velX / 2f).toInt()
+
+                prefManager.frameWidthDp = pxAsDp(params.width)
+
+                updateOverlay()
+            }
+
+            view.frame.onRightDragListener = { velX ->
+                params.width += velX.toInt()
+                params.x += (velX / 2f).toInt()
+
+                prefManager.frameWidthDp = pxAsDp(params.width)
+
+                updateOverlay()
+            }
+
+            view.frame.onTopDragListener = { velY ->
+                params.height -= velY.toInt()
+                params.y += (velY / 2f).toInt()
+
+                prefManager.frameHeightDp = pxAsDp(params.height)
+
+                updateOverlay()
+            }
+
+            view.frame.onBottomDragListener = { velY ->
+                params.height += velY.toInt()
+                params.y += (velY / 2f).toInt()
+
+                prefManager.frameHeightDp = pxAsDp(params.height)
+
+                updateOverlay()
+            }
+
+            view.frame.onInterceptListener = { down ->
+                if (down) {
+                    params.flags = params.flags or WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON
+                } else {
+                    params.flags = params.flags and WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON.inv()
+                }
+
+                updateOverlay()
+            }
+
+            view.frame.onTempHideListener = {
+                isTempHide = true
+                removeOverlay()
+            }
         }
 
         notificationCountListener.register(this)
@@ -333,12 +324,12 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
 
     private fun addOverlay() {
         mainHandler.postDelayed({
-            delegate.view.frame.addWindow(wm, params)
+            delegate.view.frame.addWindow(wm, delegate.params)
         }, 100)
     }
 
     private fun updateOverlay() {
-        delegate.view.frame.updateWindow(wm, params)
+        delegate.view.frame.updateWindow(wm, delegate.params)
     }
 
     private fun removeOverlay() {

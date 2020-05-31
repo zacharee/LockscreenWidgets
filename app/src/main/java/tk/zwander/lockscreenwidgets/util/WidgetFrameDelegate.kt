@@ -9,12 +9,14 @@ import android.content.Intent
 import android.content.SharedPreferences
 import android.database.ContentObserver
 import android.graphics.Matrix
+import android.graphics.PixelFormat
 import android.graphics.Point
 import android.net.Uri
 import android.os.Handler
 import android.os.Looper
 import android.provider.Settings
 import android.view.ContextThemeWrapper
+import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.WindowManager
 import android.widget.ImageView
@@ -43,6 +45,22 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
 
     var updatedForMove = false
 
+    val params = WindowManager.LayoutParams().apply {
+        type = WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY
+        width = dpAsPx(prefManager.frameWidthDp)
+        height = dpAsPx(prefManager.frameHeightDp)
+
+        x = prefManager.posX
+        y = prefManager.posY
+
+        gravity = Gravity.CENTER
+
+        flags =
+            WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or
+                    WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN or
+                    WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS
+        format = PixelFormat.RGBA_8888
+    }
     val wallpaper = getSystemService(Context.WALLPAPER_SERVICE) as WallpaperManager
     val wm = getSystemService(Context.WINDOW_SERVICE) as WindowManager
     val widgetManager = AppWidgetManager.getInstance(this)
@@ -55,7 +73,7 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
     }
     val view = LayoutInflater.from(ContextThemeWrapper(this, R.style.AppTheme))
         .inflate(R.layout.widget_frame, null)
-    val adapter = WidgetFrameAdapter(widgetManager, widgetHost) { item ->
+    val adapter = WidgetFrameAdapter(widgetManager, widgetHost, params) { item ->
         prefManager.currentWidgets = prefManager.currentWidgets.apply {
             remove(item)
             widgetHost.deleteAppWidgetId(item.id)

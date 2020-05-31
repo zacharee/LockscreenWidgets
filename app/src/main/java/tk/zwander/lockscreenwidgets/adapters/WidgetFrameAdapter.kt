@@ -6,6 +6,7 @@ import android.content.Intent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.WindowManager
 import android.widget.Toast
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.DiffUtil
@@ -17,20 +18,27 @@ import tk.zwander.lockscreenwidgets.activities.AddWidgetActivity
 import tk.zwander.lockscreenwidgets.data.WidgetData
 import tk.zwander.lockscreenwidgets.host.WidgetHost
 import tk.zwander.lockscreenwidgets.interfaces.ItemTouchHelperAdapter
-import tk.zwander.lockscreenwidgets.util.RemoveButtonObservable
+import tk.zwander.lockscreenwidgets.observables.OnResizeObservable
+import tk.zwander.lockscreenwidgets.observables.RemoveButtonObservable
 import tk.zwander.lockscreenwidgets.util.calculateWidgetWidth
 import tk.zwander.lockscreenwidgets.util.prefManager
 import tk.zwander.lockscreenwidgets.util.pxAsDp
 import java.util.*
 import kotlin.collections.ArrayList
 
-class WidgetFrameAdapter(private val manager: AppWidgetManager, private val host: WidgetHost, private val onRemoveCallback: (WidgetData) -> Unit) : RecyclerView.Adapter<RecyclerView.ViewHolder>(), ItemTouchHelperAdapter, CoroutineScope by MainScope() {
+class WidgetFrameAdapter(
+    private val manager: AppWidgetManager,
+    private val host: WidgetHost,
+    private val params: WindowManager.LayoutParams,
+    private val onRemoveCallback: (WidgetData) -> Unit
+) : RecyclerView.Adapter<RecyclerView.ViewHolder>(), ItemTouchHelperAdapter, CoroutineScope by MainScope() {
     companion object {
         const val VIEW_TYPE_WIDGET = 0
         const val VIEW_TYPE_ADD = 1
     }
 
     val widgets = ArrayList<WidgetData>()
+    val onResizeObservable = OnResizeObservable()
 
     var currentRemoveButtonPosition = -1
         set(value) {
@@ -38,7 +46,8 @@ class WidgetFrameAdapter(private val manager: AppWidgetManager, private val host
             removeButtonObservable.notifyObservers(value)
         }
 
-    private val removeButtonObservable = RemoveButtonObservable()
+    private val removeButtonObservable =
+        RemoveButtonObservable()
 
     fun updateWidgets(newWidgets: List<WidgetData>) {
         if (widgets.isEmpty()) {
@@ -128,14 +137,16 @@ class WidgetFrameAdapter(private val manager: AppWidgetManager, private val host
             removeButtonObservable.addObserver { _, arg ->
                 removeButtonShown = (arg.toString().toInt() == adapterPosition)
             }
+
+            onResizeObservable.addObserver { _, _ ->
+                onResize()
+            }
         }
 
         fun onBind(data: WidgetData) {
             itemView.apply {
                 launch {
-                    layoutParams = (layoutParams as ViewGroup.LayoutParams).apply {
-                        width = calculateWidgetWidth()
-                    }
+                    onResize()
 
                     val widgetInfo = withContext(Dispatchers.Main) {
                         manager.getAppWidgetInfo(data.id)
@@ -159,6 +170,14 @@ class WidgetFrameAdapter(private val manager: AppWidgetManager, private val host
                             }
                         }
                     }
+                }
+            }
+        }
+
+        fun onResize() {
+            itemView.apply {
+                layoutParams = (layoutParams as ViewGroup.LayoutParams).apply {
+                    width = calculateWidgetWidth(params.width)
                 }
             }
         }

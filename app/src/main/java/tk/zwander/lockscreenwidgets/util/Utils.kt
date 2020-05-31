@@ -123,6 +123,6 @@ fun View.fadeAndScaleIn(endListener: () -> Unit) {
     animator.start()
 }
 
-fun View.calculateWidgetWidth(): Int {
-    return context.dpAsPx(context.prefManager.frameWidthDp) / context.prefManager.frameColCount
+fun View.calculateWidgetWidth(paramWidth: Int): Int {
+    return paramWidth / context.prefManager.frameColCount
 }

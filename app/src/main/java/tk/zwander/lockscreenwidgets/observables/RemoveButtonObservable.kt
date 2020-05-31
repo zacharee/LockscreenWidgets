@@ -1,4 +1,4 @@
-package tk.zwander.lockscreenwidgets.util
+package tk.zwander.lockscreenwidgets.observables
 
 import java.util.*
 
