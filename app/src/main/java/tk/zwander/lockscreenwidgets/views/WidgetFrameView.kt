@@ -83,6 +83,9 @@ class WidgetFrameView(context: Context, attrs: AttributeSet) : ConstraintLayout(
         add_widget.setOnClickListener {
             onAddListener?.invoke()
         }
+        temp_hide_frame.setOnClickListener {
+            onTempHideListener?.invoke()
+        }
 
         if (context.prefManager.firstViewing) {
             hint_view.isVisible = true
