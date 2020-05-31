@@ -46,8 +46,8 @@ class AppAdapter(context: Context, private val selectionCallback: (provider: Wid
     })
 
     private val picasso = Picasso.Builder(context)
-        .addRequestHandler(WidgetAdapter.AppIconRequestHandler(context))
-        .addRequestHandler(WidgetAdapter.RemoteResourcesIconHandler(context))
+        .addRequestHandler(AddWidgetAdapter.AppIconRequestHandler(context))
+        .addRequestHandler(AddWidgetAdapter.RemoteResourcesIconHandler(context))
         .build()
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) =
@@ -75,7 +75,7 @@ class AppAdapter(context: Context, private val selectionCallback: (provider: Wid
     }
 
     inner class AppVH(view: View) : RecyclerView.ViewHolder(view) {
-        private val adapter = WidgetAdapter(picasso, selectionCallback)
+        private val adapter = AddWidgetAdapter(picasso, selectionCallback)
 
         fun parseInfo(info: AppInfo) {
             itemView.widget_holder.adapter = adapter
@@ -89,7 +89,7 @@ class AppAdapter(context: Context, private val selectionCallback: (provider: Wid
             picasso.cancelRequest(itemView.app_icon)
 
             picasso
-                .load(Uri.parse("${WidgetAdapter.AppIconRequestHandler.SCHEME}:${info.appInfo.packageName}"))
+                .load(Uri.parse("${AddWidgetAdapter.AppIconRequestHandler.SCHEME}:${info.appInfo.packageName}"))
                 .fit()
                 .into(itemView.app_icon)
         }

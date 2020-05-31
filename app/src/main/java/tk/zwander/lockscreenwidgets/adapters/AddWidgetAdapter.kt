@@ -2,7 +2,6 @@ package tk.zwander.lockscreenwidgets.adapters
 
 import android.content.Context
 import android.net.Uri
-import android.os.Parcelable
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -17,8 +16,8 @@ import kotlinx.android.synthetic.main.widget_item.view.*
 import tk.zwander.lockscreenwidgets.R
 import tk.zwander.lockscreenwidgets.data.WidgetListInfo
 
-class WidgetAdapter(private val picasso: Picasso, private val selectionCallback: (provider: WidgetListInfo) -> Unit) :
-    RecyclerView.Adapter<WidgetAdapter.WidgetVH>() {
+class AddWidgetAdapter(private val picasso: Picasso, private val selectionCallback: (provider: WidgetListInfo) -> Unit) :
+    RecyclerView.Adapter<AddWidgetAdapter.WidgetVH>() {
     private val widgets = SortedList(WidgetListInfo::class.java, object : SortedList.Callback<WidgetListInfo>() {
         override fun areItemsTheSame(item1: WidgetListInfo?, item2: WidgetListInfo?): Boolean {
             return false
