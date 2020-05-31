@@ -72,6 +72,7 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
                 if (it) {
                     updatedForMove = true
                     prefManager.currentWidgets = LinkedHashSet(adapter.widgets)
+                    adapter.currentRemoveButtonPosition = -1
                     updatedForMove = false
                 }
             }
@@ -88,9 +89,9 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
         override fun onSelectedChanged(viewHolder: RecyclerView.ViewHolder?, actionState: Int) {
             if (actionState != ItemTouchHelper.ACTION_STATE_IDLE) {
                 viewHolder?.itemView?.alpha = 0.5f
-                (viewHolder as WidgetFrameAdapter.WidgetVH?)?.run {
-                    removeButtonShown = !removeButtonShown
-                }
+
+                val adapterPos = viewHolder?.adapterPosition ?: -1
+                adapter.currentRemoveButtonPosition = if (adapter.currentRemoveButtonPosition == adapterPos) -1 else adapterPos
             }
 
             super.onSelectedChanged(viewHolder, actionState)

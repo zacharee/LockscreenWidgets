@@ -17,6 +17,7 @@ import tk.zwander.lockscreenwidgets.activities.AddWidgetActivity
 import tk.zwander.lockscreenwidgets.data.WidgetData
 import tk.zwander.lockscreenwidgets.host.WidgetHost
 import tk.zwander.lockscreenwidgets.interfaces.ItemTouchHelperAdapter
+import tk.zwander.lockscreenwidgets.util.RemoveButtonObservable
 import tk.zwander.lockscreenwidgets.util.calculateWidgetWidth
 import tk.zwander.lockscreenwidgets.util.prefManager
 import tk.zwander.lockscreenwidgets.util.pxAsDp
@@ -30,6 +31,14 @@ class WidgetFrameAdapter(private val manager: AppWidgetManager, private val host
     }
 
     val widgets = ArrayList<WidgetData>()
+
+    var currentRemoveButtonPosition = -1
+        set(value) {
+            field = value
+            removeButtonObservable.notifyObservers(value)
+        }
+
+    private val removeButtonObservable = RemoveButtonObservable()
 
     fun updateWidgets(newWidgets: List<WidgetData>) {
         if (widgets.isEmpty()) {
@@ -112,8 +121,12 @@ class WidgetFrameAdapter(private val manager: AppWidgetManager, private val host
                 val newPos = adapterPosition
                 if (newPos != -1) {
                     onRemoveCallback(widgets[newPos])
-                    removeButtonShown = false
+                    currentRemoveButtonPosition = -1
                 }
+            }
+
+            removeButtonObservable.addObserver { _, arg ->
+                removeButtonShown = (arg.toString().toInt() == adapterPosition)
             }
         }
 
