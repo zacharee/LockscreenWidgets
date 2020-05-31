@@ -8,10 +8,15 @@
     <string name="add_widget">Add Widget</string>
     <string name="grant">Grant</string>
     <string name="settings">Settings</string>
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
 
     <string name="category_appearance">Appearance</string>
     <string name="category_behavior">Behavior</string>
     <string name="category_debug">Debug</string>
+
+    <string name="alert_remove_widget_confirm">Remove Widget?</string>
+    <string name="alert_remove_widget_confirm_desc">Are you sure you want to remove this widget?</string>
 
     <string name="main_screen_social_twitter">Twitter</string>
     <string name="main_screen_social_twitter_desc">Follow me on Twitter for updates about my apps and random development-related nonsense.</string>

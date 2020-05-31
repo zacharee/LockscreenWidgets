@@ -36,6 +36,11 @@
             android:exported="false"
             android:excludeFromRecents="true"
             />
+        <activity android:name=".activities.RemoveWidgetDialogActivity"
+            android:exported="false"
+            android:excludeFromRecents="true"
+            android:theme="@style/AppTheme.Null"
+            />
 
         <service
             android:name="tk.zwander.lockscreenwidgets.services.Accessibility"

@@ -11,10 +11,13 @@ import android.widget.Toast
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.android.synthetic.main.widget_page_holder.view.*
 import kotlinx.coroutines.*
+import tk.zwander.lockscreenwidgets.IRemoveConfirmCallback
 import tk.zwander.lockscreenwidgets.R
 import tk.zwander.lockscreenwidgets.activities.AddWidgetActivity
+import tk.zwander.lockscreenwidgets.activities.RemoveWidgetDialogActivity
 import tk.zwander.lockscreenwidgets.data.WidgetData
 import tk.zwander.lockscreenwidgets.host.WidgetHost
 import tk.zwander.lockscreenwidgets.interfaces.ItemTouchHelperAdapter
@@ -129,8 +132,12 @@ class WidgetFrameAdapter(
             itemView.remove_widget.setOnClickListener {
                 val newPos = adapterPosition
                 if (newPos != -1) {
-                    onRemoveCallback(widgets[newPos])
-                    currentRemoveButtonPosition = -1
+                    RemoveWidgetDialogActivity.start(it.context, object : IRemoveConfirmCallback.Stub() {
+                        override fun onWidgetRemovalConfirmed() {
+                            onRemoveCallback(widgets[newPos])
+                            currentRemoveButtonPosition = -1
+                        }
+                    })
                 }
             }
 
