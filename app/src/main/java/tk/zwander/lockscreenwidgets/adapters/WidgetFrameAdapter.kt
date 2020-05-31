@@ -112,7 +112,6 @@ class WidgetFrameAdapter(private val manager: AppWidgetManager, private val host
                 val newPos = adapterPosition
                 if (newPos != -1) {
                     onRemoveCallback(widgets[newPos])
-                    notifyItemRemoved(newPos)
                     removeButtonShown = false
                 }
             }
