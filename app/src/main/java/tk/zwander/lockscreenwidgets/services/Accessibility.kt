@@ -114,6 +114,8 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
     private var wasOnKeyguard = true
     private var isScreenOn = true
     private var isTempHide = false
+    private var hideForPresentIds = false
+    private var hideForNonPresentIds = false
 
     private var currentSysUiLayer = 1
     private var currentAppLayer = 0
@@ -280,6 +282,16 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
                     } != null
                 }
 
+                val presentIds = prefManager.presentIds
+                if (presentIds.isNotEmpty()) {
+                    hideForPresentIds = sysUiNodes.any { presentIds.contains(it.viewIdResourceName) }
+                }
+
+                val nonPresentIds = prefManager.nonPresentIds
+                if (nonPresentIds.isNotEmpty()) {
+                    hideForNonPresentIds = sysUiNodes.none { nonPresentIds.contains(it.viewIdResourceName) }
+                }
+
                 sysUiNodes.forEach { it.recycle() }
             }
         }
@@ -349,6 +361,8 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
      * - [onMainLockscreen] is true OR [showingNotificationsPanel] is true OR [PrefManager.hideOnSecurityPage] is false
      * - [showingNotificationsPanel] is false OR [PrefManager.hideOnNotificationShade] is false
      * - [notificationCount] is 0 (i.e. no notifications shown with priority > MIN) OR [PrefManager.hideOnNotifications] is false
+     * - [hideForPresentIds] is false OR [PrefManager.presentIds] is empty
+     * - [hideForNonPresentIds] is false OR [PrefManager.nonPresentIds] is empty
      * - [PrefManager.widgetFrameEnabled] is true (i.e. the widget frame is actually enabled)
      */
     private fun canShow() =
@@ -359,19 +373,25 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
                 && (onMainLockscreen || showingNotificationsPanel || !prefManager.hideOnSecurityPage)
                 && (!showingNotificationsPanel || !prefManager.hideOnNotificationShade)
                 && (notificationCount == 0 || !prefManager.hideOnNotifications)
+                && (!hideForPresentIds || prefManager.presentIds.isEmpty())
+                && (!hideForNonPresentIds || prefManager.nonPresentIds.isEmpty())
                 && prefManager.widgetFrameEnabled).also {
             if (isDebug) {
                 Log.e(
-                    App.DEBUG_LOG_TAG, "canShow: $it, " +
-                            "isScreenOn: ${isScreenOn}, " +
-                            "isTempHide: ${isTempHide}, " +
-                            "wasOnKeyguard: $wasOnKeyguard, " +
-                            "currentSysUiLayer: $currentSysUiLayer, " +
-                            "currentAppLayer: $currentAppLayer, " +
-                            "onMainLockscreen: $onMainLockscreen, " +
-                            "showingNotificationsPanel: $showingNotificationsPanel, " +
-                            "notificationCount: $notificationCount, " +
-                            "widgetEnabled: ${prefManager.widgetFrameEnabled}\n\n", Exception()
+                    App.DEBUG_LOG_TAG,
+                    "canShow: $it, " +
+                    "isScreenOn: ${isScreenOn}, " +
+                    "isTempHide: ${isTempHide}, " +
+                    "wasOnKeyguard: $wasOnKeyguard, " +
+                    "currentSysUiLayer: $currentSysUiLayer, " +
+                    "currentAppLayer: $currentAppLayer, " +
+                    "onMainLockscreen: $onMainLockscreen, " +
+                    "showingNotificationsPanel: $showingNotificationsPanel, " +
+                    "notificationCount: $notificationCount, " +
+                    "hideForPresentIds: $hideForPresentIds, " +
+                    "hideForNonPresentIds: $hideForNonPresentIds, " +
+                    "widgetEnabled: ${prefManager.widgetFrameEnabled}\n\n",
+                    Exception()
                 )
             }
         }

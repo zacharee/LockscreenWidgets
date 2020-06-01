@@ -33,6 +33,8 @@ class PrefManager private constructor(context: Context) : ContextWrapper(context
         const val KEY_FRAME_ROW_COUNT = "frame_row_count"
         const val KEY_SHOW_DEBUG_ID_VIEW = "show_debug_id_view"
         const val KEY_ACCESSIBILITY_EVENT_DELAY = "accessibility_event_delay"
+        const val KEY_PRESENT_IDS = "present_ids"
+        const val KEY_NON_PRESENT_IDS = "non_present_ids"
 
         const val VALUE_PAGE_INDICATOR_BEHAVIOR_HIDDEN = 0
         const val VALUE_PAGE_INDICATOR_BEHAVIOR_AUTO_HIDE = 1
@@ -65,6 +67,23 @@ class PrefManager private constructor(context: Context) : ContextWrapper(context
             putString(
                 KEY_CURRENT_WIDGETS,
                 gson.toJson(value)
+            )
+        }
+
+    var presentIds: HashSet<String>
+        get() = HashSet(getStringSet(KEY_PRESENT_IDS, HashSet())!!)
+        set(value) {
+            putStringSet(
+                KEY_PRESENT_IDS,
+                value)
+        }
+
+    var nonPresentIds: HashSet<String>
+        get() = HashSet(getStringSet(KEY_NON_PRESENT_IDS, HashSet())!!)
+        set(value) {
+            putStringSet(
+                KEY_NON_PRESENT_IDS,
+                value
             )
         }
 
@@ -186,11 +205,13 @@ class PrefManager private constructor(context: Context) : ContextWrapper(context
     fun getFloat(key: String, def: Float) = prefs.getFloat(key, def)
     fun getInt(key: String, def: Int) = prefs.getInt(key, def)
     fun getBoolean(key: String, def: Boolean) = prefs.getBoolean(key, def)
+    fun getStringSet(key: String, def: Set<String>) = prefs.getStringSet(key, def)
 
     fun putString(key: String, value: String?) = prefs.edit { putString(key, value) }
     fun putFloat(key: String, value: Float) = prefs.edit { putFloat(key, value) }
     fun putInt(key: String, value: Int) = prefs.edit { putInt(key, value) }
     fun putBoolean(key: String, value: Boolean) = prefs.edit { putBoolean(key, value) }
+    fun putStringSet(key: String, value: Set<String>) = prefs.edit { putStringSet(key, value) }
 
     fun getResourceFloat(@IntegerRes resource: Int): Float {
         return resources.getInteger(resource).toFloat()
