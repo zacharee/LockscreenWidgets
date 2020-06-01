@@ -23,7 +23,8 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
 
         if (prefManager.firstRun || !isAccessibilityEnabled) {
-            OnboardingActivity.startForResult(this, REQ_INTRO)
+            OnboardingActivity.startForResult(this, REQ_INTRO,
+                if (!isAccessibilityEnabled) OnboardingActivity.RetroMode.ACCESSIBILITY else OnboardingActivity.RetroMode.NONE)
         }
     }
 
