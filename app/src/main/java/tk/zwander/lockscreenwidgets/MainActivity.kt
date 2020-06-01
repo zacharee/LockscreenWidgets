@@ -7,7 +7,9 @@ import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
 import tk.zwander.lockscreenwidgets.activities.AddWidgetActivity
+import tk.zwander.lockscreenwidgets.activities.OnboardingActivity
 import tk.zwander.lockscreenwidgets.activities.SettingsActivity
+import tk.zwander.lockscreenwidgets.util.isAccessibilityEnabled
 import tk.zwander.lockscreenwidgets.util.prefManager
 
 
@@ -19,6 +21,10 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+        if (prefManager.firstRun || !isAccessibilityEnabled) {
+            OnboardingActivity.startForResult(this, REQ_INTRO)
+        }
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
