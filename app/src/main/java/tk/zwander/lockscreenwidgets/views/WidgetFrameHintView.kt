@@ -1,6 +1,7 @@
 package tk.zwander.lockscreenwidgets.views
 
 import android.content.Context
+import android.text.method.ScrollingMovementMethod
 import android.util.AttributeSet
 import androidx.core.view.isVisible
 import com.google.android.material.card.MaterialCardView
@@ -15,5 +16,7 @@ class WidgetFrameHintView(context: Context, attrs: AttributeSet) : MaterialCardV
             isVisible = false
             context.prefManager.firstViewing = false
         }
+
+        hint_text.movementMethod = ScrollingMovementMethod()
     }
 }
