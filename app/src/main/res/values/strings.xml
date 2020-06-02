@@ -82,7 +82,7 @@
     <string name="intro_welcome_desc">Lockscreen Widgets is a simple app with a simple purpose: to bring back Android KitKat\'s lock screen widgets. Your widgets will show up in a simple paged slider on the lockscreen.</string>
 
     <string name="intro_usage_title">Basic Usage</string>
-    <string name="intro_usage_desc">Tap the \"plus\" page to add a widget, press and hold to reorder widgets in the list, and tap anywhere on the frame with two fingers to move/resize the frame or remove the current widget. You can also tap with three fingers to hide the widget frame until the screen is turned off and on again.</string>
+    <string name="intro_usage_desc">Tap the \"plus\" page to add a widget, press and hold to reorder/remove widgets in the list, and tap anywhere on the frame with two fingers to move/resize the frame or add a widget. You can also tap with three fingers to hide the widget frame until the screen is turned off and on again.</string>
 
     <string name="intro_accessibility_title">Accessibility</string>
     <string name="intro_accessibility_desc">To be able to display on the lock screen, you\'ll need to activate Lockscreen Widgets\' Accessibility Service. This app doesn\'t collect any data from your screen.</string>
