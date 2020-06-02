@@ -3,9 +3,11 @@ package tk.zwander.lockscreenwidgets.fragments
 import android.content.pm.PackageManager
 import android.os.Bundle
 import androidx.preference.ListPreference
+import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
 import androidx.preference.SwitchPreference
 import tk.zwander.lockscreenwidgets.R
+import tk.zwander.lockscreenwidgets.activities.HideForIDsActivity
 import tk.zwander.lockscreenwidgets.activities.OnboardingActivity
 import tk.zwander.lockscreenwidgets.util.PrefManager
 import tk.zwander.lockscreenwidgets.util.isNotificationListenerActive
@@ -27,6 +29,16 @@ class SettingsFragment : PreferenceFragmentCompat() {
                 OnboardingActivity.start(requireContext(), OnboardingActivity.RetroMode.STORAGE)
                 false
             } else true
+        }
+
+        findPreference<Preference>("present_ids_launch")?.setOnPreferenceClickListener {
+            HideForIDsActivity.start(requireContext(), HideForIDsActivity.Type.PRESENT)
+            true
+        }
+
+        findPreference<Preference>("non_present_ids_launch")?.setOnPreferenceClickListener {
+            HideForIDsActivity.start(requireContext(), HideForIDsActivity.Type.NON_PRESENT)
+            true
         }
     }
 }

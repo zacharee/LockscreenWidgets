@@ -41,6 +41,9 @@
             android:excludeFromRecents="true"
             android:theme="@style/AppTheme.Null"
             />
+        <activity android:name=".activities.HideForIDsActivity"
+            android:exported="false"
+            />
 
         <service
             android:name="tk.zwander.lockscreenwidgets.services.Accessibility"

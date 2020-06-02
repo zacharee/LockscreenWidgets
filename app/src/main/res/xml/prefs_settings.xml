@@ -44,16 +44,8 @@
     </tk.zwander.collapsiblepreferencecategory.CollapsiblePreferenceCategoryNew>
 
     <tk.zwander.collapsiblepreferencecategory.CollapsiblePreferenceCategoryNew
-        android:title="@string/category_behavior"
-        android:key="settings_behavior_category">
-
-        <SwitchPreference
-            android:title="@string/settings_screen_animate_show_hide"
-            android:summary="@string/settings_screen_animate_show_hide_desc"
-            android:key="animate_show_hide"
-            android:icon="@drawable/ic_baseline_animation_24"
-            android:defaultValue="true"
-            />
+        android:title="@string/category_visibility"
+        android:key="settings_visibility_category">
 
         <SwitchPreference
             android:title="@string/settings_screen_hide_when_notifications_shown"
@@ -74,6 +66,34 @@
             android:summary="@string/settings_screen_hide_on_security_input_desc"
             android:key="hide_on_security_page"
             android:icon="@drawable/is_baseline_password_24"
+            />
+
+        <Preference
+            android:title="@string/settings_screen_present_ids"
+            android:summary="@string/settings_screen_present_ids_desc"
+            android:key="present_ids_launch"
+            android:icon="@drawable/ic_baseline_visibility_off_24"
+            />
+
+        <Preference
+            android:title="@string/settings_screen_non_present_ids"
+            android:summary="@string/settings_screen_non_present_ids_desc"
+            android:key="non_present_ids_launch"
+            android:icon="@drawable/ic_baseline_visibility_off_24"
+            />
+
+    </tk.zwander.collapsiblepreferencecategory.CollapsiblePreferenceCategoryNew>
+
+    <tk.zwander.collapsiblepreferencecategory.CollapsiblePreferenceCategoryNew
+        android:title="@string/category_behavior"
+        android:key="settings_behavior_category">
+
+        <SwitchPreference
+            android:title="@string/settings_screen_animate_show_hide"
+            android:summary="@string/settings_screen_animate_show_hide_desc"
+            android:key="animate_show_hide"
+            android:icon="@drawable/ic_baseline_animation_24"
+            android:defaultValue="true"
             />
 
         <tk.zwander.lockscreenwidgets.prefs.AutoSummaryListPreference

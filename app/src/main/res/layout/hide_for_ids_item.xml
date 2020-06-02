@@ -3,6 +3,10 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/id_text"
     android:layout_width="match_parent"
-    android:layout_height="?listPreferredItemHeight"
+    android:layout_height="wrap_content"
+    android:paddingStart="16dp"
+    android:paddingEnd="16dp"
+    android:minHeight="?listPreferredItemHeight"
     android:background="?colorSurface"
+    android:gravity="center_vertical"
     />

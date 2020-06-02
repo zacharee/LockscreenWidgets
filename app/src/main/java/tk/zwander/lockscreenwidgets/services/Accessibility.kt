@@ -256,7 +256,7 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
                             .toString()
                     )
 
-                    delegate.view.frame.setNewDebugIdItems(sysUiNodes.mapNotNull { it.viewIdResourceName })
+                    delegate.view.frame.setNewDebugIdItems(sysUiNodes.filter { it.isVisibleToUser }.mapNotNull { it.viewIdResourceName })
                 }
 
                 //Generate "layer" values for the System UI window and for the topmost app window, if
@@ -284,12 +284,12 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
 
                 val presentIds = prefManager.presentIds
                 if (presentIds.isNotEmpty()) {
-                    hideForPresentIds = sysUiNodes.any { presentIds.contains(it.viewIdResourceName) }
+                    hideForPresentIds = sysUiNodes.any { presentIds.contains(it.viewIdResourceName) && it.isVisibleToUser }
                 }
 
                 val nonPresentIds = prefManager.nonPresentIds
                 if (nonPresentIds.isNotEmpty()) {
-                    hideForNonPresentIds = sysUiNodes.none { nonPresentIds.contains(it.viewIdResourceName) }
+                    hideForNonPresentIds = sysUiNodes.none { nonPresentIds.contains(it.viewIdResourceName) } || sysUiNodes.any { nonPresentIds.contains(it.viewIdResourceName) && !it.isVisibleToUser }
                 }
 
                 sysUiNodes.forEach { it.recycle() }
