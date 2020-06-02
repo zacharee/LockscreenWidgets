@@ -210,6 +210,7 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
             if (it) {
                 updateWallpaperLayerIfNeeded()
                 widgetHost.startListening()
+                adapter.notifyDataSetChanged()
             } else {
                 widgetHost.stopListening()
             }
