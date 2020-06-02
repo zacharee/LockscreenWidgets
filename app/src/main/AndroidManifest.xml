@@ -23,6 +23,7 @@
         </activity>
         <activity android:name="tk.zwander.lockscreenwidgets.activities.AddWidgetActivity"
             android:exported="false"
+            android:label="@string/add_widget"
             />
         <activity android:name="tk.zwander.lockscreenwidgets.activities.OnboardingActivity"
             android:exported="false"
@@ -43,6 +44,10 @@
             />
         <activity android:name=".activities.HideForIDsActivity"
             android:exported="false"
+            />
+        <activity android:name=".activities.UsageActivity"
+            android:exported="false"
+            android:label="@string/usage"
             />
 
         <service

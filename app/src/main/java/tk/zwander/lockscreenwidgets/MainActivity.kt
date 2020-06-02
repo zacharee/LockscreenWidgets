@@ -9,6 +9,7 @@ import android.view.MenuItem
 import tk.zwander.lockscreenwidgets.activities.AddWidgetActivity
 import tk.zwander.lockscreenwidgets.activities.OnboardingActivity
 import tk.zwander.lockscreenwidgets.activities.SettingsActivity
+import tk.zwander.lockscreenwidgets.activities.UsageActivity
 import tk.zwander.lockscreenwidgets.util.isAccessibilityEnabled
 import tk.zwander.lockscreenwidgets.util.prefManager
 
@@ -41,6 +42,12 @@ class MainActivity : AppCompatActivity() {
             }
             R.id.add_widget -> {
                 val intent = Intent(this, AddWidgetActivity::class.java)
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                startActivity(intent)
+                true
+            }
+            R.id.usage -> {
+                val intent = Intent(this, UsageActivity::class.java)
                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                 startActivity(intent)
                 true

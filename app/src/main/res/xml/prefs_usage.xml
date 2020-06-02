@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <tk.zwander.lockscreenwidgets.prefs.MessageDialogPreference
+        android:title="@string/usage_add_widget"
+        android:summary="@string/usage_add_widget_desc"
+        android:dialogTitle="@string/usage_add_widget"
+        android:dialogMessage="@string/usage_add_widget_desc"
+        android:key="usage_add_widget"
+        android:negativeButtonText="@null"
+        />
+
+    <tk.zwander.lockscreenwidgets.prefs.MessageDialogPreference
+        android:title="@string/usage_modify_frame"
+        android:summary="@string/usage_modify_frame_desc"
+        android:dialogTitle="@string/usage_modify_frame"
+        android:dialogMessage="@string/usage_modify_frame_desc"
+        android:key="usage_modify_frame"
+        android:negativeButtonText="@null"
+        />
+
+    <tk.zwander.lockscreenwidgets.prefs.MessageDialogPreference
+        android:title="@string/usage_temp_hide"
+        android:summary="@string/usage_temp_hide_desc"
+        android:dialogTitle="@string/usage_temp_hide"
+        android:dialogMessage="@string/usage_temp_hide_desc"
+        android:key="usage_temp_hide"
+        android:negativeButtonText="@null"
+        />
+
+    <tk.zwander.lockscreenwidgets.prefs.MessageDialogPreference
+        android:title="@string/usage_reorder_widgets"
+        android:summary="@string/usage_reorder_widgets_desc"
+        android:dialogTitle="@string/usage_reorder_widgets"
+        android:dialogMessage="@string/usage_reorder_widgets_desc"
+        android:key="usage_reorder_widgets"
+        android:negativeButtonText="@null"
+        />
+
+    <tk.zwander.lockscreenwidgets.prefs.MessageDialogPreference
+        android:title="@string/usage_remove_widgets"
+        android:summary="@string/usage_remove_widgets_desc"
+        android:dialogTitle="@string/usage_remove_widgets"
+        android:dialogMessage="@string/usage_remove_widgets_desc"
+        android:key="usage_remove_widgets"
+        android:negativeButtonText="@null"
+        />
+
+    <tk.zwander.lockscreenwidgets.prefs.MessageDialogPreference
+        android:title="@string/usage_id_blacklists"
+        android:summary="@string/usage_id_blacklists_desc"
+        android:dialogTitle="@string/usage_id_blacklists"
+        android:dialogMessage="@string/usage_id_blacklists_desc"
+        android:key="usage_id_blacklists"
+        android:negativeButtonText="@null"
+        />
+
+</PreferenceScreen>

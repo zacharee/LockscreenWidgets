@@ -10,6 +10,13 @@
         />
 
     <item
+        android:id="@+id/usage"
+        android:title="@string/usage"
+        android:icon="@drawable/ic_baseline_help_outline_24"
+        app:showAsAction="ifRoom"
+        />
+
+    <item
         android:id="@+id/settings"
         android:title="@string/settings"
         android:icon="@drawable/ic_baseline_settings_24"

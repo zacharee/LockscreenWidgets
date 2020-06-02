@@ -12,6 +12,7 @@
     <string name="no">No</string>
     <string name="add">Add</string>
     <string name="add_id">Add ID</string>
+    <string name="usage">Usage</string>
 
     <string name="add_id_hint">com.android.systemui:id/some_id_here</string>
 
@@ -95,6 +96,24 @@
 
     <string name="intro_done_title">All Done!</string>
     <string name="intro_done_desc">That\'s it! Check your lock screen and you should now see the widget frame!</string>
+
+    <string name="usage_add_widget">Add Widget</string>
+    <string name="usage_add_widget_desc">Adding a widget can be done in one of three ways. If the widget pager doesn\'t have any widgets added, simply press the \"plus\" button that appears inside it. Otherwise, you can tap the frame with two fingers and then tap the \"plus\" button on the top right of the frame. You can also add a widget from the app itself, by tapping the \"plus\" button at the top right of the main screen.</string>
+
+    <string name="usage_modify_frame">Modify Frame</string>
+    <string name="usage_modify_frame_desc">If the frame is in the way, or you want it to be a different size, you can easily move and resize it. Simply tap the frame itself with two fingers to show the editing interface.</string>
+
+    <string name="usage_temp_hide">Temp Hide</string>
+    <string name="usage_temp_hide_desc">If you need to just hide the widget frame for a while, tap it with three fingers. You can also enter the editing interface with a two-finger tap and press the eye button in the top left. This will hide the frame until the screen is turned off and on again.</string>
+
+    <string name="usage_reorder_widgets">Reorder Widgets</string>
+    <string name="usage_reorder_widgets_desc">To change the order of the widgets, simply long-press the widget you want to move and drag it to where you want it to be.</string>
+
+    <string name="usage_remove_widgets">Remove Widgets</string>
+    <string name="usage_remove_widgets_desc">To remove a widget, long-press it without dragging and tap the red button that appears in the top right.</string>
+
+    <string name="usage_id_blacklists">ID Blacklists</string>
+    <string name="usage_id_blacklists_desc">All phones are different, and it\'s possible that the built-in hiding options don\'t work on your device. Or maybe you want to implement a hiding behavior of your own. This can be implemented with the \"Hide on Present IDs\" and \"Hide on Non-Present IDs\" options. Any IDs you add to the former will cause the widget frame to hide when Lockscreen Widgets detects any of those IDs on-screen. Any IDs you add to the latter will cause the widget frame to hide when Lockscreen Widgets does <i>not</i> detect any of those IDs on-screen. You can find out which IDs should be added by enabling both Debug options and seeing which IDs are highlighted in green or red.</string>
 
     <string name="configure_widget_error">Unable to configure the widget %s due to lack of permissions. Please contact the app developer or device manufacturer.</string>
     <string name="bind_widget_error">Unable to bind the widget %s due to lack of permissions. Please contact the app developer or device manufacturer.</string>
