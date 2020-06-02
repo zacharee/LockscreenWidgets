@@ -144,8 +144,8 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
             }
 
             view.frame.onLeftDragListener = { velX ->
-                params.width -= velX.toInt()
-                params.x += (velX / 2f).toInt()
+                params.width -= velX
+                params.x += (velX / 2)
 
                 prefManager.frameWidthDp = pxAsDp(params.width)
 
@@ -153,8 +153,8 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
             }
 
             view.frame.onRightDragListener = { velX ->
-                params.width += velX.toInt()
-                params.x += (velX / 2f).toInt()
+                params.width += velX
+                params.x += (velX / 2)
 
                 prefManager.frameWidthDp = pxAsDp(params.width)
 
@@ -162,8 +162,8 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
             }
 
             view.frame.onTopDragListener = { velY ->
-                params.height -= velY.toInt()
-                params.y += (velY / 2f).toInt()
+                params.height -= velY
+                params.y += (velY / 2)
 
                 prefManager.frameHeightDp = pxAsDp(params.height)
 
@@ -171,8 +171,8 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
             }
 
             view.frame.onBottomDragListener = { velY ->
-                params.height += velY.toInt()
-                params.y += (velY / 2f).toInt()
+                params.height += velY
+                params.y += (velY / 2)
 
                 prefManager.frameHeightDp = pxAsDp(params.height)
 

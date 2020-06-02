@@ -126,3 +126,13 @@ fun View.fadeAndScaleIn(endListener: () -> Unit) {
 fun View.calculateWidgetWidth(paramWidth: Int): Int {
     return paramWidth / context.prefManager.frameColCount
 }
+
+fun Int.makeEven(): Int {
+    return when {
+        this == 0 -> this
+        this == 1 -> 2
+        this == -1 -> -2
+        this % 2 == 0 -> this
+        else -> this + if (this < 0) -1 else 1
+    }
+}

@@ -19,16 +19,17 @@ import kotlinx.android.synthetic.main.widget_frame_id_view.view.*
 import tk.zwander.lockscreenwidgets.R
 import tk.zwander.lockscreenwidgets.adapters.IDAdapter
 import tk.zwander.lockscreenwidgets.util.*
+import kotlin.math.roundToInt
 
 class WidgetFrameView(context: Context, attrs: AttributeSet) : ConstraintLayout(context, attrs) {
     var onMoveListener: ((velX: Float, velY: Float) -> Unit)? = null
     var onInterceptListener: ((down: Boolean) -> Unit)? = null
     var onAddListener: (() -> Unit)? = null
 
-    var onLeftDragListener: ((velX: Float) -> Unit)? = null
-    var onRightDragListener: ((velX: Float) -> Unit)? = null
-    var onTopDragListener: ((velY: Float) -> Unit)? = null
-    var onBottomDragListener: ((velY: Float) -> Unit)? = null
+    var onLeftDragListener: ((velX: Int) -> Unit)? = null
+    var onRightDragListener: ((velX: Int) -> Unit)? = null
+    var onTopDragListener: ((velY: Int) -> Unit)? = null
+    var onBottomDragListener: ((velY: Int) -> Unit)? = null
 
     var onTempHideListener: (() -> Unit)? = null
     var onAfterResizeListener: (() -> Unit)? = null
@@ -232,7 +233,7 @@ class WidgetFrameView(context: Context, attrs: AttributeSet) : ConstraintLayout(
         }
     }
 
-    inner class ExpandTouchListener(private val listener: ((velX: Float, velY: Float, isUp: Boolean) -> Boolean)?) : OnTouchListener {
+    inner class ExpandTouchListener(private val listener: ((velX: Int, velY: Int, isUp: Boolean) -> Boolean)?) : OnTouchListener {
         private var prevExpandX = 0f
         private var prevExpandY = 0f
 
@@ -253,16 +254,16 @@ class WidgetFrameView(context: Context, attrs: AttributeSet) : ConstraintLayout(
                     val newX = event.rawX
                     val newY = event.rawY
 
-                    val velX = newX - prevExpandX
-                    val velY = newY - prevExpandY
+                    val velX = (newX - prevExpandX).roundToInt()
+                    val velY = (newY - prevExpandY).roundToInt()
 
                     prevExpandX = newX
                     prevExpandY = newY
 
-                    listener?.invoke(velX, velY, false) ?: false
+                    listener?.invoke(velX.makeEven(), velY.makeEven(), false) ?: false
                 }
                 MotionEvent.ACTION_UP -> {
-                    listener?.invoke(0f, 0f, true)
+                    listener?.invoke(0, 0, true)
                     false
                 }
                 else -> false
