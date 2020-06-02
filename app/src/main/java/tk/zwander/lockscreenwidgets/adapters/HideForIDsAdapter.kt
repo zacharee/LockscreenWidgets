@@ -9,7 +9,7 @@ import kotlinx.android.synthetic.main.hide_for_ids_item.view.*
 import tk.zwander.lockscreenwidgets.R
 
 class HideForIDsAdapter : RecyclerView.Adapter<HideForIDsAdapter.HideForIDsVH>() {
-    private val items = SortedList(
+    val items = SortedList(
         String::class.java,
         object : SortedList.Callback<String>() {
             override fun areItemsTheSame(item1: String?, item2: String?): Boolean {
