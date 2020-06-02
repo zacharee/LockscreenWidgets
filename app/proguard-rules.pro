@@ -14,7 +14,7 @@
 
 # Uncomment this to preserve the line number information for
 # debugging stack traces.
-#-keepattributes SourceFile,LineNumberTable
+-keepattributes SourceFile,LineNumberTable
 
 # If you keep the line number information, uncomment this to
 # hide the original source file name.
@@ -24,3 +24,9 @@
 
 -keep class tk.zwander.lockscreenwidgets.** { *; }
 -keep interface tk.zwander.lockscreenwidgets.** { *; }
+
+-keep class net.bytebuddy.** { *; }
+-keep interface net.bytebuddy.** { *; }
+
+-keep class com.android.dx.** { *; }
+-keep interface com.android.dx.** { *; }
