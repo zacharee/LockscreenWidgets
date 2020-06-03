@@ -44,7 +44,7 @@ val Context.isNotificationListenerActive: Boolean
         } ?: false
 
 val Context.isDebug: Boolean
-    get() = BuildConfig.DEBUG || prefManager.debugLog
+    get() = prefManager.debugLog
 
 val AccessibilityWindowInfo.safeRoot: AccessibilityNodeInfo?
     get() = try {
