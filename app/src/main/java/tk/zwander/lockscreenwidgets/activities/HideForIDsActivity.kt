@@ -1,27 +1,38 @@
 package tk.zwander.lockscreenwidgets.activities
 
+import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.graphics.*
 import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuItem
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.gson.reflect.TypeToken
 import kotlinx.android.synthetic.main.activity_hide_for_ids.*
 import kotlinx.android.synthetic.main.add_id_dialog.view.*
 import tk.zwander.lockscreenwidgets.R
 import tk.zwander.lockscreenwidgets.adapters.HideForIDsAdapter
 import tk.zwander.lockscreenwidgets.util.prefManager
+import java.lang.StringBuilder
+import java.text.SimpleDateFormat
+import java.util.*
+import kotlin.collections.HashSet
 
 class HideForIDsActivity : AppCompatActivity() {
     companion object {
+        const val REQ_SAVE = 101
+        const val REQ_OPEN = 102
+
         const val EXTRA_TYPE = "type"
 
         fun start(context: Context, type: Type) {
@@ -108,6 +119,8 @@ class HideForIDsActivity : AppCompatActivity() {
             else -> HashSet()
         }
     }
+    private val gson by lazy { prefManager.gson }
+    private val format = SimpleDateFormat("yyyy-MM-dd_HH:mm:ss", Locale.getDefault())
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -133,7 +146,7 @@ class HideForIDsActivity : AppCompatActivity() {
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
-        menuInflater.inflate(R.menu.add, menu)
+        menuInflater.inflate(R.menu.hide_for_ids, menu)
         return true
     }
 
@@ -162,7 +175,68 @@ class HideForIDsActivity : AppCompatActivity() {
                     .show()
                 true
             }
+            R.id.backup -> {
+                val backupIntent = Intent(Intent.ACTION_CREATE_DOCUMENT)
+                backupIntent.type = "text/*"
+                backupIntent.putExtra(Intent.EXTRA_TITLE, "LockscreenWidgets_ID_Backup_${format.format(Date())}.lsw")
+
+                startActivityForResult(backupIntent, REQ_SAVE)
+                true
+            }
+            R.id.restore -> {
+                val restoreIntent = Intent(Intent.ACTION_OPEN_DOCUMENT)
+                restoreIntent.type = "text/*"
+
+                startActivityForResult(restoreIntent, REQ_OPEN)
+                true
+            }
             else -> return super.onOptionsItemSelected(item)
+        }
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+
+        if (resultCode == Activity.RESULT_OK) {
+            when (requestCode) {
+                REQ_SAVE -> {
+                    contentResolver.openOutputStream(data?.data ?: return)?.use { out ->
+                        val stringified = gson.toJson(items)
+
+                        out.bufferedWriter().use { writer ->
+                            writer.append(stringified)
+                        }
+                    }
+                }
+                REQ_OPEN -> {
+                    contentResolver.openInputStream(data?.data ?: return)?.use { input ->
+                        val builder = StringBuilder()
+
+                        input.bufferedReader().useLines { seq ->
+                            seq.forEach {
+                                builder.append(it)
+                            }
+                        }
+
+                        val list = try {
+                            gson.fromJson<HashSet<String>>(
+                                builder.toString(),
+                                object : TypeToken<HashSet<String>>() {}.type
+                            )
+                        } catch (e: Exception) {
+                            null
+                        }
+
+                        if (list.isNullOrEmpty()) {
+                            Toast.makeText(this, R.string.invalid_id_backup_error, Toast.LENGTH_SHORT).show()
+                        } else {
+                            items.clear()
+                            items.addAll(list)
+                            adapter.items.replaceAll(list)
+                        }
+                    }
+                }
+            }
         }
     }
 

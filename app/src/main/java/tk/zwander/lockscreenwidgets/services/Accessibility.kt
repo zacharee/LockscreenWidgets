@@ -424,10 +424,10 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
     }
 
     /**
-     * Recursively add all [AccessibilityNodeInfo]s contained in a parent to a list.
+     * Recursively hide_for_ids all [AccessibilityNodeInfo]s contained in a parent to a list.
      * We use this instead of [AccessibilityNodeInfo.findAccessibilityNodeInfosByViewId]
      * for performance and reliability reasons.
-     * @param parentNode the root [AccessibilityNodeInfo] whose children we want to add to
+     * @param parentNode the root [AccessibilityNodeInfo] whose children we want to hide_for_ids to
      * a list. List will include this node as well.
      * @param list the list that will contain the child nodes.
      */
