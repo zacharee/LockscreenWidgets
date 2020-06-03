@@ -254,8 +254,16 @@ class WidgetFrameView(context: Context, attrs: AttributeSet) : ConstraintLayout(
                     val newX = event.rawX
                     val newY = event.rawY
 
-                    val velX = (newX - prevExpandX).roundToInt()
-                    val velY = (newY - prevExpandY).roundToInt()
+                    val velX = try {
+                        (newX - prevExpandX).roundToInt()
+                    } catch (e: IllegalArgumentException) {
+                        0
+                    }
+                    val velY = try {
+                        (newY - prevExpandY).roundToInt()
+                    } catch (e: IllegalArgumentException) {
+                        0
+                    }
 
                     prevExpandX = newX
                     prevExpandY = newY
