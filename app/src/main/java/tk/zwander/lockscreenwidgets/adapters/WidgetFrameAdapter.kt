@@ -32,7 +32,7 @@ class WidgetFrameAdapter(
     private val manager: AppWidgetManager,
     private val host: WidgetHostCompat,
     private val params: WindowManager.LayoutParams,
-    private val onRemoveCallback: (WidgetData) -> Unit
+    private val onRemoveCallback: (WidgetFrameAdapter, WidgetData) -> Unit
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>(), ItemTouchHelperAdapter, CoroutineScope by MainScope() {
     companion object {
         const val VIEW_TYPE_WIDGET = 0
@@ -131,12 +131,7 @@ class WidgetFrameAdapter(
             itemView.remove_widget.setOnClickListener {
                 val newPos = adapterPosition
                 if (newPos != -1) {
-                    RemoveWidgetDialogActivity.start(it.context, object : IRemoveConfirmCallback.Stub() {
-                        override fun onWidgetRemovalConfirmed() {
-                            onRemoveCallback(widgets[newPos])
-                            currentRemoveButtonPosition = -1
-                        }
-                    })
+                    onRemoveCallback(this@WidgetFrameAdapter, widgets[newPos])
                 }
             }
 

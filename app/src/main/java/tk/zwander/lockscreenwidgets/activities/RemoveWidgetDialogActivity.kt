@@ -24,13 +24,13 @@ class RemoveWidgetDialogActivity : AppCompatActivity() {
         }
     }
 
+    private val callbackBinder by lazy { intent?.getBundleExtra(EXTRA_CALLBACK)?.getBinder(EXTRA_CALLBACK) }
+    private val callback by lazy { if (callbackBinder != null) IRemoveConfirmCallback.Stub.asInterface(callbackBinder) else null }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         window?.addFlags(WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED)
-
-        val callbackBinder = intent?.getBundleExtra(EXTRA_CALLBACK)?.getBinder(EXTRA_CALLBACK)
-        val callback = if (callbackBinder != null) IRemoveConfirmCallback.Stub.asInterface(callbackBinder) else null
 
         MaterialAlertDialogBuilder(this)
             .setTitle(R.string.alert_remove_widget_confirm)
@@ -49,5 +49,13 @@ class RemoveWidgetDialogActivity : AppCompatActivity() {
             }
             .create()
             .show()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+
+        try {
+            callback?.onDismiss()
+        } catch (e: Exception) {}
     }
 }

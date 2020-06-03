@@ -358,6 +358,7 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
      * - [isScreenOn] is true (i.e. the display is properly on: not in Doze or on the AOD)
      * - [isTempHide] is false
      * - [currentSysUiLayer] is greater than [currentAppLayer]
+     * - [WidgetFrameDelegate.showingRemovalConfirmation] is false
      * - [onMainLockscreen] is true OR [showingNotificationsPanel] is true OR [PrefManager.hideOnSecurityPage] is false
      * - [showingNotificationsPanel] is false OR [PrefManager.hideOnNotificationShade] is false
      * - [notificationCount] is 0 (i.e. no notifications shown with priority > MIN) OR [PrefManager.hideOnNotifications] is false
@@ -370,6 +371,7 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
                 && isScreenOn
                 && !isTempHide
                 && currentSysUiLayer > currentAppLayer
+                && !delegate.showingRemovalConfirmation
                 && (onMainLockscreen || showingNotificationsPanel || !prefManager.hideOnSecurityPage)
                 && (!showingNotificationsPanel || !prefManager.hideOnNotificationShade)
                 && (notificationCount == 0 || !prefManager.hideOnNotifications)

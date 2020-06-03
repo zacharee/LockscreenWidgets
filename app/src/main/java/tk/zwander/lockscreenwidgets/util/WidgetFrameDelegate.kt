@@ -24,8 +24,10 @@ import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import kotlinx.android.synthetic.main.widget_frame.view.*
+import tk.zwander.lockscreenwidgets.IRemoveConfirmCallback
 import tk.zwander.lockscreenwidgets.R
 import tk.zwander.lockscreenwidgets.activities.AddWidgetActivity
+import tk.zwander.lockscreenwidgets.activities.RemoveWidgetDialogActivity
 import tk.zwander.lockscreenwidgets.activities.RequestUnlockActivity
 import tk.zwander.lockscreenwidgets.adapters.WidgetFrameAdapter
 import tk.zwander.lockscreenwidgets.host.WidgetHostCompat
@@ -44,6 +46,7 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
     }
 
     var updatedForMove = false
+    var showingRemovalConfirmation = false
 
     val params = WindowManager.LayoutParams().apply {
         type = WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY
@@ -73,11 +76,21 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
     }
     val view = LayoutInflater.from(ContextThemeWrapper(this, R.style.AppTheme))
         .inflate(R.layout.widget_frame, null)
-    val adapter = WidgetFrameAdapter(widgetManager, widgetHost, params) { item ->
-        prefManager.currentWidgets = prefManager.currentWidgets.apply {
-            remove(item)
-            widgetHost.deleteAppWidgetId(item.id)
-        }
+    val adapter = WidgetFrameAdapter(widgetManager, widgetHost, params) { adapter, item ->
+        showingRemovalConfirmation = true
+        RemoveWidgetDialogActivity.start(this, object : IRemoveConfirmCallback.Stub() {
+            override fun onWidgetRemovalConfirmed() {
+                prefManager.currentWidgets = prefManager.currentWidgets.apply {
+                    remove(item)
+                    widgetHost.deleteAppWidgetId(item.id)
+                }
+                adapter.currentRemoveButtonPosition = -1
+            }
+
+            override fun onDismiss() {
+                showingRemovalConfirmation = false
+            }
+        })
     }
     val blockSnapHelper = SnapToBlock(1)
     val touchHelperCallback = object : ItemTouchHelper.SimpleCallback(ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT or ItemTouchHelper.UP or ItemTouchHelper.DOWN, 0) {
