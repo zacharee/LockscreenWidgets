@@ -122,16 +122,30 @@ class WidgetFrameView(context: Context, attrs: AttributeSet) : ConstraintLayout(
 
         when (ev.action) {
             MotionEvent.ACTION_UP -> {
-                when (maxPointerCount) {
+                val max = maxPointerCount
+                maxPointerCount = 0
+
+                when (max) {
                     2 -> {
                         setEditMode(!isInEditingMode)
+                        return true
                     }
                     3 -> {
                         onTempHideListener?.invoke()
+                        return true
                     }
                 }
 
-                maxPointerCount = 0
+                if (ev.buttonState == MotionEvent.BUTTON_SECONDARY
+                    || ev.buttonState == MotionEvent.BUTTON_STYLUS_SECONDARY) {
+                    setEditMode(!isInEditingMode)
+                    return true
+                }
+
+                if (ev.buttonState == MotionEvent.BUTTON_TERTIARY) {
+                    onTempHideListener?.invoke()
+                    return true
+                }
             }
         }
 
