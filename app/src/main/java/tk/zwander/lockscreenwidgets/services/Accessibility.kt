@@ -211,93 +211,95 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
     }
 
     override fun onAccessibilityEvent(event: AccessibilityEvent) {
-        //This block here runs even when unlocked, but it only takes a millisecond at most,
-        //so it shouldn't be noticeable to the user. We use this to check the current keyguard
-        //state and, if applicable, send the keyguard dismissal broadcast.
-        val isScreenOn = power.isInteractive
-        if (this.isScreenOn != isScreenOn) {
-            isTempHide = false
-            this.isScreenOn = isScreenOn
-        }
-        val isOnKeyguard = kgm.isKeyguardLocked
-        if (isOnKeyguard != wasOnKeyguard) {
-            wasOnKeyguard = isOnKeyguard
-            if (!isOnKeyguard) {
-                LocalBroadcastManager.getInstance(this)
-                    .sendBroadcast(Intent(ACTION_LOCKSCREEN_DISMISSED))
+        mainHandler.post {
+            //This block here runs even when unlocked, but it only takes a millisecond at most,
+            //so it shouldn't be noticeable to the user. We use this to check the current keyguard
+            //state and, if applicable, send the keyguard dismissal broadcast.
+            val isScreenOn = power.isInteractive
+            if (this.isScreenOn != isScreenOn) {
+                isTempHide = false
+                this.isScreenOn = isScreenOn
             }
-        }
-
-        if (isDebug) {
-            Log.e(App.DEBUG_LOG_TAG, "Accessibility event: $event, isScreenOn: ${this.isScreenOn}, wasOnKeyguard: $wasOnKeyguard")
-        }
-
-        //The below block can (very rarely) take over half a second to execute, so only run it
-        //if we actually need to (i.e. on the lock screen and screen is on).
-        if (wasOnKeyguard && isScreenOn) {
-            val sysUiWindows = findSystemUiWindows()
-            val appWindow = findTopAppWindow()
-
-            val appIndex = windows.indexOf(appWindow)
-            val sysUiIndex = windows.indexOf(sysUiWindows.firstOrNull())
-
-            val sysUiNodes = ArrayList<AccessibilityNodeInfo>()
-            sysUiWindows.map { it?.root }.forEach {
-                if (it != null) {
-                    addAllNodesToList(it, sysUiNodes)
+            val isOnKeyguard = kgm.isKeyguardLocked
+            if (isOnKeyguard != wasOnKeyguard) {
+                wasOnKeyguard = isOnKeyguard
+                if (!isOnKeyguard) {
+                    LocalBroadcastManager.getInstance(this)
+                        .sendBroadcast(Intent(ACTION_LOCKSCREEN_DISMISSED))
                 }
             }
 
             if (isDebug) {
-                Log.e(
-                    App.DEBUG_LOG_TAG,
-                    sysUiNodes.filter { it.isVisibleToUser }.map { it.viewIdResourceName }
-                        .toString()
-                )
-
-                delegate.view.frame.setNewDebugIdItems(sysUiNodes.filter { it.isVisibleToUser }.mapNotNull { it.viewIdResourceName })
+                Log.e(App.DEBUG_LOG_TAG, "Accessibility event: $event, isScreenOn: ${this.isScreenOn}, wasOnKeyguard: $wasOnKeyguard")
             }
 
-            //Generate "layer" values for the System UI window and for the topmost app window, if
-            //it exists.
-            currentAppLayer = if (appIndex != -1) windows.size - appIndex else appIndex
-            currentSysUiLayer = if (sysUiIndex != -1) windows.size - sysUiIndex else sysUiIndex
+            //The below block can (very rarely) take over half a second to execute, so only run it
+            //if we actually need to (i.e. on the lock screen and screen is on).
+            if (wasOnKeyguard && isScreenOn) {
+                val sysUiWindows = findSystemUiWindows()
+                val appWindow = findTopAppWindow()
 
-            if (prefManager.hideOnSecurityPage) {
-                onMainLockscreen = sysUiNodes.find {
-                    (it.viewIdResourceName == "com.android.systemui:id/notification_panel" && it.isVisibleToUser)
-                            || (it.viewIdResourceName == "com.android.systemui:id/left_button" && it.isVisibleToUser)
-                } != null
+                val appIndex = windows.indexOf(appWindow)
+                val sysUiIndex = windows.indexOf(sysUiWindows.firstOrNull())
+
+                val sysUiNodes = ArrayList<AccessibilityNodeInfo>()
+                sysUiWindows.map { it?.root }.forEach {
+                    if (it != null) {
+                        addAllNodesToList(it, sysUiNodes)
+                    }
+                }
+
+                if (isDebug) {
+                    Log.e(
+                        App.DEBUG_LOG_TAG,
+                        sysUiNodes.filter { it.isVisibleToUser }.map { it.viewIdResourceName }
+                            .toString()
+                    )
+
+                    delegate.view.frame.setNewDebugIdItems(sysUiNodes.filter { it.isVisibleToUser }.mapNotNull { it.viewIdResourceName })
+                }
+
+                //Generate "layer" values for the System UI window and for the topmost app window, if
+                //it exists.
+                currentAppLayer = if (appIndex != -1) windows.size - appIndex else appIndex
+                currentSysUiLayer = if (sysUiIndex != -1) windows.size - sysUiIndex else sysUiIndex
+
+                if (prefManager.hideOnSecurityPage) {
+                    onMainLockscreen = sysUiNodes.find {
+                        (it.viewIdResourceName == "com.android.systemui:id/notification_panel" && it.isVisibleToUser)
+                                || (it.viewIdResourceName == "com.android.systemui:id/left_button" && it.isVisibleToUser)
+                    } != null
+                }
+
+                if (prefManager.hideOnNotificationShade) {
+                    //Used for "Hide When Notification Shade Shown" so we know when it's actually expanded.
+                    //Some devices don't even have left shortcuts, so also check for keyguard_indication_area.
+                    //Just like the showingSecurityInput check, this is probably unreliable for some devices.
+                    showingNotificationsPanel = sysUiNodes.find {
+                        (it.viewIdResourceName == "com.android.systemui:id/quick_settings_panel" && it.isVisibleToUser)
+                                || (it.viewIdResourceName == "com.android.systemui:id/settings_button" && it.isVisibleToUser)
+                                || (it.viewIdResourceName == "com.android.systemui:id/tile_label" && it.isVisibleToUser)
+                    } != null
+                }
+
+                val presentIds = prefManager.presentIds
+                if (presentIds.isNotEmpty()) {
+                    hideForPresentIds = sysUiNodes.any { presentIds.contains(it.viewIdResourceName) && it.isVisibleToUser }
+                }
+
+                val nonPresentIds = prefManager.nonPresentIds
+                if (nonPresentIds.isNotEmpty()) {
+                    hideForNonPresentIds = sysUiNodes.none { nonPresentIds.contains(it.viewIdResourceName) } || sysUiNodes.any { nonPresentIds.contains(it.viewIdResourceName) && !it.isVisibleToUser }
+                }
+
+                sysUiNodes.forEach { it.recycle() }
             }
 
-            if (prefManager.hideOnNotificationShade) {
-                //Used for "Hide When Notification Shade Shown" so we know when it's actually expanded.
-                //Some devices don't even have left shortcuts, so also check for keyguard_indication_area.
-                //Just like the showingSecurityInput check, this is probably unreliable for some devices.
-                showingNotificationsPanel = sysUiNodes.find {
-                    (it.viewIdResourceName == "com.android.systemui:id/quick_settings_panel" && it.isVisibleToUser)
-                            || (it.viewIdResourceName == "com.android.systemui:id/settings_button" && it.isVisibleToUser)
-                            || (it.viewIdResourceName == "com.android.systemui:id/tile_label" && it.isVisibleToUser)
-                } != null
+            if (canShow()) {
+                addOverlay()
+            } else {
+                removeOverlay()
             }
-
-            val presentIds = prefManager.presentIds
-            if (presentIds.isNotEmpty()) {
-                hideForPresentIds = sysUiNodes.any { presentIds.contains(it.viewIdResourceName) && it.isVisibleToUser }
-            }
-
-            val nonPresentIds = prefManager.nonPresentIds
-            if (nonPresentIds.isNotEmpty()) {
-                hideForNonPresentIds = sysUiNodes.none { nonPresentIds.contains(it.viewIdResourceName) } || sysUiNodes.any { nonPresentIds.contains(it.viewIdResourceName) && !it.isVisibleToUser }
-            }
-
-            sysUiNodes.forEach { it.recycle() }
-        }
-
-        if (canShow()) {
-            addOverlay()
-        } else {
-            removeOverlay()
         }
     }
 
