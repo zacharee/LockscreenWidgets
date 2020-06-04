@@ -20,7 +20,7 @@ import tk.zwander.lockscreenwidgets.host.WidgetHostCompat
 import tk.zwander.lockscreenwidgets.util.prefManager
 
 /**
- * Manage the widget hide_for_ids flow: selection, permissions, configurations, etc.
+ * Manage the widget addition flow: selection, permissions, configurations, etc.
  */
 class AddWidgetActivity : AppCompatActivity(), CoroutineScope by MainScope() {
     companion object {
