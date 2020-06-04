@@ -235,65 +235,63 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
         //The below block can (very rarely) take over half a second to execute, so only run it
         //if we actually need to (i.e. on the lock screen and screen is on).
         if (wasOnKeyguard && isScreenOn) {
-            if (event.eventType == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED || event.eventType == AccessibilityEvent.TYPE_WINDOWS_CHANGED) {
-                val sysUiWindows = findSystemUiWindows()
-                val appWindow = findTopAppWindow()
+            val sysUiWindows = findSystemUiWindows()
+            val appWindow = findTopAppWindow()
 
-                val appIndex = windows.indexOf(appWindow)
-                val sysUiIndex = windows.indexOf(sysUiWindows.firstOrNull())
+            val appIndex = windows.indexOf(appWindow)
+            val sysUiIndex = windows.indexOf(sysUiWindows.firstOrNull())
 
-                val sysUiNodes = ArrayList<AccessibilityNodeInfo>()
-                sysUiWindows.map { it?.root }.forEach {
-                    if (it != null) {
-                        addAllNodesToList(it, sysUiNodes)
-                    }
+            val sysUiNodes = ArrayList<AccessibilityNodeInfo>()
+            sysUiWindows.map { it?.root }.forEach {
+                if (it != null) {
+                    addAllNodesToList(it, sysUiNodes)
                 }
-
-                if (isDebug) {
-                    Log.e(
-                        App.DEBUG_LOG_TAG,
-                        sysUiNodes.filter { it.isVisibleToUser }.map { it.viewIdResourceName }
-                            .toString()
-                    )
-
-                    delegate.view.frame.setNewDebugIdItems(sysUiNodes.filter { it.isVisibleToUser }.mapNotNull { it.viewIdResourceName })
-                }
-
-                //Generate "layer" values for the System UI window and for the topmost app window, if
-                //it exists.
-                currentAppLayer = if (appIndex != -1) windows.size - appIndex else appIndex
-                currentSysUiLayer = if (sysUiIndex != -1) windows.size - sysUiIndex else sysUiIndex
-
-                if (prefManager.hideOnSecurityPage) {
-                    onMainLockscreen = sysUiNodes.find {
-                        (it.viewIdResourceName == "com.android.systemui:id/notification_panel" && it.isVisibleToUser)
-                                || (it.viewIdResourceName == "com.android.systemui:id/left_button" && it.isVisibleToUser)
-                    } != null
-                }
-
-                if (prefManager.hideOnNotificationShade) {
-                    //Used for "Hide When Notification Shade Shown" so we know when it's actually expanded.
-                    //Some devices don't even have left shortcuts, so also check for keyguard_indication_area.
-                    //Just like the showingSecurityInput check, this is probably unreliable for some devices.
-                    showingNotificationsPanel = sysUiNodes.find {
-                        (it.viewIdResourceName == "com.android.systemui:id/quick_settings_panel" && it.isVisibleToUser)
-                                || (it.viewIdResourceName == "com.android.systemui:id/settings_button" && it.isVisibleToUser)
-                                || (it.viewIdResourceName == "com.android.systemui:id/tile_label" && it.isVisibleToUser)
-                    } != null
-                }
-
-                val presentIds = prefManager.presentIds
-                if (presentIds.isNotEmpty()) {
-                    hideForPresentIds = sysUiNodes.any { presentIds.contains(it.viewIdResourceName) && it.isVisibleToUser }
-                }
-
-                val nonPresentIds = prefManager.nonPresentIds
-                if (nonPresentIds.isNotEmpty()) {
-                    hideForNonPresentIds = sysUiNodes.none { nonPresentIds.contains(it.viewIdResourceName) } || sysUiNodes.any { nonPresentIds.contains(it.viewIdResourceName) && !it.isVisibleToUser }
-                }
-
-                sysUiNodes.forEach { it.recycle() }
             }
+
+            if (isDebug) {
+                Log.e(
+                    App.DEBUG_LOG_TAG,
+                    sysUiNodes.filter { it.isVisibleToUser }.map { it.viewIdResourceName }
+                        .toString()
+                )
+
+                delegate.view.frame.setNewDebugIdItems(sysUiNodes.filter { it.isVisibleToUser }.mapNotNull { it.viewIdResourceName })
+            }
+
+            //Generate "layer" values for the System UI window and for the topmost app window, if
+            //it exists.
+            currentAppLayer = if (appIndex != -1) windows.size - appIndex else appIndex
+            currentSysUiLayer = if (sysUiIndex != -1) windows.size - sysUiIndex else sysUiIndex
+
+            if (prefManager.hideOnSecurityPage) {
+                onMainLockscreen = sysUiNodes.find {
+                    (it.viewIdResourceName == "com.android.systemui:id/notification_panel" && it.isVisibleToUser)
+                            || (it.viewIdResourceName == "com.android.systemui:id/left_button" && it.isVisibleToUser)
+                } != null
+            }
+
+            if (prefManager.hideOnNotificationShade) {
+                //Used for "Hide When Notification Shade Shown" so we know when it's actually expanded.
+                //Some devices don't even have left shortcuts, so also check for keyguard_indication_area.
+                //Just like the showingSecurityInput check, this is probably unreliable for some devices.
+                showingNotificationsPanel = sysUiNodes.find {
+                    (it.viewIdResourceName == "com.android.systemui:id/quick_settings_panel" && it.isVisibleToUser)
+                            || (it.viewIdResourceName == "com.android.systemui:id/settings_button" && it.isVisibleToUser)
+                            || (it.viewIdResourceName == "com.android.systemui:id/tile_label" && it.isVisibleToUser)
+                } != null
+            }
+
+            val presentIds = prefManager.presentIds
+            if (presentIds.isNotEmpty()) {
+                hideForPresentIds = sysUiNodes.any { presentIds.contains(it.viewIdResourceName) && it.isVisibleToUser }
+            }
+
+            val nonPresentIds = prefManager.nonPresentIds
+            if (nonPresentIds.isNotEmpty()) {
+                hideForNonPresentIds = sysUiNodes.none { nonPresentIds.contains(it.viewIdResourceName) } || sysUiNodes.any { nonPresentIds.contains(it.viewIdResourceName) && !it.isVisibleToUser }
+            }
+
+            sysUiNodes.forEach { it.recycle() }
         }
 
         if (canShow()) {
