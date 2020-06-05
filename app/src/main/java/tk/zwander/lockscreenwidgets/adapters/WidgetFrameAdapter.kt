@@ -149,6 +149,8 @@ class WidgetFrameAdapter(
                 launch {
                     onResize()
 
+                    removeButtonShown = currentRemoveButtonPosition == adapterPosition
+
                     val widgetInfo = withContext(Dispatchers.Main) {
                         manager.getAppWidgetInfo(data.id)
                     }
