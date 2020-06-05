@@ -131,7 +131,7 @@ class AddWidgetActivity : AppCompatActivity(), CoroutineScope by MainScope() {
         val apps = withContext(Dispatchers.Main) {
             val apps = HashMap<String, AppInfo>()
 
-            appWidgetManager.installedProviders.forEach {
+            (appWidgetManager.installedProviders + appWidgetManager.getInstalledProviders(AppWidgetProviderInfo.WIDGET_CATEGORY_KEYGUARD)).forEach {
                 val appInfo = packageManager.getApplicationInfo(it.provider.packageName, 0)
 
                 val appName = packageManager.getApplicationLabel(appInfo)

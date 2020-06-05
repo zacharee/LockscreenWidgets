@@ -120,4 +120,5 @@
     <string name="configure_widget_error">Unable to configure the widget %s due to lack of permissions. Please contact the app developer or device manufacturer.</string>
     <string name="bind_widget_error">Unable to bind the widget %s due to lack of permissions. Please contact the app developer or device manufacturer.</string>
     <string name="invalid_id_backup_error">Invalid ID list.</string>
+    <string name="enable_debug_log_msg">Please enable the debug log option to see IDs here.</string>
 </resources>

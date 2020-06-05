@@ -15,6 +15,8 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import kotlinx.android.synthetic.main.widget_frame.view.*
 import tk.zwander.lockscreenwidgets.App
 import tk.zwander.lockscreenwidgets.activities.RequestUnlockActivity
+import tk.zwander.lockscreenwidgets.appwidget.Factory
+import tk.zwander.lockscreenwidgets.appwidget.IDListProvider
 import tk.zwander.lockscreenwidgets.util.*
 
 /**
@@ -250,6 +252,14 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
                     }
                 }
 
+                val items = sysUiNodes.filter { it.isVisibleToUser }.mapNotNull { it.viewIdResourceName }
+
+                Factory.sList.apply {
+                    clear()
+                    addAll(items)
+                }
+                IDListProvider.sendUpdate(this)
+
                 if (isDebug) {
                     Log.e(
                         App.DEBUG_LOG_TAG,
@@ -257,7 +267,7 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
                             .toString()
                     )
 
-                    delegate.view.frame.setNewDebugIdItems(sysUiNodes.filter { it.isVisibleToUser }.mapNotNull { it.viewIdResourceName })
+                    delegate.view.frame.setNewDebugIdItems(items)
                 }
 
                 //Generate "layer" values for the System UI window and for the topmost app window, if
@@ -319,6 +329,9 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
                 serviceInfo = serviceInfo.apply {
                     notificationTimeout = prefManager.accessibilityEventDelay.toLong()
                 }
+            }
+            PrefManager.KEY_DEBUG_LOG -> {
+                IDListProvider.sendUpdate(this)
             }
         }
     }

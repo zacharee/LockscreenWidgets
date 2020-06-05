@@ -68,6 +68,17 @@
                 <action android:name="android.service.notification.NotificationListenerService" />
             </intent-filter>
         </service>
+        <service android:name=".services.IDWidgetService"
+            android:permission="android.permission.BIND_REMOTEVIEWS"
+            />
+
+        <receiver android:name=".appwidget.IDListProvider">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data android:name="android.appwidget.provider"
+                android:resource="@xml/id_list_provider_info" />
+        </receiver>
 
         <meta-data android:name="google_analytics_adid_collection_enabled" android:value="false" />
     </application>
