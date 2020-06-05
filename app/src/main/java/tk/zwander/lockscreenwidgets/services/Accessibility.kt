@@ -130,6 +130,7 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
         delegate.apply {
             view.frame.onAfterResizeListener = {
                 adapter.onResizeObservable.notifyObservers()
+                delegate.updateWallpaperLayerIfNeeded()
             }
 
             view.frame.onMoveListener = { velX, velY ->
