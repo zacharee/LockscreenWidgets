@@ -1,5 +1,6 @@
 package tk.zwander.lockscreenwidgets.host
 
+import android.appwidget.AppWidgetHost
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
@@ -11,6 +12,13 @@ import net.bytebuddy.android.AndroidClassLoadingStrategy
 import net.bytebuddy.implementation.MethodDelegation
 import net.bytebuddy.implementation.SuperMethodCall
 
+/**
+ * An implementation of [AppWidgetHost] used on devices where the hidden API object
+ * [RemoteViews.OnClickHandler] is a class (i.e. Android Pie and below).
+ * The handler is implemented through dynamic bytecode generation using ByteBuddy.
+ * Since Lockscreen Widgets targets an API level above Pie, the [RemoteViews.OnClickHandler]
+ * visible to it is an interface, so we can't just create a stub class.
+ */
 class WidgetHostClass(context: Context, id: Int, unlockCallback: (() -> Unit)?)
     : WidgetHostCompat(
     context, id, ByteBuddy()

@@ -8,6 +8,15 @@ import android.os.Looper
 import android.widget.RemoteViews
 import tk.zwander.lockscreenwidgets.views.MinPaddingAppWidgetHostView
 
+/**
+ * Base widget host class. [WidgetHostClass] and [WidgetHostInterface] extend this class and
+ * are used conditionally, depending on whether [RemoteViews.OnClickHandler] is a class or interface
+ * on the current device.
+ *
+ * @param context a Context object
+ * @param id the ID of this widget host
+ * @param onClickHandler the [RemoteViews.OnClickHandler] implementation defined in the subclass
+ */
 abstract class WidgetHostCompat(
     context: Context,
     id: Int,

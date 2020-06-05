@@ -1,5 +1,6 @@
 package tk.zwander.lockscreenwidgets.host
 
+import android.appwidget.AppWidgetHost
 import android.annotation.SuppressLint
 import android.app.ActivityOptions
 import android.app.PendingIntent
@@ -11,6 +12,11 @@ import java.lang.reflect.InvocationHandler
 import java.lang.reflect.Method
 import java.lang.reflect.Proxy
 
+/**
+ * An implementation of [AppWidgetHost] used on devices where the hidden API object
+ * [RemoteViews.OnClickHandler] is an interface (i.e. Android 10 and above). Java makes
+ * it pretty easy to implement interfaces through reflection, so no ByteBuddy needed here.
+ */
 class WidgetHostInterface(context: Context, id: Int, unlockCallback: (() -> Unit)?)
     : WidgetHostCompat(
     context, id, Proxy.newProxyInstance(

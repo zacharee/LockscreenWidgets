@@ -7,6 +7,10 @@ import tk.zwander.lockscreenwidgets.R
 import tk.zwander.lockscreenwidgets.fragments.dialog.MessageDialogPreferenceFragment
 import tk.zwander.lockscreenwidgets.prefs.MessageDialogPreference
 
+/**
+ * The usage page.
+ * Show some explanations for specific options and features.
+ */
 class UsageFragment : PreferenceFragmentCompat() {
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         setPreferencesFromResource(R.xml.prefs_usage, rootKey)

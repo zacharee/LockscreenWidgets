@@ -12,6 +12,11 @@ import tk.zwander.lockscreenwidgets.activities.OnboardingActivity
 import tk.zwander.lockscreenwidgets.util.PrefManager
 import tk.zwander.lockscreenwidgets.util.isNotificationListenerActive
 
+/**
+ * The settings page.
+ * Most needed logic is handled by AndroidX, but there are some cases where
+ * we need to either request permissions or pass extras to Activities we launch.
+ */
 class SettingsFragment : PreferenceFragmentCompat() {
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         setPreferencesFromResource(R.xml.prefs_settings, rootKey)

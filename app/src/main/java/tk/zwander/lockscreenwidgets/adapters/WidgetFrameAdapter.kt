@@ -13,13 +13,10 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import kotlinx.android.synthetic.main.widget_page_holder.view.*
 import kotlinx.coroutines.*
-import tk.zwander.lockscreenwidgets.IRemoveConfirmCallback
 import tk.zwander.lockscreenwidgets.R
 import tk.zwander.lockscreenwidgets.activities.AddWidgetActivity
-import tk.zwander.lockscreenwidgets.activities.RemoveWidgetDialogActivity
 import tk.zwander.lockscreenwidgets.data.WidgetData
 import tk.zwander.lockscreenwidgets.host.WidgetHostCompat
-import tk.zwander.lockscreenwidgets.interfaces.ItemTouchHelperAdapter
 import tk.zwander.lockscreenwidgets.observables.OnResizeObservable
 import tk.zwander.lockscreenwidgets.observables.RemoveButtonObservable
 import tk.zwander.lockscreenwidgets.util.calculateWidgetWidth
@@ -36,7 +33,7 @@ class WidgetFrameAdapter(
     private val host: WidgetHostCompat,
     private val params: WindowManager.LayoutParams,
     private val onRemoveCallback: (WidgetFrameAdapter, WidgetData) -> Unit
-) : RecyclerView.Adapter<RecyclerView.ViewHolder>(), ItemTouchHelperAdapter, CoroutineScope by MainScope() {
+) : RecyclerView.Adapter<RecyclerView.ViewHolder>(), CoroutineScope by MainScope() {
     companion object {
         const val VIEW_TYPE_WIDGET = 0
         const val VIEW_TYPE_ADD = 1
@@ -85,7 +82,7 @@ class WidgetFrameAdapter(
         }
     }
 
-    override fun onMove(from: Int, to: Int): Boolean {
+    fun onMove(from: Int, to: Int): Boolean {
         return if (to < widgets.size && from < widgets.size) {
             if (from < to) {
                 for (i in from until to) {

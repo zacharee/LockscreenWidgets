@@ -5,11 +5,17 @@ import android.app.Dialog
 import android.content.DialogInterface
 import android.os.Bundle
 import android.view.WindowManager
-import androidx.appcompat.app.AlertDialog
 import androidx.preference.PreferenceDialogFragmentCompat
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import tk.zwander.lockscreenwidgets.prefs.MessageDialogPreference
 
+/**
+ * Essentially an AlertDialog implementation in the form of a Fragment.
+ * Used by [MessageDialogPreference]
+ */
 class MessageDialogPreferenceFragment : PreferenceDialogFragmentCompat() {
+    //We're replacing the standard AlertDialog.Builder with MaterialAlertDialogBuilder
+    //so we have to replicate some internal logic
     private var mWhichButtonClicked: Int
         get() = PreferenceDialogFragmentCompat::class.java
             .getDeclaredField("mWhichButtonClicked")
@@ -42,8 +48,6 @@ class MessageDialogPreferenceFragment : PreferenceDialogFragmentCompat() {
         }
 
         onPrepareDialogBuilder(builder)
-
-        // Create the dialog
 
         // Create the dialog
         val dialog: Dialog = builder.create()
