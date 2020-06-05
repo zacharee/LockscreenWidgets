@@ -9,6 +9,11 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import tk.zwander.lockscreenwidgets.IRemoveConfirmCallback
 import tk.zwander.lockscreenwidgets.R
 
+/**
+ * An Activity that simply shows a confirmation dialog.
+ * This is used to confirm whether the user truly wants to remove
+ * a specific widget from the frame.
+ */
 class RemoveWidgetDialogActivity : AppCompatActivity() {
     companion object {
         const val EXTRA_CALLBACK = "CALLBACK"
@@ -30,8 +35,12 @@ class RemoveWidgetDialogActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        //Make sure we show over the lock scree
         window?.addFlags(WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED)
 
+        //Create and show the dialog.
+        //Make sure to finish this Activity if the dialog
+        //is dismissed for any reason.
         MaterialAlertDialogBuilder(this)
             .setTitle(R.string.alert_remove_widget_confirm)
             .setMessage(R.string.alert_remove_widget_confirm_desc)

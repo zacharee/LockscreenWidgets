@@ -6,6 +6,12 @@ import kotlinx.android.parcel.Parceler
 import kotlinx.android.parcel.Parcelize
 import kotlinx.android.parcel.TypeParceler
 
+/**
+ * Contain the data about a specific on-screen ID.
+ *
+ * @property id the fully-qualified ID
+ * @property type whether this ID was added, removed, or hasn't changed state
+ */
 @Parcelize
 @TypeParceler<IDData.IDType, IDData.IDParceler>
 data class IDData(

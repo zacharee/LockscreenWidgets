@@ -14,6 +14,9 @@ import tk.zwander.lockscreenwidgets.R
 import tk.zwander.lockscreenwidgets.data.AppInfo
 import tk.zwander.lockscreenwidgets.data.WidgetListInfo
 
+/**
+ * Handle the hosting of the list of apps that have widgets that can be added to the widget frame.
+ */
 class AppAdapter(context: Context, private val selectionCallback: (provider: WidgetListInfo) -> Unit) : RecyclerView.Adapter<AppAdapter.AppVH>() {
     private val items = SortedList(AppInfo::class.java, object : SortedList.Callback<AppInfo>() {
         override fun areItemsTheSame(item1: AppInfo?, item2: AppInfo?): Boolean {
@@ -74,6 +77,9 @@ class AppAdapter(context: Context, private val selectionCallback: (provider: Wid
         this.items.addAll(items)
     }
 
+    /**
+     * Handle loading and displaying app info, as well as list of widgets
+     */
     inner class AppVH(view: View) : RecyclerView.ViewHolder(view) {
         private val adapter = AddWidgetAdapter(picasso, selectionCallback)
 

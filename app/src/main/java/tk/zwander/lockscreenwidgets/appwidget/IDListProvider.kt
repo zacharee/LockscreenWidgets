@@ -12,10 +12,13 @@ import tk.zwander.lockscreenwidgets.R
 import tk.zwander.lockscreenwidgets.services.IDWidgetService
 import tk.zwander.lockscreenwidgets.util.prefManager
 
+/**
+ * A widget-form alternative to the debug ID overlay. This is a keyguard-only widget that can be added
+ * to Lockscreen Widgets to view the ID list without distrupting the widget frame.
+ */
 class IDListProvider : AppWidgetProvider() {
     companion object {
         const val ACTION_UPDATE_IDS = "UPDATE_IDS"
-        const val EXTRA_IDS = "ID_LIST"
 
         fun sendUpdate(context: Context) {
             val intent = Intent(ACTION_UPDATE_IDS)
@@ -27,6 +30,7 @@ class IDListProvider : AppWidgetProvider() {
 
     override fun onReceive(context: Context, intent: Intent?) {
         when (intent?.action) {
+            //There's a new list of IDs; make sure the factory is notified
             ACTION_UPDATE_IDS -> {
                 val manager = AppWidgetManager.getInstance(context)
                 val component = ComponentName(context, IDListProvider::class.java)

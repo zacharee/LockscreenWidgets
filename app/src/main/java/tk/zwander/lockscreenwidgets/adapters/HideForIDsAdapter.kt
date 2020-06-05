@@ -6,8 +6,12 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.SortedList
 import kotlinx.android.synthetic.main.hide_for_ids_item.view.*
+import tk.zwander.lockscreenwidgets.util.PrefManager
 import tk.zwander.lockscreenwidgets.R
 
+/**
+ * The adapter to handle hosting the IDs listed in [PrefManager.presentIds] or [PrefManager.nonPresentIds]
+ */
 class HideForIDsAdapter : RecyclerView.Adapter<HideForIDsAdapter.HideForIDsVH>() {
     val items = SortedList(
         String::class.java,
@@ -56,6 +60,9 @@ class HideForIDsAdapter : RecyclerView.Adapter<HideForIDsAdapter.HideForIDsVH>()
         holder.onBind(items[position])
     }
 
+    /**
+     * Handle displaying the ID representing this item
+     */
     inner class HideForIDsVH(view: View) : RecyclerView.ViewHolder(view) {
         fun onBind(id: String) {
             itemView.id_text.text = id

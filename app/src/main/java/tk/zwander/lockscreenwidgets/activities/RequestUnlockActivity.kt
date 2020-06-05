@@ -11,7 +11,7 @@ import tk.zwander.lockscreenwidgets.services.Accessibility
 
 /**
  * Used when the lock screen needs to be dismissed.
- * This is either started when the hide_for_ids button is tapped from the lock screen
+ * This is either started when the add widget button is tapped from the lock screen
  * or when Lockscreen Widgets detects an Activity being launched from a widget.
  */
 class RequestUnlockActivity : AppCompatActivity() {

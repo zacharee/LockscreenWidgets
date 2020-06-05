@@ -14,8 +14,12 @@ import com.squareup.picasso.Request
 import com.squareup.picasso.RequestHandler
 import kotlinx.android.synthetic.main.widget_item.view.*
 import tk.zwander.lockscreenwidgets.R
+import tk.zwander.lockscreenwidgets.activities.AddWidgetActivity
 import tk.zwander.lockscreenwidgets.data.WidgetListInfo
 
+/**
+ * Adapter to host widget previews in [AddWidgetActivity] for a specific app.
+ */
 class AddWidgetAdapter(private val picasso: Picasso, private val selectionCallback: (provider: WidgetListInfo) -> Unit) :
     RecyclerView.Adapter<AddWidgetAdapter.WidgetVH>() {
     private val widgets = SortedList(WidgetListInfo::class.java, object : SortedList.Callback<WidgetListInfo>() {
@@ -67,9 +71,12 @@ class AddWidgetAdapter(private val picasso: Picasso, private val selectionCallba
 
     fun addItem(item: WidgetListInfo) {
         widgets.add(item)
-        notifyDataSetChanged()
     }
 
+    /**
+     * Take care of loading in widget preview image or app icon,
+     * along with widget label.
+     */
     class WidgetVH(view: View) : RecyclerView.ViewHolder(view) {
         fun parseInfo(info: WidgetListInfo, picasso: Picasso) {
             itemView.widget_name.text = info.widgetName
@@ -96,6 +103,10 @@ class AddWidgetAdapter(private val picasso: Picasso, private val selectionCallba
         }
     }
 
+    /**
+     * A request handler for Picasso to load in an app's icon by
+     * package name
+     */
     class AppIconRequestHandler(context: Context) : RequestHandler() {
         companion object {
             const val SCHEME = "package"
@@ -111,12 +122,18 @@ class AddWidgetAdapter(private val picasso: Picasso, private val selectionCallba
             val pName = request.uri.schemeSpecificPart
 
             val img = pm.getApplicationIcon(pName).mutate().toBitmap()
+                //Create a Bitmap copy since Android recycles the one from `toBitmap()`
+                //if it's a BitmapDrawable
                 .run { copy(config, false) }
 
             return Result(img, Picasso.LoadedFrom.DISK)
         }
     }
 
+    /**
+     * A request handler for Picasso to load in a resource Drawable
+     * from a remote package.
+     */
     class RemoteResourcesIconHandler(context: Context) : RequestHandler() {
         companion object {
             const val SCHEME = "remote_res_widget"
@@ -135,6 +152,8 @@ class AddWidgetAdapter(private val picasso: Picasso, private val selectionCallba
             val id = pathSegments[0].toInt()
 
             val img = pm.getResourcesForApplication(pName).getDrawable(id)
+                //Create a Bitmap copy since Android recycles the one from `toBitmap()`
+                //if it's a BitmapDrawable
                 .mutate().toBitmap().run { copy(config, false) }
 
             return Result(img, Picasso.LoadedFrom.DISK)

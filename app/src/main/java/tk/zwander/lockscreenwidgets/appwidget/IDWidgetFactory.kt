@@ -1,18 +1,17 @@
 package tk.zwander.lockscreenwidgets.appwidget
 
-import android.content.BroadcastReceiver
 import android.content.Context
-import android.content.Intent
 import android.graphics.Color
 import android.widget.RemoteViews
 import android.widget.RemoteViewsService
 import androidx.recyclerview.widget.SortedList
 import tk.zwander.lockscreenwidgets.R
-import tk.zwander.lockscreenwidgets.appwidget.IDListProvider.Companion.ACTION_UPDATE_IDS
-import tk.zwander.lockscreenwidgets.appwidget.IDListProvider.Companion.EXTRA_IDS
 import tk.zwander.lockscreenwidgets.data.IDData
 
-class Factory(private val context: Context) : RemoteViewsService.RemoteViewsFactory {
+/**
+ * Essentially an adapter to host the current ID list in Lockscreen Widgets' widget
+ */
+class IDWidgetFactory(private val context: Context) : RemoteViewsService.RemoteViewsFactory {
     companion object {
         val sList = ArrayList<String>()
     }

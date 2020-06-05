@@ -4,7 +4,6 @@ import android.accessibilityservice.AccessibilityService
 import android.annotation.SuppressLint
 import android.app.KeyguardManager
 import android.content.*
-import android.graphics.PixelFormat
 import android.os.PowerManager
 import android.util.Log
 import android.view.*
@@ -15,7 +14,7 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import kotlinx.android.synthetic.main.widget_frame.view.*
 import tk.zwander.lockscreenwidgets.App
 import tk.zwander.lockscreenwidgets.activities.RequestUnlockActivity
-import tk.zwander.lockscreenwidgets.appwidget.Factory
+import tk.zwander.lockscreenwidgets.appwidget.IDWidgetFactory
 import tk.zwander.lockscreenwidgets.appwidget.IDListProvider
 import tk.zwander.lockscreenwidgets.util.*
 
@@ -254,7 +253,7 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
 
                 val items = sysUiNodes.filter { it.isVisibleToUser }.mapNotNull { it.viewIdResourceName }
 
-                Factory.sList.apply {
+                IDWidgetFactory.sList.apply {
                     clear()
                     addAll(items)
                 }

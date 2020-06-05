@@ -4,7 +4,12 @@ import android.os.Bundle
 import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
 import tk.zwander.lockscreenwidgets.R
+import tk.zwander.lockscreenwidgets.fragments.UsageFragment
 
+/**
+ * Host the usage instructions for Lockscreen Widgets.
+ * See [UsageFragment]
+ */
 class UsageActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

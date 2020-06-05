@@ -28,6 +28,9 @@ import tk.zwander.lockscreenwidgets.util.pxAsDp
 import java.util.*
 import kotlin.collections.ArrayList
 
+/**
+ * The adapter for the widget frame itself.
+ */
 class WidgetFrameAdapter(
     private val manager: AppWidgetManager,
     private val host: WidgetHostCompat,
@@ -119,6 +122,11 @@ class WidgetFrameAdapter(
         }
     }
 
+    /**
+     * Represents an individual widget.
+     * The item will be properly sized based on the number of columns the user
+     * has specified for the frame.
+     */
     @SuppressLint("ClickableViewAccessibility")
     inner class WidgetVH(view: View) : RecyclerView.ViewHolder(view) {
         var removeButtonShown: Boolean
@@ -158,6 +166,9 @@ class WidgetFrameAdapter(
                     widget_holder.apply {
                         removeAllViews()
                         try {
+                            //We're recreating the AppWidgetHostView here each time, which probably isn't the most efficient
+                            //way to do things. However, it's not trivial to just set a new source on an AppWidgetHostView,
+                            //so this makes the most sense right now.
                             addView(withContext(Dispatchers.Main) {
                                 host.createView(itemView.context, data.id, widgetInfo).apply {
                                     val width = context.pxAsDp(itemView.width).toInt()
@@ -166,6 +177,8 @@ class WidgetFrameAdapter(
                                 }
                             })
                         } catch (e: SecurityException) {
+                            //There was an error adding the widget. Some OEMs (OPPO...) like to add permissions requirements to their
+                            //widgets, which can make it impossible for third-party non-launcher apps to bind to them.
                             Toast.makeText(context, resources.getString(R.string.bind_widget_error, widgetInfo.provider), Toast.LENGTH_LONG).show()
                             context.prefManager.currentWidgets = context.prefManager.currentWidgets.apply {
                                 remove(data)
@@ -177,6 +190,7 @@ class WidgetFrameAdapter(
             }
         }
 
+        //Make sure the item's width is properly updated on a frame resize, or on initial bind
         fun onResize() {
             itemView.apply {
                 layoutParams = (layoutParams as ViewGroup.LayoutParams).apply {
@@ -186,6 +200,10 @@ class WidgetFrameAdapter(
         }
     }
 
+    /**
+     * Represents the "add button" page when no widgets are currently
+     * added to the frame.
+     */
     inner class AddWidgetVH(view: View) : RecyclerView.ViewHolder(view) {
         init {
             itemView.setOnClickListener {

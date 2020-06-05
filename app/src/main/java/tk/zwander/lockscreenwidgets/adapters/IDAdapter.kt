@@ -10,6 +10,9 @@ import androidx.recyclerview.widget.SortedList
 import tk.zwander.lockscreenwidgets.data.IDData
 import kotlin.collections.ArrayList
 
+/**
+ * Host the IDs currently on-screen (or just-removed), to be displayed in the debug ID frame
+ */
 class IDAdapter : RecyclerView.Adapter<IDAdapter.BaseVH>() {
     private val oldItems = ArrayList<String>()
     private val items = SortedList(IDData::class.java, object: SortedList.Callback<IDData>() {
@@ -48,6 +51,9 @@ class IDAdapter : RecyclerView.Adapter<IDAdapter.BaseVH>() {
         }
     })
 
+    /**
+     * Process a new list of IDs, marking any as added, removed, or the same
+     */
     fun setItems(newItems: List<String>) {
         if (newItems.containsAll(oldItems) && oldItems.containsAll(newItems))
             return
