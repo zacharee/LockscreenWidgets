@@ -28,6 +28,12 @@ import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.collections.HashSet
 
+/**
+ * Configuration Activity for the "Hide on Present IDs" and "Hide on Non-Present IDs"
+ * options. The appropriate list of IDs will be loaded from and saved to SharedPreferences.
+ *
+ * The user can add, remove, back-up, and restore IDs from this Activity.
+ */
 class HideForIDsActivity : AppCompatActivity() {
     companion object {
         const val REQ_SAVE = 101
@@ -44,13 +50,19 @@ class HideForIDsActivity : AppCompatActivity() {
         }
     }
 
+    /**
+     * Enum class to track the current ID list type
+     */
     enum class Type {
         PRESENT,
         NON_PRESENT,
         NONE
     }
 
-    //https://github.com/kitek/android-rv-swipe-delete/blob/master/app/src/main/java/pl/kitek/rvswipetodelete/SwipeToDeleteCallback.kt
+    /**
+     * An implementation of [ItemTouchHelper.SimpleCallback] that provides a framework for swipe-to-delete in either direction.
+     * Modified from: https://github.com/kitek/android-rv-swipe-delete/blob/master/app/src/main/java/pl/kitek/rvswipetodelete/SwipeToDeleteCallback.kt
+     */
     abstract class SwipeToDeleteCallback(context: Context) : ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT) {
         private val deleteIcon = ContextCompat.getDrawable(context, R.drawable.ic_baseline_delete_24)!!
         private val intrinsicWidth = deleteIcon.intrinsicWidth
@@ -64,9 +76,14 @@ class HideForIDsActivity : AppCompatActivity() {
             viewHolder: RecyclerView.ViewHolder,
             target: RecyclerView.ViewHolder
         ): Boolean {
+            //This callback implementation isn't for moving items.
             return false
         }
 
+        /**
+         * Take care of drawing the delete icon behind the item
+         * being swiped.
+         */
         override fun onChildDraw(
             c: Canvas,
             recyclerView: RecyclerView,
@@ -86,19 +103,19 @@ class HideForIDsActivity : AppCompatActivity() {
                 return
             }
 
-            // Draw the red delete background
+            //Draw the red delete background
             background.color = backgroundColor
             background.setBounds(itemView.left, itemView.top, itemView.right, itemView.bottom)
             background.draw(c)
 
-            // Calculate position of delete icon
+            //Calculate position of delete icon
             val deleteIconTop = itemView.top + (itemHeight - intrinsicHeight) / 2
             val deleteIconMargin = (itemHeight - intrinsicHeight) / 2
             val deleteIconLeft = if (dX < 0) itemView.right - deleteIconMargin - intrinsicWidth else itemView.left + deleteIconMargin
             val deleteIconRight = if (dX < 0) itemView.right - deleteIconMargin else itemView.left + deleteIconMargin + intrinsicWidth
             val deleteIconBottom = deleteIconTop + intrinsicHeight
 
-            // Draw the delete icon
+            //Draw the delete icon
             deleteIcon.setBounds(deleteIconLeft, deleteIconTop, deleteIconRight, deleteIconBottom)
             deleteIcon.draw(c)
 
@@ -138,6 +155,7 @@ class HideForIDsActivity : AppCompatActivity() {
 
         val swipeHandler = object : SwipeToDeleteCallback(this) {
             override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
+                //Make sure we remove the swiped item from all lists.
                 items.remove(adapter.items.removeItemAt(viewHolder.adapterPosition))
             }
         }
@@ -157,6 +175,11 @@ class HideForIDsActivity : AppCompatActivity() {
                 true
             }
             R.id.add -> {
+                //Show the add ID dialog.
+                //The user can either enter a fully-qualified ID,
+                //or just the ID itself. A basic ID will have the System UI
+                //namespace prepended. A fully-qualified ID will be entered as-is
+                //(useful if the ID isn't part of the System UI namespace).
                 val inputView = LayoutInflater.from(this).inflate(R.layout.add_id_dialog, null)
                 MaterialAlertDialogBuilder(this)
                     .setView(inputView)
@@ -176,6 +199,7 @@ class HideForIDsActivity : AppCompatActivity() {
                 true
             }
             R.id.backup -> {
+                //Start the list backup flow.
                 val backupIntent = Intent(Intent.ACTION_CREATE_DOCUMENT)
                 backupIntent.type = "text/*"
                 backupIntent.putExtra(Intent.EXTRA_TITLE, "LockscreenWidgets_ID_Backup_${format.format(Date())}.lsw")
@@ -184,6 +208,7 @@ class HideForIDsActivity : AppCompatActivity() {
                 true
             }
             R.id.restore -> {
+                //Start the list restore flow.
                 val restoreIntent = Intent(Intent.ACTION_OPEN_DOCUMENT)
                 restoreIntent.type = "text/*"
 
@@ -200,6 +225,7 @@ class HideForIDsActivity : AppCompatActivity() {
         if (resultCode == Activity.RESULT_OK) {
             when (requestCode) {
                 REQ_SAVE -> {
+                    //Write the current list of IDs to the specified file
                     contentResolver.openOutputStream(data?.data ?: return)?.use { out ->
                         val stringified = gson.toJson(items)
 
@@ -209,6 +235,7 @@ class HideForIDsActivity : AppCompatActivity() {
                     }
                 }
                 REQ_OPEN -> {
+                    //Copy the IDs stored in the specified file to the list here
                     contentResolver.openInputStream(data?.data ?: return)?.use { input ->
                         val builder = StringBuilder()
 
@@ -243,6 +270,7 @@ class HideForIDsActivity : AppCompatActivity() {
     override fun onDestroy() {
         super.onDestroy()
 
+        //Persist the current list to the proper preference
         when (type) {
             Type.PRESENT -> prefManager.presentIds = items
             Type.NON_PRESENT -> prefManager.nonPresentIds = items

@@ -24,6 +24,13 @@ class OnboardingActivity : IntroActivity() {
 
         const val REQ_STORAGE_PERM = 100
 
+        /**
+         * Start [OnboardingActivity] with the requested [RetroMode]
+         *
+         * @param context a Context object
+         * @param retroMode specify a [RetroMode] if this instance is being used
+         * to request a specific permission and not showing the entire intro
+         */
         fun start(context: Context, retroMode: RetroMode = RetroMode.NONE) {
             val intent = Intent(context, OnboardingActivity::class.java)
             intent.putExtra(EXTRA_RETRO_MODE, retroMode.toString())
@@ -32,6 +39,15 @@ class OnboardingActivity : IntroActivity() {
             context.startActivity(intent)
         }
 
+        /**
+         * Same as [OnboardingActivity.start] but will return a result stating
+         * whether or not the user successfully completed the setup
+         *
+         * @param activity an Activity reference
+         * @param code the request code for returning the result
+         * @param retroMode specify a [RetroMode] if this instance is being used
+         * to request a specific permission and not showing the entire intro
+         */
         fun startForResult(activity: Activity, code: Int, retroMode: RetroMode = RetroMode.NONE) {
             val intent = Intent(activity, OnboardingActivity::class.java)
             intent.putExtra(EXTRA_RETRO_MODE, retroMode.toString())
@@ -40,6 +56,11 @@ class OnboardingActivity : IntroActivity() {
         }
     }
 
+    /**
+     * Enum class to keep track of whether this instance is
+     * showing the entire intro sequence or just requesting a
+     * specific permission
+     */
     enum class RetroMode {
         ACCESSIBILITY,
         NOTIFICATION,
@@ -52,6 +73,7 @@ class OnboardingActivity : IntroActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        //Only add these slides if this instance is the full intro
         if (retroMode == RetroMode.NONE) {
             addSlide(
                 SimpleSlide.Builder()
@@ -72,6 +94,8 @@ class OnboardingActivity : IntroActivity() {
             )
         }
 
+        //Add this slide if we're requesting Accessibility permission or if we're running
+        //the full intro.
         if (retroMode == RetroMode.ACCESSIBILITY || retroMode == RetroMode.NONE) {
             addSlide(
                 object : SimpleSlide(
@@ -93,6 +117,8 @@ class OnboardingActivity : IntroActivity() {
             )
         }
 
+        //Add this slide if we're requesting Notification access or if we're running
+        //the full intro.
         if (retroMode == RetroMode.NOTIFICATION || retroMode == RetroMode.NONE) {
             addSlide(
                 object : SimpleSlide(
@@ -114,7 +140,9 @@ class OnboardingActivity : IntroActivity() {
             )
         }
 
-        if (retroMode == RetroMode.STORAGE) {
+        //Add this slide if we're requesting storage access or if we're running
+        //the full intro.
+        if (retroMode == RetroMode.STORAGE || retroMode == RetroMode.NONE) {
             addSlide(
                 object : SimpleSlide(
                     Builder()
@@ -137,6 +165,7 @@ class OnboardingActivity : IntroActivity() {
             )
         }
 
+        //Only add the "done" slide if we're running the full intro.
         if (retroMode == RetroMode.NONE) {
             addSlide(
                 SimpleSlide.Builder()
