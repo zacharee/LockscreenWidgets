@@ -15,7 +15,9 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager
 
 /**
  * Used to notify the Accessibility service about changes in notification count,
- * along with the actual count. If the > min priority notification count is > 0,
+ * along with the actual count. If the number of notifications with
+ * [Notification.visibility] == [Notification.VISIBILITY_PUBLIC] or [Notification.VISIBILITY_PRIVATE]
+ * AND [Notification.priority] > [Notification.PRIORITY_MIN] (importance for > Nougat) is greater than 0,
  * and the user has the option enabled, the widget frame will hide.
  */
 class NotificationListener : NotificationListenerService() {
@@ -35,7 +37,8 @@ class NotificationListener : NotificationListenerService() {
         }
 
         fun register(context: Context) {
-            LocalBroadcastManager.getInstance(context).registerReceiver(this, IntentFilter(ACTION_NEW_NOTIFICATION_COUNT))
+            LocalBroadcastManager.getInstance(context)
+                .registerReceiver(this, IntentFilter(ACTION_NEW_NOTIFICATION_COUNT))
         }
 
         fun unregister(context: Context) {
@@ -59,13 +62,17 @@ class NotificationListener : NotificationListenerService() {
 
     private fun sendUpdate() {
         val intent = Intent(ACTION_NEW_NOTIFICATION_COUNT)
+
         intent.putExtra(EXTRA_NOTIFICATION_COUNT, (activeNotifications ?: arrayOf()).filter {
-            if (Build.VERSION.SDK_INT > Build.VERSION_CODES.N_MR1) {
-                val ranking = Ranking().apply { currentRanking.getRanking(it.key, this) }
-                ranking.importance > NotificationManager.IMPORTANCE_MIN
-            } else {
-                it.notification.priority > Notification.PRIORITY_MIN
-            }
+            it.notification.visibility
+                .run { this == Notification.VISIBILITY_PUBLIC || this == Notification.VISIBILITY_PRIVATE }
+                    && (
+                    if (Build.VERSION.SDK_INT > Build.VERSION_CODES.N_MR1) {
+                        val ranking = Ranking().apply { currentRanking.getRanking(it.key, this) }
+                        ranking.importance > NotificationManager.IMPORTANCE_MIN
+                    } else {
+                        it.notification.priority > Notification.PRIORITY_MIN
+                    })
         }.size)
 
         LocalBroadcastManager.getInstance(this).sendBroadcast(intent)

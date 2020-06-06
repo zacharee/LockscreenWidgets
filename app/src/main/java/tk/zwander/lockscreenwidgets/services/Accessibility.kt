@@ -69,8 +69,7 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
 
     //Receive updates from our notification listener service on how many
     //notifications are currently shown to the user. This count excludes
-    //notifications with min priority/importance, since they're not
-    //shown on the lock screen.
+    //notifications not visible on the lock screen.
     //If the notification count is > 0, and the user has the option enabled,
     //make sure to hide the widget frame.
     private val notificationCountListener =
@@ -385,7 +384,7 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
      * - [WidgetFrameDelegate.showingRemovalConfirmation] is false
      * - [onMainLockscreen] is true OR [showingNotificationsPanel] is true OR [PrefManager.hideOnSecurityPage] is false
      * - [showingNotificationsPanel] is false OR [PrefManager.hideOnNotificationShade] is false
-     * - [notificationCount] is 0 (i.e. no notifications shown with priority > MIN) OR [PrefManager.hideOnNotifications] is false
+     * - [notificationCount] is 0 (i.e. no notifications shown on lock screen, not necessarily no notifications at all) OR [PrefManager.hideOnNotifications] is false
      * - [hideForPresentIds] is false OR [PrefManager.presentIds] is empty
      * - [hideForNonPresentIds] is false OR [PrefManager.nonPresentIds] is empty
      * - [PrefManager.widgetFrameEnabled] is true (i.e. the widget frame is actually enabled)
