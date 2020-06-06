@@ -81,7 +81,11 @@ class IDWidgetFactory(private val context: Context) : RemoteViewsService.RemoteV
         return items.size()
     }
 
-    override fun getViewAt(position: Int): RemoteViews {
+    override fun getViewAt(position: Int): RemoteViews? {
+        //The list might be replaced before onDataSetChanged() is called,
+        //which can lead to indexing issues.
+        if (position >= count) return null
+
         return RemoteViews(context.packageName, R.layout.id_list_widget_item).apply {
             val item = items[position]
             setTextViewText(R.id.id_list_item, item.id)
