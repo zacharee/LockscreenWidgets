@@ -2,6 +2,7 @@ package tk.zwander.lockscreenwidgets.adapters
 
 import android.annotation.SuppressLint
 import android.appwidget.AppWidgetManager
+import android.content.Context
 import android.content.Intent
 import android.view.LayoutInflater
 import android.view.View
@@ -10,6 +11,7 @@ import android.view.WindowManager
 import android.widget.Toast
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import kotlinx.android.synthetic.main.widget_page_holder.view.*
 import kotlinx.coroutines.*
@@ -41,6 +43,8 @@ class WidgetFrameAdapter(
 
     val widgets = ArrayList<WidgetData>()
     val onResizeObservable = OnResizeObservable()
+
+    val spanSizeLookup = WidgetSpanSizeLookup(host.context)
 
     var currentRemoveButtonPosition = -1
         set(value) {
@@ -145,14 +149,14 @@ class WidgetFrameAdapter(
             }
 
             onResizeObservable.addObserver { _, _ ->
-                onResize()
+                onResize(widgets[adapterPosition])
             }
         }
 
         fun onBind(data: WidgetData) {
             itemView.apply {
                 launch {
-                    onResize()
+                    onResize(data)
 
                     removeButtonShown = currentRemoveButtonPosition == adapterPosition
 
@@ -188,10 +192,10 @@ class WidgetFrameAdapter(
         }
 
         //Make sure the item's width is properly updated on a frame resize, or on initial bind
-        fun onResize() {
+        fun onResize(data: WidgetData) {
             itemView.apply {
                 layoutParams = (layoutParams as ViewGroup.LayoutParams).apply {
-                    width = calculateWidgetWidth(params.width)
+                    width = calculateWidgetWidth(params.width, data.id)
                 }
             }
         }
@@ -208,6 +212,14 @@ class WidgetFrameAdapter(
                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                 view.context.startActivity(intent)
             }
+        }
+    }
+
+    inner class WidgetSpanSizeLookup(private val context: Context) : GridLayoutManager.SpanSizeLookup() {
+        override fun getSpanSize(position: Int): Int {
+            val id = widgets[position].id
+
+            return context.prefManager.widgetSizes[id]?.widgetHeightSpan ?: 1
         }
     }
 }

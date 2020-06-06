@@ -10,6 +10,7 @@ import com.google.gson.GsonBuilder
 import com.google.gson.reflect.TypeToken
 import tk.zwander.lockscreenwidgets.R
 import tk.zwander.lockscreenwidgets.data.WidgetData
+import tk.zwander.lockscreenwidgets.data.WidgetSizeData
 
 /**
  * Handle data persistence.
@@ -38,6 +39,7 @@ class PrefManager private constructor(context: Context) : ContextWrapper(context
         const val KEY_ACCESSIBILITY_EVENT_DELAY = "accessibility_event_delay"
         const val KEY_PRESENT_IDS = "present_ids"
         const val KEY_NON_PRESENT_IDS = "non_present_ids"
+        const val KEY_WIDGET_SIZES = "widget_sizes"
 
         const val VALUE_PAGE_INDICATOR_BEHAVIOR_HIDDEN = 0
         const val VALUE_PAGE_INDICATOR_BEHAVIOR_AUTO_HIDE = 1
@@ -91,6 +93,19 @@ class PrefManager private constructor(context: Context) : ContextWrapper(context
             putStringSet(
                 KEY_NON_PRESENT_IDS,
                 value
+            )
+        }
+
+    //If any widgets have custom sizes, those sizes are stored here.
+    var widgetSizes: HashMap<Int, WidgetSizeData>
+        get() = gson.fromJson(
+            getString(KEY_WIDGET_SIZES),
+            object : TypeToken<HashMap<Int, WidgetSizeData>>() {}.type
+        ) ?: HashMap()
+        set(value) {
+            putString(
+                KEY_WIDGET_SIZES,
+                gson.toJson(value)
             )
         }
 

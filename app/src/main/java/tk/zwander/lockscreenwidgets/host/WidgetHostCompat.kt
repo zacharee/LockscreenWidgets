@@ -6,6 +6,7 @@ import android.appwidget.AppWidgetProviderInfo
 import android.content.Context
 import android.os.Looper
 import android.widget.RemoteViews
+import tk.zwander.lockscreenwidgets.util.prefManager
 import tk.zwander.lockscreenwidgets.views.MinPaddingAppWidgetHostView
 
 /**
@@ -18,7 +19,7 @@ import tk.zwander.lockscreenwidgets.views.MinPaddingAppWidgetHostView
  * @param onClickHandler the [RemoteViews.OnClickHandler] implementation defined in the subclass
  */
 abstract class WidgetHostCompat(
-    context: Context,
+    val context: Context,
     id: Int,
     onClickHandler: RemoteViews.OnClickHandler
 ) : AppWidgetHost(context, id, onClickHandler, Looper.getMainLooper()) {
@@ -44,5 +45,15 @@ abstract class WidgetHostCompat(
         appWidget: AppWidgetProviderInfo?
     ): AppWidgetHostView {
         return MinPaddingAppWidgetHostView(context)
+    }
+
+    override fun deleteAppWidgetId(appWidgetId: Int) {
+        //If a widget is deleted, we want to make sure any later widget that
+        //happens to have the same ID doesn't inherit any custom sizing
+        //applied to the widget being deleted.
+        context.prefManager.run {
+            widgetSizes = widgetSizes.apply { remove(appWidgetId) }
+        }
+        super.deleteAppWidgetId(appWidgetId)
     }
 }

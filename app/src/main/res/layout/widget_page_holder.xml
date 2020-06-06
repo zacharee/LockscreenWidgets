@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:animateLayoutChanges="true"
     android:layout_height="match_parent">
@@ -10,18 +12,88 @@
         android:layout_height="match_parent"
         />
 
-    <ImageView
-        android:id="@+id/remove_widget"
-        android:layout_width="32dp"
-        android:layout_height="32dp"
-        android:src="@drawable/ic_baseline_remove_circle_24"
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/edit_wrapper"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
         android:clickable="true"
         android:focusable="true"
-        android:tint="@android:color/holo_red_dark"
-        android:layout_marginTop="8dp"
-        android:layout_marginEnd="8dp"
-        android:layout_gravity="top|end"
         android:visibility="gone"
-        />
+        android:background="@color/backdrop"
+        tools:visibility="visible">
+
+        <View
+            android:id="@+id/edit_outline"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@drawable/outline"
+            />
+
+        <ImageView
+            android:id="@+id/left_dragger"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/handle_left"
+            android:clickable="true"
+            android:focusable="true"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintLeft_toLeftOf="parent"
+            />
+
+        <ImageView
+            android:id="@+id/top_dragger"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/handle_top"
+            android:clickable="true"
+            android:focusable="true"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            />
+
+        <ImageView
+            android:id="@+id/right_dragger"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/handle_right"
+            android:clickable="true"
+            android:focusable="true"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            />
+
+        <ImageView
+            android:id="@+id/bottom_dragger"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/handle_bottom"
+            android:clickable="true"
+            android:focusable="true"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            />
+
+        <ImageView
+            android:id="@+id/remove_widget"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:src="@drawable/ic_baseline_remove_circle_24"
+            android:clickable="true"
+            android:focusable="true"
+            android:tint="@android:color/holo_red_dark"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="8dp"
+            android:layout_gravity="top|end"
+            android:visibility="gone"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            tools:visibility="visible"
+            />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
 </FrameLayout>

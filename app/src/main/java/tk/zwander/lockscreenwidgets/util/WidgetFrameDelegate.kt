@@ -82,6 +82,7 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
     //The actual frame View
     val view = LayoutInflater.from(ContextThemeWrapper(this, R.style.AppTheme))
         .inflate(R.layout.widget_frame, null)
+    val gridLayoutManager = GridLayoutManager(this, 1)
     val adapter = WidgetFrameAdapter(widgetManager, widgetHost, params) { adapter, item ->
         showingRemovalConfirmation = true
         RemoveWidgetDialogActivity.start(this, object : IRemoveConfirmCallback.Stub() {
@@ -246,9 +247,12 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
             }
         }
 
+        view.widgets_pager.layoutManager = gridLayoutManager
+        gridLayoutManager.spanSizeLookup = adapter.spanSizeLookup
+
         //Scroll to the stored page, making sure to catch a potential
         //out-of-bounds error.
-        view.widgets_pager.layoutManager?.apply {
+        gridLayoutManager.apply {
             try {
                 scrollToPosition(prefManager.currentPage)
             } catch (e: Exception) {}
@@ -264,7 +268,7 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
      * Make sure the number of rows in the widget frame reflects the user-selected value.
      */
     fun updateRowCount() {
-        (view.widgets_pager.layoutManager as GridLayoutManager).apply {
+        gridLayoutManager.apply {
             val rowCount = prefManager.frameRowCount
 
             this.spanCount = rowCount
