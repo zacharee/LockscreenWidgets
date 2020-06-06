@@ -36,21 +36,10 @@ class IDWidgetFactory(private val context: Context) : RemoteViewsService.RemoteV
             }
         }
 
-        override fun onInserted(position: Int, count: Int) {
-
-        }
-
-        override fun onRemoved(position: Int, count: Int) {
-
-        }
-
-        override fun onChanged(position: Int, count: Int) {
-
-        }
-
-        override fun onMoved(fromPosition: Int, toPosition: Int) {
-
-        }
+        override fun onInserted(position: Int, count: Int) {}
+        override fun onRemoved(position: Int, count: Int) {}
+        override fun onChanged(position: Int, count: Int) {}
+        override fun onMoved(fromPosition: Int, toPosition: Int) {}
     })
 
     fun setItems(newItems: List<String>) {
