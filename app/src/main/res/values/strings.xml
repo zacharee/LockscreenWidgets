@@ -15,6 +15,7 @@
     <string name="usage">Usage</string>
     <string name="back_up">Back Up</string>
     <string name="restore">Restore</string>
+    <string name="id_list">ID List</string>
 
     <string name="add_id_hint">com.android.systemui:id/some_id_here</string>
 

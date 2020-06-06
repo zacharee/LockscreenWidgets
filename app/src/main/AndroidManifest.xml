@@ -72,7 +72,8 @@
             android:permission="android.permission.BIND_REMOTEVIEWS"
             />
 
-        <receiver android:name=".appwidget.IDListProvider">
+        <receiver android:name=".appwidget.IDListProvider"
+            android:label="@string/id_list">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
             </intent-filter>
