@@ -13,7 +13,13 @@ import tk.zwander.lockscreenwidgets.activities.UsageActivity
 import tk.zwander.lockscreenwidgets.util.isAccessibilityEnabled
 import tk.zwander.lockscreenwidgets.util.prefManager
 
-
+/**
+ * Host the main page of the app (the social links). It also hosts the buttons to add a widget, view usage
+ * details, and open the settings.
+ *
+ * If it's the user's first time running the app, or a required permission is missing (i.e. Accessibility),
+ * this Activity will also make sure to start [OnboardingActivity] in the proper mode.
+ */
 class MainActivity : AppCompatActivity() {
     companion object {
         const val REQ_INTRO = 102
@@ -61,8 +67,11 @@ class MainActivity : AppCompatActivity() {
 
         if (requestCode == REQ_INTRO) {
             if (resultCode != Activity.RESULT_OK) {
+                //The intro sequence or permissions request wasn't successful. Quit.
                 finish()
             } else {
+                //The user finished the intro sequence or granted the required permission.
+                //Stay open, and make sure firstRun is false.
                 prefManager.firstRun = false
             }
         }

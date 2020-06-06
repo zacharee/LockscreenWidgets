@@ -7,6 +7,9 @@ import tk.zwander.lockscreenwidgets.R
 import tk.zwander.lockscreenwidgets.util.launchEmail
 import tk.zwander.lockscreenwidgets.util.launchUrl
 
+/**
+ * A Preference that opens a link or sends an email (defined in XML).
+ */
 class LinkPreference(context: Context, attrs: AttributeSet) : Preference(context, attrs) {
     companion object {
         const val TYPE_LINK = 0

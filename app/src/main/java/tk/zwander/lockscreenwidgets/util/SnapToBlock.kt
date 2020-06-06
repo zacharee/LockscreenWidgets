@@ -14,7 +14,11 @@ import androidx.recyclerview.widget.*
 import kotlin.math.abs
 import kotlin.math.max
 
-//https://stackoverflow.com/questions/47514072/how-to-snap-recyclerview-items-so-that-every-x-items-would-be-considered-like-a
+/**
+ * A more robust version of [PagerSnapHelper] that supports multiple columns of items.
+ *
+ * Based on: https://stackoverflow.com/questions/47514072/how-to-snap-recyclerview-items-so-that-every-x-items-would-be-considered-like-a
+ */
 class SnapToBlock internal constructor(
     // Maximum blocks to move during most vigorous fling.
     var maxFlingBlocks: Int

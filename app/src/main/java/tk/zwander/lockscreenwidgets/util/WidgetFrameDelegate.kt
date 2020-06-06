@@ -34,6 +34,10 @@ import tk.zwander.lockscreenwidgets.host.WidgetHostCompat
 import kotlin.math.roundToInt
 import kotlin.math.sign
 
+/**
+ * Handle most of the logic involving the widget frame.
+ * TODO: make this work with multiple frame "clients" (i.e. a preview in MainActivity).
+ */
 class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper(context), SharedPreferences.OnSharedPreferenceChangeListener {
     companion object {
         private var instance: WidgetFrameDelegate? = null
@@ -48,6 +52,7 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
     var updatedForMove = false
     var showingRemovalConfirmation = false
 
+    //The size, position, and such of the widget frame on the lock screen.
     val params = WindowManager.LayoutParams().apply {
         type = WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY
         width = dpAsPx(prefManager.frameWidthDp)
@@ -74,6 +79,7 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
             startActivity(intent)
         }, 100)
     }
+    //The actual frame View
     val view = LayoutInflater.from(ContextThemeWrapper(this, R.style.AppTheme))
         .inflate(R.layout.widget_frame, null)
     val adapter = WidgetFrameAdapter(widgetManager, widgetHost, params) { adapter, item ->
@@ -121,6 +127,8 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
             if (actionState != ItemTouchHelper.ACTION_STATE_IDLE) {
                 viewHolder?.itemView?.alpha = 0.5f
 
+                //The user has long-pressed a widget. Show the remove button on that widget.
+                //If the remove button is already shown on it, hide it.
                 val adapterPos = viewHolder?.adapterPosition ?: -1
                 adapter.currentRemoveButtonPosition = if (adapter.currentRemoveButtonPosition == adapterPos) -1 else adapterPos
             }
@@ -144,12 +152,15 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
             totalSize: Int,
             msSinceStartScroll: Long
         ): Int {
+            //The default scrolling speed is *way* too fast. Slow it down a bit.
             val direction = sign(viewSizeOutOfBounds.toFloat()).toInt()
             return (viewSize * 0.01f * direction).roundToInt()
         }
 
         override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {}
     }
+    //Some widgets display differently depending on the system's dark mode.
+    //Make sure the widgets are rebound if there's a change.
     val nightModeListener = object : ContentObserver(null) {
         override fun onChange(selfChange: Boolean, uri: Uri?) {
             when (uri) {
@@ -174,7 +185,7 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
             }
             PrefManager.KEY_FRAME_ROW_COUNT,
             PrefManager.KEY_FRAME_COL_COUNT -> {
-                updateSpanCountAndOrientation()
+                updateRowCount()
                 adapter.notifyDataSetChanged()
             }
             PrefManager.KEY_OPACITY_MODE -> {
@@ -202,7 +213,7 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
             nightModeListener
         )
 
-        updateSpanCountAndOrientation()
+        updateRowCount()
         adapter.updateWidgets(prefManager.currentWidgets.toList())
 
         blockSnapHelper.setSnapBlockCallback(object : SnapToBlock.SnapBlockCallback {
@@ -219,16 +230,24 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
             startActivity(intent)
         }
 
+        //We only really want to be listening to widget changes
+        //while the frame is on-screen. Otherwise, we're wasting battery.
         view.frame.attachmentStateListener = {
             if (it) {
                 updateWallpaperLayerIfNeeded()
                 widgetHost.startListening()
+                //Even with the startListening() call above,
+                //it doesn't seem like pending updates always get
+                //dispatched. Rebinding all the widgets forces
+                //them to update.
                 adapter.notifyDataSetChanged()
             } else {
                 widgetHost.stopListening()
             }
         }
 
+        //Scroll to the stored page, making sure to catch a potential
+        //out-of-bounds error.
         view.widgets_pager.layoutManager?.apply {
             try {
                 scrollToPosition(prefManager.currentPage)
@@ -241,7 +260,10 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
         contentResolver.unregisterContentObserver(nightModeListener)
     }
 
-    fun updateSpanCountAndOrientation() {
+    /**
+     * Make sure the number of rows in the widget frame reflects the user-selected value.
+     */
+    fun updateRowCount() {
         (view.widgets_pager.layoutManager as GridLayoutManager).apply {
             val rowCount = prefManager.frameRowCount
 
@@ -252,6 +274,15 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
         }
     }
 
+    /**
+     * Compute and draw the appropriate portion of the wallpaper as the widget background,
+     * if the opacity mode is set to masked.
+     *
+     * TODO: this doesn't work properly on a lot of devices. It seems to be something to do with the scale.
+     * TODO: I don't know enough about [Matrix]es to fix it.
+     * TODO: There also doesn't seem to be a way to retrieve the current lock screen wallpaper;
+     * TODO: only the home screen's.
+     */
     @SuppressLint("MissingPermission")
     fun updateWallpaperLayerIfNeeded() {
         if (prefManager.opacityMode == PrefManager.VALUE_OPACITY_MODE_MASKED) {

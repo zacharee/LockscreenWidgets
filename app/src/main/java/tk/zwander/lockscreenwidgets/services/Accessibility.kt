@@ -67,6 +67,12 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
     private val power by lazy { getSystemService(Context.POWER_SERVICE) as PowerManager }
     private val delegate by lazy { WidgetFrameDelegate.getInstance(this) }
 
+    //Receive updates from our notification listener service on how many
+    //notifications are currently shown to the user. This count excludes
+    //notifications with min priority/importance, since they're not
+    //shown on the lock screen.
+    //If the notification count is > 0, and the user has the option enabled,
+    //make sure to hide the widget frame.
     private val notificationCountListener =
         object : NotificationListener.NotificationCountListener() {
             override fun onUpdate(count: Int) {
@@ -79,6 +85,9 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
             }
         }
 
+    //Listen for the screen turning on and off.
+    //This shouldn't really be necessary, but there are some quirks in how
+    //Android works that makes it helpful.
     private val screenStateReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
             when (intent?.action) {
@@ -253,6 +262,7 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
 
                 val items = sysUiNodes.filter { it.isVisibleToUser }.mapNotNull { it.viewIdResourceName }
 
+                //Update any ID list widgets on the new IDs
                 IDWidgetFactory.sList.apply {
                     clear()
                     addAll(items)
@@ -463,6 +473,4 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
             }
         }
     }
-
-
 }

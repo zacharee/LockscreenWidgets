@@ -8,6 +8,10 @@ import com.google.android.material.card.MaterialCardView
 import kotlinx.android.synthetic.main.widget_frame_hint.view.*
 import tk.zwander.lockscreenwidgets.util.prefManager
 
+/**
+ * The View showing the first-time hint over the widget frame, giving the user basic instructions
+ * (not that anyone actually reads...)
+ */
 class WidgetFrameHintView(context: Context, attrs: AttributeSet) : MaterialCardView(context, attrs) {
     override fun onFinishInflate() {
         super.onFinishInflate()

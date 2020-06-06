@@ -24,17 +24,25 @@ import tk.zwander.lockscreenwidgets.services.Accessibility
 import tk.zwander.lockscreenwidgets.services.NotificationListener
 import kotlin.math.roundToInt
 
+/**
+ * Various utility functions
+ */
+
+//A global reference to the main-thread Handler
 val mainHandler = Handler(Looper.getMainLooper())
 
+//Convenience method for getting the preference store instance
 val Context.prefManager: PrefManager
     get() = PrefManager.getInstance(this)
 
+//Check if the Accessibility service is enabled
 val Context.isAccessibilityEnabled: Boolean
     get() = Settings.Secure.getString(
         contentResolver,
         Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES
     )?.contains(ComponentName(this, Accessibility::class.java).flattenToString()) ?: false
 
+//Check if the notification listener service is enabled
 val Context.isNotificationListenerActive: Boolean
     get() = Settings.Secure.getString(contentResolver, "enabled_notification_listeners")
         ?.run {
@@ -43,9 +51,12 @@ val Context.isNotificationListenerActive: Boolean
             contains(cmp.flattenToString()) || contains(cmp.flattenToShortString())
         } ?: false
 
+//Convenience method to check if debug logging is enabled
 val Context.isDebug: Boolean
     get() = prefManager.debugLog
 
+//Sometimes retrieving the root of a window causes an NPE
+//in the framework. Catch that here and return null if it happens.
 val AccessibilityWindowInfo.safeRoot: AccessibilityNodeInfo?
     get() = try {
         root
@@ -53,6 +64,7 @@ val AccessibilityWindowInfo.safeRoot: AccessibilityNodeInfo?
         null
     }
 
+//Take a DP value and return its representation in pixels.
 fun Context.dpAsPx(dpVal: Number) =
     TypedValue.applyDimension(
         TypedValue.COMPLEX_UNIT_DIP,
@@ -60,15 +72,12 @@ fun Context.dpAsPx(dpVal: Number) =
         resources.displayMetrics
     ).roundToInt()
 
+//Take a pixel value and return its representation in DP.
 fun Context.pxAsDp(pxVal: Number) =
     pxVal.toFloat() / resources.displayMetrics.density
 
-fun SnapHelper.getSnapPosition(recyclerView: RecyclerView): Int {
-    val layoutManager = recyclerView.layoutManager ?: return RecyclerView.NO_POSITION
-    val snapView = findSnapView(layoutManager) ?: return RecyclerView.NO_POSITION
-    return layoutManager.getPosition(snapView)
-}
-
+//Safely launch a URL.
+//If no matching Activity is found, silently fail.
 fun Context.launchUrl(url: String) {
     try {
         val browserIntent =
@@ -77,6 +86,8 @@ fun Context.launchUrl(url: String) {
     } catch (e: Exception) {}
 }
 
+//Safely start an email draft.
+//If no matching email client is found, silently fail.
 fun Context.launchEmail(to: String, subject: String) {
     try {
         val intent = Intent(Intent.ACTION_SENDTO)
@@ -87,6 +98,7 @@ fun Context.launchEmail(to: String, subject: String) {
     } catch (e: Exception) {}
 }
 
+//Fade a View to 0% alpha and 95% scale. Used when hiding the widget frame.
 fun View.fadeAndScaleOut(endListener: () -> Unit) {
     val animator = AnimatorSet().apply {
         playTogether(
@@ -105,6 +117,7 @@ fun View.fadeAndScaleOut(endListener: () -> Unit) {
     animator.start()
 }
 
+//Fade a View to 100% alpha and 100% scale. Used when showing the widget frame.
 fun View.fadeAndScaleIn(endListener: () -> Unit) {
     val animator = AnimatorSet().apply {
         playTogether(
@@ -123,10 +136,19 @@ fun View.fadeAndScaleIn(endListener: () -> Unit) {
     animator.start()
 }
 
+//Convenience method to calculate the proper widget width
+//based on the frame column count.
 fun View.calculateWidgetWidth(paramWidth: Int): Int {
     return paramWidth / context.prefManager.frameColCount
 }
 
+//Take an integer and make it even.
+//If the integer == 0, return itself (0).
+//If the integer is 1, return 2.
+//If the integer is -1, return -2.
+//If the integer is even, return itself.
+//If the integer is odd and negative, return itself - 1
+//If the integer is odd and positive, return itself + 1
 fun Int.makeEven(): Int {
     return when {
         this == 0 -> this

@@ -21,6 +21,13 @@ import tk.zwander.lockscreenwidgets.adapters.IDAdapter
 import tk.zwander.lockscreenwidgets.util.*
 import kotlin.math.roundToInt
 
+/**
+ * The widget frame itself.
+ *
+ * This contains the widget pager, along with the editing interface. While most of
+ * the logic relating to moving, resizing, etc, is handled by the Accessibility service,
+ * this View listens for and notifies of the relevant events.
+ */
 class WidgetFrameView(context: Context, attrs: AttributeSet) : ConstraintLayout(context, attrs) {
     var onMoveListener: ((velX: Float, velY: Float) -> Unit)? = null
     var onInterceptListener: ((down: Boolean) -> Unit)? = null
@@ -282,6 +289,12 @@ class WidgetFrameView(context: Context, attrs: AttributeSet) : ConstraintLayout(
                     prevExpandX = newX
                     prevExpandY = newY
 
+                    //Make sure the velocities are even.
+                    //This prevents an issue where the frame moves when resizing,
+                    //since its position needs to be compensated by half the velocity.
+                    //If the velocity is odd, the frame may over-compensate, causing it
+                    //to push the opposite side the opposite direction by a pixel every time
+                    //this is invoked.
                     listener?.invoke(velX.makeEven(), velY.makeEven(), false) ?: false
                 }
                 MotionEvent.ACTION_UP -> {

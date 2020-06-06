@@ -13,12 +13,20 @@ import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 
+/**
+ * Used to notify the Accessibility service about changes in notification count,
+ * along with the actual count. If the > min priority notification count is > 0,
+ * and the user has the option enabled, the widget frame will hide.
+ */
 class NotificationListener : NotificationListenerService() {
     companion object {
         const val ACTION_NEW_NOTIFICATION_COUNT = "NEW_NOTIFICATION_COUNT"
         const val EXTRA_NOTIFICATION_COUNT = "NOTIFICATION_COUNT"
     }
 
+    /**
+     * Convenience class for listening to changes in the notification count.
+     */
     abstract class NotificationCountListener : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
             if (intent?.action == ACTION_NEW_NOTIFICATION_COUNT) {
@@ -36,8 +44,6 @@ class NotificationListener : NotificationListenerService() {
 
         abstract fun onUpdate(count: Int)
     }
-
-    private val nm by lazy { getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager }
 
     override fun onCreate() {
         sendUpdate()

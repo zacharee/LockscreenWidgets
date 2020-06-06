@@ -11,6 +11,7 @@ class App : Application() {
 
     override fun onCreate() {
         super.onCreate()
+        //Make sure we can access hidden APIs
         disableApiBlacklist()
     }
 }
