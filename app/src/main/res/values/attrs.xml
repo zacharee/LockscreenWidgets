@@ -7,4 +7,10 @@
             <enum name="email" value="1" />
         </attr>
     </declare-styleable>
+
+    <declare-styleable name="SpannedGridLayoutManager">
+        <attr name="android:orientation" />
+        <attr name="spanCount" />
+        <attr name="aspectRatio" format="string" />
+    </declare-styleable>
 </resources>

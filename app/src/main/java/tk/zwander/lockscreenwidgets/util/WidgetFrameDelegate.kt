@@ -23,6 +23,7 @@ import android.widget.ImageView
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
+import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import kotlinx.android.synthetic.main.widget_frame.view.*
 import tk.zwander.lockscreenwidgets.IRemoveConfirmCallback
 import tk.zwander.lockscreenwidgets.R
@@ -82,7 +83,7 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
     //The actual frame View
     val view = LayoutInflater.from(ContextThemeWrapper(this, R.style.AppTheme))
         .inflate(R.layout.widget_frame, null)
-    val gridLayoutManager = GridLayoutManager(this, 1)
+    var gridLayoutManager = SpannedLayoutManager()
     val adapter = WidgetFrameAdapter(widgetManager, widgetHost, params) { adapter, item ->
         showingRemovalConfirmation = true
         RemoveWidgetDialogActivity.start(this, object : IRemoveConfirmCallback.Stub() {
@@ -91,7 +92,7 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
                     remove(item)
                     widgetHost.deleteAppWidgetId(item.id)
                 }
-                adapter.currentRemoveButtonPosition = -1
+                adapter.currentEditingInterfacePosition = -1
             }
 
             override fun onDismiss() {
@@ -110,7 +111,7 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
                 if (it) {
                     updatedForMove = true
                     prefManager.currentWidgets = LinkedHashSet(adapter.widgets)
-                    adapter.currentRemoveButtonPosition = -1
+                    adapter.currentEditingInterfacePosition = -1
                     updatedForMove = false
                 }
             }
@@ -131,7 +132,7 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
                 //The user has long-pressed a widget. Show the remove button on that widget.
                 //If the remove button is already shown on it, hide it.
                 val adapterPos = viewHolder?.adapterPosition ?: -1
-                adapter.currentRemoveButtonPosition = if (adapter.currentRemoveButtonPosition == adapterPos) -1 else adapterPos
+                adapter.currentEditingInterfacePosition = if (adapter.currentEditingInterfacePosition == adapterPos) -1 else adapterPos
             }
 
             super.onSelectedChanged(viewHolder, actionState)
@@ -204,6 +205,7 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
         prefManager.prefs.registerOnSharedPreferenceChangeListener(this)
         view.widgets_pager.apply {
             adapter = this@WidgetFrameDelegate.adapter
+            layoutManager = gridLayoutManager
             setHasFixedSize(true)
             blockSnapHelper.attachToRecyclerView(this)
             ItemTouchHelper(touchHelperCallback).attachToRecyclerView(this)
@@ -247,8 +249,7 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
             }
         }
 
-        view.widgets_pager.layoutManager = gridLayoutManager
-        gridLayoutManager.spanSizeLookup = adapter.spanSizeLookup
+//        gridLayoutManager.spanSizeLookup = adapter.spanSizeLookup
 
         //Scroll to the stored page, making sure to catch a potential
         //out-of-bounds error.
@@ -318,6 +319,12 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
             }
         } else {
             view.wallpaper_background.setImageDrawable(null)
+        }
+    }
+
+    inner class SpannedLayoutManager : StaggeredGridLayoutManager(prefManager.frameRowCount, RecyclerView.HORIZONTAL) {
+        override fun canScrollHorizontally(): Boolean {
+            return adapter.currentEditingInterfacePosition == -1 && super.canScrollHorizontally()
         }
     }
 }

@@ -140,8 +140,19 @@ fun View.fadeAndScaleIn(endListener: () -> Unit) {
 //based on the frame column count.
 fun View.calculateWidgetWidth(paramWidth: Int, widgetId: Int): Int {
     return paramWidth / context.prefManager.frameColCount *
-            (context.prefManager.widgetSizes[widgetId]?.widgetWidthSpan ?: 1)
+            (context.prefManager.widgetSizes[widgetId]?.safeWidgetWidthSpan ?: 1)
 }
+
+fun View.calculateWidgetHeight(paramHeight: Int, widgetId: Int): Int {
+    return paramHeight / context.prefManager.frameRowCount *
+            (context.prefManager.widgetSizes[widgetId]?.safeWidgetHeightSpan ?: 1)
+}
+
+val Context.widgetBlockWidth: Int
+    get() = (pxAsDp(prefManager.frameWidthDp) / prefManager.frameColCount).roundToInt()
+
+val Context.widgetBlockHeight: Int
+    get() = (pxAsDp(prefManager.frameHeightDp) / prefManager.frameRowCount).roundToInt()
 
 //Take an integer and make it even.
 //If the integer == 0, return itself (0).

@@ -2,7 +2,6 @@ package tk.zwander.lockscreenwidgets.adapters
 
 import android.annotation.SuppressLint
 import android.appwidget.AppWidgetManager
-import android.content.Context
 import android.content.Intent
 import android.view.LayoutInflater
 import android.view.View
@@ -18,14 +17,15 @@ import kotlinx.coroutines.*
 import tk.zwander.lockscreenwidgets.R
 import tk.zwander.lockscreenwidgets.activities.AddWidgetActivity
 import tk.zwander.lockscreenwidgets.data.WidgetData
+import tk.zwander.lockscreenwidgets.data.WidgetSizeData
 import tk.zwander.lockscreenwidgets.host.WidgetHostCompat
+import tk.zwander.lockscreenwidgets.listeners.WidgetResizeListener
 import tk.zwander.lockscreenwidgets.observables.OnResizeObservable
 import tk.zwander.lockscreenwidgets.observables.RemoveButtonObservable
-import tk.zwander.lockscreenwidgets.util.calculateWidgetWidth
-import tk.zwander.lockscreenwidgets.util.prefManager
-import tk.zwander.lockscreenwidgets.util.pxAsDp
+import tk.zwander.lockscreenwidgets.util.*
 import java.util.*
 import kotlin.collections.ArrayList
+import kotlin.math.min
 
 /**
  * The adapter for the widget frame itself.
@@ -44,15 +44,15 @@ class WidgetFrameAdapter(
     val widgets = ArrayList<WidgetData>()
     val onResizeObservable = OnResizeObservable()
 
-    val spanSizeLookup = WidgetSpanSizeLookup(host.context)
+    val spanSizeLookup = WidgetSpanSizeLookup()
 
-    var currentRemoveButtonPosition = -1
+    var currentEditingInterfacePosition = -1
         set(value) {
             field = value
-            removeButtonObservable.notifyObservers(value)
+            editingInterfaceObservable.notifyObservers(value)
         }
 
-    private val removeButtonObservable =
+    private val editingInterfaceObservable =
         RemoveButtonObservable()
 
     fun updateWidgets(newWidgets: List<WidgetData>) {
@@ -130,11 +130,18 @@ class WidgetFrameAdapter(
      */
     @SuppressLint("ClickableViewAccessibility")
     inner class WidgetVH(view: View) : RecyclerView.ViewHolder(view) {
-        var removeButtonShown: Boolean
-            get() = itemView.remove_widget.isVisible
+        var editingInferfaceShown: Boolean
+            get() = itemView.widget_edit_wrapper.isVisible
             set(value) {
-                itemView.remove_widget.isVisible = value
+                itemView.widget_edit_wrapper.isVisible = value
             }
+
+        val currentData: WidgetData
+            get() = widgets[adapterPosition]
+
+        val currentSizeInfo: WidgetSizeData
+            get() = itemView.context.prefManager.widgetSizes[currentData.id]
+                ?: WidgetSizeData(currentData.id, 1, 1)
 
         init {
             itemView.remove_widget.setOnClickListener {
@@ -144,8 +151,42 @@ class WidgetFrameAdapter(
                 }
             }
 
-            removeButtonObservable.addObserver { _, arg ->
-                removeButtonShown = (arg.toString().toInt() == adapterPosition)
+            itemView.apply {
+                widget_left_dragger.setOnTouchListener(WidgetResizeListener(context, WidgetResizeListener.Which.LEFT) {
+                    val sizeInfo = currentSizeInfo
+                    sizeInfo.safeWidgetWidthSpan -= it
+
+                    persistNewSizeInfo(sizeInfo)
+                    onResize(currentData)
+                })
+
+                widget_top_dragger.setOnTouchListener(WidgetResizeListener(context, WidgetResizeListener.Which.TOP) {
+                    val sizeInfo = currentSizeInfo
+                    sizeInfo.safeWidgetHeightSpan = min(sizeInfo.safeWidgetHeightSpan - it, context.prefManager.frameRowCount)
+
+                    persistNewSizeInfo(sizeInfo)
+                    onResize(currentData)
+                })
+
+                widget_right_dragger.setOnTouchListener(WidgetResizeListener(context, WidgetResizeListener.Which.RIGHT) {
+                    val sizeInfo = currentSizeInfo
+                    sizeInfo.safeWidgetWidthSpan += it
+
+                    persistNewSizeInfo(sizeInfo)
+                    onResize(currentData)
+                })
+
+                widget_bottom_dragger.setOnTouchListener(WidgetResizeListener(context, WidgetResizeListener.Which.BOTTOM) {
+                    val sizeInfo = currentSizeInfo
+                    sizeInfo.safeWidgetHeightSpan = min(sizeInfo.safeWidgetHeightSpan + it, context.prefManager.frameRowCount)
+
+                    persistNewSizeInfo(sizeInfo)
+                    onResize(currentData)
+                })
+            }
+
+            editingInterfaceObservable.addObserver { _, arg ->
+                editingInferfaceShown = (arg.toString().toInt() == adapterPosition)
             }
 
             onResizeObservable.addObserver { _, _ ->
@@ -158,7 +199,7 @@ class WidgetFrameAdapter(
                 launch {
                     onResize(data)
 
-                    removeButtonShown = currentRemoveButtonPosition == adapterPosition
+                    editingInferfaceShown = currentEditingInterfacePosition == adapterPosition
 
                     val widgetInfo = withContext(Dispatchers.Main) {
                         manager.getAppWidgetInfo(data.id)
@@ -196,8 +237,18 @@ class WidgetFrameAdapter(
             itemView.apply {
                 layoutParams = (layoutParams as ViewGroup.LayoutParams).apply {
                     width = calculateWidgetWidth(params.width, data.id)
+                    height = calculateWidgetHeight(params.height, data.id)
                 }
             }
+        }
+
+        fun persistNewSizeInfo(info: WidgetSizeData) {
+            itemView.context.prefManager.apply {
+                widgetSizes = widgetSizes.apply {
+                    this[info.widgetId] = info
+                }
+            }
+            notifyItemChanged(adapterPosition)
         }
     }
 
@@ -215,11 +266,12 @@ class WidgetFrameAdapter(
         }
     }
 
-    inner class WidgetSpanSizeLookup(private val context: Context) : GridLayoutManager.SpanSizeLookup() {
+    inner class WidgetSpanSizeLookup : GridLayoutManager.SpanSizeLookup() {
         override fun getSpanSize(position: Int): Int {
             val id = widgets[position].id
 
-            return context.prefManager.widgetSizes[id]?.widgetHeightSpan ?: 1
+            return 1
+//            return context.prefManager.widgetSizes[id]?.widgetHeightSpan ?: 1
         }
     }
 }

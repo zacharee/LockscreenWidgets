@@ -13,7 +13,7 @@
         />
 
     <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/edit_wrapper"
+        android:id="@+id/widget_edit_wrapper"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:clickable="true"
@@ -30,7 +30,7 @@
             />
 
         <ImageView
-            android:id="@+id/left_dragger"
+            android:id="@+id/widget_left_dragger"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:src="@drawable/handle_left"
@@ -42,7 +42,7 @@
             />
 
         <ImageView
-            android:id="@+id/top_dragger"
+            android:id="@+id/widget_top_dragger"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:src="@drawable/handle_top"
@@ -54,7 +54,7 @@
             />
 
         <ImageView
-            android:id="@+id/right_dragger"
+            android:id="@+id/widget_right_dragger"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:src="@drawable/handle_right"
@@ -66,7 +66,7 @@
             />
 
         <ImageView
-            android:id="@+id/bottom_dragger"
+            android:id="@+id/widget_bottom_dragger"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:src="@drawable/handle_bottom"
@@ -88,10 +88,8 @@
             android:layout_marginTop="8dp"
             android:layout_marginEnd="8dp"
             android:layout_gravity="top|end"
-            android:visibility="gone"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            tools:visibility="visible"
             />
 
     </androidx.constraintlayout.widget.ConstraintLayout>

@@ -367,7 +367,7 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
         if (isDebug) {
             Log.e("LockscreenWidgetsDebug", "Removing overlay", Exception())
         }
-        delegate.adapter.currentRemoveButtonPosition = -1
+        delegate.adapter.currentEditingInterfacePosition = -1
         delegate.view.frame.removeWindow(wm)
     }
 
