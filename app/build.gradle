@@ -59,7 +59,7 @@ dependencies {
 
     implementation 'com.github.zacharee:Unblacklister:1.1'
     implementation 'com.google.code.gson:gson:2.8.6'
-    implementation 'com.google.android.material:material:1.2.0-beta01'
+    implementation 'com.google.android.material:material:1.3.0-alpha01'
     implementation 'com.github.agrawalsuneet:DotLoadersPack-Android:v1.4.2'
     implementation 'com.squareup.picasso:picasso:2.71828'
     implementation 'com.heinrichreimersoftware:material-intro:2.0.0'
@@ -67,6 +67,6 @@ dependencies {
     implementation 'com.github.zacharee:SeekBarPreference:b0b9567cd0'
     implementation 'com.github.zacharee:CollapsiblePreferenceCategory:2f53f2d367'
 
-    implementation 'com.google.firebase:firebase-analytics:17.4.2'
-    implementation 'com.google.firebase:firebase-crashlytics:17.0.0'
+    implementation 'com.google.firebase:firebase-analytics:17.4.3'
+    implementation 'com.google.firebase:firebase-crashlytics:17.0.1'
 }
