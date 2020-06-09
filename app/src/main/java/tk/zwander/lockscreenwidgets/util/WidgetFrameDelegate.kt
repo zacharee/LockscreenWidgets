@@ -104,7 +104,7 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
     val blockSnapHelper = SnapToBlock(1)
     val touchHelperCallback = object : ItemTouchHelper.SimpleCallback(
         ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT or ItemTouchHelper.UP or ItemTouchHelper.DOWN,
-        ItemTouchHelper.DOWN
+        0
     ) {
         override fun onMove(
             recyclerView: RecyclerView,
@@ -129,17 +129,14 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
             else super.getDragDirs(recyclerView, viewHolder)
         }
 
-        override fun getSwipeDirs(
-            recyclerView: RecyclerView,
-            viewHolder: RecyclerView.ViewHolder
-        ): Int {
-            return if (viewHolder is WidgetFrameAdapter.AddWidgetVH) 0
-            else super.getSwipeDirs(recyclerView, viewHolder)
-        }
-
         override fun onSelectedChanged(viewHolder: RecyclerView.ViewHolder?, actionState: Int) {
             if (actionState != ItemTouchHelper.ACTION_STATE_IDLE) {
                 viewHolder?.itemView?.alpha = 0.5f
+
+                //The user has long-pressed a widget. Show the editing UI on that widget.
+                //If the UI is already shown on it, hide it.
+                val adapterPos = viewHolder?.adapterPosition ?: -1
+                adapter.currentEditingInterfacePosition = if (adapter.currentEditingInterfacePosition == adapterPos) -1 else adapterPos
             }
 
             super.onSelectedChanged(viewHolder, actionState)
@@ -152,7 +149,6 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
             super.clearView(recyclerView, viewHolder)
 
             viewHolder.itemView.alpha = 1.0f
-            viewHolder.itemView.translationY = 0f
         }
 
         override fun interpolateOutOfBoundsScroll(
@@ -167,31 +163,7 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
             return (viewSize * 0.01f * direction).roundToInt()
         }
 
-        override fun onChildDraw(
-            c: Canvas,
-            recyclerView: RecyclerView,
-            viewHolder: RecyclerView.ViewHolder,
-            dX: Float,
-            dY: Float,
-            actionState: Int,
-            isCurrentlyActive: Boolean
-        ) {
-            viewHolder.itemView.translationY = min(dY, viewHolder.itemView.height / 2f)
-        }
-
-        override fun getSwipeEscapeVelocity(defaultValue: Float): Float {
-            return Float.POSITIVE_INFINITY
-        }
-
-        override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
-            //The user has swiped a widget. Show the editing UI on that widget.
-            //If the UI is already shown on it, hide it.
-            val adapterPos = viewHolder.adapterPosition
-            adapter.currentEditingInterfacePosition = if (adapter.currentEditingInterfacePosition == adapterPos) -1 else adapterPos
-            viewHolder.itemView.translationY = 0f
-            viewHolder.itemView.alpha = 1f
-            adapter.notifyItemChanged(adapterPos)
-        }
+        override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {}
     }
     //Some widgets display differently depending on the system's dark mode.
     //Make sure the widgets are rebound if there's a change.
