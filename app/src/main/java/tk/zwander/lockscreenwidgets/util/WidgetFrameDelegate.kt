@@ -8,6 +8,7 @@ import android.content.ContextWrapper
 import android.content.Intent
 import android.content.SharedPreferences
 import android.database.ContentObserver
+import android.graphics.Canvas
 import android.graphics.Matrix
 import android.graphics.PixelFormat
 import android.graphics.Point
@@ -20,10 +21,9 @@ import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.WindowManager
 import android.widget.ImageView
-import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
-import androidx.recyclerview.widget.StaggeredGridLayoutManager
+import com.arasthel.spannedgridlayoutmanager.SpannedGridLayoutManager
 import kotlinx.android.synthetic.main.widget_frame.view.*
 import tk.zwander.lockscreenwidgets.IRemoveConfirmCallback
 import tk.zwander.lockscreenwidgets.R
@@ -32,6 +32,7 @@ import tk.zwander.lockscreenwidgets.activities.RemoveWidgetDialogActivity
 import tk.zwander.lockscreenwidgets.activities.RequestUnlockActivity
 import tk.zwander.lockscreenwidgets.adapters.WidgetFrameAdapter
 import tk.zwander.lockscreenwidgets.host.WidgetHostCompat
+import kotlin.math.min
 import kotlin.math.roundToInt
 import kotlin.math.sign
 
@@ -101,7 +102,10 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
         })
     }
     val blockSnapHelper = SnapToBlock(1)
-    val touchHelperCallback = object : ItemTouchHelper.SimpleCallback(ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT or ItemTouchHelper.UP or ItemTouchHelper.DOWN, 0) {
+    val touchHelperCallback = object : ItemTouchHelper.SimpleCallback(
+        ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT or ItemTouchHelper.UP or ItemTouchHelper.DOWN,
+        ItemTouchHelper.DOWN
+    ) {
         override fun onMove(
             recyclerView: RecyclerView,
             viewHolder: RecyclerView.ViewHolder,
@@ -125,14 +129,17 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
             else super.getDragDirs(recyclerView, viewHolder)
         }
 
+        override fun getSwipeDirs(
+            recyclerView: RecyclerView,
+            viewHolder: RecyclerView.ViewHolder
+        ): Int {
+            return if (viewHolder is WidgetFrameAdapter.AddWidgetVH) 0
+            else super.getSwipeDirs(recyclerView, viewHolder)
+        }
+
         override fun onSelectedChanged(viewHolder: RecyclerView.ViewHolder?, actionState: Int) {
             if (actionState != ItemTouchHelper.ACTION_STATE_IDLE) {
                 viewHolder?.itemView?.alpha = 0.5f
-
-                //The user has long-pressed a widget. Show the remove button on that widget.
-                //If the remove button is already shown on it, hide it.
-                val adapterPos = viewHolder?.adapterPosition ?: -1
-                adapter.currentEditingInterfacePosition = if (adapter.currentEditingInterfacePosition == adapterPos) -1 else adapterPos
             }
 
             super.onSelectedChanged(viewHolder, actionState)
@@ -145,6 +152,7 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
             super.clearView(recyclerView, viewHolder)
 
             viewHolder.itemView.alpha = 1.0f
+            viewHolder.itemView.translationY = 0f
         }
 
         override fun interpolateOutOfBoundsScroll(
@@ -159,7 +167,31 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
             return (viewSize * 0.01f * direction).roundToInt()
         }
 
-        override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {}
+        override fun onChildDraw(
+            c: Canvas,
+            recyclerView: RecyclerView,
+            viewHolder: RecyclerView.ViewHolder,
+            dX: Float,
+            dY: Float,
+            actionState: Int,
+            isCurrentlyActive: Boolean
+        ) {
+            viewHolder.itemView.translationY = min(dY, viewHolder.itemView.height / 2f)
+        }
+
+        override fun getSwipeEscapeVelocity(defaultValue: Float): Float {
+            return Float.POSITIVE_INFINITY
+        }
+
+        override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
+            //The user has swiped a widget. Show the editing UI on that widget.
+            //If the UI is already shown on it, hide it.
+            val adapterPos = viewHolder.adapterPosition
+            adapter.currentEditingInterfacePosition = if (adapter.currentEditingInterfacePosition == adapterPos) -1 else adapterPos
+            viewHolder.itemView.translationY = 0f
+            viewHolder.itemView.alpha = 1f
+            adapter.notifyItemChanged(adapterPos)
+        }
     }
     //Some widgets display differently depending on the system's dark mode.
     //Make sure the widgets are rebound if there's a change.
@@ -203,6 +235,8 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
 
     fun onCreate() {
         prefManager.prefs.registerOnSharedPreferenceChangeListener(this)
+        gridLayoutManager.spanSizeLookup = adapter.spanSizeLookup
+//        gridLayoutManager.customWidth = widgetBlockWidth
         view.widgets_pager.apply {
             adapter = this@WidgetFrameDelegate.adapter
             layoutManager = gridLayoutManager
@@ -271,8 +305,10 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
     fun updateRowCount() {
         gridLayoutManager.apply {
             val rowCount = prefManager.frameRowCount
+            val colCount = prefManager.frameColCount
 
-            this.spanCount = rowCount
+            this.verticalSpanCount = rowCount
+            this.horizontalSpanCount = colCount
 
             blockSnapHelper.maxFlingBlocks = rowCount
             blockSnapHelper.attachToRecyclerView(view.widgets_pager)
@@ -322,7 +358,7 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
         }
     }
 
-    inner class SpannedLayoutManager : StaggeredGridLayoutManager(prefManager.frameRowCount, RecyclerView.HORIZONTAL) {
+    inner class SpannedLayoutManager : SpannedGridLayoutManager(this@WidgetFrameDelegate, RecyclerView.HORIZONTAL, prefManager.frameRowCount, prefManager.frameColCount) {
         override fun canScrollHorizontally(): Boolean {
             return adapter.currentEditingInterfacePosition == -1 && super.canScrollHorizontally()
         }

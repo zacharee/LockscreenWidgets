@@ -17,13 +17,13 @@ android {
 
     buildTypes {
         release {
-            minifyEnabled true
+//            minifyEnabled true
             shrinkResources false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
 
         debug {
-            minifyEnabled true
+//            minifyEnabled true
             shrinkResources false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
@@ -66,6 +66,8 @@ dependencies {
     implementation 'net.bytebuddy:byte-buddy-android:1.10.10'
     implementation 'com.github.zacharee:SeekBarPreference:b0b9567cd0'
     implementation 'com.github.zacharee:CollapsiblePreferenceCategory:2f53f2d367'
+//    implementation 'com.github.zacharee:SpannedGridLayoutManager:3c5f61a51a'
+    implementation project(':spannedlm')
 
     implementation 'com.google.firebase:firebase-analytics:17.4.3'
     implementation 'com.google.firebase:firebase-crashlytics:17.0.1'

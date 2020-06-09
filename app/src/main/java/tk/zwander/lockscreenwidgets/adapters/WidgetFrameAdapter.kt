@@ -10,8 +10,9 @@ import android.view.WindowManager
 import android.widget.Toast
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.DiffUtil
-import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.arasthel.spannedgridlayoutmanager.SpanSize
+import com.arasthel.spannedgridlayoutmanager.SpannedGridLayoutManager
 import kotlinx.android.synthetic.main.widget_page_holder.view.*
 import kotlinx.coroutines.*
 import tk.zwander.lockscreenwidgets.R
@@ -190,7 +191,11 @@ class WidgetFrameAdapter(
             }
 
             onResizeObservable.addObserver { _, _ ->
-                onResize(widgets[adapterPosition])
+                val pos = adapterPosition
+
+                if (pos != -1) {
+                    onResize(widgets[pos])
+                }
             }
         }
 
@@ -237,7 +242,7 @@ class WidgetFrameAdapter(
             itemView.apply {
                 layoutParams = (layoutParams as ViewGroup.LayoutParams).apply {
                     width = calculateWidgetWidth(params.width, data.id)
-                    height = calculateWidgetHeight(params.height, data.id)
+//                    height = calculateWidgetHeight(params.height, data.id)
                 }
             }
         }
@@ -266,12 +271,13 @@ class WidgetFrameAdapter(
         }
     }
 
-    inner class WidgetSpanSizeLookup : GridLayoutManager.SpanSizeLookup() {
-        override fun getSpanSize(position: Int): Int {
+    inner class WidgetSpanSizeLookup : SpannedGridLayoutManager.SpanSizeLookup({ position ->
+        if (widgets.isEmpty()) SpanSize(1, 1)
+        else {
             val id = widgets[position].id
+            val size = host.context.prefManager.widgetSizes[id]
 
-            return 1
-//            return context.prefManager.widgetSizes[id]?.widgetHeightSpan ?: 1
+            SpanSize(size?.safeWidgetWidthSpan ?: 1, size?.safeWidgetHeightSpan ?: 1)
         }
-    }
+    })
 }

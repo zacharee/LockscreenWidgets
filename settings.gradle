@@ -1,2 +1,3 @@
-include ':app'
+include ':app', ':spannedlm'
 rootProject.name = "Lockscreen Widgets"
+project(':spannedlm').projectDir = new File('../SpannedGridLayoutManager/spannedgridlayoutmanager')

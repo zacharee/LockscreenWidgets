@@ -11,6 +11,7 @@ import androidx.annotation.NonNull
 import androidx.annotation.Nullable
 import androidx.core.view.ViewCompat
 import androidx.recyclerview.widget.*
+import com.arasthel.spannedgridlayoutmanager.SpannedGridLayoutManager
 import kotlin.math.abs
 import kotlin.math.max
 
@@ -53,7 +54,7 @@ class SnapToBlock internal constructor(
     override fun attachToRecyclerView(@Nullable recyclerView: RecyclerView?) {
         if (recyclerView != null) {
             this.recyclerView = recyclerView
-            val layoutManager = recyclerView.layoutManager as StaggeredGridLayoutManager
+            val layoutManager = recyclerView.layoutManager as LinearLayoutManager
             when {
                 layoutManager.canScrollHorizontally() -> {
                     orientationHelper = OrientationHelper.createHorizontalHelper(layoutManager)
@@ -105,7 +106,7 @@ class SnapToBlock internal constructor(
         layoutManager: RecyclerView.LayoutManager,
         velocityX: Int, velocityY: Int
     ): Int {
-        val lm = layoutManager as StaggeredGridLayoutManager
+        val lm = layoutManager as LinearLayoutManager
         initItemDimensionIfNeeded(layoutManager)
         scroller!!.fling(
             0,
@@ -129,7 +130,7 @@ class SnapToBlock internal constructor(
     override fun findSnapView(layoutManager: RecyclerView.LayoutManager): View? {
         // Snap to a view that is either 1) toward the bottom of the data and therefore on screen,
         // or, 2) toward the top of the data and may be off-screen.
-        val snapPos = calcTargetPosition(layoutManager as StaggeredGridLayoutManager)
+        val snapPos = calcTargetPosition(layoutManager as LinearLayoutManager)
         val snapView =
             if (snapPos == RecyclerView.NO_POSITION) null else layoutManager.findViewByPosition(
                 snapPos
@@ -142,16 +143,16 @@ class SnapToBlock internal constructor(
     }
 
     // Does the heavy lifting for findSnapView.
-    private fun calcTargetPosition(layoutManager: StaggeredGridLayoutManager): Int {
+    private fun calcTargetPosition(layoutManager: LinearLayoutManager): Int {
         val snapPos: Int
-        val firstVisiblePos: Int = layoutManager.findFirstVisibleItemPositions(null)[0]
+        val firstVisiblePos: Int = layoutManager.findFirstVisibleItemPosition()
         if (firstVisiblePos == RecyclerView.NO_POSITION) {
             return RecyclerView.NO_POSITION
         }
         initItemDimensionIfNeeded(layoutManager)
         if (firstVisiblePos >= priorFirstPosition) {
             // Scrolling toward bottom of data
-            val firstCompletePosition: Int = layoutManager.findFirstCompletelyVisibleItemPositions(null)[0]
+            val firstCompletePosition: Int = layoutManager.findFirstCompletelyVisibleItemPosition()
             snapPos = if (firstCompletePosition != RecyclerView.NO_POSITION
                 && firstCompletePosition % max(blockSize, 1) == 0
             ) {
@@ -162,7 +163,7 @@ class SnapToBlock internal constructor(
         } else {
             // Scrolling toward top of data
 //            snapPos = roundDownToBlockSize(firstVisiblePos)
-            val firstCompletePosition: Int = layoutManager.findFirstCompletelyVisibleItemPositions(null)[0]
+            val firstCompletePosition: Int = layoutManager.findFirstCompletelyVisibleItemPosition()
             snapPos = if (firstCompletePosition != RecyclerView.NO_POSITION
                 && firstCompletePosition % max(blockSize, 1) == 0
             ) {
@@ -208,7 +209,7 @@ class SnapToBlock internal constructor(
     }
 
     private fun getSpanCount(layoutManager: RecyclerView.LayoutManager): Int {
-        return if (layoutManager is GridLayoutManager) layoutManager.spanCount else 1
+        return if (layoutManager is GridLayoutManager) layoutManager.spanCount else if (layoutManager is SpannedGridLayoutManager) layoutManager.verticalSpanCount else 1
     }
 
     private fun roundDownToBlockSize(trialPosition: Int): Int {
@@ -275,21 +276,21 @@ class SnapToBlock internal constructor(
          * Calculate the distance to final snap position when the view corresponding to the snap
          * position is not currently available.
          *
-         * @param layoutManager StaggeredGridLayoutManager or descendant class
+         * @param layoutManager LinearLayoutManager or descendant class
          * @param targetPos     - Adapter position to snap to
          * @return int[2] {x-distance in pixels, y-distance in pixels}
          */
         fun calculateDistanceToScroll(
-            layoutManager: StaggeredGridLayoutManager,
+            layoutManager: LinearLayoutManager,
             targetPos: Int
         ): IntArray {
             val out = IntArray(2)
-            val firstVisiblePos: Int = layoutManager.findFirstVisibleItemPositions(null)[0]
+            val firstVisiblePos: Int = layoutManager.findFirstVisibleItemPosition()
             if (layoutManager.canScrollHorizontally()) {
                 if (targetPos <= firstVisiblePos) { // scrolling toward top of data
                     if (mIsRTL) {
                         val lastView =
-                            layoutManager.findViewByPosition(layoutManager.findLastVisibleItemPositions(null)[0])
+                            layoutManager.findViewByPosition(layoutManager.findLastVisibleItemPosition())
                         out[0] = (orientationHelper!!.getDecoratedEnd(lastView)
                                 + (firstVisiblePos - targetPos) * itemDimension)
                     } else {
@@ -315,9 +316,9 @@ class SnapToBlock internal constructor(
             and the size of the items to be scrolled. Return integral multiple of mBlockSize not
             equal to zero.
          */
-        fun getPositionsToMove(llm: StaggeredGridLayoutManager, scroll: Int, itemSize: Int): Int {
+        fun getPositionsToMove(llm: LinearLayoutManager, scroll: Int, itemSize: Int): Int {
             var positionsToMove: Int
-            positionsToMove = roundUpToBlockSize(Math.abs(scroll) / itemSize)
+            positionsToMove = roundUpToBlockSize(abs(scroll) / itemSize)
             if (positionsToMove < blockSize) {
                 // Must move at least one block
                 positionsToMove = blockSize
@@ -333,8 +334,8 @@ class SnapToBlock internal constructor(
             }
             return if (layoutDirectionHelper!!.isDirectionToBottom(scroll < 0)) {
                 // Scrolling toward the bottom of data.
-                roundDownToBlockSize(llm.findFirstVisibleItemPositions(null)[0]) + positionsToMove
-            } else roundDownToBlockSize(llm.findLastVisibleItemPositions(null)[0]) + positionsToMove
+                roundDownToBlockSize(llm.findFirstVisibleItemPosition()) + positionsToMove
+            } else roundDownToBlockSize(llm.findLastVisibleItemPosition()) + positionsToMove
             // Scrolling toward the top of the data.
         }
 
