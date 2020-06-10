@@ -50,7 +50,9 @@ class WidgetFrameAdapter(
     var currentEditingInterfacePosition = -1
         set(value) {
             field = value
-            editingInterfaceObservable.notifyObservers(value)
+            mainHandler.post {
+                editingInterfaceObservable.notifyObservers(value)
+            }
         }
 
     private val editingInterfaceObservable =
@@ -131,7 +133,7 @@ class WidgetFrameAdapter(
      */
     @SuppressLint("ClickableViewAccessibility")
     inner class WidgetVH(view: View) : RecyclerView.ViewHolder(view) {
-        var editingInferfaceShown: Boolean
+        var editingInterfaceShown: Boolean
             get() = itemView.widget_edit_wrapper.isVisible
             set(value) {
                 itemView.widget_edit_wrapper.isVisible = value
@@ -187,7 +189,7 @@ class WidgetFrameAdapter(
             }
 
             editingInterfaceObservable.addObserver { _, arg ->
-                editingInferfaceShown = (arg.toString().toInt() == adapterPosition)
+                editingInterfaceShown = currentEditingInterfacePosition != -1 && (currentEditingInterfacePosition == adapterPosition)
             }
 
             onResizeObservable.addObserver { _, _ ->
@@ -204,7 +206,7 @@ class WidgetFrameAdapter(
                 launch {
                     onResize(data)
 
-                    editingInferfaceShown = currentEditingInterfacePosition == adapterPosition
+                    editingInterfaceShown = currentEditingInterfacePosition != -1 && currentEditingInterfacePosition == adapterPosition
 
                     val widgetInfo = withContext(Dispatchers.Main) {
                         manager.getAppWidgetInfo(data.id)

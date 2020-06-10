@@ -8,7 +8,6 @@ import android.content.ContextWrapper
 import android.content.Intent
 import android.content.SharedPreferences
 import android.database.ContentObserver
-import android.graphics.Canvas
 import android.graphics.Matrix
 import android.graphics.PixelFormat
 import android.graphics.Point
@@ -32,7 +31,6 @@ import tk.zwander.lockscreenwidgets.activities.RemoveWidgetDialogActivity
 import tk.zwander.lockscreenwidgets.activities.RequestUnlockActivity
 import tk.zwander.lockscreenwidgets.adapters.WidgetFrameAdapter
 import tk.zwander.lockscreenwidgets.host.WidgetHostCompat
-import kotlin.math.min
 import kotlin.math.roundToInt
 import kotlin.math.sign
 
@@ -101,7 +99,7 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
             }
         })
     }
-    val blockSnapHelper = SnapToBlock(1)
+    val blockSnapHelper = SnapToBlock(this, 1)
     val touchHelperCallback = object : ItemTouchHelper.SimpleCallback(
         ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT or ItemTouchHelper.UP or ItemTouchHelper.DOWN,
         0
