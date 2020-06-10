@@ -237,16 +237,22 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
         //We only really want to be listening to widget changes
         //while the frame is on-screen. Otherwise, we're wasting battery.
         view.frame.attachmentStateListener = {
-            if (it) {
-                updateWallpaperLayerIfNeeded()
-                widgetHost.startListening()
-                //Even with the startListening() call above,
-                //it doesn't seem like pending updates always get
-                //dispatched. Rebinding all the widgets forces
-                //them to update.
-                adapter.notifyDataSetChanged()
-            } else {
-                widgetHost.stopListening()
+            try {
+                if (it) {
+                    updateWallpaperLayerIfNeeded()
+                    widgetHost.startListening()
+                    //Even with the startListening() call above,
+                    //it doesn't seem like pending updates always get
+                    //dispatched. Rebinding all the widgets forces
+                    //them to update.
+                    adapter.notifyDataSetChanged()
+                } else {
+                    widgetHost.stopListening()
+                }
+            } catch (e: NullPointerException) {
+                //The stupid "Attempt to read from field 'com.android.server.appwidget.AppWidgetServiceImpl$ProviderId
+                //com.android.server.appwidget.AppWidgetServiceImpl$Provider.id' on a null object reference"
+                //Exception is thrown on stopListening() as well for some reason.
             }
         }
 
