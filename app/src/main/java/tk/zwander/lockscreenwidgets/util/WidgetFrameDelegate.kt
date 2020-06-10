@@ -99,7 +99,7 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
             }
         })
     }
-    val blockSnapHelper = SnapToBlock(this, 1)
+    val blockSnapHelper = ItemSnapHelper()
     val touchHelperCallback = object : ItemTouchHelper.SimpleCallback(
         ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT or ItemTouchHelper.UP or ItemTouchHelper.DOWN,
         0
@@ -223,12 +223,9 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
         updateRowCount()
         adapter.updateWidgets(prefManager.currentWidgets.toList())
 
-        blockSnapHelper.setSnapBlockCallback(object : SnapToBlock.SnapBlockCallback {
-            override fun onBlockSnap(snapPosition: Int) {}
-            override fun onBlockSnapped(snapPosition: Int) {
-                prefManager.currentPage = snapPosition
-            }
-        })
+        blockSnapHelper.snapCallback = {
+            prefManager.currentPage = it
+        }
 
         view.frame.onAddListener = {
             val intent = Intent(this, AddWidgetActivity::class.java)
@@ -257,11 +254,9 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
 
         //Scroll to the stored page, making sure to catch a potential
         //out-of-bounds error.
-        gridLayoutManager.apply {
-            try {
-                scrollToPosition(prefManager.currentPage)
-            } catch (e: Exception) {}
-        }
+        try {
+            gridLayoutManager.scrollToPosition(prefManager.currentPage)
+        } catch (e: Exception) {}
     }
 
     fun onDestroy() {
@@ -280,7 +275,7 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
             this.verticalSpanCount = rowCount
             this.horizontalSpanCount = colCount
 
-            blockSnapHelper.maxFlingBlocks = rowCount
+//            blockSnapHelper.maxFlingBlocks = rowCount
             blockSnapHelper.attachToRecyclerView(view.widgets_pager)
         }
     }

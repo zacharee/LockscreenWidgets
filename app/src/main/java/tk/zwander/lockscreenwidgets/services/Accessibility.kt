@@ -365,7 +365,7 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
 
     private fun removeOverlay() {
         if (isDebug) {
-            Log.e("LockscreenWidgetsDebug", "Removing overlay", Exception())
+            Log.e(App.DEBUG_LOG_TAG, "Removing overlay", Exception())
         }
         delegate.adapter.currentEditingInterfacePosition = -1
         delegate.view.frame.removeWindow(wm)
