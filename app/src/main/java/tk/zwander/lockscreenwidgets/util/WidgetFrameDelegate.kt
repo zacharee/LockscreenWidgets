@@ -278,8 +278,8 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
             val rowCount = prefManager.frameRowCount
             val colCount = prefManager.frameColCount
 
-            this.verticalSpanCount = rowCount
-            this.horizontalSpanCount = colCount
+            this.rowCount = rowCount
+            this.columnCount = colCount
 
 //            blockSnapHelper.maxFlingBlocks = rowCount
             blockSnapHelper.attachToRecyclerView(view.widgets_pager)
