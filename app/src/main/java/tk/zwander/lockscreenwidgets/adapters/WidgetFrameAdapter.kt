@@ -276,7 +276,8 @@ class WidgetFrameAdapter(
     inner class WidgetSpanSizeLookup : SpannedGridLayoutManager.SpanSizeLookup({ position ->
         if (widgets.isEmpty()) SpanSize(1, 1)
         else {
-            val id = widgets[position].id
+            val widget = if (position >= widgets.size) null else widgets[position]
+            val id = widget?.id ?: -1
             val size = host.context.prefManager.widgetSizes[id]
 
             SpanSize(size?.safeWidgetWidthSpan ?: 1, size?.safeWidgetHeightSpan ?: 1)
