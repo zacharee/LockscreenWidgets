@@ -39,6 +39,9 @@
     <string name="main_screen_social_telegram">Telegram</string>
     <string name="main_screen_social_telegram_desc">If email isn\'t your thing, you can ask your question in my Telegram server. Please mention which app you\'re using, as this server is for all of the ones I\'ve developed.</string>
 
+    <string name="main_screen_social_github">GitHub</string>
+    <string name="main_screen_social_github_desc">Lockscreen Widgets is open source! If you\'re a developer or tinkerer interested in helping to improve the project (or you just want to check out the source), tap here.</string>
+
     <string name="settings_screen_enabled">Enabled</string>
     <string name="settings_screen_enabled_desc">Enable the widget frame on the lockscreen.</string>
 

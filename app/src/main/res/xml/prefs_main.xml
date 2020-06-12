@@ -30,4 +30,11 @@
         app:link="https://bit.ly/ZachareeTG"
         />
 
+    <tk.zwander.lockscreenwidgets.prefs.LinkPreference
+        android:title="@string/main_screen_social_github"
+        android:summary="@string/main_screen_social_github_desc"
+        android:icon="@drawable/ic_baseline_github_24"
+        app:link="https://github.com/zacharee/LockscreenWidgets"
+        />
+
 </PreferenceScreen>
