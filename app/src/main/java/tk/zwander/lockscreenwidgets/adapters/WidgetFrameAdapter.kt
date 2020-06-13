@@ -157,7 +157,7 @@ class WidgetFrameAdapter(
             itemView.apply {
                 widget_left_dragger.setOnTouchListener(WidgetResizeListener(context, WidgetResizeListener.Which.LEFT) {
                     val sizeInfo = currentSizeInfo
-                    sizeInfo.safeWidgetWidthSpan -= it
+                    sizeInfo.safeWidgetWidthSpan = min(sizeInfo.safeWidgetWidthSpan - it, context.prefManager.frameColCount)
 
                     persistNewSizeInfo(sizeInfo)
                     onResize(currentData)
@@ -173,7 +173,7 @@ class WidgetFrameAdapter(
 
                 widget_right_dragger.setOnTouchListener(WidgetResizeListener(context, WidgetResizeListener.Which.RIGHT) {
                     val sizeInfo = currentSizeInfo
-                    sizeInfo.safeWidgetWidthSpan += it
+                    sizeInfo.safeWidgetWidthSpan = min(sizeInfo.safeWidgetWidthSpan + it, context.prefManager.frameColCount)
 
                     persistNewSizeInfo(sizeInfo)
                     onResize(currentData)
@@ -280,7 +280,10 @@ class WidgetFrameAdapter(
             val id = widget?.id ?: -1
             val size = host.context.prefManager.widgetSizes[id]
 
-            SpanSize(size?.safeWidgetWidthSpan ?: 1, size?.safeWidgetHeightSpan ?: 1)
+            SpanSize(
+                size?.safeWidgetWidthSpan?.coerceAtMost(host.context.prefManager.frameColCount) ?: 1,
+                size?.safeWidgetHeightSpan?.coerceAtMost(host.context.prefManager.frameRowCount) ?: 1
+            )
         }
     })
 }
