@@ -51,6 +51,7 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
 
     var updatedForMove = false
     var showingRemovalConfirmation = false
+    var isHoldingItem = false
 
     //The size, position, and such of the widget frame on the lock screen.
     val params = WindowManager.LayoutParams().apply {
@@ -130,6 +131,7 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
         override fun onSelectedChanged(viewHolder: RecyclerView.ViewHolder?, actionState: Int) {
             if (actionState != ItemTouchHelper.ACTION_STATE_IDLE) {
                 viewHolder?.itemView?.alpha = 0.5f
+                isHoldingItem = true
 
                 //The user has long-pressed a widget. Show the editing UI on that widget.
                 //If the UI is already shown on it, hide it.
@@ -146,6 +148,7 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
         ) {
             super.clearView(recyclerView, viewHolder)
 
+            isHoldingItem = false
             viewHolder.itemView.alpha = 1.0f
         }
 
@@ -331,7 +334,7 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
 
     inner class SpannedLayoutManager : SpannedGridLayoutManager(this@WidgetFrameDelegate, RecyclerView.HORIZONTAL, prefManager.frameRowCount, prefManager.frameColCount) {
         override fun canScrollHorizontally(): Boolean {
-            return adapter.currentEditingInterfacePosition == -1 && super.canScrollHorizontally()
+            return (adapter.currentEditingInterfacePosition == -1 || isHoldingItem) && super.canScrollHorizontally()
         }
     }
 }
