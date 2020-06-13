@@ -2,6 +2,7 @@ package tk.zwander.lockscreenwidgets.views
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.graphics.Rect
 import android.os.Build
 import android.os.VibrationEffect
 import android.os.Vibrator
@@ -125,7 +126,20 @@ class WidgetFrameView(context: Context, attrs: AttributeSet) : ConstraintLayout(
     override fun dispatchTouchEvent(ev: MotionEvent): Boolean {
         onTouch(ev)
 
-        maxPointerCount = ev.pointerCount.run { if (this > maxPointerCount) this else maxPointerCount }
+        maxPointerCount = ev.pointerCount.run {
+            var properMax = this
+
+            for (i in 0 until this) {
+                val coords = MotionEvent.PointerCoords().apply { ev.getPointerCoords(i, this) }
+                val frameRect = Rect().apply { getBoundsOnScreen(this) }
+
+                if (coords.x < frameRect.left || coords.x > frameRect.right || coords.y < frameRect.top || coords.y > frameRect.bottom) {
+                    properMax--
+                }
+            }
+
+            if (properMax > maxPointerCount) properMax else maxPointerCount
+        }
 
         when (ev.action) {
             MotionEvent.ACTION_UP -> {
