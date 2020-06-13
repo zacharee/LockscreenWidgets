@@ -137,6 +137,24 @@ class WidgetFrameAdapter(
             get() = itemView.widget_edit_wrapper.isVisible
             set(value) {
                 itemView.widget_edit_wrapper.isVisible = value
+                showHorizontalSizers = value && itemView.context.prefManager.frameColCount > 1
+                showVerticalSizers = value && itemView.context.prefManager.frameRowCount > 1
+            }
+        var showHorizontalSizers: Boolean
+            get() = itemView.run { widget_left_dragger.isVisible && widget_right_dragger.isVisible }
+            set(value) {
+                itemView.apply {
+                    widget_left_dragger.isVisible = value
+                    widget_right_dragger.isVisible = value
+                }
+            }
+        var showVerticalSizers: Boolean
+            get() = itemView.run { widget_top_dragger.isVisible && widget_bottom_dragger.isVisible }
+            set(value) {
+                itemView.apply {
+                    widget_top_dragger.isVisible = value
+                    widget_bottom_dragger.isVisible = value
+                }
             }
 
         val currentData: WidgetData
@@ -205,7 +223,6 @@ class WidgetFrameAdapter(
             itemView.apply {
                 launch {
                     onResize(data)
-
                     editingInterfaceShown = currentEditingInterfacePosition != -1 && currentEditingInterfacePosition == adapterPosition
 
                     val widgetInfo = withContext(Dispatchers.Main) {
