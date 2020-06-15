@@ -213,7 +213,7 @@ class WidgetFrameAdapter(
             onResizeObservable.addObserver { _, _ ->
                 val pos = adapterPosition
 
-                if (pos != -1) {
+                if (pos != -1 && pos < widgets.size) {
                     onResize(widgets[pos])
                 }
             }
