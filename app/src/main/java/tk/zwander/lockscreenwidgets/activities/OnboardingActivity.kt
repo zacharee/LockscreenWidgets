@@ -12,6 +12,7 @@ import com.heinrichreimersoftware.materialintro.slide.SimpleSlide
 import tk.zwander.lockscreenwidgets.R
 import tk.zwander.lockscreenwidgets.util.isAccessibilityEnabled
 import tk.zwander.lockscreenwidgets.util.isNotificationListenerActive
+import tk.zwander.lockscreenwidgets.util.launchUrl
 
 /**
  * The introduction for the app.
@@ -165,13 +166,26 @@ class OnboardingActivity : IntroActivity() {
             )
         }
 
-        //Only add the "done" slide if we're running the full intro.
+        //Only add the battery optimization and "done" slides if we're running the full intro.
         if (retroMode == RetroMode.NONE) {
+            addSlide(
+                SimpleSlide.Builder()
+                    .title(R.string.intro_battery_optimization)
+                    .description(R.string.intro_battery_optimization_desc)
+                    .background(R.color.slide_6)
+                    .image(R.drawable.ic_baseline_battery_alert_24)
+                    .buttonCtaLabel(R.string.more_info)
+                    .buttonCtaClickListener {
+                        launchUrl("https://dontkillmyapp.com/?app=Lockscreen%20Widgets")
+                    }
+                    .build()
+            )
+
             addSlide(
                 SimpleSlide.Builder()
                     .title(R.string.intro_done_title)
                     .description(R.string.intro_done_desc)
-                    .background(R.color.slide_6)
+                    .background(R.color.slide_7)
                     .image(R.drawable.ic_baseline_done_24)
                     .build()
             )
