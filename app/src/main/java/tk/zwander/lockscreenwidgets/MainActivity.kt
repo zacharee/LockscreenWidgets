@@ -31,7 +31,7 @@ class MainActivity : AppCompatActivity() {
 
         if (prefManager.firstRun || !isAccessibilityEnabled) {
             OnboardingActivity.startForResult(this, REQ_INTRO,
-                if (!isAccessibilityEnabled) OnboardingActivity.RetroMode.ACCESSIBILITY else OnboardingActivity.RetroMode.NONE)
+                if (!prefManager.firstRun) OnboardingActivity.RetroMode.ACCESSIBILITY else OnboardingActivity.RetroMode.NONE)
         }
     }
 
