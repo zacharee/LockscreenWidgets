@@ -1,6 +1,7 @@
 package tk.zwander.lockscreenwidgets.util
 
 import android.annotation.SuppressLint
+import android.app.IWallpaperManager
 import android.app.WallpaperManager
 import android.appwidget.AppWidgetManager
 import android.content.Context
@@ -8,17 +9,12 @@ import android.content.ContextWrapper
 import android.content.Intent
 import android.content.SharedPreferences
 import android.database.ContentObserver
-import android.graphics.Matrix
-import android.graphics.PixelFormat
-import android.graphics.Point
+import android.graphics.*
+import android.graphics.drawable.BitmapDrawable
 import android.net.Uri
-import android.os.Handler
-import android.os.Looper
+import android.os.*
 import android.provider.Settings
-import android.view.ContextThemeWrapper
-import android.view.Gravity
-import android.view.LayoutInflater
-import android.view.WindowManager
+import android.view.*
 import android.widget.ImageView
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
@@ -67,7 +63,8 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
         flags =
             WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or
                     WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN or
-                    WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS
+                    WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS or
+                    WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER
         format = PixelFormat.RGBA_8888
     }
     val wallpaper = getSystemService(Context.WALLPAPER_SERVICE) as WallpaperManager
@@ -295,14 +292,43 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
      *
      * TODO: this doesn't work properly on a lot of devices. It seems to be something to do with the scale.
      * TODO: I don't know enough about [Matrix]es to fix it.
-     * TODO: There also doesn't seem to be a way to retrieve the current lock screen wallpaper;
-     * TODO: only the home screen's.
+     *
+     * TODO: There are also a lot of limitations related to wallpaper offsets. It doesn't seem to be
+     * TODO: possible to retrieve those offsets unless you're the active wallpaper, so this method
+     * TODO: just assumes that a wallpaper [Bitmap] that's larger than the screen is centered,
+     * TODO: which isn't always true.
+     *
+     * TODO: You can only specifically retrieve the lock screen wallpaper on Nougat and up.
      */
     @SuppressLint("MissingPermission")
     fun updateWallpaperLayerIfNeeded() {
         if (prefManager.opacityMode == PrefManager.VALUE_OPACITY_MODE_MASKED) {
+            val service = IWallpaperManager.Stub.asInterface(ServiceManager.getService("wallpaper"))
+
+            val bundle = Bundle()
+            val w = if (Build.VERSION.SDK_INT > Build.VERSION_CODES.M) {
+                service.getWallpaper(
+                    packageName,
+                    null,
+                    WallpaperManager.FLAG_LOCK,
+                    bundle,
+                    UserHandle.getCallingUserId()
+                )
+            } else null
+
             try {
-                val fastW = wallpaper.fastDrawable
+                val fastW = run {
+                    if (w == null) null
+                    else {
+                        val fd = w.fileDescriptor
+                        if (fd == null) null
+                        else {
+                            val bmp = BitmapFactory.decodeFileDescriptor(fd)
+                            if (bmp == null) null
+                            else BitmapDrawable(resources, bmp)
+                        }
+                    }
+                } ?: wallpaper.fastDrawable
 
                 fastW?.mutate()?.apply {
                     view.wallpaper_background.setImageDrawable(this)
@@ -319,7 +345,7 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
 
                         setTranslate(
                             (-loc[0].toFloat() - wallpaperAdjustmentX),
-                            //TODO: LGUX 9 doesn't like this Y-translation for some reason
+                            //TODO: a bunch of skins don't like this
                             (-loc[1].toFloat() - wallpaperAdjustmentY)
                         )
                     }
