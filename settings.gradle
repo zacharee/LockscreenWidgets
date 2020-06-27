@@ -1,3 +1,5 @@
-include ':app', ':spannedlm'
+include ':app' /* Remove the spannedlm inclusion from this list */, ':spannedlm'
 rootProject.name = "Lockscreen Widgets"
+
+//Remove this line
 project(':spannedlm').projectDir = new File('../SpannedGridLayoutManager/spannedgridlayoutmanager')
