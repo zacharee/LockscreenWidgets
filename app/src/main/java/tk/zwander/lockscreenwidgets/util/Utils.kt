@@ -7,19 +7,17 @@ import android.animation.ObjectAnimator
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
+import android.graphics.Point
 import android.net.Uri
 import android.os.Handler
 import android.os.Looper
 import android.provider.Settings
 import android.util.TypedValue
 import android.view.View
-import android.view.ViewGroup
+import android.view.WindowManager
 import android.view.accessibility.AccessibilityNodeInfo
 import android.view.accessibility.AccessibilityWindowInfo
-import androidx.recyclerview.widget.GridLayoutManager
-import androidx.recyclerview.widget.RecyclerView
-import androidx.recyclerview.widget.SnapHelper
-import tk.zwander.lockscreenwidgets.BuildConfig
+import tk.zwander.lockscreenwidgets.R
 import tk.zwander.lockscreenwidgets.services.Accessibility
 import tk.zwander.lockscreenwidgets.services.NotificationListener
 import kotlin.math.roundToInt
@@ -153,6 +151,37 @@ val Context.widgetBlockWidth: Int
 
 val Context.widgetBlockHeight: Int
     get() = (pxAsDp(prefManager.frameHeightDp) / prefManager.frameRowCount).roundToInt()
+
+val Context.isTouchWiz: Boolean
+    get() = packageManager.hasSystemFeature("com.samsung.feature.samsung_experience_mobile")
+
+val Context.windowManager: WindowManager
+    get() = getSystemService(Context.WINDOW_SERVICE) as WindowManager
+
+val Context.realResolution: Point
+    get() = Point().apply { windowManager.defaultDisplay.getRealSize(this) }
+
+fun Context.calculateNCPosXFromRightDefault(): Int {
+    val fromRight = dpAsPx(resources.getInteger(R.integer.def_notification_pos_x_from_right_dp))
+    val screenWidth = realResolution.x
+    val frameWidthPx = dpAsPx(prefManager.notificationFrameWidthDp)
+
+    val frameRight = (frameWidthPx / 2f)
+    val coord = (screenWidth / 2f) - fromRight - frameRight
+
+    return coord.toInt()
+}
+
+fun Context.calculateNCPosYFromTopDefault(): Int {
+    val fromTop = dpAsPx(resources.getInteger(R.integer.def_notification_pos_y_from_top_dp))
+    val screenHeight = realResolution.y
+    val frameHeightPx = dpAsPx(prefManager.notificationFrameHeightDp)
+
+    val frameTop = (frameHeightPx / 2f)
+    val coord = -(screenHeight / 2f) + frameTop + fromTop
+
+    return coord.toInt()
+}
 
 //Take an integer and make it even.
 //If the integer == 0, return itself (0).

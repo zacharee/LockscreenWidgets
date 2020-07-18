@@ -11,6 +11,7 @@ import tk.zwander.lockscreenwidgets.activities.HideForIDsActivity
 import tk.zwander.lockscreenwidgets.activities.OnboardingActivity
 import tk.zwander.lockscreenwidgets.util.PrefManager
 import tk.zwander.lockscreenwidgets.util.isNotificationListenerActive
+import tk.zwander.lockscreenwidgets.util.isTouchWiz
 
 /**
  * The settings page.
@@ -26,6 +27,10 @@ class SettingsFragment : PreferenceFragmentCompat() {
                 OnboardingActivity.start(requireContext(), OnboardingActivity.RetroMode.NOTIFICATION)
                 false
             } else true
+        }
+
+        findPreference<SwitchPreference>(PrefManager.KEY_SHOW_IN_NOTIFICATION_CENTER)?.apply {
+            if (!requireContext().isTouchWiz) isVisible = false
         }
 
         findPreference<ListPreference>(PrefManager.KEY_OPACITY_MODE)?.setOnPreferenceChangeListener { _, newValue ->

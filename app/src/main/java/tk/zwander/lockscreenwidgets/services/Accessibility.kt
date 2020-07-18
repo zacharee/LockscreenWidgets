@@ -126,6 +126,12 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
     private var hideForPresentIds = false
     private var hideForNonPresentIds = false
 
+    private var notificationsPanelFullyExpanded: Boolean
+        get() = delegate.notificationsPanelFullyExpanded
+        set(value) {
+            delegate.notificationsPanelFullyExpanded = value
+        }
+
     private var currentSysUiLayer = 1
     private var currentAppLayer = 0
 
@@ -146,8 +152,8 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
                 params.x += velX.toInt()
                 params.y += velY.toInt()
 
-                prefManager.posX = params.x
-                prefManager.posY = params.y
+                prefManager.setCorrectFrameX(saveForNC, params.x)
+                prefManager.setCorrectFrameY(saveForNC, params.y)
 
                 updateOverlay()
                 delegate.updateWallpaperLayerIfNeeded()
@@ -157,7 +163,7 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
                 params.width -= velX
                 params.x += (velX / 2)
 
-                prefManager.frameWidthDp = pxAsDp(params.width)
+                prefManager.setCorrectFrameWidth(saveForNC, pxAsDp(params.width))
 
                 updateOverlay()
             }
@@ -166,7 +172,7 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
                 params.width += velX
                 params.x += (velX / 2)
 
-                prefManager.frameWidthDp = pxAsDp(params.width)
+                prefManager.setCorrectFrameWidth(saveForNC, pxAsDp(params.width))
 
                 updateOverlay()
             }
@@ -175,7 +181,7 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
                 params.height -= velY
                 params.y += (velY / 2)
 
-                prefManager.frameHeightDp = pxAsDp(params.height)
+                prefManager.setCorrectFrameHeight(saveForNC, pxAsDp(params.height))
 
                 updateOverlay()
             }
@@ -184,7 +190,7 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
                 params.height += velY
                 params.y += (velY / 2)
 
-                prefManager.frameHeightDp = pxAsDp(params.height)
+                prefManager.setCorrectFrameHeight(saveForNC, pxAsDp(params.height))
 
                 updateOverlay()
             }
@@ -245,7 +251,7 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
 
             //The below block can (very rarely) take over half a second to execute, so only run it
             //if we actually need to (i.e. on the lock screen and screen is on).
-            if (wasOnKeyguard && isScreenOn) {
+            if ((wasOnKeyguard || prefManager.showInNotificationCenter) && isScreenOn) {
                 val sysUiWindows = findSystemUiWindows()
                 val appWindow = findTopAppWindow()
 
@@ -278,26 +284,34 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
                     delegate.view.frame.setNewDebugIdItems(items)
                 }
 
-                //Generate "layer" values for the System UI window and for the topmost app window, if
-                //it exists.
-                currentAppLayer = if (appIndex != -1) windows.size - appIndex else appIndex
-                currentSysUiLayer = if (sysUiIndex != -1) windows.size - sysUiIndex else sysUiIndex
+                if (isOnKeyguard) {
+                    //Generate "layer" values for the System UI window and for the topmost app window, if
+                    //it exists.
+                    currentAppLayer = if (appIndex != -1) windows.size - appIndex else appIndex
+                    currentSysUiLayer = if (sysUiIndex != -1) windows.size - sysUiIndex else sysUiIndex
 
-                if (prefManager.hideOnSecurityPage) {
-                    onMainLockscreen = sysUiNodes.find {
-                        (it.viewIdResourceName == "com.android.systemui:id/notification_panel" && it.isVisibleToUser)
-                                || (it.viewIdResourceName == "com.android.systemui:id/left_button" && it.isVisibleToUser)
-                    } != null
+                    if (prefManager.hideOnSecurityPage) {
+                        onMainLockscreen = sysUiNodes.find {
+                            (it.viewIdResourceName == "com.android.systemui:id/notification_panel" && it.isVisibleToUser)
+                                    || (it.viewIdResourceName == "com.android.systemui:id/left_button" && it.isVisibleToUser)
+                        } != null
+                    }
+
+                    if (prefManager.hideOnNotificationShade) {
+                        //Used for "Hide When Notification Shade Shown" so we know when it's actually expanded.
+                        //Some devices don't even have left shortcuts, so also check for keyguard_indication_area.
+                        //Just like the showingSecurityInput check, this is probably unreliable for some devices.
+                        showingNotificationsPanel = sysUiNodes.find {
+                            (it.viewIdResourceName == "com.android.systemui:id/quick_settings_panel" && it.isVisibleToUser)
+                                    || (it.viewIdResourceName == "com.android.systemui:id/settings_button" && it.isVisibleToUser)
+                                    || (it.viewIdResourceName == "com.android.systemui:id/tile_label" && it.isVisibleToUser)
+                        } != null
+                    }
                 }
 
-                if (prefManager.hideOnNotificationShade) {
-                    //Used for "Hide When Notification Shade Shown" so we know when it's actually expanded.
-                    //Some devices don't even have left shortcuts, so also check for keyguard_indication_area.
-                    //Just like the showingSecurityInput check, this is probably unreliable for some devices.
-                    showingNotificationsPanel = sysUiNodes.find {
-                        (it.viewIdResourceName == "com.android.systemui:id/quick_settings_panel" && it.isVisibleToUser)
-                                || (it.viewIdResourceName == "com.android.systemui:id/settings_button" && it.isVisibleToUser)
-                                || (it.viewIdResourceName == "com.android.systemui:id/tile_label" && it.isVisibleToUser)
+                if (prefManager.showInNotificationCenter) {
+                    notificationsPanelFullyExpanded = sysUiNodes.find {
+                        it.viewIdResourceName == "com.android.systemui:id/more_button" && it.isVisibleToUser
                     } != null
                 }
 
@@ -383,43 +397,52 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
      * - [currentSysUiLayer] is greater than [currentAppLayer]
      * - [WidgetFrameDelegate.showingRemovalConfirmation] is false
      * - [onMainLockscreen] is true OR [showingNotificationsPanel] is true OR [PrefManager.hideOnSecurityPage] is false
-     * - [showingNotificationsPanel] is false OR [PrefManager.hideOnNotificationShade] is false
+     * - [showingNotificationsPanel] is false OR [PrefManager.hideOnNotificationShade] is false (OR [notificationsPanelFullyExpanded] is true AND [PrefManager.showInNotificationCenter] is true
      * - [notificationCount] is 0 (i.e. no notifications shown on lock screen, not necessarily no notifications at all) OR [PrefManager.hideOnNotifications] is false
      * - [hideForPresentIds] is false OR [PrefManager.presentIds] is empty
      * - [hideForNonPresentIds] is false OR [PrefManager.nonPresentIds] is empty
      * - [PrefManager.widgetFrameEnabled] is true (i.e. the widget frame is actually enabled)
      */
-    private fun canShow() =
-        (wasOnKeyguard
-                && isScreenOn
-                && !isTempHide
-                && currentSysUiLayer > currentAppLayer
-                && !delegate.showingRemovalConfirmation
-                && (onMainLockscreen || showingNotificationsPanel || !prefManager.hideOnSecurityPage)
-                && (!showingNotificationsPanel || !prefManager.hideOnNotificationShade)
-                && (notificationCount == 0 || !prefManager.hideOnNotifications)
-                && (!hideForPresentIds || prefManager.presentIds.isEmpty())
-                && (!hideForNonPresentIds || prefManager.nonPresentIds.isEmpty())
-                && prefManager.widgetFrameEnabled).also {
-            if (isDebug) {
-                Log.e(
-                    App.DEBUG_LOG_TAG,
-                    "canShow: $it, " +
-                    "isScreenOn: ${isScreenOn}, " +
-                    "isTempHide: ${isTempHide}, " +
-                    "wasOnKeyguard: $wasOnKeyguard, " +
-                    "currentSysUiLayer: $currentSysUiLayer, " +
-                    "currentAppLayer: $currentAppLayer, " +
-                    "onMainLockscreen: $onMainLockscreen, " +
-                    "showingNotificationsPanel: $showingNotificationsPanel, " +
-                    "notificationCount: $notificationCount, " +
-                    "hideForPresentIds: $hideForPresentIds, " +
-                    "hideForNonPresentIds: $hideForNonPresentIds, " +
-                    "widgetEnabled: ${prefManager.widgetFrameEnabled}\n\n",
-                    Exception()
-                )
+    private fun canShow(): Boolean {
+        return (
+                (isScreenOn
+                        && !isTempHide
+                        && (notificationsPanelFullyExpanded && prefManager.showInNotificationCenter)
+                        && prefManager.widgetFrameEnabled
+                ) || (wasOnKeyguard
+                        && isScreenOn
+                        && !isTempHide
+                        && currentSysUiLayer > currentAppLayer
+                        && !delegate.showingRemovalConfirmation
+                        && (onMainLockscreen || showingNotificationsPanel || !prefManager.hideOnSecurityPage)
+                        && (!showingNotificationsPanel || !prefManager.hideOnNotificationShade)
+                        && (notificationCount == 0 || !prefManager.hideOnNotifications)
+                        && (!hideForPresentIds || prefManager.presentIds.isEmpty())
+                        && (!hideForNonPresentIds || prefManager.nonPresentIds.isEmpty())
+                        && prefManager.widgetFrameEnabled
+                        )
+                ).also {
+                if (isDebug) {
+                    Log.e(
+                        App.DEBUG_LOG_TAG,
+                        "canShow: $it, " +
+                                "isScreenOn: ${isScreenOn}, " +
+                                "isTempHide: ${isTempHide}, " +
+                                "wasOnKeyguard: $wasOnKeyguard, " +
+                                "currentSysUiLayer: $currentSysUiLayer, " +
+                                "currentAppLayer: $currentAppLayer, " +
+                                "onMainLockscreen: $onMainLockscreen, " +
+                                "showingNotificationsPanel: $showingNotificationsPanel, " +
+                                "notificationsPanelFullyExpanded: $notificationsPanelFullyExpanded, " +
+                                "notificationCount: $notificationCount, " +
+                                "hideForPresentIds: $hideForPresentIds, " +
+                                "hideForNonPresentIds: $hideForNonPresentIds, " +
+                                "widgetEnabled: ${prefManager.widgetFrameEnabled}\n\n",
+                        Exception()
+                    )
+                }
             }
-        }
+    }
 
     /**
      * Find the [AccessibilityWindowInfo] corresponding to System UI

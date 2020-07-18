@@ -19,9 +19,13 @@ class PrefManager private constructor(context: Context) : ContextWrapper(context
     companion object {
         const val KEY_CURRENT_WIDGETS = "current_widgets"
         const val KEY_FRAME_WIDTH = "frame_width"
+        const val KEY_NOTIFICATION_FRAME_WIDTH = "notification_frame_width"
         const val KEY_FRAME_HEIGHT = "frame_height"
+        const val KEY_NOTIFICATION_FRAME_HEIGHT = "notification_frame_height"
         const val KEY_POS_X = "position_x"
+        const val KEY_NOTIFICATION_POS_X = "notification_position_x"
         const val KEY_POS_Y = "position_y"
+        const val KEY_NOTIFICATION_POS_Y = "notification_position_y"
         const val KEY_FIRST_VIEWING = "first_viewing"
         const val KEY_FIRST_RUN = "first_run"
         const val KEY_OPACITY_MODE = "opacity_mode"
@@ -40,6 +44,7 @@ class PrefManager private constructor(context: Context) : ContextWrapper(context
         const val KEY_PRESENT_IDS = "present_ids"
         const val KEY_NON_PRESENT_IDS = "non_present_ids"
         const val KEY_WIDGET_SIZES = "widget_sizes"
+        const val KEY_SHOW_IN_NOTIFICATION_CENTER = "show_in_notification_center"
 
         const val VALUE_PAGE_INDICATOR_BEHAVIOR_HIDDEN = 0
         const val VALUE_PAGE_INDICATOR_BEHAVIOR_AUTO_HIDE = 1
@@ -116,11 +121,25 @@ class PrefManager private constructor(context: Context) : ContextWrapper(context
             putFloat(KEY_FRAME_WIDTH, value)
         }
 
+    //The width of the frame in the NC in DP.
+    var notificationFrameWidthDp: Float
+        get() = getFloat(KEY_NOTIFICATION_FRAME_WIDTH, getResourceFloat(R.integer.def_notification_frame_width))
+        set(value) {
+            putFloat(KEY_NOTIFICATION_FRAME_WIDTH, value)
+        }
+
     //The height of the frame in DP
     var frameHeightDp: Float
         get() = getFloat(KEY_FRAME_HEIGHT, getResourceFloat(R.integer.def_frame_height))
         set(value) {
             putFloat(KEY_FRAME_HEIGHT, value)
+        }
+
+    //The height of the frame in the NC in DP.
+    var notificationFrameHeightDp: Float
+        get() = getFloat(KEY_NOTIFICATION_FRAME_HEIGHT, getResourceFloat(R.integer.def_notification_frame_height))
+        set(value) {
+            putFloat(KEY_NOTIFICATION_FRAME_HEIGHT, value)
         }
 
     //The horizontal position of the center of the frame (from the center of the screen) in pixels
@@ -130,11 +149,25 @@ class PrefManager private constructor(context: Context) : ContextWrapper(context
             putInt(KEY_POS_X, value)
         }
 
+    //The horizontal position of the center of the frame in the NC (from the center of the screen) in pixels
+    var notificationPosX: Int
+        get() = getInt(KEY_NOTIFICATION_POS_X, calculateNCPosXFromRightDefault())
+        set(value) {
+            putInt(KEY_NOTIFICATION_POS_X, value)
+        }
+
     //The vertical position of the center of the frame (from the center of the screen) in pixels
     var posY: Int
         get() = getInt(KEY_POS_Y, 0)
         set(value) {
             putInt(KEY_POS_Y, value)
+        }
+
+    //The vertical position of the center of the frame in the NC (from the center of the screen) in pixels
+    var notificationPosY: Int
+        get() = getInt(KEY_NOTIFICATION_POS_Y, calculateNCPosYFromTopDefault())
+        set(value) {
+            putInt(KEY_NOTIFICATION_POS_Y, value)
         }
 
     //The current page/index of the frame the user is currently on. Stored value may be higher
@@ -251,6 +284,56 @@ class PrefManager private constructor(context: Context) : ContextWrapper(context
         set(value) {
             putInt(KEY_FRAME_ROW_COUNT, value)
         }
+
+    //Whether to show in the notification center.
+    //This mode has separate dimensions and positioning
+    //vs the standard lock screen mode.
+    //Only available for Samsung One UI 1.0 and later.
+    var showInNotificationCenter: Boolean
+        get() = getBoolean(KEY_SHOW_IN_NOTIFICATION_CENTER, false)
+        set(value) {
+            putBoolean(KEY_SHOW_IN_NOTIFICATION_CENTER, value)
+        }
+
+    fun getCorrectFrameWidth(isNC: Boolean): Float {
+        return if (isNC) notificationFrameWidthDp
+        else frameWidthDp
+    }
+
+    fun setCorrectFrameWidth(isNC: Boolean, width: Float) {
+        if (isNC) notificationFrameWidthDp = width
+        else frameWidthDp = width
+    }
+
+    fun getCorrectFrameHeight(isNC: Boolean): Float {
+        return if (isNC) notificationFrameHeightDp
+        else frameHeightDp
+    }
+
+    fun setCorrectFrameHeight(isNC: Boolean, height: Float) {
+        if (isNC) notificationFrameHeightDp = height
+        else frameHeightDp = height
+    }
+
+    fun getCorrectFrameX(isNC: Boolean): Int {
+        return if (isNC) notificationPosX
+        else posX
+    }
+
+    fun setCorrectFrameX(isNC: Boolean, x: Int) {
+        if (isNC) notificationPosX = x
+        else posX = x
+    }
+
+    fun getCorrectFrameY(isNC: Boolean): Int {
+        return if (isNC) notificationPosY
+        else posY
+    }
+
+    fun setCorrectFrameY(isNC: Boolean, y: Int) {
+        if (isNC) notificationPosY = y
+        else posY = y
+    }
 
     fun getString(key: String, def: String? = null) = prefs.getString(key, def)
     fun getFloat(key: String, def: Float) = prefs.getFloat(key, def)

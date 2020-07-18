@@ -89,6 +89,13 @@
         android:key="settings_behavior_category">
 
         <SwitchPreference
+            android:title="@string/settings_screen_show_in_notification_center"
+            android:summary="@string/settings_screen_show_in_notification_center_desc"
+            android:key="show_in_notification_center"
+            android:defaultValue="false"
+            />
+
+        <SwitchPreference
             android:title="@string/settings_screen_animate_show_hide"
             android:summary="@string/settings_screen_animate_show_hide_desc"
             android:key="animate_show_hide"

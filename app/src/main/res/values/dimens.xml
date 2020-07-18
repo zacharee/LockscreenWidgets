@@ -2,4 +2,10 @@
 <resources>
     <integer name="def_frame_width">250</integer>
     <integer name="def_frame_height">200</integer>
+
+    <integer name="def_notification_frame_width">300</integer>
+    <integer name="def_notification_frame_height">170</integer>
+
+    <integer name="def_notification_pos_x_from_right_dp">8</integer>
+    <integer name="def_notification_pos_y_from_top_dp">50</integer>
 </resources>

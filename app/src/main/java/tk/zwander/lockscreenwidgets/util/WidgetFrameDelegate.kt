@@ -48,15 +48,24 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
     var updatedForMove = false
     var showingRemovalConfirmation = false
     var isHoldingItem = false
+    var notificationsPanelFullyExpanded = false
+        set(value) {
+            field = value
+
+            updateParamsForNotificationCenterStateChange()
+        }
+
+    val saveForNC: Boolean
+        get() = notificationsPanelFullyExpanded && prefManager.showInNotificationCenter
 
     //The size, position, and such of the widget frame on the lock screen.
     val params = WindowManager.LayoutParams().apply {
         type = WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY
-        width = dpAsPx(prefManager.frameWidthDp)
-        height = dpAsPx(prefManager.frameHeightDp)
+        width = dpAsPx(prefManager.getCorrectFrameWidth(saveForNC))
+        height = dpAsPx(prefManager.getCorrectFrameHeight(saveForNC))
 
-        x = prefManager.posX
-        y = prefManager.posY
+        x = prefManager.getCorrectFrameX(saveForNC)
+        y = prefManager.getCorrectFrameY(saveForNC)
 
         gravity = Gravity.CENTER
 
@@ -200,6 +209,9 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
                 PrefManager.KEY_DEBUG_LOG -> {
                 view.frame.updateDebugIdViewVisibility()
             }
+            PrefManager.KEY_SHOW_IN_NOTIFICATION_CENTER -> {
+                updateParamsForNotificationCenterStateChange()
+            }
         }
     }
 
@@ -302,7 +314,7 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
      */
     @SuppressLint("MissingPermission")
     fun updateWallpaperLayerIfNeeded() {
-        if (prefManager.opacityMode == PrefManager.VALUE_OPACITY_MODE_MASKED) {
+        if (prefManager.opacityMode == PrefManager.VALUE_OPACITY_MODE_MASKED && (!notificationsPanelFullyExpanded || !prefManager.showInNotificationCenter)) {
             val service = IWallpaperManager.Stub.asInterface(ServiceManager.getService("wallpaper"))
 
             val bundle = Bundle()
@@ -356,6 +368,15 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
         } else {
             view.wallpaper_background.setImageDrawable(null)
         }
+    }
+
+    private fun updateParamsForNotificationCenterStateChange() {
+        params.x = prefManager.getCorrectFrameX(saveForNC)
+        params.y = prefManager.getCorrectFrameY(saveForNC)
+        params.width = dpAsPx(prefManager.getCorrectFrameWidth(saveForNC))
+        params.height = dpAsPx(prefManager.getCorrectFrameHeight(saveForNC))
+
+        view.frame.updateWindow(wm, params)
     }
 
     inner class SpannedLayoutManager : SpannedGridLayoutManager(this@WidgetFrameDelegate, RecyclerView.HORIZONTAL, prefManager.frameRowCount, prefManager.frameColCount) {
