@@ -1,6 +1,7 @@
 package tk.zwander.lockscreenwidgets.fragments
 
 import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
 import androidx.preference.ListPreference
 import androidx.preference.Preference
@@ -30,7 +31,7 @@ class SettingsFragment : PreferenceFragmentCompat() {
         }
 
         findPreference<SwitchPreference>(PrefManager.KEY_SHOW_IN_NOTIFICATION_CENTER)?.apply {
-            if (!requireContext().isTouchWiz) isVisible = false
+            if (!requireContext().isTouchWiz || Build.VERSION.SDK_INT < Build.VERSION_CODES.P) isVisible = false
         }
 
         findPreference<ListPreference>(PrefManager.KEY_OPACITY_MODE)?.setOnPreferenceChangeListener { _, newValue ->
