@@ -321,13 +321,20 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
 
             val bundle = Bundle()
             val w = if (Build.VERSION.SDK_INT > Build.VERSION_CODES.M) {
-                service.getWallpaper(
-                    packageName,
-                    null,
-                    WallpaperManager.FLAG_LOCK,
-                    bundle,
-                    UserHandle.getCallingUserId()
-                )
+                //Even though this hidden method was added in Android Nougat,
+                //some devices (SAMSUNG >_>) removed or changed it, so it won't
+                //always work. Thus the try-catch.
+                try {
+                    service.getWallpaper(
+                        packageName,
+                        null,
+                        WallpaperManager.FLAG_LOCK,
+                        bundle,
+                        UserHandle.getCallingUserId()
+                    )
+                } catch (e: Exception) {
+                    null
+                }
             } else null
 
             try {
