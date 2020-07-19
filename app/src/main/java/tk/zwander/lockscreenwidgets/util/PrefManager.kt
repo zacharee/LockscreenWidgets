@@ -45,6 +45,7 @@ class PrefManager private constructor(context: Context) : ContextWrapper(context
         const val KEY_NON_PRESENT_IDS = "non_present_ids"
         const val KEY_WIDGET_SIZES = "widget_sizes"
         const val KEY_SHOW_IN_NOTIFICATION_CENTER = "show_in_notification_center"
+        const val KEY_SHOW_ON_MAIN_LOCK_SCREEN = "show_on_main_lock_screen"
 
         const val VALUE_PAGE_INDICATOR_BEHAVIOR_HIDDEN = 0
         const val VALUE_PAGE_INDICATOR_BEHAVIOR_AUTO_HIDE = 1
@@ -293,6 +294,15 @@ class PrefManager private constructor(context: Context) : ContextWrapper(context
         get() = getBoolean(KEY_SHOW_IN_NOTIFICATION_CENTER, false)
         set(value) {
             putBoolean(KEY_SHOW_IN_NOTIFICATION_CENTER, value)
+        }
+
+    //A dependent option for [showInNotificationCenter].
+    //Disabling this while [showInNotificationCenter] is enabled
+    //will cause the widget frame to only show in the notification center.
+    var showOnMainLockScreen: Boolean
+        get() = getBoolean(KEY_SHOW_ON_MAIN_LOCK_SCREEN, true) || !showInNotificationCenter
+        set(value) {
+            putBoolean(KEY_SHOW_ON_MAIN_LOCK_SCREEN, value)
         }
 
     fun getCorrectFrameWidth(isNC: Boolean): Float {

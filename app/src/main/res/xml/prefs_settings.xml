@@ -97,6 +97,15 @@
             />
 
         <SwitchPreference
+            android:title="@string/settings_screen_show_on_main_lock_screen"
+            android:summary="@string/settings_screen_show_on_main_lock_screen_desc"
+            android:key="show_on_main_lock_screen"
+            android:icon="@drawable/ic_baseline_lock_24"
+            android:defaultValue="true"
+            android:dependency="show_in_notification_center"
+            />
+
+        <SwitchPreference
             android:title="@string/settings_screen_animate_show_hide"
             android:summary="@string/settings_screen_animate_show_hide_desc"
             android:key="animate_show_hide"

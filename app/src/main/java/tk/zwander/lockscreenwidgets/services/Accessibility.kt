@@ -391,9 +391,19 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
      * members first, then try SharedPreferences, then use IPC methods).
      *
      * The widget frame can only show if ALL of the following conditions are met:
+     *
+     * =======
+     * - [isScreenOn] is true
+     * - [isTempHide] is false
+     * - [notificationsPanelFullyExpanded] is true AND [PrefManager.showInNotificationCenter] is true
+     * - [PrefManager.widgetFrameEnabled] is true
+     * =======
+     * OR
+     * =======
      * - [wasOnKeyguard] is true
      * - [isScreenOn] is true (i.e. the display is properly on: not in Doze or on the AOD)
      * - [isTempHide] is false
+     * - [PrefManager.showOnMainLockScreen] is true OR [PrefManager.showInNotificationCenter] is false
      * - [currentSysUiLayer] is greater than [currentAppLayer]
      * - [WidgetFrameDelegate.showingRemovalConfirmation] is false
      * - [onMainLockscreen] is true OR [showingNotificationsPanel] is true OR [PrefManager.hideOnSecurityPage] is false
@@ -402,6 +412,7 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
      * - [hideForPresentIds] is false OR [PrefManager.presentIds] is empty
      * - [hideForNonPresentIds] is false OR [PrefManager.nonPresentIds] is empty
      * - [PrefManager.widgetFrameEnabled] is true (i.e. the widget frame is actually enabled)
+     * =======
      */
     private fun canShow(): Boolean {
         return (
@@ -412,6 +423,7 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
                 ) || (wasOnKeyguard
                         && isScreenOn
                         && !isTempHide
+                        && (prefManager.showOnMainLockScreen || !prefManager.showInNotificationCenter)
                         && currentSysUiLayer > currentAppLayer
                         && !delegate.showingRemovalConfirmation
                         && (onMainLockscreen || showingNotificationsPanel || !prefManager.hideOnSecurityPage)
@@ -434,6 +446,7 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
                                 "onMainLockscreen: $onMainLockscreen, " +
                                 "showingNotificationsPanel: $showingNotificationsPanel, " +
                                 "notificationsPanelFullyExpanded: $notificationsPanelFullyExpanded, " +
+                                "showOnMainLockScreen: ${prefManager.showOnMainLockScreen}" +
                                 "notificationCount: $notificationCount, " +
                                 "hideForPresentIds: $hideForPresentIds, " +
                                 "hideForNonPresentIds: $hideForNonPresentIds, " +

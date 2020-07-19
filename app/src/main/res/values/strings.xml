@@ -89,6 +89,9 @@
     <string name="settings_screen_show_in_notification_center">Show when Notification Shade is Fully Expanded</string>
     <string name="settings_screen_show_in_notification_center_desc">Samsung\'s One UI 1 (Pie) and One UI 2 (10) have some empty space to the right of the clock when the notification center is fully expanded. Enabling this option will cause the widget frame to appear when the shade is fully expanded. This state has its own independent positioning and size.</string>
 
+    <string name="settings_screen_show_on_main_lock_screen">Show on Main Lock Screen</string>
+    <string name="settings_screen_show_on_main_lock_screen_desc">If you\'re using the option to show in the notification center, you may not want Lockscreen Widgets to show on the main lock screen. Disable this option to have the frame only show when the notification center is fully expanded.</string>
+
     <string name="intro_welcome_title">Welcome!</string>
     <string name="intro_welcome_desc">Lockscreen Widgets is a simple app with a simple purpose: to bring back Android KitKat\'s lock screen widgets. Your widgets will show up in a simple paged slider on the lockscreen.</string>
 

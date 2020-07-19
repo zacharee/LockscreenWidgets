@@ -30,8 +30,16 @@ class SettingsFragment : PreferenceFragmentCompat() {
             } else true
         }
 
+        //Currently, the option to show the frame when the notification center is fully expanded is only
+        //for Samsung One UI 1.0 and above, so we need to hide the relevant toggles.
+        val ncCondition = requireContext().isTouchWiz && Build.VERSION.SDK_INT >= Build.VERSION_CODES.P
+
         findPreference<SwitchPreference>(PrefManager.KEY_SHOW_IN_NOTIFICATION_CENTER)?.apply {
-            if (!requireContext().isTouchWiz || Build.VERSION.SDK_INT < Build.VERSION_CODES.P) isVisible = false
+            if (!ncCondition) isVisible = false
+        }
+
+        findPreference<SwitchPreference>(PrefManager.KEY_SHOW_ON_MAIN_LOCK_SCREEN)?.apply {
+            if (!ncCondition) isVisible = false
         }
 
         findPreference<ListPreference>(PrefManager.KEY_OPACITY_MODE)?.setOnPreferenceChangeListener { _, newValue ->
