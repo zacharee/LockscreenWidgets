@@ -50,9 +50,10 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
     var isHoldingItem = false
     var notificationsPanelFullyExpanded = false
         set(value) {
+            val changed = field != value
             field = value
 
-            updateParamsForNotificationCenterStateChange()
+            if (changed) updateParamsForNotificationCenterStateChange()
         }
 
     val saveForNC: Boolean
