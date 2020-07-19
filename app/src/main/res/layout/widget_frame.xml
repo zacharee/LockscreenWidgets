@@ -148,6 +148,12 @@
         </androidx.constraintlayout.widget.ConstraintLayout>
 
         <include
+            android:id="@+id/remove_widget_confirmation"
+            android:visibility="gone"
+            layout="@layout/remove_widget_confirmation_layout"
+            />
+
+        <include
             android:id="@+id/id_view"
             android:visibility="gone"
             layout="@layout/widget_frame_id_view"

@@ -20,13 +20,12 @@ import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import com.arasthel.spannedgridlayoutmanager.SpannedGridLayoutManager
 import kotlinx.android.synthetic.main.widget_frame.view.*
-import tk.zwander.lockscreenwidgets.IRemoveConfirmCallback
 import tk.zwander.lockscreenwidgets.R
 import tk.zwander.lockscreenwidgets.activities.AddWidgetActivity
-import tk.zwander.lockscreenwidgets.activities.RemoveWidgetDialogActivity
 import tk.zwander.lockscreenwidgets.activities.RequestUnlockActivity
 import tk.zwander.lockscreenwidgets.adapters.WidgetFrameAdapter
 import tk.zwander.lockscreenwidgets.host.WidgetHostCompat
+import tk.zwander.lockscreenwidgets.views.RemoveWidgetConfirmationView
 import kotlin.math.roundToInt
 import kotlin.math.sign
 
@@ -46,7 +45,6 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
     }
 
     var updatedForMove = false
-    var showingRemovalConfirmation = false
     var isHoldingItem = false
     var notificationsPanelFullyExpanded = false
         set(value) {
@@ -90,22 +88,20 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
     //The actual frame View
     val view = LayoutInflater.from(ContextThemeWrapper(this, R.style.AppTheme))
         .inflate(R.layout.widget_frame, null)
-    var gridLayoutManager = SpannedLayoutManager()
+    val gridLayoutManager = SpannedLayoutManager()
     val adapter = WidgetFrameAdapter(widgetManager, widgetHost, params) { adapter, item ->
-        showingRemovalConfirmation = true
-        RemoveWidgetDialogActivity.start(this, object : IRemoveConfirmCallback.Stub() {
-            override fun onWidgetRemovalConfirmed() {
-                prefManager.currentWidgets = prefManager.currentWidgets.apply {
-                    remove(item)
-                    widgetHost.deleteAppWidgetId(item.id)
+        (view.remove_widget_confirmation as RemoveWidgetConfirmationView).apply {
+            onConfirmListener = {
+                if (it) {
+                    prefManager.currentWidgets = prefManager.currentWidgets.apply {
+                        remove(item)
+                        widgetHost.deleteAppWidgetId(item.id)
+                    }
+                    adapter.currentEditingInterfacePosition = -1
                 }
-                adapter.currentEditingInterfacePosition = -1
             }
-
-            override fun onDismiss() {
-                showingRemovalConfirmation = false
-            }
-        })
+            show()
+        }
     }
     val blockSnapHelper = ItemSnapHelper()
     val touchHelperCallback = object : ItemTouchHelper.SimpleCallback(

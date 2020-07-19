@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<tk.zwander.lockscreenwidgets.views.RemoveWidgetConfirmationView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:layout_width="300dp"
+    tools:layout_height="200dp"
+    android:background="?colorSurface"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:padding="8dp"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <TextView
+            android:id="@+id/confirm_delete_text"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:text="@string/alert_remove_widget_confirm_desc"
+            android:scrollbars="vertical"
+            tools:textSize="28sp"
+            tools:ignore="NestedWeights"
+            />
+
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="end">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/cancel_delete"
+                android:layout_width="wrap_content"
+                android:layout_height="36dp"
+                android:text="@string/no"
+                android:layout_gravity="end"
+                style="@style/Widget.MaterialComponents.Button.TextButton"
+                />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/confirm_delete"
+                android:layout_width="wrap_content"
+                android:layout_height="36dp"
+                android:text="@string/yes"
+                android:layout_gravity="end"
+                style="@style/Widget.MaterialComponents.Button.TextButton"
+                />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+</tk.zwander.lockscreenwidgets.views.RemoveWidgetConfirmationView>

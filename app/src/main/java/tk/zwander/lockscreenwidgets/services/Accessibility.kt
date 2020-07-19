@@ -405,7 +405,6 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
      * - [isTempHide] is false
      * - [PrefManager.showOnMainLockScreen] is true OR [PrefManager.showInNotificationCenter] is false
      * - [currentSysUiLayer] is greater than [currentAppLayer]
-     * - [WidgetFrameDelegate.showingRemovalConfirmation] is false
      * - [onMainLockscreen] is true OR [showingNotificationsPanel] is true OR [PrefManager.hideOnSecurityPage] is false
      * - [showingNotificationsPanel] is false OR [PrefManager.hideOnNotificationShade] is false (OR [notificationsPanelFullyExpanded] is true AND [PrefManager.showInNotificationCenter] is true
      * - [notificationCount] is 0 (i.e. no notifications shown on lock screen, not necessarily no notifications at all) OR [PrefManager.hideOnNotifications] is false
@@ -425,7 +424,6 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
                         && !isTempHide
                         && (prefManager.showOnMainLockScreen || !prefManager.showInNotificationCenter)
                         && currentSysUiLayer > currentAppLayer
-                        && !delegate.showingRemovalConfirmation
                         && (onMainLockscreen || showingNotificationsPanel || !prefManager.hideOnSecurityPage)
                         && (!showingNotificationsPanel || !prefManager.hideOnNotificationShade)
                         && (notificationCount == 0 || !prefManager.hideOnNotifications)
