@@ -213,6 +213,9 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
             PrefManager.KEY_SHOW_IN_NOTIFICATION_CENTER -> {
                 updateParamsForNotificationCenterStateChange()
             }
+            PrefManager.KEY_FRAME_CORNER_RADIUS -> {
+                view.frame.updateCornerRadius()
+            }
         }
     }
 

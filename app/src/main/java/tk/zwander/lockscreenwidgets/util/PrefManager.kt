@@ -46,6 +46,7 @@ class PrefManager private constructor(context: Context) : ContextWrapper(context
         const val KEY_WIDGET_SIZES = "widget_sizes"
         const val KEY_SHOW_IN_NOTIFICATION_CENTER = "show_in_notification_center"
         const val KEY_SHOW_ON_MAIN_LOCK_SCREEN = "show_on_main_lock_screen"
+        const val KEY_FRAME_CORNER_RADIUS = "corner_radius"
 
         const val VALUE_PAGE_INDICATOR_BEHAVIOR_HIDDEN = 0
         const val VALUE_PAGE_INDICATOR_BEHAVIOR_AUTO_HIDE = 1
@@ -303,6 +304,14 @@ class PrefManager private constructor(context: Context) : ContextWrapper(context
         get() = getBoolean(KEY_SHOW_ON_MAIN_LOCK_SCREEN, true) || !showInNotificationCenter
         set(value) {
             putBoolean(KEY_SHOW_ON_MAIN_LOCK_SCREEN, value)
+        }
+
+    //The corner radius for the widget frame
+    //(how rounded the corners are, in dp)
+    var cornerRadiusDp: Float
+        get() = getInt(KEY_FRAME_CORNER_RADIUS, resources.getInteger(R.integer.def_corner_radius_dp_scaled_10x)) / 10f
+        set(value) {
+            putInt(KEY_FRAME_CORNER_RADIUS, (value * 10f).toInt())
         }
 
     fun getCorrectFrameWidth(isNC: Boolean): Float {

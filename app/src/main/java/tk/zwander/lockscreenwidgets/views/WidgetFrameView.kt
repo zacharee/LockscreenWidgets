@@ -2,10 +2,13 @@ package tk.zwander.lockscreenwidgets.views
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.graphics.drawable.GradientDrawable
+import android.graphics.drawable.ShapeDrawable
 import android.os.Build
 import android.os.VibrationEffect
 import android.os.Vibrator
 import android.util.AttributeSet
+import android.util.Log
 import android.util.TypedValue
 import android.view.*
 import androidx.constraintlayout.widget.ConstraintLayout
@@ -54,6 +57,8 @@ class WidgetFrameView(context: Context, attrs: AttributeSet) : ConstraintLayout(
         frame_card.alpha = 0f
         frame_card.scaleX = 0.95f
         frame_card.scaleY = 0.95f
+
+        updateCornerRadius()
 
         move.setOnTouchListener(MoveTouchListener())
 
@@ -170,6 +175,19 @@ class WidgetFrameView(context: Context, attrs: AttributeSet) : ConstraintLayout(
 
     override fun onInterceptTouchEvent(ev: MotionEvent): Boolean {
         return (maxPointerCount > 1)
+    }
+
+    fun updateCornerRadius() {
+        val radius = context.dpAsPx(context.prefManager.cornerRadiusDp).toFloat()
+        frame_card.radius = radius
+
+        //Since all instances of a Drawable are technically the same instance
+        //(unless someone uses mutate()), setting the corner radius for the
+        //editing outline here means it applies to both the main frame editing UI
+        //and each widget editing UI.
+        (edit_outline.background as GradientDrawable).apply {
+            this.cornerRadius = radius
+        }
     }
 
     fun updateFrameBackground() {
