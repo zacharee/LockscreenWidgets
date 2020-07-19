@@ -11,12 +11,15 @@ import android.content.SharedPreferences
 import android.database.ContentObserver
 import android.graphics.*
 import android.graphics.drawable.BitmapDrawable
+import android.hardware.SensorManager
 import android.net.Uri
 import android.os.*
 import android.provider.Settings
 import android.view.*
 import android.widget.ImageView
 import androidx.recyclerview.widget.ItemTouchHelper
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.LinearSmoothScroller
 import androidx.recyclerview.widget.RecyclerView
 import com.arasthel.spannedgridlayoutmanager.SpannedGridLayoutManager
 import kotlinx.android.synthetic.main.widget_frame.view.*
@@ -26,6 +29,8 @@ import tk.zwander.lockscreenwidgets.activities.RequestUnlockActivity
 import tk.zwander.lockscreenwidgets.adapters.WidgetFrameAdapter
 import tk.zwander.lockscreenwidgets.host.WidgetHostCompat
 import tk.zwander.lockscreenwidgets.views.RemoveWidgetConfirmationView
+import kotlin.math.abs
+import kotlin.math.ln
 import kotlin.math.roundToInt
 import kotlin.math.sign
 
@@ -103,7 +108,6 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
             show()
         }
     }
-    val blockSnapHelper = ItemSnapHelper()
     val touchHelperCallback = object : ItemTouchHelper.SimpleCallback(
         ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT or ItemTouchHelper.UP or ItemTouchHelper.DOWN,
         0
@@ -225,7 +229,7 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
             adapter = this@WidgetFrameDelegate.adapter
             layoutManager = gridLayoutManager
             setHasFixedSize(true)
-            blockSnapHelper.attachToRecyclerView(this)
+//            blockSnapHelper.attachToRecyclerView(this)
             ItemTouchHelper(touchHelperCallback).attachToRecyclerView(this)
         }
         contentResolver.registerContentObserver(
@@ -236,10 +240,6 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
 
         updateRowCount()
         adapter.updateWidgets(prefManager.currentWidgets.toList())
-
-        blockSnapHelper.snapCallback = {
-            prefManager.currentPage = it
-        }
 
         view.frame.onAddListener = {
             val intent = Intent(this, AddWidgetActivity::class.java)
@@ -296,7 +296,7 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
             this.columnCount = colCount
 
 //            blockSnapHelper.maxFlingBlocks = rowCount
-            blockSnapHelper.attachToRecyclerView(view.widgets_pager)
+//            blockSnapHelper.attachToRecyclerView(view.widgets_pager)
         }
     }
 
@@ -392,9 +392,30 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
         }
     }
 
-    inner class SpannedLayoutManager : SpannedGridLayoutManager(this@WidgetFrameDelegate, RecyclerView.HORIZONTAL, prefManager.frameRowCount, prefManager.frameColCount) {
+    //Parts based on https://stackoverflow.com/a/26445064/5496177
+    inner class SpannedLayoutManager : SpannedGridLayoutManager(this@WidgetFrameDelegate, RecyclerView.HORIZONTAL, prefManager.frameRowCount, prefManager.frameColCount), ISnappyLayoutManager {
         override fun canScrollHorizontally(): Boolean {
             return (adapter.currentEditingInterfacePosition == -1 || isHoldingItem) && super.canScrollHorizontally()
+        }
+
+        override fun getFixScrollPos(velocityX: Int, velocityY: Int): Int {
+            return getPositionForVelocity(velocityX, velocityY)
+        }
+
+        override fun getPositionForVelocity(velocityX: Int, velocityY: Int): Int {
+            if (childCount == 0) return 0
+
+            return if (velocityX > 0) {
+                lastVisiblePosition
+            } else {
+                firstVisiblePosition
+            }.also {
+                prefManager.currentPage = it
+            }
+        }
+
+        override fun canSnap(): Boolean {
+            return adapter.currentEditingInterfacePosition == -1
         }
     }
 }
