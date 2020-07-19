@@ -191,14 +191,7 @@ class WidgetFrameView(context: Context, attrs: AttributeSet) : ConstraintLayout(
     }
 
     fun updateFrameBackground() {
-        if (context.prefManager.opacityMode == PrefManager.VALUE_OPACITY_MODE_OPAQUE) {
-            frame_card.setCardBackgroundColor(TypedValue().run {
-                context.theme.resolveAttribute(R.attr.colorPrimarySurface, this, true)
-                data
-            })
-        } else {
-            frame_card.setCardBackgroundColor(ContextCompat.getColor(context, android.R.color.transparent))
-        }
+        frame_card.setCardBackgroundColor(context.prefManager.backgroundColor)
     }
 
     fun updatePageIndicatorBehavior() {

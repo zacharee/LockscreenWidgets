@@ -198,8 +198,10 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
                 updateRowCount()
                 adapter.notifyDataSetChanged()
             }
-            PrefManager.KEY_OPACITY_MODE -> {
+            PrefManager.KEY_FRAME_BACKGROUND_COLOR -> {
                 view.frame.updateFrameBackground()
+            }
+            PrefManager.KEY_FRAME_MASKED_MODE -> {
                 updateWallpaperLayerIfNeeded()
             }
             PrefManager.KEY_SHOW_DEBUG_ID_VIEW,
@@ -300,7 +302,7 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
 
     /**
      * Compute and draw the appropriate portion of the wallpaper as the widget background,
-     * if the opacity mode is set to masked.
+     * if masked mode is enabled.
      *
      * TODO: this doesn't work properly on a lot of devices. It seems to be something to do with the scale.
      * TODO: I don't know enough about [Matrix]es to fix it.
@@ -314,7 +316,7 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
      */
     @SuppressLint("MissingPermission")
     fun updateWallpaperLayerIfNeeded() {
-        if (prefManager.opacityMode == PrefManager.VALUE_OPACITY_MODE_MASKED && (!notificationsPanelFullyExpanded || !prefManager.showInNotificationCenter)) {
+        if (prefManager.maskedMode && (!notificationsPanelFullyExpanded || !prefManager.showInNotificationCenter)) {
             val service = IWallpaperManager.Stub.asInterface(ServiceManager.getService("wallpaper"))
 
             val bundle = Bundle()

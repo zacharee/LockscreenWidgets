@@ -14,13 +14,21 @@
         android:title="@string/category_appearance"
         android:key="settings_appearance_category">
 
-        <tk.zwander.lockscreenwidgets.prefs.AutoSummaryListPreference
-            android:title="@string/settings_screen_opacity_mode"
-            android:key="opacity_mode"
-            android:icon="@drawable/ic_baseline_opacity_24"
-            android:entries="@array/opacity_mode_names"
-            android:entryValues="@array/opacity_mode_values"
+        <com.jaredrummler.android.colorpicker.ColorPreferenceCompat
+            android:title="@string/settings_screen_background_color"
+            android:summary="@string/settings_screen_background_color_desc"
+            android:icon="@drawable/ic_baseline_color_lens_24"
+            android:key="background_color"
             android:defaultValue="0"
+            app:cpv_showAlphaSlider="true"
+            />
+
+        <SwitchPreference
+            android:title="@string/settings_screen_masked_mode"
+            android:summary="@string/settings_screen_masked_mode_desc"
+            android:icon="@drawable/ic_baseline_opacity_24"
+            android:key="masked_mode"
+            android:defaultValue="false"
             />
 
         <tk.zwander.seekbarpreference.SeekBarPreference

@@ -3,6 +3,7 @@ package tk.zwander.lockscreenwidgets.util
 import android.annotation.IntegerRes
 import android.content.Context
 import android.content.ContextWrapper
+import android.graphics.Color
 import androidx.collection.ArraySet
 import androidx.core.content.edit
 import androidx.preference.PreferenceManager
@@ -28,7 +29,6 @@ class PrefManager private constructor(context: Context) : ContextWrapper(context
         const val KEY_NOTIFICATION_POS_Y = "notification_position_y"
         const val KEY_FIRST_VIEWING = "first_viewing"
         const val KEY_FIRST_RUN = "first_run"
-        const val KEY_OPACITY_MODE = "opacity_mode"
         const val KEY_HIDE_ON_NOTIFICATIONS = "hide_on_notifications"
         const val KEY_WIDGET_FRAME_ENABLED = "widget_frame_enabled"
         const val KEY_PAGE_INDICATOR_BEHAVIOR = "page_indicator_behavior"
@@ -47,14 +47,12 @@ class PrefManager private constructor(context: Context) : ContextWrapper(context
         const val KEY_SHOW_IN_NOTIFICATION_CENTER = "show_in_notification_center"
         const val KEY_SHOW_ON_MAIN_LOCK_SCREEN = "show_on_main_lock_screen"
         const val KEY_FRAME_CORNER_RADIUS = "corner_radius"
+        const val KEY_FRAME_BACKGROUND_COLOR = "background_color"
+        const val KEY_FRAME_MASKED_MODE = "masked_mode"
 
         const val VALUE_PAGE_INDICATOR_BEHAVIOR_HIDDEN = 0
         const val VALUE_PAGE_INDICATOR_BEHAVIOR_AUTO_HIDE = 1
         const val VALUE_PAGE_INDICATOR_BEHAVIOR_SHOWN = 2
-
-        const val VALUE_OPACITY_MODE_TRANSPARENT = 0
-        const val VALUE_OPACITY_MODE_MASKED = 1
-        const val VALUE_OPACITY_MODE_OPAQUE = 2
 
         private var instance: PrefManager? = null
 
@@ -263,14 +261,21 @@ class PrefManager private constructor(context: Context) : ContextWrapper(context
             putString(KEY_PAGE_INDICATOR_BEHAVIOR, value.toString())
         }
 
-    //The appearance of the widget frame's background (transparent, opaque, masked).
-    //Masked mode attempts to reconstruct the relevant portion of the user's wallpaper as the
-    //frame background, giving it the effect of transparency, with the ability to overlay
-    //lock screen elements.
-    var opacityMode: Int
-        get() = getString(KEY_OPACITY_MODE, VALUE_OPACITY_MODE_TRANSPARENT.toString())!!.toInt()
+    //The background color of the widget frame.
+    var backgroundColor: Int
+        get() = getInt(KEY_FRAME_BACKGROUND_COLOR, Color.TRANSPARENT)
         set(value) {
-            putString(KEY_OPACITY_MODE, value.toString())
+            putInt(KEY_FRAME_BACKGROUND_COLOR, value)
+        }
+
+    //Whether masked mode is enabled.
+    //On compatible devices with a proper wallpaper setup,
+    //this will emulate a transparent widget background by
+    //drawing the user's wallpaper as the frame background.
+    var maskedMode: Boolean
+        get() = getBoolean(KEY_FRAME_MASKED_MODE, false)
+        set(value) {
+            putBoolean(KEY_FRAME_MASKED_MODE, value)
         }
 
     //How many columns of widgets should be shown per page.

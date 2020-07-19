@@ -46,11 +46,6 @@
     <string name="settings_screen_enabled">Enabled</string>
     <string name="settings_screen_enabled_desc">Enable the widget frame on the lockscreen.</string>
 
-    <string name="settings_screen_opacity_mode">Opacity Mode</string>
-    <string name="settings_screen_opacity_mode_transparent">Transparent</string>
-    <string name="settings_screen_opacity_mode_masked">Masked (EXPERIMENTAL!)</string>
-    <string name="settings_screen_opacity_mode_opaque">Opaque</string>
-
     <string name="settings_screen_hide_when_notifications_shown">Hide when Showing Notifications</string>
     <string name="settings_screen_hide_when_notifications_shown_desc">Hide the widget frame while there are notifications being shown. This requires the use of a Notification Listener Service. You don\'t have to grant this permission right now.</string>
 
@@ -94,6 +89,12 @@
 
     <string name="settings_screen_corner_radius">Corner Radius</string>
     <string name="settings_screen_corner_radius_desc">Change how rounded the corners of the widget frame are.</string>
+
+    <string name="settings_screen_background_color">Background Color</string>
+    <string name="settings_screen_background_color_desc">Set the background color of the widget frame, including transparency.</string>
+
+    <string name="settings_screen_masked_mode">Masked Mode (Experimental)</string>
+    <string name="settings_screen_masked_mode_desc">Masked Mode attempts to draw the wallpaper as the background of the widget frame. On a compatible device, this will give the appearance of a transparent frame, while still allowing you to overlay UI elements.</string>
 
     <string name="intro_welcome_title">Welcome!</string>
     <string name="intro_welcome_desc">Lockscreen Widgets is a simple app with a simple purpose: to bring back Android KitKat\'s lock screen widgets. Your widgets will show up in a simple paged slider on the lockscreen.</string>

@@ -42,8 +42,8 @@ class SettingsFragment : PreferenceFragmentCompat() {
             if (!ncCondition) isVisible = false
         }
 
-        findPreference<ListPreference>(PrefManager.KEY_OPACITY_MODE)?.setOnPreferenceChangeListener { _, newValue ->
-            if (newValue.toString().toInt() == PrefManager.VALUE_OPACITY_MODE_MASKED
+        findPreference<SwitchPreference>(PrefManager.KEY_FRAME_MASKED_MODE)?.setOnPreferenceChangeListener { _, newValue ->
+            if (newValue.toString().toBoolean()
                 && requireContext().checkCallingOrSelfPermission(android.Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
                 OnboardingActivity.start(requireContext(), OnboardingActivity.RetroMode.STORAGE)
                 false
