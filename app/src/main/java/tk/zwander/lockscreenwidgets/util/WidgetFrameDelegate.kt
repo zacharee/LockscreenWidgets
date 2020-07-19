@@ -378,6 +378,10 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
         params.height = dpAsPx(prefManager.getCorrectFrameHeight(saveForNC))
 
         view.frame.updateWindow(wm, params)
+        mainHandler.post {
+            updateWallpaperLayerIfNeeded()
+            adapter.notifyDataSetChanged()
+        }
     }
 
     inner class SpannedLayoutManager : SpannedGridLayoutManager(this@WidgetFrameDelegate, RecyclerView.HORIZONTAL, prefManager.frameRowCount, prefManager.frameColCount) {
