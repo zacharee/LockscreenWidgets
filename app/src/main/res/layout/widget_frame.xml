@@ -33,6 +33,12 @@
             tools:listitem="@layout/widget_page_holder"
             />
 
+        <include
+            android:id="@+id/hint_view"
+            android:visibility="gone"
+            layout="@layout/widget_frame_hint"
+            />
+
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/edit_wrapper"
             android:layout_width="match_parent"
@@ -140,12 +146,6 @@
                 />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
-
-        <include
-            android:id="@+id/hint_view"
-            android:visibility="gone"
-            layout="@layout/widget_frame_hint"
-            />
 
         <include
             android:id="@+id/id_view"
