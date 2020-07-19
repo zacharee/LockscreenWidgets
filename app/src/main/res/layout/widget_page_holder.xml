@@ -23,7 +23,7 @@
         tools:visibility="visible">
 
         <View
-            android:id="@+id/edit_outline"
+            android:id="@+id/widget_edit_outline"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:background="@drawable/outline"
