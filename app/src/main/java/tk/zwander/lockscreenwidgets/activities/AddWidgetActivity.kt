@@ -43,7 +43,7 @@ class AddWidgetActivity : AppCompatActivity(), CoroutineScope by MainScope() {
          * We want the user to unlock the device when adding a widget, since potential configuration Activities
          * won't show on the lock screen.
          */
-        val intent = Intent(this, RequestUnlockActivity::class.java)
+        val intent = Intent(this, DismissOrUnlockActivity::class.java)
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         startActivity(intent)
 

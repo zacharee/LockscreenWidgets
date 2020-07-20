@@ -11,26 +11,21 @@ import android.content.SharedPreferences
 import android.database.ContentObserver
 import android.graphics.*
 import android.graphics.drawable.BitmapDrawable
-import android.hardware.SensorManager
 import android.net.Uri
 import android.os.*
 import android.provider.Settings
 import android.view.*
 import android.widget.ImageView
 import androidx.recyclerview.widget.ItemTouchHelper
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.LinearSmoothScroller
 import androidx.recyclerview.widget.RecyclerView
 import com.arasthel.spannedgridlayoutmanager.SpannedGridLayoutManager
 import kotlinx.android.synthetic.main.widget_frame.view.*
 import tk.zwander.lockscreenwidgets.R
 import tk.zwander.lockscreenwidgets.activities.AddWidgetActivity
-import tk.zwander.lockscreenwidgets.activities.RequestUnlockActivity
+import tk.zwander.lockscreenwidgets.activities.DismissOrUnlockActivity
 import tk.zwander.lockscreenwidgets.adapters.WidgetFrameAdapter
 import tk.zwander.lockscreenwidgets.host.WidgetHostCompat
 import tk.zwander.lockscreenwidgets.views.RemoveWidgetConfirmationView
-import kotlin.math.abs
-import kotlin.math.ln
 import kotlin.math.roundToInt
 import kotlin.math.sign
 
@@ -85,7 +80,7 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
     val widgetManager = AppWidgetManager.getInstance(this)
     val widgetHost = WidgetHostCompat.getInstance(this, 1003) {
         Handler(Looper.getMainLooper()).postDelayed({
-            val intent = Intent(this, RequestUnlockActivity::class.java)
+            val intent = Intent(this, DismissOrUnlockActivity::class.java)
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             startActivity(intent)
         }, 100)

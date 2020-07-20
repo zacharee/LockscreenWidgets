@@ -13,7 +13,7 @@ import android.view.accessibility.AccessibilityWindowInfo
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import kotlinx.android.synthetic.main.widget_frame.view.*
 import tk.zwander.lockscreenwidgets.App
-import tk.zwander.lockscreenwidgets.activities.RequestUnlockActivity
+import tk.zwander.lockscreenwidgets.activities.DismissOrUnlockActivity
 import tk.zwander.lockscreenwidgets.appwidget.IDWidgetFactory
 import tk.zwander.lockscreenwidgets.appwidget.IDListProvider
 import tk.zwander.lockscreenwidgets.util.*
@@ -39,7 +39,7 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
      * On earlier Android versions, it's not so easy, and we need a way to detect when the
      * lock screen has successfully been dismissed.
      *
-     * This is just a simple wrapper class around a BroadcastReceiver for [RequestUnlockActivity]
+     * This is just a simple wrapper class around a BroadcastReceiver for [DismissOrUnlockActivity]
      * to implement so it can receive the keyguard dismissal event we generate from this service.
      */
     abstract class OnLockscreenDismissListener : BroadcastReceiver() {

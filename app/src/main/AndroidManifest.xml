@@ -33,7 +33,7 @@
             android:exported="false"
             android:label="@string/settings"
             />
-        <activity android:name=".activities.RequestUnlockActivity"
+        <activity android:name=".activities.DismissOrUnlockActivity"
             android:exported="false"
             android:excludeFromRecents="true"
             />
