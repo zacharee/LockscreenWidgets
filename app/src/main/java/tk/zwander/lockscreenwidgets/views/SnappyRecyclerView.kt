@@ -22,7 +22,7 @@ class SnappyRecyclerView(context: Context, attrs: AttributeSet) : RecyclerView(c
 
             val layoutManager = layoutManager
             if (layoutManager is ISnappyLayoutManager && layoutManager.canSnap()) {
-                super.smoothScrollToPosition(layoutManager.getPositionForVelocity(velocityX, velocityY))
+                smoothScrollToPosition(layoutManager.getPositionForVelocity(velocityX, velocityY))
                 return true
             }
         } else {
