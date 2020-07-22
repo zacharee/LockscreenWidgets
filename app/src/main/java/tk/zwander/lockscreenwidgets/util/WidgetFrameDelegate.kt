@@ -329,6 +329,8 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
                     )
                 } catch (e: Exception) {
                     null
+                } catch (e: NoSuchMethodError) {
+                    null
                 }
             } else null
 
