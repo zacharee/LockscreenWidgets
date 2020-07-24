@@ -1,12 +1,14 @@
 package tk.zwander.lockscreenwidgets.activities
 
 import android.app.Activity
+import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
+import android.util.Log
 import com.heinrichreimersoftware.materialintro.app.IntroActivity
 import com.heinrichreimersoftware.materialintro.slide.SimpleSlide
 import tk.zwander.lockscreenwidgets.R
@@ -107,8 +109,16 @@ class OnboardingActivity : IntroActivity() {
                         .image(R.drawable.ic_baseline_accessibility_new_24)
                         .buttonCtaLabel(R.string.grant)
                         .buttonCtaClickListener {
-                            val accIntent = Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)
-                            startActivity(accIntent)
+                            try {
+                                val accIntent = Intent(Intent.ACTION_MAIN)
+                                accIntent.`package` = "com.android.settings"
+                                accIntent.component = ComponentName("com.android.settings", "com.android.settings.Settings\$AccessibilityInstalledServiceActivity")
+                                startActivity(accIntent)
+                            } catch (e: Exception) {
+                                Log.e("LockscreenWidgets", "Error", e)
+                                val accIntent = Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)
+                                startActivity(accIntent)
+                            }
                         }
                 ) {
                     override fun canGoForward(): Boolean {
