@@ -11,6 +11,7 @@ import android.provider.Settings
 import android.util.Log
 import com.heinrichreimersoftware.materialintro.app.IntroActivity
 import com.heinrichreimersoftware.materialintro.slide.SimpleSlide
+import tk.zwander.lockscreenwidgets.App
 import tk.zwander.lockscreenwidgets.R
 import tk.zwander.lockscreenwidgets.util.isAccessibilityEnabled
 import tk.zwander.lockscreenwidgets.util.isNotificationListenerActive
@@ -115,7 +116,7 @@ class OnboardingActivity : IntroActivity() {
                                 accIntent.component = ComponentName("com.android.settings", "com.android.settings.Settings\$AccessibilityInstalledServiceActivity")
                                 startActivity(accIntent)
                             } catch (e: Exception) {
-                                Log.e("LockscreenWidgets", "Error", e)
+                                Log.e(App.DEBUG_LOG_TAG, "Error opening Installed Services:", e)
                                 val accIntent = Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)
                                 startActivity(accIntent)
                             }

@@ -98,13 +98,15 @@ fun Context.launchEmail(to: String, subject: String) {
 
 //Fade a View to 0% alpha and 95% scale. Used when hiding the widget frame.
 fun View.fadeAndScaleOut(endListener: () -> Unit) {
+    clearAnimation()
+
     val animator = AnimatorSet().apply {
         playTogether(
-            ObjectAnimator.ofFloat(this@fadeAndScaleOut, "scaleX", 1.0f, 0.95f),
-            ObjectAnimator.ofFloat(this@fadeAndScaleOut, "scaleY", 1.0f, 0.95f),
-            ObjectAnimator.ofFloat(this@fadeAndScaleOut, "alpha", 1.0f, 0f)
+            ObjectAnimator.ofFloat(this@fadeAndScaleOut, "scaleX", scaleX, 0.95f),
+            ObjectAnimator.ofFloat(this@fadeAndScaleOut, "scaleY", scaleY, 0.95f),
+            ObjectAnimator.ofFloat(this@fadeAndScaleOut, "alpha", alpha, 0f)
         )
-        duration = if (context.prefManager.animateShowHide) 100L else 0L
+        duration = if (context.prefManager.animateShowHide) 400L else 0L
         addListener(object : AnimatorListenerAdapter() {
             override fun onAnimationEnd(animation: Animator?) {
                 clearAnimation()
@@ -117,13 +119,15 @@ fun View.fadeAndScaleOut(endListener: () -> Unit) {
 
 //Fade a View to 100% alpha and 100% scale. Used when showing the widget frame.
 fun View.fadeAndScaleIn(endListener: () -> Unit) {
+    clearAnimation()
+
     val animator = AnimatorSet().apply {
         playTogether(
-            ObjectAnimator.ofFloat(this@fadeAndScaleIn, "scaleX", 0.95f, 1.0f),
-            ObjectAnimator.ofFloat(this@fadeAndScaleIn, "scaleY", 0.95f, 1.0f),
-            ObjectAnimator.ofFloat(this@fadeAndScaleIn, "alpha", 0f, 1.0f)
+            ObjectAnimator.ofFloat(this@fadeAndScaleIn, "scaleX", scaleX, 1.0f),
+            ObjectAnimator.ofFloat(this@fadeAndScaleIn, "scaleY", scaleY, 1.0f),
+            ObjectAnimator.ofFloat(this@fadeAndScaleIn, "alpha", alpha, 1.0f)
         )
-        duration = if (context.prefManager.animateShowHide) 100L else 0L
+        duration = if (context.prefManager.animateShowHide) 400L else 0L
         addListener(object : AnimatorListenerAdapter() {
             override fun onAnimationEnd(animation: Animator?) {
                 clearAnimation()

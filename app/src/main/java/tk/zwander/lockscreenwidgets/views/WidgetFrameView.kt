@@ -42,6 +42,7 @@ class WidgetFrameView(context: Context, attrs: AttributeSet) : ConstraintLayout(
     var onAfterResizeListener: (() -> Unit)? = null
 
     var attachmentStateListener: ((isAttached: Boolean) -> Unit)? = null
+    var animationState = AnimationState.STATE_IDLE
 
     private var maxPointerCount = 0
     private var alreadyIndicatedMoving = false
@@ -49,6 +50,12 @@ class WidgetFrameView(context: Context, attrs: AttributeSet) : ConstraintLayout(
     var isInEditingMode = false
 
     private val vibrator by lazy { context.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator }
+
+    enum class AnimationState {
+        STATE_ADDING,
+        STATE_REMOVING,
+        STATE_IDLE
+    }
 
     @SuppressLint("ClickableViewAccessibility")
     override fun onFinishInflate() {
@@ -112,9 +119,12 @@ class WidgetFrameView(context: Context, attrs: AttributeSet) : ConstraintLayout(
     override fun onAttachedToWindow() {
         super.onAttachedToWindow()
 
-        frame_card.fadeAndScaleIn {
-            attachmentStateListener?.invoke(true)
-        }
+        postDelayed({
+            frame_card.fadeAndScaleIn {
+                attachmentStateListener?.invoke(true)
+                animationState = AnimationState.STATE_IDLE
+            }
+        }, 50)
     }
 
     override fun onDetachedFromWindow() {
@@ -122,6 +132,7 @@ class WidgetFrameView(context: Context, attrs: AttributeSet) : ConstraintLayout(
 
         setEditMode(false)
         attachmentStateListener?.invoke(false)
+        animationState = AnimationState.STATE_IDLE
     }
 
     override fun dispatchTouchEvent(ev: MotionEvent): Boolean {
@@ -224,22 +235,32 @@ class WidgetFrameView(context: Context, attrs: AttributeSet) : ConstraintLayout(
     }
 
     fun addWindow(wm: WindowManager, params: WindowManager.LayoutParams) {
-        try {
-            wm.addView(this, params)
-        } catch (e: Exception) {}
+        if (!isAttachedToWindow && animationState != AnimationState.STATE_ADDING) {
+            animationState = AnimationState.STATE_ADDING
+            try {
+                wm.addView(this, params)
+            } catch (e: Exception) {}
+        }
     }
 
     fun updateWindow(wm: WindowManager, params: WindowManager.LayoutParams) {
-        try {
-            wm.updateViewLayout(this, params)
-        } catch (e: Exception) {}
+        if (isAttachedToWindow) {
+            try {
+                wm.updateViewLayout(this, params)
+            } catch (e: Exception) {}
+        }
     }
 
     fun removeWindow(wm: WindowManager) {
-        frame_card.fadeAndScaleOut {
-            try {
-                wm.removeView(this)
-            } catch (e: Exception) {}
+        if (isAttachedToWindow && animationState != AnimationState.STATE_REMOVING) {
+            animationState = AnimationState.STATE_REMOVING
+            frame_card.fadeAndScaleOut {
+                postDelayed({
+                    try {
+                        wm.removeView(this)
+                    } catch (e: Exception) {}
+                }, 50)
+            }
         }
     }
 

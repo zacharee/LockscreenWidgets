@@ -26,6 +26,7 @@ import tk.zwander.lockscreenwidgets.activities.DismissOrUnlockActivity
 import tk.zwander.lockscreenwidgets.adapters.WidgetFrameAdapter
 import tk.zwander.lockscreenwidgets.host.WidgetHostCompat
 import tk.zwander.lockscreenwidgets.views.RemoveWidgetConfirmationView
+import tk.zwander.lockscreenwidgets.views.WidgetFrameView
 import kotlin.math.roundToInt
 import kotlin.math.sign
 
@@ -44,6 +45,8 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
         }
     }
 
+    private var isPendingNotificationStateChange = false
+
     var updatedForMove = false
     var isHoldingItem = false
     var notificationsPanelFullyExpanded = false
@@ -51,7 +54,7 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
             val changed = field != value
             field = value
 
-            if (changed) updateParamsForNotificationCenterStateChange()
+            isPendingNotificationStateChange = changed
         }
 
     val saveForNC: Boolean
@@ -248,13 +251,15 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
         view.frame.attachmentStateListener = {
             try {
                 if (it) {
-                    updateWallpaperLayerIfNeeded()
                     widgetHost.startListening()
                     //Even with the startListening() call above,
                     //it doesn't seem like pending updates always get
                     //dispatched. Rebinding all the widgets forces
                     //them to update.
-                    adapter.notifyDataSetChanged()
+                    mainHandler.postDelayed({
+                        updateWallpaperLayerIfNeeded()
+                        adapter.notifyDataSetChanged()
+                    }, 50)
                 } else {
                     widgetHost.stopListening()
                 }
@@ -373,6 +378,15 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
             }
         } else {
             view.wallpaper_background.setImageDrawable(null)
+        }
+    }
+
+    fun updateAccessibilityPass() {
+        if (view.frame.animationState == WidgetFrameView.AnimationState.STATE_IDLE) {
+            if (isPendingNotificationStateChange) {
+                updateParamsForNotificationCenterStateChange()
+                isPendingNotificationStateChange = false
+            }
         }
     }
 

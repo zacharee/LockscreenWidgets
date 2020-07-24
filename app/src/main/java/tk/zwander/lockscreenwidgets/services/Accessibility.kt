@@ -333,6 +333,8 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
             } else {
                 removeOverlay()
             }
+
+            delegate.updateAccessibilityPass()
         }
     }
 
