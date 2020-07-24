@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <accessibility-service
-    android:accessibilityEventTypes="typeWindowsChanged|typeWindowStateChanged"
+    android:accessibilityEventTypes="typeWindowsChanged|typeWindowStateChanged|typeWindowContentChanged"
     android:notificationTimeout="50"
     android:accessibilityFeedbackType="feedbackGeneric"
     android:canRequestTouchExplorationMode="false"
