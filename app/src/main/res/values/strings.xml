@@ -135,6 +135,8 @@
     <string name="usage_id_blacklists">ID Blacklists</string>
     <string name="usage_id_blacklists_desc">All phones are different, and it\'s possible that the built-in hiding options don\'t work on your device. Or maybe you want to implement a hiding behavior of your own. This can be implemented with the \"Hide on Present IDs\" and \"Hide on Non-Present IDs\" options. Any IDs you add to the former will cause the widget frame to hide when Lockscreen Widgets detects any of those IDs on-screen. Any IDs you add to the latter will cause the widget frame to hide when Lockscreen Widgets does <i>not</i> detect any of those IDs on-screen. You can find out which IDs should be added by enabling both Debug options and seeing which IDs are highlighted in green or red.</string>
 
+    <string name="tile_show_in_notification_center">Show in NC</string>
+
     <string name="configure_widget_error">Unable to configure the widget %s due to lack of permissions. Please contact the app developer or device manufacturer.</string>
     <string name="bind_widget_error">Unable to bind the widget %s due to lack of permissions. Please contact the app developer or device manufacturer.</string>
     <string name="invalid_id_backup_error">Invalid ID list.</string>

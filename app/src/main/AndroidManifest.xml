@@ -66,6 +66,24 @@
         <service android:name=".services.IDWidgetService"
             android:permission="android.permission.BIND_REMOTEVIEWS"
             />
+        <service
+            android:name=".tiles.EnableDisableTile"
+            android:label="@string/settings_screen_enabled"
+            android:icon="@drawable/ic_baseline_power_settings_new_24"
+            android:permission="android.permission.BIND_QUICK_SETTINGS_TILE">
+            <intent-filter>
+                <action android:name="android.service.quicksettings.action.QS_TILE" />
+            </intent-filter>
+        </service>
+        <service
+            android:name=".tiles.NCTile"
+            android:label="@string/tile_show_in_notification_center"
+            android:icon="@drawable/ic_baseline_notifications_active_24"
+            android:permission="android.permission.BIND_QUICK_SETTINGS_TILE">
+            <intent-filter>
+                <action android:name="android.service.quicksettings.action.QS_TILE" />
+            </intent-filter>
+        </service>
 
         <receiver android:name=".appwidget.IDListProvider"
             android:label="@string/id_list">
