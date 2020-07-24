@@ -211,7 +211,7 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
                 view.frame.updateDebugIdViewVisibility()
             }
             PrefManager.KEY_SHOW_IN_NOTIFICATION_CENTER -> {
-                updateParamsForNotificationCenterStateChange()
+                isPendingNotificationStateChange = true
             }
             PrefManager.KEY_FRAME_CORNER_RADIUS -> {
                 view.frame.updateCornerRadius()
