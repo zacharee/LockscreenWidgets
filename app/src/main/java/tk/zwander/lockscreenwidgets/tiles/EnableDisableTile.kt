@@ -6,6 +6,9 @@ import android.service.quicksettings.TileService
 import androidx.annotation.RequiresApi
 import tk.zwander.lockscreenwidgets.util.prefManager
 
+/**
+ * A QS tile to enable or disable the widget frame.
+ */
 @RequiresApi(Build.VERSION_CODES.N)
 class EnableDisableTile : TileService() {
     override fun onStartListening() {

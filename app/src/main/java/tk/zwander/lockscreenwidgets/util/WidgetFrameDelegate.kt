@@ -45,6 +45,19 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
         }
     }
 
+    //This is used to track when the notification shade has
+    //been expanded/collapsed or when the "show in NC" setting
+    //has been changed. Since the params are different for the
+    //widget frame depending on whether it's showing in the NC
+    //or not, we need to update them. We could do it directly,
+    //but that causes weird shifting and resizing since it happens
+    //before the Accessibility Service hides or shows the frame.
+    //So instead, we set this flag to true when the params should be
+    //updated. The Accessibility Service takes care of calling
+    //the update method after it starts a frame removal or addition.
+    //The method itself checks whether it can run (i.e. the
+    //animation state of the frame is IDLE) and then updates
+    //the params.
     private var isPendingNotificationStateChange = false
 
     var updatedForMove = false
@@ -197,7 +210,7 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
             }
             PrefManager.KEY_FRAME_ROW_COUNT,
             PrefManager.KEY_FRAME_COL_COUNT -> {
-                updateRowCount()
+                updateRowColCount()
                 adapter.notifyDataSetChanged()
             }
             PrefManager.KEY_FRAME_BACKGROUND_COLOR -> {
@@ -236,7 +249,7 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
             nightModeListener
         )
 
-        updateRowCount()
+        updateRowColCount()
         adapter.updateWidgets(prefManager.currentWidgets.toList())
 
         view.frame.onAddListener = {
@@ -285,9 +298,9 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
     }
 
     /**
-     * Make sure the number of rows in the widget frame reflects the user-selected value.
+     * Make sure the number of rows/columns in the widget frame reflects the user-selected value.
      */
-    fun updateRowCount() {
+    fun updateRowColCount() {
         gridLayoutManager.apply {
             val rowCount = prefManager.frameRowCount
             val colCount = prefManager.frameColCount
@@ -381,6 +394,12 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
         }
     }
 
+    /**
+     * This is called by the Accessibility Service on an event,
+     * after all other logic has finished (e.g. frame removal/addition
+     * calls). Use this method for updating things that are conditional
+     * upon the frame's state after an event.
+     */
     fun updateAccessibilityPass() {
         if (view.frame.animationState == WidgetFrameView.AnimationState.STATE_IDLE) {
             if (isPendingNotificationStateChange) {
@@ -390,6 +409,10 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
         }
     }
 
+    /**
+     * Update the frame's params for its current state (normal
+     * or in expanded notification center).
+     */
     private fun updateParamsForNotificationCenterStateChange() {
         params.x = prefManager.getCorrectFrameX(saveForNC)
         params.y = prefManager.getCorrectFrameY(saveForNC)

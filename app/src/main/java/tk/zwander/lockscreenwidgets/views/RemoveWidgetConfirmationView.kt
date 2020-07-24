@@ -6,6 +6,11 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.isVisible
 import kotlinx.android.synthetic.main.remove_widget_confirmation_layout.view.*
 
+/**
+ * An overlay on the widget frame that appears when a user taps the "remove"
+ * button for a widget. It asks the user whether they really want to remove
+ * the widget, and passes the result back to the delegate.
+ */
 class RemoveWidgetConfirmationView(context: Context, attrs: AttributeSet) : ConstraintLayout(context, attrs) {
     var onConfirmListener: ((confirmed: Boolean) -> Unit)? = null
 

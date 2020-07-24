@@ -10,6 +10,11 @@ import tk.zwander.lockscreenwidgets.util.widgetBlockWidth
 import kotlin.math.absoluteValue
 import kotlin.math.sign
 
+/**
+ * A helper class for listening to drag events on the widget resize handles.
+ * Detects a user dragging on the specified resize handle and only triggers
+ * an update if the user has dragged far enough.
+ */
 class WidgetResizeListener(private val context: Context, private val which: Which, private val callback: (Int) -> Unit) : View.OnTouchListener {
     enum class Which {
         LEFT,
@@ -24,6 +29,9 @@ class WidgetResizeListener(private val context: Context, private val which: Whic
     var prevX = 0f
     var prevY = 0f
 
+    //The threshold for a drag event.
+    //Either the standard widget width or
+    //height depending on the current handle.
     private val _thresholdPx: Int
         get() = context.run { if (which == Which.LEFT || which == Which.RIGHT) widgetBlockWidth else widgetBlockHeight }
 
@@ -39,6 +47,12 @@ class WidgetResizeListener(private val context: Context, private val which: Whic
                 prevX = origX
                 prevY = origY
 
+                //The user might change the row/col count
+                //after this class has been initialized,
+                //so make sure the threshold stays up-to-date.
+                //While we could just inline the getter with
+                //this variable, it's less resource-intensive
+                //to only update it once per gesture.
                 thresholdPx = _thresholdPx
             }
 

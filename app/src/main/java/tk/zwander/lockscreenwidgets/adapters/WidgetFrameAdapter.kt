@@ -58,6 +58,13 @@ class WidgetFrameAdapter(
     private val editingInterfaceObservable =
         RemoveButtonObservable()
 
+    /**
+     * Push a new set of widgets to the frame.
+     * If there are currently no widgets added,
+     * add the new ones and notify the entire set.
+     * Otherwise, calculate the diffeence and notify
+     * accordingly.
+     */
     fun updateWidgets(newWidgets: List<WidgetData>) {
         if (widgets.isEmpty()) {
             widgets.addAll(newWidgets)
@@ -89,6 +96,10 @@ class WidgetFrameAdapter(
         }
     }
 
+    /**
+     * Move a widget to a new position in the adapter.
+     * Used for when user is reordering widgets.
+     */
     fun onMove(from: Int, to: Int): Boolean {
         return if (to < widgets.size && from < widgets.size) {
             if (from < to) {

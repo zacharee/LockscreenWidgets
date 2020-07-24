@@ -369,16 +369,28 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
         delegate.onDestroy()
     }
 
+    /**
+     * Add the widget frame to the display.
+     */
     private fun addOverlay() {
         mainHandler.postDelayed({
             delegate.view.frame.addWindow(wm, delegate.params)
         }, 100)
     }
 
+    /**
+     * Update the window manager on any params changes
+     * that may have occurred.
+     */
     private fun updateOverlay() {
         delegate.view.frame.updateWindow(wm, delegate.params)
     }
 
+    /**
+     * Remove the widget frame from the display.
+     * Make sure the editing UI is hidden if currently
+     * displayed.
+     */
     private fun removeOverlay() {
         if (isDebug) {
             Log.e(App.DEBUG_LOG_TAG, "Removing overlay", Exception())

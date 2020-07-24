@@ -110,6 +110,13 @@ class OnboardingActivity : IntroActivity() {
                         .image(R.drawable.ic_baseline_accessibility_new_24)
                         .buttonCtaLabel(R.string.grant)
                         .buttonCtaClickListener {
+                            //Samsung devices have a separate Activity for listing
+                            //installed Accessibility Services, for some reason.
+                            //It's exported and permission-free, at least on Android 10,
+                            //so attempt to launch it. A "dumb" try-catch is simpler
+                            //than a check for the existence and state of this Activity.
+                            //If the Installed Services Activity can't be launched,
+                            //just launch the normal Accessibility Activity.
                             try {
                                 val accIntent = Intent(Intent.ACTION_MAIN)
                                 accIntent.`package` = "com.android.settings"

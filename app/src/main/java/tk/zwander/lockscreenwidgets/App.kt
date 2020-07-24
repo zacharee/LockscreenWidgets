@@ -9,6 +9,16 @@ import tk.zwander.lockscreenwidgets.util.isTouchWiz
 import tk.zwander.lockscreenwidgets.util.prefManager
 import tk.zwander.unblacklister.disableApiBlacklist
 
+/**
+ * The main application.
+ * Not much is happening here, but it's still important.
+ * As soon as the app starts, we disable Android's
+ * hidden API blacklist, since Lockscreen Widgets
+ * uses quite a few of them. We also need to
+ * set the component state of the "show in NC"
+ * QS tile depending on whether the user is
+ * running One UI or not.
+ */
 class App : Application() {
     companion object {
         const val DEBUG_LOG_TAG = "LockscreenWidgetsDebug"

@@ -6,6 +6,11 @@ import android.service.quicksettings.TileService
 import androidx.annotation.RequiresApi
 import tk.zwander.lockscreenwidgets.util.prefManager
 
+/**
+ * A QS tile to enable or disable the feature
+ * to show the widget frame in the expanded
+ * notification center.
+ */
 @RequiresApi(Build.VERSION_CODES.N)
 class NCTile : TileService() {
     override fun onStartListening() {
