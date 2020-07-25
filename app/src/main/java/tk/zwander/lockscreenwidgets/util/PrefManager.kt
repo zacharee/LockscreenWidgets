@@ -49,6 +49,7 @@ class PrefManager private constructor(context: Context) : ContextWrapper(context
         const val KEY_FRAME_CORNER_RADIUS = "corner_radius"
         const val KEY_FRAME_BACKGROUND_COLOR = "background_color"
         const val KEY_FRAME_MASKED_MODE = "masked_mode"
+        const val KEY_TOUCH_PROTECTION = "touch_protection"
 
         const val VALUE_PAGE_INDICATOR_BEHAVIOR_HIDDEN = 0
         const val VALUE_PAGE_INDICATOR_BEHAVIOR_AUTO_HIDE = 1
@@ -317,6 +318,15 @@ class PrefManager private constructor(context: Context) : ContextWrapper(context
         get() = getInt(KEY_FRAME_CORNER_RADIUS, resources.getInteger(R.integer.def_corner_radius_dp_scaled_10x)) / 10f
         set(value) {
             putInt(KEY_FRAME_CORNER_RADIUS, (value * 10f).toInt())
+        }
+
+    //Whether to enable touch protection
+    //(ignore touches when proximity sensor
+    //is covered)
+    var touchProtection: Boolean
+        get() = getBoolean(KEY_TOUCH_PROTECTION, false)
+        set(value) {
+            putBoolean(KEY_TOUCH_PROTECTION, value)
         }
 
     fun getCorrectFrameWidth(isNC: Boolean): Float {

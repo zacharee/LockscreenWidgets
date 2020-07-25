@@ -2,21 +2,21 @@ package tk.zwander.lockscreenwidgets.views
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.content.SharedPreferences
 import android.graphics.drawable.GradientDrawable
-import android.graphics.drawable.ShapeDrawable
+import android.hardware.Sensor
+import android.hardware.SensorEvent
+import android.hardware.SensorEventListener2
+import android.hardware.SensorManager
 import android.os.Build
 import android.os.VibrationEffect
 import android.os.Vibrator
 import android.util.AttributeSet
-import android.util.Log
-import android.util.TypedValue
 import android.view.*
 import androidx.constraintlayout.widget.ConstraintLayout
-import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import kotlinx.android.synthetic.main.widget_frame.view.*
 import kotlinx.android.synthetic.main.widget_frame_id_view.view.*
-import tk.zwander.lockscreenwidgets.R
 import tk.zwander.lockscreenwidgets.adapters.IDAdapter
 import tk.zwander.lockscreenwidgets.util.*
 import kotlin.math.roundToInt
@@ -28,7 +28,7 @@ import kotlin.math.roundToInt
  * the logic relating to moving, resizing, etc, is handled by the Accessibility service,
  * this View listens for and notifies of the relevant events.
  */
-class WidgetFrameView(context: Context, attrs: AttributeSet) : ConstraintLayout(context, attrs) {
+class WidgetFrameView(context: Context, attrs: AttributeSet) : ConstraintLayout(context, attrs), SharedPreferences.OnSharedPreferenceChangeListener {
     var onMoveListener: ((velX: Float, velY: Float) -> Unit)? = null
     var onInterceptListener: ((down: Boolean) -> Unit)? = null
     var onAddListener: (() -> Unit)? = null
@@ -46,10 +46,29 @@ class WidgetFrameView(context: Context, attrs: AttributeSet) : ConstraintLayout(
 
     private var maxPointerCount = 0
     private var alreadyIndicatedMoving = false
+    private var isProxTooClose = false
+        set(value) {
+            field = value
+
+            updateProximity(value)
+        }
 
     var isInEditingMode = false
 
     private val vibrator by lazy { context.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator }
+    private val sensorManager by lazy { context.getSystemService(Context.SENSOR_SERVICE) as SensorManager }
+
+    private val proximityListener = object : SensorEventListener2 {
+        override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {}
+
+        override fun onFlushCompleted(sensor: Sensor?) {}
+
+        override fun onSensorChanged(event: SensorEvent) {
+            val dist = event.values[0]
+
+            isProxTooClose = dist < 5
+        }
+    }
 
     enum class AnimationState {
         STATE_ADDING,
@@ -119,6 +138,11 @@ class WidgetFrameView(context: Context, attrs: AttributeSet) : ConstraintLayout(
     override fun onAttachedToWindow() {
         super.onAttachedToWindow()
 
+        context.prefManager.prefs.registerOnSharedPreferenceChangeListener(this)
+        if (context.prefManager.touchProtection) {
+            registerProxListener()
+        }
+
         postDelayed({
             frame_card.fadeAndScaleIn {
                 attachmentStateListener?.invoke(true)
@@ -130,62 +154,81 @@ class WidgetFrameView(context: Context, attrs: AttributeSet) : ConstraintLayout(
     override fun onDetachedFromWindow() {
         super.onDetachedFromWindow()
 
+        context.prefManager.prefs.unregisterOnSharedPreferenceChangeListener(this)
+        unregisterProxListener()
+
         setEditMode(false)
         attachmentStateListener?.invoke(false)
         animationState = AnimationState.STATE_IDLE
     }
 
     override fun dispatchTouchEvent(ev: MotionEvent): Boolean {
-        onTouch(ev)
+        if (!isProxTooClose) {
+            onTouch(ev)
 
-        maxPointerCount = ev.pointerCount.run {
-            var properMax = this
+            maxPointerCount = ev.pointerCount.run {
+                var properMax = this
 
-            for (i in 0 until this) {
-                val coords = MotionEvent.PointerCoords().apply { ev.getPointerCoords(i, this) }
+                for (i in 0 until this) {
+                    val coords = MotionEvent.PointerCoords().apply { ev.getPointerCoords(i, this) }
 
-                if (coords.x < 0 || coords.x > width || coords.y < 0 || coords.y > height) {
-                    properMax--
+                    if (coords.x < 0 || coords.x > width || coords.y < 0 || coords.y > height) {
+                        properMax--
+                    }
                 }
+
+                if (properMax > maxPointerCount) properMax else maxPointerCount
             }
 
-            if (properMax > maxPointerCount) properMax else maxPointerCount
-        }
+            when (ev.action) {
+                MotionEvent.ACTION_UP -> {
+                    val max = maxPointerCount
+                    maxPointerCount = 0
 
-        when (ev.action) {
-            MotionEvent.ACTION_UP -> {
-                val max = maxPointerCount
-                maxPointerCount = 0
+                    when (max) {
+                        2 -> {
+                            setEditMode(!isInEditingMode)
+                            return true
+                        }
+                        3 -> {
+                            onTempHideListener?.invoke()
+                            return true
+                        }
+                    }
 
-                when (max) {
-                    2 -> {
+                    if (ev.buttonState == MotionEvent.BUTTON_SECONDARY
+                        || ev.buttonState == MotionEvent.BUTTON_STYLUS_SECONDARY) {
                         setEditMode(!isInEditingMode)
                         return true
                     }
-                    3 -> {
+
+                    if (ev.buttonState == MotionEvent.BUTTON_TERTIARY) {
                         onTempHideListener?.invoke()
                         return true
                     }
                 }
-
-                if (ev.buttonState == MotionEvent.BUTTON_SECONDARY
-                    || ev.buttonState == MotionEvent.BUTTON_STYLUS_SECONDARY) {
-                    setEditMode(!isInEditingMode)
-                    return true
-                }
-
-                if (ev.buttonState == MotionEvent.BUTTON_TERTIARY) {
-                    onTempHideListener?.invoke()
-                    return true
-                }
             }
         }
 
-        return super.dispatchTouchEvent(ev)
+        return super.dispatchTouchEvent(ev) && !isProxTooClose
     }
 
     override fun onInterceptTouchEvent(ev: MotionEvent): Boolean {
-        return (maxPointerCount > 1)
+        return (maxPointerCount > 1 || isProxTooClose)
+    }
+
+    override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
+        when (key) {
+            PrefManager.KEY_TOUCH_PROTECTION -> {
+                if (isAttachedToWindow) {
+                    if (context.prefManager.touchProtection) {
+                        registerProxListener()
+                    } else {
+                        unregisterProxListener()
+                    }
+                }
+            }
+        }
     }
 
     fun updateCornerRadius() {
@@ -262,6 +305,22 @@ class WidgetFrameView(context: Context, attrs: AttributeSet) : ConstraintLayout(
                 }, 50)
             }
         }
+    }
+
+    private fun updateProximity(tooClose: Boolean) {
+        touch_protection_view.isVisible = tooClose
+    }
+
+    private fun registerProxListener() {
+        sensorManager.registerListener(
+            proximityListener,
+            sensorManager.getDefaultSensor(Sensor.TYPE_PROXIMITY),
+            1 * 200 * 1000 /* 200ms */
+        )
+    }
+
+    private fun unregisterProxListener() {
+        sensorManager.unregisterListener(proximityListener)
     }
 
     private fun onTouch(event: MotionEvent): Boolean {

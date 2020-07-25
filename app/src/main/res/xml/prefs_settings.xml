@@ -133,6 +133,14 @@
             android:defaultValue="true"
             />
 
+        <SwitchPreference
+            android:title="@string/settings_screen_touch_protection"
+            android:summary="@string/settings_screen_touch_protection_desc"
+            android:icon="@drawable/ic_baseline_block_24"
+            android:key="touch_protection"
+            android:defaultValue="false"
+            />
+
         <tk.zwander.lockscreenwidgets.prefs.AutoSummaryListPreference
             android:title="@string/settings_screen_page_indicator_behavior"
             android:key="page_indicator_behavior"

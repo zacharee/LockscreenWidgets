@@ -96,6 +96,9 @@
     <string name="settings_screen_masked_mode">Masked Mode (Experimental)</string>
     <string name="settings_screen_masked_mode_desc">Masked Mode attempts to draw the wallpaper as the background of the widget frame. On a compatible device, this will give the appearance of a transparent frame, while still allowing you to overlay UI elements.</string>
 
+    <string name="settings_screen_touch_protection">Touch Protection</string>
+    <string name="settings_screen_touch_protection_desc">Ignore touches on the widget frame when the proximity sensor is covered.</string>
+
     <string name="intro_welcome_title">Welcome!</string>
     <string name="intro_welcome_desc">Lockscreen Widgets is a simple app with a simple purpose: to bring back Android KitKat\'s lock screen widgets. Your widgets will show up in a simple paged slider on the lockscreen.</string>
 
@@ -141,4 +144,5 @@
     <string name="bind_widget_error">Unable to bind the widget %s due to lack of permissions. Please contact the app developer or device manufacturer.</string>
     <string name="invalid_id_backup_error">Invalid ID list.</string>
     <string name="enable_debug_log_msg">Please enable the debug log option to see IDs here.</string>
+    <string name="touch_protection_active">Touch protection active. Please uncover the proximity sensor.</string>
 </resources>

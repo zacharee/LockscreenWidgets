@@ -159,6 +159,12 @@
             layout="@layout/widget_frame_id_view"
             />
 
+        <include
+            android:id="@+id/touch_protection_view"
+            android:visibility="gone"
+            layout="@layout/touch_protection_layer"
+            />
+
     </com.google.android.material.card.MaterialCardView>
 
 </tk.zwander.lockscreenwidgets.views.WidgetFrameView>
