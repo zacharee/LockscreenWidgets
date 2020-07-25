@@ -29,12 +29,15 @@ class App : Application() {
         //Make sure we can access hidden APIs
         disableApiBlacklist()
 
-        //We don't want the NC tile to show on non-One UI devices.
-        packageManager.setComponentEnabledSetting(
-            ComponentName(this, NCTile::class.java),
-            if (isTouchWiz && Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) PackageManager.COMPONENT_ENABLED_STATE_ENABLED
-            else PackageManager.COMPONENT_ENABLED_STATE_DISABLED,
-            0
-        )
+        //This should only run on Nougat and above.
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            //We don't want the NC tile to show on non-One UI devices.
+            packageManager.setComponentEnabledSetting(
+                ComponentName(this, NCTile::class.java),
+                if (isTouchWiz && Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) PackageManager.COMPONENT_ENABLED_STATE_ENABLED
+                else PackageManager.COMPONENT_ENABLED_STATE_DISABLED,
+                0
+            )
+        }
     }
 }
