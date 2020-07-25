@@ -445,7 +445,7 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
                 firstVisiblePosition
             }.also {
                 prefManager.currentPage = it
-            }
+            }.run { if (this == -1) 0 else this }
         }
 
         override fun canSnap(): Boolean {
