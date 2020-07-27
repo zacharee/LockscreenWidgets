@@ -23,6 +23,8 @@
     <string name="category_appearance">Appearance</string>
     <string name="category_behavior">Behavior</string>
     <string name="category_visibility">Visibility</string>
+    <string name="category_layout">Layout</string>
+    <string name="category_interaction">Interaction</string>
     <string name="category_debug">Debug</string>
 
     <string name="alert_remove_widget_confirm">Remove Widget?</string>

@@ -43,6 +43,12 @@
             app:units="dp"
             />
 
+    </tk.zwander.collapsiblepreferencecategory.CollapsiblePreferenceCategoryNew>
+
+    <tk.zwander.collapsiblepreferencecategory.CollapsiblePreferenceCategoryNew
+        android:title="@string/category_layout"
+        android:key="settings_layout_category">
+
         <tk.zwander.seekbarpreference.SeekBarPreference
             android:title="@string/settings_screen_frame_col_count"
             android:key="frame_col_count"
@@ -133,22 +139,6 @@
             android:defaultValue="true"
             />
 
-        <SwitchPreference
-            android:title="@string/settings_screen_touch_protection"
-            android:summary="@string/settings_screen_touch_protection_desc"
-            android:icon="@drawable/ic_baseline_block_24"
-            android:key="touch_protection"
-            android:defaultValue="false"
-            />
-
-        <SwitchPreference
-            android:title="@string/settings_screen_request_unlock"
-            android:summary="@string/settings_screen_request_unlock_desc"
-            android:key="request_unlock"
-            android:icon="@drawable/ic_baseline_launch_24"
-            android:defaultValue="true"
-            />
-
         <tk.zwander.lockscreenwidgets.prefs.AutoSummaryListPreference
             android:title="@string/settings_screen_page_indicator_behavior"
             android:key="page_indicator_behavior"
@@ -167,6 +157,28 @@
             app:minValue="0"
             app:maxValue="5000"
             app:units="ms"
+            />
+
+    </tk.zwander.collapsiblepreferencecategory.CollapsiblePreferenceCategoryNew>
+
+    <tk.zwander.collapsiblepreferencecategory.CollapsiblePreferenceCategoryNew
+        android:title="@string/category_interaction"
+        android:key="settings_interaction_category">
+
+        <SwitchPreference
+            android:title="@string/settings_screen_touch_protection"
+            android:summary="@string/settings_screen_touch_protection_desc"
+            android:icon="@drawable/ic_baseline_block_24"
+            android:key="touch_protection"
+            android:defaultValue="false"
+            />
+
+        <SwitchPreference
+            android:title="@string/settings_screen_request_unlock"
+            android:summary="@string/settings_screen_request_unlock_desc"
+            android:key="request_unlock"
+            android:icon="@drawable/ic_baseline_launch_24"
+            android:defaultValue="true"
             />
 
     </tk.zwander.collapsiblepreferencecategory.CollapsiblePreferenceCategoryNew>
