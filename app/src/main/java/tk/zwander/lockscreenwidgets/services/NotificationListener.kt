@@ -48,6 +48,16 @@ class NotificationListener : NotificationListenerService() {
         abstract fun onUpdate(count: Int)
     }
 
+    private var isListening = false
+
+    override fun onListenerConnected() {
+        isListening = true
+    }
+
+    override fun onListenerDisconnected() {
+        isListening = false
+    }
+
     override fun onCreate() {
         sendUpdate()
     }
@@ -61,20 +71,22 @@ class NotificationListener : NotificationListenerService() {
     }
 
     private fun sendUpdate() {
-        val intent = Intent(ACTION_NEW_NOTIFICATION_COUNT)
+        if (isListening) {
+            val intent = Intent(ACTION_NEW_NOTIFICATION_COUNT)
 
-        intent.putExtra(EXTRA_NOTIFICATION_COUNT, (activeNotifications ?: arrayOf()).filter {
-            it.notification.visibility
-                .run { this == Notification.VISIBILITY_PUBLIC || this == Notification.VISIBILITY_PRIVATE }
-                    && (
-                    if (Build.VERSION.SDK_INT > Build.VERSION_CODES.N_MR1) {
-                        val ranking = Ranking().apply { currentRanking.getRanking(it.key, this) }
-                        ranking.importance > NotificationManager.IMPORTANCE_MIN
-                    } else {
-                        it.notification.priority > Notification.PRIORITY_MIN
-                    })
-        }.size)
+            intent.putExtra(EXTRA_NOTIFICATION_COUNT, (activeNotifications ?: arrayOf()).filter {
+                it.notification.visibility
+                    .run { this == Notification.VISIBILITY_PUBLIC || this == Notification.VISIBILITY_PRIVATE }
+                        && (
+                        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.N_MR1) {
+                            val ranking = Ranking().apply { currentRanking.getRanking(it.key, this) }
+                            ranking.importance > NotificationManager.IMPORTANCE_MIN
+                        } else {
+                            it.notification.priority > Notification.PRIORITY_MIN
+                        })
+            }.size)
 
-        LocalBroadcastManager.getInstance(this).sendBroadcast(intent)
+            LocalBroadcastManager.getInstance(this).sendBroadcast(intent)
+        }
     }
 }
