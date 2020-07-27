@@ -50,6 +50,7 @@ class PrefManager private constructor(context: Context) : ContextWrapper(context
         const val KEY_FRAME_BACKGROUND_COLOR = "background_color"
         const val KEY_FRAME_MASKED_MODE = "masked_mode"
         const val KEY_TOUCH_PROTECTION = "touch_protection"
+        const val KEY_REQUEST_UNLOCK = "request_unlock"
 
         const val VALUE_PAGE_INDICATOR_BEHAVIOR_HIDDEN = 0
         const val VALUE_PAGE_INDICATOR_BEHAVIOR_AUTO_HIDE = 1
@@ -327,6 +328,15 @@ class PrefManager private constructor(context: Context) : ContextWrapper(context
         get() = getBoolean(KEY_TOUCH_PROTECTION, false)
         set(value) {
             putBoolean(KEY_TOUCH_PROTECTION, value)
+        }
+
+    //Whether to request an unlock/dismiss the
+    //notification center when LSWidg detects
+    //an Activity launch.
+    var requestUnlock: Boolean
+        get() = getBoolean(KEY_REQUEST_UNLOCK, true)
+        set(value) {
+            putBoolean(KEY_REQUEST_UNLOCK, value)
         }
 
     fun getCorrectFrameWidth(isNC: Boolean): Float {

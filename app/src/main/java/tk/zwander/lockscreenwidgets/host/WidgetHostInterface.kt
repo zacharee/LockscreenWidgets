@@ -22,10 +22,10 @@ class WidgetHostInterface(context: Context, id: Int, unlockCallback: (() -> Unit
     context, id, Proxy.newProxyInstance(
         RemoteViews.OnClickHandler::class.java.classLoader,
         arrayOf(RemoteViews.OnClickHandler::class.java),
-        InnerOnClickHandlerQ(unlockCallback)
+        InnerOnClickHandlerQ(context, unlockCallback)
     ) as RemoteViews.OnClickHandler
 ) {
-    class InnerOnClickHandlerQ(private val unlockCallback: (() -> Unit)?) : InvocationHandler {
+    class InnerOnClickHandlerQ(context: Context, unlockCallback: (() -> Unit)?) : BaseInnerOnClickHandler(context, unlockCallback), InvocationHandler {
         @SuppressLint("BlockedPrivateApi", "PrivateApi")
         override fun invoke(proxy: Any?, method: Method?, args: Array<out Any>): Any {
             val view = args[0] as View
@@ -40,9 +40,7 @@ class WidgetHostInterface(context: Context, id: Int, unlockCallback: (() -> Unit
 
             val launchOptions = getLaunchOptions.invoke(response, view) as android.util.Pair<Intent, ActivityOptions>
 
-            if (pi.isActivity) {
-                unlockCallback?.invoke()
-            }
+            checkPendingIntent(pi)
 
             return startPendingIntent.invoke(null, view, pi, launchOptions) as Boolean
         }

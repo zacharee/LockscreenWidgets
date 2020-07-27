@@ -1,5 +1,6 @@
 package tk.zwander.lockscreenwidgets.host
 
+import android.app.PendingIntent
 import android.appwidget.AppWidgetHost
 import android.appwidget.AppWidgetHostView
 import android.appwidget.AppWidgetProviderInfo
@@ -35,6 +36,14 @@ abstract class WidgetHostCompat(
                 }).also {
                     instance = it
                 }
+            }
+        }
+    }
+
+    open class BaseInnerOnClickHandler(internal val context: Context, private val unlockCallback: (() -> Unit)?) {
+        fun checkPendingIntent(pendingIntent: PendingIntent) {
+            if (pendingIntent.isActivity && context.prefManager.requestUnlock) {
+                unlockCallback?.invoke()
             }
         }
     }

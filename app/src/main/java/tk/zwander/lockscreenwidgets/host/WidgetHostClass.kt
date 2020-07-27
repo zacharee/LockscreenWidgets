@@ -27,7 +27,7 @@ class WidgetHostClass(context: Context, id: Int, unlockCallback: (() -> Unit)?)
         .defineMethod("onClickHandler", Boolean::class.java)
         .withParameters(View::class.java, PendingIntent::class.java, Intent::class.java)
         .intercept(
-            MethodDelegation.to(InnerOnClickHandlerPie(unlockCallback))
+            MethodDelegation.to(InnerOnClickHandlerPie(context, unlockCallback))
                 .andThen(SuperMethodCall.INSTANCE)
         )
         .apply {
@@ -35,7 +35,7 @@ class WidgetHostClass(context: Context, id: Int, unlockCallback: (() -> Unit)?)
                 defineMethod("onClickHandler", Boolean::class.java)
                     .withParameters(View::class.java, PendingIntent::class.java, Intent::class.java, Int::class.java)
                     .intercept(
-                        MethodDelegation.to(InnerOnClickHandlerPie(unlockCallback))
+                        MethodDelegation.to(InnerOnClickHandlerPie(context, unlockCallback))
                         .andThen(SuperMethodCall.INSTANCE)
                     )
             }
@@ -45,15 +45,13 @@ class WidgetHostClass(context: Context, id: Int, unlockCallback: (() -> Unit)?)
         .loaded
         .newInstance()
 ) {
-    class InnerOnClickHandlerPie(private val unlockCallback: (() -> Unit)?) {
+    class InnerOnClickHandlerPie(context: Context, unlockCallback: (() -> Unit)?): BaseInnerOnClickHandler(context, unlockCallback) {
         fun onClickHandler(
             view: View,
             pendingIntent: PendingIntent,
             fillInIntent: Intent
         ): Boolean {
-            if (pendingIntent.isActivity) {
-                unlockCallback?.invoke()
-            }
+            checkPendingIntent(pendingIntent)
 
             return true
         }
@@ -64,9 +62,7 @@ class WidgetHostClass(context: Context, id: Int, unlockCallback: (() -> Unit)?)
             fillInIntent: Intent,
             windowingMode: Int
         ): Boolean {
-            if (pendingIntent.isActivity) {
-                unlockCallback?.invoke()
-            }
+            checkPendingIntent(pendingIntent)
 
             return true
         }
