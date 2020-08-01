@@ -137,6 +137,7 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
 
     private var currentSysUiLayer = 1
     private var currentAppLayer = 0
+    private var currentAppPackage: String? = null
 
     @SuppressLint("ClickableViewAccessibility", "NewApi")
     override fun onCreate() {
@@ -257,8 +258,9 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
             //The below block can (very rarely) take over half a second to execute, so only run it
             //if we actually need to (i.e. on the lock screen and screen is on).
             if ((wasOnKeyguard || prefManager.showInNotificationCenter) && isScreenOn) {
-                val sysUiWindows = findSystemUiWindows()
-                val appWindow = findTopAppWindow()
+                val windows = windows
+                val sysUiWindows = findSystemUiWindows(windows)
+                val appWindow = findTopAppWindow(windows)
 
                 val sysUiNodes = ArrayList<AccessibilityNodeInfo>()
                 sysUiWindows.mapNotNull { it?.root }.forEach {
@@ -286,11 +288,16 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
 
                 if (isOnKeyguard) {
                     val appIndex = windows.indexOf(appWindow)
-                    val sysUiIndex = windows.indexOf(sysUiWindows.firstOrNull())
+                    val sysUiIndex = sysUiWindows.map { windows.indexOf(it) }.filter { it > -1 }.min() ?: -1
 
                     //Generate "layer" values for the System UI window and for the topmost app window, if
                     //it exists.
+                    //currentAppLayer *should* be -1 even if there's an app open, since getWindows()
+                    //is only meant to return windows that can actually be interacted with. The only
+                    //time it should be anything else (usually 1) is if an app is displaying above
+                    //the keyguard, such as the incoming call screen or the camera.
                     currentAppLayer = if (appIndex != -1) windows.size - appIndex else appIndex
+                    currentAppPackage = appWindow?.safeRoot?.packageName?.toString()
                     currentSysUiLayer = if (sysUiIndex != -1) windows.size - sysUiIndex else sysUiIndex
 
                     if (prefManager.hideOnSecurityPage) {
@@ -426,7 +433,7 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
      * - [isScreenOn] is true (i.e. the display is properly on: not in Doze or on the AOD)
      * - [isTempHide] is false
      * - [PrefManager.showOnMainLockScreen] is true OR [PrefManager.showInNotificationCenter] is false
-     * - [currentSysUiLayer] is greater than [currentAppLayer]
+     * - [currentAppLayer] is less than 0 (i.e. doesn't exist)
      * - [onMainLockscreen] is true OR [showingNotificationsPanel] is true OR [PrefManager.hideOnSecurityPage] is false
      * - [showingNotificationsPanel] is false OR [PrefManager.hideOnNotificationShade] is false (OR [notificationsPanelFullyExpanded] is true AND [PrefManager.showInNotificationCenter] is true
      * - [notificationCount] is 0 (i.e. no notifications shown on lock screen, not necessarily no notifications at all) OR [PrefManager.hideOnNotifications] is false
@@ -445,7 +452,7 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
                         && isScreenOn
                         && !isTempHide
                         && (prefManager.showOnMainLockScreen || !prefManager.showInNotificationCenter)
-                        && currentSysUiLayer > currentAppLayer
+                        && currentAppLayer < 0
                         && (onMainLockscreen || showingNotificationsPanel || !prefManager.hideOnSecurityPage)
                         && (!showingNotificationsPanel || !prefManager.hideOnNotificationShade)
                         && (notificationCount == 0 || !prefManager.hideOnNotifications)
@@ -463,6 +470,7 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
                                 "wasOnKeyguard: $wasOnKeyguard, " +
                                 "currentSysUiLayer: $currentSysUiLayer, " +
                                 "currentAppLayer: $currentAppLayer, " +
+                                "currentAppPackage: $currentAppPackage, " +
                                 "onMainLockscreen: $onMainLockscreen, " +
                                 "showingNotificationsPanel: $showingNotificationsPanel, " +
                                 "notificationsPanelFullyExpanded: $notificationsPanelFullyExpanded, " +
@@ -482,7 +490,7 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
      *
      * @return the System UI window if it exists onscreen
      */
-    private fun findSystemUiWindows(): List<AccessibilityWindowInfo?> {
+    private fun findSystemUiWindows(windows: List<AccessibilityWindowInfo> = this.windows): List<AccessibilityWindowInfo?> {
         return windows.filter { it.type == AccessibilityWindowInfo.TYPE_SYSTEM && it.safeRoot.run {
                 this?.packageName == "com.android.systemui".also { this?.recycle() }
             }
@@ -495,10 +503,11 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
      *
      * @return the app window if it exists onscreen
      */
-    private fun findTopAppWindow(): AccessibilityWindowInfo? {
+    private fun findTopAppWindow(windows: List<AccessibilityWindowInfo> = this.windows): AccessibilityWindowInfo? {
         windows.forEach {
-            if (it.type == AccessibilityWindowInfo.TYPE_APPLICATION)
+            if (it.type == AccessibilityWindowInfo.TYPE_APPLICATION) {
                 return it
+            }
         }
 
         return null
