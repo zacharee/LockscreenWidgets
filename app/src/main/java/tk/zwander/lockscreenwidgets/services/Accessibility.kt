@@ -227,6 +227,8 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
     }
 
     override fun onAccessibilityEvent(event: AccessibilityEvent) {
+        val eventCopy = AccessibilityEvent.obtain(event)
+
         mainHandler.post {
             //This block here runs even when unlocked, but it only takes a millisecond at most,
             //so it shouldn't be noticeable to the user. We use this to check the current keyguard
@@ -246,7 +248,7 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
             }
 
             if (isDebug) {
-                Log.e(App.DEBUG_LOG_TAG, "Accessibility event: $event, isScreenOn: ${this.isScreenOn}, wasOnKeyguard: $wasOnKeyguard")
+                Log.e(App.DEBUG_LOG_TAG, "Accessibility event: $eventCopy, isScreenOn: ${this.isScreenOn}, wasOnKeyguard: $wasOnKeyguard")
             }
 
             //The below block can (very rarely) take over half a second to execute, so only run it
@@ -335,6 +337,8 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
             }
 
             delegate.updateAccessibilityPass()
+
+            eventCopy.recycle()
         }
     }
 
