@@ -257,13 +257,8 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
             //The below block can (very rarely) take over half a second to execute, so only run it
             //if we actually need to (i.e. on the lock screen and screen is on).
             if ((wasOnKeyguard || prefManager.showInNotificationCenter) && isScreenOn) {
-                val start = System.currentTimeMillis()
                 val sysUiWindows = findSystemUiWindows()
                 val appWindow = findTopAppWindow()
-                Log.e("LockscreenWidgets", "${System.currentTimeMillis() - start}")
-
-                val appIndex = windows.indexOf(appWindow)
-                val sysUiIndex = windows.indexOf(sysUiWindows.firstOrNull())
 
                 val sysUiNodes = ArrayList<AccessibilityNodeInfo>()
                 sysUiWindows.map { it?.root }.forEach {
@@ -292,6 +287,9 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
                 }
 
                 if (isOnKeyguard) {
+                    val appIndex = windows.indexOf(appWindow)
+                    val sysUiIndex = windows.indexOf(sysUiWindows.firstOrNull())
+
                     //Generate "layer" values for the System UI window and for the topmost app window, if
                     //it exists.
                     currentAppLayer = if (appIndex != -1) windows.size - appIndex else appIndex
