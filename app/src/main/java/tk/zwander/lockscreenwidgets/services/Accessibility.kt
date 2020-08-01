@@ -261,10 +261,8 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
                 val appWindow = findTopAppWindow()
 
                 val sysUiNodes = ArrayList<AccessibilityNodeInfo>()
-                sysUiWindows.map { it?.root }.forEach {
-                    if (it != null) {
-                        addAllNodesToList(it, sysUiNodes)
-                    }
+                sysUiWindows.mapNotNull { it?.root }.forEach {
+                    addAllNodesToList(it, sysUiNodes)
                 }
 
                 val items = sysUiNodes.filter { it.isVisibleToUser }.mapNotNull { it.viewIdResourceName }
@@ -322,12 +320,15 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
 
                 val presentIds = prefManager.presentIds
                 if (presentIds.isNotEmpty()) {
-                    hideForPresentIds = sysUiNodes.any { presentIds.contains(it.viewIdResourceName) && it.isVisibleToUser }
+                    hideForPresentIds = sysUiNodes.any {
+                        presentIds.contains(it.viewIdResourceName) && it.isVisibleToUser }
                 }
 
                 val nonPresentIds = prefManager.nonPresentIds
                 if (nonPresentIds.isNotEmpty()) {
-                    hideForNonPresentIds = sysUiNodes.none { nonPresentIds.contains(it.viewIdResourceName) } || sysUiNodes.any { nonPresentIds.contains(it.viewIdResourceName) && !it.isVisibleToUser }
+                    hideForNonPresentIds = sysUiNodes.none {
+                        nonPresentIds.contains(it.viewIdResourceName) }
+                            || sysUiNodes.any { nonPresentIds.contains(it.viewIdResourceName) && !it.isVisibleToUser }
                 }
 
                 sysUiNodes.forEach { it.recycle() }
