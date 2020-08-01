@@ -257,8 +257,10 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
             //The below block can (very rarely) take over half a second to execute, so only run it
             //if we actually need to (i.e. on the lock screen and screen is on).
             if ((wasOnKeyguard || prefManager.showInNotificationCenter) && isScreenOn) {
+                val start = System.currentTimeMillis()
                 val sysUiWindows = findSystemUiWindows()
                 val appWindow = findTopAppWindow()
+                Log.e("LockscreenWidgets", "${System.currentTimeMillis() - start}")
 
                 val appIndex = windows.indexOf(appWindow)
                 val sysUiIndex = windows.indexOf(sysUiWindows.firstOrNull())

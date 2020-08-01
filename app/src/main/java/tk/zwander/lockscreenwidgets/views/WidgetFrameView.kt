@@ -321,6 +321,7 @@ class WidgetFrameView(context: Context, attrs: AttributeSet) : ConstraintLayout(
 
     private fun unregisterProxListener() {
         sensorManager.unregisterListener(proximityListener)
+        isProxTooClose = false
     }
 
     private fun onTouch(event: MotionEvent): Boolean {
