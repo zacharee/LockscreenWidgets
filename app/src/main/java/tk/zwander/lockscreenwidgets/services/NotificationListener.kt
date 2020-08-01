@@ -72,21 +72,28 @@ class NotificationListener : NotificationListenerService() {
 
     private fun sendUpdate() {
         if (isListening) {
-            val intent = Intent(ACTION_NEW_NOTIFICATION_COUNT)
+            //Even with the check to make sure the notification listener is connected, some devices still
+            //crash with an "unknown listener" error when trying to retrieve the notification lists.
+            //This shouldn't happen, but it does, so catch the Exception.
+            try {
+                val intent = Intent(ACTION_NEW_NOTIFICATION_COUNT)
 
-            intent.putExtra(EXTRA_NOTIFICATION_COUNT, (activeNotifications ?: arrayOf()).filter {
-                it.notification.visibility
-                    .run { this == Notification.VISIBILITY_PUBLIC || this == Notification.VISIBILITY_PRIVATE }
-                        && (
-                        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.N_MR1) {
-                            val ranking = Ranking().apply { currentRanking.getRanking(it.key, this) }
-                            ranking.importance > NotificationManager.IMPORTANCE_MIN
-                        } else {
-                            it.notification.priority > Notification.PRIORITY_MIN
-                        })
-            }.size)
+                intent.putExtra(EXTRA_NOTIFICATION_COUNT, (activeNotifications ?: arrayOf()).filter {
+                    it.notification.visibility
+                        .run { this == Notification.VISIBILITY_PUBLIC || this == Notification.VISIBILITY_PRIVATE }
+                            && (
+                            if (Build.VERSION.SDK_INT > Build.VERSION_CODES.N_MR1) {
+                                val ranking = Ranking().apply { currentRanking.getRanking(it.key, this) }
+                                ranking.importance > NotificationManager.IMPORTANCE_MIN
+                            } else {
+                                it.notification.priority > Notification.PRIORITY_MIN
+                            })
+                }.size)
 
-            LocalBroadcastManager.getInstance(this).sendBroadcast(intent)
+                LocalBroadcastManager.getInstance(this).sendBroadcast(intent)
+            } catch (e: Exception) {
+                //ignored
+            }
         }
     }
 }
