@@ -12,6 +12,9 @@ import android.view.accessibility.AccessibilityNodeInfo
 import android.view.accessibility.AccessibilityWindowInfo
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import kotlinx.android.synthetic.main.widget_frame.view.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.launch
 import tk.zwander.lockscreenwidgets.App
 import tk.zwander.lockscreenwidgets.activities.DismissOrUnlockActivity
 import tk.zwander.lockscreenwidgets.appwidget.IDWidgetFactory
@@ -29,7 +32,7 @@ import tk.zwander.lockscreenwidgets.util.*
  * check that the left lock screen shortcut is no longer visible, since it hides when the notification shade
  * is shown.
  */
-class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferenceChangeListener {
+class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferenceChangeListener, CoroutineScope by MainScope() {
     companion object {
         const val ACTION_LOCKSCREEN_DISMISSED = "LOCKSCREEN_DISMISSED"
     }
@@ -229,26 +232,26 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
     override fun onAccessibilityEvent(event: AccessibilityEvent) {
         val eventCopy = AccessibilityEvent.obtain(event)
 
-        mainHandler.post {
+        launch {
             //This block here runs even when unlocked, but it only takes a millisecond at most,
             //so it shouldn't be noticeable to the user. We use this to check the current keyguard
             //state and, if applicable, send the keyguard dismissal broadcast.
             val isScreenOn = power.isInteractive
-            if (this.isScreenOn != isScreenOn) {
+            if (this@Accessibility.isScreenOn != isScreenOn) {
                 isTempHide = false
-                this.isScreenOn = isScreenOn
+                this@Accessibility.isScreenOn = isScreenOn
             }
             val isOnKeyguard = kgm.isKeyguardLocked
             if (isOnKeyguard != wasOnKeyguard) {
                 wasOnKeyguard = isOnKeyguard
                 if (!isOnKeyguard) {
-                    LocalBroadcastManager.getInstance(this)
+                    LocalBroadcastManager.getInstance(this@Accessibility)
                         .sendBroadcast(Intent(ACTION_LOCKSCREEN_DISMISSED))
                 }
             }
 
             if (isDebug) {
-                Log.e(App.DEBUG_LOG_TAG, "Accessibility event: $eventCopy, isScreenOn: ${this.isScreenOn}, wasOnKeyguard: $wasOnKeyguard")
+                Log.e(App.DEBUG_LOG_TAG, "Accessibility event: $eventCopy, isScreenOn: ${isScreenOn}, wasOnKeyguard: $wasOnKeyguard")
             }
 
             //The below block can (very rarely) take over half a second to execute, so only run it
@@ -274,7 +277,7 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
                     clear()
                     addAll(items)
                 }
-                IDListProvider.sendUpdate(this)
+                IDListProvider.sendUpdate(this@Accessibility)
 
                 if (isDebug) {
                     Log.e(
