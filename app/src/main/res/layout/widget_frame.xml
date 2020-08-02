@@ -39,6 +39,12 @@
             layout="@layout/widget_frame_hint"
             />
 
+        <include
+            android:id="@+id/id_view"
+            android:visibility="gone"
+            layout="@layout/widget_frame_id_view"
+            />
+
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/edit_wrapper"
             android:layout_width="match_parent"
@@ -151,12 +157,6 @@
             android:id="@+id/remove_widget_confirmation"
             android:visibility="gone"
             layout="@layout/remove_widget_confirmation_layout"
-            />
-
-        <include
-            android:id="@+id/id_view"
-            android:visibility="gone"
-            layout="@layout/widget_frame_id_view"
             />
 
         <include
