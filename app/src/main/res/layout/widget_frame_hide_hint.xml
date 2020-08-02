@@ -1,14 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
-<tk.zwander.lockscreenwidgets.views.WidgetFrameHintView
+<tk.zwander.lockscreenwidgets.views.WidgetFrameHideHintView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:elevation="0dp"
     tools:layout_width="300dp"
     tools:layout_height="200dp"
     app:contentPadding="8dp"
-    app:cardCornerRadius="2dp">
+    app:cardCornerRadius="2dp"
+    app:cardElevation="0dp">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -28,39 +30,22 @@
             android:orientation="vertical"
             android:layout_width="0dp"
             android:layout_weight="1"
+            android:gravity="center_vertical"
             android:layout_height="match_parent">
 
             <TextView
-                android:id="@+id/hint_text"
+                android:id="@+id/hide_hint_text"
                 android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_weight="1"
-                android:text="@string/gesture_hint"
+                android:layout_height="wrap_content"
+                android:text="@string/hide_gesture_hint"
                 android:scrollbars="vertical"
+                android:textSize="18sp"
                 tools:textSize="28sp"
                 tools:ignore="NestedWeights"
-                />
-
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/close_hint"
-                android:layout_width="wrap_content"
-                android:layout_height="36dp"
-                android:text="@android:string/ok"
-                android:layout_gravity="end"
-                style="@style/Widget.MaterialComponents.Button.TextButton"
                 />
 
         </LinearLayout>
 
     </LinearLayout>
 
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:layout_gravity="center"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent">
-
-
-
-    </androidx.constraintlayout.widget.ConstraintLayout>
-
-</tk.zwander.lockscreenwidgets.views.WidgetFrameHintView>
+</tk.zwander.lockscreenwidgets.views.WidgetFrameHideHintView>

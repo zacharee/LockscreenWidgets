@@ -12,11 +12,14 @@ import android.os.Build
 import android.os.VibrationEffect
 import android.os.Vibrator
 import android.util.AttributeSet
+import android.util.Log
 import android.view.*
+import android.widget.Toast
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.isVisible
 import kotlinx.android.synthetic.main.widget_frame.view.*
 import kotlinx.android.synthetic.main.widget_frame_id_view.view.*
+import tk.zwander.lockscreenwidgets.R
 import tk.zwander.lockscreenwidgets.adapters.IDAdapter
 import tk.zwander.lockscreenwidgets.util.*
 import kotlin.math.roundToInt
@@ -124,7 +127,7 @@ class WidgetFrameView(context: Context, attrs: AttributeSet) : ConstraintLayout(
         }
 
         if (context.prefManager.firstViewing) {
-            hint_view.isVisible = true
+            gesture_hint_view.isVisible = true
         }
 
         id_list.adapter = IDAdapter()
@@ -188,9 +191,22 @@ class WidgetFrameView(context: Context, attrs: AttributeSet) : ConstraintLayout(
                     when (max) {
                         2 -> {
                             setEditMode(!isInEditingMode)
+                            if (gesture_hint_view.isVisible) {
+                                val ghv = gesture_hint_view as WidgetFrameGestureHintView
+                                if (!ghv.stage2) {
+                                    ghv.stage2 = true
+                                } else if (ghv.stage2) {
+                                    ghv.stage2 = false
+                                    ghv.close()
+                                    hide_hint_view.isVisible = true
+                                }
+                            }
                             return true
                         }
                         3 -> {
+                            if (hide_hint_view.isVisible) {
+                                (hide_hint_view as WidgetFrameHideHintView).close()
+                            }
                             onTempHideListener?.invoke()
                             return true
                         }
@@ -344,7 +360,6 @@ class WidgetFrameView(context: Context, attrs: AttributeSet) : ConstraintLayout(
 
     private fun setEditMode(editing: Boolean) {
         isInEditingMode = editing
-
         edit_wrapper.isVisible = editing
     }
 

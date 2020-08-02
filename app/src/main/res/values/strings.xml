@@ -2,7 +2,10 @@
     <string name="app_name">Lockscreen Widgets</string>
 
     <string name="content_desc_widget_image">Widget Image</string>
-    <string name="gesture_hint">Tap the widget pager with two fingers to show the resize and move controls. Tap the widget pager with three fingers to temporarily hide it.</string>
+    <string name="edit_gesture_hint">Tap the widget frame with two fingers to move and resize it.</string>
+    <string name="edit_gesture_hint_2">Great! Tap with two fingers to hide the editing UI.</string>
+    <string name="hide_gesture_hint">Tap the widget frame with three fingers to temporarily hide it. It will remain hidden until you turn the display off and on again.</string>
+    <string name="hide_gesture_hint_2">Turn the display off and on again to bring the widget frame back.</string>
     <string name="accessibility_service_desc">Lockscreen Widgets requires an Accessibility Service to display on the lock screen. No data is collected, and no actions will be performed.</string>
 
     <string name="add_widget">Add Widget</string>

@@ -34,9 +34,15 @@
             />
 
         <include
-            android:id="@+id/hint_view"
+            android:id="@+id/hide_hint_view"
             android:visibility="gone"
-            layout="@layout/widget_frame_hint"
+            layout="@layout/widget_frame_hide_hint"
+            />
+
+        <include
+            android:id="@+id/gesture_hint_view"
+            android:visibility="gone"
+            layout="@layout/widget_frame_gesture_hint"
             />
 
         <include
