@@ -233,9 +233,12 @@ class AddWidgetActivity : AppCompatActivity(), CoroutineScope by MainScope() {
                     app = apps[appInfo.packageName]!!
                 }
 
-                app.widgets.add(WidgetListInfo(widgetName,
+                app.widgets.add(WidgetListInfo(
+                    widgetName,
                     it.previewImage.run { if (this != 0) this else appInfo.icon },
-                    it, appInfo))
+                    it,
+                    appInfo
+                ))
             }
 
             apps

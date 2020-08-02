@@ -14,10 +14,21 @@
         android:id="@+id/widget_name"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="8dp"
+        android:layout_marginBottom="2dp"
         android:textAlignment="center"
         android:textSize="16sp"
-        tools:text="Some Random Widget" />
+        tools:text="Some Random Widget"
+        />
+
+    <TextView
+        android:id="@+id/widget_size"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:textAlignment="center"
+        android:textSize="14sp"
+        tools:text="5x1"
+        />
 
     <FrameLayout
         android:layout_width="match_parent"

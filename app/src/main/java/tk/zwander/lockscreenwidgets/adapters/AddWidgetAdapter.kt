@@ -1,5 +1,6 @@
 package tk.zwander.lockscreenwidgets.adapters
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.net.Uri
 import android.view.LayoutInflater
@@ -63,8 +64,10 @@ class AddWidgetAdapter(private val picasso: Picasso, private val selectionCallba
      * along with widget label.
      */
     class WidgetVH(view: View) : RecyclerView.ViewHolder(view) {
+        @SuppressLint("SetTextI18n")
         fun parseInfo(info: WidgetListInfo, picasso: Picasso) {
             itemView.widget_name.text = info.widgetName
+            itemView.widget_size.text = "${info.providerInfo.minWidth}x${info.providerInfo.minHeight}"
 
             val img = itemView.widget_image
 
