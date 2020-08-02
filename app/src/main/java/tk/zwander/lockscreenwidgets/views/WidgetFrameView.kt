@@ -283,6 +283,8 @@ class WidgetFrameView(context: Context, attrs: AttributeSet) : ConstraintLayout(
             try {
                 wm.addView(this, params)
             } catch (e: Exception) {}
+        } else if (isAttachedToWindow) {
+            updateWindow(wm, params)
         }
     }
 

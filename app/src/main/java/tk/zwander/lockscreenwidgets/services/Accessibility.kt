@@ -125,6 +125,13 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
     private var showingNotificationsPanel = false
     private var wasOnKeyguard = true
     private var isScreenOn = true
+        set(value) {
+            field = value
+
+            if (!value) {
+                notificationsPanelFullyExpanded = false
+            }
+        }
     private var isTempHide = false
     private var hideForPresentIds = false
     private var hideForNonPresentIds = false
@@ -342,12 +349,12 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
             }
 
             if (canShow()) {
+                delegate.updateAccessibilityPass()
                 addOverlay()
             } else {
                 removeOverlay()
+                delegate.updateAccessibilityPass()
             }
-
-            delegate.updateAccessibilityPass()
 
             eventCopy.recycle()
         }

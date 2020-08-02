@@ -276,6 +276,8 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
                 } else {
                     widgetHost.stopListening()
                 }
+
+                updateParamsForNotificationCenterStateChange()
             } catch (e: NullPointerException) {
                 //The stupid "Attempt to read from field 'com.android.server.appwidget.AppWidgetServiceImpl$ProviderId
                 //com.android.server.appwidget.AppWidgetServiceImpl$Provider.id' on a null object reference"
