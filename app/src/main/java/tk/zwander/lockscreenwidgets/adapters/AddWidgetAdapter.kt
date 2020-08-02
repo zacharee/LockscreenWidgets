@@ -6,6 +6,8 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.graphics.drawable.toBitmap
+import androidx.recyclerview.widget.AsyncListDiffer
+import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.SortedList
 import com.squareup.picasso.Callback
@@ -16,39 +18,20 @@ import kotlinx.android.synthetic.main.widget_item.view.*
 import tk.zwander.lockscreenwidgets.R
 import tk.zwander.lockscreenwidgets.activities.AddWidgetActivity
 import tk.zwander.lockscreenwidgets.data.WidgetListInfo
+import tk.zwander.lockscreenwidgets.util.matchesFilter
 
 /**
  * Adapter to host widget previews in [AddWidgetActivity] for a specific app.
  */
 class AddWidgetAdapter(private val picasso: Picasso, private val selectionCallback: (provider: WidgetListInfo) -> Unit) :
     RecyclerView.Adapter<AddWidgetAdapter.WidgetVH>() {
-    private val widgets = SortedList(WidgetListInfo::class.java, object : SortedList.Callback<WidgetListInfo>() {
-        override fun areItemsTheSame(item1: WidgetListInfo?, item2: WidgetListInfo?): Boolean {
+    private val widgets = AsyncListDiffer<WidgetListInfo>(this, object : DiffUtil.ItemCallback<WidgetListInfo>() {
+        override fun areContentsTheSame(oldItem: WidgetListInfo, newItem: WidgetListInfo): Boolean {
             return false
         }
 
-        override fun areContentsTheSame(oldItem: WidgetListInfo?, newItem: WidgetListInfo?): Boolean {
+        override fun areItemsTheSame(oldItem: WidgetListInfo, newItem: WidgetListInfo): Boolean {
             return false
-        }
-
-        override fun compare(o1: WidgetListInfo, o2: WidgetListInfo): Int {
-            return o1.compareTo(o2)
-        }
-
-        override fun onMoved(fromPosition: Int, toPosition: Int) {
-            notifyItemMoved(fromPosition, toPosition)
-        }
-
-        override fun onChanged(position: Int, count: Int) {
-            notifyItemRangeChanged(position, count)
-        }
-
-        override fun onInserted(position: Int, count: Int) {
-            notifyItemRangeInserted(position, count)
-        }
-
-        override fun onRemoved(position: Int, count: Int) {
-            notifyItemRangeRemoved(position, count)
         }
     })
 
@@ -63,14 +46,16 @@ class AddWidgetAdapter(private val picasso: Picasso, private val selectionCallba
 
     override fun onBindViewHolder(holder: WidgetVH, position: Int) {
         holder.itemView
-            .setOnClickListener { selectionCallback.invoke(widgets.get(holder.adapterPosition)) }
-        holder.parseInfo(widgets.get(holder.adapterPosition), picasso)
+            .setOnClickListener { selectionCallback.invoke(widgets.currentList[holder.adapterPosition]) }
+        holder.parseInfo(widgets.currentList[holder.adapterPosition], picasso)
     }
 
-    override fun getItemCount() = widgets.size()
+    override fun getItemCount() = widgets.currentList.size
 
-    fun addItem(item: WidgetListInfo) {
-        widgets.add(item)
+    fun setItems(items: List<WidgetListInfo>) {
+        widgets.submitList(items) {
+            notifyDataSetChanged()
+        }
     }
 
     /**

@@ -6,9 +6,12 @@ import android.appwidget.AppWidgetProviderInfo
 import android.content.ComponentName
 import android.content.Intent
 import android.os.Bundle
+import android.view.Menu
+import android.view.MenuItem
 import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.SearchView
 import kotlinx.android.synthetic.main.activity_add_widget.*
 import kotlinx.coroutines.*
 import tk.zwander.lockscreenwidgets.R
@@ -36,6 +39,12 @@ class AddWidgetActivity : AppCompatActivity(), CoroutineScope by MainScope() {
         }
     }
 
+    private var searchItem: MenuItem? = null
+    private val searchView: SearchView?
+        get() = (searchItem?.actionView as SearchView?)
+
+    private var doneLoading = false
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -52,6 +61,39 @@ class AddWidgetActivity : AppCompatActivity(), CoroutineScope by MainScope() {
         selection_list.adapter = adapter
 
         populateAsync()
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        menuInflater.inflate(R.menu.menu_search, menu)
+        searchItem = menu?.findItem(R.id.search)
+
+        searchItem?.setOnActionExpandListener(object : MenuItem.OnActionExpandListener {
+            override fun onMenuItemActionCollapse(item: MenuItem?): Boolean {
+                adapter.currentFilter = null
+                return true
+            }
+
+            override fun onMenuItemActionExpand(item: MenuItem?): Boolean {
+                return true
+            }
+        })
+
+        searchView?.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
+            override fun onQueryTextChange(newText: String?): Boolean {
+                adapter.currentFilter = newText
+                return true
+            }
+
+            override fun onQueryTextSubmit(query: String?): Boolean {
+                return false
+            }
+        })
+
+        if (doneLoading) {
+            searchItem?.isVisible = true
+        }
+
+        return super.onCreateOptionsMenu(menu)
     }
 
     override fun onBackPressed() {
@@ -199,8 +241,11 @@ class AddWidgetActivity : AppCompatActivity(), CoroutineScope by MainScope() {
             apps
         }
 
-        adapter.addItems(apps.values)
+        adapter.setItems(apps.values.toList())
         progress.visibility = View.GONE
         selection_list.visibility = View.VISIBLE
+        searchItem?.isVisible = true
+
+        doneLoading = true
     }
 }

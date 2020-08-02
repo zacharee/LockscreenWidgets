@@ -12,12 +12,15 @@ import android.net.Uri
 import android.os.Handler
 import android.os.Looper
 import android.provider.Settings
+import android.util.Log
 import android.util.TypedValue
 import android.view.View
 import android.view.WindowManager
 import android.view.accessibility.AccessibilityNodeInfo
 import android.view.accessibility.AccessibilityWindowInfo
 import tk.zwander.lockscreenwidgets.R
+import tk.zwander.lockscreenwidgets.data.AppInfo
+import tk.zwander.lockscreenwidgets.data.WidgetListInfo
 import tk.zwander.lockscreenwidgets.services.Accessibility
 import tk.zwander.lockscreenwidgets.services.NotificationListener
 import kotlin.math.roundToInt
@@ -185,6 +188,20 @@ fun Context.calculateNCPosYFromTopDefault(): Int {
     val coord = -(screenHeight / 2f) + frameTop + fromTop
 
     return coord.toInt()
+}
+
+fun AppInfo.matchesFilter(filter: String?): Boolean {
+    if (filter.isNullOrBlank()) return true
+    if (appName.contains(filter, true)) return true
+    if (widgets.any { it.matchesFilter(filter) }) return true
+
+    return false
+}
+
+fun WidgetListInfo.matchesFilter(filter: String?): Boolean {
+    if (filter.isNullOrBlank()) return true
+    if (widgetName.contains(filter, true)) return true
+    return false
 }
 
 //Take an integer and make it even.
