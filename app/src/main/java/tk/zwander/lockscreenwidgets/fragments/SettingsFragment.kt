@@ -1,9 +1,7 @@
 package tk.zwander.lockscreenwidgets.fragments
 
 import android.content.pm.PackageManager
-import android.os.Build
 import android.os.Bundle
-import androidx.preference.ListPreference
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
 import androidx.preference.SwitchPreference
@@ -12,7 +10,7 @@ import tk.zwander.lockscreenwidgets.activities.HideForIDsActivity
 import tk.zwander.lockscreenwidgets.activities.OnboardingActivity
 import tk.zwander.lockscreenwidgets.util.PrefManager
 import tk.zwander.lockscreenwidgets.util.isNotificationListenerActive
-import tk.zwander.lockscreenwidgets.util.isTouchWiz
+import tk.zwander.lockscreenwidgets.util.isOneUI
 
 /**
  * The settings page.
@@ -32,14 +30,18 @@ class SettingsFragment : PreferenceFragmentCompat() {
 
         //Currently, the option to show the frame when the notification center is fully expanded is only
         //for Samsung One UI 1.0 and above, so we need to hide the relevant toggles.
-        val ncCondition = requireContext().isTouchWiz && Build.VERSION.SDK_INT >= Build.VERSION_CODES.P
+        val ncCondition = requireContext().isOneUI
 
         findPreference<SwitchPreference>(PrefManager.KEY_SHOW_IN_NOTIFICATION_CENTER)?.apply {
-            if (!ncCondition) isVisible = false
+            if (!ncCondition) {
+                preferenceScreen.removePreferenceRecursively(key)
+            }
         }
 
         findPreference<SwitchPreference>(PrefManager.KEY_SHOW_ON_MAIN_LOCK_SCREEN)?.apply {
-            if (!ncCondition) isVisible = false
+            if (!ncCondition) {
+                preferenceScreen.removePreferenceRecursively(key)
+            }
         }
 
         findPreference<SwitchPreference>(PrefManager.KEY_FRAME_MASKED_MODE)?.setOnPreferenceChangeListener { _, newValue ->

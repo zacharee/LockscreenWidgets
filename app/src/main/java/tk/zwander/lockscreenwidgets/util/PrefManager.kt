@@ -299,7 +299,7 @@ class PrefManager private constructor(context: Context) : ContextWrapper(context
     //vs the standard lock screen mode.
     //Only available for Samsung One UI 1.0 and later.
     var showInNotificationCenter: Boolean
-        get() = getBoolean(KEY_SHOW_IN_NOTIFICATION_CENTER, false)
+        get() = getBoolean(KEY_SHOW_IN_NOTIFICATION_CENTER, false) && isOneUI
         set(value) {
             putBoolean(KEY_SHOW_IN_NOTIFICATION_CENTER, value)
         }

@@ -9,6 +9,7 @@ import android.content.Context
 import android.content.Intent
 import android.graphics.Point
 import android.net.Uri
+import android.os.Build
 import android.os.Handler
 import android.os.Looper
 import android.provider.Settings
@@ -161,6 +162,9 @@ val Context.widgetBlockHeight: Int
 
 val Context.isTouchWiz: Boolean
     get() = packageManager.hasSystemFeature("com.samsung.feature.samsung_experience_mobile")
+
+val Context.isOneUI: Boolean
+    get() = isTouchWiz && Build.VERSION.SDK_INT >= Build.VERSION_CODES.P
 
 val Context.windowManager: WindowManager
     get() = getSystemService(Context.WINDOW_SERVICE) as WindowManager
