@@ -135,6 +135,7 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
     private var isTempHide = false
     private var hideForPresentIds = false
     private var hideForNonPresentIds = false
+    private var isOnScreenOffMemo = false
 
     private var notificationsPanelFullyExpanded: Boolean
         get() = delegate.notificationsPanelFullyExpanded
@@ -297,6 +298,8 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
                     val appIndex = windows.indexOf(appWindow)
                     val sysUiIndex = sysUiWindows.map { windows.indexOf(it) }.filter { it > -1 }.min() ?: -1
 
+                    isOnScreenOffMemo = windows.any { it.safeRoot?.packageName == "com.samsung.android.app.notes" }
+
                     //Generate "layer" values for the System UI window and for the topmost app window, if
                     //it exists.
                     //currentAppLayer *should* be -1 even if there's an app open, since getWindows()
@@ -324,6 +327,8 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
                                     || (it.viewIdResourceName == "com.android.systemui:id/tile_label" && it.isVisibleToUser)
                         } != null
                     }
+                } else {
+                    isOnScreenOffMemo = false
                 }
 
                 if (prefManager.showInNotificationCenter) {
@@ -441,6 +446,7 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
      * - [isTempHide] is false
      * - [PrefManager.showOnMainLockScreen] is true OR [PrefManager.showInNotificationCenter] is false
      * - [currentAppLayer] is less than 0 (i.e. doesn't exist)
+     * - [isOnScreenOffMemo] is false
      * - [onMainLockscreen] is true OR [showingNotificationsPanel] is true OR [PrefManager.hideOnSecurityPage] is false
      * - [showingNotificationsPanel] is false OR [PrefManager.hideOnNotificationShade] is false (OR [notificationsPanelFullyExpanded] is true AND [PrefManager.showInNotificationCenter] is true
      * - [notificationCount] is 0 (i.e. no notifications shown on lock screen, not necessarily no notifications at all) OR [PrefManager.hideOnNotifications] is false
@@ -460,6 +466,7 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
                         && !isTempHide
                         && (prefManager.showOnMainLockScreen || !prefManager.showInNotificationCenter)
                         && currentAppLayer < 0
+                        && !isOnScreenOffMemo
                         && (onMainLockscreen || showingNotificationsPanel || !prefManager.hideOnSecurityPage)
                         && (!showingNotificationsPanel || !prefManager.hideOnNotificationShade)
                         && (notificationCount == 0 || !prefManager.hideOnNotifications)
