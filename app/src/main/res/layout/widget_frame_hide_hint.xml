@@ -28,20 +28,29 @@
 
         <LinearLayout
             android:orientation="vertical"
-            android:layout_width="0dp"
-            android:layout_weight="1"
+            android:layout_width="match_parent"
             android:gravity="center_vertical"
             android:layout_height="match_parent">
 
             <TextView
                 android:id="@+id/hide_hint_text"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="0dp"
+                android:layout_weight="1"
                 android:text="@string/hide_gesture_hint"
                 android:scrollbars="vertical"
                 android:textSize="18sp"
                 tools:textSize="28sp"
                 tools:ignore="NestedWeights"
+                />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/ok_for_hide_hint"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="end"
+                android:text="@android:string/ok"
+                style="@style/Widget.MaterialComponents.Button.TextButton.Dialog"
                 />
 
         </LinearLayout>

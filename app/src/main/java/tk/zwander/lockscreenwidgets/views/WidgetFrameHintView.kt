@@ -40,6 +40,9 @@ class WidgetFrameHideHintView(context: Context, attrs: AttributeSet) : WidgetFra
         super.onFinishInflate()
 
         hide_hint_text.movementMethod = ScrollingMovementMethod()
+        ok_for_hide_hint.setOnClickListener {
+            close()
+        }
     }
 
     override fun close() {
