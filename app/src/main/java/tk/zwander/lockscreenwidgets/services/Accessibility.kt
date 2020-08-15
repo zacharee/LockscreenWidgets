@@ -271,7 +271,7 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
                 val appWindow = findTopAppWindow(windows)
 
                 val sysUiNodes = ArrayList<AccessibilityNodeInfo>()
-                sysUiWindows.mapNotNull { it?.root }.forEach {
+                sysUiWindows.mapNotNull { it?.safeRoot }.forEach {
                     addAllNodesToList(it, sysUiNodes)
                 }
 
