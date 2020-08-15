@@ -64,6 +64,9 @@ val AccessibilityWindowInfo.safeRoot: AccessibilityNodeInfo?
         root
     } catch (e: NullPointerException) {
         null
+    } catch (e: Exception) {
+        Log.e("LockscreenWidgets", "Error getting window root", e)
+        null
     }
 
 //Take a DP value and return its representation in pixels.
