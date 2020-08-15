@@ -14,6 +14,7 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import kotlinx.android.synthetic.main.widget_frame.view.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import tk.zwander.lockscreenwidgets.App
 import tk.zwander.lockscreenwidgets.activities.DismissOrUnlockActivity
@@ -390,6 +391,7 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
     override fun onDestroy() {
         super.onDestroy()
 
+        cancel()
         prefManager.prefs.unregisterOnSharedPreferenceChangeListener(this)
         notificationCountListener.unregister(this)
         unregisterReceiver(screenStateReceiver)
