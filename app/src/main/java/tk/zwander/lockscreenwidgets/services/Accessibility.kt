@@ -543,7 +543,13 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
     ) {
         list.add(parentNode)
         for (i in 0 until parentNode.childCount) {
-            val child = parentNode.getChild(i)
+            val child = try {
+                parentNode.getChild(i)
+            } catch (e: SecurityException) {
+                //Sometimes a SecurityException gets thrown here (on Huawei devices)
+                //so just return null if it happens
+                null
+            }
             if (child != null) {
                 if (child.childCount > 0) {
                     addAllNodesToList(child, list)
