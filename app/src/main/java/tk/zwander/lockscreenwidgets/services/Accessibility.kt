@@ -350,21 +350,25 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
                     //IDs, and OEMs change them. "notification_panel" and "left_button" are largely unchanged,
                     //although this method isn't perfect.
                     if (prefManager.hideOnSecurityPage) {
-                        onMainLockscreen = sysUiNodes.find {
-                            (it.viewIdResourceName == "com.android.systemui:id/notification_panel" && it.isVisibleToUser)
-                                    || (it.viewIdResourceName == "com.android.systemui:id/left_button" && it.isVisibleToUser)
-                        } != null
+                        onMainLockscreen = sysUiNodes.any {
+                            it.hasVisibleIds(
+                                "com.android.systemui:id/notification_panel",
+                                "com.android.systemui:id/left_button"
+                            )
+                        }
                     }
 
                     if (prefManager.hideOnNotificationShade) {
                         //Used for "Hide When Notification Shade Shown" so we know when it's actually expanded.
                         //Some devices don't even have left shortcuts, so also check for keyguard_indication_area.
                         //Just like the showingSecurityInput check, this is probably unreliable for some devices.
-                        showingNotificationsPanel = sysUiNodes.find {
-                            (it.viewIdResourceName == "com.android.systemui:id/quick_settings_panel" && it.isVisibleToUser)
-                                    || (it.viewIdResourceName == "com.android.systemui:id/settings_button" && it.isVisibleToUser)
-                                    || (it.viewIdResourceName == "com.android.systemui:id/tile_label" && it.isVisibleToUser)
-                        } != null
+                        showingNotificationsPanel = sysUiNodes.any {
+                            it.hasVisibleIds(
+                                "com.android.systemui:id/quick_settings_panel",
+                                "com.android.systemui:id/settings_button",
+                                "com.android.systemui:id/tile_label"
+                            )
+                        }
                     }
                 } else {
                     //If we're not on the lock screen, whether or not Screen-Off Memo is showing
@@ -377,9 +381,9 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
                 //ID, which is unique to One UI (it's the three-dot button), and is only
                 //visible when the NC is fully expanded.
                 if (prefManager.showInNotificationCenter) {
-                    notificationsPanelFullyExpanded = sysUiNodes.find {
-                        it.viewIdResourceName == "com.android.systemui:id/more_button" && it.isVisibleToUser
-                    } != null
+                    notificationsPanelFullyExpanded = sysUiNodes.any {
+                        it.hasVisibleIds("com.android.systemui:id/more_button")
+                    }
                 }
 
                 //Check to see if any of the user-specified IDs are present.
@@ -387,11 +391,12 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
                 val presentIds = prefManager.presentIds
                 if (presentIds.isNotEmpty()) {
                     hideForPresentIds = sysUiNodes.any {
-                        presentIds.contains(it.viewIdResourceName) && it.isVisibleToUser }
+                        it.hasVisibleIds(presentIds)
+                    }
                 }
 
-                //Check to see if any of the user-specified IDs aren't present.
-                //If any aren't, the frame will be hidden.
+                //Check to see if any of the user-specified IDs aren't present
+                //(or are present but not visible). If any aren't, the frame will be hidden.
                 val nonPresentIds = prefManager.nonPresentIds
                 if (nonPresentIds.isNotEmpty()) {
                     hideForNonPresentIds = sysUiNodes.none {
@@ -399,6 +404,7 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
                             || sysUiNodes.any { nonPresentIds.contains(it.viewIdResourceName) && !it.isVisibleToUser }
                 }
 
+                //Recycle all windows and nodes.
                 sysUiNodes.forEach { it.recycle() }
                 sysUiWindows.forEach {
                     it.first?.recycle()

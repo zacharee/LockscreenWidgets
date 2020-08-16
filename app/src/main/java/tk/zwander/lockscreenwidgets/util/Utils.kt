@@ -227,3 +227,11 @@ fun Int.makeEven(): Int {
         else -> this + if (this < 0) -1 else 1
     }
 }
+
+fun AccessibilityNodeInfo.hasVisibleIds(vararg ids: String): Boolean {
+    return ids.contains(viewIdResourceName) && isVisibleToUser
+}
+
+fun AccessibilityNodeInfo.hasVisibleIds(ids: Iterable<String>): Boolean {
+    return ids.contains(viewIdResourceName) && isVisibleToUser
+}
