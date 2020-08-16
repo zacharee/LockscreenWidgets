@@ -323,7 +323,9 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
                     //However, it's not an Application-type window for some reason, so it won't hide with the
                     //currentAppLayer check. Explicitly check for its existence here.
                     isOnScreenOffMemo = windows.any { win ->
-                        win.safeRoot?.packageName == "com.samsung.android.app.notes"
+                        win.safeRoot.run {
+                            packageName == "com.samsung.android.app.notes".also { this?.recycle() }
+                        }
                     }
 
                     //Generate "layer" values for the System UI window and for the topmost app window, if
@@ -337,7 +339,9 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
                     currentSysUiLayer = if (sysUiIndex != -1) windows.size - sysUiIndex else sysUiIndex
 
                     //This is mostly a debug value to see which app LSWidg thinks is on top.
-                    currentAppPackage = appWindow?.safeRoot?.packageName?.toString()
+                    currentAppPackage = appWindow?.safeRoot?.run {
+                        packageName?.toString().also { recycle() }
+                    }
 
                     //If the user has enabled the option to hide the frame on security (pin, pattern, password)
                     //input, we need to check if they're on the main lock screen. This is more reliable than
@@ -395,6 +399,8 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
                 }
 
                 sysUiNodes.forEach { it.recycle() }
+                sysUiWindows.forEach { it?.recycle() }
+                appWindow?.recycle()
             }
 
             //Check whether the frame can show.
