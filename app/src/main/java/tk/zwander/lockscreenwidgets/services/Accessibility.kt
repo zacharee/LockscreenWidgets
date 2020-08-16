@@ -287,12 +287,13 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
                 //Flatted the nodes/Views in the System UI windows into
                 //a single list for easier handling.
                 val sysUiNodes = ArrayList<AccessibilityNodeInfo>()
-                sysUiWindows.mapNotNull { it?.safeRoot }.forEach {
+                sysUiWindows.mapNotNull { it.second }.forEach {
                     addAllNodesToList(it, sysUiNodes)
                 }
 
                 //Get all View IDs from successfully-flattened System UI nodes.
-                val items = sysUiNodes.filter { it.isVisibleToUser }.mapNotNull { it.viewIdResourceName }
+                val items = sysUiNodes.filter { it.isVisibleToUser }
+                    .mapNotNull { it.viewIdResourceName }
 
                 //Update any ID list widgets on the new IDs
                 IDWidgetFactory.sList.apply {
@@ -317,7 +318,7 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
                     //Find index of the topmost application window in the set of all windows.
                     val appIndex = windows.indexOf(appWindow)
                     //Find the *least* index of the System UI windows in the set of all windows.
-                    val sysUiIndex = sysUiWindows.map { windows.indexOf(it) }.filter { it > -1 }.min() ?: -1
+                    val sysUiIndex = sysUiWindows.map { windows.indexOf(it.first) }.filter { it > -1 }.min() ?: -1
 
                     //Samsung's Screen-Off Memo is really just a normal Activity that shows over the lock screen.
                     //However, it's not an Application-type window for some reason, so it won't hide with the
@@ -399,7 +400,9 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
                 }
 
                 sysUiNodes.forEach { it.recycle() }
-                sysUiWindows.forEach { it?.recycle() }
+                sysUiWindows.forEach {
+                    it.first?.recycle()
+                }
                 appWindow?.recycle()
             }
 
@@ -557,11 +560,17 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
      *
      * @return the System UI window if it exists onscreen
      */
-    private fun findSystemUiWindows(windows: List<AccessibilityWindowInfo> = this.windows): List<AccessibilityWindowInfo?> {
-        return windows.filter { it.type == AccessibilityWindowInfo.TYPE_SYSTEM && it.safeRoot.run {
-                this?.packageName == "com.android.systemui".also { this?.recycle() }
+    private fun findSystemUiWindows(windows: List<AccessibilityWindowInfo> = this.windows): List<Pair<AccessibilityWindowInfo?, AccessibilityNodeInfo?>> {
+        val list = ArrayList<Pair<AccessibilityWindowInfo?, AccessibilityNodeInfo?>>()
+
+        windows.forEach {
+            val safeRoot = it.safeRoot
+            if (it.type == AccessibilityWindowInfo.TYPE_SYSTEM && safeRoot?.packageName == "com.android.systemui") {
+                list.add(it to safeRoot)
             }
         }
+
+        return list
     }
 
     /**
