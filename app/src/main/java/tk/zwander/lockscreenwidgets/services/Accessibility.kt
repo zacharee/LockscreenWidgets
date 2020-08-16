@@ -240,20 +240,30 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
     }
 
     override fun onAccessibilityEvent(event: AccessibilityEvent) {
+        //Since we're launching our logic on the main Thread, it's possible
+        //that [event] will be reused by Android, causing some crash issues.
+        //Make a copy that is recycled later.
         val eventCopy = AccessibilityEvent.obtain(event)
 
         launch {
             //This block here runs even when unlocked, but it only takes a millisecond at most,
             //so it shouldn't be noticeable to the user. We use this to check the current keyguard
             //state and, if applicable, send the keyguard dismissal broadcast.
+
+            //Check if the screen is on.
             val isScreenOn = power.isInteractive
             if (this@Accessibility.isScreenOn != isScreenOn) {
+                //Make sure to turn off temp hide if it was on.
                 isTempHide = false
                 this@Accessibility.isScreenOn = isScreenOn
             }
+
+            //Check if the lock screen is shown.
             val isOnKeyguard = kgm.isKeyguardLocked
             if (isOnKeyguard != wasOnKeyguard) {
                 wasOnKeyguard = isOnKeyguard
+                //Update the keyguard dismissal Activity that the lock screen
+                //has been dismissed.
                 if (!isOnKeyguard) {
                     LocalBroadcastManager.getInstance(this@Accessibility)
                         .sendBroadcast(Intent(ACTION_LOCKSCREEN_DISMISSED))
@@ -267,15 +277,21 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
             //The below block can (very rarely) take over half a second to execute, so only run it
             //if we actually need to (i.e. on the lock screen and screen is on).
             if ((wasOnKeyguard || prefManager.showInNotificationCenter) && isScreenOn) {
+                //Retrieve the current window set.
                 val windows = windows
+                //Get all windows with the System UI package name.
                 val sysUiWindows = findSystemUiWindows(windows)
+                //Get the topmost application window.
                 val appWindow = findTopAppWindow(windows)
 
+                //Flatted the nodes/Views in the System UI windows into
+                //a single list for easier handling.
                 val sysUiNodes = ArrayList<AccessibilityNodeInfo>()
                 sysUiWindows.mapNotNull { it?.safeRoot }.forEach {
                     addAllNodesToList(it, sysUiNodes)
                 }
 
+                //Get all View IDs from successfully-flattened System UI nodes.
                 val items = sysUiNodes.filter { it.isVisibleToUser }.mapNotNull { it.viewIdResourceName }
 
                 //Update any ID list widgets on the new IDs
@@ -295,22 +311,39 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
                     delegate.view.frame.setNewDebugIdItems(items)
                 }
 
+                //The logic in this block only needs to run when on the lock screen.
+                //Put it in an if-check to help performance.
                 if (isOnKeyguard) {
+                    //Find index of the topmost application window in the set of all windows.
                     val appIndex = windows.indexOf(appWindow)
+                    //Find the *least* index of the System UI windows in the set of all windows.
                     val sysUiIndex = sysUiWindows.map { windows.indexOf(it) }.filter { it > -1 }.min() ?: -1
 
-                    isOnScreenOffMemo = windows.any { it.safeRoot?.packageName == "com.samsung.android.app.notes" }
+                    //Samsung's Screen-Off Memo is really just a normal Activity that shows over the lock screen.
+                    //However, it's not an Application-type window for some reason, so it won't hide with the
+                    //currentAppLayer check. Explicitly check for its existence here.
+                    isOnScreenOffMemo = windows.any { win ->
+                        win.safeRoot?.packageName == "com.samsung.android.app.notes"
+                    }
 
                     //Generate "layer" values for the System UI window and for the topmost app window, if
                     //it exists.
-                    //currentAppLayer *should* be -1 even if there's an app open, since getWindows()
-                    //is only meant to return windows that can actually be interacted with. The only
-                    //time it should be anything else (usually 1) is if an app is displaying above
-                    //the keyguard, such as the incoming call screen or the camera.
+                    //currentAppLayer *should* be -1 even if there's an app open in the background,
+                    //since getWindows() is only meant to return windows that can actually be
+                    //interacted with. The only time it should be anything else (usually 1) is
+                    //if an app is displaying above the keyguard, such as the incoming call
+                    //screen or the camera.
                     currentAppLayer = if (appIndex != -1) windows.size - appIndex else appIndex
-                    currentAppPackage = appWindow?.safeRoot?.packageName?.toString()
                     currentSysUiLayer = if (sysUiIndex != -1) windows.size - sysUiIndex else sysUiIndex
 
+                    //This is mostly a debug value to see which app LSWidg thinks is on top.
+                    currentAppPackage = appWindow?.safeRoot?.packageName?.toString()
+
+                    //If the user has enabled the option to hide the frame on security (pin, pattern, password)
+                    //input, we need to check if they're on the main lock screen. This is more reliable than
+                    //checking for the existence of a security input, since there are a lot of different possible
+                    //IDs, and OEMs change them. "notification_panel" and "left_button" are largely unchanged,
+                    //although this method isn't perfect.
                     if (prefManager.hideOnSecurityPage) {
                         onMainLockscreen = sysUiNodes.find {
                             (it.viewIdResourceName == "com.android.systemui:id/notification_panel" && it.isVisibleToUser)
@@ -329,21 +362,31 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
                         } != null
                     }
                 } else {
+                    //If we're not on the lock screen, whether or not Screen-Off Memo is showing
+                    //doesn't matter.
                     isOnScreenOffMemo = false
                 }
 
+                //If the option to show when the NC is fully expanded is enabled,
+                //check if the frame can actually show. This checks to the "more_button"
+                //ID, which is unique to One UI (it's the three-dot button), and is only
+                //visible when the NC is fully expanded.
                 if (prefManager.showInNotificationCenter) {
                     notificationsPanelFullyExpanded = sysUiNodes.find {
                         it.viewIdResourceName == "com.android.systemui:id/more_button" && it.isVisibleToUser
                     } != null
                 }
 
+                //Check to see if any of the user-specified IDs are present.
+                //If any are, the frame will be hidden.
                 val presentIds = prefManager.presentIds
                 if (presentIds.isNotEmpty()) {
                     hideForPresentIds = sysUiNodes.any {
                         presentIds.contains(it.viewIdResourceName) && it.isVisibleToUser }
                 }
 
+                //Check to see if any of the user-specified IDs aren't present.
+                //If any aren't, the frame will be hidden.
                 val nonPresentIds = prefManager.nonPresentIds
                 if (nonPresentIds.isNotEmpty()) {
                     hideForNonPresentIds = sysUiNodes.none {
@@ -354,6 +397,7 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
                 sysUiNodes.forEach { it.recycle() }
             }
 
+            //Check whether the frame can show.
             if (canShow()) {
                 delegate.updateAccessibilityPass()
                 addOverlay()
@@ -362,6 +406,7 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
                 delegate.updateAccessibilityPass()
             }
 
+            //Make sure to recycle the copy of the event.
             eventCopy.recycle()
         }
     }
