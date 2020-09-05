@@ -71,6 +71,7 @@ dependencies {
 
     //You'll need to replace this implementation here with a non-local one.
     //You can get the instructions from https://jitpack.io/#zacharee/SpannedGridLayoutManager.
+    //Use the latest commit tag NOT the latest release.
     //Make sure to remove this project from settings.gradle as well.
     implementation project(':spannedlm')
 
