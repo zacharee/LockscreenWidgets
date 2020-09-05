@@ -615,6 +615,12 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
                 //Sometimes a SecurityException gets thrown here (on Huawei devices)
                 //so just return null if it happens
                 null
+            } catch (e: NullPointerException) {
+                //Sometimes a NullPointerException is thrown here with this error:
+                //"Attempt to read from field 'com.android.server.appwidget.AppWidgetServiceImpl$ProviderId
+                //com.android.server.appwidget.AppWidgetServiceImpl$Provider.id' on a null object reference"
+                //so just return null if that happens.
+                null
             }
             if (child != null) {
                 if (child.childCount > 0) {
