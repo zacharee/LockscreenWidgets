@@ -319,7 +319,9 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
                     //Find index of the topmost application window in the set of all windows.
                     val appIndex = windows.indexOf(appWindow)
                     //Find the *least* index of the System UI windows in the set of all windows.
-                    val sysUiIndex = sysUiWindows.map { windows.indexOf(it.first) }.filter { it > -1 }.min() ?: -1
+                    val sysUiIndex = sysUiWindows.map { windows.indexOf(it.first) }.filter { it > -1 }
+                        .minOrNull()
+                        ?: -1
 
                     //Samsung's Screen-Off Memo is really just a normal Activity that shows over the lock screen.
                     //However, it's not an Application-type window for some reason, so it won't hide with the
