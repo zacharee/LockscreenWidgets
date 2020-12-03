@@ -137,6 +137,7 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
     private var hideForPresentIds = false
     private var hideForNonPresentIds = false
     private var isOnScreenOffMemo = false
+    private var isOnFaceWidgets = false
 
     private var notificationsPanelFullyExpanded: Boolean
         get() = delegate.notificationsPanelFullyExpanded
@@ -325,7 +326,7 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
                     //currentAppLayer check. Explicitly check for its existence here.
                     isOnScreenOffMemo = windows.any { win ->
                         win.safeRoot.run {
-                            packageName == "com.samsung.android.app.notes".also { this?.recycle() }
+                            this?.packageName == "com.samsung.android.app.notes".also { this?.recycle() }
                         }
                     }
 
@@ -368,6 +369,14 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
                                 "com.android.systemui:id/settings_button",
                                 "com.android.systemui:id/tile_label"
                             )
+                        }
+                    }
+
+                    if (prefManager.hideOnFaceWidgets) {
+                        isOnFaceWidgets = windows.any {
+                            it.safeRoot.run {
+                                this?.packageName == "com.samsung.android.app.aodservice".also { this?.recycle() }
+                            }
                         }
                     }
                 } else {
@@ -507,6 +516,7 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
      * - [isScreenOn] is true (i.e. the display is properly on: not in Doze or on the AOD)
      * - [isTempHide] is false
      * - [PrefManager.showOnMainLockScreen] is true OR [PrefManager.showInNotificationCenter] is false
+     * - [PrefManager.hideOnFaceWidgets] is false OR [isOnFaceWidgets] is false
      * - [currentAppLayer] is less than 0 (i.e. doesn't exist)
      * - [isOnScreenOffMemo] is false
      * - [onMainLockscreen] is true OR [showingNotificationsPanel] is true OR [PrefManager.hideOnSecurityPage] is false
@@ -527,6 +537,7 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
                         && isScreenOn
                         && !isTempHide
                         && (prefManager.showOnMainLockScreen || !prefManager.showInNotificationCenter)
+                        && (!prefManager.hideOnFaceWidgets || !isOnFaceWidgets)
                         && currentAppLayer < 0
                         && !isOnScreenOffMemo
                         && (onMainLockscreen || showingNotificationsPanel || !prefManager.hideOnSecurityPage)
@@ -548,6 +559,7 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
                                 "currentAppLayer: $currentAppLayer, " +
                                 "currentAppPackage: $currentAppPackage, " +
                                 "onMainLockscreen: $onMainLockscreen, " +
+                                "isOnFaceWidgets: $isOnFaceWidgets, " +
                                 "showingNotificationsPanel: $showingNotificationsPanel, " +
                                 "notificationsPanelFullyExpanded: $notificationsPanelFullyExpanded, " +
                                 "showOnMainLockScreen: ${prefManager.showOnMainLockScreen}" +
@@ -571,8 +583,10 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
 
         windows.forEach {
             val safeRoot = it.safeRoot
-            if (it.type == AccessibilityWindowInfo.TYPE_SYSTEM && safeRoot?.packageName == "com.android.systemui") {
+            if (safeRoot?.packageName == "com.android.systemui") {
                 list.add(it to safeRoot)
+            } else {
+                safeRoot?.recycle()
             }
         }
 

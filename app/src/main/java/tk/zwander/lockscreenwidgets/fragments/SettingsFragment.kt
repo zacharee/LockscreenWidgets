@@ -1,6 +1,7 @@
 package tk.zwander.lockscreenwidgets.fragments
 
 import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
@@ -40,6 +41,12 @@ class SettingsFragment : PreferenceFragmentCompat() {
 
         findPreference<SwitchPreference>(PrefManager.KEY_SHOW_ON_MAIN_LOCK_SCREEN)?.apply {
             if (!ncCondition) {
+                preferenceScreen.removePreferenceRecursively(key)
+            }
+        }
+
+        findPreference<SwitchPreference>(PrefManager.KEY_HIDE_ON_FACEWIDGETS)?.apply {
+            if (!requireContext().isOneUI || Build.VERSION.SDK_INT <= Build.VERSION_CODES.Q) {
                 preferenceScreen.removePreferenceRecursively(key)
             }
         }

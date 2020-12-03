@@ -94,6 +94,13 @@
             android:icon="@drawable/is_baseline_password_24"
             />
 
+        <SwitchPreference
+            android:title="@string/settings_screen_hide_on_facewidgets"
+            android:summary="@string/settings_screen_hide_on_facewidgets_desc"
+            android:key="hide_on_facewidgets"
+            android:icon="@null"
+            />
+
         <Preference
             android:title="@string/settings_screen_present_ids"
             android:summary="@string/settings_screen_present_ids_desc"
