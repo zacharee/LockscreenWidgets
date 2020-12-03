@@ -93,7 +93,7 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
     }
     val wallpaper = getSystemService(Context.WALLPAPER_SERVICE) as WallpaperManager
     val wm = getSystemService(Context.WINDOW_SERVICE) as WindowManager
-    val widgetManager = AppWidgetManager.getInstance(this)
+    val widgetManager = AppWidgetManager.getInstance(this)!!
     val widgetHost = WidgetHostCompat.getInstance(this, 1003) {
         Handler(Looper.getMainLooper()).postDelayed({
             val intent = Intent(this, DismissOrUnlockActivity::class.java)
@@ -103,7 +103,7 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
     }
     //The actual frame View
     val view = LayoutInflater.from(ContextThemeWrapper(this, R.style.AppTheme))
-        .inflate(R.layout.widget_frame, null)
+        .inflate(R.layout.widget_frame, null)!!
     val gridLayoutManager = SpannedLayoutManager()
     val adapter = WidgetFrameAdapter(widgetManager, widgetHost, params) { adapter, item ->
         (view.remove_widget_confirmation as RemoveWidgetConfirmationView).apply {

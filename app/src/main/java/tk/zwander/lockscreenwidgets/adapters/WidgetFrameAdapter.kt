@@ -144,14 +144,14 @@ class WidgetFrameAdapter(
      */
     @SuppressLint("ClickableViewAccessibility")
     inner class WidgetVH(view: View) : RecyclerView.ViewHolder(view) {
-        var editingInterfaceShown: Boolean
+        private var editingInterfaceShown: Boolean
             get() = itemView.widget_edit_wrapper.isVisible
             set(value) {
                 itemView.widget_edit_wrapper.isVisible = value
                 showHorizontalSizers = value && itemView.context.prefManager.frameColCount > 1
                 showVerticalSizers = value && itemView.context.prefManager.frameRowCount > 1
             }
-        var showHorizontalSizers: Boolean
+        private var showHorizontalSizers: Boolean
             get() = itemView.run { widget_left_dragger.isVisible && widget_right_dragger.isVisible }
             set(value) {
                 itemView.apply {
@@ -159,7 +159,7 @@ class WidgetFrameAdapter(
                     widget_right_dragger.isVisible = value
                 }
             }
-        var showVerticalSizers: Boolean
+        private var showVerticalSizers: Boolean
             get() = itemView.run { widget_top_dragger.isVisible && widget_bottom_dragger.isVisible }
             set(value) {
                 itemView.apply {
@@ -168,10 +168,10 @@ class WidgetFrameAdapter(
                 }
             }
 
-        val currentData: WidgetData
+        private val currentData: WidgetData
             get() = widgets[adapterPosition]
 
-        val currentSizeInfo: WidgetSizeData
+        private val currentSizeInfo: WidgetSizeData
             get() = itemView.context.prefManager.widgetSizes[currentData.id]
                 ?: WidgetSizeData(currentData.id, 1, 1)
 
@@ -277,7 +277,7 @@ class WidgetFrameAdapter(
             }
         }
 
-        fun persistNewSizeInfo(info: WidgetSizeData) {
+        private fun persistNewSizeInfo(info: WidgetSizeData) {
             itemView.context.prefManager.apply {
                 widgetSizes = widgetSizes.apply {
                     this[info.widgetId] = info

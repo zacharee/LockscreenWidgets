@@ -6,7 +6,6 @@ import android.content.Intent
 import android.graphics.*
 import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuItem
@@ -23,7 +22,6 @@ import kotlinx.android.synthetic.main.add_id_dialog.view.*
 import tk.zwander.lockscreenwidgets.R
 import tk.zwander.lockscreenwidgets.adapters.HideForIDsAdapter
 import tk.zwander.lockscreenwidgets.util.prefManager
-import java.lang.StringBuilder
 import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.collections.HashSet

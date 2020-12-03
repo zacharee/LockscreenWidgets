@@ -6,11 +6,11 @@ import android.net.Uri
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.content.res.ResourcesCompat
 import androidx.core.graphics.drawable.toBitmap
 import androidx.recyclerview.widget.AsyncListDiffer
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
-import androidx.recyclerview.widget.SortedList
 import com.squareup.picasso.Callback
 import com.squareup.picasso.Picasso
 import com.squareup.picasso.Request
@@ -19,14 +19,13 @@ import kotlinx.android.synthetic.main.widget_item.view.*
 import tk.zwander.lockscreenwidgets.R
 import tk.zwander.lockscreenwidgets.activities.AddWidgetActivity
 import tk.zwander.lockscreenwidgets.data.WidgetListInfo
-import tk.zwander.lockscreenwidgets.util.matchesFilter
 
 /**
  * Adapter to host widget previews in [AddWidgetActivity] for a specific app.
  */
 class AddWidgetAdapter(private val picasso: Picasso, private val selectionCallback: (provider: WidgetListInfo) -> Unit) :
     RecyclerView.Adapter<AddWidgetAdapter.WidgetVH>() {
-    private val widgets = AsyncListDiffer<WidgetListInfo>(this, object : DiffUtil.ItemCallback<WidgetListInfo>() {
+    private val widgets = AsyncListDiffer(this, object : DiffUtil.ItemCallback<WidgetListInfo>() {
         override fun areContentsTheSame(oldItem: WidgetListInfo, newItem: WidgetListInfo): Boolean {
             return false
         }
@@ -106,7 +105,7 @@ class AddWidgetAdapter(private val picasso: Picasso, private val selectionCallba
             return (data.uri != null && data.uri.scheme == SCHEME)
         }
 
-        override fun load(request: Request, networkPolicy: Int): Result? {
+        override fun load(request: Request, networkPolicy: Int): Result {
             val pName = request.uri.schemeSpecificPart
 
             val img = pm.getApplicationIcon(pName).mutate().toBitmap()
@@ -133,13 +132,13 @@ class AddWidgetAdapter(private val picasso: Picasso, private val selectionCallba
             return (data.uri != null && data.uri.scheme == SCHEME)
         }
 
-        override fun load(request: Request, networkPolicy: Int): Result? {
+        override fun load(request: Request, networkPolicy: Int): Result {
             val pathSegments = request.uri.pathSegments
 
             val pName = request.uri.host
             val id = pathSegments[0].toInt()
 
-            val img = pm.getResourcesForApplication(pName).getDrawable(id)
+            val img = pm.getResourcesForApplication(pName).run { ResourcesCompat.getDrawable(this, id, newTheme()) }!!
                 //Create a Bitmap copy since Android recycles the one from `toBitmap()`
                 //if it's a BitmapDrawable
                 .mutate().toBitmap().run { copy(config, false) }

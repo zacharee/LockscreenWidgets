@@ -5,12 +5,9 @@ import android.appwidget.AppWidgetProvider
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
-import android.view.View
 import android.widget.RemoteViews
-import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import tk.zwander.lockscreenwidgets.R
 import tk.zwander.lockscreenwidgets.services.IDWidgetService
-import tk.zwander.lockscreenwidgets.util.prefManager
 
 /**
  * A widget-form alternative to the debug ID overlay. This is a keyguard-only widget that can be added

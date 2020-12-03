@@ -4,7 +4,6 @@ import android.annotation.IntegerRes
 import android.content.Context
 import android.content.ContextWrapper
 import android.graphics.Color
-import androidx.collection.ArraySet
 import androidx.core.content.edit
 import androidx.preference.PreferenceManager
 import com.google.gson.GsonBuilder
@@ -69,9 +68,9 @@ class PrefManager private constructor(context: Context) : ContextWrapper(context
     }
 
     //The actual SharedPreferences implementation
-    val prefs = PreferenceManager.getDefaultSharedPreferences(this)
+    val prefs = PreferenceManager.getDefaultSharedPreferences(this)!!
     val gson = GsonBuilder()
-        .create()
+        .create()!!
 
     //The widgets currently added to the widget frame
     var currentWidgets: LinkedHashSet<WidgetData>
@@ -396,11 +395,11 @@ class PrefManager private constructor(context: Context) : ContextWrapper(context
         else posY = y
     }
 
-    fun getString(key: String, def: String? = null) = prefs.getString(key, def)
-    fun getFloat(key: String, def: Float) = prefs.getFloat(key, def)
-    fun getInt(key: String, def: Int) = prefs.getInt(key, def)
-    fun getBoolean(key: String, def: Boolean) = prefs.getBoolean(key, def)
-    fun getStringSet(key: String, def: Set<String>) = prefs.getStringSet(key, def)
+    fun getString(key: String, def: String? = null): String? = prefs.getString(key, def)
+    fun getFloat(key: String, def: Float): Float = prefs.getFloat(key, def)
+    fun getInt(key: String, def: Int): Int = prefs.getInt(key, def)
+    fun getBoolean(key: String, def: Boolean): Boolean = prefs.getBoolean(key, def)
+    fun getStringSet(key: String, def: Set<String>): Set<String> = prefs.getStringSet(key, def)
 
     fun putString(key: String, value: String?) = prefs.edit { putString(key, value) }
     fun putFloat(key: String, value: Float) = prefs.edit { putFloat(key, value) }

@@ -22,7 +22,7 @@ class NCTile : TileService() {
         updateState()
     }
 
-    fun updateState() {
+    private fun updateState() {
         qsTile?.apply {
             state = (if (prefManager.showInNotificationCenter) Tile.STATE_ACTIVE
                     else Tile.STATE_INACTIVE)

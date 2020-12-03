@@ -20,7 +20,7 @@ class EnableDisableTile : TileService() {
         updateState()
     }
 
-    fun updateState() {
+    private fun updateState() {
         qsTile?.apply {
             state = (if (prefManager.widgetFrameEnabled) Tile.STATE_ACTIVE
                     else Tile.STATE_INACTIVE)

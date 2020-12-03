@@ -4,7 +4,6 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.view.MotionEvent
 import android.view.View
-import tk.zwander.lockscreenwidgets.util.dpAsPx
 import tk.zwander.lockscreenwidgets.util.widgetBlockHeight
 import tk.zwander.lockscreenwidgets.util.widgetBlockWidth
 import kotlin.math.absoluteValue
@@ -23,11 +22,11 @@ class WidgetResizeListener(private val context: Context, private val which: Whic
         BOTTOM
     }
 
-    var origX = 0f
-    var origY = 0f
+    private var origX = 0f
+    private var origY = 0f
 
-    var prevX = 0f
-    var prevY = 0f
+    private var prevX = 0f
+    private var prevY = 0f
 
     //The threshold for a drag event.
     //Either the standard widget width or
@@ -35,7 +34,7 @@ class WidgetResizeListener(private val context: Context, private val which: Whic
     private val _thresholdPx: Int
         get() = context.run { if (which == Which.LEFT || which == Which.RIGHT) widgetBlockWidth else widgetBlockHeight }
 
-    var thresholdPx: Int = _thresholdPx
+    private var thresholdPx: Int = _thresholdPx
 
     @SuppressLint("ClickableViewAccessibility")
     override fun onTouch(v: View?, event: MotionEvent?): Boolean {
