@@ -98,14 +98,14 @@
             android:title="@string/settings_screen_hide_on_facewidgets"
             android:summary="@string/settings_screen_hide_on_facewidgets_desc"
             android:key="hide_on_facewidgets"
-            android:icon="@null"
+            android:icon="@drawable/ic_baseline_widgets_24"
             />
 
         <SwitchPreference
             android:title="@string/settings_screen_hide_in_landscape"
             android:summary="@string/settings_screen_hide_in_landscape_desc"
             android:key="hide_in_landscape"
-            android:icon="@null"
+            android:icon="@drawable/ic_baseline_crop_landscape_24"
             />
 
         <Preference
