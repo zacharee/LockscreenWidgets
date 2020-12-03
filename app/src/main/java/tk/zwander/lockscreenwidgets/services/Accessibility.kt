@@ -138,6 +138,7 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
     private var hideForNonPresentIds = false
     private var isOnScreenOffMemo = false
     private var isOnFaceWidgets = false
+    private var screenOrientation = Surface.ROTATION_0
 
     private var notificationsPanelFullyExpanded: Boolean
         get() = delegate.notificationsPanelFullyExpanded
@@ -270,6 +271,8 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
                         .sendBroadcast(Intent(ACTION_LOCKSCREEN_DISMISSED))
                 }
             }
+
+            screenOrientation = wm.defaultDisplay.rotation
 
             if (isDebug) {
                 Log.e(App.DEBUG_LOG_TAG, "Accessibility event: $eventCopy, isScreenOn: ${isScreenOn}, wasOnKeyguard: $wasOnKeyguard")
@@ -511,6 +514,7 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
      * - [isTempHide] is false
      * - [notificationsPanelFullyExpanded] is true AND [PrefManager.showInNotificationCenter] is true
      * - [PrefManager.widgetFrameEnabled] is true
+     * - [PrefManager.hideInLandscape] is false OR [screenOrientation] represents a portrait rotation
      * =======
      * OR
      * =======
@@ -526,6 +530,7 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
      * - [notificationCount] is 0 (i.e. no notifications shown on lock screen, not necessarily no notifications at all) OR [PrefManager.hideOnNotifications] is false
      * - [hideForPresentIds] is false OR [PrefManager.presentIds] is empty
      * - [hideForNonPresentIds] is false OR [PrefManager.nonPresentIds] is empty
+     * - [PrefManager.hideInLandscape] is false OR [screenOrientation] represents a portrait rotation
      * - [PrefManager.widgetFrameEnabled] is true (i.e. the widget frame is actually enabled)
      * =======
      */
@@ -535,6 +540,7 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
                         && !isTempHide
                         && (notificationsPanelFullyExpanded && prefManager.showInNotificationCenter)
                         && prefManager.widgetFrameEnabled
+                        && (!prefManager.hideInLandscape || screenOrientation == Surface.ROTATION_0 || screenOrientation == Surface.ROTATION_180)
                 ) || (wasOnKeyguard
                         && isScreenOn
                         && !isTempHide
@@ -547,6 +553,7 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
                         && (notificationCount == 0 || !prefManager.hideOnNotifications)
                         && (!hideForPresentIds || prefManager.presentIds.isEmpty())
                         && (!hideForNonPresentIds || prefManager.nonPresentIds.isEmpty())
+                        && (!prefManager.hideInLandscape || screenOrientation == Surface.ROTATION_0 || screenOrientation == Surface.ROTATION_180)
                         && prefManager.widgetFrameEnabled
                         )
                 ).also {
@@ -568,6 +575,7 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
                                 "notificationCount: $notificationCount, " +
                                 "hideForPresentIds: $hideForPresentIds, " +
                                 "hideForNonPresentIds: $hideForNonPresentIds, " +
+                                "screenRotation: $screenOrientation, " +
                                 "widgetEnabled: ${prefManager.widgetFrameEnabled}\n\n",
                         Exception()
                     )

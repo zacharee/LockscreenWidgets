@@ -52,6 +52,7 @@ class PrefManager private constructor(context: Context) : ContextWrapper(context
         const val KEY_TOUCH_PROTECTION = "touch_protection"
         const val KEY_REQUEST_UNLOCK = "request_unlock"
         const val KEY_HIDE_ON_FACEWIDGETS = "hide_on_facewidgets"
+        const val KEY_HIDE_IN_LANDSCAPE = "hide_in_landscape"
 
         const val VALUE_PAGE_INDICATOR_BEHAVIOR_HIDDEN = 0
         const val VALUE_PAGE_INDICATOR_BEHAVIOR_AUTO_HIDE = 1
@@ -341,10 +342,18 @@ class PrefManager private constructor(context: Context) : ContextWrapper(context
         }
 
     //Whether to hide the frame when Samsung's FaceWidgets screen is showing.
+    //(One UI 3.0+)
     var hideOnFaceWidgets: Boolean
         get() = getBoolean(KEY_HIDE_ON_FACEWIDGETS, false)
         set(value) {
             putBoolean(KEY_HIDE_ON_FACEWIDGETS, value)
+        }
+
+    //Whether to hide the frame in landscape.
+    var hideInLandscape: Boolean
+        get() = getBoolean(KEY_HIDE_IN_LANDSCAPE, false)
+        set(value) {
+            putBoolean(KEY_HIDE_IN_LANDSCAPE, value)
         }
 
     fun getCorrectFrameWidth(isNC: Boolean): Float {

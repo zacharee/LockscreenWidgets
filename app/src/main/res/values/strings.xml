@@ -111,6 +111,9 @@
     <string name="settings_screen_hide_on_facewidgets">Hide on FaceWidgets Screen</string>
     <string name="settings_screen_hide_on_facewidgets_desc">Hide the frame when the FaceWidgets screen is shown.</string>
 
+    <string name="settings_screen_hide_in_landscape">Hide in Landscape</string>
+    <string name="settings_screen_hide_in_landscape_desc">Hide the widget frame when the device is in landscape.</string>
+
     <string name="intro_welcome_title">Welcome!</string>
     <string name="intro_welcome_desc">Lockscreen Widgets is a simple app with a simple purpose: to bring back Android KitKat\'s lock screen widgets. Your widgets will show up in a simple paged slider on the lockscreen.</string>
 

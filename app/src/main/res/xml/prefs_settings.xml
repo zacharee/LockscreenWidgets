@@ -101,6 +101,13 @@
             android:icon="@null"
             />
 
+        <SwitchPreference
+            android:title="@string/settings_screen_hide_in_landscape"
+            android:summary="@string/settings_screen_hide_in_landscape_desc"
+            android:key="hide_in_landscape"
+            android:icon="@null"
+            />
+
         <Preference
             android:title="@string/settings_screen_present_ids"
             android:summary="@string/settings_screen_present_ids_desc"
