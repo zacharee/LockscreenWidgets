@@ -423,7 +423,10 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
                 sysUiWindows.forEach {
                     it.first?.recycle()
                 }
-                appWindow?.recycle()
+
+                try {
+                    appWindow?.recycle()
+                } catch (e: IllegalStateException) {}
             }
 
             //Check whether the frame can show.
