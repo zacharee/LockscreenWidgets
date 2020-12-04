@@ -19,11 +19,11 @@ import android.widget.ImageView
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import com.arasthel.spannedgridlayoutmanager.SpannedGridLayoutManager
-import kotlinx.android.synthetic.main.widget_frame.view.*
 import tk.zwander.lockscreenwidgets.R
 import tk.zwander.lockscreenwidgets.activities.AddWidgetActivity
 import tk.zwander.lockscreenwidgets.activities.DismissOrUnlockActivity
 import tk.zwander.lockscreenwidgets.adapters.WidgetFrameAdapter
+import tk.zwander.lockscreenwidgets.databinding.WidgetFrameBinding
 import tk.zwander.lockscreenwidgets.host.WidgetHostCompat
 import tk.zwander.lockscreenwidgets.views.RemoveWidgetConfirmationView
 import tk.zwander.lockscreenwidgets.views.WidgetFrameView
@@ -104,9 +104,10 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
     //The actual frame View
     val view = LayoutInflater.from(ContextThemeWrapper(this, R.style.AppTheme))
         .inflate(R.layout.widget_frame, null)!!
+    val binding = WidgetFrameBinding.bind(view)
     val gridLayoutManager = SpannedLayoutManager()
     val adapter = WidgetFrameAdapter(widgetManager, widgetHost, params) { adapter, item ->
-        (view.remove_widget_confirmation as RemoveWidgetConfirmationView).apply {
+        binding.removeWidgetConfirmation.root.apply {
             onConfirmListener = {
                 if (it) {
                     prefManager.currentWidgets = prefManager.currentWidgets.apply {
@@ -206,7 +207,7 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
                 }
             }
             PrefManager.KEY_PAGE_INDICATOR_BEHAVIOR -> {
-                view.frame.updatePageIndicatorBehavior()
+                binding.frame.updatePageIndicatorBehavior()
             }
             PrefManager.KEY_FRAME_ROW_COUNT,
             PrefManager.KEY_FRAME_COL_COUNT -> {
@@ -214,20 +215,20 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
                 adapter.notifyDataSetChanged()
             }
             PrefManager.KEY_FRAME_BACKGROUND_COLOR -> {
-                view.frame.updateFrameBackground()
+                binding.frame.updateFrameBackground()
             }
             PrefManager.KEY_FRAME_MASKED_MODE -> {
                 updateWallpaperLayerIfNeeded()
             }
             PrefManager.KEY_SHOW_DEBUG_ID_VIEW,
                 PrefManager.KEY_DEBUG_LOG -> {
-                view.frame.updateDebugIdViewVisibility()
+                binding.frame.updateDebugIdViewVisibility()
             }
             PrefManager.KEY_SHOW_IN_NOTIFICATION_CENTER -> {
                 isPendingNotificationStateChange = true
             }
             PrefManager.KEY_FRAME_CORNER_RADIUS -> {
-                view.frame.updateCornerRadius()
+                binding.frame.updateCornerRadius()
             }
         }
     }
@@ -236,7 +237,7 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
         prefManager.prefs.registerOnSharedPreferenceChangeListener(this)
         gridLayoutManager.spanSizeLookup = adapter.spanSizeLookup
 //        gridLayoutManager.customWidth = widgetBlockWidth
-        view.widgets_pager.apply {
+        binding.widgetsPager.apply {
             adapter = this@WidgetFrameDelegate.adapter
             layoutManager = gridLayoutManager
             setHasFixedSize(true)
@@ -252,7 +253,7 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
         updateRowColCount()
         adapter.updateWidgets(prefManager.currentWidgets.toList())
 
-        view.frame.onAddListener = {
+        binding.frame.onAddListener = {
             val intent = Intent(this, AddWidgetActivity::class.java)
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
 
@@ -261,7 +262,7 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
 
         //We only really want to be listening to widget changes
         //while the frame is on-screen. Otherwise, we're wasting battery.
-        view.frame.attachmentStateListener = {
+        binding.frame.attachmentStateListener = {
             try {
                 if (it) {
                     widgetHost.startListening()
@@ -369,9 +370,9 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
                 } ?: wallpaper.fastDrawable
 
                 fastW?.mutate()?.apply {
-                    view.wallpaper_background.setImageDrawable(this)
-                    view.wallpaper_background.scaleType = ImageView.ScaleType.MATRIX
-                    view.wallpaper_background.imageMatrix = Matrix().apply {
+                    binding.wallpaperBackground.setImageDrawable(this)
+                    binding.wallpaperBackground.scaleType = ImageView.ScaleType.MATRIX
+                    binding.wallpaperBackground.imageMatrix = Matrix().apply {
                         val realSize = Point().apply { wm.defaultDisplay.getRealSize(this) }
                         val loc = view.locationOnScreen ?: intArrayOf(0, 0)
 
@@ -387,12 +388,12 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
                             (-loc[1].toFloat() - wallpaperAdjustmentY)
                         )
                     }
-                } ?: view.wallpaper_background.setImageDrawable(null)
+                } ?: binding.wallpaperBackground.setImageDrawable(null)
             } catch (e: Exception) {
-                view.wallpaper_background.setImageDrawable(null)
+                binding.wallpaperBackground.setImageDrawable(null)
             }
         } else {
-            view.wallpaper_background.setImageDrawable(null)
+            binding.wallpaperBackground.setImageDrawable(null)
         }
     }
 
@@ -403,7 +404,7 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
      * upon the frame's state after an event.
      */
     fun updateAccessibilityPass() {
-        if (view.frame.animationState == WidgetFrameView.AnimationState.STATE_IDLE) {
+        if (binding.frame.animationState == WidgetFrameView.AnimationState.STATE_IDLE) {
             if (isPendingNotificationStateChange) {
                 updateParamsForNotificationCenterStateChange()
                 isPendingNotificationStateChange = false
@@ -421,7 +422,7 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
         params.width = dpAsPx(prefManager.getCorrectFrameWidth(saveForNC))
         params.height = dpAsPx(prefManager.getCorrectFrameHeight(saveForNC))
 
-        view.frame.updateWindow(wm, params)
+        binding.frame.updateWindow(wm, params)
         mainHandler.post {
             updateWallpaperLayerIfNeeded()
             adapter.notifyDataSetChanged()

@@ -13,12 +13,13 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.arasthel.spannedgridlayoutmanager.SpanSize
 import com.arasthel.spannedgridlayoutmanager.SpannedGridLayoutManager
-import kotlinx.android.synthetic.main.widget_page_holder.view.*
 import kotlinx.coroutines.*
 import tk.zwander.lockscreenwidgets.R
 import tk.zwander.lockscreenwidgets.activities.AddWidgetActivity
 import tk.zwander.lockscreenwidgets.data.WidgetData
 import tk.zwander.lockscreenwidgets.data.WidgetSizeData
+import tk.zwander.lockscreenwidgets.databinding.AddWidgetBinding
+import tk.zwander.lockscreenwidgets.databinding.WidgetPageHolderBinding
 import tk.zwander.lockscreenwidgets.host.WidgetHostCompat
 import tk.zwander.lockscreenwidgets.listeners.WidgetResizeListener
 import tk.zwander.lockscreenwidgets.observables.OnResizeObservable
@@ -144,27 +145,29 @@ class WidgetFrameAdapter(
      */
     @SuppressLint("ClickableViewAccessibility")
     inner class WidgetVH(view: View) : RecyclerView.ViewHolder(view) {
+        private val binding = WidgetPageHolderBinding.bind(view)
+
         private var editingInterfaceShown: Boolean
-            get() = itemView.widget_edit_wrapper.isVisible
+            get() = binding.widgetEditWrapper.isVisible
             set(value) {
-                itemView.widget_edit_wrapper.isVisible = value
+                binding.widgetEditWrapper.isVisible = value
                 showHorizontalSizers = value && itemView.context.prefManager.frameColCount > 1
                 showVerticalSizers = value && itemView.context.prefManager.frameRowCount > 1
             }
         private var showHorizontalSizers: Boolean
-            get() = itemView.run { widget_left_dragger.isVisible && widget_right_dragger.isVisible }
+            get() = itemView.run { binding.widgetLeftDragger.isVisible && binding.widgetRightDragger.isVisible }
             set(value) {
                 itemView.apply {
-                    widget_left_dragger.isVisible = value
-                    widget_right_dragger.isVisible = value
+                    binding.widgetLeftDragger.isVisible = value
+                    binding.widgetRightDragger.isVisible = value
                 }
             }
         private var showVerticalSizers: Boolean
-            get() = itemView.run { widget_top_dragger.isVisible && widget_bottom_dragger.isVisible }
+            get() = itemView.run { binding.widgetTopDragger.isVisible && binding.widgetBottomDragger.isVisible }
             set(value) {
                 itemView.apply {
-                    widget_top_dragger.isVisible = value
-                    widget_bottom_dragger.isVisible = value
+                    binding.widgetTopDragger.isVisible = value
+                    binding.widgetBottomDragger.isVisible = value
                 }
             }
 
@@ -176,7 +179,7 @@ class WidgetFrameAdapter(
                 ?: WidgetSizeData(currentData.id, 1, 1)
 
         init {
-            itemView.remove_widget.setOnClickListener {
+            binding.removeWidget.setOnClickListener {
                 val newPos = adapterPosition
                 if (newPos != -1) {
                     onRemoveCallback(this@WidgetFrameAdapter, widgets[newPos])
@@ -184,7 +187,7 @@ class WidgetFrameAdapter(
             }
 
             itemView.apply {
-                widget_left_dragger.setOnTouchListener(WidgetResizeListener(context, WidgetResizeListener.Which.LEFT) {
+                binding.widgetLeftDragger.setOnTouchListener(WidgetResizeListener(context, WidgetResizeListener.Which.LEFT) {
                     val sizeInfo = currentSizeInfo
                     sizeInfo.safeWidgetWidthSpan = min(sizeInfo.safeWidgetWidthSpan - it, context.prefManager.frameColCount)
 
@@ -192,7 +195,7 @@ class WidgetFrameAdapter(
                     onResize(currentData)
                 })
 
-                widget_top_dragger.setOnTouchListener(WidgetResizeListener(context, WidgetResizeListener.Which.TOP) {
+                binding.widgetTopDragger.setOnTouchListener(WidgetResizeListener(context, WidgetResizeListener.Which.TOP) {
                     val sizeInfo = currentSizeInfo
                     sizeInfo.safeWidgetHeightSpan = min(sizeInfo.safeWidgetHeightSpan - it, context.prefManager.frameRowCount)
 
@@ -200,7 +203,7 @@ class WidgetFrameAdapter(
                     onResize(currentData)
                 })
 
-                widget_right_dragger.setOnTouchListener(WidgetResizeListener(context, WidgetResizeListener.Which.RIGHT) {
+                binding.widgetRightDragger.setOnTouchListener(WidgetResizeListener(context, WidgetResizeListener.Which.RIGHT) {
                     val sizeInfo = currentSizeInfo
                     sizeInfo.safeWidgetWidthSpan = min(sizeInfo.safeWidgetWidthSpan + it, context.prefManager.frameColCount)
 
@@ -208,7 +211,7 @@ class WidgetFrameAdapter(
                     onResize(currentData)
                 })
 
-                widget_bottom_dragger.setOnTouchListener(WidgetResizeListener(context, WidgetResizeListener.Which.BOTTOM) {
+                binding.widgetBottomDragger.setOnTouchListener(WidgetResizeListener(context, WidgetResizeListener.Which.BOTTOM) {
                     val sizeInfo = currentSizeInfo
                     sizeInfo.safeWidgetHeightSpan = min(sizeInfo.safeWidgetHeightSpan + it, context.prefManager.frameRowCount)
 
@@ -240,7 +243,7 @@ class WidgetFrameAdapter(
                         manager.getAppWidgetInfo(data.id)
                     }
 
-                    widget_holder.apply {
+                    binding.widgetHolder.apply {
                         removeAllViews()
                         try {
                             //We're recreating the AppWidgetHostView here each time, which probably isn't the most efficient

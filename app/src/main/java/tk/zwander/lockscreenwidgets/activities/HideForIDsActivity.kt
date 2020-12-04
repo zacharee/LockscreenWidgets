@@ -6,7 +6,6 @@ import android.content.Intent
 import android.graphics.*
 import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
-import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuItem
 import android.widget.Toast
@@ -17,10 +16,10 @@ import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.gson.reflect.TypeToken
-import kotlinx.android.synthetic.main.activity_hide_for_ids.*
-import kotlinx.android.synthetic.main.add_id_dialog.view.*
 import tk.zwander.lockscreenwidgets.R
 import tk.zwander.lockscreenwidgets.adapters.HideForIDsAdapter
+import tk.zwander.lockscreenwidgets.databinding.ActivityHideForIdsBinding
+import tk.zwander.lockscreenwidgets.databinding.AddIdDialogBinding
 import tk.zwander.lockscreenwidgets.util.prefManager
 import java.text.SimpleDateFormat
 import java.util.*
@@ -136,11 +135,12 @@ class HideForIDsActivity : AppCompatActivity() {
     }
     private val gson by lazy { prefManager.gson }
     private val format = SimpleDateFormat("yyyy-MM-dd_HH:mm:ss", Locale.getDefault())
+    private val activityBinding by lazy { ActivityHideForIdsBinding.inflate(layoutInflater) }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        setContentView(R.layout.activity_hide_for_ids)
+        setContentView(activityBinding.root)
 
         supportActionBar?.apply {
             setDisplayHomeAsUpEnabled(true)
@@ -148,8 +148,8 @@ class HideForIDsActivity : AppCompatActivity() {
         }
 
         adapter.items.replaceAll(items)
-        list.adapter = adapter
-        list.addItemDecoration(DividerItemDecoration(this, RecyclerView.VERTICAL))
+        activityBinding.list.adapter = adapter
+        activityBinding.list.addItemDecoration(DividerItemDecoration(this, RecyclerView.VERTICAL))
 
         val swipeHandler = object : SwipeToDeleteCallback(this) {
             override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
@@ -158,7 +158,7 @@ class HideForIDsActivity : AppCompatActivity() {
             }
         }
 
-        ItemTouchHelper(swipeHandler).attachToRecyclerView(list)
+        ItemTouchHelper(swipeHandler).attachToRecyclerView(activityBinding.list)
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
@@ -178,11 +178,11 @@ class HideForIDsActivity : AppCompatActivity() {
                 //or just the ID itself. A basic ID will have the System UI
                 //namespace prepended. A fully-qualified ID will be entered as-is
                 //(useful if the ID isn't part of the System UI namespace).
-                val inputView = LayoutInflater.from(this).inflate(R.layout.add_id_dialog, null)
+                val inputBinding = AddIdDialogBinding.inflate(layoutInflater, null, false)
                 MaterialAlertDialogBuilder(this)
-                    .setView(inputView)
+                    .setView(inputBinding.root)
                     .setPositiveButton(android.R.string.ok) { _, _ ->
-                        val input = inputView.id_input.text?.toString()
+                        val input = inputBinding.idInput.text?.toString()
                         if (input.isNullOrBlank()) return@setPositiveButton
                         if (input.contains(":id/")) {
                             items.add(input)

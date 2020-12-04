@@ -10,10 +10,10 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.RecyclerView
 import com.squareup.picasso.Picasso
-import kotlinx.android.synthetic.main.app_item.view.*
 import tk.zwander.lockscreenwidgets.R
 import tk.zwander.lockscreenwidgets.data.AppInfo
 import tk.zwander.lockscreenwidgets.data.WidgetListInfo
+import tk.zwander.lockscreenwidgets.databinding.AppItemBinding
 import tk.zwander.lockscreenwidgets.util.matchesFilter
 
 /**
@@ -82,20 +82,21 @@ class AppAdapter(context: Context, private val selectionCallback: (provider: Wid
      */
     inner class AppVH(view: View) : RecyclerView.ViewHolder(view) {
         private val adapter = AddWidgetAdapter(picasso, selectionCallback)
+        private val binding = AppItemBinding.bind(itemView)
 
         fun parseInfo(info: AppInfo) {
-            itemView.widget_holder.adapter = adapter
-            itemView.widget_holder.addItemDecoration(DividerItemDecoration(itemView.context, RecyclerView.HORIZONTAL))
+            binding.widgetHolder.adapter = adapter
+            binding.widgetHolder.addItemDecoration(DividerItemDecoration(itemView.context, RecyclerView.HORIZONTAL))
 
-            itemView.app_name.text = info.appName
+            binding.appName.text = info.appName
             adapter.setItems(info.widgets)
 
-            picasso.cancelRequest(itemView.app_icon)
+            picasso.cancelRequest(binding.appIcon)
 
             picasso
                 .load(Uri.parse("${AddWidgetAdapter.AppIconRequestHandler.SCHEME}:${info.appInfo.packageName}"))
                 .fit()
-                .into(itemView.app_icon)
+                .into(binding.appIcon)
         }
     }
 }

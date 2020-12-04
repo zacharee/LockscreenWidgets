@@ -1,6 +1,6 @@
 apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
-apply plugin: 'kotlin-android-extensions'
+apply plugin: 'kotlin-parcelize'
 apply plugin: 'com.google.gms.google-services'
 apply plugin: 'com.google.firebase.crashlytics'
 
@@ -13,6 +13,10 @@ android {
         targetSdkVersion 29
         versionCode 40
         versionName "1.11.1"
+    }
+
+    buildFeatures {
+        viewBinding = true
     }
 
     buildTypes {

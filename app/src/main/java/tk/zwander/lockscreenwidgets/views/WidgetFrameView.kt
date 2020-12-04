@@ -18,9 +18,8 @@ import android.view.ViewConfiguration
 import android.view.WindowManager
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.isVisible
-import kotlinx.android.synthetic.main.widget_frame.view.*
-import kotlinx.android.synthetic.main.widget_frame_id_view.view.*
 import tk.zwander.lockscreenwidgets.adapters.IDAdapter
+import tk.zwander.lockscreenwidgets.databinding.WidgetFrameBinding
 import tk.zwander.lockscreenwidgets.util.*
 import kotlin.math.roundToInt
 
@@ -73,6 +72,8 @@ class WidgetFrameView(context: Context, attrs: AttributeSet) : ConstraintLayout(
         }
     }
 
+    private val binding by lazy { WidgetFrameBinding.bind(this) }
+
     enum class AnimationState {
         STATE_ADDING,
         STATE_REMOVING,
@@ -83,55 +84,55 @@ class WidgetFrameView(context: Context, attrs: AttributeSet) : ConstraintLayout(
     override fun onFinishInflate() {
         super.onFinishInflate()
 
-        frame_card.alpha = 0f
-        frame_card.scaleX = 0.95f
-        frame_card.scaleY = 0.95f
+        binding.frameCard.alpha = 0f
+        binding.frameCard.scaleX = 0.95f
+        binding.frameCard.scaleY = 0.95f
 
         updateCornerRadius()
 
-        move.setOnTouchListener(MoveTouchListener())
+        binding.move.setOnTouchListener(MoveTouchListener())
 
-        left_dragger.setOnTouchListener(ExpandTouchListener { velX, _, isUp ->
+        binding.leftDragger.setOnTouchListener(ExpandTouchListener { velX, _, isUp ->
             onLeftDragListener?.invoke(velX)
             if (isUp) {
                 onAfterResizeListener?.invoke()
             }
             onLeftDragListener != null
         })
-        right_dragger.setOnTouchListener(ExpandTouchListener { velX, _, isUp ->
+        binding.rightDragger.setOnTouchListener(ExpandTouchListener { velX, _, isUp ->
             onRightDragListener?.invoke(velX)
             if (isUp) {
                 onAfterResizeListener?.invoke()
             }
             onRightDragListener != null
         })
-        top_dragger.setOnTouchListener(ExpandTouchListener { _, velY, isUp ->
+        binding.topDragger.setOnTouchListener(ExpandTouchListener { _, velY, isUp ->
             onTopDragListener?.invoke(velY)
             if (isUp) {
                 onAfterResizeListener?.invoke()
             }
             onTopDragListener != null
         })
-        bottom_dragger.setOnTouchListener(ExpandTouchListener { _, velY, isUp ->
+        binding.bottomDragger.setOnTouchListener(ExpandTouchListener { _, velY, isUp ->
             onBottomDragListener?.invoke(velY)
             if (isUp) {
                 onAfterResizeListener?.invoke()
             }
             onBottomDragListener != null
         })
-        add_widget.setOnClickListener {
+        binding.addWidget.setOnClickListener {
             onAddListener?.invoke()
         }
-        temp_hide_frame.setOnClickListener {
+        binding.tempHideFrame.setOnClickListener {
             onTempHideListener?.invoke()
         }
 
         if (context.prefManager.firstViewing) {
-            gesture_hint_view.isVisible = true
+            binding.gestureHintView.root.isVisible = true
         }
 
-        id_list.adapter = IDAdapter()
-        id_list.itemAnimator = null
+        binding.idView.idList.adapter = IDAdapter()
+        binding.idView.idList.itemAnimator = null
 
         updateDebugIdViewVisibility()
         updatePageIndicatorBehavior()
@@ -147,7 +148,7 @@ class WidgetFrameView(context: Context, attrs: AttributeSet) : ConstraintLayout(
         }
 
         postDelayed({
-            frame_card.fadeAndScaleIn {
+            binding.frameCard.fadeAndScaleIn {
                 attachmentStateListener?.invoke(true)
                 animationState = AnimationState.STATE_IDLE
             }
@@ -191,21 +192,21 @@ class WidgetFrameView(context: Context, attrs: AttributeSet) : ConstraintLayout(
                     when (max) {
                         2 -> {
                             setEditMode(!isInEditingMode)
-                            if (gesture_hint_view.isVisible) {
-                                val ghv = gesture_hint_view as WidgetFrameGestureHintView
+                            if (binding.gestureHintView.root.isVisible) {
+                                val ghv = binding.gestureHintView.root
                                 if (!ghv.stage2) {
                                     ghv.stage2 = true
                                 } else if (ghv.stage2) {
                                     ghv.stage2 = false
                                     ghv.close()
-                                    hide_hint_view.isVisible = true
+                                    binding.hideHintView.root.isVisible = true
                                 }
                             }
                             return true
                         }
                         3 -> {
-                            if (hide_hint_view.isVisible) {
-                                (hide_hint_view as WidgetFrameHideHintView).close()
+                            if (binding.hideHintView.root.isVisible) {
+                                binding.hideHintView.root.close()
                             }
                             onTempHideListener?.invoke()
                             return true
@@ -249,23 +250,23 @@ class WidgetFrameView(context: Context, attrs: AttributeSet) : ConstraintLayout(
 
     fun updateCornerRadius() {
         val radius = context.dpAsPx(context.prefManager.cornerRadiusDp).toFloat()
-        frame_card.radius = radius
+        binding.frameCard.radius = radius
 
         //Since all instances of a Drawable are technically the same instance
         //(unless someone uses mutate()), setting the corner radius for the
         //editing outline here means it applies to both the main frame editing UI
         //and each widget editing UI.
-        (edit_outline.background as GradientDrawable).apply {
+        (binding.editOutline.background as GradientDrawable).apply {
             this.cornerRadius = radius
         }
     }
 
     fun updateFrameBackground() {
-        frame_card.setCardBackgroundColor(context.prefManager.backgroundColor)
+        binding.frameCard.setCardBackgroundColor(context.prefManager.backgroundColor)
     }
 
     fun updatePageIndicatorBehavior() {
-        widgets_pager.apply {
+        binding.widgetsPager.apply {
             when (context.prefManager.pageIndicatorBehavior) {
                 PrefManager.VALUE_PAGE_INDICATOR_BEHAVIOR_HIDDEN -> {
                     isHorizontalScrollBarEnabled = false
@@ -286,11 +287,11 @@ class WidgetFrameView(context: Context, attrs: AttributeSet) : ConstraintLayout(
     }
 
     fun setNewDebugIdItems(items: List<String>) {
-        (id_list.adapter as IDAdapter).setItems(items)
+        (binding.idView.idList.adapter as IDAdapter).setItems(items)
     }
 
     fun updateDebugIdViewVisibility() {
-        id_view.isVisible = context.prefManager.showDebugIdView
+        binding.idView.root.isVisible = context.prefManager.showDebugIdView
     }
 
     fun addWindow(wm: WindowManager, params: WindowManager.LayoutParams) {
@@ -315,7 +316,7 @@ class WidgetFrameView(context: Context, attrs: AttributeSet) : ConstraintLayout(
     fun removeWindow(wm: WindowManager) {
         if (isAttachedToWindow && animationState != AnimationState.STATE_REMOVING) {
             animationState = AnimationState.STATE_REMOVING
-            frame_card.fadeAndScaleOut {
+            binding.frameCard.fadeAndScaleOut {
                 postDelayed({
                     try {
                         wm.removeView(this)
@@ -326,7 +327,7 @@ class WidgetFrameView(context: Context, attrs: AttributeSet) : ConstraintLayout(
     }
 
     private fun updateProximity(tooClose: Boolean) {
-        touch_protection_view.isVisible = tooClose
+        binding.touchProtectionView.root.isVisible = tooClose
     }
 
     private fun registerProxListener() {
@@ -360,7 +361,7 @@ class WidgetFrameView(context: Context, attrs: AttributeSet) : ConstraintLayout(
 
     private fun setEditMode(editing: Boolean) {
         isInEditingMode = editing
-        edit_wrapper.isVisible = editing
+        binding.editWrapper.isVisible = editing
     }
 
     private fun vibrate() {

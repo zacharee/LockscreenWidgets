@@ -11,7 +11,6 @@ import android.view.accessibility.AccessibilityEvent
 import android.view.accessibility.AccessibilityNodeInfo
 import android.view.accessibility.AccessibilityWindowInfo
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
-import kotlinx.android.synthetic.main.widget_frame.view.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.cancel
@@ -158,12 +157,12 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
         prefManager.prefs.registerOnSharedPreferenceChangeListener(this)
 
         delegate.apply {
-            view.frame.onAfterResizeListener = {
+            binding.frame.onAfterResizeListener = {
                 adapter.onResizeObservable.notifyObservers()
                 delegate.updateWallpaperLayerIfNeeded()
             }
 
-            view.frame.onMoveListener = { velX, velY ->
+            binding.frame.onMoveListener = { velX, velY ->
                 params.x += velX.toInt()
                 params.y += velY.toInt()
 
@@ -174,7 +173,7 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
                 delegate.updateWallpaperLayerIfNeeded()
             }
 
-            view.frame.onLeftDragListener = { velX ->
+            binding.frame.onLeftDragListener = { velX ->
                 params.width -= velX
                 params.x += (velX / 2)
 
@@ -183,7 +182,7 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
                 updateOverlay()
             }
 
-            view.frame.onRightDragListener = { velX ->
+            binding.frame.onRightDragListener = { velX ->
                 params.width += velX
                 params.x += (velX / 2)
 
@@ -192,7 +191,7 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
                 updateOverlay()
             }
 
-            view.frame.onTopDragListener = { velY ->
+            binding.frame.onTopDragListener = { velY ->
                 params.height -= velY
                 params.y += (velY / 2)
 
@@ -201,7 +200,7 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
                 updateOverlay()
             }
 
-            view.frame.onBottomDragListener = { velY ->
+            binding.frame.onBottomDragListener = { velY ->
                 params.height += velY
                 params.y += (velY / 2)
 
@@ -210,7 +209,7 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
                 updateOverlay()
             }
 
-            view.frame.onInterceptListener = { down ->
+            binding.frame.onInterceptListener = { down ->
                 if (down) {
                     params.flags = params.flags or WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON
                 } else {
@@ -220,7 +219,7 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
                 updateOverlay()
             }
 
-            view.frame.onTempHideListener = {
+            binding.frame.onTempHideListener = {
                 isTempHide = true
                 removeOverlay()
             }
@@ -313,7 +312,7 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
                             .toString()
                     )
 
-                    delegate.view.frame.setNewDebugIdItems(items)
+                    delegate.binding.frame.setNewDebugIdItems(items)
                 }
 
                 //The logic in this block only needs to run when on the lock screen.
@@ -480,7 +479,7 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
      */
     private fun addOverlay() {
         mainHandler.postDelayed({
-            delegate.view.frame.addWindow(wm, delegate.params)
+            delegate.binding.frame.addWindow(wm, delegate.params)
         }, 100)
     }
 
@@ -489,7 +488,7 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
      * that may have occurred.
      */
     private fun updateOverlay() {
-        delegate.view.frame.updateWindow(wm, delegate.params)
+        delegate.binding.frame.updateWindow(wm, delegate.params)
     }
 
     /**
@@ -502,7 +501,7 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
             Log.e(App.DEBUG_LOG_TAG, "Removing overlay", Exception())
         }
         delegate.adapter.currentEditingInterfacePosition = -1
-        delegate.view.frame.removeWindow(wm)
+        delegate.binding.frame.removeWindow(wm)
     }
 
     /**

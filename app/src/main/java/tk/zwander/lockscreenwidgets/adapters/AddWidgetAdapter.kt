@@ -15,10 +15,10 @@ import com.squareup.picasso.Callback
 import com.squareup.picasso.Picasso
 import com.squareup.picasso.Request
 import com.squareup.picasso.RequestHandler
-import kotlinx.android.synthetic.main.widget_item.view.*
 import tk.zwander.lockscreenwidgets.R
 import tk.zwander.lockscreenwidgets.activities.AddWidgetActivity
 import tk.zwander.lockscreenwidgets.data.WidgetListInfo
+import tk.zwander.lockscreenwidgets.databinding.WidgetItemBinding
 
 /**
  * Adapter to host widget previews in [AddWidgetActivity] for a specific app.
@@ -63,12 +63,14 @@ class AddWidgetAdapter(private val picasso: Picasso, private val selectionCallba
      * along with widget label.
      */
     class WidgetVH(view: View) : RecyclerView.ViewHolder(view) {
+        val binding = WidgetItemBinding.bind(itemView)
+
         @SuppressLint("SetTextI18n")
         fun parseInfo(info: WidgetListInfo, picasso: Picasso) {
-            itemView.widget_name.text = info.widgetName
-            itemView.widget_size.text = "${info.providerInfo.minWidth}x${info.providerInfo.minHeight}"
+            binding.widgetName.text = info.widgetName
+            binding.widgetSize.text = "${info.providerInfo.minWidth}x${info.providerInfo.minHeight}"
 
-            val img = itemView.widget_image
+            val img = binding.widgetImage
 
             picasso.cancelRequest(img)
             picasso

@@ -5,9 +5,9 @@ import android.text.method.ScrollingMovementMethod
 import android.util.AttributeSet
 import androidx.core.view.isVisible
 import com.google.android.material.card.MaterialCardView
-import kotlinx.android.synthetic.main.widget_frame_gesture_hint.view.*
-import kotlinx.android.synthetic.main.widget_frame_hide_hint.view.*
 import tk.zwander.lockscreenwidgets.R
+import tk.zwander.lockscreenwidgets.databinding.WidgetFrameGestureHintBinding
+import tk.zwander.lockscreenwidgets.databinding.WidgetFrameHideHintBinding
 import tk.zwander.lockscreenwidgets.util.prefManager
 
 /**
@@ -25,22 +25,26 @@ class WidgetFrameGestureHintView(context: Context, attrs: AttributeSet) : Widget
         set(value) {
             field = value
 
-            gesture_hint_text.setText(if (value) R.string.edit_gesture_hint_2 else R.string.edit_gesture_hint)
+            binding.gestureHintText.setText(if (value) R.string.edit_gesture_hint_2 else R.string.edit_gesture_hint)
         }
+
+    private val binding by lazy { WidgetFrameGestureHintBinding.bind(this) }
 
     override fun onFinishInflate() {
         super.onFinishInflate()
 
-        gesture_hint_text.movementMethod = ScrollingMovementMethod()
+        binding.gestureHintText.movementMethod = ScrollingMovementMethod()
     }
 }
 
 class WidgetFrameHideHintView(context: Context, attrs: AttributeSet) : WidgetFrameHintView(context, attrs) {
+    private val binding by lazy { WidgetFrameHideHintBinding.bind(this) }
+
     override fun onFinishInflate() {
         super.onFinishInflate()
 
-        hide_hint_text.movementMethod = ScrollingMovementMethod()
-        ok_for_hide_hint.setOnClickListener {
+        binding.hideHintText.movementMethod = ScrollingMovementMethod()
+        binding.okForHideHint.setOnClickListener {
             close()
         }
     }

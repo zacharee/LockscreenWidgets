@@ -2,9 +2,9 @@ package tk.zwander.lockscreenwidgets.data
 
 import android.os.Parcel
 import android.os.Parcelable
-import kotlinx.android.parcel.Parceler
-import kotlinx.android.parcel.Parcelize
-import kotlinx.android.parcel.TypeParceler
+import kotlinx.parcelize.Parceler
+import kotlinx.parcelize.Parcelize
+import kotlinx.parcelize.TypeParceler
 
 /**
  * Contain the data about a specific on-screen ID.

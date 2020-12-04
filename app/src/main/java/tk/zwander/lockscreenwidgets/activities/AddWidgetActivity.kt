@@ -12,13 +12,13 @@ import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SearchView
-import kotlinx.android.synthetic.main.activity_add_widget.*
 import kotlinx.coroutines.*
 import tk.zwander.lockscreenwidgets.R
 import tk.zwander.lockscreenwidgets.adapters.AppAdapter
 import tk.zwander.lockscreenwidgets.data.AppInfo
 import tk.zwander.lockscreenwidgets.data.WidgetData
 import tk.zwander.lockscreenwidgets.data.WidgetListInfo
+import tk.zwander.lockscreenwidgets.databinding.ActivityAddWidgetBinding
 import tk.zwander.lockscreenwidgets.host.WidgetHostCompat
 import tk.zwander.lockscreenwidgets.util.prefManager
 
@@ -45,6 +45,8 @@ class AddWidgetActivity : AppCompatActivity(), CoroutineScope by MainScope() {
 
     private var doneLoading = false
 
+    private val binding by lazy { ActivityAddWidgetBinding.inflate(layoutInflater) }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -56,9 +58,9 @@ class AddWidgetActivity : AppCompatActivity(), CoroutineScope by MainScope() {
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         startActivity(intent)
 
-        setContentView(R.layout.activity_add_widget)
+        setContentView(binding.root)
 
-        selection_list.adapter = adapter
+        binding.selectionList.adapter = adapter
 
         populateAsync()
     }
@@ -245,8 +247,8 @@ class AddWidgetActivity : AppCompatActivity(), CoroutineScope by MainScope() {
         }
 
         adapter.setItems(apps.values.toList())
-        progress.visibility = View.GONE
-        selection_list.visibility = View.VISIBLE
+        binding.progress.visibility = View.GONE
+        binding.selectionList.visibility = View.VISIBLE
         searchItem?.isVisible = true
 
         doneLoading = true
