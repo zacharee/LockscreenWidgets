@@ -62,6 +62,9 @@ class AddWidgetActivity : AppCompatActivity(), CoroutineScope by MainScope() {
 
         binding.selectionList.adapter = adapter
 
+        supportActionBar?.setDisplayHomeAsUpEnabled(true)
+        supportActionBar?.setDisplayShowHomeEnabled(true)
+
         populateAsync()
     }
 
@@ -96,6 +99,16 @@ class AddWidgetActivity : AppCompatActivity(), CoroutineScope by MainScope() {
         }
 
         return super.onCreateOptionsMenu(menu)
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem?): Boolean {
+        return when (item?.itemId) {
+            android.R.id.home -> {
+                onBackPressed()
+                true
+            }
+            else -> super.onOptionsItemSelected(item)
+        }
     }
 
     override fun onBackPressed() {
