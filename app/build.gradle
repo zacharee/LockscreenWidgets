@@ -51,7 +51,7 @@ dependencies {
     implementation fileTree(dir: "libs", include: ["*.jar"])
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.4.2"
-    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.3.7"
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.4.2"
 
     implementation 'androidx.core:core-ktx:1.3.2'
     implementation 'androidx.appcompat:appcompat:1.2.0'
@@ -63,7 +63,7 @@ dependencies {
 
     implementation 'com.github.zacharee:Unblacklister:1.1'
     implementation 'com.google.code.gson:gson:2.8.6'
-    implementation 'com.google.android.material:material:1.3.0-alpha04'
+    implementation 'com.google.android.material:material:1.3.0-beta01'
     implementation 'com.github.agrawalsuneet:DotLoadersPack-Android:v1.4.2'
     implementation 'com.squareup.picasso:picasso:2.71828'
     implementation 'com.heinrichreimersoftware:material-intro:2.0.0'
