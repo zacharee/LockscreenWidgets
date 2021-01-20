@@ -25,7 +25,6 @@ import tk.zwander.lockscreenwidgets.activities.DismissOrUnlockActivity
 import tk.zwander.lockscreenwidgets.adapters.WidgetFrameAdapter
 import tk.zwander.lockscreenwidgets.databinding.WidgetFrameBinding
 import tk.zwander.lockscreenwidgets.host.WidgetHostCompat
-import tk.zwander.lockscreenwidgets.views.RemoveWidgetConfirmationView
 import tk.zwander.lockscreenwidgets.views.WidgetFrameView
 import kotlin.math.roundToInt
 import kotlin.math.sign

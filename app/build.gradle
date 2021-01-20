@@ -63,7 +63,7 @@ dependencies {
 
     implementation 'com.github.zacharee:Unblacklister:1.1'
     implementation 'com.google.code.gson:gson:2.8.6'
-    implementation 'com.google.android.material:material:1.3.0-beta01'
+    implementation 'com.google.android.material:material:1.3.0-rc01'
     implementation 'com.github.agrawalsuneet:DotLoadersPack-Android:v1.4.2'
     implementation 'com.squareup.picasso:picasso:2.71828'
     implementation 'com.heinrichreimersoftware:material-intro:2.0.0'
@@ -79,6 +79,6 @@ dependencies {
     //Make sure to remove this project from settings.gradle as well.
     implementation project(':spannedlm')
 
-    implementation 'com.google.firebase:firebase-analytics:18.0.0'
+    implementation 'com.google.firebase:firebase-analytics:18.0.1'
     implementation 'com.google.firebase:firebase-crashlytics:17.3.0'
 }
