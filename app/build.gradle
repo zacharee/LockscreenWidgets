@@ -79,6 +79,6 @@ dependencies {
     //Make sure to remove this project from settings.gradle as well.
     implementation project(':spannedlm')
 
-    implementation 'com.google.firebase:firebase-analytics:18.0.1'
-    implementation 'com.google.firebase:firebase-crashlytics:17.3.0'
+    implementation 'com.google.firebase:firebase-analytics:18.0.2'
+    implementation 'com.google.firebase:firebase-crashlytics:17.3.1'
 }
