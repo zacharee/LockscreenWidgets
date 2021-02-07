@@ -14,6 +14,7 @@ import android.graphics.drawable.BitmapDrawable
 import android.net.Uri
 import android.os.*
 import android.provider.Settings
+import android.util.Log
 import android.view.*
 import android.widget.ImageView
 import androidx.recyclerview.widget.ItemTouchHelper
@@ -190,7 +191,7 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
         override fun onChange(selfChange: Boolean, uri: Uri?) {
             when (uri) {
                 Settings.Secure.getUriFor(Settings.Secure.UI_NIGHT_MODE) -> {
-                    adapter.notifyDataSetChanged()
+                    adapter.updateViews()
                 }
             }
         }
@@ -211,7 +212,7 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
             PrefManager.KEY_FRAME_ROW_COUNT,
             PrefManager.KEY_FRAME_COL_COUNT -> {
                 updateRowColCount()
-                adapter.notifyDataSetChanged()
+                adapter.updateViews()
             }
             PrefManager.KEY_FRAME_BACKGROUND_COLOR -> {
                 binding.frame.updateFrameBackground()
@@ -271,13 +272,12 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
                     //them to update.
                     mainHandler.postDelayed({
                         updateWallpaperLayerIfNeeded()
-                        adapter.notifyDataSetChanged()
+                        adapter.updateViews()
+                        gridLayoutManager.scrollToPosition(prefManager.currentPage)
                     }, 50)
                 } else {
                     widgetHost.stopListening()
                 }
-
-                updateParamsForNotificationCenterStateChange()
             } catch (e: NullPointerException) {
                 //The stupid "Attempt to read from field 'com.android.server.appwidget.AppWidgetServiceImpl$ProviderId
                 //com.android.server.appwidget.AppWidgetServiceImpl$Provider.id' on a null object reference"
@@ -313,6 +313,13 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
 //            blockSnapHelper.maxFlingBlocks = rowCount
 //            blockSnapHelper.attachToRecyclerView(view.widgets_pager)
         }
+    }
+
+    fun addWindow(wm: WindowManager) {
+        if (!binding.frame.isAttachedToWindow) {
+            updateParamsForNotificationCenterStateChange()
+        }
+        binding.frame.addWindow(wm, params)
     }
 
     /**
@@ -416,15 +423,39 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
      * or in expanded notification center).
      */
     private fun updateParamsForNotificationCenterStateChange() {
-        params.x = prefManager.getCorrectFrameX(saveForNC)
-        params.y = prefManager.getCorrectFrameY(saveForNC)
-        params.width = dpAsPx(prefManager.getCorrectFrameWidth(saveForNC))
-        params.height = dpAsPx(prefManager.getCorrectFrameHeight(saveForNC))
+        val newX = prefManager.getCorrectFrameX(saveForNC)
+        val newY = prefManager.getCorrectFrameY(saveForNC)
+        val newW = dpAsPx(prefManager.getCorrectFrameWidth(saveForNC))
+        val newH = dpAsPx(prefManager.getCorrectFrameHeight(saveForNC))
 
-        binding.frame.updateWindow(wm, params)
-        mainHandler.post {
-            updateWallpaperLayerIfNeeded()
-            adapter.notifyDataSetChanged()
+        var changed = false
+
+        if (params.x != newX) {
+            changed = true
+            params.x = newX
+        }
+
+        if (params.y != newY) {
+            changed = true
+            params.y = newY
+        }
+
+        if (params.width != newW) {
+            changed = true
+            params.width = newW
+        }
+
+        if (params.height != newH) {
+            changed = true
+            params.height = newH
+        }
+
+        if (changed) {
+            binding.frame.updateWindow(wm, params)
+            mainHandler.post {
+                updateWallpaperLayerIfNeeded()
+                adapter.updateViews()
+            }
         }
     }
 

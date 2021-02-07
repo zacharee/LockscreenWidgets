@@ -479,7 +479,7 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
      */
     private fun addOverlay() {
         mainHandler.postDelayed({
-            delegate.binding.frame.addWindow(wm, delegate.params)
+            delegate.addWindow(wm)
         }, 100)
     }
 

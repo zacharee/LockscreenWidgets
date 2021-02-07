@@ -69,7 +69,7 @@ class WidgetFrameAdapter(
     fun updateWidgets(newWidgets: List<WidgetData>) {
         if (widgets.isEmpty()) {
             widgets.addAll(newWidgets)
-            notifyDataSetChanged()
+            notifyItemRangeInserted(0, itemCount)
         } else {
             val oldWidgets = widgets.toList()
             this.widgets.clear()
@@ -136,6 +136,10 @@ class WidgetFrameAdapter(
         if (position < widgets.size) {
             (holder as WidgetVH).onBind(widgets[position])
         }
+    }
+
+    fun updateViews() {
+        notifyItemRangeChanged(0, itemCount)
     }
 
     /**
