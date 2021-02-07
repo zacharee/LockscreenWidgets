@@ -72,6 +72,7 @@ dependencies {
     implementation 'com.github.zacharee:CollapsiblePreferenceCategory:2f53f2d367'
     implementation 'com.github.zacharee.colorpicker:library:9ea5085260'
     implementation 'com.github.zacharee.colorpicker:library_compat:9ea5085260'
+    implementation 'com.github.zacharee:PatreonSupportersRetrieval:4ce71eb5bf'
 
     //You'll need to replace this implementation here with a non-local one.
     //You can get the instructions from https://jitpack.io/#zacharee/SpannedGridLayoutManager.

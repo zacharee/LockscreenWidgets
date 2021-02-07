@@ -37,4 +37,14 @@
         app:link="https://github.com/zacharee/LockscreenWidgets"
         />
 
+    <tk.zwander.lockscreenwidgets.prefs.LinkPreference
+        android:title="@string/main_screen_social_patreon"
+        android:summary="@string/main_screen_social_patreon_desc"
+        android:icon="@drawable/ic_baseline_patreon_24"
+        app:link="https://patreon.com/zacharywander"
+        />
+
+    <tk.zwander.patreonsupportersretrieval.ui.SupporterDialogPreference
+        />
+
 </PreferenceScreen>
