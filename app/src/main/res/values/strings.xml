@@ -114,6 +114,9 @@
     <string name="settings_screen_hide_in_landscape">Hide in Landscape</string>
     <string name="settings_screen_hide_in_landscape_desc">Hide the widget frame when the device is in landscape.</string>
 
+    <string name="settings_screen_separate_position_for_lock_nc">Separate Notification Center Position when Locked</string>
+    <string name="settings_screen_separate_position_for_lock_nc_desc">On One UI 3, the notification center layout is slightly different when locked and unlocked. Enable this to use separate positioning for the widget frame in those two modes.</string>
+
     <string name="intro_welcome_title">Welcome!</string>
     <string name="intro_welcome_desc">Lockscreen Widgets is a simple app with a simple purpose: to bring back Android KitKat\'s lock screen widgets. Your widgets will show up in a simple paged slider on the lockscreen.</string>
 

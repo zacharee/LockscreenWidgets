@@ -2,6 +2,7 @@ package tk.zwander.lockscreenwidgets.util
 
 import android.annotation.SuppressLint
 import android.app.IWallpaperManager
+import android.app.KeyguardManager
 import android.app.WallpaperManager
 import android.appwidget.AppWidgetManager
 import android.content.Context
@@ -14,7 +15,6 @@ import android.graphics.drawable.BitmapDrawable
 import android.net.Uri
 import android.os.*
 import android.provider.Settings
-import android.util.Log
 import android.view.*
 import android.widget.ImageView
 import androidx.recyclerview.widget.ItemTouchHelper
@@ -24,6 +24,7 @@ import tk.zwander.lockscreenwidgets.R
 import tk.zwander.lockscreenwidgets.activities.AddWidgetActivity
 import tk.zwander.lockscreenwidgets.activities.DismissOrUnlockActivity
 import tk.zwander.lockscreenwidgets.adapters.WidgetFrameAdapter
+import tk.zwander.lockscreenwidgets.data.Mode
 import tk.zwander.lockscreenwidgets.databinding.WidgetFrameBinding
 import tk.zwander.lockscreenwidgets.host.WidgetHostCompat
 import tk.zwander.lockscreenwidgets.views.WidgetFrameView
@@ -70,17 +71,26 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
             isPendingNotificationStateChange = changed
         }
 
-    val saveForNC: Boolean
-        get() = notificationsPanelFullyExpanded && prefManager.showInNotificationCenter
+    val saveMode: Mode
+        get() = when {
+            notificationsPanelFullyExpanded && prefManager.showInNotificationCenter -> {
+                if (kgm.isKeyguardLocked && prefManager.separatePosForLockNC) {
+                    Mode.LOCK_NOTIFICATION
+                } else {
+                    Mode.NOTIFICATION
+                }
+            }
+            else -> Mode.LOCK_NORMAL
+        }
 
     //The size, position, and such of the widget frame on the lock screen.
     val params = WindowManager.LayoutParams().apply {
         type = WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY
-        width = dpAsPx(prefManager.getCorrectFrameWidth(saveForNC))
-        height = dpAsPx(prefManager.getCorrectFrameHeight(saveForNC))
+        width = dpAsPx(prefManager.getCorrectFrameWidth(saveMode))
+        height = dpAsPx(prefManager.getCorrectFrameHeight(saveMode))
 
-        x = prefManager.getCorrectFrameX(saveForNC)
-        y = prefManager.getCorrectFrameY(saveForNC)
+        x = prefManager.getCorrectFrameX(saveMode)
+        y = prefManager.getCorrectFrameY(saveMode)
 
         gravity = Gravity.CENTER
 
@@ -196,6 +206,8 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
             }
         }
     }
+
+    private val kgm = context.getSystemService(Context.KEYGUARD_SERVICE) as KeyguardManager
 
     override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
         when (key) {
@@ -423,10 +435,10 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
      * or in expanded notification center).
      */
     private fun updateParamsForNotificationCenterStateChange() {
-        val newX = prefManager.getCorrectFrameX(saveForNC)
-        val newY = prefManager.getCorrectFrameY(saveForNC)
-        val newW = dpAsPx(prefManager.getCorrectFrameWidth(saveForNC))
-        val newH = dpAsPx(prefManager.getCorrectFrameHeight(saveForNC))
+        val newX = prefManager.getCorrectFrameX(saveMode)
+        val newY = prefManager.getCorrectFrameY(saveMode)
+        val newW = dpAsPx(prefManager.getCorrectFrameWidth(saveMode))
+        val newH = dpAsPx(prefManager.getCorrectFrameHeight(saveMode))
 
         var changed = false
 

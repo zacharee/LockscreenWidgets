@@ -166,8 +166,8 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
                 params.x += velX.toInt()
                 params.y += velY.toInt()
 
-                prefManager.setCorrectFrameX(saveForNC, params.x)
-                prefManager.setCorrectFrameY(saveForNC, params.y)
+                prefManager.setCorrectFrameX(saveMode, params.x)
+                prefManager.setCorrectFrameY(saveMode, params.y)
 
                 updateOverlay()
                 delegate.updateWallpaperLayerIfNeeded()
@@ -177,7 +177,7 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
                 params.width -= velX
                 params.x += (velX / 2)
 
-                prefManager.setCorrectFrameWidth(saveForNC, pxAsDp(params.width))
+                prefManager.setCorrectFrameWidth(saveMode, pxAsDp(params.width))
 
                 updateOverlay()
             }
@@ -186,7 +186,7 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
                 params.width += velX
                 params.x += (velX / 2)
 
-                prefManager.setCorrectFrameWidth(saveForNC, pxAsDp(params.width))
+                prefManager.setCorrectFrameWidth(saveMode, pxAsDp(params.width))
 
                 updateOverlay()
             }
@@ -195,7 +195,7 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
                 params.height -= velY
                 params.y += (velY / 2)
 
-                prefManager.setCorrectFrameHeight(saveForNC, pxAsDp(params.height))
+                prefManager.setCorrectFrameHeight(saveMode, pxAsDp(params.height))
 
                 updateOverlay()
             }
@@ -204,7 +204,7 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
                 params.height += velY
                 params.y += (velY / 2)
 
-                prefManager.setCorrectFrameHeight(saveForNC, pxAsDp(params.height))
+                prefManager.setCorrectFrameHeight(saveMode, pxAsDp(params.height))
 
                 updateOverlay()
             }

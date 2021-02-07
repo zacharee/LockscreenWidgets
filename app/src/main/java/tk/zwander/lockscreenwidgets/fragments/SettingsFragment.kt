@@ -45,6 +45,12 @@ class SettingsFragment : PreferenceFragmentCompat() {
             }
         }
 
+        findPreference<SwitchPreference>(PrefManager.KEY_SEPARATE_POS_FOR_LOCK_NC)?.apply {
+            if (!ncCondition) {
+                preferenceScreen.removePreferenceRecursively(key)
+            }
+        }
+
         findPreference<SwitchPreference>(PrefManager.KEY_HIDE_ON_FACEWIDGETS)?.apply {
             if (!requireContext().isOneUI || Build.VERSION.SDK_INT <= Build.VERSION_CODES.Q) {
                 preferenceScreen.removePreferenceRecursively(key)

@@ -146,6 +146,15 @@
             />
 
         <SwitchPreference
+            android:title="@string/settings_screen_separate_position_for_lock_nc"
+            android:summary="@string/settings_screen_separate_position_for_lock_nc_desc"
+            android:key="separate_position_for_lock_notification"
+            android:icon="@drawable/ic_baseline_layers_24"
+            android:defaultValue="false"
+            android:dependency="show_in_notification_center"
+            />
+
+        <SwitchPreference
             android:title="@string/settings_screen_animate_show_hide"
             android:summary="@string/settings_screen_animate_show_hide_desc"
             android:key="animate_show_hide"

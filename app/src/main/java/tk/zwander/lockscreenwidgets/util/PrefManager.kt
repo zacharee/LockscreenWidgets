@@ -9,6 +9,7 @@ import androidx.preference.PreferenceManager
 import com.google.gson.GsonBuilder
 import com.google.gson.reflect.TypeToken
 import tk.zwander.lockscreenwidgets.R
+import tk.zwander.lockscreenwidgets.data.Mode
 import tk.zwander.lockscreenwidgets.data.WidgetData
 import tk.zwander.lockscreenwidgets.data.WidgetSizeData
 
@@ -24,8 +25,10 @@ class PrefManager private constructor(context: Context) : ContextWrapper(context
         const val KEY_NOTIFICATION_FRAME_HEIGHT = "notification_frame_height"
         const val KEY_POS_X = "position_x"
         const val KEY_NOTIFICATION_POS_X = "notification_position_x"
+        const val KEY_LOCK_NOTIFICATION_POS_X = "lock_notification_position_x"
         const val KEY_POS_Y = "position_y"
         const val KEY_NOTIFICATION_POS_Y = "notification_position_y"
+        const val KEY_LOCK_NOTIFICATION_POS_Y = "lock_notification_position_y"
         const val KEY_FIRST_VIEWING = "first_viewing"
         const val KEY_FIRST_RUN = "first_run"
         const val KEY_HIDE_ON_NOTIFICATIONS = "hide_on_notifications"
@@ -52,6 +55,7 @@ class PrefManager private constructor(context: Context) : ContextWrapper(context
         const val KEY_REQUEST_UNLOCK = "request_unlock"
         const val KEY_HIDE_ON_FACEWIDGETS = "hide_on_facewidgets"
         const val KEY_HIDE_IN_LANDSCAPE = "hide_in_landscape"
+        const val KEY_SEPARATE_POS_FOR_LOCK_NC = "separate_position_for_lock_notification"
 
         const val VALUE_PAGE_INDICATOR_BEHAVIOR_HIDDEN = 0
         const val VALUE_PAGE_INDICATOR_BEHAVIOR_AUTO_HIDE = 1
@@ -159,6 +163,13 @@ class PrefManager private constructor(context: Context) : ContextWrapper(context
             putInt(KEY_NOTIFICATION_POS_X, value)
         }
 
+    //The horizontal position of the center of the frame in the locked NC (from the center of the screen) in pixels
+    var lockNotificationPosX: Int
+        get() = getInt(KEY_LOCK_NOTIFICATION_POS_X, notificationPosX)
+        set(value) {
+            putInt(KEY_LOCK_NOTIFICATION_POS_X, value)
+        }
+
     //The vertical position of the center of the frame (from the center of the screen) in pixels
     var posY: Int
         get() = getInt(KEY_POS_Y, 0)
@@ -171,6 +182,13 @@ class PrefManager private constructor(context: Context) : ContextWrapper(context
         get() = getInt(KEY_NOTIFICATION_POS_Y, calculateNCPosYFromTopDefault())
         set(value) {
             putInt(KEY_NOTIFICATION_POS_Y, value)
+        }
+
+    //The vertical position of the center of the frame in the NC (from the center of the screen) in pixels
+    var lockNotificationPosY: Int
+        get() = getInt(KEY_LOCK_NOTIFICATION_POS_Y, notificationPosY)
+        set(value) {
+            putInt(KEY_LOCK_NOTIFICATION_POS_Y, value)
         }
 
     //The current page/index of the frame the user is currently on. Stored value may be higher
@@ -255,6 +273,14 @@ class PrefManager private constructor(context: Context) : ContextWrapper(context
         get() = getBoolean(KEY_SHOW_DEBUG_ID_VIEW, false) && debugLog
         set(value) {
             putBoolean(KEY_SHOW_DEBUG_ID_VIEW, value)
+        }
+
+    //Whether the widget frame should use a separate position in the notification center
+    //when locked.
+    var separatePosForLockNC: Boolean
+        get() = getBoolean(KEY_SEPARATE_POS_FOR_LOCK_NC, false)
+        set(value) {
+            putBoolean(KEY_SEPARATE_POS_FOR_LOCK_NC, value)
         }
 
     //How the page indicator (scrollbar) should behave (always show, fade out on inactivity, never show).
@@ -355,44 +381,64 @@ class PrefManager private constructor(context: Context) : ContextWrapper(context
             putBoolean(KEY_HIDE_IN_LANDSCAPE, value)
         }
 
-    fun getCorrectFrameWidth(isNC: Boolean): Float {
-        return if (isNC) notificationFrameWidthDp
-        else frameWidthDp
+    fun getCorrectFrameWidth(mode: Mode): Float {
+        return when (mode) {
+            Mode.LOCK_NORMAL -> frameWidthDp
+            Mode.LOCK_NOTIFICATION, Mode.NOTIFICATION -> notificationFrameWidthDp
+        }
     }
 
-    fun setCorrectFrameWidth(isNC: Boolean, width: Float) {
-        if (isNC) notificationFrameWidthDp = width
-        else frameWidthDp = width
+    fun setCorrectFrameWidth(mode: Mode, width: Float) {
+        when (mode) {
+            Mode.LOCK_NORMAL -> frameWidthDp = width
+            Mode.NOTIFICATION, Mode.LOCK_NOTIFICATION -> notificationFrameWidthDp = width
+        }
     }
 
-    fun getCorrectFrameHeight(isNC: Boolean): Float {
-        return if (isNC) notificationFrameHeightDp
-        else frameHeightDp
+    fun getCorrectFrameHeight(mode: Mode): Float {
+        return when (mode) {
+            Mode.LOCK_NORMAL -> frameHeightDp
+            Mode.LOCK_NOTIFICATION, Mode.NOTIFICATION -> notificationFrameHeightDp
+        }
     }
 
-    fun setCorrectFrameHeight(isNC: Boolean, height: Float) {
-        if (isNC) notificationFrameHeightDp = height
-        else frameHeightDp = height
+    fun setCorrectFrameHeight(mode: Mode, height: Float) {
+        when (mode) {
+            Mode.LOCK_NORMAL -> frameHeightDp = height
+            Mode.NOTIFICATION, Mode.LOCK_NOTIFICATION -> notificationFrameHeightDp = height
+        }
     }
 
-    fun getCorrectFrameX(isNC: Boolean): Int {
-        return if (isNC) notificationPosX
-        else posX
+    fun getCorrectFrameX(mode: Mode): Int {
+        return when (mode) {
+            Mode.LOCK_NORMAL -> posX
+            Mode.LOCK_NOTIFICATION -> lockNotificationPosX
+            Mode.NOTIFICATION -> notificationPosX
+        }
     }
 
-    fun setCorrectFrameX(isNC: Boolean, x: Int) {
-        if (isNC) notificationPosX = x
-        else posX = x
+    fun setCorrectFrameX(mode: Mode, x: Int) {
+        when (mode) {
+            Mode.LOCK_NORMAL -> posX = x
+            Mode.LOCK_NOTIFICATION -> lockNotificationPosX = x
+            Mode.NOTIFICATION -> notificationPosX = x
+        }
     }
 
-    fun getCorrectFrameY(isNC: Boolean): Int {
-        return if (isNC) notificationPosY
-        else posY
+    fun getCorrectFrameY(mode: Mode): Int {
+        return when (mode) {
+            Mode.LOCK_NORMAL -> posY
+            Mode.LOCK_NOTIFICATION -> lockNotificationPosY
+            Mode.NOTIFICATION -> notificationPosY
+        }
     }
 
-    fun setCorrectFrameY(isNC: Boolean, y: Int) {
-        if (isNC) notificationPosY = y
-        else posY = y
+    fun setCorrectFrameY(mode: Mode, y: Int) {
+        when (mode) {
+            Mode.LOCK_NORMAL -> posY = y
+            Mode.LOCK_NOTIFICATION -> lockNotificationPosY = y
+            Mode.NOTIFICATION -> notificationPosY = y
+        }
     }
 
     fun getString(key: String, def: String? = null): String? = prefs.getString(key, def)
