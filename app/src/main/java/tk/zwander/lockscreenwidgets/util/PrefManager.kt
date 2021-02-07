@@ -91,7 +91,7 @@ class PrefManager private constructor(context: Context) : ContextWrapper(context
 
     //IDs the user has selected. The widget frame will hide if any of these are detected on-screen.
     var presentIds: HashSet<String>
-        get() = HashSet(getStringSet(KEY_PRESENT_IDS, HashSet())!!)
+        get() = HashSet(getStringSet(KEY_PRESENT_IDS, HashSet()))
         set(value) {
             putStringSet(
                 KEY_PRESENT_IDS,
@@ -100,7 +100,7 @@ class PrefManager private constructor(context: Context) : ContextWrapper(context
 
     //IDs the user has selected. The widget frame will hide if any of these are *not* detected on-screen.
     var nonPresentIds: HashSet<String>
-        get() = HashSet(getStringSet(KEY_NON_PRESENT_IDS, HashSet())!!)
+        get() = HashSet(getStringSet(KEY_NON_PRESENT_IDS, HashSet()))
         set(value) {
             putStringSet(
                 KEY_NON_PRESENT_IDS,
@@ -165,7 +165,7 @@ class PrefManager private constructor(context: Context) : ContextWrapper(context
 
     //The horizontal position of the center of the frame in the locked NC (from the center of the screen) in pixels
     var lockNotificationPosX: Int
-        get() = getInt(KEY_LOCK_NOTIFICATION_POS_X, notificationPosX)
+        get() = getInt(KEY_LOCK_NOTIFICATION_POS_X, calculateNCPosXFromRightDefault())
         set(value) {
             putInt(KEY_LOCK_NOTIFICATION_POS_X, value)
         }
@@ -186,7 +186,7 @@ class PrefManager private constructor(context: Context) : ContextWrapper(context
 
     //The vertical position of the center of the frame in the NC (from the center of the screen) in pixels
     var lockNotificationPosY: Int
-        get() = getInt(KEY_LOCK_NOTIFICATION_POS_Y, notificationPosY)
+        get() = getInt(KEY_LOCK_NOTIFICATION_POS_Y, calculateNCPosYFromTopDefault())
         set(value) {
             putInt(KEY_LOCK_NOTIFICATION_POS_Y, value)
         }
