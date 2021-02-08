@@ -467,6 +467,7 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
             mainHandler.post {
                 updateWallpaperLayerIfNeeded()
                 adapter.updateViews()
+                gridLayoutManager.scrollToPosition(prefManager.currentPage)
             }
         }
     }
