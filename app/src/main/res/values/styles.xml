@@ -6,6 +6,9 @@
         <item name="android:windowDrawsSystemBarBackgrounds">true</item>
         <item name="android:statusBarColor">@android:color/transparent</item>
         <item name="android:navigationBarColor">?colorSurface</item>
+
+        <item name="actionBarStyle">@style/AppTheme.ActionBar</item>
+        <item name="android:actionBarStyle">@style/AppTheme.ActionBar</item>
     </style>
 
     <style name="AppTheme.Null" parent="AppTheme">
@@ -21,5 +24,13 @@
         <item name="windowNoTitle">true</item>
         <item name="android:windowIsFloating">true</item>
         <item name="android:backgroundDimEnabled">false</item>
+    </style>
+
+    <style name="AppTheme.ActionBar" parent="Widget.MaterialComponents.ActionBar.Surface">
+        <item name="android:background">?colorSurface</item>
+        <item name="background">?colorSurface</item>
+
+        <item name="android:elevation">4dp</item>
+        <item name="elevation">4dp</item>
     </style>
 </resources>
