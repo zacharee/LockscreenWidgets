@@ -31,6 +31,7 @@
             android:animateLayoutChanges="false"
             android:scrollbars="horizontal"
             android:scrollbarThumbHorizontal="@drawable/scrollbar"
+            android:scrollbarTrackHorizontal="@drawable/scroll_track"
             android:scrollbarSize="4dp"
             tools:listitem="@layout/widget_page_holder"
             />
