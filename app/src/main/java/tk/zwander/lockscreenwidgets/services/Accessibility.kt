@@ -91,22 +91,29 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
         override fun onReceive(context: Context?, intent: Intent?) {
             when (intent?.action) {
                 Intent.ACTION_SCREEN_OFF -> {
-                    if (isDebug) {
-                        Log.e(App.DEBUG_LOG_TAG, "Screen off")
+                    //Sometimes ACTION_SCREEN_OFF gets received *after* the display turns on,
+                    //so this check is here to make sure the screen is actually off when this
+                    //action is received.
+                    if (!power.isInteractive) {
+                        if (isDebug) {
+                            Log.e(App.DEBUG_LOG_TAG, "Screen off")
+                        }
+
+                        accessibilityJob?.cancel()
+
+                        //If the device has some sort of AOD or ambient display, by the time we receive
+                        //an accessibility event and see that the display is off, it's usually too late
+                        //and the current screen content has "frozen," causing the widget frame to show
+                        //where it shouldn't. ACTION_SCREEN_OFF is called early enough that we can remove
+                        //the frame before it's frozen in place.
+                        removeOverlay()
+                        isTempHide = false
+                        isScreenOn = false
                     }
-
-                    accessibilityJob?.cancel()
-
-                    //If the device has some sort of AOD or ambient display, by the time we receive
-                    //an accessibility event and see that the display is off, it's usually too late
-                    //and the current screen content has "frozen," causing the widget frame to show
-                    //where it shouldn't. ACTION_SCREEN_OFF is called early enough that we can remove
-                    //the frame before it's frozen in place.
-                    removeOverlay()
-                    isTempHide = false
-                    isScreenOn = false
                 }
                 Intent.ACTION_SCREEN_ON -> {
+                    latestScreenOnTime = System.currentTimeMillis()
+
                     if (isDebug) {
                         Log.e(App.DEBUG_LOG_TAG, "Screen on")
                     }
@@ -138,6 +145,8 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
     private var isOnScreenOffMemo = false
     private var isOnFaceWidgets = false
     private var screenOrientation = Surface.ROTATION_0
+
+    private var latestScreenOnTime: Long = 0L
 
     private var notificationsPanelFullyExpanded: Boolean
         get() = delegate.notificationsPanelFullyExpanded
@@ -247,6 +256,9 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
         //that [event] will be reused by Android, causing some crash issues.
         //Make a copy that is recycled later.
         val eventCopy = AccessibilityEvent.obtain(event)
+
+        if (System.currentTimeMillis() - latestScreenOnTime < 10)
+            return
 
         accessibilityJob?.cancel()
         accessibilityJob = launch {
