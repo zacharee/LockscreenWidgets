@@ -11,10 +11,7 @@ import android.view.accessibility.AccessibilityEvent
 import android.view.accessibility.AccessibilityNodeInfo
 import android.view.accessibility.AccessibilityWindowInfo
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.MainScope
-import kotlinx.coroutines.cancel
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 import tk.zwander.lockscreenwidgets.App
 import tk.zwander.lockscreenwidgets.activities.DismissOrUnlockActivity
 import tk.zwander.lockscreenwidgets.appwidget.IDWidgetFactory
@@ -98,6 +95,8 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
                         Log.e(App.DEBUG_LOG_TAG, "Screen off")
                     }
 
+                    accessibilityJob?.cancel()
+
                     //If the device has some sort of AOD or ambient display, by the time we receive
                     //an accessibility event and see that the display is off, it's usually too late
                     //and the current screen content has "frozen," causing the widget frame to show
@@ -114,6 +113,7 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
 
                     isScreenOn = true
                     if (canShow())
+                        accessibilityJob?.cancel()
                         addOverlay()
                 }
             }
@@ -148,6 +148,8 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
     private var currentSysUiLayer = 1
     private var currentAppLayer = 0
     private var currentAppPackage: String? = null
+
+    private var accessibilityJob: Job? = null
 
     @SuppressLint("ClickableViewAccessibility", "NewApi")
     override fun onCreate() {
@@ -246,7 +248,8 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
         //Make a copy that is recycled later.
         val eventCopy = AccessibilityEvent.obtain(event)
 
-        launch {
+        accessibilityJob?.cancel()
+        accessibilityJob = launch {
             //This block here runs even when unlocked, but it only takes a millisecond at most,
             //so it shouldn't be noticeable to the user. We use this to check the current keyguard
             //state and, if applicable, send the keyguard dismissal broadcast.
