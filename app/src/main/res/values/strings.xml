@@ -109,7 +109,7 @@
     <string name="settings_screen_touch_protection_desc">Ignore touches on the widget frame when the proximity sensor is covered.</string>
 
     <string name="settings_screen_request_unlock">Prompt for Unlock/Dismiss Notification Center</string>
-    <string name="settings_screen_request_unlock_desc">Lockscreen Widgets attempts to detect when interacting with a widget launches an Activity. If it detects that event, it will prompt to unlock the device and dismiss the notification center. Some widgets launch non-interactive Activities in response to widget interactions, causing Lockscreen Widgets to prompt to unlock the device or dismiss the notification center. Disable this to prevent the behavior altogether.</string>
+    <string name="settings_screen_request_unlock_desc">If Lockscreen Widgets detects that a widget is launching an app, it will prompt to unlock the device and dismiss the notification center. Disable this option to prevent that behavior.</string>
 
     <string name="settings_screen_hide_on_facewidgets">Hide on FaceWidgets Screen</string>
     <string name="settings_screen_hide_on_facewidgets_desc">Hide the frame when the FaceWidgets screen is shown.</string>
