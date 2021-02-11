@@ -480,7 +480,15 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
         }
 
         override fun getFixScrollPos(velocityX: Int, velocityY: Int): Int {
-            return getPositionForVelocity(velocityX, velocityY)
+            if (childCount == 0) return 0
+
+            return if (velocityX > 0) {
+                firstVisiblePosition
+            } else {
+                lastVisiblePosition
+            }.also {
+                prefManager.currentPage = it
+            }.run { if (this == -1) 0 else this }
         }
 
         override fun getPositionForVelocity(velocityX: Int, velocityY: Int): Int {
