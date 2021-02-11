@@ -19,6 +19,7 @@ import android.view.WindowManager
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.isVisible
 import tk.zwander.lockscreenwidgets.adapters.IDAdapter
+import tk.zwander.lockscreenwidgets.data.Mode
 import tk.zwander.lockscreenwidgets.databinding.WidgetFrameBinding
 import tk.zwander.lockscreenwidgets.util.*
 import kotlin.math.roundToInt
@@ -45,6 +46,8 @@ class WidgetFrameView(context: Context, attrs: AttributeSet) : ConstraintLayout(
 
     var attachmentStateListener: ((isAttached: Boolean) -> Unit)? = null
     var animationState = AnimationState.STATE_IDLE
+
+    var informationCallback: IInformationCallback? = null
 
     private var maxPointerCount = 0
     private var alreadyIndicatedMoving = false
@@ -91,6 +94,16 @@ class WidgetFrameView(context: Context, attrs: AttributeSet) : ConstraintLayout(
         updateCornerRadius()
 
         binding.move.setOnTouchListener(MoveTouchListener())
+        binding.centerHorizontally.setOnClickListener {
+            informationCallback?.apply {
+                context.prefManager.setCorrectFrameX(saveMode, 0)
+            }
+        }
+        binding.centerVertically.setOnClickListener {
+            informationCallback?.apply {
+                context.prefManager.setCorrectFrameY(saveMode, 0)
+            }
+        }
 
         binding.leftDragger.setOnTouchListener(ExpandTouchListener { velX, _, isUp ->
             onLeftDragListener?.invoke(velX)

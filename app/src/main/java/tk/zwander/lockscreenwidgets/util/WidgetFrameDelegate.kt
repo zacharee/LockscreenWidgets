@@ -35,7 +35,7 @@ import kotlin.math.sign
  * Handle most of the logic involving the widget frame.
  * TODO: make this work with multiple frame "clients" (i.e. a preview in MainActivity).
  */
-class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper(context), SharedPreferences.OnSharedPreferenceChangeListener {
+class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper(context), SharedPreferences.OnSharedPreferenceChangeListener, IInformationCallback {
     companion object {
         private var instance: WidgetFrameDelegate? = null
 
@@ -71,7 +71,7 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
             isPendingNotificationStateChange = changed
         }
 
-    val saveMode: Mode
+    override val saveMode: Mode
         get() = when {
             notificationsPanelFullyExpanded && prefManager.showInNotificationCenter -> {
                 if (kgm.isKeyguardLocked && prefManager.separatePosForLockNC) {
@@ -243,6 +243,14 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
             PrefManager.KEY_FRAME_CORNER_RADIUS -> {
                 binding.frame.updateCornerRadius()
             }
+            PrefManager.KEY_POS_X,
+                PrefManager.KEY_POS_Y,
+                PrefManager.KEY_NOTIFICATION_POS_X,
+                PrefManager.KEY_NOTIFICATION_POS_Y,
+                PrefManager.KEY_LOCK_NOTIFICATION_POS_X,
+                PrefManager.KEY_LOCK_NOTIFICATION_POS_Y -> {
+                    updateParamsIfNeeded()
+                }
         }
     }
 
@@ -272,6 +280,8 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
 
             startActivity(intent)
         }
+
+        binding.frame.informationCallback = this
 
         //We only really want to be listening to widget changes
         //while the frame is on-screen. Otherwise, we're wasting battery.
@@ -330,7 +340,7 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
 
     fun addWindow(wm: WindowManager) {
         if (!binding.frame.isAttachedToWindow) {
-            updateParamsForNotificationCenterStateChange()
+            updateParamsIfNeeded()
         }
         binding.frame.addWindow(wm, params)
     }
@@ -425,7 +435,7 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
     fun updateAccessibilityPass() {
         if (binding.frame.animationState == WidgetFrameView.AnimationState.STATE_IDLE) {
             if (isPendingNotificationStateChange) {
-                updateParamsForNotificationCenterStateChange()
+                updateParamsIfNeeded()
                 isPendingNotificationStateChange = false
             }
         }
@@ -435,7 +445,7 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
      * Update the frame's params for its current state (normal
      * or in expanded notification center).
      */
-    private fun updateParamsForNotificationCenterStateChange() {
+    private fun updateParamsIfNeeded() {
         val newX = prefManager.getCorrectFrameX(saveMode)
         val newY = prefManager.getCorrectFrameY(saveMode)
         val newW = dpAsPx(prefManager.getCorrectFrameWidth(saveMode))

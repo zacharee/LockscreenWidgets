@@ -64,18 +64,50 @@
             android:background="@color/backdrop"
             tools:visibility="visible">
 
-            <ImageView
-                android:id="@+id/move"
-                android:layout_width="32dp"
-                android:layout_height="32dp"
-                android:src="@drawable/ic_baseline_move_24"
-                android:clickable="true"
-                android:focusable="true"
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:orientation="horizontal"
+                android:gravity="center"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                />
+                app:layout_constraintEnd_toEndOf="parent">
+
+                <ImageView
+                    android:id="@+id/center_vertically"
+                    android:layout_width="32dp"
+                    android:layout_height="32dp"
+                    android:layout_weight="1"
+                    android:src="@drawable/ic_baseline_vertical_align_center_24"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:background="?selectableItemBackgroundBorderless"
+                    />
+
+                <ImageView
+                    android:id="@+id/move"
+                    android:layout_width="32dp"
+                    android:layout_height="32dp"
+                    android:layout_weight="1"
+                    android:src="@drawable/ic_baseline_move_24"
+                    android:clickable="true"
+                    android:focusable="true"
+                    />
+
+                <ImageView
+                    android:id="@+id/center_horizontally"
+                    android:layout_width="32dp"
+                    android:layout_height="32dp"
+                    android:layout_weight="1"
+                    android:rotation="90"
+                    android:src="@drawable/ic_baseline_vertical_align_center_24"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:background="?selectableItemBackgroundBorderless"
+                    />
+
+            </LinearLayout>
 
             <View
                 android:id="@+id/edit_outline"
