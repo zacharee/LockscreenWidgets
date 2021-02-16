@@ -75,10 +75,10 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
     private val notificationCountListener =
         object : NotificationListener.NotificationCountListener() {
             override fun onUpdate(count: Int) {
-                notificationCount = count
+                delegate.notificationCount = count
                 if (prefManager.hideOnNotifications && count > 0) {
                     removeOverlay()
-                } else if (canShow()) {
+                } else if (delegate.canShow()) {
                     addOverlay()
                 }
             }
@@ -107,8 +107,8 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
                         //where it shouldn't. ACTION_SCREEN_OFF is called early enough that we can remove
                         //the frame before it's frozen in place.
                         removeOverlay()
-                        isTempHide = false
-                        isScreenOn = false
+                        delegate.isTempHide = false
+                        delegate.isScreenOn = false
                     }
                 }
                 Intent.ACTION_SCREEN_ON -> {
@@ -118,8 +118,8 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
                         Log.e(App.DEBUG_LOG_TAG, "Screen on")
                     }
 
-                    isScreenOn = true
-                    if (canShow())
+                    delegate.isScreenOn = true
+                    if (delegate.canShow())
                         accessibilityJob?.cancel()
                         addOverlay()
                 }
@@ -127,36 +127,7 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
         }
     }
 
-    private var notificationCount = 0
-    private var onMainLockscreen = true
-    private var showingNotificationsPanel = false
-    private var wasOnKeyguard = true
-    private var isScreenOn = true
-        set(value) {
-            field = value
-
-            if (!value) {
-                notificationsPanelFullyExpanded = false
-            }
-        }
-    private var isTempHide = false
-    private var hideForPresentIds = false
-    private var hideForNonPresentIds = false
-    private var isOnScreenOffMemo = false
-    private var isOnFaceWidgets = false
-    private var screenOrientation = Surface.ROTATION_0
-
     private var latestScreenOnTime: Long = 0L
-
-    private var notificationsPanelFullyExpanded: Boolean
-        get() = delegate.notificationsPanelFullyExpanded
-        set(value) {
-            delegate.notificationsPanelFullyExpanded = value
-        }
-
-    private var currentSysUiLayer = 1
-    private var currentAppLayer = 0
-    private var currentAppPackage: String? = null
 
     private var accessibilityJob: Job? = null
 
@@ -241,8 +212,8 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
             screenStateReceiver,
             IntentFilter(Intent.ACTION_SCREEN_OFF).apply { addAction(Intent.ACTION_SCREEN_ON) })
 
-        wasOnKeyguard = kgm.isKeyguardLocked
-        isScreenOn = power.isInteractive
+        delegate.wasOnKeyguard = kgm.isKeyguardLocked
+        delegate.isScreenOn = power.isInteractive
     }
 
     override fun onServiceConnected() {
@@ -268,16 +239,16 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
 
             //Check if the screen is on.
             val isScreenOn = power.isInteractive
-            if (this@Accessibility.isScreenOn != isScreenOn) {
+            if (delegate.isScreenOn != isScreenOn) {
                 //Make sure to turn off temp hide if it was on.
-                isTempHide = false
-                this@Accessibility.isScreenOn = isScreenOn
+                delegate.isTempHide = false
+                delegate.isScreenOn = isScreenOn
             }
 
             //Check if the lock screen is shown.
             val isOnKeyguard = kgm.isKeyguardLocked
-            if (isOnKeyguard != wasOnKeyguard) {
-                wasOnKeyguard = isOnKeyguard
+            if (isOnKeyguard != delegate.wasOnKeyguard) {
+                delegate.wasOnKeyguard = isOnKeyguard
                 //Update the keyguard dismissal Activity that the lock screen
                 //has been dismissed.
                 if (!isOnKeyguard) {
@@ -286,15 +257,15 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
                 }
             }
 
-            screenOrientation = wm.defaultDisplay.rotation
+            delegate.screenOrientation = wm.defaultDisplay.rotation
 
             if (isDebug) {
-                Log.e(App.DEBUG_LOG_TAG, "Accessibility event: $eventCopy, isScreenOn: ${isScreenOn}, wasOnKeyguard: $wasOnKeyguard")
+                Log.e(App.DEBUG_LOG_TAG, "Accessibility event: $eventCopy, isScreenOn: ${isScreenOn}, wasOnKeyguard: $isOnKeyguard")
             }
 
             //The below block can (very rarely) take over half a second to execute, so only run it
             //if we actually need to (i.e. on the lock screen and screen is on).
-            if ((wasOnKeyguard || prefManager.showInNotificationCenter) && isScreenOn) {
+            if ((delegate.wasOnKeyguard || prefManager.showInNotificationCenter) && isScreenOn) {
                 //Retrieve the current window set.
                 val windows = windows
                 //Get all windows with the System UI package name.
@@ -343,7 +314,7 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
                     //Samsung's Screen-Off Memo is really just a normal Activity that shows over the lock screen.
                     //However, it's not an Application-type window for some reason, so it won't hide with the
                     //currentAppLayer check. Explicitly check for its existence here.
-                    isOnScreenOffMemo = windows.any { win ->
+                    delegate.isOnScreenOffMemo = windows.any { win ->
                         win.safeRoot.run {
                             this?.packageName == "com.samsung.android.app.notes".also { this?.recycle() }
                         }
@@ -356,11 +327,11 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
                     //interacted with. The only time it should be anything else (usually 1) is
                     //if an app is displaying above the keyguard, such as the incoming call
                     //screen or the camera.
-                    currentAppLayer = if (appIndex != -1) windows.size - appIndex else appIndex
-                    currentSysUiLayer = if (sysUiIndex != -1) windows.size - sysUiIndex else sysUiIndex
+                    delegate.currentAppLayer = if (appIndex != -1) windows.size - appIndex else appIndex
+                    delegate.currentSysUiLayer = if (sysUiIndex != -1) windows.size - sysUiIndex else sysUiIndex
 
                     //This is mostly a debug value to see which app LSWidg thinks is on top.
-                    currentAppPackage = appWindow?.safeRoot?.run {
+                    delegate.currentAppPackage = appWindow?.safeRoot?.run {
                         packageName?.toString().also { recycle() }
                     }
 
@@ -370,7 +341,7 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
                     //IDs, and OEMs change them. "notification_panel" and "left_button" are largely unchanged,
                     //although this method isn't perfect.
                     if (prefManager.hideOnSecurityPage) {
-                        onMainLockscreen = sysUiNodes.any {
+                        delegate.onMainLockscreen = sysUiNodes.any {
                             it.hasVisibleIds(
                                 "com.android.systemui:id/notification_panel",
                                 "com.android.systemui:id/left_button"
@@ -382,7 +353,7 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
                         //Used for "Hide When Notification Shade Shown" so we know when it's actually expanded.
                         //Some devices don't even have left shortcuts, so also check for keyguard_indication_area.
                         //Just like the showingSecurityInput check, this is probably unreliable for some devices.
-                        showingNotificationsPanel = sysUiNodes.any {
+                        delegate.showingNotificationsPanel = sysUiNodes.any {
                             it.hasVisibleIds(
                                 "com.android.systemui:id/quick_settings_panel",
                                 "com.android.systemui:id/settings_button",
@@ -392,7 +363,7 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
                     }
 
                     if (prefManager.hideOnFaceWidgets) {
-                        isOnFaceWidgets = windows.any {
+                        delegate.isOnFaceWidgets = windows.any {
                             it.safeRoot.run {
                                 this?.packageName == "com.samsung.android.app.aodservice".also { this?.recycle() }
                             }
@@ -401,7 +372,7 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
                 } else {
                     //If we're not on the lock screen, whether or not Screen-Off Memo is showing
                     //doesn't matter.
-                    isOnScreenOffMemo = false
+                    delegate.isOnScreenOffMemo = false
                 }
 
                 //If the option to show when the NC is fully expanded is enabled,
@@ -409,7 +380,7 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
                 //ID, which is unique to One UI (it's the three-dot button), and is only
                 //visible when the NC is fully expanded.
                 if (prefManager.showInNotificationCenter) {
-                    notificationsPanelFullyExpanded = sysUiNodes.any {
+                    delegate.notificationsPanelFullyExpanded = sysUiNodes.any {
                         it.hasVisibleIds("com.android.systemui:id/more_button")
                     }
                 }
@@ -418,7 +389,7 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
                 //If any are, the frame will be hidden.
                 val presentIds = prefManager.presentIds
                 if (presentIds.isNotEmpty()) {
-                    hideForPresentIds = sysUiNodes.any {
+                    delegate.hideForPresentIds = sysUiNodes.any {
                         it.hasVisibleIds(presentIds)
                     }
                 }
@@ -427,7 +398,7 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
                 //(or are present but not visible). If any aren't, the frame will be hidden.
                 val nonPresentIds = prefManager.nonPresentIds
                 if (nonPresentIds.isNotEmpty()) {
-                    hideForNonPresentIds = sysUiNodes.none {
+                    delegate.hideForNonPresentIds = sysUiNodes.none {
                         nonPresentIds.contains(it.viewIdResourceName) }
                             || sysUiNodes.any { nonPresentIds.contains(it.viewIdResourceName) && !it.isVisibleToUser }
                 }
@@ -444,7 +415,7 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
             }
 
             //Check whether the frame can show.
-            if (canShow()) {
+            if (delegate.canShow()) {
                 delegate.updateAccessibilityPass()
                 addOverlay()
             } else {
@@ -462,7 +433,7 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
     override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
         when (key) {
             PrefManager.KEY_WIDGET_FRAME_ENABLED -> {
-                if (canShow()) {
+                if (delegate.canShow()) {
                     addOverlay()
                 } else {
                     removeOverlay()
@@ -517,87 +488,6 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
         }
         delegate.adapter.currentEditingInterfacePosition = -1
         delegate.binding.frame.removeWindow(wm)
-    }
-
-    /**
-     * Check if the widget frame should show onscreen. There are quite a few conditions for this.
-     * This method attempts to check those conditions in increasing order of intensiveness (check simple
-     * members first, then try SharedPreferences, then use IPC methods).
-     *
-     * The widget frame can only show if ALL of the following conditions are met:
-     *
-     * =======
-     * - [isScreenOn] is true
-     * - [isTempHide] is false
-     * - [notificationsPanelFullyExpanded] is true AND [PrefManager.showInNotificationCenter] is true
-     * - [PrefManager.widgetFrameEnabled] is true
-     * - [PrefManager.hideInLandscape] is false OR [screenOrientation] represents a portrait rotation
-     * =======
-     * OR
-     * =======
-     * - [wasOnKeyguard] is true
-     * - [isScreenOn] is true (i.e. the display is properly on: not in Doze or on the AOD)
-     * - [isTempHide] is false
-     * - [PrefManager.showOnMainLockScreen] is true OR [PrefManager.showInNotificationCenter] is false
-     * - [PrefManager.hideOnFaceWidgets] is false OR [isOnFaceWidgets] is false
-     * - [currentAppLayer] is less than 0 (i.e. doesn't exist)
-     * - [isOnScreenOffMemo] is false
-     * - [onMainLockscreen] is true OR [showingNotificationsPanel] is true OR [PrefManager.hideOnSecurityPage] is false
-     * - [showingNotificationsPanel] is false OR [PrefManager.hideOnNotificationShade] is false (OR [notificationsPanelFullyExpanded] is true AND [PrefManager.showInNotificationCenter] is true
-     * - [notificationCount] is 0 (i.e. no notifications shown on lock screen, not necessarily no notifications at all) OR [PrefManager.hideOnNotifications] is false
-     * - [hideForPresentIds] is false OR [PrefManager.presentIds] is empty
-     * - [hideForNonPresentIds] is false OR [PrefManager.nonPresentIds] is empty
-     * - [PrefManager.hideInLandscape] is false OR [screenOrientation] represents a portrait rotation
-     * - [PrefManager.widgetFrameEnabled] is true (i.e. the widget frame is actually enabled)
-     * =======
-     */
-    private fun canShow(): Boolean {
-        return (
-                (isScreenOn
-                        && !isTempHide
-                        && (notificationsPanelFullyExpanded && prefManager.showInNotificationCenter)
-                        && prefManager.widgetFrameEnabled
-                        && (!prefManager.hideInLandscape || screenOrientation == Surface.ROTATION_0 || screenOrientation == Surface.ROTATION_180)
-                ) || (wasOnKeyguard
-                        && isScreenOn
-                        && !isTempHide
-                        && (prefManager.showOnMainLockScreen || !prefManager.showInNotificationCenter)
-                        && (!prefManager.hideOnFaceWidgets || !isOnFaceWidgets)
-                        && currentAppLayer < 0
-                        && !isOnScreenOffMemo
-                        && (onMainLockscreen || showingNotificationsPanel || !prefManager.hideOnSecurityPage)
-                        && (!showingNotificationsPanel || !prefManager.hideOnNotificationShade)
-                        && (notificationCount == 0 || !prefManager.hideOnNotifications)
-                        && (!hideForPresentIds || prefManager.presentIds.isEmpty())
-                        && (!hideForNonPresentIds || prefManager.nonPresentIds.isEmpty())
-                        && (!prefManager.hideInLandscape || screenOrientation == Surface.ROTATION_0 || screenOrientation == Surface.ROTATION_180)
-                        && prefManager.widgetFrameEnabled
-                        )
-                ).also {
-                if (isDebug) {
-                    Log.e(
-                        App.DEBUG_LOG_TAG,
-                        "canShow: $it, " +
-                                "isScreenOn: ${isScreenOn}, " +
-                                "isTempHide: ${isTempHide}, " +
-                                "wasOnKeyguard: $wasOnKeyguard, " +
-                                "currentSysUiLayer: $currentSysUiLayer, " +
-                                "currentAppLayer: $currentAppLayer, " +
-                                "currentAppPackage: $currentAppPackage, " +
-                                "onMainLockscreen: $onMainLockscreen, " +
-                                "isOnFaceWidgets: $isOnFaceWidgets, " +
-                                "showingNotificationsPanel: $showingNotificationsPanel, " +
-                                "notificationsPanelFullyExpanded: $notificationsPanelFullyExpanded, " +
-                                "showOnMainLockScreen: ${prefManager.showOnMainLockScreen}" +
-                                "notificationCount: $notificationCount, " +
-                                "hideForPresentIds: $hideForPresentIds, " +
-                                "hideForNonPresentIds: $hideForNonPresentIds, " +
-                                "screenRotation: $screenOrientation, " +
-                                "widgetEnabled: ${prefManager.widgetFrameEnabled}\n\n",
-                        Exception()
-                    )
-                }
-            }
     }
 
     /**

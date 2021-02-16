@@ -15,11 +15,13 @@ import android.graphics.drawable.BitmapDrawable
 import android.net.Uri
 import android.os.*
 import android.provider.Settings
+import android.util.Log
 import android.view.*
 import android.widget.ImageView
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import com.arasthel.spannedgridlayoutmanager.SpannedGridLayoutManager
+import tk.zwander.lockscreenwidgets.App
 import tk.zwander.lockscreenwidgets.R
 import tk.zwander.lockscreenwidgets.activities.AddWidgetActivity
 import tk.zwander.lockscreenwidgets.activities.DismissOrUnlockActivity
@@ -71,8 +73,20 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
             isPendingNotificationStateChange = changed
         }
 
+    var isPreview = false
+        set(value) {
+            field = value
+
+            if (value) {
+                if (canShow()) {
+                    addWindow(wm)
+                }
+            }
+        }
+
     override val saveMode: Mode
         get() = when {
+            isPreview -> Mode.PREVIEW
             notificationsPanelFullyExpanded && prefManager.showInNotificationCenter -> {
                 if (kgm.isKeyguardLocked && prefManager.separatePosForLockNC) {
                     Mode.LOCK_NOTIFICATION
@@ -208,6 +222,38 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
     }
 
     private val kgm = context.getSystemService(Context.KEYGUARD_SERVICE) as KeyguardManager
+
+    // ACCESSIBILITY VALUES //
+    var isScreenOn = false
+        set(value) {
+            field = value
+
+            if (!value) {
+                isPreview = false
+                notificationsPanelFullyExpanded = false
+            }
+        }
+    var isTempHide = false
+        set(value) {
+            if (value) {
+                isPreview = false
+            }
+
+            field = value
+        }
+    var screenOrientation = Surface.ROTATION_0
+    var wasOnKeyguard = false
+    var isOnFaceWidgets = false
+    var currentAppLayer = 0
+    var isOnScreenOffMemo = false
+    var onMainLockscreen = false
+    var showingNotificationsPanel = false
+    var notificationCount = 0
+    var hideForPresentIds = false
+    var hideForNonPresentIds = false
+    var currentSysUiLayer = 1
+    var currentAppPackage: String? = null
+    // ******************** //
 
     override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
         when (key) {
@@ -346,6 +392,92 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
     }
 
     /**
+     * Check if the widget frame should show onscreen. There are quite a few conditions for this.
+     * This method attempts to check those conditions in increasing order of intensiveness (check simple
+     * members first, then try SharedPreferences, then use IPC methods).
+     *
+     * The widget frame can only show if ALL of the following conditions are met:
+     *
+     * =======
+     * - [saveMode] is [Mode.PREVIEW]
+     * =======
+     * OR
+     * =======
+     * - [isScreenOn] is true
+     * - [isTempHide] is false
+     * - [notificationsPanelFullyExpanded] is true AND [PrefManager.showInNotificationCenter] is true
+     * - [PrefManager.widgetFrameEnabled] is true
+     * - [PrefManager.hideInLandscape] is false OR [screenOrientation] represents a portrait rotation
+     * =======
+     * OR
+     * =======
+     * - [wasOnKeyguard] is true
+     * - [isScreenOn] is true (i.e. the display is properly on: not in Doze or on the AOD)
+     * - [isTempHide] is false
+     * - [PrefManager.showOnMainLockScreen] is true OR [PrefManager.showInNotificationCenter] is false
+     * - [PrefManager.hideOnFaceWidgets] is false OR [isOnFaceWidgets] is false
+     * - [currentAppLayer] is less than 0 (i.e. doesn't exist)
+     * - [isOnScreenOffMemo] is false
+     * - [onMainLockscreen] is true OR [showingNotificationsPanel] is true OR [PrefManager.hideOnSecurityPage] is false
+     * - [showingNotificationsPanel] is false OR [PrefManager.hideOnNotificationShade] is false (OR [notificationsPanelFullyExpanded] is true AND [PrefManager.showInNotificationCenter] is true
+     * - [notificationCount] is 0 (i.e. no notifications shown on lock screen, not necessarily no notifications at all) OR [PrefManager.hideOnNotifications] is false
+     * - [hideForPresentIds] is false OR [PrefManager.presentIds] is empty
+     * - [hideForNonPresentIds] is false OR [PrefManager.nonPresentIds] is empty
+     * - [PrefManager.hideInLandscape] is false OR [screenOrientation] represents a portrait rotation
+     * - [PrefManager.widgetFrameEnabled] is true (i.e. the widget frame is actually enabled)
+     * =======
+     */
+    fun canShow(): Boolean {
+        return (
+                saveMode == Mode.PREVIEW
+                        || (isScreenOn
+                        && !isTempHide
+                        && (notificationsPanelFullyExpanded && prefManager.showInNotificationCenter)
+                        && prefManager.widgetFrameEnabled
+                        && (!prefManager.hideInLandscape || screenOrientation == Surface.ROTATION_0 || screenOrientation == Surface.ROTATION_180)
+                        ) || (wasOnKeyguard
+                        && isScreenOn
+                        && !isTempHide
+                        && (prefManager.showOnMainLockScreen || !prefManager.showInNotificationCenter)
+                        && (!prefManager.hideOnFaceWidgets || !isOnFaceWidgets)
+                        && currentAppLayer < 0
+                        && !isOnScreenOffMemo
+                        && (onMainLockscreen || showingNotificationsPanel || !prefManager.hideOnSecurityPage)
+                        && (!showingNotificationsPanel || !prefManager.hideOnNotificationShade)
+                        && (notificationCount == 0 || !prefManager.hideOnNotifications)
+                        && (!hideForPresentIds || prefManager.presentIds.isEmpty())
+                        && (!hideForNonPresentIds || prefManager.nonPresentIds.isEmpty())
+                        && (!prefManager.hideInLandscape || screenOrientation == Surface.ROTATION_0 || screenOrientation == Surface.ROTATION_180)
+                        && prefManager.widgetFrameEnabled
+                        )
+                ).also {
+                    if (isDebug) {
+                        Log.e(
+                                App.DEBUG_LOG_TAG,
+                                "canShow: $it, " +
+                                        "isScreenOn: ${isScreenOn}, " +
+                                        "isTempHide: ${isTempHide}, " +
+                                        "wasOnKeyguard: $wasOnKeyguard, " +
+                                        "currentSysUiLayer: $currentSysUiLayer, " +
+                                        "currentAppLayer: $currentAppLayer, " +
+                                        "currentAppPackage: $currentAppPackage, " +
+                                        "onMainLockscreen: $onMainLockscreen, " +
+                                        "isOnFaceWidgets: $isOnFaceWidgets, " +
+                                        "showingNotificationsPanel: $showingNotificationsPanel, " +
+                                        "notificationsPanelFullyExpanded: $notificationsPanelFullyExpanded, " +
+                                        "showOnMainLockScreen: ${prefManager.showOnMainLockScreen}" +
+                                        "notificationCount: $notificationCount, " +
+                                        "hideForPresentIds: $hideForPresentIds, " +
+                                        "hideForNonPresentIds: $hideForNonPresentIds, " +
+                                        "screenRotation: $screenOrientation, " +
+                                        "widgetEnabled: ${prefManager.widgetFrameEnabled}\n\n",
+                                Exception()
+                        )
+                    }
+                }
+    }
+
+    /**
      * Compute and draw the appropriate portion of the wallpaper as the widget background,
      * if masked mode is enabled.
      *
@@ -361,7 +493,7 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
      */
     @SuppressLint("MissingPermission")
     fun updateWallpaperLayerIfNeeded() {
-        if (prefManager.maskedMode && (!notificationsPanelFullyExpanded || !prefManager.showInNotificationCenter)) {
+        if (!isPreview && prefManager.maskedMode && (!notificationsPanelFullyExpanded || !prefManager.showInNotificationCenter)) {
             val service = IWallpaperManager.Stub.asInterface(ServiceManager.getService("wallpaper"))
 
             val bundle = Bundle()

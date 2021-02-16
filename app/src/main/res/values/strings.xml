@@ -21,6 +21,7 @@
     <string name="id_list">ID List</string>
     <string name="more_info">More Info</string>
     <string name="search">Search</string>
+    <string name="preview">Preview</string>
 
     <string name="add_id_hint">com.android.systemui:id/some_id_here</string>
 

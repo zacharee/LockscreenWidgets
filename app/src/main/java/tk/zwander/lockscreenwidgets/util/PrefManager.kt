@@ -56,6 +56,10 @@ class PrefManager private constructor(context: Context) : ContextWrapper(context
         const val KEY_HIDE_ON_FACEWIDGETS = "hide_on_facewidgets"
         const val KEY_HIDE_IN_LANDSCAPE = "hide_in_landscape"
         const val KEY_SEPARATE_POS_FOR_LOCK_NC = "separate_position_for_lock_notification"
+        const val KEY_PREVIEW_POS_X = "preview_position_x"
+        const val KEY_PREVIEW_POS_Y = "preview_position_y"
+        const val KEY_PREVIEW_WIDTH = "preview_width"
+        const val KEY_PREVIEW_HEIGHT = "preview_height"
 
         const val VALUE_PAGE_INDICATOR_BEHAVIOR_HIDDEN = 0
         const val VALUE_PAGE_INDICATOR_BEHAVIOR_AUTO_HIDE = 1
@@ -135,6 +139,13 @@ class PrefManager private constructor(context: Context) : ContextWrapper(context
             putFloat(KEY_NOTIFICATION_FRAME_WIDTH, value)
         }
 
+    //The width of the frame in preview mode in DP
+    var previewWidthDp: Float
+        get() = getFloat(KEY_PREVIEW_WIDTH, getResourceFloat(R.integer.def_frame_width))
+        set(value) {
+            putFloat(KEY_PREVIEW_WIDTH, value)
+        }
+
     //The height of the frame in DP
     var frameHeightDp: Float
         get() = getFloat(KEY_FRAME_HEIGHT, getResourceFloat(R.integer.def_frame_height))
@@ -147,6 +158,12 @@ class PrefManager private constructor(context: Context) : ContextWrapper(context
         get() = getFloat(KEY_NOTIFICATION_FRAME_HEIGHT, getResourceFloat(R.integer.def_notification_frame_height))
         set(value) {
             putFloat(KEY_NOTIFICATION_FRAME_HEIGHT, value)
+        }
+
+    var previewHeightDp: Float
+        get() = getFloat(KEY_PREVIEW_HEIGHT, getResourceFloat(R.integer.def_frame_height))
+        set(value) {
+            putFloat(KEY_PREVIEW_HEIGHT, value)
         }
 
     //The horizontal position of the center of the frame (from the center of the screen) in pixels
@@ -170,6 +187,13 @@ class PrefManager private constructor(context: Context) : ContextWrapper(context
             putInt(KEY_LOCK_NOTIFICATION_POS_X, value)
         }
 
+    //The horizontal position of the center of the frame in preview mode in pixels
+    var previewPosX: Int
+        get() = getInt(KEY_PREVIEW_POS_X, 0)
+        set(value) {
+            putInt(KEY_PREVIEW_POS_X, value)
+        }
+
     //The vertical position of the center of the frame (from the center of the screen) in pixels
     var posY: Int
         get() = getInt(KEY_POS_Y, 0)
@@ -189,6 +213,13 @@ class PrefManager private constructor(context: Context) : ContextWrapper(context
         get() = getInt(KEY_LOCK_NOTIFICATION_POS_Y, calculateNCPosYFromTopDefault())
         set(value) {
             putInt(KEY_LOCK_NOTIFICATION_POS_Y, value)
+        }
+
+    //The vertical position of the center of the frame in preview mode in pixels.
+    var previewPosY: Int
+        get() = getInt(KEY_PREVIEW_POS_Y, 0)
+        set(value) {
+            putInt(KEY_PREVIEW_POS_Y, value)
         }
 
     //The current page/index of the frame the user is currently on. Stored value may be higher
@@ -385,6 +416,7 @@ class PrefManager private constructor(context: Context) : ContextWrapper(context
         return when (mode) {
             Mode.LOCK_NORMAL -> frameWidthDp
             Mode.LOCK_NOTIFICATION, Mode.NOTIFICATION -> notificationFrameWidthDp
+            Mode.PREVIEW -> previewWidthDp
         }
     }
 
@@ -392,6 +424,7 @@ class PrefManager private constructor(context: Context) : ContextWrapper(context
         when (mode) {
             Mode.LOCK_NORMAL -> frameWidthDp = width
             Mode.NOTIFICATION, Mode.LOCK_NOTIFICATION -> notificationFrameWidthDp = width
+            Mode.PREVIEW -> previewWidthDp = width
         }
     }
 
@@ -399,6 +432,7 @@ class PrefManager private constructor(context: Context) : ContextWrapper(context
         return when (mode) {
             Mode.LOCK_NORMAL -> frameHeightDp
             Mode.LOCK_NOTIFICATION, Mode.NOTIFICATION -> notificationFrameHeightDp
+            Mode.PREVIEW -> previewHeightDp
         }
     }
 
@@ -406,6 +440,7 @@ class PrefManager private constructor(context: Context) : ContextWrapper(context
         when (mode) {
             Mode.LOCK_NORMAL -> frameHeightDp = height
             Mode.NOTIFICATION, Mode.LOCK_NOTIFICATION -> notificationFrameHeightDp = height
+            Mode.PREVIEW -> previewHeightDp = height
         }
     }
 
@@ -414,6 +449,7 @@ class PrefManager private constructor(context: Context) : ContextWrapper(context
             Mode.LOCK_NORMAL -> posX
             Mode.LOCK_NOTIFICATION -> lockNotificationPosX
             Mode.NOTIFICATION -> notificationPosX
+            Mode.PREVIEW -> previewPosX
         }
     }
 
@@ -422,6 +458,7 @@ class PrefManager private constructor(context: Context) : ContextWrapper(context
             Mode.LOCK_NORMAL -> posX = x
             Mode.LOCK_NOTIFICATION -> lockNotificationPosX = x
             Mode.NOTIFICATION -> notificationPosX = x
+            Mode.PREVIEW -> previewPosX = x
         }
     }
 
@@ -430,6 +467,7 @@ class PrefManager private constructor(context: Context) : ContextWrapper(context
             Mode.LOCK_NORMAL -> posY
             Mode.LOCK_NOTIFICATION -> lockNotificationPosY
             Mode.NOTIFICATION -> notificationPosY
+            Mode.PREVIEW -> previewPosY
         }
     }
 
@@ -438,6 +476,7 @@ class PrefManager private constructor(context: Context) : ContextWrapper(context
             Mode.LOCK_NORMAL -> posY = y
             Mode.LOCK_NOTIFICATION -> lockNotificationPosY = y
             Mode.NOTIFICATION -> notificationPosY = y
+            Mode.PREVIEW -> previewPosY = y
         }
     }
 

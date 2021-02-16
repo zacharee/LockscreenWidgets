@@ -10,6 +10,7 @@ import tk.zwander.lockscreenwidgets.activities.AddWidgetActivity
 import tk.zwander.lockscreenwidgets.activities.OnboardingActivity
 import tk.zwander.lockscreenwidgets.activities.SettingsActivity
 import tk.zwander.lockscreenwidgets.activities.UsageActivity
+import tk.zwander.lockscreenwidgets.util.WidgetFrameDelegate
 import tk.zwander.lockscreenwidgets.util.isAccessibilityEnabled
 import tk.zwander.lockscreenwidgets.util.prefManager
 
@@ -24,6 +25,8 @@ class MainActivity : AppCompatActivity() {
     companion object {
         const val REQ_INTRO = 102
     }
+
+    private val frameDelegate by lazy { WidgetFrameDelegate.getInstance(this) }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -58,8 +61,17 @@ class MainActivity : AppCompatActivity() {
                 startActivity(intent)
                 true
             }
+            R.id.preview -> {
+                frameDelegate.isPreview = true
+                true
+            }
             else -> super.onOptionsItemSelected(item)
         }
+    }
+
+    override fun onPause() {
+        super.onPause()
+        frameDelegate.isPreview = false
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
