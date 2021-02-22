@@ -251,7 +251,9 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
     var hideForPresentIds = false
     var hideForNonPresentIds = false
     var currentSysUiLayer = 1
+    var currentSystemLayer = 0
     var currentAppPackage: String? = null
+    var isOnEdgePanel = false
     // ******************** //
 
     override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
@@ -421,6 +423,7 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
      * - [PrefManager.showOnMainLockScreen] is true OR [PrefManager.showInNotificationCenter] is false
      * - [PrefManager.hideOnFaceWidgets] is false OR [isOnFaceWidgets] is false
      * - [currentAppLayer] is less than 0 (i.e. doesn't exist)
+     * - [isOnEdgePanel] is false
      * - [isOnScreenOffMemo] is false
      * - [onMainLockscreen] is true OR [showingNotificationsPanel] is true OR [PrefManager.hideOnSecurityPage] is false
      * - [showingNotificationsPanel] is false OR [PrefManager.hideOnNotificationShade] is false (OR [notificationsPanelFullyExpanded] is true AND [PrefManager.showInNotificationCenter] is true
@@ -445,6 +448,7 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
                         && (prefManager.showOnMainLockScreen || !prefManager.showInNotificationCenter)
                         && (!prefManager.hideOnFaceWidgets || !isOnFaceWidgets)
                         && currentAppLayer < 0
+                        && !isOnEdgePanel
                         && !isOnScreenOffMemo
                         && (onMainLockscreen || showingNotificationsPanel || !prefManager.hideOnSecurityPage)
                         && (!showingNotificationsPanel || !prefManager.hideOnNotificationShade)
@@ -464,6 +468,7 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
                                         "wasOnKeyguard: $wasOnKeyguard, " +
                                         "currentSysUiLayer: $currentSysUiLayer, " +
                                         "currentAppLayer: $currentAppLayer, " +
+                                        "currentSystemLayer: $currentSystemLayer, " +
                                         "currentAppPackage: $currentAppPackage, " +
                                         "onMainLockscreen: $onMainLockscreen, " +
                                         "isOnFaceWidgets: $isOnFaceWidgets, " +

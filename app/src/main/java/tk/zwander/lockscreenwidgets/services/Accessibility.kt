@@ -272,6 +272,8 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
                 val sysUiWindows = findSystemUiWindows(windows)
                 //Get the topmost application window.
                 val appWindow = findTopAppWindow(windows)
+                //Get the topmost window that isn't an application and doesn't belong to System UI.
+                val nonAppSystemWindow = findTopNonSystemUIWindow(windows)
 
                 //Flatted the nodes/Views in the System UI windows into
                 //a single list for easier handling.
@@ -310,6 +312,8 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
                     val sysUiIndex = sysUiWindows.map { windows.indexOf(it.first) }.filter { it > -1 }
                         .minOrNull()
                         ?: -1
+                    //Find index of the topmost system window.
+                    val systemIndex = windows.indexOf(nonAppSystemWindow)
 
                     //Samsung's Screen-Off Memo is really just a normal Activity that shows over the lock screen.
                     //However, it's not an Application-type window for some reason, so it won't hide with the
@@ -329,6 +333,18 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
                     //screen or the camera.
                     delegate.currentAppLayer = if (appIndex != -1) windows.size - appIndex else appIndex
                     delegate.currentSysUiLayer = if (sysUiIndex != -1) windows.size - sysUiIndex else sysUiIndex
+                    delegate.currentSystemLayer = if (systemIndex != -1) windows.size - systemIndex else systemIndex
+
+                    if (isTouchWiz) {
+                        val systemRoot = nonAppSystemWindow?.safeRoot
+
+                        delegate.isOnEdgePanel = systemRoot?.packageName == "com.samsung.android.app.cocktailbarservice"
+                                && systemIndex == 0
+
+                        systemRoot?.recycle()
+                    } else {
+                        delegate.isOnEdgePanel = false
+                    }
 
                     //This is mostly a debug value to see which app LSWidg thinks is on top.
                     delegate.currentAppPackage = appWindow?.safeRoot?.run {
@@ -520,6 +536,22 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
         windows.forEach {
             if (it.type == AccessibilityWindowInfo.TYPE_APPLICATION) {
                 return it
+            }
+        }
+
+        return null
+    }
+
+    private fun findTopNonSystemUIWindow(windows: List<AccessibilityWindowInfo> = this.windows): AccessibilityWindowInfo? {
+        windows.forEach {
+            if (it.type != AccessibilityWindowInfo.TYPE_APPLICATION
+                && it.type != AccessibilityWindowInfo.TYPE_ACCESSIBILITY_OVERLAY) {
+                val safeRoot = it.safeRoot
+                if (safeRoot?.packageName != "com.android.systemui") {
+                    return it.also { safeRoot?.recycle() }
+                } else {
+                    safeRoot.recycle()
+                }
             }
         }
 
