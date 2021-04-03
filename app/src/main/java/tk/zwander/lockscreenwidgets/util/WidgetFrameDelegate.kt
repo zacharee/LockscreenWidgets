@@ -43,7 +43,7 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
         private var instance: WidgetFrameDelegate? = null
 
         fun getInstance(context: Context): WidgetFrameDelegate {
-            return instance ?: WidgetFrameDelegate(context).also {
+            return instance ?: WidgetFrameDelegate(context.applicationContext).also {
                 instance = it
             }
         }

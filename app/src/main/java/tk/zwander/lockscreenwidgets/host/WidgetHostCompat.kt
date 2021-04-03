@@ -1,5 +1,6 @@
 package tk.zwander.lockscreenwidgets.host
 
+import android.annotation.SuppressLint
 import android.app.PendingIntent
 import android.appwidget.AppWidgetHost
 import android.appwidget.AppWidgetHostView
@@ -25,14 +26,15 @@ abstract class WidgetHostCompat(
     onClickHandler: RemoteViews.OnClickHandler
 ) : AppWidgetHost(context, id, onClickHandler, Looper.getMainLooper()) {
     companion object {
+        @SuppressLint("StaticFieldLeak")
         private var instance: WidgetHostCompat? = null
 
         fun getInstance(context: Context, id: Int, unlockCallback: (() -> Unit)? = null): WidgetHostCompat {
             return instance ?: run {
                 (if (RemoteViews.OnClickHandler::class.java.isInterface) {
-                    WidgetHostInterface(context, id, unlockCallback)
+                    WidgetHostInterface(context.applicationContext, id, unlockCallback)
                 } else {
-                    WidgetHostClass(context, id, unlockCallback)
+                    WidgetHostClass(context.applicationContext, id, unlockCallback)
                 }).also {
                     instance = it
                 }
