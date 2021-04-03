@@ -13,7 +13,7 @@ import kotlinx.parcelize.TypeParceler
  * @property type whether this ID was added, removed, or hasn't changed state
  */
 @Parcelize
-@TypeParceler<IDData.IDType, IDData.IDParceler>
+//@TypeParceler<IDData.IDType, IDData.IDParceler>
 data class IDData(
     val id: String,
     var type: IDType

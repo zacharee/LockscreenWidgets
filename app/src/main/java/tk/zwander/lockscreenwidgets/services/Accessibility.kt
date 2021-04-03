@@ -357,6 +357,7 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
                     //IDs, and OEMs change them. "notification_panel" and "left_button" are largely unchanged,
                     //although this method isn't perfect.
                     if (prefManager.hideOnSecurityPage) {
+                        Log.e("LockscreenWidgets", "")
                         delegate.onMainLockscreen = sysUiNodes.any {
                             it.hasVisibleIds(
                                 "com.android.systemui:id/notification_panel",

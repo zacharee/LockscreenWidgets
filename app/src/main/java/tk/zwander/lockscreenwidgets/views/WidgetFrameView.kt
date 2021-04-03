@@ -12,12 +12,14 @@ import android.os.Build
 import android.os.VibrationEffect
 import android.os.Vibrator
 import android.util.AttributeSet
+import android.util.Log
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewConfiguration
 import android.view.WindowManager
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.isVisible
+import tk.zwander.lockscreenwidgets.App
 import tk.zwander.lockscreenwidgets.adapters.IDAdapter
 import tk.zwander.lockscreenwidgets.databinding.WidgetFrameBinding
 import tk.zwander.lockscreenwidgets.util.*
@@ -307,13 +309,22 @@ class WidgetFrameView(context: Context, attrs: AttributeSet) : ConstraintLayout(
     }
 
     fun addWindow(wm: WindowManager, params: WindowManager.LayoutParams) {
+        if (context.isDebug) {
+            Log.e(App.DEBUG_LOG_TAG, "Trying to add overlay $animationState", Exception())
+        }
         if (!isAttachedToWindow && animationState != AnimationState.STATE_ADDING) {
+            if (context.isDebug) {
+                Log.e(App.DEBUG_LOG_TAG, "Adding overlay", Exception())
+            }
             animationState = AnimationState.STATE_ADDING
             try {
                 wm.addView(this, params)
                 clearAnimation()
             } catch (e: Exception) {}
         } else if (isAttachedToWindow) {
+            if (context.isDebug) {
+                Log.e(App.DEBUG_LOG_TAG, "Overlay already added, updating params", Exception())
+            }
             updateWindow(wm, params)
         }
     }

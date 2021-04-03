@@ -587,6 +587,10 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
      * or in expanded notification center).
      */
     private fun updateParamsIfNeeded() {
+        if (isDebug) {
+            Log.e(App.DEBUG_LOG_TAG, "Updating params", Exception())
+        }
+
         val newX = prefManager.getCorrectFrameX(saveMode)
         val newY = prefManager.getCorrectFrameY(saveMode)
         val newW = dpAsPx(prefManager.getCorrectFrameWidth(saveMode))
