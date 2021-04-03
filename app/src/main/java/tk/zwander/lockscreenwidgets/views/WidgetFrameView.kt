@@ -319,8 +319,12 @@ class WidgetFrameView(context: Context, attrs: AttributeSet) : ConstraintLayout(
             animationState = AnimationState.STATE_ADDING
             try {
                 wm.addView(this, params)
-                clearAnimation()
-            } catch (e: Exception) {}
+            } catch (e: Exception) {
+                animationState = AnimationState.STATE_IDLE
+                if (context.isDebug) {
+                    Log.e(App.DEBUG_LOG_TAG, "Unable to add overlay", e)
+                }
+            }
         } else if (isAttachedToWindow) {
             if (context.isDebug) {
                 Log.e(App.DEBUG_LOG_TAG, "Overlay already added, updating params", Exception())
@@ -344,9 +348,20 @@ class WidgetFrameView(context: Context, attrs: AttributeSet) : ConstraintLayout(
                 postDelayed({
                     try {
                         wm.removeView(this)
-                    } catch (e: Exception) {}
+                    } catch (e: Exception) {
+                        if (context.isDebug) {
+                            Log.e(App.DEBUG_LOG_TAG, "Unable to remove overlay", e)
+                        }
+                        animationState = AnimationState.STATE_IDLE
+                    }
                 }, 50)
             }
+        } else if (!isAttachedToWindow && animationState != AnimationState.STATE_IDLE) {
+            try {
+                wm.removeView(this)
+            } catch (e: Exception) {}
+
+            animationState = AnimationState.STATE_IDLE
         }
     }
 

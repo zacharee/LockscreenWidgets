@@ -39,6 +39,7 @@ import kotlin.math.sign
  */
 class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper(context), SharedPreferences.OnSharedPreferenceChangeListener, IInformationCallback {
     companion object {
+        @SuppressLint("StaticFieldLeak")
         private var instance: WidgetFrameDelegate? = null
 
         fun getInstance(context: Context): WidgetFrameDelegate {
