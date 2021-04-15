@@ -4,9 +4,9 @@ import android.app.Application
 import android.content.ComponentName
 import android.content.pm.PackageManager
 import android.os.Build
+import org.lsposed.hiddenapibypass.HiddenApiBypass
 import tk.zwander.lockscreenwidgets.tiles.NCTile
 import tk.zwander.lockscreenwidgets.util.isOneUI
-import tk.zwander.unblacklister.disableApiBlacklist
 
 /**
  * The main application.
@@ -26,7 +26,9 @@ class App : Application() {
     override fun onCreate() {
         super.onCreate()
         //Make sure we can access hidden APIs
-        disableApiBlacklist()
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            HiddenApiBypass.setHiddenApiExemptions("L")
+        }
 
         //This should only run on Nougat and above.
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
