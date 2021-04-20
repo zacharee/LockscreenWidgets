@@ -144,15 +144,17 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
                 delegate.updateWallpaperLayerIfNeeded()
             }
 
+            binding.frame.onAfterMoveListener = {
+                delegate.updateWallpaperLayerIfNeeded()
+            }
+
             binding.frame.onMoveListener = { velX, velY ->
                 params.x += velX.toInt()
                 params.y += velY.toInt()
 
-                prefManager.setCorrectFrameX(saveMode, params.x)
-                prefManager.setCorrectFrameY(saveMode, params.y)
-
                 updateOverlay()
-                delegate.updateWallpaperLayerIfNeeded()
+
+                prefManager.setCorrectFramePos(saveMode, params.x, params.y)
             }
 
             binding.frame.onLeftDragListener = { velX ->

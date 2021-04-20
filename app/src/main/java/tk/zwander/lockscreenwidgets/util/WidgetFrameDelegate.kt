@@ -589,7 +589,7 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
      */
     private fun updateParamsIfNeeded() {
         if (isDebug) {
-            Log.e(App.DEBUG_LOG_TAG, "Updating params", Exception())
+            Log.e(App.DEBUG_LOG_TAG, "Checking if params need to be updated", Exception())
         }
 
         val newX = prefManager.getCorrectFrameX(saveMode)
@@ -600,26 +600,41 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
         var changed = false
 
         if (params.x != newX) {
+            if (isDebug) {
+                Log.e("LockscreenWidgets", "x changed", Exception())
+            }
             changed = true
             params.x = newX
         }
 
         if (params.y != newY) {
+            if (isDebug) {
+                Log.e("LockscreenWidgets", "y changed", Exception())
+            }
             changed = true
             params.y = newY
         }
 
         if (params.width != newW) {
+            if (isDebug) {
+                Log.e("LockscreenWidgets", "w changed", Exception())
+            }
             changed = true
             params.width = newW
         }
 
         if (params.height != newH) {
+            if (isDebug) {
+                Log.e("LockscreenWidgets", "h changed", Exception())
+            }
             changed = true
             params.height = newH
         }
 
         if (changed) {
+            if (isDebug) {
+                Log.e(App.DEBUG_LOG_TAG, "Updating params", Exception())
+            }
             binding.frame.updateWindow(wm, params)
             mainHandler.post {
                 updateWallpaperLayerIfNeeded()
