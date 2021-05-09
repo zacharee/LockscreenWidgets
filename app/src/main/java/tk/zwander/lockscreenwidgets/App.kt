@@ -1,7 +1,9 @@
 package tk.zwander.lockscreenwidgets
 
+import android.annotation.SuppressLint
 import android.app.Application
 import android.content.ComponentName
+import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Build
 import org.lsposed.hiddenapibypass.HiddenApiBypass
@@ -21,10 +23,17 @@ import tk.zwander.lockscreenwidgets.util.isOneUI
 class App : Application() {
     companion object {
         const val DEBUG_LOG_TAG = "LockscreenWidgetsDebug"
+
+        @SuppressLint("StaticFieldLeak")
+        var globalContext: Context? = null
+            private set
     }
 
     override fun onCreate() {
         super.onCreate()
+
+        globalContext = this
+
         //Make sure we can access hidden APIs
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
             HiddenApiBypass.setHiddenApiExemptions("L")

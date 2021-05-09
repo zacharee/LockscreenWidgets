@@ -318,27 +318,16 @@ class WidgetFrameView(context: Context, attrs: AttributeSet) : ConstraintLayout(
                 Log.e(App.DEBUG_LOG_TAG, "Adding overlay", Exception())
             }
             animationState = AnimationState.STATE_ADDING
-            try {
-                wm.addView(this, params)
-            } catch (e: Exception) {
+
+            if (!wm.safeAddView(this, params)) {
                 animationState = AnimationState.STATE_IDLE
-                if (context.isDebug) {
-                    Log.e(App.DEBUG_LOG_TAG, "Unable to add overlay", e)
-                }
             }
-        } else if (isAttachedToWindow) {
-//            if (context.isDebug) {
-//                Log.e(App.DEBUG_LOG_TAG, "Overlay already added, updating params", Exception())
-//            }
-//            updateWindow(wm, params)
         }
     }
 
     fun updateWindow(wm: WindowManager, params: WindowManager.LayoutParams) {
         if (isAttachedToWindow) {
-            try {
-                wm.updateViewLayout(this, params)
-            } catch (e: Exception) {}
+            wm.safeUpdateViewLayout(this, params)
         }
     }
 
@@ -347,20 +336,13 @@ class WidgetFrameView(context: Context, attrs: AttributeSet) : ConstraintLayout(
             animationState = AnimationState.STATE_REMOVING
             binding.frameCard.fadeAndScaleOut {
                 postDelayed({
-                    try {
-                        wm.removeView(this)
-                    } catch (e: Exception) {
-                        if (context.isDebug) {
-                            Log.e(App.DEBUG_LOG_TAG, "Unable to remove overlay", e)
-                        }
+                    if (!wm.safeRemoveView(this)) {
                         animationState = AnimationState.STATE_IDLE
                     }
                 }, 50)
             }
         } else if (!isAttachedToWindow && animationState != AnimationState.STATE_IDLE) {
-            try {
-                wm.removeView(this)
-            } catch (e: Exception) {}
+            wm.safeRemoveView(this)
 
             animationState = AnimationState.STATE_IDLE
         }
