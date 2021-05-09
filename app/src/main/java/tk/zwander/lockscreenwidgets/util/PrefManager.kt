@@ -462,6 +462,29 @@ class PrefManager private constructor(context: Context) : ContextWrapper(context
         }
     }
 
+    fun setCorrectFramePos(mode: Mode, x: Int, y: Int) {
+        prefs.edit {
+            when (mode) {
+                Mode.LOCK_NORMAL -> {
+                    putInt(KEY_POS_X, x)
+                    putInt(KEY_POS_Y, y)
+                }
+                Mode.LOCK_NOTIFICATION -> {
+                    putInt(KEY_LOCK_NOTIFICATION_POS_X, x)
+                    putInt(KEY_LOCK_NOTIFICATION_POS_Y, y)
+                }
+                Mode.NOTIFICATION -> {
+                    putInt(KEY_NOTIFICATION_POS_X, x)
+                    putInt(KEY_NOTIFICATION_POS_Y, y)
+                }
+                Mode.PREVIEW -> {
+                    putInt(KEY_PREVIEW_POS_X, x)
+                    putInt(KEY_NOTIFICATION_POS_Y, y)
+                }
+            }
+        }
+    }
+
     fun getCorrectFrameY(mode: Mode): Int {
         return when (mode) {
             Mode.LOCK_NORMAL -> posY

@@ -44,6 +44,7 @@ class WidgetFrameView(context: Context, attrs: AttributeSet) : ConstraintLayout(
 
     var onTempHideListener: (() -> Unit)? = null
     var onAfterResizeListener: (() -> Unit)? = null
+    var onAfterMoveListener: (() -> Unit)? = null
 
     var attachmentStateListener: ((isAttached: Boolean) -> Unit)? = null
     var animationState = AnimationState.STATE_IDLE
@@ -326,10 +327,10 @@ class WidgetFrameView(context: Context, attrs: AttributeSet) : ConstraintLayout(
                 }
             }
         } else if (isAttachedToWindow) {
-            if (context.isDebug) {
-                Log.e(App.DEBUG_LOG_TAG, "Overlay already added, updating params", Exception())
-            }
-            updateWindow(wm, params)
+//            if (context.isDebug) {
+//                Log.e(App.DEBUG_LOG_TAG, "Overlay already added, updating params", Exception())
+//            }
+//            updateWindow(wm, params)
         }
     }
 
@@ -493,6 +494,10 @@ class WidgetFrameView(context: Context, attrs: AttributeSet) : ConstraintLayout(
 
                     onMoveListener?.invoke(velX, velY)
                     onMoveListener != null
+                }
+                MotionEvent.ACTION_UP -> {
+                    onAfterMoveListener?.invoke()
+                    true
                 }
                 else -> false
             }
