@@ -583,6 +583,12 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
         }
     }
 
+    /**
+     * Force the display to remain on, or remove that force.
+     *
+     * @param wm the WindowManager to use.
+     * @param on whether to add or remove the force flag.
+     */
     fun forceWakelock(wm: WindowManager, on: Boolean) {
         if (on) {
             params.flags = params.flags or WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON
