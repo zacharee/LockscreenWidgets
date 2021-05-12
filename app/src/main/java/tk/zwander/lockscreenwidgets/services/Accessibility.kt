@@ -119,9 +119,10 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
                     }
 
                     delegate.isScreenOn = true
-                    if (delegate.canShow())
+                    if (delegate.canShow()) {
                         accessibilityJob?.cancel()
                         addOverlay()
+                    }
                 }
             }
         }
