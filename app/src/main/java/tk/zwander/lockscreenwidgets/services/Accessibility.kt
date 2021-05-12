@@ -107,6 +107,7 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
                         //where it shouldn't. ACTION_SCREEN_OFF is called early enough that we can remove
                         //the frame before it's frozen in place.
                         removeOverlay()
+                        delegate.forceWakelock(wm, false)
                         delegate.isTempHide = false
                         delegate.isScreenOn = false
                     }
@@ -195,13 +196,7 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
             }
 
             binding.frame.onInterceptListener = { down ->
-                if (down) {
-                    params.flags = params.flags or WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON
-                } else {
-                    params.flags = params.flags and WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON.inv()
-                }
-
-                updateOverlay()
+                forceWakelock(wm, down)
             }
 
             binding.frame.onTempHideListener = {

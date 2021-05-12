@@ -583,6 +583,16 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
         }
     }
 
+    fun forceWakelock(wm: WindowManager, on: Boolean) {
+        if (on) {
+            params.flags = params.flags or WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON
+        } else {
+            params.flags = params.flags and WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON.inv()
+        }
+
+        binding.frame.updateWindow(wm, params)
+    }
+
     /**
      * Update the frame's params for its current state (normal
      * or in expanded notification center).
