@@ -69,6 +69,12 @@ val AccessibilityWindowInfo.safeRoot: AccessibilityNodeInfo?
         null
     }
 
+fun <T> AccessibilityNodeInfo?.use(block: (AccessibilityNodeInfo?) -> T): T {
+    val result = block(this)
+    this?.recycle()
+    return result
+}
+
 //Take a DP value and return its representation in pixels.
 fun Context.dpAsPx(dpVal: Number) =
     TypedValue.applyDimension(

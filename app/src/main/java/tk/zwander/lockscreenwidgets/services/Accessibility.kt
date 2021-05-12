@@ -317,8 +317,8 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
                     //However, it's not an Application-type window for some reason, so it won't hide with the
                     //currentAppLayer check. Explicitly check for its existence here.
                     delegate.isOnScreenOffMemo = windows.any { win ->
-                        win.safeRoot.run {
-                            this?.packageName == "com.samsung.android.app.notes".also { this?.recycle() }
+                        win.safeRoot.use {
+                            it?.packageName == "com.samsung.android.app.notes"
                         }
                     }
 
@@ -379,8 +379,8 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
 
                     if (prefManager.hideOnFaceWidgets) {
                         delegate.isOnFaceWidgets = windows.any {
-                            it.safeRoot.run {
-                                this?.packageName == "com.samsung.android.app.aodservice".also { this?.recycle() }
+                            it.safeRoot.use { node ->
+                                node?.packageName == "com.samsung.android.app.aodservice"
                             }
                         }
                     }
