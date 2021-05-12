@@ -77,6 +77,18 @@ class WidgetFrameView(context: Context, attrs: AttributeSet) : ConstraintLayout(
         }
     }
 
+    private val sharedPreferencesChangeHandler = HandlerRegistry {
+        handler(PrefManager.KEY_TOUCH_PROTECTION) {
+            if (isAttachedToWindow) {
+                if (context.prefManager.touchProtection) {
+                    registerProxListener()
+                } else {
+                    unregisterProxListener()
+                }
+            }
+        }
+    }
+
     private val binding by lazy { WidgetFrameBinding.bind(this) }
 
     enum class AnimationState {
@@ -249,18 +261,8 @@ class WidgetFrameView(context: Context, attrs: AttributeSet) : ConstraintLayout(
         return (maxPointerCount > 1 || isProxTooClose)
     }
 
-    override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
-        when (key) {
-            PrefManager.KEY_TOUCH_PROTECTION -> {
-                if (isAttachedToWindow) {
-                    if (context.prefManager.touchProtection) {
-                        registerProxListener()
-                    } else {
-                        unregisterProxListener()
-                    }
-                }
-            }
-        }
+    override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences, key: String) {
+        sharedPreferencesChangeHandler.handle(key)
     }
 
     fun updateCornerRadius() {

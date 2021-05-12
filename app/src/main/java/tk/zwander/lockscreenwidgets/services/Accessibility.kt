@@ -129,6 +129,24 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
         }
     }
 
+    private val sharedPreferencesChangeHandler = HandlerRegistry {
+        handler(PrefManager.KEY_WIDGET_FRAME_ENABLED) {
+            if (delegate.canShow()) {
+                addOverlay()
+            } else {
+                removeOverlay()
+            }
+        }
+        handler(PrefManager.KEY_ACCESSIBILITY_EVENT_DELAY) {
+            serviceInfo = serviceInfo.apply {
+                notificationTimeout = prefManager.accessibilityEventDelay.toLong()
+            }
+        }
+        handler(PrefManager.KEY_DEBUG_LOG) {
+            IDListProvider.sendUpdate(this@Accessibility)
+        }
+    }
+
     private var latestScreenOnTime: Long = 0L
 
     private var accessibilityJob: Job? = null
@@ -445,24 +463,8 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
 
     override fun onInterrupt() {}
 
-    override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
-        when (key) {
-            PrefManager.KEY_WIDGET_FRAME_ENABLED -> {
-                if (delegate.canShow()) {
-                    addOverlay()
-                } else {
-                    removeOverlay()
-                }
-            }
-            PrefManager.KEY_ACCESSIBILITY_EVENT_DELAY -> {
-                serviceInfo = serviceInfo.apply {
-                    notificationTimeout = prefManager.accessibilityEventDelay.toLong()
-                }
-            }
-            PrefManager.KEY_DEBUG_LOG -> {
-                IDListProvider.sendUpdate(this)
-            }
-        }
+    override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences, key: String) {
+        sharedPreferencesChangeHandler.handle(key)
     }
 
     override fun onDestroy() {
