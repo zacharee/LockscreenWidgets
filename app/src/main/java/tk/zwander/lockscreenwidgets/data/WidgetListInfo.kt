@@ -2,7 +2,7 @@ package tk.zwander.lockscreenwidgets.data
 
 import android.appwidget.AppWidgetProviderInfo
 import android.content.pm.ApplicationInfo
-import tk.zwander.lockscreenwidgets.activities.AddWidgetActivity
+import tk.zwander.lockscreenwidgets.activities.add.AddWidgetActivity
 
 /**
  * Hold the info for a widget listed in [AddWidgetActivity]

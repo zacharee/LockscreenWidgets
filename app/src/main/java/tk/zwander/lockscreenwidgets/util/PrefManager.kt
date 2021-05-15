@@ -12,6 +12,7 @@ import tk.zwander.lockscreenwidgets.R
 import tk.zwander.lockscreenwidgets.data.Mode
 import tk.zwander.lockscreenwidgets.data.WidgetData
 import tk.zwander.lockscreenwidgets.data.WidgetSizeData
+import tk.zwander.lockscreenwidgets.data.WidgetTileInfo
 
 /**
  * Handle data persistence.
@@ -60,6 +61,7 @@ class PrefManager private constructor(context: Context) : ContextWrapper(context
         const val KEY_PREVIEW_POS_Y = "preview_position_y"
         const val KEY_PREVIEW_WIDTH = "preview_width"
         const val KEY_PREVIEW_HEIGHT = "preview_height"
+        const val KEY_CUSTOM_TILES = "custom_tiles"
 
         const val VALUE_PAGE_INDICATOR_BEHAVIOR_HIDDEN = 0
         const val VALUE_PAGE_INDICATOR_BEHAVIOR_AUTO_HIDE = 1
@@ -236,6 +238,19 @@ class PrefManager private constructor(context: Context) : ContextWrapper(context
         get() = getInt(KEY_ACCESSIBILITY_EVENT_DELAY, 50)
         set(value) {
             putInt(KEY_ACCESSIBILITY_EVENT_DELAY, value)
+        }
+
+    //The widgets assigned to custom QS tiles.
+    var customTiles: HashMap<Int, WidgetTileInfo>
+        get() = gson.fromJson(
+            getString(KEY_CUSTOM_TILES, null),
+            object : TypeToken<HashMap<Int, WidgetTileInfo>>(){}.type
+        ) ?: HashMap()
+        set(value) {
+            putString(
+                KEY_CUSTOM_TILES,
+                gson.toJson(value)
+            )
         }
 
     //If it's the first time the user's seeing the widget frame. Used to decide

@@ -7,7 +7,7 @@ import android.animation.ObjectAnimator
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
-import android.graphics.Point
+import android.graphics.*
 import android.net.Uri
 import android.os.Build
 import android.os.Handler
@@ -19,12 +19,14 @@ import android.view.View
 import android.view.WindowManager
 import android.view.accessibility.AccessibilityNodeInfo
 import android.view.accessibility.AccessibilityWindowInfo
+import androidx.core.graphics.get
 import tk.zwander.lockscreenwidgets.R
 import tk.zwander.lockscreenwidgets.data.AppInfo
 import tk.zwander.lockscreenwidgets.data.WidgetListInfo
 import tk.zwander.lockscreenwidgets.services.Accessibility
 import tk.zwander.lockscreenwidgets.services.NotificationListener
 import kotlin.math.roundToInt
+
 
 /**
  * Various utility functions
@@ -240,4 +242,47 @@ fun AccessibilityNodeInfo.hasVisibleIds(vararg ids: String): Boolean {
 
 fun AccessibilityNodeInfo.hasVisibleIds(ids: Iterable<String>): Boolean {
     return ids.contains(viewIdResourceName) && isVisibleToUser
+}
+
+fun Bitmap.cropBitmapTransparency(): Bitmap {
+    var minX = width
+    var minY = height
+    var maxX = -1
+    var maxY = -1
+    for (y in 0 until height) {
+        for (x in 0 until width) {
+            val alpha = getPixel(x, y) shr 24 and 255
+            if (alpha > 0) // pixel is not 100% transparent
+            {
+                if (x < minX) minX = x
+                if (x > maxX) maxX = x
+                if (y < minY) minY = y
+                if (y > maxY) maxY = y
+            }
+        }
+    }
+    return if (maxX < minX || maxY < minY) {
+        //Fully transparent, return unchanged
+        this
+    } else Bitmap.createBitmap(
+        this,
+        minX,
+        minY,
+        maxX - minX + 1,
+        maxY - minY + 1
+    )
+}
+
+fun String.textAsBitmap(textSize: Float, textColor: Int): Bitmap? {
+    val paint = Paint(Paint.ANTI_ALIAS_FLAG)
+    paint.textSize = textSize
+    paint.color = textColor
+    paint.textAlign = Paint.Align.LEFT
+    val baseline: Float = -paint.ascent() // ascent() is negative
+    val width = (paint.measureText(this) + 0.5f).toInt() // round
+    val height = (baseline + paint.descent() + 0.5f).toInt()
+    val image = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
+    val canvas = Canvas(image)
+    canvas.drawText(this, 0f, baseline, paint)
+    return image
 }

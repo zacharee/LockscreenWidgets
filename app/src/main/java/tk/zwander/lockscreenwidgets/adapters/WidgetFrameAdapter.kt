@@ -15,10 +15,9 @@ import com.arasthel.spannedgridlayoutmanager.SpanSize
 import com.arasthel.spannedgridlayoutmanager.SpannedGridLayoutManager
 import kotlinx.coroutines.*
 import tk.zwander.lockscreenwidgets.R
-import tk.zwander.lockscreenwidgets.activities.AddWidgetActivity
+import tk.zwander.lockscreenwidgets.activities.add.AddWidgetActivity
 import tk.zwander.lockscreenwidgets.data.WidgetData
 import tk.zwander.lockscreenwidgets.data.WidgetSizeData
-import tk.zwander.lockscreenwidgets.databinding.AddWidgetBinding
 import tk.zwander.lockscreenwidgets.databinding.WidgetPageHolderBinding
 import tk.zwander.lockscreenwidgets.host.WidgetHostCompat
 import tk.zwander.lockscreenwidgets.listeners.WidgetResizeListener

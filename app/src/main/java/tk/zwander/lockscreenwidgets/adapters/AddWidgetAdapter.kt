@@ -16,7 +16,7 @@ import com.squareup.picasso.Picasso
 import com.squareup.picasso.Request
 import com.squareup.picasso.RequestHandler
 import tk.zwander.lockscreenwidgets.R
-import tk.zwander.lockscreenwidgets.activities.AddWidgetActivity
+import tk.zwander.lockscreenwidgets.activities.add.AddWidgetActivity
 import tk.zwander.lockscreenwidgets.data.WidgetListInfo
 import tk.zwander.lockscreenwidgets.databinding.WidgetItemBinding
 

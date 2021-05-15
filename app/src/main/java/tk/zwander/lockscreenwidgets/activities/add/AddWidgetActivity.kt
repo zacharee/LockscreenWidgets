@@ -1,4 +1,4 @@
-package tk.zwander.lockscreenwidgets.activities
+package tk.zwander.lockscreenwidgets.activities.add
 
 import android.app.Activity
 import android.appwidget.AppWidgetManager
@@ -14,6 +14,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SearchView
 import kotlinx.coroutines.*
 import tk.zwander.lockscreenwidgets.R
+import tk.zwander.lockscreenwidgets.activities.DismissOrUnlockActivity
 import tk.zwander.lockscreenwidgets.adapters.AppAdapter
 import tk.zwander.lockscreenwidgets.data.AppInfo
 import tk.zwander.lockscreenwidgets.data.WidgetData
@@ -25,7 +26,7 @@ import tk.zwander.lockscreenwidgets.util.prefManager
 /**
  * Manage the widget addition flow: selection, permissions, configurations, etc.
  */
-class AddWidgetActivity : AppCompatActivity(), CoroutineScope by MainScope() {
+open class AddWidgetActivity : AppCompatActivity(), CoroutineScope by MainScope() {
     companion object {
         const val PERM_CODE = 104
         const val CONFIG_CODE = 105
@@ -217,7 +218,7 @@ class AddWidgetActivity : AppCompatActivity(), CoroutineScope by MainScope() {
      *
      * @param id the ID of the widget to be added
      */
-    private fun addNewWidget(id: Int) {
+    protected open fun addNewWidget(id: Int) {
         val widget = WidgetData(id)
         prefManager.currentWidgets = prefManager.currentWidgets.apply {
             add(widget)
