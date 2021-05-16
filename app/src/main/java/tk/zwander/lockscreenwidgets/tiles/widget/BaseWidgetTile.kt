@@ -37,7 +37,6 @@ abstract class BaseWidgetTile : TileService(), SharedPreferences.OnSharedPrefere
             ServiceManager.getService(Context.APPWIDGET_SERVICE)
         )
     }
-    protected val host by lazy { AppWidgetHost(this, 1000 + tileId) }
 
     protected abstract val tileId: Int
     protected val widgetId: Int
@@ -69,15 +68,8 @@ abstract class BaseWidgetTile : TileService(), SharedPreferences.OnSharedPrefere
     override fun onStartListening() {
         super.onStartListening()
 
-        host.startListening()
-
+        views.set(generateViews())
         updateTile()
-    }
-
-    override fun onStopListening() {
-        super.onStopListening()
-
-        host.stopListening()
     }
 
     open fun semGetDetailViewTitle(): CharSequence? {
@@ -97,6 +89,7 @@ abstract class BaseWidgetTile : TileService(), SharedPreferences.OnSharedPrefere
     }
 
     open fun semGetDetailView(): RemoteViews? {
+        views.set(generateViews())
         return views.get()
     }
 
@@ -116,7 +109,7 @@ abstract class BaseWidgetTile : TileService(), SharedPreferences.OnSharedPrefere
     }
 
     private fun generateViews(): RemoteViews {
-        val outerView = generateDefaultViews()
+        var outerView = generateDefaultViews()
 
         try {
             val widgetView = iManager.getAppWidgetViews(packageName, widgetId)
@@ -125,8 +118,7 @@ abstract class BaseWidgetTile : TileService(), SharedPreferences.OnSharedPrefere
                     Log.e(App.DEBUG_LOG_TAG, "Custom widget loaded for tile ID $tileId")
                 }
 
-                outerView.removeAllViews(R.id.content)
-                outerView.addView(R.id.content, widgetView)
+                outerView = widgetView
             } else {
                 if (isDebug) {
                     Log.e(App.DEBUG_LOG_TAG, "Custom widget view is null for tile ID $tileId")
@@ -137,8 +129,6 @@ abstract class BaseWidgetTile : TileService(), SharedPreferences.OnSharedPrefere
                 Log.e(App.DEBUG_LOG_TAG, "Exception adding widget for tile ID $tileId", e)
             }
         }
-
-        outerView.apply(createApplicationContext(packageManager.getApplicationInfo("com.android.systemui", 0), 0), null, null)
 
         return outerView
     }
