@@ -29,6 +29,15 @@ import tk.zwander.lockscreenwidgets.activities.add.AddTileWidgetActivity
 import tk.zwander.lockscreenwidgets.util.*
 import java.util.concurrent.atomic.AtomicReference
 
+/**
+ * Represents the base structure and logic for a widget tile on One UI.
+ * Handles redirecting widget RemoteViews to Samsung's System UI.
+ *
+ * This is a very limited implementation. Samsung doesn't use an AppWidgetHost or
+ * anything fancy to display the RemoteViews. Things like ListView or anything that uses
+ * AppWidget-specific features (e.g., adapters) just won't work. Updates also don't happen
+ * dynamically. The detail view has to be exited and re-entered to see changes.
+ */
 @RequiresApi(Build.VERSION_CODES.N)
 abstract class BaseWidgetTile : TileService(), SharedPreferences.OnSharedPreferenceChangeListener {
     protected val manager by lazy { AppWidgetManager.getInstance(this) }
@@ -72,31 +81,63 @@ abstract class BaseWidgetTile : TileService(), SharedPreferences.OnSharedPrefere
         updateTile()
     }
 
+    override fun onTileRemoved() {
+        super.onTileRemoved()
+
+        prefManager.customTiles = prefManager.customTiles.apply { remove(tileId) }
+    }
+
+    /**
+     * The CharSequence returned here is displayed at the top
+     * of the expanded detail view.
+     */
     open fun semGetDetailViewTitle(): CharSequence? {
         return qsTile?.label
     }
 
+    /**
+     * I don't really know what this is for.
+     */
     open fun semGetDetailViewSettingButtonName(): CharSequence? {
         return "Test"
     }
 
+    /**
+     * Return true if there should be an on/off switch present
+     * in the expanded detail view.
+     */
     open fun semIsToggleButtonExists(): Boolean {
         return false
     }
 
+    /**
+     * Returns true if the switch is present.
+     */
     open fun semIsToggleButtonChecked(): Boolean {
         return false
     }
 
+    /**
+     * Get the widget's RemoteViews and pass it onto
+     * Samsung's System UI.
+     */
     open fun semGetDetailView(): RemoteViews? {
         views.set(generateViews())
         return views.get()
     }
 
+    /**
+     * This is launched when the label of the QS tile is long-pressed.
+     * Launch the widget selector for this tile.
+     */
     open fun semGetSettingsIntent(): Intent? {
         return AddTileWidgetActivity.createIntent(this, tileId)
     }
 
+    /**
+     * Called when the switch in the expanded detail view is pressed.
+     * By default, used to launch the widget selector for this tile.
+     */
     open fun semSetToggleButtonChecked(checked: Boolean) {
         startActivity(semGetSettingsIntent())
     }
@@ -108,31 +149,44 @@ abstract class BaseWidgetTile : TileService(), SharedPreferences.OnSharedPrefere
         }
     }
 
+    /**
+     * Generate a RemoteViews object for this tile.
+     * If no widget is selected, this generates an "add" button that launches
+     * the widget selector for this tile.
+     */
     private fun generateViews(): RemoteViews {
         var outerView = generateDefaultViews()
 
         try {
+            //Try to get the widget RemoteViews.
             val widgetView = iManager.getAppWidgetViews(packageName, widgetId)
             if (widgetView != null) {
                 if (isDebug) {
                     Log.e(App.DEBUG_LOG_TAG, "Custom widget loaded for tile ID $tileId")
                 }
 
+                //Success, set it.
                 outerView = widgetView
             } else {
                 if (isDebug) {
                     Log.e(App.DEBUG_LOG_TAG, "Custom widget view is null for tile ID $tileId")
                 }
+                //Error retrieving widget, or widget not selected.
             }
         } catch (e: Exception) {
             if (isDebug) {
                 Log.e(App.DEBUG_LOG_TAG, "Exception adding widget for tile ID $tileId", e)
             }
+            //Error retrieving widget.
         }
 
+        //Return either the default view or the selected widget.
         return outerView
     }
 
+    /**
+     * Create a RemoteViews for the add button.
+     */
     private fun generateDefaultViews(): RemoteViews {
         val views = RemoteViews(packageName, R.layout.default_tile_views)
         views.setOnClickPendingIntent(
@@ -142,24 +196,33 @@ abstract class BaseWidgetTile : TileService(), SharedPreferences.OnSharedPrefere
         return views
     }
 
+    /**
+     * Update the QS tile with info from the selected widget. If there is
+     * no widget selected, use the default icon and label.
+     */
     private fun updateTile() {
-        widgetInfo?.apply {
-            with (remoteResources) {
-                if (this != null) {
-                    val iconDrawable = ResourcesCompat.getDrawable(this, icon, this.newTheme())
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && iconDrawable is AdaptiveIconDrawable) {
-                        val foreground = iconDrawable.foreground
-                        qsTile?.icon = Icon.createWithBitmap(foreground.toBitmap(128, 128).cropBitmapTransparency())
-                    } else if (iconDrawable is BitmapDrawable) {
-                        qsTile?.icon = Icon.createWithBitmap(qsTile?.label?.first()?.toString()?.textAsBitmap(128f, Color.WHITE))
+        widgetInfo.apply {
+            if (this != null) {
+                with (remoteResources) {
+                    if (this != null) {
+                        val iconDrawable = ResourcesCompat.getDrawable(this, icon, this.newTheme())
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && iconDrawable is AdaptiveIconDrawable) {
+                            val foreground = iconDrawable.foreground
+                            qsTile?.icon = Icon.createWithBitmap(foreground.toBitmap(128, 128).cropBitmapTransparency())
+                        } else if (iconDrawable is BitmapDrawable) {
+                            qsTile?.icon = Icon.createWithBitmap(qsTile?.label?.first()?.toString()?.textAsBitmap(128f, Color.WHITE))
+                        } else {
+                            qsTile?.icon = Icon.createWithResource(widgetPackage, icon)
+                        }
                     } else {
                         qsTile?.icon = Icon.createWithResource(widgetPackage, icon)
                     }
-                } else {
-                    qsTile?.icon = Icon.createWithResource(widgetPackage, icon)
                 }
+                qsTile?.label = this.loadLabel(packageManager)
+            } else {
+                qsTile?.icon = Icon.createWithResource(this@BaseWidgetTile.packageName, R.drawable.ic_baseline_launch_24)
+                qsTile?.label = resources.getString(R.string.app_name)
             }
-            qsTile?.label = this.loadLabel(packageManager)
         }
 
         qsTile?.state = if (widgetInfo != null) Tile.STATE_ACTIVE else Tile.STATE_INACTIVE

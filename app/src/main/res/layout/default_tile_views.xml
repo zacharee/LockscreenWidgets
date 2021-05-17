@@ -10,12 +10,14 @@
         android:layout_height="match_parent"
         android:id="@+id/content">
 
-        <Button
+        <ImageView
             android:id="@+id/add"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:clickable="true"
             android:focusable="true"
+            android:src="@drawable/ic_baseline_add_24"
+            android:scaleType="fitCenter"
             android:background="?android:selectableItemBackgroundBorderless"
             />
 
