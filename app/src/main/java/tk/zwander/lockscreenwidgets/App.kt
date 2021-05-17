@@ -8,6 +8,7 @@ import android.content.pm.PackageManager
 import android.os.Build
 import org.lsposed.hiddenapibypass.HiddenApiBypass
 import tk.zwander.lockscreenwidgets.tiles.NCTile
+import tk.zwander.lockscreenwidgets.tiles.widget.*
 import tk.zwander.lockscreenwidgets.util.isOneUI
 
 /**
@@ -48,6 +49,23 @@ class App : Application() {
                 else PackageManager.COMPONENT_ENABLED_STATE_DISABLED,
                 0
             )
+
+            val components = arrayOf(
+                WidgetTileOne::class.java,
+                WidgetTileTwo::class.java,
+                WidgetTileThree::class.java,
+                WidgetTileFour::class.java,
+                WidgetTileFive::class.java
+            )
+
+            components.forEach {
+                packageManager.setComponentEnabledSetting(
+                    ComponentName(this, it),
+                    if (isOneUI) PackageManager.COMPONENT_ENABLED_STATE_ENABLED
+                    else PackageManager.COMPONENT_ENABLED_STATE_DISABLED,
+                    0
+                )
+            }
         }
     }
 }

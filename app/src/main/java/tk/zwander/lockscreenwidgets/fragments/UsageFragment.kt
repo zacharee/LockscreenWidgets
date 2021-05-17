@@ -6,6 +6,7 @@ import androidx.preference.PreferenceFragmentCompat
 import tk.zwander.lockscreenwidgets.R
 import tk.zwander.lockscreenwidgets.fragments.dialog.MessageDialogPreferenceFragment
 import tk.zwander.lockscreenwidgets.prefs.MessageDialogPreference
+import tk.zwander.lockscreenwidgets.util.isOneUI
 
 /**
  * The usage page.
@@ -14,6 +15,10 @@ import tk.zwander.lockscreenwidgets.prefs.MessageDialogPreference
 class UsageFragment : PreferenceFragmentCompat() {
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         setPreferencesFromResource(R.xml.prefs_usage, rootKey)
+
+        if (!requireContext().isOneUI) {
+            findPreference<Preference>("usage_widget_tiles")?.isVisible = false
+        }
     }
 
     override fun onDisplayPreferenceDialog(preference: Preference?) {

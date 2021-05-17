@@ -55,4 +55,13 @@
         android:negativeButtonText="@null"
         />
 
+    <tk.zwander.lockscreenwidgets.prefs.MessageDialogPreference
+        android:title="@string/usage_widget_tiles"
+        android:summary="@string/usage_widget_tiles_desc"
+        android:dialogTitle="@string/usage_widget_tiles"
+        android:dialogMessage="@string/usage_widget_tiles_desc"
+        android:key="usage_widget_tiles"
+        android:negativeButtonText="@null"
+        />
+
 </PreferenceScreen>
