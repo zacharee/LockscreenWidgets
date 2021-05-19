@@ -13,19 +13,20 @@ import java.lang.reflect.Method
 import java.lang.reflect.Proxy
 
 /**
- * An implementation of [AppWidgetHost] used on devices where the hidden API object
- * [RemoteViews.OnClickHandler] is an interface (i.e. Android 10 and above). Java makes
- * it pretty easy to implement interfaces through reflection, so no ByteBuddy needed here.
+ * An implementation of [AppWidgetHost] used on devices that don't have [RemoteViews.OnClickHandler]
+ * (i.e., Android 12+). Instead, this uses [RemoteViews.InteractionHandler], which is just a renamed version
+ * of [RemoteViews.OnClickHandler].
  */
-class WidgetHostInterface(context: Context, id: Int, unlockCallback: (() -> Unit)?)
-    : WidgetHostCompat(
+@SuppressLint("PrivateApi")
+class WidgetHost12(context: Context, id: Int, unlockCallback: (() -> Unit)?) : WidgetHostCompat(
     context, id, Proxy.newProxyInstance(
-        RemoteViews.OnClickHandler::class.java.classLoader,
-        arrayOf(RemoteViews.OnClickHandler::class.java),
-        InnerOnClickHandlerQ(context, unlockCallback)
+        Class.forName("android.widget.RemoteViews\$InteractionHandler").classLoader,
+        arrayOf(Class.forName("android.widget.RemoteViews\$InteractionHandler")),
+        InnerOnClickHandler12(context, unlockCallback)
     )
 ) {
-    class InnerOnClickHandlerQ(context: Context, unlockCallback: (() -> Unit)?) : BaseInnerOnClickHandler(context, unlockCallback), InvocationHandler {
+    class InnerOnClickHandler12(context: Context, unlockCallback: (() -> Unit)?) : BaseInnerOnClickHandler(context, unlockCallback),
+        InvocationHandler {
         @SuppressLint("BlockedPrivateApi", "PrivateApi")
         override fun invoke(proxy: Any?, method: Method?, args: Array<out Any>): Any {
             val view = args[0] as View
