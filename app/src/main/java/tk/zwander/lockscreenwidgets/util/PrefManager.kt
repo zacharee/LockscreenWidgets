@@ -9,10 +9,7 @@ import androidx.preference.PreferenceManager
 import com.google.gson.GsonBuilder
 import com.google.gson.reflect.TypeToken
 import tk.zwander.lockscreenwidgets.R
-import tk.zwander.lockscreenwidgets.data.Mode
-import tk.zwander.lockscreenwidgets.data.WidgetData
-import tk.zwander.lockscreenwidgets.data.WidgetSizeData
-import tk.zwander.lockscreenwidgets.data.WidgetTileInfo
+import tk.zwander.lockscreenwidgets.data.*
 
 /**
  * Handle data persistence.
@@ -62,6 +59,7 @@ class PrefManager private constructor(context: Context) : ContextWrapper(context
         const val KEY_PREVIEW_WIDTH = "preview_width"
         const val KEY_PREVIEW_HEIGHT = "preview_height"
         const val KEY_CUSTOM_TILES = "custom_tiles"
+        const val KEY_SHORTCUT_IDS = "shortcut_ids"
 
         const val VALUE_PAGE_INDICATOR_BEHAVIOR_HIDDEN = 0
         const val VALUE_PAGE_INDICATOR_BEHAVIOR_AUTO_HIDE = 1
@@ -91,6 +89,19 @@ class PrefManager private constructor(context: Context) : ContextWrapper(context
         set(value) {
             putString(
                 KEY_CURRENT_WIDGETS,
+                gson.toJson(value)
+            )
+        }
+
+    //The shortcuts currently added to the widget frame
+    var shortcutIds: LinkedHashSet<String>
+        get() = gson.fromJson(
+            getString(KEY_SHORTCUT_IDS),
+            object : TypeToken<LinkedHashSet<String>>() {}.type
+        ) ?: LinkedHashSet()
+        set(value) {
+            putString(
+                KEY_SHORTCUT_IDS,
                 gson.toJson(value)
             )
         }
