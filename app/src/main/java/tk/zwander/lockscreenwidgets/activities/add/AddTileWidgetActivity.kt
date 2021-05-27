@@ -24,12 +24,12 @@ class AddTileWidgetActivity : AddWidgetActivity() {
     private val tileId by lazy { intent.getIntExtra(EXTRA_TILE_ID, -1) }
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
         if (tileId == -1) {
             finish()
             return
         }
-
-        super.onCreate(savedInstanceState)
     }
 
     /**
