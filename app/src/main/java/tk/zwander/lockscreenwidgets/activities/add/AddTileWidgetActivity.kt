@@ -3,6 +3,7 @@ package tk.zwander.lockscreenwidgets.activities.add
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import tk.zwander.lockscreenwidgets.data.WidgetData
 import tk.zwander.lockscreenwidgets.data.WidgetTileInfo
 import tk.zwander.lockscreenwidgets.util.prefManager
 
@@ -20,6 +21,9 @@ class AddTileWidgetActivity : AddWidgetActivity() {
             }
         }
     }
+
+    override val showShortcuts: Boolean
+        get() = false
 
     private val tileId by lazy { intent.getIntExtra(EXTRA_TILE_ID, -1) }
 

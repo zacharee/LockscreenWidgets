@@ -27,6 +27,7 @@ import tk.zwander.lockscreenwidgets.activities.add.AddWidgetActivity
 import tk.zwander.lockscreenwidgets.activities.DismissOrUnlockActivity
 import tk.zwander.lockscreenwidgets.adapters.WidgetFrameAdapter
 import tk.zwander.lockscreenwidgets.data.Mode
+import tk.zwander.lockscreenwidgets.data.WidgetType
 import tk.zwander.lockscreenwidgets.databinding.WidgetFrameBinding
 import tk.zwander.lockscreenwidgets.host.WidgetHostCompat
 import tk.zwander.lockscreenwidgets.views.WidgetFrameView
@@ -120,12 +121,9 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
     val wm = getSystemService(Context.WINDOW_SERVICE) as WindowManager
     val widgetManager = AppWidgetManager.getInstance(this)!!
     val widgetHost = WidgetHostCompat.getInstance(this, 1003) {
-        Handler(Looper.getMainLooper()).postDelayed({
-            val intent = Intent(this, DismissOrUnlockActivity::class.java)
-            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-            startActivity(intent)
-        }, 100)
+        DismissOrUnlockActivity.launch(this)
     }
+    val shortcutIdManager = ShortcutIdManager.getInstance(this, widgetHost)
     //The actual frame View
     val view = LayoutInflater.from(ContextThemeWrapper(this, R.style.AppTheme))
         .inflate(R.layout.widget_frame, null)!!
@@ -137,7 +135,10 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
                 if (it) {
                     prefManager.currentWidgets = prefManager.currentWidgets.apply {
                         remove(item)
-                        widgetHost.deleteAppWidgetId(item.id)
+                        when (item.safeType) {
+                            WidgetType.WIDGET -> widgetHost.deleteAppWidgetId(item.id)
+                            WidgetType.SHORTCUT -> shortcutIdManager.removeShortcutId(item.id)
+                        }
                     }
                     adapter.currentEditingInterfacePosition = -1
                 }

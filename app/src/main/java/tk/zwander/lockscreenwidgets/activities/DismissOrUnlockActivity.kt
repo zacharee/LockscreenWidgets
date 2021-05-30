@@ -5,6 +5,8 @@ import android.content.Context
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.view.WindowManager
 import androidx.appcompat.app.AppCompatActivity
 import tk.zwander.lockscreenwidgets.services.Accessibility
@@ -15,6 +17,16 @@ import tk.zwander.lockscreenwidgets.services.Accessibility
  * or when Lockscreen Widgets detects an Activity being launched from a widget.
  */
 class DismissOrUnlockActivity : AppCompatActivity() {
+    companion object {
+        fun launch(context: Context) {
+            Handler(Looper.getMainLooper()).postDelayed({
+                val intent = Intent(context, DismissOrUnlockActivity::class.java)
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                context.startActivity(intent)
+            }, 100)
+        }
+    }
+
     private val kgm by lazy { getSystemService(Context.KEYGUARD_SERVICE) as KeyguardManager }
     private val dismissListener = object : Accessibility.OnLockscreenDismissListener() {
         override fun onDismissed() {

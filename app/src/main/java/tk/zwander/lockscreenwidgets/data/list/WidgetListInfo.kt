@@ -1,8 +1,9 @@
-package tk.zwander.lockscreenwidgets.data
+package tk.zwander.lockscreenwidgets.data.list
 
 import android.appwidget.AppWidgetProviderInfo
 import android.content.pm.ApplicationInfo
 import tk.zwander.lockscreenwidgets.activities.add.AddWidgetActivity
+import java.util.*
 
 /**
  * Hold the info for a widget listed in [AddWidgetActivity]
@@ -12,12 +13,20 @@ import tk.zwander.lockscreenwidgets.activities.add.AddWidgetActivity
  * @property providerInfo the information about the widget
  * @property appInfo the information about the application this widget belongs to
  */
-data class WidgetListInfo(
-    var widgetName: String,
-    var previewImg: Int,
+class WidgetListInfo(
+    widgetName: String,
+    previewImg: Int,
     var providerInfo: AppWidgetProviderInfo,
-    var appInfo: ApplicationInfo
-) : Comparable<WidgetListInfo> {
-    override fun compareTo(other: WidgetListInfo) =
-        widgetName.compareTo(other.widgetName)
+    appInfo: ApplicationInfo
+) : BaseListInfo(
+    widgetName, previewImg, appInfo
+) {
+    override fun equals(other: Any?): Boolean {
+        return super.equals(other) &&
+                providerInfo.provider == (other as WidgetListInfo).providerInfo.provider
+    }
+
+    override fun hashCode(): Int {
+        return super.hashCode() + Objects.hash(providerInfo.provider)
+    }
 }

@@ -170,4 +170,5 @@
     <string name="invalid_id_backup_error">Invalid ID list.</string>
     <string name="enable_debug_log_msg">Please enable the debug log option to see IDs here.</string>
     <string name="touch_protection_active">Touch protection active. Please uncover the proximity sensor.</string>
+    <string name="launch_shortcut_error">Unable to launch shortcut.</string>
 </resources>

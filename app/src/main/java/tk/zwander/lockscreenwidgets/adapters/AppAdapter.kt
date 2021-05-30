@@ -12,14 +12,15 @@ import androidx.recyclerview.widget.RecyclerView
 import com.squareup.picasso.Picasso
 import tk.zwander.lockscreenwidgets.R
 import tk.zwander.lockscreenwidgets.data.AppInfo
-import tk.zwander.lockscreenwidgets.data.WidgetListInfo
+import tk.zwander.lockscreenwidgets.data.list.BaseListInfo
+import tk.zwander.lockscreenwidgets.data.list.WidgetListInfo
 import tk.zwander.lockscreenwidgets.databinding.AppItemBinding
 import tk.zwander.lockscreenwidgets.util.matchesFilter
 
 /**
  * Handle the hosting of the list of apps that have widgets that can be added to the widget frame.
  */
-class AppAdapter(context: Context, private val selectionCallback: (provider: WidgetListInfo) -> Unit) : RecyclerView.Adapter<AppAdapter.AppVH>() {
+class AppAdapter(context: Context, private val selectionCallback: (provider: BaseListInfo) -> Unit) : RecyclerView.Adapter<AppAdapter.AppVH>() {
     var currentFilter: String? = null
         set(value) {
             field = value
@@ -89,7 +90,7 @@ class AppAdapter(context: Context, private val selectionCallback: (provider: Wid
             binding.widgetHolder.addItemDecoration(DividerItemDecoration(itemView.context, RecyclerView.HORIZONTAL))
 
             binding.appName.text = info.appName
-            adapter.setItems(info.widgets)
+            adapter.setItems(info.widgets + info.shortcuts)
 
             picasso.cancelRequest(binding.appIcon)
 

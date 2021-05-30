@@ -5,6 +5,8 @@ import android.appwidget.AppWidgetManager
 import android.appwidget.AppWidgetProviderInfo
 import android.content.ComponentName
 import android.content.Intent
+import android.content.pm.PackageManager
+import android.graphics.Bitmap
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
@@ -17,11 +19,14 @@ import tk.zwander.lockscreenwidgets.R
 import tk.zwander.lockscreenwidgets.activities.DismissOrUnlockActivity
 import tk.zwander.lockscreenwidgets.adapters.AppAdapter
 import tk.zwander.lockscreenwidgets.data.AppInfo
+import tk.zwander.lockscreenwidgets.data.list.ShortcutListInfo
 import tk.zwander.lockscreenwidgets.data.WidgetData
-import tk.zwander.lockscreenwidgets.data.WidgetListInfo
+import tk.zwander.lockscreenwidgets.data.list.WidgetListInfo
 import tk.zwander.lockscreenwidgets.databinding.ActivityAddWidgetBinding
 import tk.zwander.lockscreenwidgets.host.WidgetHostCompat
+import tk.zwander.lockscreenwidgets.util.ShortcutIdManager
 import tk.zwander.lockscreenwidgets.util.prefManager
+import tk.zwander.lockscreenwidgets.util.toBase64
 
 /**
  * Manage the widget addition flow: selection, permissions, configurations, etc.
@@ -30,13 +35,21 @@ open class AddWidgetActivity : AppCompatActivity(), CoroutineScope by MainScope(
     companion object {
         const val PERM_CODE = 104
         const val CONFIG_CODE = 105
+        const val REQ_CONFIG_SHORTCUT = 106
     }
+
+    protected open val showShortcuts = true
 
     private val widgetHost by lazy { WidgetHostCompat.getInstance(this, 1003) }
     private val appWidgetManager by lazy { AppWidgetManager.getInstance(this) }
+    private val shortcutIdManager by lazy { ShortcutIdManager.getInstance(this, widgetHost) }
     private val adapter by lazy {
         AppAdapter(this) {
-            tryBindWidget(it.providerInfo)
+            if (it is WidgetListInfo) {
+                tryBindWidget(it.providerInfo)
+            } else if (it is ShortcutListInfo) {
+                tryBindShortcut(it)
+            }
         }
     }
 
@@ -155,6 +168,23 @@ open class AddWidgetActivity : AppCompatActivity(), CoroutineScope by MainScope(
                     widgetHost.deleteAppWidgetId(id)
                 }
             }
+
+            REQ_CONFIG_SHORTCUT -> {
+                val shortcutIntent = data?.getParcelableExtra<Intent>(Intent.EXTRA_SHORTCUT_INTENT)
+
+                if (shortcutIntent != null) {
+                    val name = data.getStringExtra(Intent.EXTRA_SHORTCUT_NAME)
+                    val iconRes = data.getParcelableExtra<Intent.ShortcutIconResource?>(Intent.EXTRA_SHORTCUT_ICON_RESOURCE)
+                    val iconBmp = data.getParcelableExtra<Bitmap?>(Intent.EXTRA_SHORTCUT_ICON)
+
+                    val shortcut = WidgetData.shortcut(
+                        shortcutIdManager.allocateShortcutId(),
+                        name, iconBmp.toBase64(), iconRes, shortcutIntent
+                    )
+
+                    addNewShortcut(shortcut)
+                }
+            }
         }
     }
 
@@ -170,7 +200,10 @@ open class AddWidgetActivity : AppCompatActivity(), CoroutineScope by MainScope(
      * widgets (i.e. after an app restart), then the ID will be provided. Otherwise,
      * it will be allocated.
      */
-    private fun tryBindWidget(info: AppWidgetProviderInfo, id: Int = widgetHost.allocateAppWidgetId()) {
+    private fun tryBindWidget(
+        info: AppWidgetProviderInfo,
+        id: Int = widgetHost.allocateAppWidgetId()
+    ) {
         val canBind = appWidgetManager.bindAppWidgetIdIfAllowed(id, info.provider)
 
         if (!canBind) getWidgetPermission(id, info.provider)
@@ -183,6 +216,17 @@ open class AddWidgetActivity : AppCompatActivity(), CoroutineScope by MainScope(
                 addNewWidget(id)
             }
         }
+    }
+
+    private fun tryBindShortcut(
+        info: ShortcutListInfo
+    ) {
+        val configureIntent = Intent(Intent.ACTION_CREATE_SHORTCUT)
+        configureIntent.`package` = info.shortcutInfo.activityInfo.packageName
+        configureIntent.component = ComponentName(info.shortcutInfo.activityInfo.packageName,
+            info.shortcutInfo.activityInfo.name)
+
+        startActivityForResult(configureIntent, REQ_CONFIG_SHORTCUT)
     }
 
     /**
@@ -208,7 +252,14 @@ open class AddWidgetActivity : AppCompatActivity(), CoroutineScope by MainScope(
             //Use the system API instead of ACTION_APPWIDGET_CONFIGURE to try to avoid some permissions issues
             widgetHost.startAppWidgetConfigureActivityForResult(this, id, 0, CONFIG_CODE, null)
         } catch (e: Exception) {
-            Toast.makeText(this, resources.getString(R.string.configure_widget_error, appWidgetManager.getAppWidgetInfo(id).provider), Toast.LENGTH_LONG).show()
+            Toast.makeText(
+                this,
+                resources.getString(
+                    R.string.configure_widget_error,
+                    appWidgetManager.getAppWidgetInfo(id).provider
+                ),
+                Toast.LENGTH_LONG
+            ).show()
             addNewWidget(id)
         }
     }
@@ -219,9 +270,16 @@ open class AddWidgetActivity : AppCompatActivity(), CoroutineScope by MainScope(
      * @param id the ID of the widget to be added
      */
     protected open fun addNewWidget(id: Int) {
-        val widget = WidgetData(id)
+        val widget = WidgetData.widget(id)
         prefManager.currentWidgets = prefManager.currentWidgets.apply {
             add(widget)
+        }
+        finish()
+    }
+
+    protected open fun addNewShortcut(shortcut: WidgetData) {
+        prefManager.currentWidgets = prefManager.currentWidgets.apply {
+            add(shortcut)
         }
         finish()
     }
@@ -237,7 +295,9 @@ open class AddWidgetActivity : AppCompatActivity(), CoroutineScope by MainScope(
         val apps = withContext(Dispatchers.Main) {
             val apps = HashMap<String, AppInfo>()
 
-            (appWidgetManager.installedProviders + appWidgetManager.getInstalledProviders(AppWidgetProviderInfo.WIDGET_CATEGORY_KEYGUARD)).forEach {
+            (appWidgetManager.installedProviders + appWidgetManager.getInstalledProviders(
+                AppWidgetProviderInfo.WIDGET_CATEGORY_KEYGUARD
+            )).forEach {
                 val appInfo = packageManager.getApplicationInfo(it.provider.packageName, 0)
 
                 val appName = packageManager.getApplicationLabel(appInfo)
@@ -249,12 +309,41 @@ open class AddWidgetActivity : AppCompatActivity(), CoroutineScope by MainScope(
                     app = apps[appInfo.packageName]!!
                 }
 
-                app.widgets.add(WidgetListInfo(
-                    widgetName,
-                    it.previewImage.run { if (this != 0) this else appInfo.icon },
-                    it,
-                    appInfo
-                ))
+                app.widgets.add(
+                    WidgetListInfo(
+                        widgetName,
+                        it.previewImage.run { if (this != 0) this else appInfo.icon },
+                        it,
+                        appInfo
+                    )
+                )
+            }
+
+            if (showShortcuts) {
+                packageManager.queryIntentActivities(
+                    Intent(Intent.ACTION_CREATE_SHORTCUT),
+                    PackageManager.GET_RESOLVED_FILTER
+                ).forEach {
+                    val appInfo = packageManager.getApplicationInfo(it.activityInfo.packageName, 0)
+
+                    val appName = appInfo.loadLabel(packageManager)
+                    val shortcutName = it.loadLabel(packageManager)
+
+                    var app = apps[appInfo.packageName]
+                    if (app == null) {
+                        apps[appInfo.packageName] = AppInfo(appName.toString(), appInfo)
+                        app = apps[appInfo.packageName]!!
+                    }
+
+                    app!!.shortcuts.add(
+                        ShortcutListInfo(
+                            shortcutName.toString(),
+                            it.iconResource,
+                            it,
+                            appInfo
+                        )
+                    )
+                }
             }
 
             apps

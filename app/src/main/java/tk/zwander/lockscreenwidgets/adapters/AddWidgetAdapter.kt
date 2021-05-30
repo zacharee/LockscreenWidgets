@@ -17,20 +17,21 @@ import com.squareup.picasso.Request
 import com.squareup.picasso.RequestHandler
 import tk.zwander.lockscreenwidgets.R
 import tk.zwander.lockscreenwidgets.activities.add.AddWidgetActivity
-import tk.zwander.lockscreenwidgets.data.WidgetListInfo
+import tk.zwander.lockscreenwidgets.data.list.BaseListInfo
+import tk.zwander.lockscreenwidgets.data.list.WidgetListInfo
 import tk.zwander.lockscreenwidgets.databinding.WidgetItemBinding
 
 /**
  * Adapter to host widget previews in [AddWidgetActivity] for a specific app.
  */
-class AddWidgetAdapter(private val picasso: Picasso, private val selectionCallback: (provider: WidgetListInfo) -> Unit) :
+class AddWidgetAdapter(private val picasso: Picasso, private val selectionCallback: (provider: BaseListInfo) -> Unit) :
     RecyclerView.Adapter<AddWidgetAdapter.WidgetVH>() {
-    private val widgets = AsyncListDiffer(this, object : DiffUtil.ItemCallback<WidgetListInfo>() {
-        override fun areContentsTheSame(oldItem: WidgetListInfo, newItem: WidgetListInfo): Boolean {
+    private val widgets = AsyncListDiffer(this, object : DiffUtil.ItemCallback<BaseListInfo>() {
+        override fun areContentsTheSame(oldItem: BaseListInfo, newItem: BaseListInfo): Boolean {
             return false
         }
 
-        override fun areItemsTheSame(oldItem: WidgetListInfo, newItem: WidgetListInfo): Boolean {
+        override fun areItemsTheSame(oldItem: BaseListInfo, newItem: BaseListInfo): Boolean {
             return false
         }
     })
@@ -52,7 +53,7 @@ class AddWidgetAdapter(private val picasso: Picasso, private val selectionCallba
 
     override fun getItemCount() = widgets.currentList.size
 
-    fun setItems(items: List<WidgetListInfo>) {
+    fun setItems(items: List<BaseListInfo>) {
         widgets.submitList(items) {
             notifyDataSetChanged()
         }
@@ -66,15 +67,17 @@ class AddWidgetAdapter(private val picasso: Picasso, private val selectionCallba
         val binding = WidgetItemBinding.bind(itemView)
 
         @SuppressLint("SetTextI18n")
-        fun parseInfo(info: WidgetListInfo, picasso: Picasso) {
-            binding.widgetName.text = info.widgetName
-            binding.widgetSize.text = "${info.providerInfo.minWidth}x${info.providerInfo.minHeight}"
+        fun parseInfo(info: BaseListInfo, picasso: Picasso) {
+            binding.widgetName.text = info.name
+            binding.widgetSize.text = if (info is WidgetListInfo) {
+                "${info.providerInfo.minWidth}x${info.providerInfo.minHeight}"
+            } else "1x1"
 
             val img = binding.widgetImage
 
             picasso.cancelRequest(img)
             picasso
-                .load("${RemoteResourcesIconHandler.SCHEME}://${info.appInfo.packageName}/${info.previewImg}")
+                .load("${RemoteResourcesIconHandler.SCHEME}://${info.appInfo.packageName}/${info.icon}")
                 .resize(img.maxWidth, img.maxHeight)
                 .onlyScaleDown()
                 .centerInside()

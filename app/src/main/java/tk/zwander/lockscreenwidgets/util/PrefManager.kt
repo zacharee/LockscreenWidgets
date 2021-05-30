@@ -3,7 +3,9 @@ package tk.zwander.lockscreenwidgets.util
 import android.annotation.IntegerRes
 import android.content.Context
 import android.content.ContextWrapper
+import android.content.Intent
 import android.graphics.Color
+import android.net.Uri
 import androidx.core.content.edit
 import androidx.preference.PreferenceManager
 import com.google.gson.GsonBuilder
@@ -78,6 +80,9 @@ class PrefManager private constructor(context: Context) : ContextWrapper(context
     //The actual SharedPreferences implementation
     val prefs = PreferenceManager.getDefaultSharedPreferences(this)!!
     val gson = GsonBuilder()
+        .setExclusionStrategies(CrashFixExclusionStrategy())
+        .registerTypeAdapter(Uri::class.java, GsonUriHandler())
+        .registerTypeAdapter(Intent::class.java, GsonIntentHandler())
         .create()!!
 
     //The widgets currently added to the widget frame

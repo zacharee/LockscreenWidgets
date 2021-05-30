@@ -19,10 +19,9 @@ import android.view.View
 import android.view.WindowManager
 import android.view.accessibility.AccessibilityNodeInfo
 import android.view.accessibility.AccessibilityWindowInfo
-import androidx.core.graphics.get
 import tk.zwander.lockscreenwidgets.R
 import tk.zwander.lockscreenwidgets.data.AppInfo
-import tk.zwander.lockscreenwidgets.data.WidgetListInfo
+import tk.zwander.lockscreenwidgets.data.list.WidgetListInfo
 import tk.zwander.lockscreenwidgets.services.Accessibility
 import tk.zwander.lockscreenwidgets.services.NotificationListener
 import kotlin.math.roundToInt
@@ -215,7 +214,7 @@ fun AppInfo.matchesFilter(filter: String?): Boolean {
 
 fun WidgetListInfo.matchesFilter(filter: String?): Boolean {
     if (filter.isNullOrBlank()) return true
-    if (widgetName.contains(filter, true)) return true
+    if (name.contains(filter, true)) return true
     return false
 }
 

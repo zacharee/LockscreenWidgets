@@ -8,6 +8,8 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
 import android.widget.Toast
+import androidx.core.content.res.ResourcesCompat
+import androidx.core.graphics.drawable.toBitmap
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
@@ -15,9 +17,12 @@ import com.arasthel.spannedgridlayoutmanager.SpanSize
 import com.arasthel.spannedgridlayoutmanager.SpannedGridLayoutManager
 import kotlinx.coroutines.*
 import tk.zwander.lockscreenwidgets.R
+import tk.zwander.lockscreenwidgets.activities.DismissOrUnlockActivity
 import tk.zwander.lockscreenwidgets.activities.add.AddWidgetActivity
 import tk.zwander.lockscreenwidgets.data.WidgetData
 import tk.zwander.lockscreenwidgets.data.WidgetSizeData
+import tk.zwander.lockscreenwidgets.data.WidgetType
+import tk.zwander.lockscreenwidgets.databinding.FrameShortcutViewBinding
 import tk.zwander.lockscreenwidgets.databinding.WidgetPageHolderBinding
 import tk.zwander.lockscreenwidgets.host.WidgetHostCompat
 import tk.zwander.lockscreenwidgets.listeners.WidgetResizeListener
@@ -242,35 +247,73 @@ class WidgetFrameAdapter(
                     onResize(data)
                     editingInterfaceShown = currentEditingInterfacePosition != -1 && currentEditingInterfacePosition == adapterPosition
 
-                    val widgetInfo = withContext(Dispatchers.Main) {
-                        manager.getAppWidgetInfo(data.id)
-                    }
+                    binding.widgetHolder.removeAllViews()
 
-                    binding.widgetHolder.apply {
-                        removeAllViews()
-                        try {
-                            //We're recreating the AppWidgetHostView here each time, which probably isn't the most efficient
-                            //way to do things. However, it's not trivial to just set a new source on an AppWidgetHostView,
-                            //so this makes the most sense right now.
-                            addView(withContext(Dispatchers.Main) {
-                                host.createView(itemView.context, data.id, widgetInfo).apply {
-                                    val width = context.pxAsDp(itemView.width).toInt()
-                                    val height = context.pxAsDp(itemView.height).toInt()
-                                    updateAppWidgetSize(null, width, height, width, height)
-                                }
-                            })
-                        } catch (e: SecurityException) {
-                            //There was an error adding the widget. Some OEMs (OPPO...) like to add permissions requirements to their
-                            //widgets, which can make it impossible for third-party non-launcher apps to bind to them.
-                            Toast.makeText(context, resources.getString(R.string.bind_widget_error, widgetInfo.provider), Toast.LENGTH_LONG).show()
-                            context.prefManager.currentWidgets = context.prefManager.currentWidgets.apply {
-                                remove(data)
-                                host.deleteAppWidgetId(data.id)
-                            }
-                        }
+                    when (data.safeType) {
+                        WidgetType.WIDGET -> bindWidget(data)
+                        WidgetType.SHORTCUT -> bindShortcut(data)
                     }
                 }
             }
+        }
+
+        private suspend fun bindWidget(data: WidgetData) {
+            val widgetInfo = withContext(Dispatchers.Main) {
+                manager.getAppWidgetInfo(data.id)
+            }
+
+            binding.widgetHolder.apply {
+                try {
+                    //We're recreating the AppWidgetHostView here each time, which probably isn't the most efficient
+                    //way to do things. However, it's not trivial to just set a new source on an AppWidgetHostView,
+                    //so this makes the most sense right now.
+                    addView(withContext(Dispatchers.Main) {
+                        host.createView(itemView.context, data.id, widgetInfo).apply {
+                            val width = context.pxAsDp(itemView.width).toInt()
+                            val height = context.pxAsDp(itemView.height).toInt()
+                            updateAppWidgetSize(null, width, height, width, height)
+                        }
+                    })
+                } catch (e: SecurityException) {
+                    //There was an error adding the widget. Some OEMs (OPPO...) like to add permissions requirements to their
+                    //widgets, which can make it impossible for third-party non-launcher apps to bind to them.
+                    Toast.makeText(context, resources.getString(R.string.bind_widget_error, widgetInfo.provider), Toast.LENGTH_LONG).show()
+                    context.prefManager.currentWidgets = context.prefManager.currentWidgets.apply {
+                        remove(data)
+                        host.deleteAppWidgetId(data.id)
+                    }
+                }
+            }
+        }
+
+        private suspend fun bindShortcut(data: WidgetData) {
+            val shortcutView = FrameShortcutViewBinding.inflate(
+                LayoutInflater.from(binding.widgetHolder.context))
+            val icon = data.icon.base64ToBitmap() ?: data.iconRes?.run {
+                val res = itemView.context.packageManager.getResourcesForApplication(this.packageName)
+                ResourcesCompat.getDrawable(
+                    res,
+                    res.getIdentifier(this.resourceName, "drawable", this.packageName),
+                    res.newTheme()
+                )?.toBitmap()
+            }
+
+            shortcutView.shortcutRoot.setOnClickListener {
+                data.shortcutIntent?.apply {
+                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+
+                    try {
+                        itemView.context.startActivity(this)
+                        DismissOrUnlockActivity.launch(itemView.context)
+                    } catch (e: Exception) {
+                        Toast.makeText(itemView.context, R.string.launch_shortcut_error, Toast.LENGTH_SHORT).show()
+                    }
+                }
+            }
+            shortcutView.shortcutIcon.setImageBitmap(icon)
+            shortcutView.shortcutName.text = data.label
+
+            binding.widgetHolder.addView(shortcutView.root)
         }
 
         //Make sure the item's width is properly updated on a frame resize, or on initial bind
