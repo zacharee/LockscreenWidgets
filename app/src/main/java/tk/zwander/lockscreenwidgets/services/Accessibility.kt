@@ -326,7 +326,7 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
                         .minOrNull()
                         ?: -1
                     //Find index of the topmost system window.
-                    val systemIndex = windows.indexOf(nonAppSystemWindow)
+                    val systemIndex = windows.indexOf(nonAppSystemWindow?.first)
 
                     //Samsung's Screen-Off Memo is really just a normal Activity that shows over the lock screen.
                     //However, it's not an Application-type window for some reason, so it won't hide with the
@@ -349,7 +349,7 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
                     delegate.currentSystemLayer = if (systemIndex != -1) windows.size - systemIndex else systemIndex
 
                     if (isTouchWiz) {
-                        val systemRoot = nonAppSystemWindow?.safeRoot
+                        val systemRoot = nonAppSystemWindow?.second
 
                         delegate.isOnEdgePanel = systemRoot?.packageName == "com.samsung.android.app.cocktailbarservice"
                                 && systemIndex == 0
@@ -357,6 +357,7 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
                         systemRoot?.recycle()
                     } else {
                         delegate.isOnEdgePanel = false
+                        nonAppSystemWindow?.second?.recycle()
                     }
 
                     //This is mostly a debug value to see which app LSWidg thinks is on top.
@@ -507,12 +508,12 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
     /**
      * Find the [AccessibilityWindowInfo] and [AccessibilityNodeInfo] objects corresponding to the System UI windows.
      * Find the [AccessibilityWindowInfo] corresponding to the topmost app window.
-     * Find the [AccessibilityWindowInfo] corresponding to the topmost non-System UI window.
+     * Find the [AccessibilityWindowInfo] and [AccessibilityNodeInfo] objects corresponding to the topmost non-System UI window.
      */
-    private fun getWindows(windows: List<AccessibilityWindowInfo> = this.windows): Triple<List<Pair<AccessibilityWindowInfo?, AccessibilityNodeInfo?>>, AccessibilityWindowInfo?, AccessibilityWindowInfo?> {
+    private fun getWindows(windows: List<AccessibilityWindowInfo> = this.windows): Triple<List<Pair<AccessibilityWindowInfo?, AccessibilityNodeInfo?>>, AccessibilityWindowInfo?, Pair<AccessibilityWindowInfo?, AccessibilityNodeInfo?>?> {
         val systemUiWindows = ArrayList<Pair<AccessibilityWindowInfo?, AccessibilityNodeInfo?>>()
         var topAppWindow: AccessibilityWindowInfo? = null
-        var topNonSysUiWindow: AccessibilityWindowInfo? = null
+        var topNonSysUiWindow: Pair<AccessibilityWindowInfo?, AccessibilityNodeInfo?>? = null
 
         windows.forEach { window ->
             val safeRoot = window.safeRoot
@@ -529,11 +530,11 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
             if (topNonSysUiWindow == null && window.type != AccessibilityWindowInfo.TYPE_APPLICATION
                 && window.type != AccessibilityWindowInfo.TYPE_ACCESSIBILITY_OVERLAY) {
                 if (!isSysUi) {
-                    topNonSysUiWindow = window
+                    topNonSysUiWindow = window to safeRoot
                 }
             }
 
-            if (!isSysUi) {
+            if (!isSysUi && topNonSysUiWindow == null) {
                 safeRoot?.recycle()
             }
         }
