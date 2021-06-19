@@ -320,7 +320,7 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
                 //Put it in an if-check to help performance.
                 if (isOnKeyguard) {
                     //Find index of the topmost application window in the set of all windows.
-                    val appIndex = windows.indexOf(appWindow)
+                    val appIndex = windows.indexOf(appWindow?.first)
                     //Find the *least* index of the System UI windows in the set of all windows.
                     val sysUiIndex = sysUiWindows.map { windows.indexOf(it.first) }.filter { it > -1 }
                         .minOrNull()
@@ -361,7 +361,7 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
                     }
 
                     //This is mostly a debug value to see which app LSWidg thinks is on top.
-                    delegate.currentAppPackage = appWindow?.safeRoot?.run {
+                    delegate.currentAppPackage = appWindow?.second?.run {
                         packageName?.toString().also { recycle() }
                     }
 
@@ -441,7 +441,7 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
                 }
 
                 try {
-                    appWindow?.recycle()
+                    appWindow?.first?.recycle()
                 } catch (e: IllegalStateException) {}
             }
 
@@ -507,12 +507,12 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
 
     /**
      * Find the [AccessibilityWindowInfo] and [AccessibilityNodeInfo] objects corresponding to the System UI windows.
-     * Find the [AccessibilityWindowInfo] corresponding to the topmost app window.
-     * Find the [AccessibilityWindowInfo] and [AccessibilityNodeInfo] objects corresponding to the topmost non-System UI window.
+     * Find the [AccessibilityWindowInfo] and [AccessibilityNodeInfo] corresponding to the topmost app window.
+     * Find the [AccessibilityWindowInfo] and [AccessibilityNodeInfo] corresponding to the topmost non-System UI window.
      */
-    private fun getWindows(windows: List<AccessibilityWindowInfo> = this.windows): Triple<List<Pair<AccessibilityWindowInfo?, AccessibilityNodeInfo?>>, AccessibilityWindowInfo?, Pair<AccessibilityWindowInfo?, AccessibilityNodeInfo?>?> {
+    private fun getWindows(windows: List<AccessibilityWindowInfo> = this.windows): Triple<List<Pair<AccessibilityWindowInfo?, AccessibilityNodeInfo?>>, Pair<AccessibilityWindowInfo?, AccessibilityNodeInfo?>?, Pair<AccessibilityWindowInfo?, AccessibilityNodeInfo?>?> {
         val systemUiWindows = ArrayList<Pair<AccessibilityWindowInfo?, AccessibilityNodeInfo?>>()
-        var topAppWindow: AccessibilityWindowInfo? = null
+        var topAppWindow: Pair<AccessibilityWindowInfo?, AccessibilityNodeInfo?>? = null
         var topNonSysUiWindow: Pair<AccessibilityWindowInfo?, AccessibilityNodeInfo?>? = null
 
         windows.forEach { window ->
@@ -524,7 +524,7 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
             }
 
             if (topAppWindow == null && window.type == AccessibilityWindowInfo.TYPE_APPLICATION) {
-                topAppWindow = window
+                topAppWindow = window to safeRoot
             }
 
             if (topNonSysUiWindow == null && window.type != AccessibilityWindowInfo.TYPE_APPLICATION
@@ -534,7 +534,7 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
                 }
             }
 
-            if (!isSysUi && topNonSysUiWindow == null) {
+            if (!isSysUi && topNonSysUiWindow == null && topAppWindow == null) {
                 safeRoot?.recycle()
             }
         }
