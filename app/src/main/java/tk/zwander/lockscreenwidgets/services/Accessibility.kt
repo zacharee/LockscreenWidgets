@@ -284,23 +284,20 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
             if ((delegate.wasOnKeyguard || prefManager.showInNotificationCenter) && isScreenOn) {
                 //Retrieve the current window set.
                 val windows = windows
+
                 //Get all windows with the System UI package name.
-                val sysUiWindows = findSystemUiWindows(windows)
                 //Get the topmost application window.
-                val appWindow = findTopAppWindow(windows)
                 //Get the topmost window that isn't an application and doesn't belong to System UI.
-                val nonAppSystemWindow = findTopNonSystemUIWindow(windows)
+                val (sysUiWindows, appWindow, nonAppSystemWindow) = getWindows(windows)
 
                 //Flatted the nodes/Views in the System UI windows into
                 //a single list for easier handling.
                 val sysUiNodes = ArrayList<AccessibilityNodeInfo>()
-                sysUiWindows.mapNotNull { it.second }.forEach {
-                    addAllNodesToList(it, sysUiNodes)
-                }
-
                 //Get all View IDs from successfully-flattened System UI nodes.
-                val items = sysUiNodes.filter { it.isVisibleToUser }
-                    .mapNotNull { it.viewIdResourceName }
+                val items = ArrayList<String>()
+                sysUiWindows.mapNotNull { it.second }.forEach {
+                    addAllNodesToList(it, sysUiNodes, items)
+                }
 
                 //Update any ID list widgets on the new IDs
                 IDWidgetFactory.sList.apply {
@@ -508,55 +505,40 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
     }
 
     /**
-     * Find the [AccessibilityWindowInfo] corresponding to System UI
-     *
-     * @return the System UI window if it exists onscreen
+     * Find the [AccessibilityWindowInfo] and [AccessibilityNodeInfo] objects corresponding to the System UI windows.
+     * Find the [AccessibilityWindowInfo] corresponding to the topmost app window.
+     * Find the [AccessibilityWindowInfo] corresponding to the topmost non-System UI window.
      */
-    private fun findSystemUiWindows(windows: List<AccessibilityWindowInfo> = this.windows): List<Pair<AccessibilityWindowInfo?, AccessibilityNodeInfo?>> {
-        val list = ArrayList<Pair<AccessibilityWindowInfo?, AccessibilityNodeInfo?>>()
+    private fun getWindows(windows: List<AccessibilityWindowInfo> = this.windows): Triple<List<Pair<AccessibilityWindowInfo?, AccessibilityNodeInfo?>>, AccessibilityWindowInfo?, AccessibilityWindowInfo?> {
+        val systemUiWindows = ArrayList<Pair<AccessibilityWindowInfo?, AccessibilityNodeInfo?>>()
+        var topAppWindow: AccessibilityWindowInfo? = null
+        var topNonSysUiWindow: AccessibilityWindowInfo? = null
 
-        windows.forEach {
-            val safeRoot = it.safeRoot
-            if (safeRoot?.packageName == "com.android.systemui") {
-                list.add(it to safeRoot)
-            } else {
+        windows.forEach { window ->
+            val safeRoot = window.safeRoot
+            val isSysUi = safeRoot?.packageName == "com.android.systemui"
+
+            if (isSysUi) {
+                systemUiWindows.add(window to safeRoot)
+            }
+
+            if (topAppWindow == null && window.type == AccessibilityWindowInfo.TYPE_APPLICATION) {
+                topAppWindow = window
+            }
+
+            if (topNonSysUiWindow == null && window.type != AccessibilityWindowInfo.TYPE_APPLICATION
+                && window.type != AccessibilityWindowInfo.TYPE_ACCESSIBILITY_OVERLAY) {
+                if (!isSysUi) {
+                    topNonSysUiWindow = window
+                }
+            }
+
+            if (!isSysUi) {
                 safeRoot?.recycle()
             }
         }
 
-        return list
-    }
-
-    /**
-     * Find the [AccessibilityWindowInfo] corresponding to the current topmost app
-     * (the most recently-used one)
-     *
-     * @return the app window if it exists onscreen
-     */
-    private fun findTopAppWindow(windows: List<AccessibilityWindowInfo> = this.windows): AccessibilityWindowInfo? {
-        windows.forEach {
-            if (it.type == AccessibilityWindowInfo.TYPE_APPLICATION) {
-                return it
-            }
-        }
-
-        return null
-    }
-
-    private fun findTopNonSystemUIWindow(windows: List<AccessibilityWindowInfo> = this.windows): AccessibilityWindowInfo? {
-        windows.forEach {
-            if (it.type != AccessibilityWindowInfo.TYPE_APPLICATION
-                && it.type != AccessibilityWindowInfo.TYPE_ACCESSIBILITY_OVERLAY) {
-                val safeRoot = it.safeRoot
-                if (safeRoot?.packageName != "com.android.systemui") {
-                    return it.also { safeRoot?.recycle() }
-                } else {
-                    safeRoot.recycle()
-                }
-            }
-        }
-
-        return null
+        return Triple(systemUiWindows, topAppWindow, topNonSysUiWindow)
     }
 
     /**
@@ -569,9 +551,14 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
      */
     private fun addAllNodesToList(
         parentNode: AccessibilityNodeInfo,
-        list: ArrayList<AccessibilityNodeInfo>
+        list: ArrayList<AccessibilityNodeInfo>,
+        ids: ArrayList<String>
     ) {
         list.add(parentNode)
+        if (parentNode.isVisibleToUser && parentNode.viewIdResourceName != null) {
+            ids.add(parentNode.viewIdResourceName)
+        }
+
         for (i in 0 until parentNode.childCount) {
             val child = try {
                 parentNode.getChild(i)
@@ -588,9 +575,12 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
             }
             if (child != null) {
                 if (child.childCount > 0) {
-                    addAllNodesToList(child, list)
+                    addAllNodesToList(child, list, ids)
                 } else {
                     list.add(child)
+                    if (child.isVisibleToUser && child.viewIdResourceName != null) {
+                        ids.add(child.viewIdResourceName)
+                    }
                 }
             }
         }
