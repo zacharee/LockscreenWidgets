@@ -17,6 +17,7 @@ import tk.zwander.lockscreenwidgets.activities.DismissOrUnlockActivity
 import tk.zwander.lockscreenwidgets.appwidget.IDWidgetFactory
 import tk.zwander.lockscreenwidgets.appwidget.IDListProvider
 import tk.zwander.lockscreenwidgets.util.*
+import java.lang.IllegalStateException
 
 /**
  * This is where a lot of the magic happens.
@@ -283,7 +284,7 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
             //if we actually need to (i.e. on the lock screen and screen is on).
             if ((delegate.wasOnKeyguard || prefManager.showInNotificationCenter) && isScreenOn) {
                 //Retrieve the current window set.
-                val windows = windows
+                val windows = windows.map { it to it.safeRoot }
 
                 //Get all windows with the System UI package name.
                 //Get the topmost application window.
@@ -295,8 +296,10 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
                 val sysUiNodes = ArrayList<AccessibilityNodeInfo>()
                 //Get all View IDs from successfully-flattened System UI nodes.
                 val items = ArrayList<String>()
-                sysUiWindows.mapNotNull { it.second }.forEach {
-                    addAllNodesToList(it, sysUiNodes, items)
+                sysUiWindows.forEach {
+                    it.second?.let { root ->
+                        addAllNodesToList(root, sysUiNodes, items)
+                    }
                 }
 
                 //Update any ID list widgets on the new IDs
@@ -304,7 +307,9 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
                     clear()
                     addAll(items)
                 }
-                IDListProvider.sendUpdate(this@Accessibility)
+                launch {
+                    IDListProvider.sendUpdate(this@Accessibility)
+                }
 
                 if (isDebug) {
                     Log.e(
@@ -320,21 +325,19 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
                 //Put it in an if-check to help performance.
                 if (isOnKeyguard) {
                     //Find index of the topmost application window in the set of all windows.
-                    val appIndex = windows.indexOf(appWindow?.first)
+                    val appIndex = windows.indexOf(appWindow)
                     //Find the *least* index of the System UI windows in the set of all windows.
-                    val sysUiIndex = sysUiWindows.map { windows.indexOf(it.first) }.filter { it > -1 }
+                    val sysUiIndex = sysUiWindows.mapNotNull { windows.indexOf(it).run { if (this > -1) this else null } }
                         .minOrNull()
                         ?: -1
                     //Find index of the topmost system window.
-                    val systemIndex = windows.indexOf(nonAppSystemWindow?.first)
+                    val systemIndex = windows.indexOf(nonAppSystemWindow)
 
                     //Samsung's Screen-Off Memo is really just a normal Activity that shows over the lock screen.
                     //However, it's not an Application-type window for some reason, so it won't hide with the
                     //currentAppLayer check. Explicitly check for its existence here.
                     delegate.isOnScreenOffMemo = windows.any { win ->
-                        win.safeRoot.use {
-                            it?.packageName == "com.samsung.android.app.notes"
-                        }
+                        win.second?.packageName == "com.samsung.android.app.notes"
                     }
 
                     //Generate "layer" values for the System UI window and for the topmost app window, if
@@ -353,16 +356,13 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
 
                         delegate.isOnEdgePanel = systemRoot?.packageName == "com.samsung.android.app.cocktailbarservice"
                                 && systemIndex == 0
-
-                        systemRoot?.recycle()
                     } else {
                         delegate.isOnEdgePanel = false
-                        nonAppSystemWindow?.second?.recycle()
                     }
 
                     //This is mostly a debug value to see which app LSWidg thinks is on top.
                     delegate.currentAppPackage = appWindow?.second?.run {
-                        packageName?.toString().also { recycle() }
+                        packageName?.toString()
                     }
 
                     //If the user has enabled the option to hide the frame on security (pin, pattern, password)
@@ -371,7 +371,6 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
                     //IDs, and OEMs change them. "notification_panel" and "left_button" are largely unchanged,
                     //although this method isn't perfect.
                     if (prefManager.hideOnSecurityPage) {
-                        Log.e("LockscreenWidgets", "")
                         delegate.onMainLockscreen = sysUiNodes.any {
                             it.hasVisibleIds(
                                 "com.android.systemui:id/notification_panel",
@@ -395,9 +394,7 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
 
                     if (prefManager.hideOnFaceWidgets) {
                         delegate.isOnFaceWidgets = windows.any {
-                            it.safeRoot.use { node ->
-                                node?.packageName == "com.samsung.android.app.aodservice"
-                            }
+                            it.second?.packageName == "com.samsung.android.app.aodservice"
                         }
                     }
                 } else {
@@ -436,13 +433,16 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
 
                 //Recycle all windows and nodes.
                 sysUiNodes.forEach { it.recycle() }
-                sysUiWindows.forEach {
-                    it.first?.recycle()
-                }
 
-                try {
-                    appWindow?.first?.recycle()
-                } catch (e: IllegalStateException) {}
+                windows.forEach {
+                    try {
+                        it.first?.recycle()
+                    } catch (e: IllegalStateException) {}
+
+                    try {
+                        it.second?.recycle()
+                    } catch (e: IllegalStateException) {}
+                }
             }
 
             //Check whether the frame can show.
@@ -510,32 +510,28 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
      * Find the [AccessibilityWindowInfo] and [AccessibilityNodeInfo] corresponding to the topmost app window.
      * Find the [AccessibilityWindowInfo] and [AccessibilityNodeInfo] corresponding to the topmost non-System UI window.
      */
-    private fun getWindows(windows: List<AccessibilityWindowInfo> = this.windows): Triple<List<Pair<AccessibilityWindowInfo?, AccessibilityNodeInfo?>>, Pair<AccessibilityWindowInfo?, AccessibilityNodeInfo?>?, Pair<AccessibilityWindowInfo?, AccessibilityNodeInfo?>?> {
-        val systemUiWindows = ArrayList<Pair<AccessibilityWindowInfo?, AccessibilityNodeInfo?>>()
-        var topAppWindow: Pair<AccessibilityWindowInfo?, AccessibilityNodeInfo?>? = null
-        var topNonSysUiWindow: Pair<AccessibilityWindowInfo?, AccessibilityNodeInfo?>? = null
+    private fun getWindows(windows: List<Pair<AccessibilityWindowInfo, AccessibilityNodeInfo?>>): Triple<List<Pair<AccessibilityWindowInfo, AccessibilityNodeInfo?>>, Pair<AccessibilityWindowInfo, AccessibilityNodeInfo?>?, Pair<AccessibilityWindowInfo, AccessibilityNodeInfo?>?> {
+        val systemUiWindows = ArrayList<Pair<AccessibilityWindowInfo, AccessibilityNodeInfo?>>()
+        var topAppWindow: Pair<AccessibilityWindowInfo, AccessibilityNodeInfo?>? = null
+        var topNonSysUiWindow: Pair<AccessibilityWindowInfo, AccessibilityNodeInfo?>? = null
 
         windows.forEach { window ->
-            val safeRoot = window.safeRoot
+            val safeRoot = window.second
             val isSysUi = safeRoot?.packageName == "com.android.systemui"
 
             if (isSysUi) {
-                systemUiWindows.add(window to safeRoot)
+                systemUiWindows.add(window)
             }
 
-            if (topAppWindow == null && window.type == AccessibilityWindowInfo.TYPE_APPLICATION) {
-                topAppWindow = window to safeRoot
+            if (topAppWindow == null && window.first.type == AccessibilityWindowInfo.TYPE_APPLICATION) {
+                topAppWindow = window
             }
 
-            if (topNonSysUiWindow == null && window.type != AccessibilityWindowInfo.TYPE_APPLICATION
-                && window.type != AccessibilityWindowInfo.TYPE_ACCESSIBILITY_OVERLAY) {
+            if (topNonSysUiWindow == null && window.first.type != AccessibilityWindowInfo.TYPE_APPLICATION
+                && window.first.type != AccessibilityWindowInfo.TYPE_ACCESSIBILITY_OVERLAY) {
                 if (!isSysUi) {
-                    topNonSysUiWindow = window to safeRoot
+                    topNonSysUiWindow = window
                 }
-            }
-
-            if (!isSysUi && topNonSysUiWindow == null && topAppWindow == null) {
-                safeRoot?.recycle()
             }
         }
 
