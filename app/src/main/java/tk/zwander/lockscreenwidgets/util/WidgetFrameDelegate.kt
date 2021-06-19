@@ -168,7 +168,7 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
             recyclerView: RecyclerView,
             viewHolder: RecyclerView.ViewHolder
         ): Int {
-            return if (viewHolder is WidgetFrameAdapter.AddWidgetVH) 0
+            return if (viewHolder is WidgetFrameAdapter.AddWidgetVH || prefManager.lockWidgetFrame) 0
             else super.getDragDirs(recyclerView, viewHolder)
         }
 
@@ -309,6 +309,11 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
             PrefManager.KEY_LOCK_NOTIFICATION_POS_Y
         ) {
             updateParamsIfNeeded()
+        }
+        handler(
+            PrefManager.KEY_LOCK_WIDGET_FRAME
+        ) {
+            adapter.currentEditingInterfacePosition = -1
         }
     }
 

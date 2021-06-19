@@ -67,6 +67,14 @@
             app:maxValue="5"
             />
 
+        <SwitchPreference
+            android:title="@string/settings_screen_lock_widget_frame"
+            android:summary="@string/settings_screen_lock_widget_frame_desc"
+            android:key="lock_widget_frame"
+            android:icon="@drawable/ic_baseline_lock_24"
+            android:defaultValue="false"
+            />
+
     </tk.zwander.collapsiblepreferencecategory.CollapsiblePreferenceCategoryNew>
 
     <tk.zwander.collapsiblepreferencecategory.CollapsiblePreferenceCategoryNew

@@ -87,6 +87,9 @@ class WidgetFrameView(context: Context, attrs: AttributeSet) : ConstraintLayout(
                 }
             }
         }
+        handler(PrefManager.KEY_LOCK_WIDGET_FRAME) {
+            setEditMode(false)
+        }
     }
 
     private val binding by lazy { WidgetFrameBinding.bind(this) }
@@ -218,18 +221,20 @@ class WidgetFrameView(context: Context, attrs: AttributeSet) : ConstraintLayout(
 
                     when (max) {
                         2 -> {
-                            setEditMode(!isInEditingMode)
-                            if (binding.gestureHintView.root.isVisible) {
-                                val ghv = binding.gestureHintView.root
-                                if (!ghv.stage2) {
-                                    ghv.stage2 = true
-                                } else if (ghv.stage2) {
-                                    ghv.stage2 = false
-                                    ghv.close()
-                                    binding.hideHintView.root.isVisible = true
+                            if (!context.prefManager.lockWidgetFrame) {
+                                setEditMode(!isInEditingMode)
+                                if (binding.gestureHintView.root.isVisible) {
+                                    val ghv = binding.gestureHintView.root
+                                    if (!ghv.stage2) {
+                                        ghv.stage2 = true
+                                    } else if (ghv.stage2) {
+                                        ghv.stage2 = false
+                                        ghv.close()
+                                        binding.hideHintView.root.isVisible = true
+                                    }
                                 }
+                                return true
                             }
-                            return true
                         }
                         3 -> {
                             if (binding.hideHintView.root.isVisible) {

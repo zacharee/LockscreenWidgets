@@ -62,6 +62,7 @@ class PrefManager private constructor(context: Context) : ContextWrapper(context
         const val KEY_PREVIEW_HEIGHT = "preview_height"
         const val KEY_CUSTOM_TILES = "custom_tiles"
         const val KEY_SHORTCUT_IDS = "shortcut_ids"
+        const val KEY_LOCK_WIDGET_FRAME = "lock_widget_frame"
 
         const val VALUE_PAGE_INDICATOR_BEHAVIOR_HIDDEN = 0
         const val VALUE_PAGE_INDICATOR_BEHAVIOR_AUTO_HIDE = 1
@@ -441,6 +442,13 @@ class PrefManager private constructor(context: Context) : ContextWrapper(context
         get() = getBoolean(KEY_HIDE_IN_LANDSCAPE, false)
         set(value) {
             putBoolean(KEY_HIDE_IN_LANDSCAPE, value)
+        }
+
+    //Whether to lock the frame layout and position.
+    var lockWidgetFrame: Boolean
+        get() = getBoolean(KEY_LOCK_WIDGET_FRAME, false)
+        set(value) {
+            putBoolean(KEY_LOCK_WIDGET_FRAME, value)
         }
 
     fun getCorrectFrameWidth(mode: Mode): Float {
