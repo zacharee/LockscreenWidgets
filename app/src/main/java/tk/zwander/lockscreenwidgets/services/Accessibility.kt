@@ -18,6 +18,8 @@ import tk.zwander.lockscreenwidgets.appwidget.IDWidgetFactory
 import tk.zwander.lockscreenwidgets.appwidget.IDListProvider
 import tk.zwander.lockscreenwidgets.util.*
 import java.lang.IllegalStateException
+import java.util.concurrent.ConcurrentLinkedDeque
+import java.util.concurrent.ConcurrentLinkedQueue
 
 /**
  * This is where a lot of the magic happens.
@@ -293,14 +295,16 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
 
                 //Flatted the nodes/Views in the System UI windows into
                 //a single list for easier handling.
-                val sysUiNodes = ArrayList<AccessibilityNodeInfo>()
+                val sysUiNodes = ConcurrentLinkedQueue<AccessibilityNodeInfo>()
                 //Get all View IDs from successfully-flattened System UI nodes.
-                val items = ArrayList<String>()
+                val items = ConcurrentLinkedQueue<String>()
+                val awaits = ArrayList<Deferred<*>>()
                 sysUiWindows.forEach {
                     it.second?.let { root ->
-                        addAllNodesToList(root, sysUiNodes, items)
+                        addAllNodesToList(root, sysUiNodes, items, awaits)
                     }
                 }
+                awaits.awaitAll()
 
                 //Update any ID list widgets on the new IDs
                 IDWidgetFactory.sList.apply {
@@ -318,7 +322,7 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
                             .toString()
                     )
 
-                    delegate.binding.frame.setNewDebugIdItems(items)
+                    delegate.binding.frame.setNewDebugIdItems(items.toList())
                 }
 
                 //The logic in this block only needs to run when on the lock screen.
@@ -545,40 +549,46 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
      * @param parentNode the root [AccessibilityNodeInfo] whose children we want to hide_for_ids to
      * a list. List will include this node as well.
      * @param list the list that will contain the child nodes.
+     * @param ids the list of all visible IDs
      */
-    private fun addAllNodesToList(
+    private suspend fun addAllNodesToList(
         parentNode: AccessibilityNodeInfo,
-        list: ArrayList<AccessibilityNodeInfo>,
-        ids: ArrayList<String>
+        list: ConcurrentLinkedQueue<AccessibilityNodeInfo>,
+        ids: ConcurrentLinkedQueue<String>,
+        awaits: ArrayList<Deferred<*>>
     ) {
-        list.add(parentNode)
-        if (parentNode.isVisibleToUser && parentNode.viewIdResourceName != null) {
-            ids.add(parentNode.viewIdResourceName)
-        }
-
-        for (i in 0 until parentNode.childCount) {
-            val child = try {
-                parentNode.getChild(i)
-            } catch (e: SecurityException) {
-                //Sometimes a SecurityException gets thrown here (on Huawei devices)
-                //so just return null if it happens
-                null
-            } catch (e: NullPointerException) {
-                //Sometimes a NullPointerException is thrown here with this error:
-                //"Attempt to read from field 'com.android.server.appwidget.AppWidgetServiceImpl$ProviderId
-                //com.android.server.appwidget.AppWidgetServiceImpl$Provider.id' on a null object reference"
-                //so just return null if that happens.
-                null
+        coroutineScope {
+            list.add(parentNode)
+            if (parentNode.isVisibleToUser && parentNode.viewIdResourceName != null) {
+                ids.add(parentNode.viewIdResourceName)
             }
-            if (child != null) {
-                if (child.childCount > 0) {
-                    addAllNodesToList(child, list, ids)
-                } else {
-                    list.add(child)
-                    if (child.isVisibleToUser && child.viewIdResourceName != null) {
-                        ids.add(child.viewIdResourceName)
+
+            for (i in 0 until parentNode.childCount) {
+                awaits.add(async {
+                    val child = try {
+                        parentNode.getChild(i)
+                    } catch (e: SecurityException) {
+                        //Sometimes a SecurityException gets thrown here (on Huawei devices)
+                        //so just return null if it happens
+                        null
+                    } catch (e: NullPointerException) {
+                        //Sometimes a NullPointerException is thrown here with this error:
+                        //"Attempt to read from field 'com.android.server.appwidget.AppWidgetServiceImpl$ProviderId
+                        //com.android.server.appwidget.AppWidgetServiceImpl$Provider.id' on a null object reference"
+                        //so just return null if that happens.
+                        null
                     }
-                }
+                    if (child != null) {
+                        if (child.childCount > 0) {
+                            addAllNodesToList(child, list, ids, awaits)
+                        } else {
+                            list.add(child)
+                            if (child.isVisibleToUser && child.viewIdResourceName != null) {
+                                ids.add(child.viewIdResourceName)
+                            }
+                        }
+                    }
+                })
             }
         }
     }

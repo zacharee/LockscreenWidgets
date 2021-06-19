@@ -19,6 +19,7 @@ import android.view.View
 import android.view.WindowManager
 import android.view.accessibility.AccessibilityNodeInfo
 import android.view.accessibility.AccessibilityWindowInfo
+import kotlinx.coroutines.*
 import tk.zwander.lockscreenwidgets.R
 import tk.zwander.lockscreenwidgets.data.AppInfo
 import tk.zwander.lockscreenwidgets.data.list.WidgetListInfo
@@ -284,4 +285,14 @@ fun String.textAsBitmap(textSize: Float, textColor: Int): Bitmap? {
     val canvas = Canvas(image)
     canvas.drawText(this, 0f, baseline, paint)
     return image
+}
+
+suspend inline fun <T> Collection<T>.forEachParallel(crossinline action: suspend CoroutineScope.(T) -> Unit) {
+    coroutineScope {
+        val awaits = ArrayList<Deferred<*>>(size)
+
+        forEach { awaits.add(async { action(it) }) }
+
+        awaits.awaitAll()
+    }
 }
