@@ -298,7 +298,7 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
                 val sysUiNodes = ConcurrentLinkedQueue<AccessibilityNodeInfo>()
                 //Get all View IDs from successfully-flattened System UI nodes.
                 val items = ConcurrentLinkedQueue<String>()
-                val awaits = ArrayList<Deferred<*>>()
+                val awaits = ConcurrentLinkedQueue<Deferred<*>>()
                 sysUiWindows.forEach {
                     it.second?.let { root ->
                         addAllNodesToList(root, sysUiNodes, items, awaits)
@@ -555,41 +555,43 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
         parentNode: AccessibilityNodeInfo,
         list: ConcurrentLinkedQueue<AccessibilityNodeInfo>,
         ids: ConcurrentLinkedQueue<String>,
-        awaits: ArrayList<Deferred<*>>
+        awaits: ConcurrentLinkedQueue<Deferred<*>>
     ) {
         coroutineScope {
-            list.add(parentNode)
-            if (parentNode.isVisibleToUser && parentNode.viewIdResourceName != null) {
-                ids.add(parentNode.viewIdResourceName)
-            }
+            awaits.add(async {
+                list.add(parentNode)
+                if (parentNode.isVisibleToUser && parentNode.viewIdResourceName != null) {
+                    ids.add(parentNode.viewIdResourceName)
+                }
 
-            for (i in 0 until parentNode.childCount) {
-                awaits.add(async {
-                    val child = try {
-                        parentNode.getChild(i)
-                    } catch (e: SecurityException) {
-                        //Sometimes a SecurityException gets thrown here (on Huawei devices)
-                        //so just return null if it happens
-                        null
-                    } catch (e: NullPointerException) {
-                        //Sometimes a NullPointerException is thrown here with this error:
-                        //"Attempt to read from field 'com.android.server.appwidget.AppWidgetServiceImpl$ProviderId
-                        //com.android.server.appwidget.AppWidgetServiceImpl$Provider.id' on a null object reference"
-                        //so just return null if that happens.
-                        null
-                    }
-                    if (child != null) {
-                        if (child.childCount > 0) {
-                            addAllNodesToList(child, list, ids, awaits)
-                        } else {
-                            list.add(child)
-                            if (child.isVisibleToUser && child.viewIdResourceName != null) {
-                                ids.add(child.viewIdResourceName)
+                for (i in 0 until parentNode.childCount) {
+                    awaits.add(async {
+                        val child = try {
+                            parentNode.getChild(i)
+                        } catch (e: SecurityException) {
+                            //Sometimes a SecurityException gets thrown here (on Huawei devices)
+                            //so just return null if it happens
+                            null
+                        } catch (e: NullPointerException) {
+                            //Sometimes a NullPointerException is thrown here with this error:
+                            //"Attempt to read from field 'com.android.server.appwidget.AppWidgetServiceImpl$ProviderId
+                            //com.android.server.appwidget.AppWidgetServiceImpl$Provider.id' on a null object reference"
+                            //so just return null if that happens.
+                            null
+                        }
+                        if (child != null) {
+                            if (child.childCount > 0) {
+                                addAllNodesToList(child, list, ids, awaits)
+                            } else {
+                                list.add(child)
+                                if (child.isVisibleToUser && child.viewIdResourceName != null) {
+                                    ids.add(child.viewIdResourceName)
+                                }
                             }
                         }
-                    }
-                })
-            }
+                    })
+                }
+            })
         }
     }
 }
