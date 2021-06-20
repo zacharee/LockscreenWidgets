@@ -3,6 +3,7 @@ package tk.zwander.lockscreenwidgets.adapters
 import android.annotation.SuppressLint
 import android.appwidget.AppWidgetManager
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -290,7 +291,12 @@ class WidgetFrameAdapter(
             val shortcutView = FrameShortcutViewBinding.inflate(
                 LayoutInflater.from(binding.widgetHolder.context))
             val icon = data.icon.base64ToBitmap() ?: data.iconRes?.run {
-                val res = itemView.context.packageManager.getResourcesForApplication(this.packageName)
+                val res = try {
+                    itemView.context.packageManager.getResourcesForApplication(this.packageName)
+                } catch (e: PackageManager.NameNotFoundException) {
+                    onRemoveCallback(this@WidgetFrameAdapter, data)
+                    return@bindShortcut
+                }
                 ResourcesCompat.getDrawable(
                     res,
                     res.getIdentifier(this.resourceName, "drawable", this.packageName),
