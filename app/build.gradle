@@ -67,7 +67,7 @@ dependencies {
     implementation 'com.github.agrawalsuneet:DotLoadersPack-Android:v1.4.2'
     implementation 'com.squareup.picasso:picasso:2.71828'
     implementation 'com.heinrichreimersoftware:material-intro:2.0.0'
-    implementation 'net.bytebuddy:byte-buddy-android:1.11.0'
+    implementation 'net.bytebuddy:byte-buddy-android:1.11.5'
     implementation 'com.github.zacharee:SeekBarPreference:b0b9567cd0'
     implementation 'com.github.zacharee:CollapsiblePreferenceCategory:2f53f2d367'
     implementation 'com.github.zacharee.colorpicker:library:9ea5085260'
