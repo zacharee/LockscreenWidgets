@@ -16,9 +16,10 @@ import tk.zwander.lockscreenwidgets.App
 import tk.zwander.lockscreenwidgets.activities.DismissOrUnlockActivity
 import tk.zwander.lockscreenwidgets.appwidget.IDWidgetFactory
 import tk.zwander.lockscreenwidgets.appwidget.IDListProvider
+import tk.zwander.lockscreenwidgets.data.window.WindowInfo
+import tk.zwander.lockscreenwidgets.data.window.WindowRootPair
 import tk.zwander.lockscreenwidgets.util.*
 import java.lang.IllegalStateException
-import java.util.concurrent.ConcurrentLinkedDeque
 import java.util.concurrent.ConcurrentLinkedQueue
 
 /**
@@ -286,7 +287,7 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
             //if we actually need to (i.e. on the lock screen and screen is on).
             if ((delegate.wasOnKeyguard || prefManager.showInNotificationCenter) && isScreenOn) {
                 //Retrieve the current window set.
-                val windows = windows.map { it to it.safeRoot }
+                val windows = windows.map { WindowRootPair(it, it.safeRoot) }
 
                 //Get all windows with the System UI package name.
                 //Get the topmost application window.
@@ -300,7 +301,7 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
                 val items = ConcurrentLinkedQueue<String>()
                 val awaits = ConcurrentLinkedQueue<Deferred<*>>()
                 sysUiWindows.forEach {
-                    it.second?.let { root ->
+                    it.root?.let { root ->
                         addAllNodesToList(root, sysUiNodes, items, awaits)
                     }
                 }
@@ -341,7 +342,7 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
                     //However, it's not an Application-type window for some reason, so it won't hide with the
                     //currentAppLayer check. Explicitly check for its existence here.
                     delegate.isOnScreenOffMemo = windows.any { win ->
-                        win.second?.packageName == "com.samsung.android.app.notes"
+                        win.root?.packageName == "com.samsung.android.app.notes"
                     }
 
                     //Generate "layer" values for the System UI window and for the topmost app window, if
@@ -356,7 +357,7 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
                     delegate.currentSystemLayer = if (systemIndex != -1) windows.size - systemIndex else systemIndex
 
                     if (isTouchWiz) {
-                        val systemRoot = nonAppSystemWindow?.second
+                        val systemRoot = nonAppSystemWindow?.root
 
                         delegate.isOnEdgePanel = systemRoot?.packageName == "com.samsung.android.app.cocktailbarservice"
                                 && systemIndex == 0
@@ -365,7 +366,7 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
                     }
 
                     //This is mostly a debug value to see which app LSWidg thinks is on top.
-                    delegate.currentAppPackage = appWindow?.second?.run {
+                    delegate.currentAppPackage = appWindow?.root?.run {
                         packageName?.toString()
                     }
 
@@ -398,7 +399,7 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
 
                     if (prefManager.hideOnFaceWidgets) {
                         delegate.isOnFaceWidgets = windows.any {
-                            it.second?.packageName == "com.samsung.android.app.aodservice"
+                            it.root?.packageName == "com.samsung.android.app.aodservice"
                         }
                     }
                 } else {
@@ -440,11 +441,11 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
 
                 windows.forEach {
                     try {
-                        it.first?.recycle()
+                        it.root?.recycle()
                     } catch (e: IllegalStateException) {}
 
                     try {
-                        it.second?.recycle()
+                        it.root?.recycle()
                     } catch (e: IllegalStateException) {}
                 }
             }
@@ -514,32 +515,32 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
      * Find the [AccessibilityWindowInfo] and [AccessibilityNodeInfo] corresponding to the topmost app window.
      * Find the [AccessibilityWindowInfo] and [AccessibilityNodeInfo] corresponding to the topmost non-System UI window.
      */
-    private fun getWindows(windows: List<Pair<AccessibilityWindowInfo, AccessibilityNodeInfo?>>): Triple<List<Pair<AccessibilityWindowInfo, AccessibilityNodeInfo?>>, Pair<AccessibilityWindowInfo, AccessibilityNodeInfo?>?, Pair<AccessibilityWindowInfo, AccessibilityNodeInfo?>?> {
-        val systemUiWindows = ArrayList<Pair<AccessibilityWindowInfo, AccessibilityNodeInfo?>>()
-        var topAppWindow: Pair<AccessibilityWindowInfo, AccessibilityNodeInfo?>? = null
-        var topNonSysUiWindow: Pair<AccessibilityWindowInfo, AccessibilityNodeInfo?>? = null
+    private fun getWindows(windows: List<WindowRootPair>): WindowInfo {
+        val systemUiWindows = ArrayList<WindowRootPair>()
+        var topAppWindow: WindowRootPair? = null
+        var topNonSysUiWindow: WindowRootPair? = null
 
         windows.forEach { window ->
-            val safeRoot = window.second
+            val safeRoot = window.root
             val isSysUi = safeRoot?.packageName == "com.android.systemui"
 
             if (isSysUi) {
                 systemUiWindows.add(window)
             }
 
-            if (topAppWindow == null && window.first.type == AccessibilityWindowInfo.TYPE_APPLICATION) {
+            if (topAppWindow == null && window.window.type == AccessibilityWindowInfo.TYPE_APPLICATION) {
                 topAppWindow = window
             }
 
-            if (topNonSysUiWindow == null && window.first.type != AccessibilityWindowInfo.TYPE_APPLICATION
-                && window.first.type != AccessibilityWindowInfo.TYPE_ACCESSIBILITY_OVERLAY) {
+            if (topNonSysUiWindow == null && window.window.type != AccessibilityWindowInfo.TYPE_APPLICATION
+                && window.window.type != AccessibilityWindowInfo.TYPE_ACCESSIBILITY_OVERLAY) {
                 if (!isSysUi) {
                     topNonSysUiWindow = window
                 }
             }
         }
 
-        return Triple(systemUiWindows, topAppWindow, topNonSysUiWindow)
+        return WindowInfo(systemUiWindows, topAppWindow, topNonSysUiWindow)
     }
 
     /**
@@ -550,6 +551,13 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
      * a list. List will include this node as well.
      * @param list the list that will contain the child nodes.
      * @param ids the list of all visible IDs
+     * @param awaits a list of all running Jobs here. The caller should use awaitAll().
+     *
+     * TODO: This has to recursively traverse the View tree it's given. [AccessibilityNodeInfo.getChild]
+     * TODO: can be pretty slow. All adjacent nodes of the tree are processed concurrently, but their
+     * TODO: children have to be processed linearly. We need a flattened list of [AccessibilityNodeInfo] objects
+     * TODO: to properly handle frame visibility, but there may be a better way to do that, since this can take
+     * TODO: up to a second to finish executing.
      */
     private suspend fun addAllNodesToList(
         parentNode: AccessibilityNodeInfo,
