@@ -170,6 +170,18 @@
             android:defaultValue="true"
             />
 
+        <tk.zwander.seekbarpreference.SeekBarPreference
+            android:title="@string/settings_screen_animation_duration"
+            android:summary="@string/settings_screen_animation_duration_desc"
+            android:key="animation_duration"
+            android:icon="@drawable/ic_baseline_timer_24"
+            android:defaultValue="300"
+            android:dependency="animate_show_hide"
+            app:minValue="0"
+            app:maxValue="2000"
+            app:units="ms"
+            />
+
         <tk.zwander.lockscreenwidgets.prefs.AutoSummaryListPreference
             android:title="@string/settings_screen_page_indicator_behavior"
             android:key="page_indicator_behavior"

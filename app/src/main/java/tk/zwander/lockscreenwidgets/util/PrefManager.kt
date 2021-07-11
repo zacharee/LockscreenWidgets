@@ -37,6 +37,7 @@ class PrefManager private constructor(context: Context) : ContextWrapper(context
         const val KEY_HIDE_ON_SECURITY_PAGE = "hide_on_security_page"
         const val KEY_HIDE_ON_NOTIFICATION_SHADE = "hide_on_notification_shade"
         const val KEY_ANIMATE_SHOW_HIDE = "animate_show_hide"
+        const val KEY_ANIMATION_DURATION = "animation_duration"
         const val KEY_CURRENT_PAGE = "current_page"
         const val KEY_DEBUG_LOG = "debug_log"
         const val KEY_FRAME_COL_COUNT = "frame_col_count"
@@ -449,6 +450,13 @@ class PrefManager private constructor(context: Context) : ContextWrapper(context
         get() = getBoolean(KEY_LOCK_WIDGET_FRAME, false)
         set(value) {
             putBoolean(KEY_LOCK_WIDGET_FRAME, value)
+        }
+
+    //The duration of the fade-in/out animation.
+    var animationDuration: Int
+        get() = getInt(KEY_ANIMATION_DURATION, 300)
+        set(value) {
+            putInt(KEY_ANIMATION_DURATION, value)
         }
 
     fun getCorrectFrameWidth(mode: Mode): Float {
