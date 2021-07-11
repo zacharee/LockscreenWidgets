@@ -42,6 +42,7 @@ class IDWidgetFactory(private val context: Context) : RemoteViewsService.RemoteV
         override fun onMoved(fromPosition: Int, toPosition: Int) {}
     })
 
+    @Synchronized
     fun setItems(newItems: List<String>) {
         if (newItems.containsAll(oldItems) && oldItems.containsAll(newItems))
             return
