@@ -339,13 +339,29 @@ class WidgetFrameView(context: Context, attrs: AttributeSet) : ConstraintLayout(
     }
 
     fun removeWindow(wm: WindowManager) {
+        if (context.isDebug) {
+            Log.e(App.DEBUG_LOG_TAG, "Trying to remove overlay $animationState", Exception())
+        }
+
         if (isAttachedToWindow && animationState != AnimationState.STATE_REMOVING) {
             animationState = AnimationState.STATE_REMOVING
+
+            if (context.isDebug) {
+                Log.e(App.DEBUG_LOG_TAG, "Pre-animation removal", Exception())
+            }
+
             binding.frameCard.fadeAndScaleOut {
+                if (context.isDebug) {
+                    Log.e(App.DEBUG_LOG_TAG, "Post-animation removal", Exception())
+                }
+
                 postDelayed({
-                    if (!wm.safeRemoveView(this)) {
-                        animationState = AnimationState.STATE_IDLE
+                    if (context.isDebug) {
+                        Log.e(App.DEBUG_LOG_TAG, "Posted removal", Exception())
                     }
+
+                    wm.safeRemoveView(this)
+                    animationState = AnimationState.STATE_IDLE
                 }, 50)
             }
         } else if (!isAttachedToWindow && animationState != AnimationState.STATE_IDLE) {
