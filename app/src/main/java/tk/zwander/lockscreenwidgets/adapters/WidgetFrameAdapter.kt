@@ -196,37 +196,57 @@ class WidgetFrameAdapter(
             }
 
             itemView.apply {
-                binding.widgetLeftDragger.setOnTouchListener(WidgetResizeListener(context, WidgetResizeListener.Which.LEFT) {
-                    val sizeInfo = currentSizeInfo
-                    sizeInfo.safeWidgetWidthSpan = min(sizeInfo.safeWidgetWidthSpan - it, context.prefManager.frameColCount)
+                binding.widgetLeftDragger.setOnTouchListener(WidgetResizeListener(context, WidgetResizeListener.Which.LEFT,
+                    {
+                        val sizeInfo = currentSizeInfo
+                        sizeInfo.safeWidgetWidthSpan = min(sizeInfo.safeWidgetWidthSpan - it, context.prefManager.frameColCount)
 
-                    persistNewSizeInfo(sizeInfo)
-                    onResize(currentData)
-                })
+                        persistNewSizeInfo(sizeInfo)
+                        onResize(currentData)
+                    },
+                    {
+                        notifyItemChanged(bindingAdapterPosition)
+                    }
+                ))
 
-                binding.widgetTopDragger.setOnTouchListener(WidgetResizeListener(context, WidgetResizeListener.Which.TOP) {
-                    val sizeInfo = currentSizeInfo
-                    sizeInfo.safeWidgetHeightSpan = min(sizeInfo.safeWidgetHeightSpan - it, context.prefManager.frameRowCount)
+                binding.widgetTopDragger.setOnTouchListener(WidgetResizeListener(context, WidgetResizeListener.Which.TOP,
+                    {
+                        val sizeInfo = currentSizeInfo
+                        sizeInfo.safeWidgetHeightSpan = min(sizeInfo.safeWidgetHeightSpan - it, context.prefManager.frameRowCount)
 
-                    persistNewSizeInfo(sizeInfo)
-                    onResize(currentData)
-                })
+                        persistNewSizeInfo(sizeInfo)
+                        onResize(currentData)
+                    },
+                    {
+                        notifyItemChanged(bindingAdapterPosition)
+                    }
+                ))
 
-                binding.widgetRightDragger.setOnTouchListener(WidgetResizeListener(context, WidgetResizeListener.Which.RIGHT) {
-                    val sizeInfo = currentSizeInfo
-                    sizeInfo.safeWidgetWidthSpan = min(sizeInfo.safeWidgetWidthSpan + it, context.prefManager.frameColCount)
+                binding.widgetRightDragger.setOnTouchListener(WidgetResizeListener(context, WidgetResizeListener.Which.RIGHT,
+                    {
+                        val sizeInfo = currentSizeInfo
+                        sizeInfo.safeWidgetWidthSpan = min(sizeInfo.safeWidgetWidthSpan + it, context.prefManager.frameColCount)
 
-                    persistNewSizeInfo(sizeInfo)
-                    onResize(currentData)
-                })
+                        persistNewSizeInfo(sizeInfo)
+                        onResize(currentData)
+                    },
+                    {
+                        notifyItemChanged(bindingAdapterPosition)
+                    }
+                ))
 
-                binding.widgetBottomDragger.setOnTouchListener(WidgetResizeListener(context, WidgetResizeListener.Which.BOTTOM) {
-                    val sizeInfo = currentSizeInfo
-                    sizeInfo.safeWidgetHeightSpan = min(sizeInfo.safeWidgetHeightSpan + it, context.prefManager.frameRowCount)
+                binding.widgetBottomDragger.setOnTouchListener(WidgetResizeListener(context, WidgetResizeListener.Which.BOTTOM,
+                    {
+                        val sizeInfo = currentSizeInfo
+                        sizeInfo.safeWidgetHeightSpan = min(sizeInfo.safeWidgetHeightSpan + it, context.prefManager.frameRowCount)
 
-                    persistNewSizeInfo(sizeInfo)
-                    onResize(currentData)
-                })
+                        persistNewSizeInfo(sizeInfo)
+                        onResize(currentData)
+                    },
+                    {
+                        notifyItemChanged(bindingAdapterPosition)
+                    }
+                ))
             }
 
             editingInterfaceObservable.addObserver { _, arg ->
@@ -338,7 +358,6 @@ class WidgetFrameAdapter(
                     this[info.widgetId] = info
                 }
             }
-            notifyItemChanged(adapterPosition)
         }
     }
 

@@ -14,7 +14,12 @@ import kotlin.math.sign
  * Detects a user dragging on the specified resize handle and only triggers
  * an update if the user has dragged far enough.
  */
-class WidgetResizeListener(private val context: Context, private val which: Which, private val callback: (Int) -> Unit) : View.OnTouchListener {
+class WidgetResizeListener(
+    private val context: Context,
+    private val which: Which,
+    private val resizeCallback: (Int) -> Unit,
+    private val liftCallback: () -> Unit
+) : View.OnTouchListener {
     enum class Which {
         LEFT,
         TOP,
@@ -66,14 +71,18 @@ class WidgetResizeListener(private val context: Context, private val which: Whic
                     if (distX.absoluteValue > thresholdPx) {
                         prevX += thresholdPx * distX.sign
 
-                        callback(distX.sign.toInt())
+                        resizeCallback(distX.sign.toInt())
                     }
                 } else {
                     if (distY.absoluteValue > thresholdPx) {
                         prevY += thresholdPx * distY.sign
-                        callback(distY.sign.toInt())
+                        resizeCallback(distY.sign.toInt())
                     }
                 }
+            }
+
+            MotionEvent.ACTION_UP -> {
+                liftCallback()
             }
         }
 
