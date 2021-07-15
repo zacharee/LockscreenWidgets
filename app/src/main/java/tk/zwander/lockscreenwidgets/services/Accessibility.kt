@@ -251,10 +251,7 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
         if (System.currentTimeMillis() - latestScreenOnTime < 10)
             return
 
-        if (accessibilityJob.run { this != null && !this.isCompleted && !this.isCancelled })
-            return
-
-//        accessibilityJob?.cancel()
+        accessibilityJob?.cancel()
         accessibilityJob = launch {
             //This block here runs even when unlocked, but it only takes a millisecond at most,
             //so it shouldn't be noticeable to the user. We use this to check the current keyguard
