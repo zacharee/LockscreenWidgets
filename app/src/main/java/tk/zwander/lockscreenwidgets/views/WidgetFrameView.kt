@@ -364,7 +364,7 @@ class WidgetFrameView(context: Context, attrs: AttributeSet) : ConstraintLayout(
                     animationState = AnimationState.STATE_IDLE
                 }, 50)
             }
-        } else if (!isAttachedToWindow && animationState != AnimationState.STATE_IDLE) {
+        } else if (!isAttachedToWindow) {
             wm.safeRemoveView(this)
 
             animationState = AnimationState.STATE_IDLE

@@ -30,6 +30,7 @@ import tk.zwander.lockscreenwidgets.data.Mode
 import tk.zwander.lockscreenwidgets.data.WidgetType
 import tk.zwander.lockscreenwidgets.databinding.WidgetFrameBinding
 import tk.zwander.lockscreenwidgets.host.WidgetHostCompat
+import tk.zwander.lockscreenwidgets.services.Accessibility
 import tk.zwander.lockscreenwidgets.views.WidgetFrameView
 import kotlin.math.roundToInt
 import kotlin.math.sign
@@ -43,9 +44,18 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
         @SuppressLint("StaticFieldLeak")
         private var instance: WidgetFrameDelegate? = null
 
+        val hasInstance: Boolean
+            get() = instance != null
+
         fun getInstance(context: Context): WidgetFrameDelegate {
-            return instance ?: WidgetFrameDelegate(context.applicationContext).also {
-                instance = it
+            return instance ?: run {
+                if (context !is Accessibility) {
+                    throw IllegalStateException("Delegate can only be initialized by Accessibility Service!")
+                } else {
+                    WidgetFrameDelegate(context).also {
+                        instance = it
+                    }
+                }
             }
         }
     }
@@ -82,6 +92,10 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
             if (value) {
                 if (canShow()) {
                     addWindow(wm)
+                }
+            } else {
+                if (!canShow()) {
+                    binding.frame.removeWindow(wm)
                 }
             }
         }

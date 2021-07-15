@@ -4,14 +4,20 @@ import android.app.Activity
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
+import android.widget.Toast
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.cancel
 import tk.zwander.lockscreenwidgets.activities.add.AddWidgetActivity
 import tk.zwander.lockscreenwidgets.activities.OnboardingActivity
 import tk.zwander.lockscreenwidgets.activities.SettingsActivity
 import tk.zwander.lockscreenwidgets.activities.UsageActivity
 import tk.zwander.lockscreenwidgets.util.WidgetFrameDelegate
 import tk.zwander.lockscreenwidgets.util.isAccessibilityEnabled
+import tk.zwander.lockscreenwidgets.util.isDebug
 import tk.zwander.lockscreenwidgets.util.prefManager
 
 /**
@@ -21,12 +27,25 @@ import tk.zwander.lockscreenwidgets.util.prefManager
  * If it's the user's first time running the app, or a required permission is missing (i.e. Accessibility),
  * this Activity will also make sure to start [OnboardingActivity] in the proper mode.
  */
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity(), CoroutineScope by MainScope() {
     companion object {
         const val REQ_INTRO = 102
     }
 
-    private val frameDelegate by lazy { WidgetFrameDelegate.getInstance(this) }
+    private val frameDelegate: WidgetFrameDelegate?
+        get() {
+            if (!WidgetFrameDelegate.hasInstance) {
+                if (isDebug) {
+                    Log.e(App.DEBUG_LOG_TAG, "Accessibility isn't running yet", Exception())
+                }
+
+                Toast.makeText(this, R.string.accessibility_not_started, Toast.LENGTH_SHORT).show()
+
+                return null
+            }
+
+            return WidgetFrameDelegate.getInstance(this)
+        }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -62,7 +81,9 @@ class MainActivity : AppCompatActivity() {
                 true
             }
             R.id.preview -> {
-                frameDelegate.isPreview = true
+                frameDelegate?.let {
+                    it.isPreview = !it.isPreview
+                }
                 true
             }
             else -> super.onOptionsItemSelected(item)
@@ -71,7 +92,13 @@ class MainActivity : AppCompatActivity() {
 
     override fun onPause() {
         super.onPause()
-        frameDelegate.isPreview = false
+
+        frameDelegate?.isPreview = false
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        cancel()
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
