@@ -154,7 +154,7 @@ class HideForIDsActivity : AppCompatActivity() {
         val swipeHandler = object : SwipeToDeleteCallback(this) {
             override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
                 //Make sure we remove the swiped item from all lists.
-                items.remove(adapter.items.removeItemAt(viewHolder.adapterPosition))
+                items.remove(adapter.items.removeItemAt(viewHolder.bindingAdapterPosition))
             }
         }
 

@@ -47,8 +47,8 @@ class AddWidgetAdapter(private val picasso: Picasso, private val selectionCallba
 
     override fun onBindViewHolder(holder: WidgetVH, position: Int) {
         holder.itemView
-            .setOnClickListener { selectionCallback.invoke(widgets.currentList[holder.adapterPosition]) }
-        holder.parseInfo(widgets.currentList[holder.adapterPosition], picasso)
+            .setOnClickListener { selectionCallback.invoke(widgets.currentList[holder.bindingAdapterPosition]) }
+        holder.parseInfo(widgets.currentList[holder.bindingAdapterPosition], picasso)
     }
 
     override fun getItemCount() = widgets.currentList.size

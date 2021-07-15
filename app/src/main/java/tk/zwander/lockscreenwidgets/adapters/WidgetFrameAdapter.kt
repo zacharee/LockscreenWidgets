@@ -181,7 +181,7 @@ class WidgetFrameAdapter(
             }
 
         private val currentData: WidgetData
-            get() = widgets[adapterPosition]
+            get() = widgets[bindingAdapterPosition]
 
         private val currentSizeInfo: WidgetSizeData
             get() = itemView.context.prefManager.widgetSizes[currentData.id]
@@ -189,7 +189,7 @@ class WidgetFrameAdapter(
 
         init {
             binding.removeWidget.setOnClickListener {
-                val newPos = adapterPosition
+                val newPos = bindingAdapterPosition
                 if (newPos != -1) {
                     onRemoveCallback(this@WidgetFrameAdapter, widgets[newPos])
                 }
@@ -250,11 +250,11 @@ class WidgetFrameAdapter(
             }
 
             editingInterfaceObservable.addObserver { _, arg ->
-                editingInterfaceShown = currentEditingInterfacePosition != -1 && (currentEditingInterfacePosition == adapterPosition)
+                editingInterfaceShown = currentEditingInterfacePosition != -1 && (currentEditingInterfacePosition == bindingAdapterPosition)
             }
 
             onResizeObservable.addObserver { _, _ ->
-                val pos = adapterPosition
+                val pos = bindingAdapterPosition
 
                 if (pos != -1 && pos < widgets.size) {
                     onResize(widgets[pos])
@@ -266,7 +266,7 @@ class WidgetFrameAdapter(
             itemView.apply {
                 launch {
                     onResize(data)
-                    editingInterfaceShown = currentEditingInterfacePosition != -1 && currentEditingInterfacePosition == adapterPosition
+                    editingInterfaceShown = currentEditingInterfacePosition != -1 && currentEditingInterfacePosition == bindingAdapterPosition
 
                     binding.widgetHolder.removeAllViews()
 

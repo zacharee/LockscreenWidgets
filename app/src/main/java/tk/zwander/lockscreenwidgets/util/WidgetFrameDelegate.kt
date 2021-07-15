@@ -169,7 +169,7 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
             viewHolder: RecyclerView.ViewHolder,
             target: RecyclerView.ViewHolder
         ): Boolean {
-            return adapter.onMove(viewHolder.adapterPosition, target.adapterPosition).also {
+            return adapter.onMove(viewHolder.bindingAdapterPosition, target.bindingAdapterPosition).also {
                 if (it) {
                     updatedForMove = true
                     prefManager.currentWidgets = LinkedHashSet(adapter.widgets)
@@ -193,7 +193,7 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
 
                 //The user has long-pressed a widget. Show the editing UI on that widget.
                 //If the UI is already shown on it, hide it.
-                val adapterPos = viewHolder?.adapterPosition ?: -1
+                val adapterPos = viewHolder?.bindingAdapterPosition ?: -1
                 adapter.currentEditingInterfacePosition = if (adapter.currentEditingInterfacePosition == adapterPos) -1 else adapterPos
             }
 
