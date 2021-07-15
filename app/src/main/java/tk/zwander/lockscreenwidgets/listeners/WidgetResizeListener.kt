@@ -65,6 +65,7 @@ class WidgetResizeListener(private val context: Context, private val which: Whic
                 if (which == Which.LEFT || which == Which.RIGHT) {
                     if (distX.absoluteValue > thresholdPx) {
                         prevX += thresholdPx * distX.sign
+
                         callback(distX.sign.toInt())
                     }
                 } else {

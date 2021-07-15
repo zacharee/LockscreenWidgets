@@ -166,10 +166,10 @@ fun View.calculateWidgetHeight(paramHeight: Int, widgetId: Int): Int {
 }
 
 val Context.widgetBlockWidth: Int
-    get() = (pxAsDp(prefManager.frameWidthDp) / prefManager.frameColCount).roundToInt()
+    get() = (dpAsPx(prefManager.frameWidthDp) / prefManager.frameColCount)
 
 val Context.widgetBlockHeight: Int
-    get() = (pxAsDp(prefManager.frameHeightDp) / prefManager.frameRowCount).roundToInt()
+    get() = (dpAsPx(prefManager.frameHeightDp) / prefManager.frameRowCount)
 
 val Context.isTouchWiz: Boolean
     get() = packageManager.hasSystemFeature("com.samsung.feature.samsung_experience_mobile")
