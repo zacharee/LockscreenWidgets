@@ -4,6 +4,7 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.util.Base64
 import android.util.Log
+import tk.zwander.lockscreenwidgets.App
 import java.io.ByteArrayOutputStream
 import java.io.IOException
 
@@ -18,7 +19,7 @@ fun Bitmap?.toByteArray(): ByteArray? {
         out.close()
         out.toByteArray()
     } catch (e: IOException) {
-        Log.w("LockscreenWidgets", "Could not write bitmap")
+        App.globalContext!!.logUtils.normalLog("Could not write bitmap", e)
         null
     }
 }

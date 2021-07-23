@@ -8,7 +8,8 @@ import java.io.OutputStream
 
 class LogUtils private constructor(private val context: Context) {
     companion object {
-        const val DEBUG_LOG_TAG = "LockscreenWidgetsDebug"
+        const val NORMAL_LOG_TAG = "LockscreenWidgets"
+        const val DEBUG_LOG_TAG = "${NORMAL_LOG_TAG}Debug"
 
         @SuppressLint("StaticFieldLeak")
         private var instance: LogUtils? = null
@@ -30,6 +31,14 @@ class LogUtils private constructor(private val context: Context) {
 
             logFile.appendText("\n\n$fullMessage")
         }
+    }
+
+    fun normalLog(message: String, throwable: Throwable = Exception()) {
+        val fullMessage = "${message}\n${Log.getStackTraceString(throwable)}"
+
+        Log.e(NORMAL_LOG_TAG, fullMessage)
+
+        logFile.appendText("\n\n$fullMessage")
     }
 
     fun resetDebugLog() {

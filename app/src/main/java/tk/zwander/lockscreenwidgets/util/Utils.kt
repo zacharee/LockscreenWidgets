@@ -21,6 +21,7 @@ import android.view.WindowManager
 import android.view.accessibility.AccessibilityNodeInfo
 import android.view.accessibility.AccessibilityWindowInfo
 import kotlinx.coroutines.*
+import tk.zwander.lockscreenwidgets.App
 import tk.zwander.lockscreenwidgets.R
 import tk.zwander.lockscreenwidgets.data.AppInfo
 import tk.zwander.lockscreenwidgets.data.list.WidgetListInfo
@@ -68,7 +69,7 @@ val AccessibilityWindowInfo.safeRoot: AccessibilityNodeInfo?
     } catch (e: NullPointerException) {
         null
     } catch (e: Exception) {
-        Log.e("LockscreenWidgets", "Error getting window root", e)
+        App.globalContext!!.logUtils.normalLog("Error getting window root", e)
         null
     }
 
