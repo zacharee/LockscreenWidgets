@@ -23,8 +23,6 @@ import tk.zwander.lockscreenwidgets.util.isOneUI
  */
 class App : Application() {
     companion object {
-        const val DEBUG_LOG_TAG = "LockscreenWidgetsDebug"
-
         @SuppressLint("StaticFieldLeak")
         var globalContext: Context? = null
             private set

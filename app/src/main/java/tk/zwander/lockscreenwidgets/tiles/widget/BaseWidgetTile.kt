@@ -161,22 +161,16 @@ abstract class BaseWidgetTile : TileService(), SharedPreferences.OnSharedPrefere
             //Try to get the widget RemoteViews.
             val widgetView = iManager.getAppWidgetViews(packageName, widgetId)
             if (widgetView != null) {
-                if (isDebug) {
-                    Log.e(App.DEBUG_LOG_TAG, "Custom widget loaded for tile ID $tileId")
-                }
+                logUtils.debugLog("Custom widget loaded for tile ID $tileId")
 
                 //Success, set it.
                 outerView = widgetView
             } else {
-                if (isDebug) {
-                    Log.e(App.DEBUG_LOG_TAG, "Custom widget view is null for tile ID $tileId")
-                }
+                logUtils.debugLog("Custom widget view is null for tile ID $tileId")
                 //Error retrieving widget, or widget not selected.
             }
         } catch (e: Exception) {
-            if (isDebug) {
-                Log.e(App.DEBUG_LOG_TAG, "Exception adding widget for tile ID $tileId", e)
-            }
+            logUtils.debugLog("Exception adding widget for tile ID $tileId", e)
             //Error retrieving widget.
         }
 

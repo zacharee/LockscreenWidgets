@@ -317,13 +317,11 @@ class WidgetFrameView(context: Context, attrs: AttributeSet) : ConstraintLayout(
     }
 
     fun addWindow(wm: WindowManager, params: WindowManager.LayoutParams) {
-        if (context.isDebug) {
-            Log.e(App.DEBUG_LOG_TAG, "Trying to add overlay $animationState", Exception())
-        }
+        context.logUtils.debugLog("Trying to add overlay $animationState")
+
         if (!isAttachedToWindow && animationState != AnimationState.STATE_ADDING) {
-            if (context.isDebug) {
-                Log.e(App.DEBUG_LOG_TAG, "Adding overlay", Exception())
-            }
+            context.logUtils.debugLog("Adding overlay")
+
             animationState = AnimationState.STATE_ADDING
 
             if (!wm.safeAddView(this, params)) {
@@ -339,26 +337,18 @@ class WidgetFrameView(context: Context, attrs: AttributeSet) : ConstraintLayout(
     }
 
     fun removeWindow(wm: WindowManager) {
-        if (context.isDebug) {
-            Log.e(App.DEBUG_LOG_TAG, "Trying to remove overlay $animationState", Exception())
-        }
+        context.logUtils.debugLog("Trying to remove overlay $animationState")
 
         if (isAttachedToWindow && animationState != AnimationState.STATE_REMOVING) {
             animationState = AnimationState.STATE_REMOVING
 
-            if (context.isDebug) {
-                Log.e(App.DEBUG_LOG_TAG, "Pre-animation removal", Exception())
-            }
+            context.logUtils.debugLog("Pre-animation removal")
 
             binding.frameCard.fadeAndScaleOut {
-                if (context.isDebug) {
-                    Log.e(App.DEBUG_LOG_TAG, "Post-animation removal", Exception())
-                }
+                context.logUtils.debugLog("Post-animation removal")
 
                 postDelayed({
-                    if (context.isDebug) {
-                        Log.e(App.DEBUG_LOG_TAG, "Posted removal", Exception())
-                    }
+                    context.logUtils.debugLog("Posted removal")
 
                     wm.safeRemoveView(this)
                     animationState = AnimationState.STATE_IDLE

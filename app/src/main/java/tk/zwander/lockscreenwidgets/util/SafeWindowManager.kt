@@ -1,6 +1,5 @@
 package tk.zwander.lockscreenwidgets.util
 
-import android.util.Log
 import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
@@ -11,9 +10,7 @@ fun WindowManager.safeAddView(view: View, params: ViewGroup.LayoutParams): Boole
         addView(view, params)
         true
     } catch (e: Exception) {
-        if (App.globalContext!!.isDebug) {
-            Log.e(App.DEBUG_LOG_TAG, "Error adding view", e)
-        }
+        App.globalContext!!.logUtils.debugLog("Error adding view", e)
         false
     }
 }
@@ -23,9 +20,7 @@ fun WindowManager.safeRemoveView(view: View): Boolean {
         removeView(view)
         true
     } catch (e: Exception) {
-        if (App.globalContext!!.isDebug) {
-            Log.e(App.DEBUG_LOG_TAG, "Error removing view", e)
-        }
+        App.globalContext!!.logUtils.debugLog("Error removing view", e)
         false
     }
 }
@@ -35,9 +30,7 @@ fun WindowManager.safeRemoveViewImmediate(view: View): Boolean {
         removeViewImmediate(view)
         true
     } catch (e: Exception) {
-        if (App.globalContext!!.isDebug) {
-            Log.e(App.DEBUG_LOG_TAG, "Error removing view immediate", e)
-        }
+        App.globalContext!!.logUtils.debugLog("Error removing view immediate", e)
         false
     }
 }
@@ -47,9 +40,7 @@ fun WindowManager.safeUpdateViewLayout(view: View, params: ViewGroup.LayoutParam
         updateViewLayout(view, params)
         true
     } catch (e: Exception) {
-        if (App.globalContext!!.isDebug) {
-            Log.e(App.DEBUG_LOG_TAG, "Error updating view", e)
-        }
+        App.globalContext!!.logUtils.debugLog("Error updating view", e)
         false
     }
 }

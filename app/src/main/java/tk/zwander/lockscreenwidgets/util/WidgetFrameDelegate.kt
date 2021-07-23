@@ -39,7 +39,8 @@ import kotlin.math.sign
  * Handle most of the logic involving the widget frame.
  * TODO: make this work with multiple frame "clients" (i.e. a preview in MainActivity).
  */
-class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper(context), SharedPreferences.OnSharedPreferenceChangeListener, IInformationCallback {
+class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper(context),
+    SharedPreferences.OnSharedPreferenceChangeListener, IInformationCallback {
     companion object {
         @SuppressLint("StaticFieldLeak")
         private var instance: WidgetFrameDelegate? = null
@@ -138,6 +139,7 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
         DismissOrUnlockActivity.launch(this)
     }
     val shortcutIdManager = ShortcutIdManager.getInstance(this, widgetHost)
+
     //The actual frame View
     val view = LayoutInflater.from(ContextThemeWrapper(this, R.style.AppTheme))
         .inflate(R.layout.widget_frame, null)!!
@@ -169,13 +171,14 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
             viewHolder: RecyclerView.ViewHolder,
             target: RecyclerView.ViewHolder
         ): Boolean {
-            return adapter.onMove(viewHolder.bindingAdapterPosition, target.bindingAdapterPosition).also {
-                if (it) {
-                    updatedForMove = true
-                    prefManager.currentWidgets = LinkedHashSet(adapter.widgets)
-                    adapter.currentEditingInterfacePosition = -1
+            return adapter.onMove(viewHolder.bindingAdapterPosition, target.bindingAdapterPosition)
+                .also {
+                    if (it) {
+                        updatedForMove = true
+                        prefManager.currentWidgets = LinkedHashSet(adapter.widgets)
+                        adapter.currentEditingInterfacePosition = -1
+                    }
                 }
-            }
         }
 
         override fun getDragDirs(
@@ -194,7 +197,8 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
                 //The user has long-pressed a widget. Show the editing UI on that widget.
                 //If the UI is already shown on it, hide it.
                 val adapterPos = viewHolder?.bindingAdapterPosition ?: -1
-                adapter.currentEditingInterfacePosition = if (adapter.currentEditingInterfacePosition == adapterPos) -1 else adapterPos
+                adapter.currentEditingInterfacePosition =
+                    if (adapter.currentEditingInterfacePosition == adapterPos) -1 else adapterPos
             }
 
             super.onSelectedChanged(viewHolder, actionState)
@@ -224,6 +228,7 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
 
         override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {}
     }
+
     //Some widgets display differently depending on the system's dark mode.
     //Make sure the widgets are rebound if there's a change.
     val nightModeListener = object : ContentObserver(null) {
@@ -395,7 +400,8 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
         //out-of-bounds error.
         try {
             gridLayoutManager.scrollToPosition(prefManager.currentPage)
-        } catch (e: Exception) {}
+        } catch (e: Exception) {
+        }
     }
 
     fun onDestroy() {
@@ -488,31 +494,27 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
                         && prefManager.widgetFrameEnabled
                         )
                 ).also {
-                    if (isDebug) {
-                        Log.e(
-                                App.DEBUG_LOG_TAG,
-                                "canShow: $it, " +
-                                        "isScreenOn: ${isScreenOn}, " +
-                                        "isTempHide: ${isTempHide}, " +
-                                        "wasOnKeyguard: $wasOnKeyguard, " +
-                                        "currentSysUiLayer: $currentSysUiLayer, " +
-                                        "currentAppLayer: $currentAppLayer, " +
-                                        "currentSystemLayer: $currentSystemLayer, " +
-                                        "currentAppPackage: $currentAppPackage, " +
-                                        "onMainLockscreen: $onMainLockscreen, " +
-                                        "isOnFaceWidgets: $isOnFaceWidgets, " +
-                                        "showingNotificationsPanel: $showingNotificationsPanel, " +
-                                        "notificationsPanelFullyExpanded: $notificationsPanelFullyExpanded, " +
-                                        "showOnMainLockScreen: ${prefManager.showOnMainLockScreen}" +
-                                        "notificationCount: $notificationCount, " +
-                                        "hideForPresentIds: $hideForPresentIds, " +
-                                        "hideForNonPresentIds: $hideForNonPresentIds, " +
-                                        "screenRotation: $screenOrientation, " +
-                                        "widgetEnabled: ${prefManager.widgetFrameEnabled}\n\n",
-                                Exception()
-                        )
-                    }
-                }
+                logUtils.debugLog(
+                    "canShow: $it, " +
+                            "isScreenOn: ${isScreenOn}, " +
+                            "isTempHide: ${isTempHide}, " +
+                            "wasOnKeyguard: $wasOnKeyguard, " +
+                            "currentSysUiLayer: $currentSysUiLayer, " +
+                            "currentAppLayer: $currentAppLayer, " +
+                            "currentSystemLayer: $currentSystemLayer, " +
+                            "currentAppPackage: $currentAppPackage, " +
+                            "onMainLockscreen: $onMainLockscreen, " +
+                            "isOnFaceWidgets: $isOnFaceWidgets, " +
+                            "showingNotificationsPanel: $showingNotificationsPanel, " +
+                            "notificationsPanelFullyExpanded: $notificationsPanelFullyExpanded, " +
+                            "showOnMainLockScreen: ${prefManager.showOnMainLockScreen}" +
+                            "notificationCount: $notificationCount, " +
+                            "hideForPresentIds: $hideForPresentIds, " +
+                            "hideForNonPresentIds: $hideForNonPresentIds, " +
+                            "screenRotation: $screenOrientation, " +
+                            "widgetEnabled: ${prefManager.widgetFrameEnabled}\n\n"
+                )
+            }
     }
 
     /**
@@ -632,9 +634,7 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
      * or in expanded notification center).
      */
     private fun updateParamsIfNeeded() {
-        if (isDebug) {
-            Log.e(App.DEBUG_LOG_TAG, "Checking if params need to be updated", Exception())
-        }
+        logUtils.debugLog("Checking if params need to be updated")
 
         val newX = prefManager.getCorrectFrameX(saveMode)
         val newY = prefManager.getCorrectFrameY(saveMode)
@@ -644,41 +644,36 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
         var changed = false
 
         if (params.x != newX) {
-            if (isDebug) {
-                Log.e("LockscreenWidgets", "x changed", Exception())
-            }
+            logUtils.debugLog("x changed")
+
             changed = true
             params.x = newX
         }
 
         if (params.y != newY) {
-            if (isDebug) {
-                Log.e("LockscreenWidgets", "y changed", Exception())
-            }
+            logUtils.debugLog("y changed")
+
             changed = true
             params.y = newY
         }
 
         if (params.width != newW) {
-            if (isDebug) {
-                Log.e("LockscreenWidgets", "w changed", Exception())
-            }
+            logUtils.debugLog("w changed")
+
             changed = true
             params.width = newW
         }
 
         if (params.height != newH) {
-            if (isDebug) {
-                Log.e("LockscreenWidgets", "h changed", Exception())
-            }
+            logUtils.debugLog("h changed")
+
             changed = true
             params.height = newH
         }
 
         if (changed) {
-            if (isDebug) {
-                Log.e(App.DEBUG_LOG_TAG, "Updating params", Exception())
-            }
+            logUtils.debugLog("Updating params")
+
             binding.frame.updateWindow(wm, params)
             mainHandler.post {
                 updateWallpaperLayerIfNeeded()
@@ -689,7 +684,12 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
     }
 
     //Parts based on https://stackoverflow.com/a/26445064/5496177
-    inner class SpannedLayoutManager : SpannedGridLayoutManager(this@WidgetFrameDelegate, RecyclerView.HORIZONTAL, prefManager.frameRowCount, prefManager.frameColCount), ISnappyLayoutManager {
+    inner class SpannedLayoutManager : SpannedGridLayoutManager(
+        this@WidgetFrameDelegate,
+        RecyclerView.HORIZONTAL,
+        prefManager.frameRowCount,
+        prefManager.frameColCount
+    ), ISnappyLayoutManager {
         override fun canScrollHorizontally(): Boolean {
             return (adapter.currentEditingInterfacePosition == -1 || isHoldingItem) && super.canScrollHorizontally()
         }

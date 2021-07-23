@@ -99,9 +99,7 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
                     //so this check is here to make sure the screen is actually off when this
                     //action is received.
                     if (!power.isInteractive) {
-                        if (isDebug) {
-                            Log.e(App.DEBUG_LOG_TAG, "Screen off")
-                        }
+                        logUtils.debugLog("Screen off")
 
                         accessibilityJob?.cancel()
 
@@ -119,9 +117,7 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
                 Intent.ACTION_SCREEN_ON -> {
                     latestScreenOnTime = System.currentTimeMillis()
 
-                    if (isDebug) {
-                        Log.e(App.DEBUG_LOG_TAG, "Screen on")
-                    }
+                    logUtils.debugLog("Screen on")
 
                     delegate.isScreenOn = true
                     if (delegate.canShow()) {
@@ -279,9 +275,7 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
 
             delegate.screenOrientation = wm.defaultDisplay.rotation
 
-            if (isDebug) {
-                Log.e(App.DEBUG_LOG_TAG, "Accessibility event: $eventCopy, isScreenOn: ${isScreenOn}, wasOnKeyguard: $isOnKeyguard")
-            }
+            logUtils.debugLog("Accessibility event: $eventCopy, isScreenOn: ${isScreenOn}, wasOnKeyguard: $isOnKeyguard")
 
             //The below block can (very rarely) take over half a second to execute, so only run it
             //if we actually need to (i.e. on the lock screen and screen is on).
@@ -317,8 +311,7 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
                 }
 
                 if (isDebug) {
-                    Log.e(
-                        App.DEBUG_LOG_TAG,
+                    logUtils.debugLog(
                         sysUiNodes.filter { it.isVisibleToUser }.map { it.viewIdResourceName }
                             .toString()
                     )
@@ -503,9 +496,8 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
      * displayed.
      */
     private fun removeOverlay() {
-        if (isDebug) {
-            Log.e(App.DEBUG_LOG_TAG, "Removing overlay", Exception())
-        }
+        logUtils.debugLog("Removing overlay")
+
         delegate.adapter.currentEditingInterfacePosition = -1
         delegate.binding.frame.removeWindow(wm)
     }

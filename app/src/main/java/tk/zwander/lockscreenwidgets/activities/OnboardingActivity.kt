@@ -16,6 +16,7 @@ import tk.zwander.lockscreenwidgets.R
 import tk.zwander.lockscreenwidgets.util.isAccessibilityEnabled
 import tk.zwander.lockscreenwidgets.util.isNotificationListenerActive
 import tk.zwander.lockscreenwidgets.util.launchUrl
+import tk.zwander.lockscreenwidgets.util.logUtils
 
 /**
  * The introduction for the app.
@@ -123,7 +124,7 @@ class OnboardingActivity : IntroActivity() {
                                 accIntent.component = ComponentName("com.android.settings", "com.android.settings.Settings\$AccessibilityInstalledServiceActivity")
                                 startActivity(accIntent)
                             } catch (e: Exception) {
-                                Log.e(App.DEBUG_LOG_TAG, "Error opening Installed Services:", e)
+                                logUtils.debugLog("Error opening Installed Services:", e)
                                 val accIntent = Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)
                                 startActivity(accIntent)
                             }

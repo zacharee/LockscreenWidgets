@@ -15,10 +15,7 @@ import tk.zwander.lockscreenwidgets.activities.add.AddWidgetActivity
 import tk.zwander.lockscreenwidgets.activities.OnboardingActivity
 import tk.zwander.lockscreenwidgets.activities.SettingsActivity
 import tk.zwander.lockscreenwidgets.activities.UsageActivity
-import tk.zwander.lockscreenwidgets.util.WidgetFrameDelegate
-import tk.zwander.lockscreenwidgets.util.isAccessibilityEnabled
-import tk.zwander.lockscreenwidgets.util.isDebug
-import tk.zwander.lockscreenwidgets.util.prefManager
+import tk.zwander.lockscreenwidgets.util.*
 
 /**
  * Host the main page of the app (the social links). It also hosts the buttons to add a widget, view usage
@@ -35,9 +32,7 @@ class MainActivity : AppCompatActivity(), CoroutineScope by MainScope() {
     private val frameDelegate: WidgetFrameDelegate?
         get() {
             if (!WidgetFrameDelegate.hasInstance) {
-                if (isDebug) {
-                    Log.e(App.DEBUG_LOG_TAG, "Accessibility isn't running yet", Exception())
-                }
+                logUtils.debugLog("Accessibility isn't running yet")
 
                 Toast.makeText(this, R.string.accessibility_not_started, Toast.LENGTH_SHORT).show()
 

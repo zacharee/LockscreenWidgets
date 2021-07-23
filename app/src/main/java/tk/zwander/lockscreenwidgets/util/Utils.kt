@@ -4,6 +4,7 @@ import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
 import android.animation.AnimatorSet
 import android.animation.ObjectAnimator
+import android.app.Application
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
@@ -296,3 +297,9 @@ suspend inline fun <T> Collection<T>.forEachParallel(crossinline action: suspend
         awaits.awaitAll()
     }
 }
+
+val Context.safeApplicationContext: Context
+    get() = if (this is Application) this else applicationContext
+
+val Context.logUtils: LogUtils
+    get() = LogUtils.getInstance(this)
