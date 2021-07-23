@@ -6,9 +6,12 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Build
+import com.google.firebase.crashlytics.FirebaseCrashlytics
+import com.google.firebase.crashlytics.internal.common.CrashlyticsCore
 import org.lsposed.hiddenapibypass.HiddenApiBypass
 import tk.zwander.lockscreenwidgets.tiles.NCTile
 import tk.zwander.lockscreenwidgets.tiles.widget.*
+import tk.zwander.lockscreenwidgets.util.GlobalExceptionHandler
 import tk.zwander.lockscreenwidgets.util.isOneUI
 
 /**
@@ -32,6 +35,9 @@ class App : Application() {
         super.onCreate()
 
         globalContext = this
+
+        val previousHandler = Thread.getDefaultUncaughtExceptionHandler()
+        Thread.setDefaultUncaughtExceptionHandler(GlobalExceptionHandler(this, previousHandler))
 
         //Make sure we can access hidden APIs
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
