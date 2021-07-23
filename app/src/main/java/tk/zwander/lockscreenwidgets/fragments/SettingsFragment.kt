@@ -1,8 +1,11 @@
 package tk.zwander.lockscreenwidgets.fragments
 
+import android.content.Intent
 import android.content.pm.PackageManager
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
 import androidx.preference.SwitchPreference
@@ -12,6 +15,9 @@ import tk.zwander.lockscreenwidgets.activities.OnboardingActivity
 import tk.zwander.lockscreenwidgets.util.PrefManager
 import tk.zwander.lockscreenwidgets.util.isNotificationListenerActive
 import tk.zwander.lockscreenwidgets.util.isOneUI
+import tk.zwander.lockscreenwidgets.util.logUtils
+import java.text.SimpleDateFormat
+import java.util.*
 
 /**
  * The settings page.
@@ -19,6 +25,14 @@ import tk.zwander.lockscreenwidgets.util.isOneUI
  * we need to either request permissions or pass extras to Activities we launch.
  */
 class SettingsFragment : PreferenceFragmentCompat() {
+    private val onDebugExportResult = registerForActivityResult(ActivityResultContracts.CreateDocument()) { uri: Uri? ->
+        if (uri != null) {
+            requireContext().apply {
+                logUtils.exportLog(contentResolver.openOutputStream(uri))
+            }
+        }
+    }
+
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         setPreferencesFromResource(R.xml.prefs_settings, rootKey)
 
@@ -72,6 +86,18 @@ class SettingsFragment : PreferenceFragmentCompat() {
 
         findPreference<Preference>("non_present_ids_launch")?.setOnPreferenceClickListener {
             HideForIDsActivity.start(requireContext(), HideForIDsActivity.Type.NON_PRESENT)
+            true
+        }
+
+        findPreference<Preference>("clear_debug_log")?.setOnPreferenceClickListener {
+            context?.logUtils?.resetDebugLog()
+            true
+        }
+
+        findPreference<Preference>("export_debug_log")?.setOnPreferenceClickListener {
+            val formatter = SimpleDateFormat("yyyy-MM-dd_HH:mm:ss", Locale.getDefault())
+
+            onDebugExportResult.launch("lockscreen_widgets_debug_${formatter.format(Date())}.txt")
             true
         }
     }

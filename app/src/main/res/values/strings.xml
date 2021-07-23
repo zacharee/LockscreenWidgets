@@ -76,6 +76,12 @@
     <string name="settings_screen_debug_log">Debug Logs</string>
     <string name="settings_screen_debug_log_desc">Turn this on to create verbose logs of Lockscreen Widgets\' state.</string>
 
+    <string name="settings_screen_clear_debug_log">Clear Debug Logs</string>
+    <string name="settings_screen_clear_debug_log_desc">Clear previous debug logs.</string>
+
+    <string name="settings_screen_export_debug_log">Export Debug Logs</string>
+    <string name="settings_screen_export_debug_log_desc">Export debug logs to a file.</string>
+
     <string name="settings_screen_frame_col_count">Columns per Page</string>
     <string name="settings_screen_frame_row_count">Rows per Page</string>
 

@@ -512,7 +512,7 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
                             "hideForPresentIds: $hideForPresentIds, " +
                             "hideForNonPresentIds: $hideForNonPresentIds, " +
                             "screenRotation: $screenOrientation, " +
-                            "widgetEnabled: ${prefManager.widgetFrameEnabled}\n\n"
+                            "widgetEnabled: ${prefManager.widgetFrameEnabled}"
                 )
             }
     }
