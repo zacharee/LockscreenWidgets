@@ -59,6 +59,10 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
                 }
             }
         }
+
+        fun invalidateInstance() {
+            instance = null
+        }
     }
 
     //This is used to track when the notification shade has

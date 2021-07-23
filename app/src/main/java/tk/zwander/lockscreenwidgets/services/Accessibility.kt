@@ -69,7 +69,8 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
     private val kgm by lazy { getSystemService(Context.KEYGUARD_SERVICE) as KeyguardManager }
     private val wm by lazy { getSystemService(Context.WINDOW_SERVICE) as WindowManager }
     private val power by lazy { getSystemService(Context.POWER_SERVICE) as PowerManager }
-    private val delegate by lazy { WidgetFrameDelegate.getInstance(this) }
+    private val delegate: WidgetFrameDelegate
+        get() = WidgetFrameDelegate.getInstance(this)
 
     //Receive updates from our notification listener service on how many
     //notifications are currently shown to the user. This count excludes
@@ -471,6 +472,8 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
         notificationCountListener.unregister(this)
         unregisterReceiver(screenStateReceiver)
         delegate.onDestroy()
+
+        WidgetFrameDelegate.invalidateInstance()
     }
 
     /**
