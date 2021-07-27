@@ -50,7 +50,7 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="end"
                 android:text="@android:string/ok"
-                style="@style/Widget.MaterialComponents.Button.TextButton.Dialog"
+                style="@style/Widget.MaterialComponents.Button.UnelevatedButton"
                 />
 
         </LinearLayout>
