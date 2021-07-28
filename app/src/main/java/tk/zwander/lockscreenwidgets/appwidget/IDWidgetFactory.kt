@@ -7,13 +7,14 @@ import android.widget.RemoteViewsService
 import androidx.recyclerview.widget.SortedList
 import tk.zwander.lockscreenwidgets.R
 import tk.zwander.lockscreenwidgets.data.IDData
+import java.util.concurrent.ConcurrentLinkedQueue
 
 /**
  * Essentially an adapter to host the current ID list in Lockscreen Widgets' widget
  */
 class IDWidgetFactory(private val context: Context) : RemoteViewsService.RemoteViewsFactory {
     companion object {
-        val sList = ArrayList<String>()
+        val sList = ConcurrentLinkedQueue<String>()
     }
 
     private val oldItems = ArrayList<String>()
@@ -43,7 +44,7 @@ class IDWidgetFactory(private val context: Context) : RemoteViewsService.RemoteV
     })
 
     @Synchronized
-    fun setItems(newItems: List<String>) {
+    fun setItems(newItems: ConcurrentLinkedQueue<String>) {
         if (newItems.containsAll(oldItems) && oldItems.containsAll(newItems))
             return
 
