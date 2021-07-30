@@ -197,55 +197,23 @@ class WidgetFrameAdapter(
 
             itemView.apply {
                 binding.widgetLeftDragger.setOnTouchListener(WidgetResizeListener(context, WidgetResizeListener.Which.LEFT,
-                    {
-                        val sizeInfo = currentSizeInfo
-                        sizeInfo.safeWidgetWidthSpan = min(sizeInfo.safeWidgetWidthSpan - it, context.prefManager.frameColCount)
-
-                        persistNewSizeInfo(sizeInfo)
-                        onResize(currentData)
-                    },
-                    {
-                        notifyItemChanged(bindingAdapterPosition)
-                    }
+                    { handleResize(it, -1) },
+                    { notifyItemChanged(bindingAdapterPosition) }
                 ))
 
                 binding.widgetTopDragger.setOnTouchListener(WidgetResizeListener(context, WidgetResizeListener.Which.TOP,
-                    {
-                        val sizeInfo = currentSizeInfo
-                        sizeInfo.safeWidgetHeightSpan = min(sizeInfo.safeWidgetHeightSpan - it, context.prefManager.frameRowCount)
-
-                        persistNewSizeInfo(sizeInfo)
-                        onResize(currentData)
-                    },
-                    {
-                        notifyItemChanged(bindingAdapterPosition)
-                    }
+                    { handleResize(it, -1) },
+                    { notifyItemChanged(bindingAdapterPosition) }
                 ))
 
                 binding.widgetRightDragger.setOnTouchListener(WidgetResizeListener(context, WidgetResizeListener.Which.RIGHT,
-                    {
-                        val sizeInfo = currentSizeInfo
-                        sizeInfo.safeWidgetWidthSpan = min(sizeInfo.safeWidgetWidthSpan + it, context.prefManager.frameColCount)
-
-                        persistNewSizeInfo(sizeInfo)
-                        onResize(currentData)
-                    },
-                    {
-                        notifyItemChanged(bindingAdapterPosition)
-                    }
+                    { handleResize(it, 1) },
+                    { notifyItemChanged(bindingAdapterPosition) }
                 ))
 
                 binding.widgetBottomDragger.setOnTouchListener(WidgetResizeListener(context, WidgetResizeListener.Which.BOTTOM,
-                    {
-                        val sizeInfo = currentSizeInfo
-                        sizeInfo.safeWidgetHeightSpan = min(sizeInfo.safeWidgetHeightSpan + it, context.prefManager.frameRowCount)
-
-                        persistNewSizeInfo(sizeInfo)
-                        onResize(currentData)
-                    },
-                    {
-                        notifyItemChanged(bindingAdapterPosition)
-                    }
+                    { handleResize(it, 1) },
+                    { notifyItemChanged(bindingAdapterPosition) }
                 ))
             }
 
@@ -342,8 +310,17 @@ class WidgetFrameAdapter(
             binding.widgetHolder.addView(shortcutView.root)
         }
 
+        private fun handleResize(step: Int, direction: Int) {
+            val sizeInfo = currentSizeInfo
+            sizeInfo.safeWidgetWidthSpan = min(sizeInfo.safeWidgetWidthSpan + step * direction,
+                itemView.context.prefManager.frameColCount)
+
+            persistNewSizeInfo(sizeInfo)
+            onResize(currentData)
+        }
+
         //Make sure the item's width is properly updated on a frame resize, or on initial bind
-        fun onResize(data: WidgetData) {
+        private fun onResize(data: WidgetData) {
             itemView.apply {
                 layoutParams = (layoutParams as ViewGroup.LayoutParams).apply {
                     width = calculateWidgetWidth(params.width, data.id)
