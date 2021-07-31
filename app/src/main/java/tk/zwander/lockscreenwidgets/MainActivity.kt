@@ -30,15 +30,11 @@ class MainActivity : AppCompatActivity(), CoroutineScope by MainScope() {
 
     private val frameDelegate: WidgetFrameDelegate?
         get() {
-            if (!WidgetFrameDelegate.hasInstance) {
-                logUtils.debugLog("Accessibility isn't running yet")
-
-                Toast.makeText(this, R.string.accessibility_not_started, Toast.LENGTH_SHORT).show()
-
-                return null
+            return WidgetFrameDelegate.peekInstance(this).also {
+                if (it == null) {
+                    Toast.makeText(this, R.string.accessibility_not_started, Toast.LENGTH_SHORT).show()
+                }
             }
-
-            return WidgetFrameDelegate.getInstance(this)
         }
 
     override fun onCreate(savedInstanceState: Bundle?) {

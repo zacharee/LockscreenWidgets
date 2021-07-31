@@ -73,7 +73,7 @@ class PrefManager private constructor(context: Context) : ContextWrapper(context
 
         fun getInstance(context: Context): PrefManager {
             return instance ?: run {
-                instance = PrefManager(context.applicationContext)
+                instance = PrefManager(context.safeApplicationContext)
                 instance!!
             }
         }

@@ -48,6 +48,16 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
         val hasInstance: Boolean
             get() = instance != null
 
+        fun peekInstance(context: Context): WidgetFrameDelegate? {
+            if (!hasInstance) {
+                context.logUtils.debugLog("Accessibility isn't running yet")
+
+                return null
+            }
+
+            return getInstance(context)
+        }
+
         fun getInstance(context: Context): WidgetFrameDelegate {
             return instance ?: run {
                 if (context !is Accessibility) {

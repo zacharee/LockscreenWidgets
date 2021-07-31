@@ -6,8 +6,6 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Build
-import com.google.firebase.crashlytics.FirebaseCrashlytics
-import com.google.firebase.crashlytics.internal.common.CrashlyticsCore
 import org.lsposed.hiddenapibypass.HiddenApiBypass
 import tk.zwander.lockscreenwidgets.tiles.NCTile
 import tk.zwander.lockscreenwidgets.tiles.widget.*

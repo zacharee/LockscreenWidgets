@@ -19,7 +19,7 @@ fun Bitmap?.toByteArray(): ByteArray? {
         out.close()
         out.toByteArray()
     } catch (e: IOException) {
-        App.globalContext!!.logUtils.normalLog("Could not write bitmap", e)
+        App.globalContext?.logUtils?.normalLog("Could not write bitmap", e)
         null
     }
 }

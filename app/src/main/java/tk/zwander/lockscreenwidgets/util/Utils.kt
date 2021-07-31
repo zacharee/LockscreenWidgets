@@ -69,7 +69,7 @@ val AccessibilityWindowInfo.safeRoot: AccessibilityNodeInfo?
     } catch (e: NullPointerException) {
         null
     } catch (e: Exception) {
-        App.globalContext!!.logUtils.normalLog("Error getting window root", e)
+        App.globalContext?.logUtils?.normalLog("Error getting window root", e)
         null
     }
 

@@ -10,6 +10,7 @@ import android.os.Build
 import android.os.Looper
 import android.widget.RemoteViews
 import tk.zwander.lockscreenwidgets.util.prefManager
+import tk.zwander.lockscreenwidgets.util.safeApplicationContext
 import tk.zwander.lockscreenwidgets.views.MinPaddingAppWidgetHostView
 
 /**
@@ -34,12 +35,12 @@ abstract class WidgetHostCompat(
         fun getInstance(context: Context, id: Int, unlockCallback: (() -> Unit)? = null): WidgetHostCompat {
             return instance ?: run {
                 if (!onClickHandlerExists) {
-                    WidgetHost12(context.applicationContext, id, unlockCallback)
+                    WidgetHost12(context.safeApplicationContext, id, unlockCallback)
                 } else {
                     (if (RemoteViews.OnClickHandler::class.java.isInterface) {
-                        WidgetHostInterface(context.applicationContext, id, unlockCallback)
+                        WidgetHostInterface(context.safeApplicationContext, id, unlockCallback)
                     } else {
-                        WidgetHostClass(context.applicationContext, id, unlockCallback)
+                        WidgetHostClass(context.safeApplicationContext, id, unlockCallback)
                     }).also {
                         instance = it
                     }
@@ -48,6 +49,7 @@ abstract class WidgetHostCompat(
         }
 
         private val onClickHandlerExists: Boolean
+            @SuppressLint("PrivateApi")
             get() = try {
                 Class.forName("android.widget.RemoteViews\$OnClickHandler")
                 true

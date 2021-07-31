@@ -11,7 +11,7 @@ class ShortcutIdManager private constructor(private val context: Context, privat
         private var instance: ShortcutIdManager? = null
 
         fun getInstance(context: Context, host: AppWidgetHost): ShortcutIdManager {
-            if (instance == null) instance = ShortcutIdManager(context.applicationContext, host)
+            if (instance == null) instance = ShortcutIdManager(context.safeApplicationContext, host)
             return instance!!
         }
     }
