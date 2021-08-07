@@ -161,7 +161,7 @@ open class AddWidgetActivity : AppCompatActivity(), CoroutineScope by MainScope(
                 if (resultCode == Activity.RESULT_OK) {
                     //Widget configuration was successful: add the
                     //widget to the frame
-                    addNewWidget(id)
+                    addNewWidget(id, appWidgetManager.getAppWidgetInfo(id).provider)
                 } else {
                     //Widget configuration was canceled: delete the
                     //allocated ID
@@ -211,9 +211,9 @@ open class AddWidgetActivity : AppCompatActivity(), CoroutineScope by MainScope(
             //Only launch the config Activity if the widget isn't already bound (avoid reconfiguring it
             //every time the app restarts)
             if (info.configure != null && !prefManager.currentWidgets.map { it.id }.contains(id)) {
-                configureWidget(id)
+                configureWidget(id, info.provider)
             } else {
-                addNewWidget(id)
+                addNewWidget(id, info.provider)
             }
         }
     }
@@ -247,7 +247,7 @@ open class AddWidgetActivity : AppCompatActivity(), CoroutineScope by MainScope(
      *
      * @param id the ID of the widget to configure
      */
-    private fun configureWidget(id: Int) {
+    private fun configureWidget(id: Int, provider: ComponentName) {
         try {
             //Use the system API instead of ACTION_APPWIDGET_CONFIGURE to try to avoid some permissions issues
             widgetHost.startAppWidgetConfigureActivityForResult(this, id, 0, CONFIG_CODE, null)
@@ -256,11 +256,11 @@ open class AddWidgetActivity : AppCompatActivity(), CoroutineScope by MainScope(
                 this,
                 resources.getString(
                     R.string.configure_widget_error,
-                    appWidgetManager.getAppWidgetInfo(id).provider
+                    provider
                 ),
                 Toast.LENGTH_LONG
             ).show()
-            addNewWidget(id)
+            addNewWidget(id, provider)
         }
     }
 
@@ -269,8 +269,8 @@ open class AddWidgetActivity : AppCompatActivity(), CoroutineScope by MainScope(
      *
      * @param id the ID of the widget to be added
      */
-    protected open fun addNewWidget(id: Int) {
-        val widget = WidgetData.widget(id)
+    protected open fun addNewWidget(id: Int, provider: ComponentName) {
+        val widget = WidgetData.widget(id, provider)
         prefManager.currentWidgets = prefManager.currentWidgets.apply {
             add(widget)
         }

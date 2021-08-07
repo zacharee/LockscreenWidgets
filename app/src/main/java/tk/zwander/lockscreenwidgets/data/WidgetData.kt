@@ -1,5 +1,6 @@
 package tk.zwander.lockscreenwidgets.data
 
+import android.content.ComponentName
 import android.content.Intent
 import android.os.Parcelable
 import kotlinx.parcelize.Parcelize
@@ -7,8 +8,6 @@ import java.util.*
 
 /**
  * Persistent data for a widget added to the frame.
- * Currently only holds the ID, but is left open for
- * more potential persistent data.
  *
  * @property id the ID of the widget
  */
@@ -19,7 +18,8 @@ open class WidgetData(
     var label: String?,
     var icon: String?,
     var iconRes: Intent.ShortcutIconResource?,
-    var shortcutIntent: Intent?
+    var shortcutIntent: Intent?,
+    var widgetProvider: String?
 ) : Parcelable {
     companion object {
         fun shortcut(
@@ -31,20 +31,25 @@ open class WidgetData(
         ): WidgetData {
             return WidgetData(
                 id, WidgetType.SHORTCUT,
-                label, icon, iconRes, shortcutIntent
+                label, icon, iconRes, shortcutIntent,
+                null
             )
         }
 
         fun widget(
-            id: Int
+            id: Int,
+            widgetProvider: ComponentName
         ): WidgetData {
             return WidgetData(id, WidgetType.WIDGET, null, null,
-                null, null)
+                null, null, widgetProvider.flattenToString())
         }
     }
 
     val safeType: WidgetType
         get() = type ?: WidgetType.WIDGET
+
+    val widgetProviderComponent: ComponentName?
+        get() = widgetProvider?.let { ComponentName.unflattenFromString(it) }
 
     override fun equals(other: Any?): Boolean {
         return other is WidgetData && other.id == id

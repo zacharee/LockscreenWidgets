@@ -2,8 +2,10 @@ package tk.zwander.lockscreenwidgets.adapters
 
 import android.annotation.SuppressLint
 import android.appwidget.AppWidgetManager
+import android.appwidget.AppWidgetProviderInfo
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.os.UserHandle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -217,6 +219,29 @@ class WidgetFrameAdapter(
                 ))
             }
 
+            binding.widgetReconfigure.setOnClickListener {
+                val data = currentData
+                val provider = data.widgetProviderComponent
+
+                if (provider == null) {
+                    //TODO: Notify + debug log
+                } else {
+                    val manager = AppWidgetManager.getInstance(itemView.context)
+                    val pkg = provider.packageName
+                    val providerInfo = (manager.getInstalledProvidersForProfile(
+                        AppWidgetProviderInfo.WIDGET_CATEGORY_HOME_SCREEN, UserHandle.CURRENT, pkg) +
+                            manager.getInstalledProvidersForProfile(
+                                AppWidgetProviderInfo.WIDGET_CATEGORY_KEYGUARD, UserHandle.CURRENT, pkg))
+                        .find { it.provider == provider }
+
+                    if (providerInfo == null) {
+                        //TODO: Notify + debug log
+                    } else {
+
+                    }
+                }
+            }
+
             editingInterfaceObservable.addObserver { _, arg ->
                 editingInterfaceShown = currentEditingInterfacePosition != -1 && (currentEditingInterfacePosition == bindingAdapterPosition)
             }
@@ -251,27 +276,33 @@ class WidgetFrameAdapter(
                 manager.getAppWidgetInfo(data.id)
             }
 
-            binding.widgetHolder.apply {
-                try {
-                    //We're recreating the AppWidgetHostView here each time, which probably isn't the most efficient
-                    //way to do things. However, it's not trivial to just set a new source on an AppWidgetHostView,
-                    //so this makes the most sense right now.
-                    addView(withContext(Dispatchers.Main) {
-                        host.createView(itemView.context, data.id, widgetInfo).apply {
-                            val width = context.pxAsDp(itemView.width).toInt()
-                            val height = context.pxAsDp(itemView.height).toInt()
-                            updateAppWidgetSize(null, width, height, width, height)
+            if (widgetInfo != null) {
+                binding.widgetHolder.apply {
+                    isVisible = true
+
+                    try {
+                        //We're recreating the AppWidgetHostView here each time, which probably isn't the most efficient
+                        //way to do things. However, it's not trivial to just set a new source on an AppWidgetHostView,
+                        //so this makes the most sense right now.
+                        addView(withContext(Dispatchers.Main) {
+                            host.createView(itemView.context, data.id, widgetInfo).apply {
+                                val width = context.pxAsDp(itemView.width).toInt()
+                                val height = context.pxAsDp(itemView.height).toInt()
+                                updateAppWidgetSize(null, width, height, width, height)
+                            }
+                        })
+                    } catch (e: SecurityException) {
+                        //There was an error adding the widget. Some OEMs (OPPO...) like to add permissions requirements to their
+                        //widgets, which can make it impossible for third-party non-launcher apps to bind to them.
+                        Toast.makeText(context, resources.getString(R.string.bind_widget_error, widgetInfo.provider), Toast.LENGTH_LONG).show()
+                        context.prefManager.currentWidgets = context.prefManager.currentWidgets.apply {
+                            remove(data)
+                            host.deleteAppWidgetId(data.id)
                         }
-                    })
-                } catch (e: SecurityException) {
-                    //There was an error adding the widget. Some OEMs (OPPO...) like to add permissions requirements to their
-                    //widgets, which can make it impossible for third-party non-launcher apps to bind to them.
-                    Toast.makeText(context, resources.getString(R.string.bind_widget_error, widgetInfo.provider), Toast.LENGTH_LONG).show()
-                    context.prefManager.currentWidgets = context.prefManager.currentWidgets.apply {
-                        remove(data)
-                        host.deleteAppWidgetId(data.id)
                     }
                 }
+            } else {
+                binding.widgetReconfigure.isVisible = true
             }
         }
 
