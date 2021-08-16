@@ -22,6 +22,7 @@ import kotlinx.coroutines.*
 import tk.zwander.lockscreenwidgets.R
 import tk.zwander.lockscreenwidgets.activities.DismissOrUnlockActivity
 import tk.zwander.lockscreenwidgets.activities.add.AddWidgetActivity
+import tk.zwander.lockscreenwidgets.activities.add.ReconfigureWidgetActivity
 import tk.zwander.lockscreenwidgets.data.WidgetData
 import tk.zwander.lockscreenwidgets.data.WidgetSizeData
 import tk.zwander.lockscreenwidgets.data.WidgetType
@@ -225,6 +226,7 @@ class WidgetFrameAdapter(
 
                 if (provider == null) {
                     //TODO: Notify + debug log
+                    it.context.logUtils.debugLog("Unable to reconfigure widget: provider is null.")
                 } else {
                     val manager = AppWidgetManager.getInstance(itemView.context)
                     val pkg = provider.packageName
@@ -232,12 +234,13 @@ class WidgetFrameAdapter(
                         AppWidgetProviderInfo.WIDGET_CATEGORY_HOME_SCREEN, UserHandle.CURRENT, pkg) +
                             manager.getInstalledProvidersForProfile(
                                 AppWidgetProviderInfo.WIDGET_CATEGORY_KEYGUARD, UserHandle.CURRENT, pkg))
-                        .find { it.provider == provider }
+                        .find { info -> info.provider == provider }
 
                     if (providerInfo == null) {
                         //TODO: Notify + debug log
+                        it.context.logUtils.debugLog("Unable to reconfigure widget $provider: provider info is null.")
                     } else {
-
+                        ReconfigureWidgetActivity.launch(it.context, data.id, providerInfo)
                     }
                 }
             }

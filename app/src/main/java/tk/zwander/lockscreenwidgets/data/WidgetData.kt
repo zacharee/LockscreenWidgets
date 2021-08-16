@@ -54,6 +54,7 @@ open class WidgetData(
     override fun equals(other: Any?): Boolean {
         return other is WidgetData && other.id == id
                 && other.safeType == safeType
+                && (safeType != WidgetType.WIDGET || widgetProviderComponent == other.widgetProviderComponent)
     }
 
     override fun hashCode(): Int {
