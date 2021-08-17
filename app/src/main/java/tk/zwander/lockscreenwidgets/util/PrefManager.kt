@@ -537,7 +537,7 @@ class PrefManager private constructor(context: Context) : ContextWrapper(context
                 }
                 Mode.PREVIEW -> {
                     putInt(KEY_PREVIEW_POS_X, x)
-                    putInt(KEY_NOTIFICATION_POS_Y, y)
+                    putInt(KEY_PREVIEW_POS_Y, y)
                 }
             }
         }
