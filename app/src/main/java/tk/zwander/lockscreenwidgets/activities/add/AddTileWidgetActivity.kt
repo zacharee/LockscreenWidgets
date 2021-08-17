@@ -1,5 +1,6 @@
 package tk.zwander.lockscreenwidgets.activities.add
 
+import android.appwidget.AppWidgetProviderInfo
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
@@ -42,7 +43,7 @@ class AddTileWidgetActivity : AddWidgetActivity() {
      *
      * @param id the ID of the widget to be added
      */
-    override fun addNewWidget(id: Int, provider: ComponentName) {
+    override fun addNewWidget(id: Int, provider: AppWidgetProviderInfo) {
         prefManager.customTiles = prefManager.customTiles.apply {
             this[tileId] = WidgetTileInfo(id)
         }

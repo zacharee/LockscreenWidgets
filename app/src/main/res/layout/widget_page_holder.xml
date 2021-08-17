@@ -22,12 +22,38 @@
         android:background="?selectableItemBackground"
         tools:visibility="visible">
 
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+            <ImageView
+                android:id="@+id/widget_preview"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:scaleType="fitCenter"
+                tools:src="@drawable/ic_baseline_open_in_new_24"
+                />
+
+            <TextView
+                android:id="@+id/widget_label"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:textAlignment="center"
+                tools:text="Some Widget"
+                />
+
+        </LinearLayout>
+
         <ImageView
             android:id="@+id/widget_reconfigure_icon"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_gravity="center"
             android:src="@drawable/ic_baseline_restore_24"
+            android:background="#55000000"
             android:scaleType="fitCenter"
             />
 

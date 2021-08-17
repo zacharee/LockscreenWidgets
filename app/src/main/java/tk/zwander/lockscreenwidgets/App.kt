@@ -11,6 +11,7 @@ import tk.zwander.lockscreenwidgets.tiles.NCTile
 import tk.zwander.lockscreenwidgets.tiles.widget.*
 import tk.zwander.lockscreenwidgets.util.GlobalExceptionHandler
 import tk.zwander.lockscreenwidgets.util.isOneUI
+import tk.zwander.lockscreenwidgets.util.migrationManager
 
 /**
  * The main application.
@@ -31,6 +32,8 @@ class App : Application() {
 
     override fun onCreate() {
         super.onCreate()
+
+        migrationManager.runMigrations()
 
         globalContext = this
 

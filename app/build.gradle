@@ -22,12 +22,14 @@ android {
     buildTypes {
         release {
 //            minifyEnabled true
+            buildConfigField("Integer", "DATABASE_VERSION", project.properties["databaseVersion"])
             shrinkResources false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
 
         debug {
 //            minifyEnabled true
+            buildConfigField("Integer", "DATABASE_VERSION", project.properties["databaseVersion"])
             shrinkResources false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }

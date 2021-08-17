@@ -6,8 +6,11 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import androidx.core.graphics.drawable.toBitmap
+import tk.zwander.lockscreenwidgets.activities.DismissOrUnlockActivity
 import tk.zwander.lockscreenwidgets.data.WidgetData
 import tk.zwander.lockscreenwidgets.util.prefManager
+import tk.zwander.lockscreenwidgets.util.toBase64
 
 class ReconfigureWidgetActivity : BaseBindWidgetActivity() {
     companion object {
@@ -46,18 +49,28 @@ class ReconfigureWidgetActivity : BaseBindWidgetActivity() {
         if (!canBind) getWidgetPermission(id, info.provider)
         else {
             if (info.configure != null) {
-                configureWidget(id, info.provider)
+                configureWidget(id, info)
             } else {
-                addNewWidget(id, info.provider)
+                addNewWidget(id, info)
             }
         }
     }
 
-    override fun addNewWidget(id: Int, provider: ComponentName) {
-        val widget = WidgetData.widget(id, provider)
+    override fun configureWidget(id: Int, provider: AppWidgetProviderInfo) {
+        DismissOrUnlockActivity.launch(this, false)
+        super.configureWidget(id, provider)
+    }
+
+    override fun addNewWidget(id: Int, provider: AppWidgetProviderInfo) {
+        val widget = WidgetData.widget(
+            id,
+            provider.provider,
+            provider.loadLabel(packageManager),
+            provider.loadPreviewImage(this, 0).toBitmap().toBase64()
+        )
         val newSet = prefManager.currentWidgets.toMutableList()
 
-        val oldWidgetIndex = newSet.indexOf(WidgetData.widget(prevId, provider))
+        val oldWidgetIndex = newSet.indexOf(WidgetData.widget(prevId, provider.provider, "", null))
 
         newSet.removeAt(oldWidgetIndex)
         newSet.add(oldWidgetIndex, widget)

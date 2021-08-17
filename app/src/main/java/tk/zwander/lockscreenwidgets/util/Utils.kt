@@ -304,3 +304,6 @@ val Context.safeApplicationContext: Context
 
 val Context.logUtils: LogUtils
     get() = LogUtils.getInstance(this)
+
+val Context.migrationManager: MigrationManager
+    get() = MigrationManager.getInstance(this)

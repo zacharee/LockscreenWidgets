@@ -8,6 +8,7 @@ import android.content.Intent
 import android.graphics.Bitmap
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.graphics.drawable.toBitmap
 import tk.zwander.lockscreenwidgets.R
 import tk.zwander.lockscreenwidgets.data.WidgetData
 import tk.zwander.lockscreenwidgets.data.list.ShortcutListInfo
@@ -54,7 +55,7 @@ abstract class BaseBindWidgetActivity : AppCompatActivity() {
                 if (resultCode == Activity.RESULT_OK) {
                     //Widget configuration was successful: add the
                     //widget to the frame
-                    addNewWidget(id, appWidgetManager.getAppWidgetInfo(id).provider)
+                    addNewWidget(id, appWidgetManager.getAppWidgetInfo(id))
                 } else {
                     //Widget configuration was canceled: delete the
                     //allocated ID
@@ -104,9 +105,9 @@ abstract class BaseBindWidgetActivity : AppCompatActivity() {
             //Only launch the config Activity if the widget isn't already bound (avoid reconfiguring it
             //every time the app restarts)
             if (info.configure != null && !prefManager.currentWidgets.map { it.id }.contains(id)) {
-                configureWidget(id, info.provider)
+                configureWidget(id, info)
             } else {
-                addNewWidget(id, info.provider)
+                addNewWidget(id, info)
             }
         }
     }
@@ -140,7 +141,7 @@ abstract class BaseBindWidgetActivity : AppCompatActivity() {
      *
      * @param id the ID of the widget to configure
      */
-    protected fun configureWidget(id: Int, provider: ComponentName) {
+    protected open fun configureWidget(id: Int, provider: AppWidgetProviderInfo) {
         try {
             //Use the system API instead of ACTION_APPWIDGET_CONFIGURE to try to avoid some permissions issues
             widgetHost.startAppWidgetConfigureActivityForResult(this, id, 0,
@@ -163,8 +164,13 @@ abstract class BaseBindWidgetActivity : AppCompatActivity() {
      *
      * @param id the ID of the widget to be added
      */
-    protected open fun addNewWidget(id: Int, provider: ComponentName) {
-        val widget = WidgetData.widget(id, provider)
+    protected open fun addNewWidget(id: Int, provider: AppWidgetProviderInfo) {
+        val widget = WidgetData.widget(
+            id,
+            provider.provider,
+            provider.loadLabel(packageManager),
+            provider.loadPreviewImage(this, 0).toBitmap().toBase64()
+        )
         prefManager.currentWidgets = prefManager.currentWidgets.apply {
             add(widget)
         }

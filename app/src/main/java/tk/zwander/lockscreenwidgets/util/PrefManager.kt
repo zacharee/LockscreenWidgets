@@ -64,6 +64,7 @@ class PrefManager private constructor(context: Context) : ContextWrapper(context
         const val KEY_CUSTOM_TILES = "custom_tiles"
         const val KEY_SHORTCUT_IDS = "shortcut_ids"
         const val KEY_LOCK_WIDGET_FRAME = "lock_widget_frame"
+        const val KEY_DATABASE_VERSION = "database_version"
 
         const val VALUE_PAGE_INDICATOR_BEHAVIOR_HIDDEN = 0
         const val VALUE_PAGE_INDICATOR_BEHAVIOR_AUTO_HIDE = 1
@@ -460,6 +461,13 @@ class PrefManager private constructor(context: Context) : ContextWrapper(context
         get() = getInt(KEY_ANIMATION_DURATION, 300)
         set(value) {
             putInt(KEY_ANIMATION_DURATION, value)
+        }
+
+    //The current widget database version. Used for migrations.
+    var databaseVersion: Int
+        get() = getInt(KEY_DATABASE_VERSION, 0)
+        set(value) {
+            putInt(KEY_DATABASE_VERSION, value)
         }
 
     fun getCorrectFrameWidth(mode: Mode): Float {

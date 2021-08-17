@@ -309,6 +309,8 @@ class WidgetFrameAdapter(
                 }
             } else {
                 binding.widgetReconfigure.isVisible = true
+                binding.widgetPreview.setImageBitmap(data.icon?.base64ToBitmap())
+                binding.widgetLabel.text = data.label
             }
         }
 

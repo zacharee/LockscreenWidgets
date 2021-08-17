@@ -38,9 +38,11 @@ open class WidgetData(
 
         fun widget(
             id: Int,
-            widgetProvider: ComponentName
+            widgetProvider: ComponentName,
+            label: String,
+            icon: String?
         ): WidgetData {
-            return WidgetData(id, WidgetType.WIDGET, null, null,
+            return WidgetData(id, WidgetType.WIDGET, label, icon,
                 null, null, widgetProvider.flattenToString())
         }
     }
