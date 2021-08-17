@@ -226,19 +226,21 @@ class WidgetFrameAdapter(
 
                 if (provider == null) {
                     //TODO: Notify + debug log
-                    it.context.logUtils.debugLog("Unable to reconfigure widget: provider is null.")
+                    it.context.logUtils.normalLog("Unable to reconfigure widget: provider is null.")
                 } else {
                     val manager = AppWidgetManager.getInstance(itemView.context)
                     val pkg = provider.packageName
                     val providerInfo = (manager.getInstalledProvidersForProfile(
-                        AppWidgetProviderInfo.WIDGET_CATEGORY_HOME_SCREEN, UserHandle.CURRENT, pkg) +
+                        AppWidgetProviderInfo.WIDGET_CATEGORY_HOME_SCREEN, null, pkg) +
                             manager.getInstalledProvidersForProfile(
-                                AppWidgetProviderInfo.WIDGET_CATEGORY_KEYGUARD, UserHandle.CURRENT, pkg))
-                        .find { info -> info.provider == provider }
+                                AppWidgetProviderInfo.WIDGET_CATEGORY_KEYGUARD, null, pkg))
+                        .find { info ->
+                            info.provider == provider
+                        }
 
                     if (providerInfo == null) {
                         //TODO: Notify + debug log
-                        it.context.logUtils.debugLog("Unable to reconfigure widget $provider: provider info is null.")
+                        it.context.logUtils.normalLog("Unable to reconfigure widget $provider: provider info is null.")
                     } else {
                         ReconfigureWidgetActivity.launch(it.context, data.id, providerInfo)
                     }
@@ -280,6 +282,7 @@ class WidgetFrameAdapter(
             }
 
             if (widgetInfo != null) {
+                binding.widgetReconfigure.isVisible = false
                 binding.widgetHolder.apply {
                     isVisible = true
 
@@ -310,6 +313,9 @@ class WidgetFrameAdapter(
         }
 
         private suspend fun bindShortcut(data: WidgetData) {
+            binding.widgetReconfigure.isVisible = false
+            binding.widgetHolder.isVisible = true
+
             val shortcutView = FrameShortcutViewBinding.inflate(
                 LayoutInflater.from(binding.widgetHolder.context))
             val icon = data.icon.base64ToBitmap() ?: data.iconRes?.run {
@@ -330,11 +336,14 @@ class WidgetFrameAdapter(
                 data.shortcutIntent?.apply {
                     addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
 
-                    try {
-                        itemView.context.startActivity(this)
-                        DismissOrUnlockActivity.launch(itemView.context)
-                    } catch (e: Exception) {
-                        Toast.makeText(itemView.context, R.string.launch_shortcut_error, Toast.LENGTH_SHORT).show()
+                    mainHandler.post {
+                        try {
+                            itemView.context.startActivity(this)
+                            DismissOrUnlockActivity.launch(itemView.context, false)
+                        } catch (e: Exception) {
+                            it.context.logUtils.normalLog("Unable to launch shortcut", e)
+                            Toast.makeText(itemView.context, R.string.launch_shortcut_error, Toast.LENGTH_SHORT).show()
+                        }
                     }
                 }
             }

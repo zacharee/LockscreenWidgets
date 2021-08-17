@@ -41,6 +41,7 @@
         <activity android:name=".activities.DismissOrUnlockActivity"
             android:exported="false"
             android:excludeFromRecents="true"
+            android:theme="@style/AppTheme.Null"
             />
         <activity android:name=".activities.HideForIDsActivity"
             android:exported="false"
@@ -48,6 +49,10 @@
         <activity android:name=".activities.UsageActivity"
             android:exported="false"
             android:label="@string/usage"
+            />
+        <activity android:name=".activities.add.ReconfigureWidgetActivity"
+            android:exported="false"
+            android:theme="@style/AppTheme.Null"
             />
 
         <service

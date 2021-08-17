@@ -10,6 +10,20 @@
         android:defaultValue="true"
         />
 
+    <Preference
+        android:title="@string/settings_screen_back_up_widgets"
+        android:summary="@string/settings_screen_back_up_widgets_desc"
+        android:key="back_up_widgets"
+        android:icon="@drawable/ic_baseline_save_24"
+        />
+
+    <Preference
+        android:title="@string/settings_screen_restore_widgets"
+        android:summary="@string/settings_screen_restore_widgets_desc"
+        android:key="restore_widgets"
+        android:icon="@drawable/ic_baseline_open_in_new_24"
+        />
+
     <tk.zwander.collapsiblepreferencecategory.CollapsiblePreferenceCategoryNew
         android:title="@string/category_appearance"
         android:key="settings_appearance_category">

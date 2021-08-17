@@ -19,6 +19,7 @@ class ReconfigureWidgetActivity : BaseBindWidgetActivity() {
 
             intent.putExtra(EXTRA_PREVIOUS_ID, id)
             intent.putExtra(EXTRA_PROVIDER_INFO, providerInfo)
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
 
             context.startActivity(intent)
         }
@@ -35,19 +36,21 @@ class ReconfigureWidgetActivity : BaseBindWidgetActivity() {
             return
         }
 
-        tryBindWidget(providerInfo!!, prevId)
+        tryBindWidget(providerInfo!!, widgetHost.allocateAppWidgetId())
     }
 
     @SuppressLint("NewApi")
     override fun tryBindWidget(info: AppWidgetProviderInfo, id: Int) {
-        var goodId = id
+        val canBind = appWidgetManager.bindAppWidgetIdIfAllowed(id, info.provider)
 
-        if (widgetHost.appWidgetIds.contains(id)
-            && appWidgetManager.getAppWidgetInfo(id).provider != info.provider) {
-            goodId = widgetHost.allocateAppWidgetId()
+        if (!canBind) getWidgetPermission(id, info.provider)
+        else {
+            if (info.configure != null) {
+                configureWidget(id, info.provider)
+            } else {
+                addNewWidget(id, info.provider)
+            }
         }
-
-        super.tryBindWidget(info, goodId)
     }
 
     override fun addNewWidget(id: Int, provider: ComponentName) {

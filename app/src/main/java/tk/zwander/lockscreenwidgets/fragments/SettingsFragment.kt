@@ -1,10 +1,13 @@
 package tk.zwander.lockscreenwidgets.fragments
 
+import android.appwidget.AppWidgetHost
+import android.appwidget.AppWidgetManager
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
@@ -12,10 +15,8 @@ import androidx.preference.SwitchPreference
 import tk.zwander.lockscreenwidgets.R
 import tk.zwander.lockscreenwidgets.activities.HideForIDsActivity
 import tk.zwander.lockscreenwidgets.activities.OnboardingActivity
-import tk.zwander.lockscreenwidgets.util.PrefManager
-import tk.zwander.lockscreenwidgets.util.isNotificationListenerActive
-import tk.zwander.lockscreenwidgets.util.isOneUI
-import tk.zwander.lockscreenwidgets.util.logUtils
+import tk.zwander.lockscreenwidgets.host.WidgetHostCompat
+import tk.zwander.lockscreenwidgets.util.*
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -29,6 +30,40 @@ class SettingsFragment : PreferenceFragmentCompat() {
         if (uri != null) {
             requireContext().apply {
                 logUtils.exportLog(contentResolver.openOutputStream(uri))
+            }
+        }
+    }
+
+    private val onWidgetBackUp = registerForActivityResult(ActivityResultContracts.CreateDocument()) { uri: Uri? ->
+        if (uri != null) {
+            requireContext().apply {
+                contentResolver.openOutputStream(uri)?.bufferedWriter()?.use { output ->
+                    prefManager.currentWidgetsString?.let { string ->
+                        output.write(string)
+                    }
+                }
+            }
+        }
+    }
+
+    private val onWidgetRestore = registerForActivityResult(ActivityResultContracts.OpenDocument()) { uri: Uri? ->
+        if (uri != null) {
+            requireContext().apply {
+                val input = contentResolver.openInputStream(uri)?.bufferedReader()?.readText()
+
+                if (!prefManager.isValidWidgetsString(input)) {
+                    Toast.makeText(this, R.string.unable_to_restore_widgets, Toast.LENGTH_SHORT)
+                    logUtils.normalLog("Unable to restore widgets")
+                } else {
+                    val old = prefManager.currentWidgets
+                    val widgetHost = WidgetHostCompat.getInstance(this, 1003)
+
+                    old.forEach {
+                        widgetHost.deleteAppWidgetId(it.id)
+                    }
+
+                    prefManager.currentWidgetsString = input
+                }
             }
         }
     }
@@ -98,6 +133,18 @@ class SettingsFragment : PreferenceFragmentCompat() {
             val formatter = SimpleDateFormat("yyyy-MM-dd_HH:mm:ss", Locale.getDefault())
 
             onDebugExportResult.launch("lockscreen_widgets_debug_${formatter.format(Date())}.txt")
+            true
+        }
+
+        findPreference<Preference>("back_up_widgets")?.setOnPreferenceClickListener {
+            val formatter = SimpleDateFormat("yyyy-MM-dd_HH:mm:ss", Locale.getDefault())
+
+            onWidgetBackUp.launch("lockscreen_widgets_backup_${formatter.format(Date())}.lswidg")
+            true
+        }
+
+        findPreference<Preference>("restore_widgets")?.setOnPreferenceClickListener {
+            onWidgetRestore.launch(arrayOf("*/*"))
             true
         }
     }

@@ -133,6 +133,12 @@
     <string name="settings_screen_animation_duration">Animation Duration</string>
     <string name="settings_screen_animation_duration_desc">Set how long it takes for the fade-in/fade-out animation to complete.</string>
 
+    <string name="settings_screen_back_up_widgets">Back Up</string>
+    <string name="settings_screen_back_up_widgets_desc">Back up current widgets and shortcuts. This does not include widget tiles.</string>
+
+    <string name="settings_screen_restore_widgets">Restore</string>
+    <string name="settings_screen_restore_widgets_desc">Restore widgets and shortcuts from a backup. This will replace existing widgets and shortcuts. This does not include widget tiles.</string>
+
     <string name="intro_welcome_title">Welcome!</string>
     <string name="intro_welcome_desc">Lockscreen Widgets is a simple app with a simple purpose: to bring back Android KitKat\'s lock screen widgets. Your widgets will show up in a simple paged slider on the lockscreen.</string>
 
@@ -184,4 +190,5 @@
     <string name="touch_protection_active">Touch protection active. Please uncover the proximity sensor.</string>
     <string name="launch_shortcut_error">Unable to launch shortcut.</string>
     <string name="accessibility_not_started">The Accessibility Service hasn\'t started yet. Please wait.</string>
+    <string name="unable_to_restore_widgets">Unable to restore widgets.</string>
 </resources>

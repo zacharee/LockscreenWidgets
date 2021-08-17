@@ -90,14 +90,17 @@ class PrefManager private constructor(context: Context) : ContextWrapper(context
     //The widgets currently added to the widget frame
     var currentWidgets: LinkedHashSet<WidgetData>
         get() = gson.fromJson(
-            getString(KEY_CURRENT_WIDGETS),
+            currentWidgetsString,
             object : TypeToken<LinkedHashSet<WidgetData>>() {}.type
         ) ?: LinkedHashSet()
         set(value) {
-            putString(
-                KEY_CURRENT_WIDGETS,
-                gson.toJson(value)
-            )
+            currentWidgetsString = gson.toJson(value)
+        }
+
+    var currentWidgetsString: String?
+        get() = getString(KEY_CURRENT_WIDGETS)
+        set(value) {
+            putString(KEY_CURRENT_WIDGETS, value)
         }
 
     //The shortcuts currently added to the widget frame
@@ -547,6 +550,18 @@ class PrefManager private constructor(context: Context) : ContextWrapper(context
             Mode.LOCK_NOTIFICATION -> lockNotificationPosY = y
             Mode.NOTIFICATION -> notificationPosY = y
             Mode.PREVIEW -> previewPosY = y
+        }
+    }
+
+    fun isValidWidgetsString(string: String?): Boolean {
+        return try {
+            gson.fromJson<LinkedHashSet<WidgetData>>(
+                string,
+                object : TypeToken<LinkedHashSet<WidgetData>>() {}.type
+            ) != null
+        } catch (e: Exception) {
+            logUtils.normalLog("Error parsing input string $string", e)
+            false
         }
     }
 

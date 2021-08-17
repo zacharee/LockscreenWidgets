@@ -10,6 +10,8 @@ import android.os.Looper
 import android.view.WindowManager
 import androidx.appcompat.app.AppCompatActivity
 import tk.zwander.lockscreenwidgets.services.Accessibility
+import tk.zwander.lockscreenwidgets.util.logUtils
+import tk.zwander.lockscreenwidgets.util.mainHandler
 
 /**
  * Used when the lock screen or notification center needs to be dismissed.
@@ -18,12 +20,21 @@ import tk.zwander.lockscreenwidgets.services.Accessibility
  */
 class DismissOrUnlockActivity : AppCompatActivity() {
     companion object {
-        fun launch(context: Context) {
-            Handler(Looper.getMainLooper()).postDelayed({
-                val intent = Intent(context, DismissOrUnlockActivity::class.java)
-                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                context.startActivity(intent)
-            }, 100)
+        fun launch(context: Context, runOnMain: Boolean = true) {
+            if (runOnMain) {
+                mainHandler.postDelayed({
+                    launch(context)
+                }, 100)
+            } else {
+                launch(context)
+            }
+        }
+
+        private fun launch(context: Context) {
+            val intent = Intent(context, DismissOrUnlockActivity::class.java)
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_SINGLE_TOP
+                                or Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
+            context.startActivity(intent)
         }
     }
 
@@ -36,6 +47,8 @@ class DismissOrUnlockActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        window.addFlags(WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED)
 
         if (kgm.isKeyguardLocked) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
