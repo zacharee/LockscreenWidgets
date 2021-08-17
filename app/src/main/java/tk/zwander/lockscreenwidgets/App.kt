@@ -33,8 +33,6 @@ class App : Application() {
     override fun onCreate() {
         super.onCreate()
 
-        migrationManager.runMigrations()
-
         globalContext = this
 
         val previousHandler = Thread.getDefaultUncaughtExceptionHandler()
@@ -44,6 +42,8 @@ class App : Application() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
             HiddenApiBypass.setHiddenApiExemptions("L")
         }
+
+        migrationManager.runMigrations()
 
         //This should only run on Nougat and above.
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
