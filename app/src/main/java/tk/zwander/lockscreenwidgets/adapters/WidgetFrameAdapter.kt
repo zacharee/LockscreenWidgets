@@ -19,6 +19,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.arasthel.spannedgridlayoutmanager.SpanSize
 import com.arasthel.spannedgridlayoutmanager.SpannedGridLayoutManager
 import kotlinx.coroutines.*
+import tk.zwander.lockscreenwidgets.App
 import tk.zwander.lockscreenwidgets.R
 import tk.zwander.lockscreenwidgets.activities.DismissOrUnlockActivity
 import tk.zwander.lockscreenwidgets.activities.add.AddWidgetActivity
@@ -35,6 +36,8 @@ import tk.zwander.lockscreenwidgets.observables.RemoveButtonObservable
 import tk.zwander.lockscreenwidgets.util.*
 import java.util.*
 import kotlin.collections.ArrayList
+import kotlin.collections.HashSet
+import kotlin.collections.LinkedHashSet
 import kotlin.math.min
 
 /**
@@ -67,6 +70,8 @@ class WidgetFrameAdapter(
     private val editingInterfaceObservable =
         RemoveButtonObservable()
 
+    private var didResize = false
+
     /**
      * Push a new set of widgets to the frame.
      * If there are currently no widgets added,
@@ -75,33 +80,37 @@ class WidgetFrameAdapter(
      * accordingly.
      */
     fun updateWidgets(newWidgets: List<WidgetData>) {
-        if (widgets.isEmpty()) {
-            widgets.addAll(newWidgets)
-            notifyItemRangeInserted(0, itemCount)
+        if (!didResize) {
+            if (widgets.isEmpty()) {
+                widgets.addAll(newWidgets)
+                notifyItemRangeInserted(0, itemCount)
+            } else {
+                val oldWidgets = widgets.toList()
+                this.widgets.clear()
+                this.widgets.addAll(newWidgets)
+
+                val result = DiffUtil.calculateDiff(object : DiffUtil.Callback() {
+                    override fun areContentsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
+                        return oldWidgets[oldItemPosition].id == newWidgets[newItemPosition].id
+                    }
+
+                    override fun areItemsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
+                        return oldWidgets[oldItemPosition] == newWidgets[newItemPosition]
+                    }
+
+                    override fun getNewListSize(): Int {
+                        return newWidgets.size
+                    }
+
+                    override fun getOldListSize(): Int {
+                        return oldWidgets.size
+                    }
+                }, true)
+
+                result.dispatchUpdatesTo(this)
+            }
         } else {
-            val oldWidgets = widgets.toList()
-            this.widgets.clear()
-            this.widgets.addAll(newWidgets)
-
-            val result = DiffUtil.calculateDiff(object : DiffUtil.Callback() {
-                override fun areContentsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
-                    return oldWidgets[oldItemPosition].id == newWidgets[newItemPosition].id
-                }
-
-                override fun areItemsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
-                    return oldWidgets[oldItemPosition] == newWidgets[newItemPosition]
-                }
-
-                override fun getNewListSize(): Int {
-                    return newWidgets.size
-                }
-
-                override fun getOldListSize(): Int {
-                    return oldWidgets.size
-                }
-            }, true)
-
-            result.dispatchUpdatesTo(this)
+            didResize = false
         }
     }
 
@@ -185,10 +194,6 @@ class WidgetFrameAdapter(
 
         private val currentData: WidgetData
             get() = widgets[bindingAdapterPosition]
-
-        private val currentSizeInfo: WidgetSizeData
-            get() = itemView.context.prefManager.widgetSizes[currentData.id]
-                ?: WidgetSizeData(currentData.id, 1, 1)
 
         init {
             binding.removeWidget.setOnClickListener {
@@ -356,7 +361,7 @@ class WidgetFrameAdapter(
         }
 
         private fun handleResize(step: Int, direction: Int, vertical: Boolean) {
-            val sizeInfo = currentSizeInfo
+            val sizeInfo = currentData.safeSize
 
             if (vertical) {
                 sizeInfo.safeWidgetHeightSpan = min(sizeInfo.safeWidgetHeightSpan + step * direction,
@@ -366,25 +371,25 @@ class WidgetFrameAdapter(
                     itemView.context.prefManager.frameColCount)
             }
 
-            persistNewSizeInfo(sizeInfo)
             onResize(currentData)
+            persistResize(currentData)
         }
 
         //Make sure the item's width is properly updated on a frame resize, or on initial bind
         private fun onResize(data: WidgetData) {
             itemView.apply {
                 layoutParams = (layoutParams as ViewGroup.LayoutParams).apply {
-                    width = calculateWidgetWidth(params.width, data.id)
+                    width = calculateWidgetWidth(params.width, data.safeSize)
 //                    height = calculateWidgetHeight(params.height, data.id)
                 }
             }
         }
 
-        private fun persistNewSizeInfo(info: WidgetSizeData) {
+        private fun persistResize(data: WidgetData) {
+            didResize = true
+
             itemView.context.prefManager.apply {
-                widgetSizes = widgetSizes.apply {
-                    this[info.widgetId] = info
-                }
+                currentWidgets = LinkedHashSet(widgets)
             }
         }
     }
@@ -407,8 +412,7 @@ class WidgetFrameAdapter(
         if (widgets.isEmpty()) SpanSize(1, 1)
         else {
             val widget = if (position >= widgets.size) null else widgets[position]
-            val id = widget?.id ?: -1
-            val size = host.context.prefManager.widgetSizes[id]
+            val size = widget?.safeSize
 
             SpanSize(
                 size?.safeWidgetWidthSpan?.coerceAtMost(host.context.prefManager.frameColCount) ?: 1,

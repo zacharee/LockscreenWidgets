@@ -11,6 +11,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.graphics.drawable.toBitmap
 import tk.zwander.lockscreenwidgets.R
 import tk.zwander.lockscreenwidgets.data.WidgetData
+import tk.zwander.lockscreenwidgets.data.WidgetSizeData
 import tk.zwander.lockscreenwidgets.data.list.ShortcutListInfo
 import tk.zwander.lockscreenwidgets.host.WidgetHostCompat
 import tk.zwander.lockscreenwidgets.util.*
@@ -73,7 +74,8 @@ abstract class BaseBindWidgetActivity : AppCompatActivity() {
 
                     val shortcut = WidgetData.shortcut(
                         shortcutIdManager.allocateShortcutId(),
-                        name, iconBmp.toBase64(), iconRes, shortcutIntent
+                        name, iconBmp.toBase64(), iconRes, shortcutIntent,
+                        WidgetSizeData(1, 1)
                     )
 
                     addNewShortcut(shortcut)
@@ -169,7 +171,8 @@ abstract class BaseBindWidgetActivity : AppCompatActivity() {
             id,
             provider.provider,
             provider.loadLabel(packageManager),
-            provider.loadPreviewOrIcon(this, 0)?.toBitmap().toBase64()
+            provider.loadPreviewOrIcon(this, 0)?.toBitmap().toBase64(),
+            WidgetSizeData(1, 1)
         )
         prefManager.currentWidgets = prefManager.currentWidgets.apply {
             add(widget)

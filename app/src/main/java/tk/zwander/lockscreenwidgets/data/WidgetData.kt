@@ -19,7 +19,8 @@ open class WidgetData(
     var icon: String?,
     var iconRes: Intent.ShortcutIconResource?,
     var shortcutIntent: Intent?,
-    var widgetProvider: String?
+    var widgetProvider: String?,
+    var size: WidgetSizeData?
 ) : Parcelable {
     companion object {
         fun shortcut(
@@ -27,12 +28,13 @@ open class WidgetData(
             label: String,
             icon: String?,
             iconRes: Intent.ShortcutIconResource?,
-            shortcutIntent: Intent
+            shortcutIntent: Intent,
+            size: WidgetSizeData
         ): WidgetData {
             return WidgetData(
                 id, WidgetType.SHORTCUT,
                 label, icon, iconRes, shortcutIntent,
-                null
+                null, size
             )
         }
 
@@ -40,10 +42,15 @@ open class WidgetData(
             id: Int,
             widgetProvider: ComponentName,
             label: String,
-            icon: String?
+            icon: String?,
+            size: WidgetSizeData
         ): WidgetData {
-            return WidgetData(id, WidgetType.WIDGET, label, icon,
-                null, null, widgetProvider.flattenToString())
+            return WidgetData(
+                id, WidgetType.WIDGET, label, icon,
+                null, null,
+                widgetProvider.flattenToString(),
+                size
+            )
         }
     }
 
@@ -52,6 +59,12 @@ open class WidgetData(
 
     val widgetProviderComponent: ComponentName?
         get() = widgetProvider?.let { ComponentName.unflattenFromString(it) }
+
+    var safeSize: WidgetSizeData
+        get() = size ?: WidgetSizeData(1, 1)
+        set(value) {
+            size = value
+        }
 
     override fun equals(other: Any?): Boolean {
         return other is WidgetData && other.id == id

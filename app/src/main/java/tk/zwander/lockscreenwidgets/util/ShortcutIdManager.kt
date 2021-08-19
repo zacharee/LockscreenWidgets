@@ -36,6 +36,5 @@ class ShortcutIdManager private constructor(private val context: Context, privat
 
     fun removeShortcutId(id: Int) {
         prefs.shortcutIds = prefs.shortcutIds.apply { remove(id.toString()) }
-        prefs.widgetSizes = prefs.widgetSizes.apply { remove(id) }
     }
 }

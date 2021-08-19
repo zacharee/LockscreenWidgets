@@ -1,15 +1,17 @@
 package tk.zwander.lockscreenwidgets.data
 
+import android.os.Parcelable
+import kotlinx.parcelize.Parcelize
 import kotlin.math.max
 
 /**
  * Keep track of the size of each widget.
  */
+@Parcelize
 data class WidgetSizeData(
-    var widgetId: Int,
     private var widgetWidthSpan: Int,
     private var widgetHeightSpan: Int
-) {
+) : Parcelable {
     /**
      * Don't allow the user to have a zero-width widget.
      */

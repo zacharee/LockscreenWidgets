@@ -16,7 +16,6 @@ import android.os.Build
 import android.os.Handler
 import android.os.Looper
 import android.provider.Settings
-import android.util.Log
 import android.util.TypedValue
 import android.view.View
 import android.view.WindowManager
@@ -26,6 +25,7 @@ import kotlinx.coroutines.*
 import tk.zwander.lockscreenwidgets.App
 import tk.zwander.lockscreenwidgets.R
 import tk.zwander.lockscreenwidgets.data.AppInfo
+import tk.zwander.lockscreenwidgets.data.WidgetSizeData
 import tk.zwander.lockscreenwidgets.data.list.WidgetListInfo
 import tk.zwander.lockscreenwidgets.services.Accessibility
 import tk.zwander.lockscreenwidgets.services.NotificationListener
@@ -159,14 +159,9 @@ fun View.fadeAndScaleIn(endListener: () -> Unit) {
 
 //Convenience method to calculate the proper widget width
 //based on the frame column count.
-fun View.calculateWidgetWidth(paramWidth: Int, widgetId: Int): Int {
+fun View.calculateWidgetWidth(paramWidth: Int, size: WidgetSizeData?): Int {
     return paramWidth / context.prefManager.frameColCount *
-            (context.prefManager.widgetSizes[widgetId]?.safeWidgetWidthSpan ?: 1)
-}
-
-fun View.calculateWidgetHeight(paramHeight: Int, widgetId: Int): Int {
-    return paramHeight / context.prefManager.frameRowCount *
-            (context.prefManager.widgetSizes[widgetId]?.safeWidgetHeightSpan ?: 1)
+            (size?.safeWidgetWidthSpan ?: 1)
 }
 
 val Context.widgetBlockWidth: Int

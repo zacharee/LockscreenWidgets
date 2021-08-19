@@ -86,12 +86,6 @@ abstract class WidgetHostCompat(
     }
 
     override fun deleteAppWidgetId(appWidgetId: Int) {
-        //If a widget is deleted, we want to make sure any later widget that
-        //happens to have the same ID doesn't inherit any custom sizing
-        //applied to the widget being deleted.
-        context.prefManager.run {
-            widgetSizes = widgetSizes.apply { remove(appWidgetId) }
-        }
         super.deleteAppWidgetId(appWidgetId)
     }
 }
