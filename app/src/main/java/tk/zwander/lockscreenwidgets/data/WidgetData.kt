@@ -60,7 +60,11 @@ open class WidgetData(
     }
 
     override fun hashCode(): Int {
-        return Objects.hash(id, safeType)
+        return if (safeType != WidgetType.WIDGET) {
+            Objects.hash(id, safeType)
+        } else {
+            Objects.hash(id, safeType, widgetProviderComponent)
+        }
     }
 }
 

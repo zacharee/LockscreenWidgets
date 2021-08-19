@@ -13,10 +13,7 @@ import tk.zwander.lockscreenwidgets.R
 import tk.zwander.lockscreenwidgets.data.WidgetData
 import tk.zwander.lockscreenwidgets.data.list.ShortcutListInfo
 import tk.zwander.lockscreenwidgets.host.WidgetHostCompat
-import tk.zwander.lockscreenwidgets.util.ShortcutIdManager
-import tk.zwander.lockscreenwidgets.util.loadPreviewOrIcon
-import tk.zwander.lockscreenwidgets.util.prefManager
-import tk.zwander.lockscreenwidgets.util.toBase64
+import tk.zwander.lockscreenwidgets.util.*
 
 abstract class BaseBindWidgetActivity : AppCompatActivity() {
     companion object {
@@ -54,10 +51,12 @@ abstract class BaseBindWidgetActivity : AppCompatActivity() {
                 if (id == -1) return
 
                 if (resultCode == Activity.RESULT_OK) {
+                    logUtils.debugLog("Successfully configured widget.")
                     //Widget configuration was successful: add the
                     //widget to the frame
                     addNewWidget(id, appWidgetManager.getAppWidgetInfo(id))
                 } else {
+                    logUtils.debugLog("Failed to configure widget.")
                     //Widget configuration was canceled: delete the
                     //allocated ID
                     widgetHost.deleteAppWidgetId(id)

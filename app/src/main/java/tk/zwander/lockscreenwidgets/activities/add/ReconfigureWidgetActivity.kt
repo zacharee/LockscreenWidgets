@@ -10,6 +10,7 @@ import androidx.core.graphics.drawable.toBitmap
 import tk.zwander.lockscreenwidgets.activities.DismissOrUnlockActivity
 import tk.zwander.lockscreenwidgets.data.WidgetData
 import tk.zwander.lockscreenwidgets.util.loadPreviewOrIcon
+import tk.zwander.lockscreenwidgets.util.logUtils
 import tk.zwander.lockscreenwidgets.util.prefManager
 import tk.zwander.lockscreenwidgets.util.toBase64
 
@@ -70,13 +71,19 @@ class ReconfigureWidgetActivity : BaseBindWidgetActivity() {
             provider.loadPreviewOrIcon(this, 0)?.toBitmap().toBase64()
         )
         val newSet = prefManager.currentWidgets.toMutableList()
+        val newSizes = prefManager.widgetSizes
 
         val oldWidgetIndex = newSet.indexOf(WidgetData.widget(prevId, provider.provider, "", null))
 
         newSet.removeAt(oldWidgetIndex)
         newSet.add(oldWidgetIndex, widget)
 
+        newSizes.remove(prevId)?.let { newSizes[id] = it }
+
+        logUtils.normalLog("Removed old widget from $oldWidgetIndex and added new one $widget")
+
         prefManager.currentWidgets = LinkedHashSet(newSet)
+        prefManager.widgetSizes = newSizes
 
         finish()
     }
