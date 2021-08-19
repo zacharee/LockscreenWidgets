@@ -200,22 +200,22 @@ class WidgetFrameAdapter(
 
             itemView.apply {
                 binding.widgetLeftDragger.setOnTouchListener(WidgetResizeListener(context, WidgetResizeListener.Which.LEFT,
-                    { handleResize(it, -1) },
+                    { handleResize(it, -1, false) },
                     { notifyItemChanged(bindingAdapterPosition) }
                 ))
 
                 binding.widgetTopDragger.setOnTouchListener(WidgetResizeListener(context, WidgetResizeListener.Which.TOP,
-                    { handleResize(it, -1) },
+                    { handleResize(it, -1, true) },
                     { notifyItemChanged(bindingAdapterPosition) }
                 ))
 
                 binding.widgetRightDragger.setOnTouchListener(WidgetResizeListener(context, WidgetResizeListener.Which.RIGHT,
-                    { handleResize(it, 1) },
+                    { handleResize(it, 1, false) },
                     { notifyItemChanged(bindingAdapterPosition) }
                 ))
 
                 binding.widgetBottomDragger.setOnTouchListener(WidgetResizeListener(context, WidgetResizeListener.Which.BOTTOM,
-                    { handleResize(it, 1) },
+                    { handleResize(it, 1, true) },
                     { notifyItemChanged(bindingAdapterPosition) }
                 ))
             }
@@ -355,10 +355,16 @@ class WidgetFrameAdapter(
             binding.widgetHolder.addView(shortcutView.root)
         }
 
-        private fun handleResize(step: Int, direction: Int) {
+        private fun handleResize(step: Int, direction: Int, vertical: Boolean) {
             val sizeInfo = currentSizeInfo
-            sizeInfo.safeWidgetWidthSpan = min(sizeInfo.safeWidgetWidthSpan + step * direction,
-                itemView.context.prefManager.frameColCount)
+
+            if (vertical) {
+                sizeInfo.safeWidgetHeightSpan = min(sizeInfo.safeWidgetHeightSpan + step * direction,
+                    itemView.context.prefManager.frameRowCount)
+            } else {
+                sizeInfo.safeWidgetWidthSpan = min(sizeInfo.safeWidgetWidthSpan + step * direction,
+                    itemView.context.prefManager.frameColCount)
+            }
 
             persistNewSizeInfo(sizeInfo)
             onResize(currentData)
