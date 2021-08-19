@@ -14,6 +14,7 @@ import tk.zwander.lockscreenwidgets.data.WidgetData
 import tk.zwander.lockscreenwidgets.data.list.ShortcutListInfo
 import tk.zwander.lockscreenwidgets.host.WidgetHostCompat
 import tk.zwander.lockscreenwidgets.util.ShortcutIdManager
+import tk.zwander.lockscreenwidgets.util.loadPreviewOrIcon
 import tk.zwander.lockscreenwidgets.util.prefManager
 import tk.zwander.lockscreenwidgets.util.toBase64
 
@@ -169,7 +170,7 @@ abstract class BaseBindWidgetActivity : AppCompatActivity() {
             id,
             provider.provider,
             provider.loadLabel(packageManager),
-            provider.loadPreviewImage(this, 0).toBitmap().toBase64()
+            provider.loadPreviewOrIcon(this, 0)?.toBitmap().toBase64()
         )
         prefManager.currentWidgets = prefManager.currentWidgets.apply {
             add(widget)

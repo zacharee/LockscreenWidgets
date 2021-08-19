@@ -5,10 +5,12 @@ import android.animation.AnimatorListenerAdapter
 import android.animation.AnimatorSet
 import android.animation.ObjectAnimator
 import android.app.Application
+import android.appwidget.AppWidgetProviderInfo
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.graphics.*
+import android.graphics.drawable.Drawable
 import android.net.Uri
 import android.os.Build
 import android.os.Handler
@@ -307,3 +309,7 @@ val Context.logUtils: LogUtils
 
 val Context.migrationManager: MigrationManager
     get() = MigrationManager.getInstance(this)
+
+fun AppWidgetProviderInfo.loadPreviewOrIcon(context: Context, density: Int): Drawable? {
+    return loadPreviewImage(context, density) ?: loadIcon(context, density)
+}

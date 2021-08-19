@@ -9,6 +9,7 @@ import android.os.Bundle
 import androidx.core.graphics.drawable.toBitmap
 import tk.zwander.lockscreenwidgets.activities.DismissOrUnlockActivity
 import tk.zwander.lockscreenwidgets.data.WidgetData
+import tk.zwander.lockscreenwidgets.util.loadPreviewOrIcon
 import tk.zwander.lockscreenwidgets.util.prefManager
 import tk.zwander.lockscreenwidgets.util.toBase64
 
@@ -66,7 +67,7 @@ class ReconfigureWidgetActivity : BaseBindWidgetActivity() {
             id,
             provider.provider,
             provider.loadLabel(packageManager),
-            provider.loadPreviewImage(this, 0).toBitmap().toBase64()
+            provider.loadPreviewOrIcon(this, 0)?.toBitmap().toBase64()
         )
         val newSet = prefManager.currentWidgets.toMutableList()
 
