@@ -38,9 +38,7 @@ class SettingsFragment : PreferenceFragmentCompat() {
         if (uri != null) {
             requireContext().apply {
                 contentResolver.openOutputStream(uri)?.bufferedWriter()?.use { output ->
-                    prefManager.currentWidgetsString?.let { string ->
-                        output.write(string)
-                    }
+                    output.write(backupRestoreManager.createBackupString())
                 }
             }
         }
@@ -51,18 +49,9 @@ class SettingsFragment : PreferenceFragmentCompat() {
             requireContext().apply {
                 val input = contentResolver.openInputStream(uri)?.bufferedReader()?.readText()
 
-                if (!prefManager.isValidWidgetsString(input)) {
+                if (!backupRestoreManager.restoreBackupString(input)) {
                     Toast.makeText(this, R.string.unable_to_restore_widgets, Toast.LENGTH_SHORT)
                     logUtils.normalLog("Unable to restore widgets")
-                } else {
-                    val old = prefManager.currentWidgets
-                    val widgetHost = WidgetHostCompat.getInstance(this, 1003)
-
-                    old.forEach {
-                        widgetHost.deleteAppWidgetId(it.id)
-                    }
-
-                    prefManager.currentWidgetsString = input
                 }
             }
         }

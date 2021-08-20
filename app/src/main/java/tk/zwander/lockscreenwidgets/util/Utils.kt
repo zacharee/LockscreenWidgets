@@ -30,6 +30,7 @@ import tk.zwander.lockscreenwidgets.data.WidgetSizeData
 import tk.zwander.lockscreenwidgets.data.list.WidgetListInfo
 import tk.zwander.lockscreenwidgets.services.Accessibility
 import tk.zwander.lockscreenwidgets.services.NotificationListener
+import tk.zwander.lockscreenwidgets.util.backup.BackupRestoreManager
 import kotlin.math.roundToInt
 
 
@@ -317,3 +318,6 @@ val Context.defaultDisplayCompat: Display
     } else {
         windowManager.defaultDisplay
     }
+
+val Context.backupRestoreManager: BackupRestoreManager
+    get() = BackupRestoreManager.getInstance(this)
