@@ -76,11 +76,8 @@ dependencies {
     implementation 'com.github.zacharee.colorpicker:library_compat:9ea5085260'
     implementation 'com.github.zacharee:PatreonSupportersRetrieval:4ce71eb5bf'
 
-    //You'll need to replace this implementation here with a non-local one.
-    //You can get the instructions from https://jitpack.io/#zacharee/SpannedGridLayoutManager.
-    //Use the latest commit tag NOT the latest release.
-    //Make sure to remove this project from settings.gradle as well.
-    implementation project(':spannedlm')
+//    implementation project(':spannedlm')
+    implementation 'com.github.zacharee:SpannedGridLayoutManager:a58b974403'
 
     implementation 'com.google.firebase:firebase-analytics:19.0.0'
     implementation 'com.google.firebase:firebase-crashlytics:18.2.1'
