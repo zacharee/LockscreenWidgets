@@ -588,7 +588,7 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
                     binding.wallpaperBackground.setImageDrawable(this)
                     binding.wallpaperBackground.scaleType = ImageView.ScaleType.MATRIX
                     binding.wallpaperBackground.imageMatrix = Matrix().apply {
-                        val realSize = Point().apply { wm.defaultDisplay.getRealSize(this) }
+                        val realSize = Point().apply { defaultDisplayCompat.getRealSize(this) }
                         val loc = view.locationOnScreen ?: intArrayOf(0, 0)
 
                         val dwidth: Int = intrinsicWidth

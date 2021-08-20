@@ -47,6 +47,7 @@ class DismissOrUnlockActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        @Suppress("DEPRECATION")
         window.addFlags(WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED)
 
         if (kgm.isKeyguardLocked) {
@@ -67,6 +68,7 @@ class DismissOrUnlockActivity : AppCompatActivity() {
             } else {
                 //If we're below 8.0, we have to do some weirdness to dismiss the lock screen.
                 dismissListener.register(this)
+                @Suppress("DEPRECATION")
                 window.addFlags(WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD or WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED)
             }
         } else {

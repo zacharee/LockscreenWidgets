@@ -5,7 +5,6 @@ import android.appwidget.AppWidgetManager
 import android.appwidget.AppWidgetProviderInfo
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.os.UserHandle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -19,13 +18,11 @@ import androidx.recyclerview.widget.RecyclerView
 import com.arasthel.spannedgridlayoutmanager.SpanSize
 import com.arasthel.spannedgridlayoutmanager.SpannedGridLayoutManager
 import kotlinx.coroutines.*
-import tk.zwander.lockscreenwidgets.App
 import tk.zwander.lockscreenwidgets.R
 import tk.zwander.lockscreenwidgets.activities.DismissOrUnlockActivity
 import tk.zwander.lockscreenwidgets.activities.add.AddWidgetActivity
 import tk.zwander.lockscreenwidgets.activities.add.ReconfigureWidgetActivity
 import tk.zwander.lockscreenwidgets.data.WidgetData
-import tk.zwander.lockscreenwidgets.data.WidgetSizeData
 import tk.zwander.lockscreenwidgets.data.WidgetType
 import tk.zwander.lockscreenwidgets.databinding.FrameShortcutViewBinding
 import tk.zwander.lockscreenwidgets.databinding.WidgetPageHolderBinding
@@ -36,7 +33,6 @@ import tk.zwander.lockscreenwidgets.observables.RemoveButtonObservable
 import tk.zwander.lockscreenwidgets.util.*
 import java.util.*
 import kotlin.collections.ArrayList
-import kotlin.collections.HashSet
 import kotlin.collections.LinkedHashSet
 import kotlin.math.min
 
@@ -252,7 +248,7 @@ class WidgetFrameAdapter(
                 }
             }
 
-            editingInterfaceObservable.addObserver { _, arg ->
+            editingInterfaceObservable.addObserver { _, _ ->
                 editingInterfaceShown = currentEditingInterfacePosition != -1 && (currentEditingInterfacePosition == bindingAdapterPosition)
             }
 
@@ -372,7 +368,7 @@ class WidgetFrameAdapter(
             }
 
             onResize(currentData)
-            persistResize(currentData)
+            persistResize()
         }
 
         //Make sure the item's width is properly updated on a frame resize, or on initial bind
@@ -385,7 +381,7 @@ class WidgetFrameAdapter(
             }
         }
 
-        private fun persistResize(data: WidgetData) {
+        private fun persistResize() {
             didResize = true
 
             itemView.context.prefManager.apply {

@@ -7,6 +7,7 @@ import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.cancel
@@ -37,12 +38,23 @@ class MainActivity : AppCompatActivity(), CoroutineScope by MainScope() {
             }
         }
 
+    private val introRequest = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        if (result.resultCode != Activity.RESULT_OK) {
+            //The intro sequence or permissions request wasn't successful. Quit.
+            finish()
+        } else {
+            //The user finished the intro sequence or granted the required permission.
+            //Stay open, and make sure firstRun is false.
+            prefManager.firstRun = false
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
         if (prefManager.firstRun || !isAccessibilityEnabled) {
-            OnboardingActivity.startForResult(this, REQ_INTRO,
+            OnboardingActivity.startForResult(this, introRequest,
                 if (!prefManager.firstRun) OnboardingActivity.RetroMode.ACCESSIBILITY else OnboardingActivity.RetroMode.NONE)
         }
     }
@@ -89,20 +101,5 @@ class MainActivity : AppCompatActivity(), CoroutineScope by MainScope() {
     override fun onDestroy() {
         super.onDestroy()
         cancel()
-    }
-
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-
-        if (requestCode == REQ_INTRO) {
-            if (resultCode != Activity.RESULT_OK) {
-                //The intro sequence or permissions request wasn't successful. Quit.
-                finish()
-            } else {
-                //The user finished the intro sequence or granted the required permission.
-                //Stay open, and make sure firstRun is false.
-                prefManager.firstRun = false
-            }
-        }
     }
 }

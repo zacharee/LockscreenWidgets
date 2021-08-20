@@ -46,6 +46,7 @@ class WidgetHostClass(context: Context, id: Int, unlockCallback: (() -> Unit)?)
         .newInstance()
 ) {
     class InnerOnClickHandlerPie(context: Context, unlockCallback: (() -> Unit)?): BaseInnerOnClickHandler(context, unlockCallback) {
+        @Suppress("UNUSED_PARAMETER")
         fun onClickHandler(
             view: View,
             pendingIntent: PendingIntent,
@@ -56,6 +57,7 @@ class WidgetHostClass(context: Context, id: Int, unlockCallback: (() -> Unit)?)
             return true
         }
 
+        @Suppress("UNUSED_PARAMETER")
         fun onClickHandler(
             view: View,
             pendingIntent: PendingIntent,

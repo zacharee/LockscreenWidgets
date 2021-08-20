@@ -84,6 +84,7 @@ class NotificationListener : NotificationListenerService() {
                                 val ranking = Ranking().apply { currentRanking.getRanking(it.key, this) }
                                 ranking.importance > NotificationManager.IMPORTANCE_MIN
                             } else {
+                                @Suppress("DEPRECATION")
                                 it.notification.priority > Notification.PRIORITY_MIN
                             })
                 }.size)

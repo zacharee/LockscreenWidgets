@@ -274,7 +274,7 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
                 }
             }
 
-            delegate.screenOrientation = wm.defaultDisplay.rotation
+            delegate.screenOrientation = defaultDisplayCompat.rotation
 
             logUtils.debugLog("Accessibility event: $eventCopy, isScreenOn: ${isScreenOn}, wasOnKeyguard: $isOnKeyguard")
 

@@ -1,6 +1,5 @@
 package tk.zwander.lockscreenwidgets.util.migrations
 
-import android.appwidget.AppWidgetHost
 import android.appwidget.AppWidgetManager
 import android.content.Context
 import androidx.core.graphics.drawable.toBitmap
@@ -18,20 +17,19 @@ class AddExtraWidgetInfoMigration : Migration {
 
     override fun run(context: Context) {
         val manager = AppWidgetManager.getInstance(context)
-        val host = WidgetHostCompat.getInstance(context, 1003)
 
         val currentWidgets = context.prefManager.currentWidgets
 
         currentWidgets.forEach { widget ->
             if (widget.type == WidgetType.WIDGET) {
-                context.migrateWidget(widget, manager, host)
+                context.migrateWidget(widget, manager)
             }
         }
 
         context.prefManager.currentWidgets = currentWidgets
     }
 
-    private fun Context.migrateWidget(widget: WidgetData, manager: AppWidgetManager, host: AppWidgetHost) {
+    private fun Context.migrateWidget(widget: WidgetData, manager: AppWidgetManager) {
         val widgetInfo = manager.getAppWidgetInfo(widget.id)
 
         if (widgetInfo == null) {

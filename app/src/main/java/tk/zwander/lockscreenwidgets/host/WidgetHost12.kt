@@ -39,6 +39,7 @@ class WidgetHost12(context: Context, id: Int, unlockCallback: (() -> Unit)?) : W
             val startPendingIntent = RemoteViews::class.java.getDeclaredMethod(
                 "startPendingIntent", View::class.java, PendingIntent::class.java, android.util.Pair::class.java)
 
+            @Suppress("UNCHECKED_CAST")
             val launchOptions = getLaunchOptions.invoke(response, view) as android.util.Pair<Intent, ActivityOptions>
 
             checkPendingIntent(pi)

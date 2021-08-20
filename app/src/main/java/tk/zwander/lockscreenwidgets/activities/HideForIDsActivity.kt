@@ -9,6 +9,7 @@ import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.DividerItemDecoration
@@ -33,9 +34,6 @@ import kotlin.collections.HashSet
  */
 class HideForIDsActivity : AppCompatActivity() {
     companion object {
-        const val REQ_SAVE = 101
-        const val REQ_OPEN = 102
-
         const val EXTRA_TYPE = "type"
 
         fun start(context: Context, type: Type) {
@@ -137,6 +135,47 @@ class HideForIDsActivity : AppCompatActivity() {
     private val format = SimpleDateFormat("yyyy-MM-dd_HH:mm:ss", Locale.getDefault())
     private val activityBinding by lazy { ActivityHideForIdsBinding.inflate(layoutInflater) }
 
+    private val saveRequest = registerForActivityResult(ActivityResultContracts.CreateDocument()) { uri ->
+        //Write the current list of IDs to the specified file
+        contentResolver.openOutputStream(uri ?: return@registerForActivityResult)?.use { out ->
+            val stringified = gson.toJson(items)
+
+            out.bufferedWriter().use { writer ->
+                writer.append(stringified)
+            }
+        }
+    }
+
+    private val openRequest = registerForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
+        //Copy the IDs stored in the specified file to the list here
+        contentResolver.openInputStream(uri ?: return@registerForActivityResult)?.use { input ->
+            val builder = StringBuilder()
+
+            input.bufferedReader().useLines { seq ->
+                seq.forEach {
+                    builder.append(it)
+                }
+            }
+
+            val list = try {
+                gson.fromJson<HashSet<String>>(
+                    builder.toString(),
+                    object : TypeToken<HashSet<String>>() {}.type
+                )
+            } catch (e: Exception) {
+                null
+            }
+
+            if (list.isNullOrEmpty()) {
+                Toast.makeText(this, R.string.invalid_id_backup_error, Toast.LENGTH_SHORT).show()
+            } else {
+                items.clear()
+                items.addAll(list)
+                adapter.items.replaceAll(list)
+            }
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -198,70 +237,15 @@ class HideForIDsActivity : AppCompatActivity() {
             }
             R.id.backup -> {
                 //Start the list backup flow.
-                val backupIntent = Intent(Intent.ACTION_CREATE_DOCUMENT)
-                backupIntent.type = "text/*"
-                backupIntent.putExtra(Intent.EXTRA_TITLE, "LockscreenWidgets_ID_Backup_${format.format(Date())}.lsw")
-
-                startActivityForResult(backupIntent, REQ_SAVE)
+                saveRequest.launch("LockscreenWidgets_ID_Backup_${format.format(Date())}.lsw")
                 true
             }
             R.id.restore -> {
                 //Start the list restore flow.
-                val restoreIntent = Intent(Intent.ACTION_OPEN_DOCUMENT)
-                restoreIntent.type = "text/*"
-
-                startActivityForResult(restoreIntent, REQ_OPEN)
+                openRequest.launch(arrayOf("*/*"))
                 true
             }
             else -> return super.onOptionsItemSelected(item)
-        }
-    }
-
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-
-        if (resultCode == Activity.RESULT_OK) {
-            when (requestCode) {
-                REQ_SAVE -> {
-                    //Write the current list of IDs to the specified file
-                    contentResolver.openOutputStream(data?.data ?: return)?.use { out ->
-                        val stringified = gson.toJson(items)
-
-                        out.bufferedWriter().use { writer ->
-                            writer.append(stringified)
-                        }
-                    }
-                }
-                REQ_OPEN -> {
-                    //Copy the IDs stored in the specified file to the list here
-                    contentResolver.openInputStream(data?.data ?: return)?.use { input ->
-                        val builder = StringBuilder()
-
-                        input.bufferedReader().useLines { seq ->
-                            seq.forEach {
-                                builder.append(it)
-                            }
-                        }
-
-                        val list = try {
-                            gson.fromJson<HashSet<String>>(
-                                builder.toString(),
-                                object : TypeToken<HashSet<String>>() {}.type
-                            )
-                        } catch (e: Exception) {
-                            null
-                        }
-
-                        if (list.isNullOrEmpty()) {
-                            Toast.makeText(this, R.string.invalid_id_backup_error, Toast.LENGTH_SHORT).show()
-                        } else {
-                            items.clear()
-                            items.addAll(list)
-                            adapter.items.replaceAll(list)
-                        }
-                    }
-                }
-            }
         }
     }
 

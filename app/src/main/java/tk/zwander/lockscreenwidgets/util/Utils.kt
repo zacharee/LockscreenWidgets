@@ -17,6 +17,7 @@ import android.os.Handler
 import android.os.Looper
 import android.provider.Settings
 import android.util.TypedValue
+import android.view.Display
 import android.view.View
 import android.view.WindowManager
 import android.view.accessibility.AccessibilityNodeInfo
@@ -180,7 +181,7 @@ val Context.windowManager: WindowManager
     get() = getSystemService(Context.WINDOW_SERVICE) as WindowManager
 
 val Context.realResolution: Point
-    get() = Point().apply { windowManager.defaultDisplay.getRealSize(this) }
+    get() = Point().apply { defaultDisplayCompat.getRealSize(this) }
 
 fun Context.calculateNCPosXFromRightDefault(): Int {
     val fromRight = dpAsPx(resources.getInteger(R.integer.def_notification_pos_x_from_right_dp))
@@ -308,3 +309,11 @@ val Context.migrationManager: MigrationManager
 fun AppWidgetProviderInfo.loadPreviewOrIcon(context: Context, density: Int): Drawable? {
     return loadPreviewImage(context, density) ?: loadIcon(context, density)
 }
+
+@Suppress("DEPRECATION")
+val Context.defaultDisplayCompat: Display
+    get() = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+        display
+    } else {
+        windowManager.defaultDisplay
+    }

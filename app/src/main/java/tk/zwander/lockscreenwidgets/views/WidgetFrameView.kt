@@ -404,6 +404,7 @@ class WidgetFrameView(context: Context, attrs: AttributeSet) : ConstraintLayout(
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             vibrator.vibrate(VibrationEffect.createOneShot(time, 100))
         } else {
+            @Suppress("DEPRECATION")
             vibrator.vibrate(time)
         }
     }

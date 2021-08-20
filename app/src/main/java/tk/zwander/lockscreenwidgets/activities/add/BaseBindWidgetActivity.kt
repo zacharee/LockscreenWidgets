@@ -7,6 +7,7 @@ import android.content.ComponentName
 import android.content.Intent
 import android.graphics.Bitmap
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.graphics.drawable.toBitmap
 import tk.zwander.lockscreenwidgets.R
@@ -18,67 +19,69 @@ import tk.zwander.lockscreenwidgets.util.*
 
 abstract class BaseBindWidgetActivity : AppCompatActivity() {
     companion object {
-        const val PERM_CODE = 104
-        const val CONFIG_CODE = 105
-        const val REQ_CONFIG_SHORTCUT = 106
+        private const val CONFIG_CODE = 1001
     }
 
     protected val widgetHost by lazy { WidgetHostCompat.getInstance(this, 1003) }
     protected val appWidgetManager by lazy { AppWidgetManager.getInstance(this)!! }
     protected val shortcutIdManager by lazy { ShortcutIdManager.getInstance(this, widgetHost) }
 
+    private val permRequest = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        val id = result.data?.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, -1) ?: return@registerForActivityResult
+
+        if (result.resultCode == Activity.RESULT_OK) {
+            //The user has granted permission for Lockscreen Widgets
+            //so retry binding the widget
+            tryBindWidget(
+                appWidgetManager.getAppWidgetInfo(id)
+            )
+        } else {
+            //The user didn't allow Lockscreen Widgets to bind
+            //widgets, so delete the allocated ID
+            widgetHost.deleteAppWidgetId(id)
+        }
+    }
+
+    @Suppress("DEPRECATION")
+    private val configShortcutRequest = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        val shortcutIntent = result.data?.getParcelableExtra<Intent>(Intent.EXTRA_SHORTCUT_INTENT)
+
+        if (shortcutIntent != null) {
+            val name = result.data!!.getStringExtra(Intent.EXTRA_SHORTCUT_NAME)
+            val iconRes = result.data!!.getParcelableExtra<Intent.ShortcutIconResource?>(Intent.EXTRA_SHORTCUT_ICON_RESOURCE)
+            val iconBmp = result.data!!.getParcelableExtra<Bitmap?>(Intent.EXTRA_SHORTCUT_ICON)
+
+            val shortcut = WidgetData.shortcut(
+                shortcutIdManager.allocateShortcutId(),
+                name, iconBmp.toBase64(), iconRes, shortcutIntent,
+                WidgetSizeData(1, 1)
+            )
+
+            addNewShortcut(shortcut)
+        }
+    }
+
+    @Suppress("DEPRECATION")
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
 
         when (requestCode) {
-            PERM_CODE -> {
-                val id = data?.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, -1) ?: return
-
-                if (resultCode == Activity.RESULT_OK) {
-                    //The user has granted permission for Lockscreen Widgets
-                    //so retry binding the widget
-                    tryBindWidget(
-                        appWidgetManager.getAppWidgetInfo(id)
-                    )
-                } else {
-                    //The user didn't allow Lockscreen Widgets to bind
-                    //widgets, so delete the allocated ID
-                    widgetHost.deleteAppWidgetId(id)
-                }
-            }
-
             CONFIG_CODE -> {
-                val id = data?.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, -1) ?: return
-                if (id == -1) return
-
                 if (resultCode == Activity.RESULT_OK) {
-                    logUtils.debugLog("Successfully configured widget.")
-                    //Widget configuration was successful: add the
-                    //widget to the frame
-                    addNewWidget(id, appWidgetManager.getAppWidgetInfo(id))
-                } else {
-                    logUtils.debugLog("Failed to configure widget.")
-                    //Widget configuration was canceled: delete the
-                    //allocated ID
-                    widgetHost.deleteAppWidgetId(id)
-                }
-            }
+                    val id = data?.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, -1) ?: return
+                    if (id == -1) return
 
-            REQ_CONFIG_SHORTCUT -> {
-                val shortcutIntent = data?.getParcelableExtra<Intent>(Intent.EXTRA_SHORTCUT_INTENT)
-
-                if (shortcutIntent != null) {
-                    val name = data.getStringExtra(Intent.EXTRA_SHORTCUT_NAME)
-                    val iconRes = data.getParcelableExtra<Intent.ShortcutIconResource?>(Intent.EXTRA_SHORTCUT_ICON_RESOURCE)
-                    val iconBmp = data.getParcelableExtra<Bitmap?>(Intent.EXTRA_SHORTCUT_ICON)
-
-                    val shortcut = WidgetData.shortcut(
-                        shortcutIdManager.allocateShortcutId(),
-                        name, iconBmp.toBase64(), iconRes, shortcutIntent,
-                        WidgetSizeData(1, 1)
-                    )
-
-                    addNewShortcut(shortcut)
+                    if (resultCode == Activity.RESULT_OK) {
+                        logUtils.debugLog("Successfully configured widget.")
+                        //Widget configuration was successful: add the
+                        //widget to the frame
+                        addNewWidget(id, appWidgetManager.getAppWidgetInfo(id))
+                    } else {
+                        logUtils.debugLog("Failed to configure widget.")
+                        //Widget configuration was canceled: delete the
+                        //allocated ID
+                        widgetHost.deleteAppWidgetId(id)
+                    }
                 }
             }
         }
@@ -122,7 +125,7 @@ abstract class BaseBindWidgetActivity : AppCompatActivity() {
         configureIntent.component = ComponentName(info.shortcutInfo.activityInfo.packageName,
             info.shortcutInfo.activityInfo.name)
 
-        startActivityForResult(configureIntent, REQ_CONFIG_SHORTCUT)
+        configShortcutRequest.launch(configureIntent)
     }
 
     /**
@@ -135,7 +138,8 @@ abstract class BaseBindWidgetActivity : AppCompatActivity() {
         val intent = Intent(AppWidgetManager.ACTION_APPWIDGET_BIND)
         intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, id)
         intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_PROVIDER, provider)
-        startActivityForResult(intent, PERM_CODE)
+
+        permRequest.launch(intent)
     }
 
     /**

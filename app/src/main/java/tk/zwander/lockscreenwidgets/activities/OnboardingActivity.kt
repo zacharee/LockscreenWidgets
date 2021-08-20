@@ -9,6 +9,7 @@ import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
 import android.util.Log
+import androidx.activity.result.ActivityResultLauncher
 import com.heinrichreimersoftware.materialintro.app.IntroActivity
 import com.heinrichreimersoftware.materialintro.slide.SimpleSlide
 import tk.zwander.lockscreenwidgets.App
@@ -49,15 +50,15 @@ class OnboardingActivity : IntroActivity() {
          * whether or not the user successfully completed the setup
          *
          * @param activity an Activity reference
-         * @param code the request code for returning the result
+         * @param request the request for returning the result
          * @param retroMode specify a [RetroMode] if this instance is being used
          * to request a specific permission and not showing the entire intro
          */
-        fun startForResult(activity: Activity, code: Int, retroMode: RetroMode = RetroMode.NONE) {
+        fun startForResult(activity: Activity, request: ActivityResultLauncher<Intent>, retroMode: RetroMode = RetroMode.NONE) {
             val intent = Intent(activity, OnboardingActivity::class.java)
             intent.putExtra(EXTRA_RETRO_MODE, retroMode.toString())
 
-            activity.startActivityForResult(intent, code)
+            request.launch(intent)
         }
     }
 
