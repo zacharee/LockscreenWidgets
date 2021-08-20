@@ -52,6 +52,8 @@ class SettingsFragment : PreferenceFragmentCompat() {
                 if (!backupRestoreManager.restoreBackupString(input)) {
                     Toast.makeText(this, R.string.unable_to_restore_widgets, Toast.LENGTH_SHORT)
                     logUtils.normalLog("Unable to restore widgets")
+                } else {
+                    requireActivity().finish()
                 }
             }
         }
