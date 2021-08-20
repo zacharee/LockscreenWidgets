@@ -11,6 +11,7 @@ import android.content.Context
 import android.content.Intent
 import android.graphics.*
 import android.graphics.drawable.Drawable
+import android.hardware.display.DisplayManager
 import android.net.Uri
 import android.os.Build
 import android.os.Handler
@@ -314,7 +315,7 @@ fun AppWidgetProviderInfo.loadPreviewOrIcon(context: Context, density: Int): Dra
 @Suppress("DEPRECATION")
 val Context.defaultDisplayCompat: Display
     get() = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-        display
+        displayNoVerify
     } else {
         windowManager.defaultDisplay
     }
