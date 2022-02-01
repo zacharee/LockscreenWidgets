@@ -5,6 +5,8 @@ import android.appwidget.AppWidgetManager
 import android.appwidget.AppWidgetProviderInfo
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.graphics.Rect
+import android.graphics.RectF
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
@@ -300,20 +302,40 @@ class WidgetFrameAdapter(
                                 val width = context.pxAsDp(itemView.width)
                                 val height = context.pxAsDp(itemView.height)
 
+                                val paddingRect = Rect(
+                                    com.android.internal.R.dimen.default_app_widget_padding_left,
+                                    com.android.internal.R.dimen.default_app_widget_padding_top,
+                                    com.android.internal.R.dimen.default_app_widget_padding_right,
+                                    com.android.internal.R.dimen.default_app_widget_padding_bottom
+                                ).run {
+                                    RectF(
+                                        context.pxAsDp(context.resources.getDimensionPixelSize(left)),
+                                        context.pxAsDp(context.resources.getDimensionPixelSize(top)),
+                                        context.pxAsDp(context.resources.getDimensionPixelSize(right)),
+                                        context.pxAsDp(context.resources.getDimensionPixelSize(bottom))
+                                    )
+                                }
+
                                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                                     updateAppWidgetSize(
                                         Bundle(),
                                         listOf(
-                                            SizeF(width, height)
+                                            SizeF(
+                                                width + paddingRect.left + paddingRect.right,
+                                                height + paddingRect.top + paddingRect.bottom
+                                            )
                                         )
                                     )
                                 } else {
+                                    val adjustedWidth = width + paddingRect.left + paddingRect.right
+                                    val adjustedHeight = height + paddingRect.top + paddingRect.bottom
+
                                     updateAppWidgetSize(
                                         null,
-                                        width.toInt(),
-                                        height.toInt(),
-                                        width.toInt(),
-                                        height.toInt()
+                                        adjustedWidth.toInt(),
+                                        adjustedHeight.toInt(),
+                                        adjustedWidth.toInt(),
+                                        adjustedHeight.toInt()
                                     )
                                 }
                             }
