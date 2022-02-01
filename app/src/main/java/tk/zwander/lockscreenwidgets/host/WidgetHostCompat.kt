@@ -32,12 +32,13 @@ abstract class WidgetHostCompat(
         @SuppressLint("StaticFieldLeak")
         private var instance: WidgetHostCompat? = null
 
+        @SuppressLint("PrivateApi")
         fun getInstance(context: Context, id: Int, unlockCallback: (() -> Unit)? = null): WidgetHostCompat {
             return instance ?: run {
                 if (!onClickHandlerExists) {
                     WidgetHost12(context.safeApplicationContext, id, unlockCallback)
                 } else {
-                    (if (RemoteViews.OnClickHandler::class.java.isInterface) {
+                    (if (Class.forName("android.widget.RemoteViews\$OnClickHandler").isInterface) {
                         WidgetHostInterface(context.safeApplicationContext, id, unlockCallback)
                     } else {
                         WidgetHostClass(context.safeApplicationContext, id, unlockCallback)

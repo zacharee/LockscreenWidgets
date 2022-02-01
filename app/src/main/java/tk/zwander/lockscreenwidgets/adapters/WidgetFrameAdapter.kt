@@ -5,6 +5,10 @@ import android.appwidget.AppWidgetManager
 import android.appwidget.AppWidgetProviderInfo
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.os.Build
+import android.os.Bundle
+import android.util.Log
+import android.util.SizeF
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -293,9 +297,25 @@ class WidgetFrameAdapter(
                         //so this makes the most sense right now.
                         addView(withContext(Dispatchers.Main) {
                             host.createView(itemView.context, data.id, widgetInfo).apply {
-                                val width = context.pxAsDp(itemView.width).toInt()
-                                val height = context.pxAsDp(itemView.height).toInt()
-                                updateAppWidgetSize(null, width, height, width, height)
+                                val width = context.pxAsDp(itemView.width)
+                                val height = context.pxAsDp(itemView.height)
+
+                                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                                    updateAppWidgetSize(
+                                        Bundle(),
+                                        listOf(
+                                            SizeF(width, height)
+                                        )
+                                    )
+                                } else {
+                                    updateAppWidgetSize(
+                                        null,
+                                        width.toInt(),
+                                        height.toInt(),
+                                        width.toInt(),
+                                        height.toInt()
+                                    )
+                                }
                             }
                         })
                     } catch (e: SecurityException) {

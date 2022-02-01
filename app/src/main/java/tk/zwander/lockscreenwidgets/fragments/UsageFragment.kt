@@ -21,7 +21,7 @@ class UsageFragment : PreferenceFragmentCompat() {
         }
     }
 
-    override fun onDisplayPreferenceDialog(preference: Preference?) {
+    override fun onDisplayPreferenceDialog(preference: Preference) {
         when (preference) {
             is MessageDialogPreference -> {
                 val f = MessageDialogPreferenceFragment()

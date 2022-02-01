@@ -15,7 +15,8 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         android:name="tk.zwander.lockscreenwidgets.App">
-        <activity android:name="tk.zwander.lockscreenwidgets.MainActivity">
+        <activity android:name="tk.zwander.lockscreenwidgets.MainActivity"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -57,7 +58,8 @@
 
         <service
             android:name="tk.zwander.lockscreenwidgets.services.Accessibility"
-            android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE">
+            android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.accessibilityservice.AccessibilityService" />
             </intent-filter>
@@ -68,19 +70,22 @@
         </service>
         <service android:name="tk.zwander.lockscreenwidgets.services.NotificationListener"
             android:label="@string/app_name"
-            android:permission="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE">
+            android:permission="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.service.notification.NotificationListenerService" />
             </intent-filter>
         </service>
         <service android:name=".services.IDWidgetService"
             android:permission="android.permission.BIND_REMOTEVIEWS"
+            android:exported="true"
             />
         <service
             android:name=".tiles.EnableDisableTile"
             android:label="@string/settings_screen_enabled"
             android:icon="@drawable/ic_baseline_power_settings_new_24"
-            android:permission="android.permission.BIND_QUICK_SETTINGS_TILE">
+            android:permission="android.permission.BIND_QUICK_SETTINGS_TILE"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.service.quicksettings.action.QS_TILE" />
             </intent-filter>
@@ -89,7 +94,8 @@
             android:name=".tiles.NCTile"
             android:label="@string/tile_show_in_notification_center"
             android:icon="@drawable/ic_baseline_notifications_active_24"
-            android:permission="android.permission.BIND_QUICK_SETTINGS_TILE">
+            android:permission="android.permission.BIND_QUICK_SETTINGS_TILE"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.service.quicksettings.action.QS_TILE" />
             </intent-filter>
@@ -98,7 +104,8 @@
             android:name=".tiles.widget.WidgetTileOne"
             android:label="@string/app_name"
             android:icon="@drawable/ic_baseline_launch_24"
-            android:permission="android.permission.BIND_QUICK_SETTINGS_TILE">
+            android:permission="android.permission.BIND_QUICK_SETTINGS_TILE"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.service.quicksettings.action.QS_TILE" />
             </intent-filter>
@@ -107,7 +114,8 @@
             android:name=".tiles.widget.WidgetTileTwo"
             android:label="@string/app_name"
             android:icon="@drawable/ic_baseline_launch_24"
-            android:permission="android.permission.BIND_QUICK_SETTINGS_TILE">
+            android:permission="android.permission.BIND_QUICK_SETTINGS_TILE"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.service.quicksettings.action.QS_TILE" />
             </intent-filter>
@@ -116,7 +124,8 @@
             android:name=".tiles.widget.WidgetTileThree"
             android:label="@string/app_name"
             android:icon="@drawable/ic_baseline_launch_24"
-            android:permission="android.permission.BIND_QUICK_SETTINGS_TILE">
+            android:permission="android.permission.BIND_QUICK_SETTINGS_TILE"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.service.quicksettings.action.QS_TILE" />
             </intent-filter>
@@ -125,7 +134,8 @@
             android:name=".tiles.widget.WidgetTileFour"
             android:label="@string/app_name"
             android:icon="@drawable/ic_baseline_launch_24"
-            android:permission="android.permission.BIND_QUICK_SETTINGS_TILE">
+            android:permission="android.permission.BIND_QUICK_SETTINGS_TILE"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.service.quicksettings.action.QS_TILE" />
             </intent-filter>
@@ -134,14 +144,16 @@
             android:name=".tiles.widget.WidgetTileFive"
             android:label="@string/app_name"
             android:icon="@drawable/ic_baseline_launch_24"
-            android:permission="android.permission.BIND_QUICK_SETTINGS_TILE">
+            android:permission="android.permission.BIND_QUICK_SETTINGS_TILE"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.service.quicksettings.action.QS_TILE" />
             </intent-filter>
         </service>
 
         <receiver android:name=".appwidget.IDListProvider"
-            android:label="@string/id_list">
+            android:label="@string/id_list"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
             </intent-filter>

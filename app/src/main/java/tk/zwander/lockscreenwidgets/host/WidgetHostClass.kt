@@ -1,5 +1,6 @@
 package tk.zwander.lockscreenwidgets.host
 
+import android.annotation.SuppressLint
 import android.appwidget.AppWidgetHost
 import android.app.PendingIntent
 import android.content.Context
@@ -19,10 +20,11 @@ import net.bytebuddy.implementation.SuperMethodCall
  * Since Lockscreen Widgets targets an API level above Pie, the [RemoteViews.OnClickHandler]
  * visible to it is an interface, so we can't just create a stub class.
  */
+@SuppressLint("PrivateApi")
 class WidgetHostClass(context: Context, id: Int, unlockCallback: (() -> Unit)?)
     : WidgetHostCompat(
     context, id, ByteBuddy()
-        .subclass(RemoteViews.OnClickHandler::class.java)
+        .subclass(Class.forName("android.widget.RemoteViews\$OnClickHandler"))
         .name("OnClickHandlerPieIntercept")
         .defineMethod("onClickHandler", Boolean::class.java)
         .withParameters(View::class.java, PendingIntent::class.java, Intent::class.java)

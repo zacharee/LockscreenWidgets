@@ -17,11 +17,12 @@ import java.lang.reflect.Proxy
  * [RemoteViews.OnClickHandler] is an interface (i.e. Android 10 and above). Java makes
  * it pretty easy to implement interfaces through reflection, so no ByteBuddy needed here.
  */
+@SuppressLint("PrivateApi")
 class WidgetHostInterface(context: Context, id: Int, unlockCallback: (() -> Unit)?)
     : WidgetHostCompat(
     context, id, Proxy.newProxyInstance(
-        RemoteViews.OnClickHandler::class.java.classLoader,
-        arrayOf(RemoteViews.OnClickHandler::class.java),
+        Class.forName("android.widget.RemoteViews\$OnClickHandler").classLoader,
+        arrayOf(Class.forName("android.widget.RemoteViews\$OnClickHandler")),
         InnerOnClickHandlerQ(context, unlockCallback)
     )
 ) {

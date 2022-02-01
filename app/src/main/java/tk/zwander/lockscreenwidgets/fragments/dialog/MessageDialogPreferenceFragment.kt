@@ -39,7 +39,7 @@ class MessageDialogPreferenceFragment : PreferenceDialogFragmentCompat() {
                 .setPositiveButton(preference.positiveButtonText, this)
                 .setNegativeButton(preference.negativeButtonText, this)
 
-        val contentView = onCreateDialogView(context)
+        val contentView = onCreateDialogView(requireContext())
         if (contentView != null) {
             onBindDialogView(contentView)
             builder.setView(contentView)
