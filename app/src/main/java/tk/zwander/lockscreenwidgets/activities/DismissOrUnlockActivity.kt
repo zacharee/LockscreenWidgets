@@ -72,8 +72,10 @@ class DismissOrUnlockActivity : AppCompatActivity() {
                 window.addFlags(WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD or WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED)
             }
         } else {
-            val i = Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS)
-            sendBroadcast(i)
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
+                val i = Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS)
+                sendBroadcast(i)
+            }
 
             finish()
         }
