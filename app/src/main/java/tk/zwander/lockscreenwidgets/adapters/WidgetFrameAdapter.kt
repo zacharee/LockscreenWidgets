@@ -194,14 +194,13 @@ class WidgetFrameAdapter(
                 }
             }
 
-        private val currentData: WidgetData
-            get() = widgets[bindingAdapterPosition]
+        private val currentData: WidgetData?
+            get() = bindingAdapterPosition.let { if (it != -1) widgets[it] else null }
 
         init {
             binding.removeWidget.setOnClickListener {
-                val newPos = bindingAdapterPosition
-                if (newPos != -1) {
-                    onRemoveCallback(this@WidgetFrameAdapter, widgets[newPos])
+                currentData?.let {
+                    onRemoveCallback(this@WidgetFrameAdapter, it)
                 }
             }
 
@@ -228,7 +227,7 @@ class WidgetFrameAdapter(
             }
 
             binding.widgetReconfigure.setOnClickListener {
-                val data = currentData
+                val data = currentData ?: return@setOnClickListener
                 val provider = data.widgetProviderComponent
 
                 if (provider == null) {
@@ -399,7 +398,7 @@ class WidgetFrameAdapter(
         }
 
         private fun handleResize(step: Int, direction: Int, vertical: Boolean) {
-            val sizeInfo = currentData.safeSize
+            val sizeInfo = currentData?.safeSize ?: return
 
             if (vertical) {
                 sizeInfo.safeWidgetHeightSpan = min(sizeInfo.safeWidgetHeightSpan + step * direction,
@@ -409,7 +408,7 @@ class WidgetFrameAdapter(
                     itemView.context.prefManager.frameColCount)
             }
 
-            onResize(currentData)
+            onResize(currentData ?: return)
             persistResize()
         }
 
