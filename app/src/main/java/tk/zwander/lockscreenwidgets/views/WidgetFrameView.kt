@@ -32,20 +32,6 @@ import kotlin.math.roundToInt
  * this View listens for and notifies of the relevant events.
  */
 class WidgetFrameView(context: Context, attrs: AttributeSet) : ConstraintLayout(context, attrs), SharedPreferences.OnSharedPreferenceChangeListener {
-    var onMoveListener: ((velX: Float, velY: Float) -> Unit)? = null
-    var onInterceptListener: ((down: Boolean) -> Unit)? = null
-    var onAddListener: (() -> Unit)? = null
-
-    var onLeftDragListener: ((velX: Int) -> Unit)? = null
-    var onRightDragListener: ((velX: Int) -> Unit)? = null
-    var onTopDragListener: ((velY: Int) -> Unit)? = null
-    var onBottomDragListener: ((velY: Int) -> Unit)? = null
-
-    var onTempHideListener: (() -> Unit)? = null
-    var onAfterResizeListener: (() -> Unit)? = null
-    var onAfterMoveListener: (() -> Unit)? = null
-
-    var attachmentStateListener: ((isAttached: Boolean) -> Unit)? = null
     var animationState = AnimationState.STATE_IDLE
 
     var informationCallback: IInformationCallback? = null
@@ -128,38 +114,26 @@ class WidgetFrameView(context: Context, attrs: AttributeSet) : ConstraintLayout(
         }
 
         binding.leftDragger.setOnTouchListener(ExpandTouchListener { velX, _, isUp ->
-            onLeftDragListener?.invoke(velX)
-            if (isUp) {
-                onAfterResizeListener?.invoke()
-            }
-            onLeftDragListener != null
+            context.eventManager.sendEvent(Event.FrameResized(Event.FrameResized.Side.LEFT, velX, isUp))
+            true
         })
         binding.rightDragger.setOnTouchListener(ExpandTouchListener { velX, _, isUp ->
-            onRightDragListener?.invoke(velX)
-            if (isUp) {
-                onAfterResizeListener?.invoke()
-            }
-            onRightDragListener != null
+            context.eventManager.sendEvent(Event.FrameResized(Event.FrameResized.Side.RIGHT, velX, isUp))
+            true
         })
         binding.topDragger.setOnTouchListener(ExpandTouchListener { _, velY, isUp ->
-            onTopDragListener?.invoke(velY)
-            if (isUp) {
-                onAfterResizeListener?.invoke()
-            }
-            onTopDragListener != null
+            context.eventManager.sendEvent(Event.FrameResized(Event.FrameResized.Side.TOP, velY, isUp))
+            true
         })
         binding.bottomDragger.setOnTouchListener(ExpandTouchListener { _, velY, isUp ->
-            onBottomDragListener?.invoke(velY)
-            if (isUp) {
-                onAfterResizeListener?.invoke()
-            }
-            onBottomDragListener != null
+            context.eventManager.sendEvent(Event.FrameResized(Event.FrameResized.Side.BOTTOM, velY, isUp))
+            true
         })
         binding.addWidget.setOnClickListener {
-            onAddListener?.invoke()
+            context.eventManager.sendEvent(Event.LaunchAddWidget)
         }
         binding.tempHideFrame.setOnClickListener {
-            onTempHideListener?.invoke()
+            context.eventManager.sendEvent(Event.TempHide)
         }
 
         if (context.prefManager.firstViewing) {
@@ -184,7 +158,7 @@ class WidgetFrameView(context: Context, attrs: AttributeSet) : ConstraintLayout(
 
         postDelayed({
             binding.frameCard.fadeAndScaleIn {
-                attachmentStateListener?.invoke(true)
+                context.eventManager.sendEvent(Event.FrameAttachmentState(true))
                 animationState = AnimationState.STATE_IDLE
             }
         }, 50)
@@ -201,7 +175,7 @@ class WidgetFrameView(context: Context, attrs: AttributeSet) : ConstraintLayout(
         unregisterProxListener()
 
         setEditMode(false)
-        attachmentStateListener?.invoke(false)
+        context.eventManager.sendEvent(Event.FrameAttachmentState(false))
         animationState = AnimationState.STATE_IDLE
     }
 
@@ -249,7 +223,7 @@ class WidgetFrameView(context: Context, attrs: AttributeSet) : ConstraintLayout(
                             if (binding.hideHintView.root.isVisible) {
                                 binding.hideHintView.root.close()
                             }
-                            onTempHideListener?.invoke()
+                            context.eventManager.sendEvent(Event.TempHide)
                             return true
                         }
                     }
@@ -261,7 +235,7 @@ class WidgetFrameView(context: Context, attrs: AttributeSet) : ConstraintLayout(
                     }
 
                     if (ev.buttonState == MotionEvent.BUTTON_TERTIARY) {
-                        onTempHideListener?.invoke()
+                        context.eventManager.sendEvent(Event.TempHide)
                         return true
                     }
                 }
@@ -391,12 +365,12 @@ class WidgetFrameView(context: Context, attrs: AttributeSet) : ConstraintLayout(
     private fun onTouch(event: MotionEvent): Boolean {
         return when (event.action) {
             MotionEvent.ACTION_DOWN -> {
-                onInterceptListener?.invoke(true)
+                context.eventManager.sendEvent(Event.FrameIntercept(true))
                 false
             }
             MotionEvent.ACTION_CANCEL,
             MotionEvent.ACTION_UP -> {
-                onInterceptListener?.invoke(false)
+                context.eventManager.sendEvent(Event.FrameIntercept(false))
                 alreadyIndicatedMoving = false
                 false
             }
@@ -498,11 +472,11 @@ class WidgetFrameView(context: Context, attrs: AttributeSet) : ConstraintLayout(
                     prevX = newX
                     prevY = newY
 
-                    onMoveListener?.invoke(velX, velY)
-                    onMoveListener != null
+                    context.eventManager.sendEvent(Event.FrameMoved(velX, velY))
+                    true
                 }
                 MotionEvent.ACTION_UP -> {
-                    onAfterMoveListener?.invoke()
+                    context.eventManager.sendEvent(Event.FrameMoveFinished)
                     true
                 }
                 else -> false

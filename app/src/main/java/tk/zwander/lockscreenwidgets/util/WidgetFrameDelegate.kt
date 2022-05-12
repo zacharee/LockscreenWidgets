@@ -17,7 +17,6 @@ import android.os.*
 import android.provider.Settings
 import android.view.*
 import android.widget.ImageView
-import androidx.core.graphics.drawable.DrawableCompat
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import com.arasthel.spannedgridlayoutmanager.SpannedGridLayoutManager
@@ -39,7 +38,7 @@ import kotlin.math.sign
  * TODO: make this work with multiple frame "clients" (i.e. a preview in MainActivity).
  */
 class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper(context),
-    SharedPreferences.OnSharedPreferenceChangeListener, IInformationCallback {
+    SharedPreferences.OnSharedPreferenceChangeListener, IInformationCallback, EventObserver {
     companion object {
         @SuppressLint("StaticFieldLeak")
         private var instance: WidgetFrameDelegate? = null
@@ -128,7 +127,7 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
         }
 
     //The size, position, and such of the widget frame on the lock screen.
-    val params = WindowManager.LayoutParams().apply {
+    private val params = WindowManager.LayoutParams().apply {
         type = WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY
         width = dpAsPx(prefManager.getCorrectFrameWidth(saveMode))
         height = dpAsPx(prefManager.getCorrectFrameHeight(saveMode))
@@ -145,37 +144,23 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
                     WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER
         format = PixelFormat.RGBA_8888
     }
-    val wallpaper = getSystemService(Context.WALLPAPER_SERVICE) as WallpaperManager
-    val wm = getSystemService(Context.WINDOW_SERVICE) as WindowManager
-    val widgetManager = AppWidgetManager.getInstance(this)!!
-    val widgetHost = WidgetHostCompat.getInstance(this, 1003) {
+    private val wallpaper = getSystemService(Context.WALLPAPER_SERVICE) as WallpaperManager
+    private val wm = getSystemService(Context.WINDOW_SERVICE) as WindowManager
+    private val widgetManager = AppWidgetManager.getInstance(this)!!
+    private val widgetHost = WidgetHostCompat.getInstance(this, 1003) {
         DismissOrUnlockActivity.launch(this)
     }
-    val shortcutIdManager = ShortcutIdManager.getInstance(this, widgetHost)
+    private val shortcutIdManager = ShortcutIdManager.getInstance(this, widgetHost)
 
     //The actual frame View
     val view = LayoutInflater.from(ContextThemeWrapper(this, R.style.AppTheme))
         .inflate(R.layout.widget_frame, null)!!
     val binding = WidgetFrameBinding.bind(view)
-    val gridLayoutManager = SpannedLayoutManager()
-    val adapter = WidgetFrameAdapter(widgetManager, widgetHost, params) { adapter, item ->
-        binding.removeWidgetConfirmation.root.apply {
-            onConfirmListener = {
-                if (it) {
-                    prefManager.currentWidgets = prefManager.currentWidgets.apply {
-                        remove(item)
-                        when (item.safeType) {
-                            WidgetType.WIDGET -> widgetHost.deleteAppWidgetId(item.id)
-                            WidgetType.SHORTCUT -> shortcutIdManager.removeShortcutId(item.id)
-                        }
-                    }
-                    adapter.currentEditingInterfacePosition = -1
-                }
-            }
-            show()
-        }
+    private val gridLayoutManager = SpannedLayoutManager()
+    val adapter = WidgetFrameAdapter(widgetManager, widgetHost, params) { _, item ->
+        binding.removeWidgetConfirmation.root.show(item)
     }
-    val touchHelperCallback = object : ItemTouchHelper.SimpleCallback(
+    private val touchHelperCallback = object : ItemTouchHelper.SimpleCallback(
         ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT or ItemTouchHelper.UP or ItemTouchHelper.DOWN,
         0
     ) {
@@ -244,7 +229,7 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
 
     //Some widgets display differently depending on the system's dark mode.
     //Make sure the widgets are rebound if there's a change.
-    val nightModeListener = object : ContentObserver(null) {
+    private val nightModeListener = object : ContentObserver(null) {
         override fun onChange(selfChange: Boolean, uri: Uri?) {
             when (uri) {
                 Settings.Secure.getUriFor(Settings.Secure.UI_NIGHT_MODE) -> {
@@ -359,6 +344,93 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
         sharedPreferencesChangeHandler.handle(key)
     }
 
+    override fun onEvent(event: Event) {
+        when (event) {
+            Event.FrameMoveFinished -> updateWallpaperLayerIfNeeded()
+            Event.TempHide -> {
+                isTempHide = true
+            }
+            is Event.FrameResized -> {
+                when (event.which) {
+                    Event.FrameResized.Side.LEFT -> {
+                        params.width -= event.velocity
+                        params.x += (event.velocity / 2)
+                    }
+                    Event.FrameResized.Side.TOP -> {
+                        params.height -= event.velocity
+                        params.y += (event.velocity / 2)
+                    }
+                    Event.FrameResized.Side.RIGHT -> {
+                        params.width += event.velocity
+                        params.x += (event.velocity / 2)
+                    }
+                    Event.FrameResized.Side.BOTTOM -> {
+                        params.height += event.velocity
+                        params.y += (event.velocity / 2)
+                    }
+                }
+
+                prefManager.setCorrectFrameWidth(saveMode, pxAsDp(params.width))
+                prefManager.setCorrectFrameHeight(saveMode, pxAsDp(params.height))
+
+                updateOverlay()
+
+                if (event.isUp) {
+                    adapter.onResizeObservable.notifyObservers()
+                    updateWallpaperLayerIfNeeded()
+                }
+            }
+            //We only really want to be listening to widget changes
+            //while the frame is on-screen. Otherwise, we're wasting battery.
+            is Event.FrameAttachmentState -> {
+                try {
+                    if (event.attached) {
+                        updateBlur()
+                        widgetHost.startListening()
+                        //Even with the startListening() call above,
+                        //it doesn't seem like pending updates always get
+                        //dispatched. Rebinding all the widgets forces
+                        //them to update.
+                        mainHandler.postDelayed({
+                            updateWallpaperLayerIfNeeded()
+                            adapter.updateViews()
+                            gridLayoutManager.scrollToPosition(prefManager.currentPage)
+                        }, 50)
+                    } else {
+                        widgetHost.stopListening()
+                    }
+                } catch (e: NullPointerException) {
+                    //The stupid "Attempt to read from field 'com.android.server.appwidget.AppWidgetServiceImpl$ProviderId
+                    //com.android.server.appwidget.AppWidgetServiceImpl$Provider.id' on a null object reference"
+                    //Exception is thrown on stopListening() as well for some reason.
+                }
+            }
+            is Event.FrameMoved -> {
+                params.x += event.velX.toInt()
+                params.y += event.velY.toInt()
+
+                updateOverlay()
+
+                prefManager.setCorrectFramePos(saveMode, params.x, params.y)
+            }
+            is Event.FrameIntercept -> forceWakelock(wm, event.down)
+            is Event.RemoveWidgetConfirmed -> {
+                if (event.remove) {
+                    prefManager.currentWidgets = prefManager.currentWidgets.apply {
+                        remove(event.item)
+                        when (event.item?.safeType) {
+                            WidgetType.WIDGET -> widgetHost.deleteAppWidgetId(event.item.id)
+                            WidgetType.SHORTCUT -> shortcutIdManager.removeShortcutId(event.item.id)
+                            else -> {}
+                        }
+                    }
+                    adapter.currentEditingInterfacePosition = -1
+                }
+            }
+            else -> {}
+        }
+    }
+
     fun onCreate() {
         prefManager.prefs.registerOnSharedPreferenceChangeListener(this)
         gridLayoutManager.spanSizeLookup = adapter.spanSizeLookup
@@ -377,51 +449,25 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
         updateRowColCount()
         adapter.updateWidgets(prefManager.currentWidgets.toList())
 
-        binding.frame.onAddListener = {
-            val intent = Intent(this, AddWidgetActivity::class.java)
-            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-
-            startActivity(intent)
-        }
-
         binding.frame.informationCallback = this
-
-        //We only really want to be listening to widget changes
-        //while the frame is on-screen. Otherwise, we're wasting battery.
-        binding.frame.attachmentStateListener = {
-            try {
-                if (it) {
-                    updateBlur()
-                    widgetHost.startListening()
-                    //Even with the startListening() call above,
-                    //it doesn't seem like pending updates always get
-                    //dispatched. Rebinding all the widgets forces
-                    //them to update.
-                    mainHandler.postDelayed({
-                        updateWallpaperLayerIfNeeded()
-                        adapter.updateViews()
-                        gridLayoutManager.scrollToPosition(prefManager.currentPage)
-                    }, 50)
-                } else {
-                    widgetHost.stopListening()
-                }
-            } catch (e: NullPointerException) {
-                //The stupid "Attempt to read from field 'com.android.server.appwidget.AppWidgetServiceImpl$ProviderId
-                //com.android.server.appwidget.AppWidgetServiceImpl$Provider.id' on a null object reference"
-                //Exception is thrown on stopListening() as well for some reason.
-            }
-        }
 
         //Scroll to the stored page, making sure to catch a potential
         //out-of-bounds error.
         try {
             gridLayoutManager.scrollToPosition(prefManager.currentPage)
-        } catch (e: Exception) {}
+        } catch (_: Exception) {}
+
+        eventManager.apply {
+            addObserver(this@WidgetFrameDelegate)
+        }
     }
 
     fun onDestroy() {
         prefManager.prefs.unregisterOnSharedPreferenceChangeListener(this)
         contentResolver.unregisterContentObserver(nightModeListener)
+        eventManager.apply {
+            removeObserver(this@WidgetFrameDelegate)
+        }
     }
 
     /**
@@ -434,9 +480,6 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
 
             this.rowCount = rowCount
             this.columnCount = colCount
-
-//            blockSnapHelper.maxFlingBlocks = rowCount
-//            blockSnapHelper.attachToRecyclerView(view.widgets_pager)
         }
     }
 
@@ -642,6 +685,10 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
             params.flags = params.flags and WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON.inv()
         }
 
+        binding.frame.updateWindow(wm, params)
+    }
+
+    fun updateOverlay() {
         binding.frame.updateWindow(wm, params)
     }
 

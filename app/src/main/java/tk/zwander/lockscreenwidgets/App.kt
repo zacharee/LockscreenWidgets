@@ -4,14 +4,14 @@ import android.annotation.SuppressLint
 import android.app.Application
 import android.content.ComponentName
 import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
 import org.lsposed.hiddenapibypass.HiddenApiBypass
+import tk.zwander.lockscreenwidgets.activities.add.AddWidgetActivity
 import tk.zwander.lockscreenwidgets.tiles.NCTile
 import tk.zwander.lockscreenwidgets.tiles.widget.*
-import tk.zwander.lockscreenwidgets.util.GlobalExceptionHandler
-import tk.zwander.lockscreenwidgets.util.isOneUI
-import tk.zwander.lockscreenwidgets.util.migrationManager
+import tk.zwander.lockscreenwidgets.util.*
 
 /**
  * The main application.
@@ -28,6 +28,13 @@ class App : Application() {
         @SuppressLint("StaticFieldLeak")
         var globalContext: Context? = null
             private set
+    }
+
+    private val addWidgetListener: (Event.LaunchAddWidget) -> Unit = {
+        val intent = Intent(this, AddWidgetActivity::class.java)
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+
+        startActivity(intent)
     }
 
     override fun onCreate() {
@@ -72,5 +79,7 @@ class App : Application() {
                 )
             }
         }
+
+        eventManager.addListener(addWidgetListener)
     }
 }

@@ -4,7 +4,10 @@ import android.content.Context
 import android.util.AttributeSet
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.isVisible
+import tk.zwander.lockscreenwidgets.data.WidgetData
 import tk.zwander.lockscreenwidgets.databinding.RemoveWidgetConfirmationLayoutBinding
+import tk.zwander.lockscreenwidgets.util.Event
+import tk.zwander.lockscreenwidgets.util.eventManager
 
 /**
  * An overlay on the widget frame that appears when a user taps the "remove"
@@ -13,29 +16,30 @@ import tk.zwander.lockscreenwidgets.databinding.RemoveWidgetConfirmationLayoutBi
  */
 class RemoveWidgetConfirmationView(context: Context, attrs: AttributeSet) : ConstraintLayout(context, attrs) {
     val binding by lazy { RemoveWidgetConfirmationLayoutBinding.bind(this) }
-    var onConfirmListener: ((confirmed: Boolean) -> Unit)? = null
+
+    private var item: WidgetData? = null
 
     override fun onFinishInflate() {
         super.onFinishInflate()
 
         binding.confirmDelete.setOnClickListener {
-            onConfirmListener?.invoke(true)
-            onConfirmListener = null
+            context.eventManager.sendEvent(Event.RemoveWidgetConfirmed(true, item))
             hide()
         }
 
         binding.cancelDelete.setOnClickListener {
-            onConfirmListener?.invoke(false)
-            onConfirmListener = null
+            context.eventManager.sendEvent(Event.RemoveWidgetConfirmed(false, item))
             hide()
         }
     }
 
-    fun show() {
+    fun show(item: WidgetData) {
         isVisible = true
+        this.item = item
     }
 
     fun hide() {
         isVisible = false
+        this.item = null
     }
 }

@@ -108,6 +108,10 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
         }
     }
 
+    private val tempHideListener: (Event.TempHide) -> Unit = {
+        removeOverlay()
+    }
+
     private var latestScreenOnTime: Long = 0L
 
     private var accessibilityJob: Job? = null
@@ -119,78 +123,15 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
         delegate.onCreate()
         prefManager.prefs.registerOnSharedPreferenceChangeListener(this)
 
-        delegate.apply {
-            binding.frame.onAfterResizeListener = {
-                adapter.onResizeObservable.notifyObservers()
-                delegate.updateWallpaperLayerIfNeeded()
-            }
-
-            binding.frame.onAfterMoveListener = {
-                delegate.updateWallpaperLayerIfNeeded()
-            }
-
-            binding.frame.onMoveListener = { velX, velY ->
-                params.x += velX.toInt()
-                params.y += velY.toInt()
-
-                updateOverlay()
-
-                prefManager.setCorrectFramePos(saveMode, params.x, params.y)
-            }
-
-            binding.frame.onLeftDragListener = { velX ->
-                params.width -= velX
-                params.x += (velX / 2)
-
-                prefManager.setCorrectFrameWidth(saveMode, pxAsDp(params.width))
-
-                updateOverlay()
-            }
-
-            binding.frame.onRightDragListener = { velX ->
-                params.width += velX
-                params.x += (velX / 2)
-
-                prefManager.setCorrectFrameWidth(saveMode, pxAsDp(params.width))
-
-                updateOverlay()
-            }
-
-            binding.frame.onTopDragListener = { velY ->
-                params.height -= velY
-                params.y += (velY / 2)
-
-                prefManager.setCorrectFrameHeight(saveMode, pxAsDp(params.height))
-
-                updateOverlay()
-            }
-
-            binding.frame.onBottomDragListener = { velY ->
-                params.height += velY
-                params.y += (velY / 2)
-
-                prefManager.setCorrectFrameHeight(saveMode, pxAsDp(params.height))
-
-                updateOverlay()
-            }
-
-            binding.frame.onInterceptListener = { down ->
-                forceWakelock(wm, down)
-            }
-
-            binding.frame.onTempHideListener = {
-                isTempHide = true
-                removeOverlay()
-            }
-        }
-
-        eventManager.addListener(notificationEventListener)
         registerReceiver(
             screenStateReceiver,
             IntentFilter(Intent.ACTION_SCREEN_OFF).apply { addAction(Intent.ACTION_SCREEN_ON) })
 
         delegate.wasOnKeyguard = kgm.isKeyguardLocked
         delegate.isScreenOn = power.isInteractive
+
+        eventManager.addListener(notificationEventListener)
+        eventManager.addListener(tempHideListener)
     }
 
     override fun onServiceConnected() {
@@ -432,11 +373,13 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
 
         cancel()
         prefManager.prefs.unregisterOnSharedPreferenceChangeListener(this)
-        eventManager.removeListener(notificationEventListener)
         unregisterReceiver(screenStateReceiver)
         delegate.onDestroy()
 
         WidgetFrameDelegate.invalidateInstance()
+
+        eventManager.removeListener(notificationEventListener)
+        eventManager.removeListener(tempHideListener)
     }
 
     /**
@@ -453,7 +396,7 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
      * that may have occurred.
      */
     private fun updateOverlay() {
-        delegate.binding.frame.updateWindow(wm, delegate.params)
+        delegate.updateOverlay()
     }
 
     /**
