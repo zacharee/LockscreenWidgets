@@ -9,9 +9,7 @@ import android.view.*
 import android.view.accessibility.AccessibilityEvent
 import android.view.accessibility.AccessibilityNodeInfo
 import android.view.accessibility.AccessibilityWindowInfo
-import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import kotlinx.coroutines.*
-import tk.zwander.lockscreenwidgets.activities.DismissOrUnlockActivity
 import tk.zwander.lockscreenwidgets.appwidget.IDWidgetFactory
 import tk.zwander.lockscreenwidgets.appwidget.IDListProvider
 import tk.zwander.lockscreenwidgets.data.window.WindowInfo
@@ -31,38 +29,6 @@ import java.util.concurrent.ConcurrentLinkedQueue
  * is shown.
  */
 class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferenceChangeListener, CoroutineScope by MainScope() {
-    companion object {
-        const val ACTION_LOCKSCREEN_DISMISSED = "LOCKSCREEN_DISMISSED"
-    }
-
-    /**
-     * On Android 8.0+, it's pretty easy to dismiss the lock screen with a simple API call.
-     * On earlier Android versions, it's not so easy, and we need a way to detect when the
-     * lock screen has successfully been dismissed.
-     *
-     * This is just a simple wrapper class around a BroadcastReceiver for [DismissOrUnlockActivity]
-     * to implement so it can receive the keyguard dismissal event we generate from this service.
-     */
-    abstract class OnLockscreenDismissListener : BroadcastReceiver() {
-        final override fun onReceive(context: Context?, intent: Intent?) {
-            if (intent?.action == ACTION_LOCKSCREEN_DISMISSED) {
-                onDismissed()
-            }
-        }
-
-        fun register(context: Context) {
-            LocalBroadcastManager.getInstance(context)
-                .registerReceiver(this, IntentFilter(ACTION_LOCKSCREEN_DISMISSED))
-        }
-
-        fun unregister(context: Context) {
-            LocalBroadcastManager.getInstance(context)
-                .unregisterReceiver(this)
-        }
-
-        abstract fun onDismissed()
-    }
-
     private val kgm by lazy { getSystemService(Context.KEYGUARD_SERVICE) as KeyguardManager }
     private val wm by lazy { getSystemService(Context.WINDOW_SERVICE) as WindowManager }
     private val power by lazy { getSystemService(Context.POWER_SERVICE) as PowerManager }
@@ -74,17 +40,14 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
     //notifications not visible on the lock screen.
     //If the notification count is > 0, and the user has the option enabled,
     //make sure to hide the widget frame.
-    private val notificationCountListener =
-        object : NotificationListener.NotificationCountListener() {
-            override fun onUpdate(count: Int) {
-                delegate.notificationCount = count
-                if (prefManager.hideOnNotifications && count > 0) {
-                    removeOverlay()
-                } else if (delegate.canShow()) {
-                    addOverlay()
-                }
-            }
+    private val notificationEventListener: (Event.NewNotificationCount) -> Unit = {
+        delegate.notificationCount = it.count
+        if (prefManager.hideOnNotifications && it.count > 0) {
+            removeOverlay()
+        } else if (delegate.canShow()) {
+            addOverlay()
         }
+    }
 
     //Listen for the screen turning on and off.
     //This shouldn't really be necessary, but there are some quirks in how
@@ -221,7 +184,7 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
             }
         }
 
-        notificationCountListener.register(this)
+        eventManager.addListener(notificationEventListener)
         registerReceiver(
             screenStateReceiver,
             IntentFilter(Intent.ACTION_SCREEN_OFF).apply { addAction(Intent.ACTION_SCREEN_ON) })
@@ -266,8 +229,7 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
                 //Update the keyguard dismissal Activity that the lock screen
                 //has been dismissed.
                 if (!isOnKeyguard) {
-                    LocalBroadcastManager.getInstance(this@Accessibility)
-                        .sendBroadcast(Intent(ACTION_LOCKSCREEN_DISMISSED))
+                    eventManager.sendEvent(Event.LockscreenDismissed)
                 }
             }
 
@@ -433,11 +395,11 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
                 windows.forEach {
                     try {
                         it.root?.recycle()
-                    } catch (e: IllegalStateException) {}
+                    } catch (_: IllegalStateException) {}
 
                     try {
                         it.root?.recycle()
-                    } catch (e: IllegalStateException) {}
+                    } catch (_: IllegalStateException) {}
                 }
             }
 
@@ -470,7 +432,7 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
 
         cancel()
         prefManager.prefs.unregisterOnSharedPreferenceChangeListener(this)
-        notificationCountListener.unregister(this)
+        eventManager.removeListener(notificationEventListener)
         unregisterReceiver(screenStateReceiver)
         delegate.onDestroy()
 

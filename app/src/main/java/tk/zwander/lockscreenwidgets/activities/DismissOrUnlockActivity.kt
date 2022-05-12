@@ -1,5 +1,6 @@
 package tk.zwander.lockscreenwidgets.activities
 
+import android.annotation.SuppressLint
 import android.app.KeyguardManager
 import android.content.Context
 import android.content.Intent
@@ -7,7 +8,8 @@ import android.os.Build
 import android.os.Bundle
 import android.view.WindowManager
 import androidx.appcompat.app.AppCompatActivity
-import tk.zwander.lockscreenwidgets.services.Accessibility
+import tk.zwander.lockscreenwidgets.util.Event
+import tk.zwander.lockscreenwidgets.util.eventManager
 import tk.zwander.lockscreenwidgets.util.mainHandler
 
 /**
@@ -35,10 +37,8 @@ class DismissOrUnlockActivity : AppCompatActivity() {
     }
 
     private val kgm by lazy { getSystemService(Context.KEYGUARD_SERVICE) as KeyguardManager }
-    private val dismissListener = object : Accessibility.OnLockscreenDismissListener() {
-        override fun onDismissed() {
-            finish()
-        }
+    private val eventListener: (Event.LockscreenDismissed) -> Unit = {
+        finish()
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -64,11 +64,12 @@ class DismissOrUnlockActivity : AppCompatActivity() {
                 })
             } else {
                 //If we're below 8.0, we have to do some weirdness to dismiss the lock screen.
-                dismissListener.register(this)
+                eventManager.addListener(eventListener)
                 @Suppress("DEPRECATION")
                 window.addFlags(WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD or WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED)
             }
         } else {
+            @SuppressLint("MissingPermission")
             if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
                 val i = Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS)
                 sendBroadcast(i)
@@ -87,6 +88,6 @@ class DismissOrUnlockActivity : AppCompatActivity() {
     override fun onDestroy() {
         super.onDestroy()
 
-        dismissListener.unregister(this)
+        eventManager.removeListener(eventListener)
     }
 }

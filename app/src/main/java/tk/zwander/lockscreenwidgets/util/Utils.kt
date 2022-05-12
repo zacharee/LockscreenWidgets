@@ -322,3 +322,6 @@ val Context.defaultDisplayCompat: Display
 
 val Context.backupRestoreManager: BackupRestoreManager
     get() = BackupRestoreManager.getInstance(this)
+
+val Context.eventManager: EventManager
+    get() = EventManager.getInstance(this)
