@@ -5,21 +5,18 @@ import android.annotation.SuppressLint
 import android.app.KeyguardManager
 import android.content.*
 import android.os.PowerManager
-import android.util.Log
 import android.view.*
 import android.view.accessibility.AccessibilityEvent
 import android.view.accessibility.AccessibilityNodeInfo
 import android.view.accessibility.AccessibilityWindowInfo
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import kotlinx.coroutines.*
-import tk.zwander.lockscreenwidgets.App
 import tk.zwander.lockscreenwidgets.activities.DismissOrUnlockActivity
 import tk.zwander.lockscreenwidgets.appwidget.IDWidgetFactory
 import tk.zwander.lockscreenwidgets.appwidget.IDListProvider
 import tk.zwander.lockscreenwidgets.data.window.WindowInfo
 import tk.zwander.lockscreenwidgets.data.window.WindowRootPair
 import tk.zwander.lockscreenwidgets.util.*
-import java.lang.IllegalStateException
 import java.util.concurrent.ConcurrentLinkedQueue
 
 /**
@@ -453,8 +450,12 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
                 delegate.updateAccessibilityPass()
             }
 
-            //Make sure to recycle the copy of the event.
-            eventCopy.recycle()
+            try {
+                //Make sure to recycle the copy of the event.
+                eventCopy.recycle()
+            } catch (e: IllegalStateException) {
+                //Sometimes the event is already recycled somehow.
+            }
         }
     }
 
