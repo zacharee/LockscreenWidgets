@@ -699,7 +699,7 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
         val blur = prefManager.blurBackground
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            if (blur) {
+            if (blur && !showWallpaperLayerCondition) {
                 binding.blurBackground.background = binding.frame.blurDrawable?.wrapped
             } else {
                 binding.blurBackground.background = null
@@ -711,7 +711,7 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
                 null
             }
 
-            if (blur) {
+            if (blur && !showWallpaperLayerCondition) {
                 params.flags = params.flags or WindowManager.LayoutParams.FLAG_DIM_BEHIND
 
                 f?.set(params, f.get(params) as Int or 64)
