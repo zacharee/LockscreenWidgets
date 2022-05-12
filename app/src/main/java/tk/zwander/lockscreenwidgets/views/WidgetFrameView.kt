@@ -19,6 +19,7 @@ import android.view.ViewConfiguration
 import android.view.WindowManager
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.isVisible
+import com.android.internal.graphics.drawable.BackgroundBlurDrawable
 import tk.zwander.lockscreenwidgets.App
 import tk.zwander.lockscreenwidgets.adapters.IDAdapter
 import tk.zwander.lockscreenwidgets.databinding.WidgetFrameBinding
@@ -90,9 +91,15 @@ class WidgetFrameView(context: Context, attrs: AttributeSet) : ConstraintLayout(
         handler(PrefManager.KEY_LOCK_WIDGET_FRAME) {
             setEditMode(false)
         }
+        handler(PrefManager.KEY_BLUR_BACKGROUND_AMOUNT) {
+            blurDrawable?.setBlurRadius(context.prefManager.backgroundBlurAmount)
+        }
     }
 
     private val binding by lazy { WidgetFrameBinding.bind(this) }
+
+    var blurDrawable: BackgroundBlurDrawable? = null
+        private set
 
     enum class AnimationState {
         STATE_ADDING,
@@ -183,6 +190,10 @@ class WidgetFrameView(context: Context, attrs: AttributeSet) : ConstraintLayout(
                 animationState = AnimationState.STATE_IDLE
             }
         }, 50)
+
+        blurDrawable = viewRootImpl.createBackgroundBlurDrawable()
+        blurDrawable?.setBlurRadius(context.prefManager.backgroundBlurAmount)
+        updateCornerRadius()
     }
 
     override fun onDetachedFromWindow() {
@@ -273,6 +284,7 @@ class WidgetFrameView(context: Context, attrs: AttributeSet) : ConstraintLayout(
     fun updateCornerRadius() {
         val radius = context.dpAsPx(context.prefManager.cornerRadiusDp).toFloat()
         binding.frameCard.radius = radius
+        blurDrawable?.setCornerRadius(radius)
 
         //Since all instances of a Drawable are technically the same instance
         //(unless someone uses mutate()), setting the corner radius for the

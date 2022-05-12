@@ -38,11 +38,43 @@
             />
 
         <SwitchPreference
+            android:title="@string/settings_screen_blur_background"
+            android:summary="@string/settings_screen_blur_background_desc"
+            android:icon="@drawable/ic_baseline_blur_on_24"
+            android:key="blur_background"
+            android:defaultValue="false"
+            />
+
+        <tk.zwander.seekbarpreference.SeekBarPreference
+            android:title="@string/settings_screen_blur_background_amount"
+            android:summary="@string/settings_screen_blur_background_amount_desc"
+            android:icon="@drawable/ic_baseline_deblur_24"
+            android:key="blur_background_amount"
+            android:defaultValue="100"
+            android:dependency="blur_background"
+            app:minValue="0"
+            app:maxValue="1000"
+            />
+
+        <SwitchPreference
             android:title="@string/settings_screen_masked_mode"
             android:summary="@string/settings_screen_masked_mode_desc"
             android:icon="@drawable/ic_baseline_opacity_24"
             android:key="masked_mode"
             android:defaultValue="false"
+            />
+
+        <tk.zwander.seekbarpreference.SeekBarPreference
+            android:title="@string/settings_screen_masked_mode_dim_amount"
+            android:summary="@string/settings_screen_masked_mode_dim_amount_desc"
+            android:icon="@drawable/ic_baseline_brightness_medium_24"
+            android:key="masked_mode_wallpaper_dim_amount"
+            android:defaultValue="0"
+            android:dependency="masked_mode"
+            app:minValue="0"
+            app:maxValue="1000"
+            app:scale="0.1"
+            app:units="%"
             />
 
         <tk.zwander.seekbarpreference.SeekBarPreference

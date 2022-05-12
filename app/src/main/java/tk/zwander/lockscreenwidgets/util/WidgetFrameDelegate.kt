@@ -15,13 +15,12 @@ import android.graphics.drawable.BitmapDrawable
 import android.net.Uri
 import android.os.*
 import android.provider.Settings
-import android.util.Log
 import android.view.*
 import android.widget.ImageView
+import androidx.core.graphics.drawable.DrawableCompat
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import com.arasthel.spannedgridlayoutmanager.SpannedGridLayoutManager
-import tk.zwander.lockscreenwidgets.App
 import tk.zwander.lockscreenwidgets.R
 import tk.zwander.lockscreenwidgets.activities.add.AddWidgetActivity
 import tk.zwander.lockscreenwidgets.activities.DismissOrUnlockActivity
@@ -318,8 +317,11 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
         handler(PrefManager.KEY_FRAME_BACKGROUND_COLOR) {
             binding.frame.updateFrameBackground()
         }
-        handler(PrefManager.KEY_FRAME_MASKED_MODE) {
+        handler(PrefManager.KEY_FRAME_MASKED_MODE, PrefManager.KEY_MASKED_MODE_DIM_AMOUNT) {
             updateWallpaperLayerIfNeeded()
+        }
+        handler(PrefManager.KEY_BLUR_BACKGROUND, PrefManager.KEY_BLUR_BACKGROUND_AMOUNT) {
+            updateBlur()
         }
         handler(
             PrefManager.KEY_SHOW_DEBUG_ID_VIEW,
@@ -350,6 +352,9 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
         }
     }
 
+    private val showWallpaperLayerCondition: Boolean
+        get() = !isPreview && prefManager.maskedMode && (!notificationsPanelFullyExpanded || !prefManager.showInNotificationCenter)
+
     override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences, key: String) {
         sharedPreferencesChangeHandler.handle(key)
     }
@@ -357,12 +362,10 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
     fun onCreate() {
         prefManager.prefs.registerOnSharedPreferenceChangeListener(this)
         gridLayoutManager.spanSizeLookup = adapter.spanSizeLookup
-//        gridLayoutManager.customWidth = widgetBlockWidth
         binding.widgetsPager.apply {
             adapter = this@WidgetFrameDelegate.adapter
             layoutManager = gridLayoutManager
             setHasFixedSize(true)
-//            blockSnapHelper.attachToRecyclerView(this)
             ItemTouchHelper(touchHelperCallback).attachToRecyclerView(this)
         }
         contentResolver.registerContentObserver(
@@ -388,6 +391,7 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
         binding.frame.attachmentStateListener = {
             try {
                 if (it) {
+                    updateBlur()
                     widgetHost.startListening()
                     //Even with the startListening() call above,
                     //it doesn't seem like pending updates always get
@@ -408,14 +412,11 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
             }
         }
 
-//        gridLayoutManager.spanSizeLookup = adapter.spanSizeLookup
-
         //Scroll to the stored page, making sure to catch a potential
         //out-of-bounds error.
         try {
             gridLayoutManager.scrollToPosition(prefManager.currentPage)
-        } catch (e: Exception) {
-        }
+        } catch (e: Exception) {}
     }
 
     fun onDestroy() {
@@ -547,7 +548,7 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
      */
     @SuppressLint("MissingPermission")
     fun updateWallpaperLayerIfNeeded() {
-        if (!isPreview && prefManager.maskedMode && (!notificationsPanelFullyExpanded || !prefManager.showInNotificationCenter)) {
+        if (showWallpaperLayerCondition) {
             val service = IWallpaperManager.Stub.asInterface(ServiceManager.getService("wallpaper"))
 
             val bundle = Bundle()
@@ -586,6 +587,7 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
 
                 fastW?.mutate()?.apply {
                     binding.wallpaperBackground.setImageDrawable(this)
+                    binding.wallpaperBackground.colorFilter = PorterDuffColorFilter(Color.argb(((prefManager.wallpaperDimAmount / 100f) * 255).toInt(), 0, 0, 0), PorterDuff.Mode.SRC_ATOP)
                     binding.wallpaperBackground.scaleType = ImageView.ScaleType.MATRIX
                     binding.wallpaperBackground.imageMatrix = Matrix().apply {
                         val realSize = Point().apply { defaultDisplayCompat.getRealSize(this) }
@@ -638,6 +640,41 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
             params.flags = params.flags or WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON
         } else {
             params.flags = params.flags and WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON.inv()
+        }
+
+        binding.frame.updateWindow(wm, params)
+    }
+
+    /**
+     * Updates the params needed to blur or not blur the widget frame background.
+     */
+    private fun updateBlur() {
+        val blur = prefManager.blurBackground
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            if (blur) {
+                binding.blurBackground.background = binding.frame.blurDrawable
+            } else {
+                binding.blurBackground.background = null
+            }
+        } else {
+            val f = try {
+                params::class.java.getDeclaredField("samsungFlags")
+            } catch (e: Exception) {
+                null
+            }
+
+            if (blur) {
+                params.flags = params.flags or WindowManager.LayoutParams.FLAG_DIM_BEHIND
+
+                f?.set(params, f.get(params) as Int or 64)
+                params.dimAmount = prefManager.backgroundBlurAmount / 1000f
+            } else {
+                params.flags = params.flags and WindowManager.LayoutParams.FLAG_DIM_BEHIND.inv()
+
+                f?.set(params, f.get(params) as Int and 64.inv())
+                params.dimAmount = 0.0f
+            }
         }
 
         binding.frame.updateWindow(wm, params)

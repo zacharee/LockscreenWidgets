@@ -17,6 +17,7 @@ import tk.zwander.lockscreenwidgets.activities.HideForIDsActivity
 import tk.zwander.lockscreenwidgets.activities.OnboardingActivity
 import tk.zwander.lockscreenwidgets.host.WidgetHostCompat
 import tk.zwander.lockscreenwidgets.util.*
+import tk.zwander.seekbarpreference.SeekBarPreference
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -98,12 +99,16 @@ class SettingsFragment : PreferenceFragmentCompat() {
         }
 
         findPreference<SwitchPreference>(PrefManager.KEY_FRAME_MASKED_MODE)?.setOnPreferenceChangeListener { _, newValue ->
-            if (newValue.toString().toBoolean()
+            (if (newValue.toString().toBoolean()
                 && requireContext().checkCallingOrSelfPermission(android.Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
                 OnboardingActivity.start(requireContext(), OnboardingActivity.RetroMode.STORAGE)
                 false
-            } else true
+            } else true)
         }
+
+        val showBlurOptions = requireContext().isOneUI || Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
+        findPreference<SwitchPreference>(PrefManager.KEY_BLUR_BACKGROUND)?.isVisible = showBlurOptions
+        findPreference<SeekBarPreference>(PrefManager.KEY_BLUR_BACKGROUND_AMOUNT)?.isVisible = showBlurOptions
 
         findPreference<Preference>("present_ids_launch")?.setOnPreferenceClickListener {
             HideForIDsActivity.start(requireContext(), HideForIDsActivity.Type.PRESENT)

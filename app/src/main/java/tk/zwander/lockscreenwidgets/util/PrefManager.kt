@@ -65,6 +65,9 @@ class PrefManager private constructor(context: Context) : ContextWrapper(context
         const val KEY_SHORTCUT_IDS = "shortcut_ids"
         const val KEY_LOCK_WIDGET_FRAME = "lock_widget_frame"
         const val KEY_DATABASE_VERSION = "database_version"
+        const val KEY_BLUR_BACKGROUND = "blur_background"
+        const val KEY_BLUR_BACKGROUND_AMOUNT = "blur_background_amount"
+        const val KEY_MASKED_MODE_DIM_AMOUNT = "masked_mode_wallpaper_dim_amount"
 
         const val VALUE_PAGE_INDICATOR_BEHAVIOR_HIDDEN = 0
         const val VALUE_PAGE_INDICATOR_BEHAVIOR_AUTO_HIDE = 1
@@ -375,6 +378,13 @@ class PrefManager private constructor(context: Context) : ContextWrapper(context
             putBoolean(KEY_FRAME_MASKED_MODE, value)
         }
 
+    //Whether the frame background should be blurred.
+    var blurBackground: Boolean
+        get() = getBoolean(KEY_BLUR_BACKGROUND, false)
+        set(value) {
+            putBoolean(KEY_BLUR_BACKGROUND, value)
+        }
+
     //How many columns of widgets should be shown per page.
     var frameColCount: Int
         get() = getInt(KEY_FRAME_COL_COUNT, 1)
@@ -387,6 +397,20 @@ class PrefManager private constructor(context: Context) : ContextWrapper(context
         get() = getInt(KEY_FRAME_ROW_COUNT, 1)
         set(value) {
             putInt(KEY_FRAME_ROW_COUNT, value)
+        }
+
+    //The degree of the background blur
+    var backgroundBlurAmount: Int
+        get() = getInt(KEY_BLUR_BACKGROUND_AMOUNT, 100)
+        set(value) {
+            putInt(KEY_BLUR_BACKGROUND_AMOUNT, value)
+        }
+
+    //How much to dim the masked mode wallpaper (in percent)
+    var wallpaperDimAmount: Float
+        get() = getInt(KEY_MASKED_MODE_DIM_AMOUNT, 0) / 10f
+        set(value) {
+            putInt(KEY_MASKED_MODE_DIM_AMOUNT, (value * 10f).toInt())
         }
 
     //Whether to show in the notification center.

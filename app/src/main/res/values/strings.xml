@@ -112,6 +112,9 @@
     <string name="settings_screen_masked_mode">Masked Mode (Experimental)</string>
     <string name="settings_screen_masked_mode_desc">Masked Mode attempts to draw the wallpaper as the background of the widget frame. On a compatible device, this will give the appearance of a transparent frame, while still allowing you to overlay UI elements.</string>
 
+    <string name="settings_screen_masked_mode_dim_amount">Masked Dim Amount</string>
+    <string name="settings_screen_masked_mode_dim_amount_desc">Some devices dim the wallpaper on the lock screen slightly. Adjust this to match.</string>
+
     <string name="settings_screen_touch_protection">Touch Protection</string>
     <string name="settings_screen_touch_protection_desc">Ignore touches on the widget frame when the proximity sensor is covered.</string>
 
@@ -138,6 +141,12 @@
 
     <string name="settings_screen_restore_widgets">Restore</string>
     <string name="settings_screen_restore_widgets_desc">Restore widgets and shortcuts from a backup. This will replace existing widgets and shortcuts. This does not include widget tiles.</string>
+
+    <string name="settings_screen_blur_background">Blur Background</string>
+    <string name="settings_screen_blur_background_desc">On Samsung devices, it\'s possible to blur the background of the frame. This won\'t apply where Masked Mode applies.</string>
+
+    <string name="settings_screen_blur_background_amount">Blur Amount</string>
+    <string name="settings_screen_blur_background_amount_desc">Set how blurred the background should be.</string>
 
     <string name="intro_welcome_title">Welcome!</string>
     <string name="intro_welcome_desc">Lockscreen Widgets is a simple app with a simple purpose: to bring back Android KitKat\'s lock screen widgets. Your widgets will show up in a simple paged slider on the lockscreen.</string>
