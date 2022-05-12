@@ -12,17 +12,15 @@ import android.os.Build
 import android.os.VibrationEffect
 import android.os.Vibrator
 import android.util.AttributeSet
-import android.util.Log
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewConfiguration
 import android.view.WindowManager
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.isVisible
-import com.android.internal.graphics.drawable.BackgroundBlurDrawable
-import tk.zwander.lockscreenwidgets.App
 import tk.zwander.lockscreenwidgets.adapters.IDAdapter
 import tk.zwander.lockscreenwidgets.databinding.WidgetFrameBinding
+import tk.zwander.lockscreenwidgets.drawable.BackgroundBlurDrawableCompatDelegate
 import tk.zwander.lockscreenwidgets.util.*
 import kotlin.math.roundToInt
 
@@ -98,7 +96,7 @@ class WidgetFrameView(context: Context, attrs: AttributeSet) : ConstraintLayout(
 
     private val binding by lazy { WidgetFrameBinding.bind(this) }
 
-    var blurDrawable: BackgroundBlurDrawable? = null
+    var blurDrawable: BackgroundBlurDrawableCompatDelegate? = null
         private set
 
     enum class AnimationState {
@@ -191,7 +189,7 @@ class WidgetFrameView(context: Context, attrs: AttributeSet) : ConstraintLayout(
             }
         }, 50)
 
-        blurDrawable = viewRootImpl.createBackgroundBlurDrawable()
+        blurDrawable = viewRootImpl.createBackgroundBlurDrawableCompat()
         blurDrawable?.setBlurRadius(context.prefManager.backgroundBlurAmount)
         updateCornerRadius()
     }

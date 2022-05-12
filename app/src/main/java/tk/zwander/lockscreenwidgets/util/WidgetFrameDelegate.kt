@@ -653,7 +653,7 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             if (blur) {
-                binding.blurBackground.background = binding.frame.blurDrawable
+                binding.blurBackground.background = binding.frame.blurDrawable?.wrapped
             } else {
                 binding.blurBackground.background = null
             }
