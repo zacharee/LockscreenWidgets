@@ -2,7 +2,6 @@ package tk.zwander.lockscreenwidgets.activities.add
 
 import android.annotation.SuppressLint
 import android.appwidget.AppWidgetProviderInfo
-import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
