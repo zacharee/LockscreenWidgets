@@ -1,15 +1,20 @@
 package tk.zwander.lockscreenwidgets.activities.add
 
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.appwidget.AppWidgetManager
 import android.appwidget.AppWidgetProviderInfo
 import android.content.ComponentName
+import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
+import android.os.ServiceManager
 import android.widget.Toast
+import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.graphics.drawable.toBitmap
+import com.android.internal.appwidget.IAppWidgetService
 import tk.zwander.lockscreenwidgets.R
 import tk.zwander.lockscreenwidgets.data.WidgetData
 import tk.zwander.lockscreenwidgets.data.WidgetSizeData
@@ -18,10 +23,6 @@ import tk.zwander.lockscreenwidgets.host.WidgetHostCompat
 import tk.zwander.lockscreenwidgets.util.*
 
 abstract class BaseBindWidgetActivity : AppCompatActivity() {
-    companion object {
-        private const val CONFIG_CODE = 1001
-    }
-
     protected val widgetHost by lazy { WidgetHostCompat.getInstance(this, 1003) }
     protected val appWidgetManager by lazy { AppWidgetManager.getInstance(this)!! }
     protected val shortcutIdManager by lazy { ShortcutIdManager.getInstance(this, widgetHost) }
@@ -61,31 +62,7 @@ abstract class BaseBindWidgetActivity : AppCompatActivity() {
         }
     }
 
-    @Suppress("DEPRECATION")
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-
-        when (requestCode) {
-            CONFIG_CODE -> {
-                if (resultCode == Activity.RESULT_OK) {
-                    val id = data?.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, -1) ?: return
-                    if (id == -1) return
-
-                    if (resultCode == Activity.RESULT_OK) {
-                        logUtils.debugLog("Successfully configured widget.")
-                        //Widget configuration was successful: add the
-                        //widget to the frame
-                        addNewWidget(id, appWidgetManager.getAppWidgetInfo(id))
-                    } else {
-                        logUtils.debugLog("Failed to configure widget.")
-                        //Widget configuration was canceled: delete the
-                        //allocated ID
-                        widgetHost.deleteAppWidgetId(id)
-                    }
-                }
-            }
-        }
-    }
+    protected var currentConfigId: Int? = null
 
     /**
      * Start the widget binding process.
@@ -142,27 +119,54 @@ abstract class BaseBindWidgetActivity : AppCompatActivity() {
         permRequest.launch(intent)
     }
 
+    protected open val configLauncher = registerForActivityResult(ActivityResultContracts.StartIntentSenderForResult()) { result ->
+        val id = result.data?.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, -1)
+
+        if (result.resultCode == Activity.RESULT_OK && id != null && id != -1) {
+            logUtils.debugLog("Successfully configured widget.")
+            //Widget configuration was successful: add the
+            //widget to the frame
+            addNewWidget(id, appWidgetManager.getAppWidgetInfo(id))
+        } else {
+            logUtils.debugLog("Failed to configure widget.")
+            currentConfigId?.let {
+                //Widget configuration was canceled: delete the
+                //allocated ID
+                widgetHost.deleteAppWidgetId(it)
+            }
+        }
+
+        currentConfigId = null
+    }
+
     /**
      * Launch the specified widget's configuration Activity.
      *
      * @param id the ID of the widget to configure
      */
+    @SuppressLint("NewApi")
     protected open fun configureWidget(id: Int, provider: AppWidgetProviderInfo) {
-        try {
-            //Use the system API instead of ACTION_APPWIDGET_CONFIGURE to try to avoid some permissions issues
-            widgetHost.startAppWidgetConfigureActivityForResult(this, id, 0,
-                CONFIG_CODE, null)
-        } catch (e: Exception) {
-            Toast.makeText(
-                this,
-                resources.getString(
-                    R.string.configure_widget_error,
-                    provider
-                ),
-                Toast.LENGTH_LONG
-            ).show()
-            addNewWidget(id, provider)
+        //Use the system API instead of ACTION_APPWIDGET_CONFIGURE to try to avoid some permissions issues
+        val intentSender = IAppWidgetService.Stub.asInterface(ServiceManager.getService(Context.APPWIDGET_SERVICE))
+            .createAppWidgetConfigIntentSender(opPackageName, id, 0)
+
+        if (intentSender != null) {
+            try {
+                currentConfigId = id
+                configLauncher.launch(IntentSenderRequest.Builder(intentSender).build())
+                return
+            } catch (_: Exception) {}
         }
+
+        Toast.makeText(
+            this,
+            resources.getString(
+                R.string.configure_widget_error,
+                provider
+            ),
+            Toast.LENGTH_LONG
+        ).show()
+        addNewWidget(id, provider)
     }
 
     /**
