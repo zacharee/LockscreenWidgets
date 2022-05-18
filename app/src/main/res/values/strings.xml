@@ -55,6 +55,7 @@
     <string name="main_screen_social_patreon">Patreon</string>
     <string name="main_screen_social_patreon_desc">For $1 every month, you get access to all of my paid apps, along with some exclusive stuff.</string>
 
+    <string name="intro_privacy_policy_desc">Lockscreen Widgets doesn\'t collect any data beyond what\'s needed for crash analysis. Learn more below.</string>
     <string name="main_screen_privacy_policy_desc">Lockscreen Widgets doesn\'t collect any data beyond what\'s needed for crash analysis. Tap here to learn more.</string>
 
     <string name="settings_screen_enabled">Enabled</string>

@@ -78,6 +78,8 @@ class OnboardingActivity : IntroActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        buttonBackFunction = BUTTON_BACK_FUNCTION_BACK
+
         //Only add these slides if this instance is the full intro
         if (retroMode == RetroMode.NONE) {
             addSlide(
@@ -97,6 +99,19 @@ class OnboardingActivity : IntroActivity() {
                     .image(R.drawable.ic_baseline_gesture_two_tap)
                     .build()
             )
+
+            addSlide(
+                SimpleSlide.Builder()
+                    .title(R.string.privacy_policy)
+                    .description(R.string.intro_privacy_policy_desc)
+                    .background(R.color.slide_3)
+                    .image(R.drawable.info)
+                    .buttonCtaLabel(R.string.more_info)
+                    .buttonCtaClickListener {
+                        launchUrl("https://github.com/zacharee/LockscreenWidgets/blob/master/PRIVACY.md")
+                    }
+                    .build()
+            )
         }
 
         //Add this slide if we're requesting Accessibility permission or if we're running
@@ -107,7 +122,7 @@ class OnboardingActivity : IntroActivity() {
                     Builder()
                         .title(R.string.intro_accessibility_title)
                         .description(R.string.accessibility_service_desc)
-                        .background(R.color.slide_3)
+                        .background(R.color.slide_4)
                         .image(R.drawable.ic_baseline_accessibility_new_24)
                         .buttonCtaLabel(R.string.more_info)
                         .buttonCtaClickListener {
@@ -136,9 +151,6 @@ class OnboardingActivity : IntroActivity() {
                                 .setNegativeButton(R.string.close_app) { _, _ ->
                                     finish()
                                 }
-                                .setNeutralButton(R.string.privacy_policy) { _, _ ->
-                                    launchUrl("https://github.com/zacharee/LockscreenWidgets/blob/master/PRIVACY.md")
-                                }
                                 .show()
                         }
                 ) {
@@ -157,7 +169,7 @@ class OnboardingActivity : IntroActivity() {
                     Builder()
                         .title(R.string.intro_notification_listener_title)
                         .description(R.string.intro_notification_listener_desc)
-                        .background(R.color.slide_4)
+                        .background(R.color.slide_5)
                         .image(R.drawable.ic_baseline_notifications_active_24)
                         .buttonCtaLabel(R.string.grant)
                         .buttonCtaClickListener {
@@ -180,7 +192,7 @@ class OnboardingActivity : IntroActivity() {
                     Builder()
                         .title(R.string.intro_read_storage_title)
                         .description(R.string.intro_read_storage_desc)
-                        .background(R.color.slide_5)
+                        .background(R.color.slide_6)
                         .image(R.drawable.ic_baseline_sd_storage_24)
                         .buttonCtaLabel(R.string.grant)
                         .buttonCtaClickListener {
@@ -203,7 +215,7 @@ class OnboardingActivity : IntroActivity() {
                 SimpleSlide.Builder()
                     .title(R.string.intro_battery_optimization)
                     .description(R.string.intro_battery_optimization_desc)
-                    .background(R.color.slide_6)
+                    .background(R.color.slide_7)
                     .image(R.drawable.ic_baseline_battery_alert_24)
                     .buttonCtaLabel(R.string.more_info)
                     .buttonCtaClickListener {
@@ -216,7 +228,7 @@ class OnboardingActivity : IntroActivity() {
                 SimpleSlide.Builder()
                     .title(R.string.intro_done_title)
                     .description(R.string.intro_done_desc)
-                    .background(R.color.slide_7)
+                    .background(R.color.slide_8)
                     .image(R.drawable.ic_baseline_done_24)
                     .build()
             )
