@@ -12,7 +12,7 @@ android {
         minSdkVersion 22
         targetSdkVersion 31
         versionCode 60
-        versionName "1.17.3"
+        versionName "1.18.0"
     }
 
     buildFeatures {
