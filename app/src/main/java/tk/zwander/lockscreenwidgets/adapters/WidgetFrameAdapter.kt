@@ -302,10 +302,10 @@ class WidgetFrameAdapter(
                                 val height = context.pxAsDp(itemView.height)
 
                                 val paddingRect = Rect(
-                                    com.android.internal.R.dimen.default_app_widget_padding_left,
-                                    com.android.internal.R.dimen.default_app_widget_padding_top,
-                                    com.android.internal.R.dimen.default_app_widget_padding_right,
-                                    com.android.internal.R.dimen.default_app_widget_padding_bottom
+                                    R.dimen.app_widget_padding,
+                                    R.dimen.app_widget_padding,
+                                    R.dimen.app_widget_padding,
+                                    R.dimen.app_widget_padding
                                 ).run {
                                     RectF(
                                         context.pxAsDp(context.resources.getDimensionPixelSize(left)),

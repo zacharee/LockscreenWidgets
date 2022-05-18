@@ -10,4 +10,6 @@
     <integer name="def_notification_pos_y_from_top_dp">50</integer>
 
     <integer name="def_corner_radius_dp_scaled_10x">20</integer>
+
+    <dimen name="app_widget_padding">8dp</dimen>
 </resources>

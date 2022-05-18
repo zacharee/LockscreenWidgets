@@ -11,45 +11,52 @@ import androidx.annotation.RequiresApi
 import com.android.internal.graphics.drawable.BackgroundBlurDrawable
 import org.xmlpull.v1.XmlPullParser
 
-class BackgroundBlurDrawableCompatDelegate(val wrapped: Drawable?) {
-    private val castWrapped: BackgroundBlurDrawable?
-        @RequiresApi(Build.VERSION_CODES.S)
-        get() = wrapped as? BackgroundBlurDrawable
-
-    fun setColor(@ColorInt color: Int) {
-        safeInvoke {
-            castWrapped?.setColor(color)
-        }
+class BackgroundBlurDrawableCompat12(override val wrapped: BackgroundBlurDrawable?) : BackgroundBlurDrawableCompatDelegate(wrapped) {
+    override fun setColor(color: Int) {
+        wrapped?.setColor(color)
     }
 
-    fun setBlurRadius(blurRadius: Int) {
-        safeInvoke {
-            castWrapped?.setBlurRadius(blurRadius)
-        }
+    override fun setBlurRadius(blurRadius: Int) {
+        wrapped?.setBlurRadius(blurRadius)
     }
 
-    fun setCornerRadius(cornerRadius: Float) {
-        safeInvoke {
-            castWrapped?.setCornerRadius(cornerRadius)
-        }
+    override fun setCornerRadius(cornerRadius: Float) {
+        wrapped?.setCornerRadius(cornerRadius)
     }
 
-    fun setCornerRadius(
+    override fun setCornerRadius(
         cornerRadiusTL: Float,
         cornerRadiusTR: Float,
         cornerRadiusBL: Float,
         cornerRadiusBR: Float
     ) {
-        safeInvoke {
-            castWrapped?.setCornerRadius(
-                cornerRadiusTL, cornerRadiusTR, cornerRadiusBL, cornerRadiusBR
-            )
+        wrapped?.setCornerRadius(cornerRadiusTL, cornerRadiusTR, cornerRadiusBL, cornerRadiusBR)
+    }
+}
+
+class BackgroundBlurDrawableCompatPre12(wrapped: Drawable?) : BackgroundBlurDrawableCompatDelegate(wrapped)
+
+sealed class BackgroundBlurDrawableCompatDelegate(open val wrapped: Drawable?) {
+    companion object {
+        fun getInstance(wrapped: Drawable?): BackgroundBlurDrawableCompatDelegate {
+            return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                BackgroundBlurDrawableCompat12(wrapped as? BackgroundBlurDrawable)
+            } else {
+                BackgroundBlurDrawableCompatPre12(wrapped)
+            }
         }
     }
 
-    private fun safeInvoke(block: () -> Unit) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            block()
-        }
-    }
+    open fun setColor(@ColorInt color: Int) {}
+
+    open fun setBlurRadius(blurRadius: Int) {}
+
+    open fun setCornerRadius(cornerRadius: Float) {}
+
+    open fun setCornerRadius(
+        cornerRadiusTL: Float,
+        cornerRadiusTR: Float,
+        cornerRadiusBL: Float,
+        cornerRadiusBR: Float
+    ) {}
 }
