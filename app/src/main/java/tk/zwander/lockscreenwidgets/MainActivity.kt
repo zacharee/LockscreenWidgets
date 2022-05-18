@@ -24,18 +24,17 @@ import tk.zwander.lockscreenwidgets.util.*
  * this Activity will also make sure to start [OnboardingActivity] in the proper mode.
  */
 class MainActivity : AppCompatActivity(), CoroutineScope by MainScope() {
-    companion object {
-        const val REQ_INTRO = 102
-    }
-
     private val frameDelegate: WidgetFrameDelegate?
         get() {
-            return WidgetFrameDelegate.peekInstance(this).also {
+            return frameDelegateNoPrompt.also {
                 if (it == null) {
                     Toast.makeText(this, R.string.accessibility_not_started, Toast.LENGTH_SHORT).show()
                 }
             }
         }
+
+    private val frameDelegateNoPrompt: WidgetFrameDelegate?
+        get() = WidgetFrameDelegate.peekInstance(this)
 
     private val introRequest = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         if (result.resultCode != Activity.RESULT_OK) {
@@ -92,7 +91,7 @@ class MainActivity : AppCompatActivity(), CoroutineScope by MainScope() {
     override fun onStop() {
         super.onStop()
 
-        frameDelegate?.isPreview = false
+        frameDelegateNoPrompt?.isPreview = false
     }
 
     override fun onDestroy() {

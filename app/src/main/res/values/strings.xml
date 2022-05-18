@@ -6,7 +6,7 @@
     <string name="edit_gesture_hint_2">Great! Tap with two fingers to hide the editing UI.</string>
     <string name="hide_gesture_hint">Tap the widget frame with three fingers to temporarily hide it. It will remain hidden until you turn the display off and on again.</string>
     <string name="hide_gesture_hint_2">Turn the display off and on again to bring the widget frame back.</string>
-    <string name="accessibility_service_desc">Lockscreen Widgets requires an Accessibility Service to display on the lock screen. No data is collected, and no actions will be performed.</string>
+    <string name="accessibility_service_desc">Lockscreen Widgets requires an Accessibility Service to display on the lock screen and in the notification center. No data is collected, and no actions will be performed on the device.</string>
 
     <string name="add_widget">Add Widget</string>
     <string name="grant">Grant</string>
@@ -22,6 +22,8 @@
     <string name="more_info">More Info</string>
     <string name="search">Search</string>
     <string name="preview">Preview</string>
+    <string name="close_app">Close App</string>
+    <string name="privacy_policy">Privacy Policy</string>
 
     <string name="add_id_hint">com.android.systemui:id/some_id_here</string>
 
@@ -52,6 +54,8 @@
 
     <string name="main_screen_social_patreon">Patreon</string>
     <string name="main_screen_social_patreon_desc">For $1 every month, you get access to all of my paid apps, along with some exclusive stuff.</string>
+
+    <string name="main_screen_privacy_policy_desc">Lockscreen Widgets doesn\'t collect any data beyond what\'s needed for crash analysis. Tap here to learn more.</string>
 
     <string name="settings_screen_enabled">Enabled</string>
     <string name="settings_screen_enabled_desc">Enable the widget frame.</string>

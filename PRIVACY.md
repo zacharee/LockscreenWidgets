@@ -2,6 +2,11 @@
 Lockscreen Widgets collects only the data necessary to function and provide crash reports. Any data not collected by Google's Firebase is kept strictly on-device. This can be confirmed by browsing the source code.
 
 # Permissions
+## Accessibility
+Lockscreen Widgets requires an accessibility service in order to display on the lock screen and in the notification center.
+
+This is due to the special overlay type used, which only accessibility services have access to. Without it, Lockscreen Widgets wouldn't be able to perform its main function.
+
 ## VIBRATE
 Lockscreen Widgets uses this permission to activate the vibration motor for haptic feedback.
 

@@ -9,6 +9,7 @@ import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
 import androidx.activity.result.ActivityResultLauncher
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.heinrichreimersoftware.materialintro.app.IntroActivity
 import com.heinrichreimersoftware.materialintro.slide.SimpleSlide
 import tk.zwander.lockscreenwidgets.R
@@ -108,25 +109,37 @@ class OnboardingActivity : IntroActivity() {
                         .description(R.string.accessibility_service_desc)
                         .background(R.color.slide_3)
                         .image(R.drawable.ic_baseline_accessibility_new_24)
-                        .buttonCtaLabel(R.string.grant)
+                        .buttonCtaLabel(R.string.more_info)
                         .buttonCtaClickListener {
-                            //Samsung devices have a separate Activity for listing
-                            //installed Accessibility Services, for some reason.
-                            //It's exported and permission-free, at least on Android 10,
-                            //so attempt to launch it. A "dumb" try-catch is simpler
-                            //than a check for the existence and state of this Activity.
-                            //If the Installed Services Activity can't be launched,
-                            //just launch the normal Accessibility Activity.
-                            try {
-                                val accIntent = Intent(Intent.ACTION_MAIN)
-                                accIntent.`package` = "com.android.settings"
-                                accIntent.component = ComponentName("com.android.settings", "com.android.settings.Settings\$AccessibilityInstalledServiceActivity")
-                                startActivity(accIntent)
-                            } catch (e: Exception) {
-                                logUtils.debugLog("Error opening Installed Services:", e)
-                                val accIntent = Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)
-                                startActivity(accIntent)
-                            }
+                            MaterialAlertDialogBuilder(this)
+                                .setTitle(R.string.intro_accessibility_title)
+                                .setMessage(R.string.intro_accessibility_desc)
+                                .setPositiveButton(R.string.grant) { _, _ ->
+                                    //Samsung devices have a separate Activity for listing
+                                    //installed Accessibility Services, for some reason.
+                                    //It's exported and permission-free, at least on Android 10,
+                                    //so attempt to launch it. A "dumb" try-catch is simpler
+                                    //than a check for the existence and state of this Activity.
+                                    //If the Installed Services Activity can't be launched,
+                                    //just launch the normal Accessibility Activity.
+                                    try {
+                                        val accIntent = Intent(Intent.ACTION_MAIN)
+                                        accIntent.`package` = "com.android.settings"
+                                        accIntent.component = ComponentName("com.android.settings", "com.android.settings.Settings\$AccessibilityInstalledServiceActivity")
+                                        startActivity(accIntent)
+                                    } catch (e: Exception) {
+                                        logUtils.debugLog("Error opening Installed Services:", e)
+                                        val accIntent = Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)
+                                        startActivity(accIntent)
+                                    }
+                                }
+                                .setNegativeButton(R.string.close_app) { _, _ ->
+                                    finish()
+                                }
+                                .setNeutralButton(R.string.privacy_policy) { _, _ ->
+                                    launchUrl("https://github.com/zacharee/LockscreenWidgets/blob/master/PRIVACY.md")
+                                }
+                                .show()
                         }
                 ) {
                     override fun canGoForward(): Boolean {

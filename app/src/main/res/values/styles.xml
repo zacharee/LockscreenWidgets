@@ -33,4 +33,13 @@
         <item name="android:elevation">4dp</item>
         <item name="elevation">4dp</item>
     </style>
+
+    <style name="AppTheme.Intro" parent="AppTheme">
+        <item name="android:windowDrawsSystemBarBackgrounds">true</item>
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:windowIsTranslucent">true</item>
+
+        <item name="android:windowNoTitle">true</item>
+        <item name="windowNoTitle">true</item>
+    </style>
 </resources>

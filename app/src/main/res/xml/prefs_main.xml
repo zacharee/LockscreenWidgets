@@ -3,6 +3,13 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <tk.zwander.lockscreenwidgets.prefs.LinkPreference
+        android:title="@string/privacy_policy"
+        android:summary="@string/main_screen_privacy_policy_desc"
+        android:icon="@drawable/info"
+        app:link="https://github.com/zacharee/LockscreenWidgets/blob/master/PRIVACY.md"
+        />
+
+    <tk.zwander.lockscreenwidgets.prefs.LinkPreference
         android:title="@string/main_screen_social_twitter"
         android:summary="@string/main_screen_social_twitter_desc"
         android:icon="@drawable/ic_baseline_twitter_24"
