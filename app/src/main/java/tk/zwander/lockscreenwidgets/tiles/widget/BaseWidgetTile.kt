@@ -185,7 +185,7 @@ abstract class BaseWidgetTile : TileService(), SharedPreferences.OnSharedPrefere
         val views = RemoteViews(packageName, R.layout.default_tile_views)
         views.setOnClickPendingIntent(
             R.id.add, PendingIntent.getActivity(
-            this, 100, semGetSettingsIntent(), 0
+            this, 100, semGetSettingsIntent(), PendingIntent.FLAG_IMMUTABLE
         ))
         return views
     }

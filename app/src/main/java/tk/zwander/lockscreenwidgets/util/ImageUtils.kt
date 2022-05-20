@@ -2,11 +2,14 @@ package tk.zwander.lockscreenwidgets.util
 
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.graphics.drawable.Drawable
 import android.util.Base64
-import android.util.Log
+import androidx.core.graphics.drawable.toBitmap
+import com.android.internal.R.id.image
 import tk.zwander.lockscreenwidgets.App
 import java.io.ByteArrayOutputStream
 import java.io.IOException
+
 
 fun Bitmap?.toByteArray(): ByteArray? {
     if (this == null) return null
@@ -48,4 +51,26 @@ fun String?.base64ToByteArray(): ByteArray? {
 
 fun String?.base64ToBitmap(): Bitmap? {
     return base64ToByteArray()?.toBitmap()
+}
+
+fun Drawable.toBitmap(maxWidth: Int = intrinsicWidth, maxHeight: Int = intrinsicHeight, config: Bitmap.Config? = null): Bitmap {
+    var image = toBitmap(width = intrinsicWidth, height = intrinsicHeight, config = config)
+
+    return if (maxHeight > 0 && maxWidth > 0) {
+        val width: Int = intrinsicWidth
+        val height: Int = intrinsicHeight
+        val ratioBitmap = width.toFloat() / height.toFloat()
+        val ratioMax = maxWidth.toFloat() / maxHeight.toFloat()
+        var finalWidth = maxWidth
+        var finalHeight = maxHeight
+        if (ratioMax > ratioBitmap) {
+            finalWidth = (maxHeight.toFloat() * ratioBitmap).toInt()
+        } else {
+            finalHeight = (maxWidth.toFloat() / ratioBitmap).toInt()
+        }
+        image = Bitmap.createScaledBitmap(image, finalWidth, finalHeight, true)
+        image
+    } else {
+        image
+    }
 }

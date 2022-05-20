@@ -99,8 +99,10 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
             }
         }
         handler(PrefManager.KEY_ACCESSIBILITY_EVENT_DELAY) {
-            serviceInfo = serviceInfo.apply {
-                notificationTimeout = prefManager.accessibilityEventDelay.toLong()
+            serviceInfo?.let {
+                serviceInfo = serviceInfo.apply {
+                    notificationTimeout = prefManager.accessibilityEventDelay.toLong()
+                }
             }
         }
         handler(PrefManager.KEY_DEBUG_LOG) {
