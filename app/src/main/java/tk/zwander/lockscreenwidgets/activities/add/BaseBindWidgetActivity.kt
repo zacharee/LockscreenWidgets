@@ -65,7 +65,7 @@ abstract class BaseBindWidgetActivity : AppCompatActivity() {
         }
     }
 
-    private val configureLauncher by lazy { ConfigureLauncher() }
+    private val configureLauncher = ConfigureLauncher()
 
     @Suppress("DeprecatedCallableAddReplaceWith")
     @Deprecated("Deprecated in Java")
