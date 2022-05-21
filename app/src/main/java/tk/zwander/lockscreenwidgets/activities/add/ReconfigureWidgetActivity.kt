@@ -67,19 +67,22 @@ class ReconfigureWidgetActivity : BaseBindWidgetActivity() {
         val newSet = prefManager.currentWidgets.toMutableList()
 
         val oldWidgetIndex = newSet.indexOf(WidgetData.widget(prevId, provider.provider, "", null, WidgetSizeData(1, 1)))
-        val oldWidget = newSet.removeAt(oldWidgetIndex)
+
+        val oldWidget = if (oldWidgetIndex != -1) newSet.removeAt(oldWidgetIndex) else null
 
         val widget = WidgetData.widget(
             id,
             provider.provider,
             provider.loadLabel(packageManager),
             provider.loadPreviewOrIcon(this, 0)?.toBitmap().toBase64(),
-            oldWidget.safeSize
+            oldWidget?.safeSize ?: WidgetSizeData(1, 1)
         )
 
-        newSet.add(oldWidgetIndex, widget)
+        val safeIndex = if (oldWidgetIndex != -1) oldWidgetIndex else newSet.lastIndex
 
-        logUtils.normalLog("Removed old widget from $oldWidgetIndex and added new one $widget")
+        newSet.add(safeIndex, widget)
+
+        logUtils.normalLog("Removed old widget from $oldWidgetIndex ($safeIndex) and added new one $widget")
 
         prefManager.currentWidgets = LinkedHashSet(newSet)
 
