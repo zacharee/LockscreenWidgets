@@ -71,6 +71,7 @@ class DismissOrUnlockActivity : AppCompatActivity() {
         } else {
             @SuppressLint("MissingPermission")
             if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
+                @Suppress("DEPRECATION")
                 val i = Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS)
                 sendBroadcast(i)
             }

@@ -7,7 +7,6 @@ import android.app.WallpaperManager
 import android.appwidget.AppWidgetManager
 import android.content.Context
 import android.content.ContextWrapper
-import android.content.Intent
 import android.content.SharedPreferences
 import android.database.ContentObserver
 import android.graphics.*
@@ -21,7 +20,6 @@ import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import com.arasthel.spannedgridlayoutmanager.SpannedGridLayoutManager
 import tk.zwander.lockscreenwidgets.R
-import tk.zwander.lockscreenwidgets.activities.add.AddWidgetActivity
 import tk.zwander.lockscreenwidgets.activities.DismissOrUnlockActivity
 import tk.zwander.lockscreenwidgets.adapters.WidgetFrameAdapter
 import tk.zwander.lockscreenwidgets.data.Mode
@@ -153,9 +151,7 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
     private val shortcutIdManager = ShortcutIdManager.getInstance(this, widgetHost)
 
     //The actual frame View
-    val view = LayoutInflater.from(ContextThemeWrapper(this, R.style.AppTheme))
-        .inflate(R.layout.widget_frame, null)!!
-    val binding = WidgetFrameBinding.bind(view)
+    val binding = WidgetFrameBinding.inflate(LayoutInflater.from(ContextThemeWrapper(this, R.style.AppTheme)))
     private val gridLayoutManager = SpannedLayoutManager()
     val adapter = WidgetFrameAdapter(widgetManager, widgetHost, params) { _, item ->
         binding.removeWidgetConfirmation.root.show(item)
@@ -600,13 +596,25 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
                 //some devices (SAMSUNG >_>) removed or changed it, so it won't
                 //always work. Thus the try-catch.
                 try {
-                    service.getWallpaper(
-                        packageName,
-                        null,
-                        WallpaperManager.FLAG_LOCK,
-                        bundle,
-                        UserHandle.getCallingUserId()
-                    )
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                        service.getWallpaperWithFeature(
+                            packageName,
+                            attributionTag,
+                            null,
+                            WallpaperManager.FLAG_LOCK,
+                            bundle,
+                            UserHandle.getCallingUserId()
+                        )
+                    } else {
+                        @Suppress("DEPRECATION")
+                        service.getWallpaper(
+                            packageName,
+                            null,
+                            WallpaperManager.FLAG_LOCK,
+                            bundle,
+                            UserHandle.getCallingUserId()
+                        )
+                    }
                 } catch (e: Exception) {
                     null
                 } catch (e: NoSuchMethodError) {
@@ -633,14 +641,14 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
                     binding.wallpaperBackground.colorFilter = PorterDuffColorFilter(Color.argb(((prefManager.wallpaperDimAmount / 100f) * 255).toInt(), 0, 0, 0), PorterDuff.Mode.SRC_ATOP)
                     binding.wallpaperBackground.scaleType = ImageView.ScaleType.MATRIX
                     binding.wallpaperBackground.imageMatrix = Matrix().apply {
-                        val realSize = Point().apply { defaultDisplayCompat.getRealSize(this) }
-                        val loc = view.locationOnScreen ?: intArrayOf(0, 0)
+                        val realSize = realResolution
+                        val loc = binding.root.locationOnScreen ?: intArrayOf(0, 0)
 
-                        val dwidth: Int = intrinsicWidth
-                        val dheight: Int = intrinsicHeight
+                        val dWidth: Int = intrinsicWidth
+                        val dHeight: Int = intrinsicHeight
 
-                        val wallpaperAdjustmentX = (dwidth - realSize.x) / 2f
-                        val wallpaperAdjustmentY = (dheight - realSize.y) / 2f
+                        val wallpaperAdjustmentX = (dWidth - realSize.x) / 2f
+                        val wallpaperAdjustmentY = (dHeight - realSize.y) / 2f
 
                         setTranslate(
                             (-loc[0].toFloat() - wallpaperAdjustmentX),

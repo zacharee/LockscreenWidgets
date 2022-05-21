@@ -11,7 +11,6 @@ import android.content.Context
 import android.content.Intent
 import android.graphics.*
 import android.graphics.drawable.Drawable
-import android.hardware.display.DisplayManager
 import android.net.Uri
 import android.os.Build
 import android.os.Handler
@@ -103,7 +102,7 @@ fun Context.launchUrl(url: String) {
         val browserIntent =
             Intent(Intent.ACTION_VIEW, Uri.parse(url))
         startActivity(browserIntent)
-    } catch (e: Exception) {}
+    } catch (_: Exception) {}
 }
 
 //Safely start an email draft.
@@ -111,11 +110,10 @@ fun Context.launchUrl(url: String) {
 fun Context.launchEmail(to: String, subject: String) {
     try {
         val intent = Intent(Intent.ACTION_SENDTO)
-        intent.type = "text/plain"
-        intent.data = Uri.parse("mailto:${Uri.encode(to)}?subject=${Uri.encode(subject)}")
+        intent.setDataAndType(Uri.parse("mailto:${Uri.encode(to)}?subject=${Uri.encode(subject)}"), "text/plain")
 
         startActivity(intent)
-    } catch (e: Exception) {}
+    } catch (_: Exception) {}
 }
 
 //Fade a View to 0% alpha and 95% scale. Used when hiding the widget frame.
@@ -183,7 +181,10 @@ val Context.windowManager: WindowManager
     get() = getSystemService(Context.WINDOW_SERVICE) as WindowManager
 
 val Context.realResolution: Point
-    get() = Point().apply { defaultDisplayCompat.getRealSize(this) }
+    get() = Point().apply {
+        @Suppress("DEPRECATION")
+        defaultDisplayCompat.getRealSize(this)
+    }
 
 fun Context.calculateNCPosXFromRightDefault(): Int {
     val fromRight = dpAsPx(resources.getInteger(R.integer.def_notification_pos_x_from_right_dp))
@@ -230,7 +231,7 @@ fun WidgetListInfo.matchesFilter(filter: String?): Boolean {
 //If the integer is odd and positive, return itself + 1
 fun Int.makeEven(): Int {
     return when {
-        this == 0 -> this
+        this == 0 -> 0
         this == 1 -> 2
         this == -1 -> -2
         this % 2 == 0 -> this

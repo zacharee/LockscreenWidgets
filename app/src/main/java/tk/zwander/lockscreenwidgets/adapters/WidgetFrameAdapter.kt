@@ -9,7 +9,6 @@ import android.graphics.Rect
 import android.graphics.RectF
 import android.os.Build
 import android.os.Bundle
-import android.util.Log
 import android.util.SizeF
 import android.view.LayoutInflater
 import android.view.View
@@ -329,6 +328,7 @@ class WidgetFrameAdapter(
                                     val adjustedWidth = width + paddingRect.left + paddingRect.right
                                     val adjustedHeight = height + paddingRect.top + paddingRect.bottom
 
+                                    @Suppress("DEPRECATION")
                                     updateAppWidgetSize(
                                         null,
                                         adjustedWidth.toInt(),

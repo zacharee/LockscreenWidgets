@@ -28,7 +28,6 @@ class UsageFragment : PreferenceFragmentCompat() {
                 f.arguments = Bundle().apply {
                     putString("key", preference.key)
                 }
-                f.setTargetFragment(this, 0)
 
                 f.show(parentFragmentManager, null)
             }

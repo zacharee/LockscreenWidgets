@@ -6,6 +6,7 @@ import tk.zwander.lockscreenwidgets.data.WidgetData
 
 class EventManager private constructor(private val context: Context) {
     companion object {
+        @Suppress("ObjectPropertyName")
         @SuppressLint("StaticFieldLeak")
         private var _instance: EventManager? = null
 
@@ -29,6 +30,7 @@ class EventManager private constructor(private val context: Context) {
     }
 
     fun <T : Event> addListener(listenerInfo: ListenerInfo<T>) {
+        @Suppress("UNCHECKED_CAST")
         listeners.add(listenerInfo as ListenerInfo<Event>)
     }
 
@@ -46,6 +48,7 @@ class EventManager private constructor(private val context: Context) {
     }
 
     fun <T : Event> removeListener(listenerInfo: ListenerInfo<T>) {
+        @Suppress("UNCHECKED_CAST")
         listeners.remove(listenerInfo as ListenerInfo<Event>)
     }
 
