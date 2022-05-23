@@ -37,8 +37,6 @@ import tk.zwander.lockscreenwidgets.observables.OnResizeObservable
 import tk.zwander.lockscreenwidgets.observables.RemoveButtonObservable
 import tk.zwander.lockscreenwidgets.util.*
 import java.util.*
-import kotlin.collections.ArrayList
-import kotlin.collections.LinkedHashSet
 import kotlin.math.min
 
 /**
@@ -91,11 +89,17 @@ class WidgetFrameAdapter(
                 this.widgets.addAll(newWidgets)
 
                 val result = DiffUtil.calculateDiff(object : DiffUtil.Callback() {
-                    override fun areContentsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
+                    override fun areContentsTheSame(
+                        oldItemPosition: Int,
+                        newItemPosition: Int
+                    ): Boolean {
                         return oldWidgets[oldItemPosition].id == newWidgets[newItemPosition].id
                     }
 
-                    override fun areItemsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
+                    override fun areItemsTheSame(
+                        oldItemPosition: Int,
+                        newItemPosition: Int
+                    ): Boolean {
                         return oldWidgets[oldItemPosition] == newWidgets[newItemPosition]
                     }
 
@@ -146,7 +150,13 @@ class WidgetFrameAdapter(
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         val inflater = LayoutInflater.from(parent.context)
-        return if (viewType == VIEW_TYPE_ADD) AddWidgetVH(inflater.inflate(R.layout.add_widget, parent, false))
+        return if (viewType == VIEW_TYPE_ADD) AddWidgetVH(
+            inflater.inflate(
+                R.layout.add_widget,
+                parent,
+                false
+            )
+        )
         else WidgetVH(inflater.inflate(R.layout.widget_page_holder, parent, false))
     }
 
@@ -204,22 +214,26 @@ class WidgetFrameAdapter(
             }
 
             itemView.apply {
-                binding.widgetLeftDragger.setOnTouchListener(WidgetResizeListener(context, WidgetResizeListener.Which.LEFT,
+                binding.widgetLeftDragger.setOnTouchListener(WidgetResizeListener(context,
+                    WidgetResizeListener.Which.LEFT,
                     { handleResize(it, -1, false) },
                     { notifyItemChanged(bindingAdapterPosition) }
                 ))
 
-                binding.widgetTopDragger.setOnTouchListener(WidgetResizeListener(context, WidgetResizeListener.Which.TOP,
+                binding.widgetTopDragger.setOnTouchListener(WidgetResizeListener(context,
+                    WidgetResizeListener.Which.TOP,
                     { handleResize(it, -1, true) },
                     { notifyItemChanged(bindingAdapterPosition) }
                 ))
 
-                binding.widgetRightDragger.setOnTouchListener(WidgetResizeListener(context, WidgetResizeListener.Which.RIGHT,
+                binding.widgetRightDragger.setOnTouchListener(WidgetResizeListener(context,
+                    WidgetResizeListener.Which.RIGHT,
                     { handleResize(it, 1, false) },
                     { notifyItemChanged(bindingAdapterPosition) }
                 ))
 
-                binding.widgetBottomDragger.setOnTouchListener(WidgetResizeListener(context, WidgetResizeListener.Which.BOTTOM,
+                binding.widgetBottomDragger.setOnTouchListener(WidgetResizeListener(context,
+                    WidgetResizeListener.Which.BOTTOM,
                     { handleResize(it, 1, true) },
                     { notifyItemChanged(bindingAdapterPosition) }
                 ))
@@ -235,13 +249,28 @@ class WidgetFrameAdapter(
                 } else {
                     val manager = AppWidgetManager.getInstance(itemView.context)
                     val pkg = provider.packageName
-                    val providerInfo = (manager.getInstalledProvidersForProfile(
-                        AppWidgetProviderInfo.WIDGET_CATEGORY_HOME_SCREEN, null, pkg) +
+                    val providerInfo = run {
+                        val providers = try {
                             manager.getInstalledProvidersForProfile(
-                                AppWidgetProviderInfo.WIDGET_CATEGORY_KEYGUARD, null, pkg))
-                        .find { info ->
-                            info.provider == provider
+                                AppWidgetProviderInfo.WIDGET_CATEGORY_HOME_SCREEN,
+                                null,
+                                pkg
+                            ) + manager.getInstalledProvidersForProfile(
+                                AppWidgetProviderInfo.WIDGET_CATEGORY_KEYGUARD,
+                                null,
+                                pkg
+                            ) + manager.getInstalledProvidersForProfile(
+                                AppWidgetProviderInfo.WIDGET_CATEGORY_SEARCHBOX,
+                                null,
+                                pkg
+                            )
+                        } catch (e: NoSuchMethodError) {
+                            manager.getInstalledProviders(AppWidgetProviderInfo.WIDGET_CATEGORY_HOME_SCREEN) +
+                                    manager.getInstalledProviders(AppWidgetProviderInfo.WIDGET_CATEGORY_KEYGUARD) +
+                                    manager.getInstalledProviders(AppWidgetProviderInfo.WIDGET_CATEGORY_SEARCHBOX)
                         }
+                        providers.find { info -> info.provider == provider }
+                    }
 
                     if (providerInfo == null) {
                         //TODO: Notify + debug log
@@ -253,7 +282,8 @@ class WidgetFrameAdapter(
             }
 
             editingInterfaceObservable.addObserver { _, _ ->
-                editingInterfaceShown = currentEditingInterfacePosition != -1 && (currentEditingInterfacePosition == bindingAdapterPosition)
+                editingInterfaceShown =
+                    currentEditingInterfacePosition != -1 && (currentEditingInterfacePosition == bindingAdapterPosition)
             }
 
             onResizeObservable.addObserver { _, _ ->
@@ -269,7 +299,8 @@ class WidgetFrameAdapter(
             itemView.apply {
                 launch {
                     onResize(data)
-                    editingInterfaceShown = currentEditingInterfacePosition != -1 && currentEditingInterfacePosition == bindingAdapterPosition
+                    editingInterfaceShown =
+                        currentEditingInterfacePosition != -1 && currentEditingInterfacePosition == bindingAdapterPosition
 
                     binding.widgetHolder.removeAllViews()
 
@@ -310,7 +341,11 @@ class WidgetFrameAdapter(
                                         context.pxAsDp(context.resources.getDimensionPixelSize(left)),
                                         context.pxAsDp(context.resources.getDimensionPixelSize(top)),
                                         context.pxAsDp(context.resources.getDimensionPixelSize(right)),
-                                        context.pxAsDp(context.resources.getDimensionPixelSize(bottom))
+                                        context.pxAsDp(
+                                            context.resources.getDimensionPixelSize(
+                                                bottom
+                                            )
+                                        )
                                     )
                                 }
 
@@ -326,7 +361,8 @@ class WidgetFrameAdapter(
                                     )
                                 } else {
                                     val adjustedWidth = width + paddingRect.left + paddingRect.right
-                                    val adjustedHeight = height + paddingRect.top + paddingRect.bottom
+                                    val adjustedHeight =
+                                        height + paddingRect.top + paddingRect.bottom
 
                                     @Suppress("DEPRECATION")
                                     updateAppWidgetSize(
@@ -342,11 +378,16 @@ class WidgetFrameAdapter(
                     } catch (e: SecurityException) {
                         //There was an error adding the widget. Some OEMs (OPPO...) like to add permissions requirements to their
                         //widgets, which can make it impossible for third-party non-launcher apps to bind to them.
-                        Toast.makeText(context, resources.getString(R.string.bind_widget_error, widgetInfo.provider), Toast.LENGTH_LONG).show()
-                        context.prefManager.currentWidgets = context.prefManager.currentWidgets.apply {
-                            remove(data)
-                            host.deleteAppWidgetId(data.id)
-                        }
+                        Toast.makeText(
+                            context,
+                            resources.getString(R.string.bind_widget_error, widgetInfo.provider),
+                            Toast.LENGTH_LONG
+                        ).show()
+                        context.prefManager.currentWidgets =
+                            context.prefManager.currentWidgets.apply {
+                                remove(data)
+                                host.deleteAppWidgetId(data.id)
+                            }
                     }
                 }
             } else {
@@ -361,7 +402,8 @@ class WidgetFrameAdapter(
             binding.widgetHolder.isVisible = true
 
             val shortcutView = FrameShortcutViewBinding.inflate(
-                LayoutInflater.from(binding.widgetHolder.context))
+                LayoutInflater.from(binding.widgetHolder.context)
+            )
             val icon = data.icon.base64ToBitmap() ?: data.iconRes?.run {
                 val res = try {
                     itemView.context.packageManager.getResourcesForApplication(this.packageName)
@@ -386,7 +428,11 @@ class WidgetFrameAdapter(
                             DismissOrUnlockActivity.launch(itemView.context, false)
                         } catch (e: Exception) {
                             it.context.logUtils.normalLog("Unable to launch shortcut", e)
-                            Toast.makeText(itemView.context, R.string.launch_shortcut_error, Toast.LENGTH_SHORT).show()
+                            Toast.makeText(
+                                itemView.context,
+                                R.string.launch_shortcut_error,
+                                Toast.LENGTH_SHORT
+                            ).show()
                         }
                     }
                 }
@@ -401,11 +447,15 @@ class WidgetFrameAdapter(
             val sizeInfo = currentData?.safeSize ?: return
 
             if (vertical) {
-                sizeInfo.safeWidgetHeightSpan = min(sizeInfo.safeWidgetHeightSpan + step * direction,
-                    itemView.context.prefManager.frameRowCount)
+                sizeInfo.safeWidgetHeightSpan = min(
+                    sizeInfo.safeWidgetHeightSpan + step * direction,
+                    itemView.context.prefManager.frameRowCount
+                )
             } else {
-                sizeInfo.safeWidgetWidthSpan = min(sizeInfo.safeWidgetWidthSpan + step * direction,
-                    itemView.context.prefManager.frameColCount)
+                sizeInfo.safeWidgetWidthSpan = min(
+                    sizeInfo.safeWidgetWidthSpan + step * direction,
+                    itemView.context.prefManager.frameColCount
+                )
             }
 
             onResize(currentData ?: return)
@@ -452,8 +502,10 @@ class WidgetFrameAdapter(
             val size = widget?.safeSize
 
             SpanSize(
-                size?.safeWidgetWidthSpan?.coerceAtMost(host.context.prefManager.frameColCount) ?: 1,
-                size?.safeWidgetHeightSpan?.coerceAtMost(host.context.prefManager.frameRowCount) ?: 1
+                size?.safeWidgetWidthSpan?.coerceAtMost(host.context.prefManager.frameColCount)
+                    ?: 1,
+                size?.safeWidgetHeightSpan?.coerceAtMost(host.context.prefManager.frameRowCount)
+                    ?: 1
             )
         }
     })
