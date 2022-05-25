@@ -16,6 +16,7 @@ import android.os.*
 import android.provider.Settings
 import android.view.*
 import android.widget.ImageView
+import androidx.annotation.RequiresApi
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import com.arasthel.spannedgridlayoutmanager.SpannedGridLayoutManager
@@ -587,21 +588,27 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
      */
     @SuppressLint("MissingPermission")
     fun updateWallpaperLayerIfNeeded() {
+        logUtils.debugLog("updateWallpaperLayerIfNeeded() called $showWallpaperLayerCondition")
+
         if (showWallpaperLayerCondition) {
             val service = IWallpaperManager.Stub.asInterface(ServiceManager.getService("wallpaper"))
 
-            val bundle = Bundle()
-            val w = if (Build.VERSION.SDK_INT > Build.VERSION_CODES.M) {
+            logUtils.debugLog("Trying to retrieve wallpaper")
+
+            @RequiresApi(Build.VERSION_CODES.N)
+            fun getWallpaper(flag: Int): ParcelFileDescriptor? {
+                val bundle = Bundle()
+
                 //Even though this hidden method was added in Android Nougat,
                 //some devices (SAMSUNG >_>) removed or changed it, so it won't
                 //always work. Thus the try-catch.
-                try {
+                return try {
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
                         service.getWallpaperWithFeature(
                             packageName,
                             attributionTag,
                             null,
-                            WallpaperManager.FLAG_LOCK,
+                            flag,
                             bundle,
                             UserHandle.getCallingUserId()
                         )
@@ -610,16 +617,22 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
                         service.getWallpaper(
                             packageName,
                             null,
-                            WallpaperManager.FLAG_LOCK,
+                            flag,
                             bundle,
                             UserHandle.getCallingUserId()
                         )
                     }
                 } catch (e: Exception) {
+                    logUtils.debugLog("Error retrieving wallpaper", e)
                     null
                 } catch (e: NoSuchMethodError) {
+                    logUtils.debugLog("Error retrieving wallpaper", e)
                     null
                 }
+            }
+
+            val w = if (Build.VERSION.SDK_INT > Build.VERSION_CODES.M) {
+                getWallpaper(WallpaperManager.FLAG_LOCK) ?: getWallpaper(WallpaperManager.FLAG_SYSTEM)
             } else null
 
             try {
@@ -634,9 +647,13 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
                             else BitmapDrawable(resources, bmp)
                         }
                     }
-                } ?: wallpaper.fastDrawable
+                } ?: wallpaper.drawable
+
+                logUtils.debugLog("Retrieved fast wallpaper w: $w, fastW: $fastW")
 
                 fastW?.mutate()?.apply {
+                    logUtils.debugLog("Setting wallpaper drawable.")
+
                     binding.wallpaperBackground.setImageDrawable(this)
                     binding.wallpaperBackground.colorFilter = PorterDuffColorFilter(Color.argb(((prefManager.wallpaperDimAmount / 100f) * 255).toInt(), 0, 0, 0), PorterDuff.Mode.SRC_ATOP)
                     binding.wallpaperBackground.scaleType = ImageView.ScaleType.MATRIX
@@ -658,9 +675,12 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
                     }
                 } ?: binding.wallpaperBackground.setImageDrawable(null)
             } catch (e: Exception) {
+                logUtils.debugLog("Error setting wallpaper", e)
                 binding.wallpaperBackground.setImageDrawable(null)
             }
         } else {
+            logUtils.debugLog("Removing wallpaper")
+
             binding.wallpaperBackground.setImageDrawable(null)
         }
     }
