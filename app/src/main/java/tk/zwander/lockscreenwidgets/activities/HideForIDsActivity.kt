@@ -1,6 +1,5 @@
 package tk.zwander.lockscreenwidgets.activities
 
-import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.graphics.*
@@ -21,10 +20,10 @@ import tk.zwander.lockscreenwidgets.R
 import tk.zwander.lockscreenwidgets.adapters.HideForIDsAdapter
 import tk.zwander.lockscreenwidgets.databinding.ActivityHideForIdsBinding
 import tk.zwander.lockscreenwidgets.databinding.AddIdDialogBinding
+import tk.zwander.lockscreenwidgets.util.logUtils
 import tk.zwander.lockscreenwidgets.util.prefManager
 import java.text.SimpleDateFormat
 import java.util.*
-import kotlin.collections.HashSet
 
 /**
  * Configuration Activity for the "Hide on Present IDs" and "Hide on Non-Present IDs"
@@ -163,6 +162,8 @@ class HideForIDsActivity : AppCompatActivity() {
                     object : TypeToken<HashSet<String>>() {}.type
                 )
             } catch (e: Exception) {
+                logUtils.debugLog("Unable to parse ID list", e)
+
                 null
             }
 

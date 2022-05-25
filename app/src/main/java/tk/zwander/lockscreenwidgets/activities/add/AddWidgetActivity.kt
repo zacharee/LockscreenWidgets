@@ -16,6 +16,7 @@ import tk.zwander.lockscreenwidgets.data.AppInfo
 import tk.zwander.lockscreenwidgets.data.list.ShortcutListInfo
 import tk.zwander.lockscreenwidgets.data.list.WidgetListInfo
 import tk.zwander.lockscreenwidgets.databinding.ActivityAddWidgetBinding
+import tk.zwander.lockscreenwidgets.util.logUtils
 
 /**
  * Manage the widget addition flow: selection, permissions, configurations, etc.
@@ -151,7 +152,9 @@ open class AddWidgetActivity : BaseBindWidgetActivity(), CoroutineScope by MainS
                             appInfo
                         )
                     )
-                } catch (_: PackageManager.NameNotFoundException) {}
+                } catch (e: PackageManager.NameNotFoundException) {
+                    logUtils.debugLog("Unable to parse application info for widget", e)
+                }
             }
 
             if (showShortcuts) {
@@ -179,7 +182,9 @@ open class AddWidgetActivity : BaseBindWidgetActivity(), CoroutineScope by MainS
                                 appInfo
                             )
                         )
-                    } catch (_: PackageManager.NameNotFoundException) {}
+                    } catch (e: PackageManager.NameNotFoundException) {
+                        logUtils.debugLog("Unable to parse application info for shortcut", e)
+                    }
                 }
             }
 

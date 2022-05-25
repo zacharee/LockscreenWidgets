@@ -203,6 +203,7 @@
     <string name="enable_debug_log_msg">Please enable the debug log option to see IDs here.</string>
     <string name="touch_protection_active">Touch protection active. Please uncover the proximity sensor.</string>
     <string name="launch_shortcut_error">Unable to launch shortcut.</string>
+    <string name="create_shortcut_error">Unable to create shortcut.</string>
     <string name="accessibility_not_started">The Accessibility Service hasn\'t started yet. Please wait.</string>
     <string name="unable_to_restore_widgets">Unable to restore widgets.</string>
 </resources>

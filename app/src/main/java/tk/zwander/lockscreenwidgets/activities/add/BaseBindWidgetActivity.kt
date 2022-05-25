@@ -109,12 +109,18 @@ abstract class BaseBindWidgetActivity : AppCompatActivity() {
     protected fun tryBindShortcut(
         info: ShortcutListInfo
     ) {
-        val configureIntent = Intent(Intent.ACTION_CREATE_SHORTCUT)
-        configureIntent.`package` = info.shortcutInfo.activityInfo.packageName
-        configureIntent.component = ComponentName(info.shortcutInfo.activityInfo.packageName,
-            info.shortcutInfo.activityInfo.name)
+        try {
+            val configureIntent = Intent(Intent.ACTION_CREATE_SHORTCUT)
+            configureIntent.`package` = info.shortcutInfo.activityInfo.packageName
+            configureIntent.component = ComponentName(info.shortcutInfo.activityInfo.packageName,
+                info.shortcutInfo.activityInfo.name)
 
-        configShortcutRequest.launch(configureIntent)
+            configShortcutRequest.launch(configureIntent)
+        } catch (e: SecurityException) {
+            logUtils.debugLog("Unable to create shortcut", e)
+
+            Toast.makeText(this, R.string.create_shortcut_error, Toast.LENGTH_SHORT).show()
+        }
     }
 
     /**
@@ -199,7 +205,9 @@ abstract class BaseBindWidgetActivity : AppCompatActivity() {
                     currentConfigId = id
                     return true
                 }
-            } catch (_: Exception) {}
+            } catch (e: Exception) {
+                logUtils.debugLog("Unable to launch widget config IntentSender", e)
+            }
 
             try {
                 widgetHost.startAppWidgetConfigureActivityForResult(
@@ -208,7 +216,9 @@ abstract class BaseBindWidgetActivity : AppCompatActivity() {
                 )
                 currentConfigId = id
                 return true
-            } catch (_: Exception) {}
+            } catch (e: Exception) {
+                logUtils.debugLog("Unable to startAppWidgetConfigureActivityForResult", e)
+            }
 
             return false
         }

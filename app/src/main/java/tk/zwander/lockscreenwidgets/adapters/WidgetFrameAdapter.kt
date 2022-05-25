@@ -265,6 +265,8 @@ class WidgetFrameAdapter(
                                 pkg
                             )
                         } catch (e: NoSuchMethodError) {
+                            itemView.context.logUtils.debugLog("Unable to use getInstalledProvidersForProfile", e)
+
                             manager.getInstalledProviders(AppWidgetProviderInfo.WIDGET_CATEGORY_HOME_SCREEN) +
                                     manager.getInstalledProviders(AppWidgetProviderInfo.WIDGET_CATEGORY_KEYGUARD) +
                                     manager.getInstalledProviders(AppWidgetProviderInfo.WIDGET_CATEGORY_SEARCHBOX)
@@ -376,6 +378,8 @@ class WidgetFrameAdapter(
                             }
                         })
                     } catch (e: SecurityException) {
+                        context.logUtils.debugLog("Unable to bind widget view", e)
+
                         //There was an error adding the widget. Some OEMs (OPPO...) like to add permissions requirements to their
                         //widgets, which can make it impossible for third-party non-launcher apps to bind to them.
                         Toast.makeText(
@@ -408,6 +412,7 @@ class WidgetFrameAdapter(
                 val res = try {
                     itemView.context.packageManager.getResourcesForApplication(this.packageName)
                 } catch (e: PackageManager.NameNotFoundException) {
+                    host.context.logUtils.debugLog("Unable to bind shortcut", e)
                     onRemoveCallback(this@WidgetFrameAdapter, data)
                     return@bindShortcut
                 }

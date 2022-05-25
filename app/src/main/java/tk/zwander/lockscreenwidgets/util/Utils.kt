@@ -9,7 +9,10 @@ import android.appwidget.AppWidgetProviderInfo
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
-import android.graphics.*
+import android.graphics.Bitmap
+import android.graphics.Canvas
+import android.graphics.Paint
+import android.graphics.Point
 import android.graphics.drawable.Drawable
 import android.net.Uri
 import android.os.Build
@@ -102,7 +105,9 @@ fun Context.launchUrl(url: String) {
         val browserIntent =
             Intent(Intent.ACTION_VIEW, Uri.parse(url))
         startActivity(browserIntent)
-    } catch (_: Exception) {}
+    } catch (e: Exception) {
+        logUtils.debugLog("Unable to launch URL", e)
+    }
 }
 
 //Safely start an email draft.
@@ -113,7 +118,9 @@ fun Context.launchEmail(to: String, subject: String) {
         intent.setDataAndType(Uri.parse("mailto:${Uri.encode(to)}?subject=${Uri.encode(subject)}"), "text/plain")
 
         startActivity(intent)
-    } catch (_: Exception) {}
+    } catch (e: Exception) {
+        logUtils.debugLog("Unable to launch email", e)
+    }
 }
 
 //Fade a View to 0% alpha and 95% scale. Used when hiding the widget frame.
