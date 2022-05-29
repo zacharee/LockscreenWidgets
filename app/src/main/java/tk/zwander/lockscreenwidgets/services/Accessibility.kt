@@ -5,13 +5,13 @@ import android.annotation.SuppressLint
 import android.app.KeyguardManager
 import android.content.*
 import android.os.PowerManager
-import android.view.*
+import android.view.WindowManager
 import android.view.accessibility.AccessibilityEvent
 import android.view.accessibility.AccessibilityNodeInfo
 import android.view.accessibility.AccessibilityWindowInfo
 import kotlinx.coroutines.*
-import tk.zwander.lockscreenwidgets.appwidget.IDWidgetFactory
 import tk.zwander.lockscreenwidgets.appwidget.IDListProvider
+import tk.zwander.lockscreenwidgets.appwidget.IDWidgetFactory
 import tk.zwander.lockscreenwidgets.data.window.WindowInfo
 import tk.zwander.lockscreenwidgets.data.window.WindowRootPair
 import tk.zwander.lockscreenwidgets.util.*
@@ -28,7 +28,8 @@ import java.util.concurrent.ConcurrentLinkedQueue
  * check that the left lock screen shortcut is no longer visible, since it hides when the notification shade
  * is shown.
  */
-class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferenceChangeListener, CoroutineScope by MainScope() {
+class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferenceChangeListener,
+    CoroutineScope by MainScope() {
     private val kgm by lazy { getSystemService(Context.KEYGUARD_SERVICE) as KeyguardManager }
     private val wm by lazy { getSystemService(Context.WINDOW_SERVICE) as WindowManager }
     private val power by lazy { getSystemService(Context.POWER_SERVICE) as PowerManager }
@@ -127,7 +128,8 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
 
         registerReceiver(
             screenStateReceiver,
-            IntentFilter(Intent.ACTION_SCREEN_OFF).apply { addAction(Intent.ACTION_SCREEN_ON) })
+            IntentFilter(Intent.ACTION_SCREEN_OFF).apply { addAction(Intent.ACTION_SCREEN_ON) }
+        )
 
         delegate.wasOnKeyguard = kgm.isKeyguardLocked
         delegate.isScreenOn = power.isInteractive
@@ -177,6 +179,24 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
             }
 
             delegate.screenOrientation = defaultDisplayCompat.rotation
+
+            try {
+                logUtils.debugLog("Source Node ID: ${eventCopy.sourceNodeId}, Window ID: ${eventCopy.windowId}, Source ID Name: ${eventCopy.source?.viewIdResourceName}")
+                logUtils.debugLog(
+                    "Records: ${
+                        run {
+                            val records = ArrayList<String>()
+                            for (i in 0 until eventCopy.recordCount) {
+                                val record = eventCopy.getRecord(i)
+                                records.add("$record ${record.sourceNodeId} ${record.windowId} ${record.source?.viewIdResourceName}")
+                            }
+                            records.joinToString(",,,,,,,,")
+                        }
+                    }"
+                )
+            } catch (e: Exception) {
+                logUtils.debugLog("Error printing debug info", e)
+            }
 
             logUtils.debugLog("Accessibility event: $eventCopy, isScreenOn: ${isScreenOn}, wasOnKeyguard: $isOnKeyguard")
 
@@ -228,9 +248,9 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
                     //Find index of the topmost application window in the set of all windows.
                     val appIndex = windows.indexOf(appWindow)
                     //Find the *least* index of the System UI windows in the set of all windows.
-                    val sysUiIndex = sysUiWindows.mapNotNull { windows.indexOf(it).run { if (this > -1) this else null } }
-                        .minOrNull()
-                        ?: -1
+                    val sysUiIndex = sysUiWindows.mapNotNull {
+                        windows.indexOf(it).run { if (this > -1) this else null }
+                    }.minOrNull() ?: -1
                     //Find index of the topmost system window.
                     val systemIndex = windows.indexOf(nonAppSystemWindow)
 
@@ -248,15 +268,19 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
                     //interacted with. The only time it should be anything else (usually 1) is
                     //if an app is displaying above the keyguard, such as the incoming call
                     //screen or the camera.
-                    delegate.currentAppLayer = if (appIndex != -1) windows.size - appIndex else appIndex
-                    delegate.currentSysUiLayer = if (sysUiIndex != -1) windows.size - sysUiIndex else sysUiIndex
-                    delegate.currentSystemLayer = if (systemIndex != -1) windows.size - systemIndex else systemIndex
+                    delegate.currentAppLayer =
+                        if (appIndex != -1) windows.size - appIndex else appIndex
+                    delegate.currentSysUiLayer =
+                        if (sysUiIndex != -1) windows.size - sysUiIndex else sysUiIndex
+                    delegate.currentSystemLayer =
+                        if (systemIndex != -1) windows.size - systemIndex else systemIndex
 
                     if (isTouchWiz) {
                         val systemRoot = nonAppSystemWindow?.root
 
-                        delegate.isOnEdgePanel = systemRoot?.packageName == "com.samsung.android.app.cocktailbarservice"
-                                && systemIndex == 0
+                        delegate.isOnEdgePanel =
+                            systemRoot?.packageName == "com.samsung.android.app.cocktailbarservice"
+                                    && systemIndex == 0
                     } else {
                         delegate.isOnEdgePanel = false
                     }
@@ -327,8 +351,7 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
                 //(or are present but not visible). If any aren't, the frame will be hidden.
                 val nonPresentIds = prefManager.nonPresentIds
                 if (nonPresentIds.isNotEmpty()) {
-                    delegate.hideForNonPresentIds = sysUiNodes.none {
-                        nonPresentIds.contains(it.viewIdResourceName) }
+                    delegate.hideForNonPresentIds = sysUiNodes.none { nonPresentIds.contains(it.viewIdResourceName) }
                             || sysUiNodes.any { nonPresentIds.contains(it.viewIdResourceName) && !it.isVisibleToUser }
                 }
 
@@ -435,7 +458,8 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
                 topAppWindow = window
             }
 
-            if (topNonSysUiWindow == null && window.window.type != AccessibilityWindowInfo.TYPE_APPLICATION
+            if (topNonSysUiWindow == null
+                && window.window.type != AccessibilityWindowInfo.TYPE_APPLICATION
                 && window.window.type != AccessibilityWindowInfo.TYPE_ACCESSIBILITY_OVERLAY) {
                 if (!isSysUi) {
                     topNonSysUiWindow = window
