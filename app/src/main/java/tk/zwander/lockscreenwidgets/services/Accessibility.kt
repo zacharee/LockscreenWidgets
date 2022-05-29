@@ -3,7 +3,10 @@ package tk.zwander.lockscreenwidgets.services
 import android.accessibilityservice.AccessibilityService
 import android.annotation.SuppressLint
 import android.app.KeyguardManager
-import android.content.*
+import android.content.BroadcastReceiver
+import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
 import android.os.PowerManager
 import android.view.WindowManager
 import android.view.accessibility.AccessibilityEvent
@@ -28,27 +31,13 @@ import java.util.concurrent.ConcurrentLinkedQueue
  * check that the left lock screen shortcut is no longer visible, since it hides when the notification shade
  * is shown.
  */
-class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferenceChangeListener,
-    CoroutineScope by MainScope() {
+class Accessibility : AccessibilityService(), EventObserver, CoroutineScope by MainScope() {
     private val kgm by lazy { getSystemService(Context.KEYGUARD_SERVICE) as KeyguardManager }
     private val wm by lazy { getSystemService(Context.WINDOW_SERVICE) as WindowManager }
     private val power by lazy { getSystemService(Context.POWER_SERVICE) as PowerManager }
     private val delegate: WidgetFrameDelegate
         get() = WidgetFrameDelegate.getInstance(this)
 
-    //Receive updates from our notification listener service on how many
-    //notifications are currently shown to the user. This count excludes
-    //notifications not visible on the lock screen.
-    //If the notification count is > 0, and the user has the option enabled,
-    //make sure to hide the widget frame.
-    private val notificationEventListener: (Event.NewNotificationCount) -> Unit = {
-        delegate.notificationCount = it.count
-        if (prefManager.hideOnNotifications && it.count > 0) {
-            removeOverlay()
-        } else if (delegate.canShow()) {
-            addOverlay()
-        }
-    }
 
     //Listen for the screen turning on and off.
     //This shouldn't really be necessary, but there are some quirks in how
@@ -111,10 +100,6 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
         }
     }
 
-    private val tempHideListener: (Event.TempHide) -> Unit = {
-        removeOverlay()
-    }
-
     private var latestScreenOnTime: Long = 0L
 
     private var accessibilityJob: Job? = null
@@ -124,7 +109,7 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
         super.onCreate()
 
         delegate.onCreate()
-        prefManager.prefs.registerOnSharedPreferenceChangeListener(this)
+        prefManager.prefs.registerOnSharedPreferenceChangeListener(sharedPreferencesChangeHandler)
 
         registerReceiver(
             screenStateReceiver,
@@ -134,8 +119,7 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
         delegate.wasOnKeyguard = kgm.isKeyguardLocked
         delegate.isScreenOn = power.isInteractive
 
-        eventManager.addListener(notificationEventListener)
-        eventManager.addListener(tempHideListener)
+        eventManager.addObserver(this)
     }
 
     override fun onServiceConnected() {
@@ -389,22 +373,40 @@ class Accessibility : AccessibilityService(), SharedPreferences.OnSharedPreferen
 
     override fun onInterrupt() {}
 
-    override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences, key: String) {
-        sharedPreferencesChangeHandler.handle(key)
+    override fun onEvent(event: Event) {
+        when (event) {
+            is Event.NewNotificationCount -> {
+                //Receive updates from our notification listener service on how many
+                //notifications are currently shown to the user. This count excludes
+                //notifications not visible on the lock screen.
+                //If the notification count is > 0, and the user has the option enabled,
+                //make sure to hide the widget frame.
+
+                delegate.notificationCount = event.count
+                if (prefManager.hideOnNotifications && event.count > 0) {
+                    removeOverlay()
+                } else if (delegate.canShow()) {
+                    addOverlay()
+                }
+            }
+            Event.TempHide -> {
+                removeOverlay()
+            }
+            else -> {}
+        }
     }
 
     override fun onDestroy() {
         super.onDestroy()
 
         cancel()
-        prefManager.prefs.unregisterOnSharedPreferenceChangeListener(this)
+        prefManager.prefs.unregisterOnSharedPreferenceChangeListener(sharedPreferencesChangeHandler)
         unregisterReceiver(screenStateReceiver)
         delegate.onDestroy()
 
         WidgetFrameDelegate.invalidateInstance()
 
-        eventManager.removeListener(notificationEventListener)
-        eventManager.removeListener(tempHideListener)
+        eventManager.removeObserver(this)
     }
 
     /**

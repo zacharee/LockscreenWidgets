@@ -37,9 +37,6 @@ class DismissOrUnlockActivity : AppCompatActivity() {
     }
 
     private val kgm by lazy { getSystemService(Context.KEYGUARD_SERVICE) as KeyguardManager }
-    private val eventListener: (Event.LockscreenDismissed) -> Unit = {
-        finish()
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -64,7 +61,11 @@ class DismissOrUnlockActivity : AppCompatActivity() {
                 })
             } else {
                 //If we're below 8.0, we have to do some weirdness to dismiss the lock screen.
-                eventManager.addListener(eventListener)
+                with (eventManager) {
+                    registerListener { _: Event.LockscreenDismissed ->
+                        finish()
+                    }
+                }
                 @Suppress("DEPRECATION")
                 window.addFlags(WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD or WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED)
             }
@@ -84,11 +85,5 @@ class DismissOrUnlockActivity : AppCompatActivity() {
         if (!hasFocus) {
             finish()
         }
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-
-        eventManager.removeListener(eventListener)
     }
 }

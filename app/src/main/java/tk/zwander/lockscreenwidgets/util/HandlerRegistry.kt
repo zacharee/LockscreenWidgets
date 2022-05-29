@@ -1,6 +1,8 @@
 package tk.zwander.lockscreenwidgets.util
 
-class HandlerRegistry(setup: HandlerRegistry.() -> Unit) {
+import android.content.SharedPreferences
+
+class HandlerRegistry(setup: HandlerRegistry.() -> Unit) : SharedPreferences.OnSharedPreferenceChangeListener {
     private val items: HashMap<String, ItemHandler> = HashMap()
 
     init {
@@ -25,6 +27,10 @@ class HandlerRegistry(setup: HandlerRegistry.() -> Unit) {
 
     fun handle(key: String) {
         items[key]?.action?.invoke(key)
+    }
+
+    override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences, key: String) {
+        handle(key)
     }
 
     data class ItemHandler(

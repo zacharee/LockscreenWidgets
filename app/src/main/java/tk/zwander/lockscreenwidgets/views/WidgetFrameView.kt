@@ -2,7 +2,6 @@ package tk.zwander.lockscreenwidgets.views
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.content.SharedPreferences
 import android.graphics.drawable.GradientDrawable
 import android.hardware.Sensor
 import android.hardware.SensorEvent
@@ -32,7 +31,7 @@ import kotlin.math.roundToInt
  * the logic relating to moving, resizing, etc, is handled by the Accessibility service,
  * this View listens for and notifies of the relevant events.
  */
-class WidgetFrameView(context: Context, attrs: AttributeSet) : ConstraintLayout(context, attrs), SharedPreferences.OnSharedPreferenceChangeListener {
+class WidgetFrameView(context: Context, attrs: AttributeSet) : ConstraintLayout(context, attrs) {
     var animationState = AnimationState.STATE_IDLE
 
     var informationCallback: IInformationCallback? = null
@@ -159,7 +158,7 @@ class WidgetFrameView(context: Context, attrs: AttributeSet) : ConstraintLayout(
     override fun onAttachedToWindow() {
         super.onAttachedToWindow()
 
-        context.prefManager.prefs.registerOnSharedPreferenceChangeListener(this)
+        context.prefManager.prefs.registerOnSharedPreferenceChangeListener(sharedPreferencesChangeHandler)
         if (context.prefManager.touchProtection) {
             registerProxListener()
         }
@@ -179,7 +178,7 @@ class WidgetFrameView(context: Context, attrs: AttributeSet) : ConstraintLayout(
     override fun onDetachedFromWindow() {
         super.onDetachedFromWindow()
 
-        context.prefManager.prefs.unregisterOnSharedPreferenceChangeListener(this)
+        context.prefManager.prefs.unregisterOnSharedPreferenceChangeListener(sharedPreferencesChangeHandler)
         unregisterProxListener()
 
         setEditMode(false)
@@ -255,10 +254,6 @@ class WidgetFrameView(context: Context, attrs: AttributeSet) : ConstraintLayout(
 
     override fun onInterceptTouchEvent(ev: MotionEvent): Boolean {
         return (maxPointerCount > 1 || isProxTooClose)
-    }
-
-    override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences, key: String) {
-        sharedPreferencesChangeHandler.handle(key)
     }
 
     fun updateCornerRadius() {

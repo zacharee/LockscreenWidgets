@@ -2,6 +2,8 @@ package tk.zwander.lockscreenwidgets.util
 
 import android.annotation.SuppressLint
 import android.content.Context
+import androidx.lifecycle.DefaultLifecycleObserver
+import androidx.lifecycle.LifecycleOwner
 import tk.zwander.lockscreenwidgets.data.WidgetData
 
 class EventManager private constructor(private val context: Context) {
@@ -20,6 +22,17 @@ class EventManager private constructor(private val context: Context) {
     private val listeners: MutableList<ListenerInfo<Event>> = ArrayList()
     private val observers: MutableList<EventObserver> = ArrayList()
 
+    inline fun <reified T : Event> LifecycleOwner.registerListener(noinline listener: (T) -> Unit) {
+        addListener(listener)
+
+        lifecycle.addObserver(object : DefaultLifecycleObserver {
+            override fun onDestroy(owner: LifecycleOwner) {
+                removeListener(listener)
+                lifecycle.removeObserver(this)
+            }
+        })
+    }
+
     inline fun <reified T : Event> addListener(noinline listener: (T) -> Unit) {
         addListener(
             ListenerInfo(
@@ -32,6 +45,17 @@ class EventManager private constructor(private val context: Context) {
     fun <T : Event> addListener(listenerInfo: ListenerInfo<T>) {
         @Suppress("UNCHECKED_CAST")
         listeners.add(listenerInfo as ListenerInfo<Event>)
+    }
+
+    fun LifecycleOwner.registerObserver(observer: EventObserver) {
+        addObserver(observer)
+
+        lifecycle.addObserver(object : DefaultLifecycleObserver {
+            override fun onDestroy(owner: LifecycleOwner) {
+                removeObserver(observer)
+                lifecycle.removeObserver(this)
+            }
+        })
     }
 
     fun addObserver(observer: EventObserver) {

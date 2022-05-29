@@ -7,7 +7,6 @@ import android.app.WallpaperManager
 import android.appwidget.AppWidgetManager
 import android.content.Context
 import android.content.ContextWrapper
-import android.content.SharedPreferences
 import android.database.ContentObserver
 import android.graphics.*
 import android.graphics.drawable.BitmapDrawable
@@ -37,7 +36,7 @@ import kotlin.math.sign
  * TODO: make this work with multiple frame "clients" (i.e. a preview in MainActivity).
  */
 class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper(context),
-    SharedPreferences.OnSharedPreferenceChangeListener, IInformationCallback, EventObserver {
+    IInformationCallback, EventObserver {
     companion object {
         @SuppressLint("StaticFieldLeak")
         private var instance: WidgetFrameDelegate? = null
@@ -337,10 +336,6 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
     private val showWallpaperLayerCondition: Boolean
         get() = !isPreview && prefManager.maskedMode && (!notificationsPanelFullyExpanded || !prefManager.showInNotificationCenter)
 
-    override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences, key: String) {
-        sharedPreferencesChangeHandler.handle(key)
-    }
-
     override fun onEvent(event: Event) {
         when (event) {
             Event.FrameMoveFinished -> updateWallpaperLayerIfNeeded()
@@ -429,7 +424,7 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
     }
 
     fun onCreate() {
-        prefManager.prefs.registerOnSharedPreferenceChangeListener(this)
+        prefManager.prefs.registerOnSharedPreferenceChangeListener(sharedPreferencesChangeHandler)
         gridLayoutManager.spanSizeLookup = adapter.spanSizeLookup
         binding.widgetsPager.apply {
             adapter = this@WidgetFrameDelegate.adapter
@@ -460,7 +455,7 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
     }
 
     fun onDestroy() {
-        prefManager.prefs.unregisterOnSharedPreferenceChangeListener(this)
+        prefManager.prefs.unregisterOnSharedPreferenceChangeListener(sharedPreferencesChangeHandler)
         contentResolver.unregisterContentObserver(nightModeListener)
         eventManager.apply {
             removeObserver(this@WidgetFrameDelegate)
