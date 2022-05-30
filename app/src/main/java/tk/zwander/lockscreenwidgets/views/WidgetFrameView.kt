@@ -34,8 +34,6 @@ import kotlin.math.roundToInt
 class WidgetFrameView(context: Context, attrs: AttributeSet) : ConstraintLayout(context, attrs) {
     var animationState = AnimationState.STATE_IDLE
 
-    var informationCallback: IInformationCallback? = null
-
     private var maxPointerCount = 0
     private var alreadyIndicatedMoving = false
     private var isProxTooClose = false
@@ -110,14 +108,10 @@ class WidgetFrameView(context: Context, attrs: AttributeSet) : ConstraintLayout(
 
         binding.move.setOnTouchListener(MoveTouchListener())
         binding.centerHorizontally.setOnClickListener {
-            informationCallback?.apply {
-                context.prefManager.setCorrectFrameX(saveMode, 0)
-            }
+            context.eventManager.sendEvent(Event.CenterFrameHorizontally)
         }
         binding.centerVertically.setOnClickListener {
-            informationCallback?.apply {
-                context.prefManager.setCorrectFrameY(saveMode, 0)
-            }
+            context.eventManager.sendEvent(Event.CenterFrameVertically)
         }
 
         binding.leftDragger.setOnTouchListener(ExpandTouchListener { velX, _, isUp ->

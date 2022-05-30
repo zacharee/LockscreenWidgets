@@ -69,6 +69,7 @@ abstract class WidgetHostCompat(
     }
 
     open class BaseInnerOnClickHandler(internal val context: Context, private val unlockCallback: (() -> Unit)?) {
+        @SuppressLint("NewApi")
         fun checkPendingIntent(pendingIntent: PendingIntent) {
             if (pendingIntent.isActivity && context.prefManager.requestUnlock) {
                 unlockCallback?.invoke()

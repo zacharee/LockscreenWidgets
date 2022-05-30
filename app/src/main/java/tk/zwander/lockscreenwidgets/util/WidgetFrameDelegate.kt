@@ -34,8 +34,7 @@ import kotlin.math.sign
  * Handle most of the logic involving the widget frame.
  * TODO: make this work with multiple frame "clients" (i.e. a preview in MainActivity).
  */
-class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper(context),
-    IInformationCallback, EventObserver {
+class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper(context), EventObserver {
     companion object {
         @SuppressLint("StaticFieldLeak")
         private var instance: WidgetFrameDelegate? = null
@@ -112,7 +111,7 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
             }
         }
 
-    override val saveMode: Mode
+    val saveMode: Mode
         get() = when {
             state.isPreview -> Mode.PREVIEW
             state.notificationsPanelFullyExpanded && prefManager.showInNotificationCenter -> {
@@ -300,6 +299,14 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
             Event.NightModeUpdate -> {
                 adapter.updateViews()
             }
+            Event.CenterFrameHorizontally -> {
+                prefManager.setCorrectFrameX(saveMode, 0)
+                updateParamsIfNeeded()
+            }
+            Event.CenterFrameVertically -> {
+                prefManager.setCorrectFrameY(saveMode, 0)
+                updateParamsIfNeeded()
+            }
             is Event.FrameResized -> {
                 when (event.which) {
                     Event.FrameResized.Side.LEFT -> {
@@ -393,8 +400,6 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
 
         updateRowColCount()
         adapter.updateWidgets(prefManager.currentWidgets.toList())
-
-        binding.frame.informationCallback = this
 
         //Scroll to the stored page, making sure to catch a potential
         //out-of-bounds error.

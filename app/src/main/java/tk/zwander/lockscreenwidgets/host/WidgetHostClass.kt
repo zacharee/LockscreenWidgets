@@ -1,8 +1,8 @@
 package tk.zwander.lockscreenwidgets.host
 
 import android.annotation.SuppressLint
-import android.appwidget.AppWidgetHost
 import android.app.PendingIntent
+import android.appwidget.AppWidgetHost
 import android.content.Context
 import android.content.Intent
 import android.os.Build
@@ -48,7 +48,7 @@ class WidgetHostClass(context: Context, id: Int, unlockCallback: (() -> Unit)?)
         .newInstance()
 ) {
     class InnerOnClickHandlerPie(context: Context, unlockCallback: (() -> Unit)?): BaseInnerOnClickHandler(context, unlockCallback) {
-        @Suppress("UNUSED_PARAMETER")
+        @Suppress("UNUSED_PARAMETER", "unused")
         fun onClickHandler(
             view: View,
             pendingIntent: PendingIntent,
@@ -59,7 +59,7 @@ class WidgetHostClass(context: Context, id: Int, unlockCallback: (() -> Unit)?)
             return true
         }
 
-        @Suppress("UNUSED_PARAMETER")
+        @Suppress("UNUSED_PARAMETER", "unused")
         fun onClickHandler(
             view: View,
             pendingIntent: PendingIntent,
