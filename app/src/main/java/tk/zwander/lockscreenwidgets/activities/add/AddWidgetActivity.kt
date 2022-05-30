@@ -63,9 +63,9 @@ open class AddWidgetActivity : BaseBindWidgetActivity(), CoroutineScope by MainS
         populateAsync()
     }
 
-    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+    override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.menu_search, menu)
-        searchItem = menu?.findItem(R.id.search)
+        searchItem = menu.findItem(R.id.search)
 
         searchItem?.setOnActionExpandListener(object : MenuItem.OnActionExpandListener {
             override fun onMenuItemActionCollapse(item: MenuItem?): Boolean {
@@ -96,8 +96,8 @@ open class AddWidgetActivity : BaseBindWidgetActivity(), CoroutineScope by MainS
         return super.onCreateOptionsMenu(menu)
     }
 
-    override fun onOptionsItemSelected(item: MenuItem?): Boolean {
-        return when (item?.itemId) {
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return when (item.itemId) {
             android.R.id.home -> {
                 onBackPressed()
                 true

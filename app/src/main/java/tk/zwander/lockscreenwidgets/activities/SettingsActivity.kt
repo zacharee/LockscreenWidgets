@@ -3,8 +3,8 @@ package tk.zwander.lockscreenwidgets.activities
 import android.os.Bundle
 import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
-import tk.zwander.lockscreenwidgets.fragments.SettingsFragment
 import tk.zwander.lockscreenwidgets.R
+import tk.zwander.lockscreenwidgets.fragments.SettingsFragment
 
 /**
  * Host the app's settings. Most of the logic is either in [SettingsFragment]
@@ -20,8 +20,8 @@ class SettingsActivity : AppCompatActivity() {
         supportActionBar?.setDisplayShowHomeEnabled(true)
     }
 
-    override fun onOptionsItemSelected(item: MenuItem?): Boolean {
-        return when (item?.itemId) {
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return when (item.itemId) {
             android.R.id.home -> {
                 onBackPressed()
                 true
