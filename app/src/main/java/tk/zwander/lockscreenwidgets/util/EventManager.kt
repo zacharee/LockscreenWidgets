@@ -5,6 +5,7 @@ import android.content.Context
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import tk.zwander.lockscreenwidgets.data.WidgetData
+import java.util.concurrent.ConcurrentLinkedQueue
 
 class EventManager private constructor(private val context: Context) {
     companion object {
@@ -19,8 +20,8 @@ class EventManager private constructor(private val context: Context) {
         }
     }
 
-    private val listeners: MutableList<ListenerInfo<Event>> = ArrayList()
-    private val observers: MutableList<EventObserver> = ArrayList()
+    private val listeners: MutableCollection<ListenerInfo<Event>> = ConcurrentLinkedQueue()
+    private val observers: MutableCollection<EventObserver> = ConcurrentLinkedQueue()
 
     inline fun <reified T : Event> LifecycleOwner.registerListener(noinline listener: (T) -> Unit) {
         addListener(listener)
@@ -119,6 +120,7 @@ sealed class Event {
         }
     }
     data class RemoveWidgetConfirmed(val remove: Boolean, val item: WidgetData?) : Event()
+    data class DebugIdsUpdated(val ids: Collection<String>) : Event()
 }
 
 interface EventObserver {

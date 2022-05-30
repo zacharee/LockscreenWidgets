@@ -11,7 +11,6 @@ import android.view.accessibility.AccessibilityNodeInfo
 import android.view.accessibility.AccessibilityWindowInfo
 import kotlinx.coroutines.*
 import tk.zwander.lockscreenwidgets.appwidget.IDListProvider
-import tk.zwander.lockscreenwidgets.appwidget.IDWidgetFactory
 import tk.zwander.lockscreenwidgets.data.window.WindowInfo
 import tk.zwander.lockscreenwidgets.data.window.WindowRootPair
 import tk.zwander.lockscreenwidgets.util.*
@@ -37,11 +36,7 @@ class Accessibility : AccessibilityService(), EventObserver, CoroutineScope by M
 
     private val sharedPreferencesChangeHandler = HandlerRegistry {
         handler(PrefManager.KEY_WIDGET_FRAME_ENABLED) {
-            if (delegate.canShow()) {
-                addOverlay()
-            } else {
-                removeOverlay()
-            }
+            delegate.updateWindowState(wm)
         }
         handler(PrefManager.KEY_ACCESSIBILITY_EVENT_DELAY) {
             serviceInfo?.let {
@@ -161,11 +156,8 @@ class Accessibility : AccessibilityService(), EventObserver, CoroutineScope by M
                 awaits.awaitAll()
 
                 //Update any ID list widgets on the new IDs
-                IDWidgetFactory.sList.apply {
-                    clear()
-                    addAll(items)
-                }
                 launch {
+                    eventManager.sendEvent(Event.DebugIdsUpdated(items))
                     IDListProvider.sendUpdate(this@Accessibility)
                 }
 
@@ -312,13 +304,7 @@ class Accessibility : AccessibilityService(), EventObserver, CoroutineScope by M
             delegate.updateState { newState }
 
             //Check whether the frame can show.
-            if (delegate.canShow()) {
-                delegate.updateAccessibilityPass()
-                addOverlay()
-            } else {
-                removeOverlay()
-                delegate.updateAccessibilityPass()
-            }
+            delegate.updateWindowState(wm, true)
 
             try {
                 //Make sure to recycle the copy of the event.
@@ -341,11 +327,7 @@ class Accessibility : AccessibilityService(), EventObserver, CoroutineScope by M
                 //make sure to hide the widget frame.
 
                 delegate.updateState { it.copy(notificationCount = event.count) }
-                if (prefManager.hideOnNotifications && event.count > 0) {
-                    removeOverlay()
-                } else if (delegate.canShow()) {
-                    addOverlay()
-                }
+                delegate.updateWindowState(wm)
             }
             Event.TempHide -> {
                 removeOverlay()
@@ -375,10 +357,8 @@ class Accessibility : AccessibilityService(), EventObserver, CoroutineScope by M
                 logUtils.debugLog("Screen on")
 
                 delegate.updateState { it.copy(isScreenOn = true) }
-                if (delegate.canShow()) {
-                    accessibilityJob?.cancel()
-                    addOverlay()
-                }
+                accessibilityJob?.cancel()
+                delegate.updateWindowState(wm)
             }
             else -> {}
         }

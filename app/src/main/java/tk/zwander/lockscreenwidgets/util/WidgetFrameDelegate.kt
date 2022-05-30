@@ -439,6 +439,16 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
         binding.frame.setNewDebugIdItems(items)
     }
 
+    fun updateWindowState(wm: WindowManager, updateAccessibility: Boolean = false) {
+        if (canShow()) {
+            if (updateAccessibility) updateAccessibilityPass()
+            mainHandler.postDelayed({ addWindow(wm) }, 100)
+        } else {
+            removeWindow(wm)
+            if (updateAccessibility) updateAccessibilityPass()
+        }
+    }
+
     /**
      * Check if the widget frame should show onscreen. There are quite a few conditions for this.
      * This method attempts to check those conditions in increasing order of intensiveness (check simple
@@ -478,7 +488,7 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
      * - [PrefManager.widgetFrameEnabled] is true (i.e. the widget frame is actually enabled)
      * =======
      */
-    fun canShow(): Boolean {
+    private fun canShow(): Boolean {
         fun forPreview(): Boolean {
             return state.isPreview
         }

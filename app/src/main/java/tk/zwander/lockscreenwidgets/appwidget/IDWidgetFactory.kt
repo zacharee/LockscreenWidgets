@@ -7,16 +7,11 @@ import android.widget.RemoteViewsService
 import androidx.recyclerview.widget.SortedList
 import tk.zwander.lockscreenwidgets.R
 import tk.zwander.lockscreenwidgets.data.IDData
-import java.util.concurrent.ConcurrentLinkedQueue
 
 /**
  * Essentially an adapter to host the current ID list in Lockscreen Widgets' widget
  */
 class IDWidgetFactory(private val context: Context) : RemoteViewsService.RemoteViewsFactory {
-    companion object {
-        val sList = ConcurrentLinkedQueue<String>()
-    }
-
     private val oldItems = ArrayList<String>()
     private val items = SortedList(IDData::class.java, object: SortedList.Callback<IDData>() {
         override fun areItemsTheSame(item1: IDData?, item2: IDData?): Boolean {
@@ -44,13 +39,13 @@ class IDWidgetFactory(private val context: Context) : RemoteViewsService.RemoteV
     })
 
     @Synchronized
-    fun setItems(newItems: ConcurrentLinkedQueue<String>) {
+    fun setItems(newItems: Collection<String>) {
         if (newItems.containsAll(oldItems) && oldItems.containsAll(newItems))
             return
 
-        val removed = oldItems - newItems
-        val added = newItems - oldItems
-        val same = oldItems - removed - added
+        val removed = oldItems - newItems.toSet()
+        val added = newItems - oldItems.toSet()
+        val same = oldItems - removed.toSet() - added.toSet()
 
         val newList = ArrayList<IDData>()
 
@@ -74,10 +69,7 @@ class IDWidgetFactory(private val context: Context) : RemoteViewsService.RemoteV
 
     override fun onCreate() {}
     override fun onDestroy() {}
-
-    override fun onDataSetChanged() {
-        setItems(sList)
-    }
+    override fun onDataSetChanged() {}
 
     override fun getCount(): Int {
         return items.size()
@@ -100,7 +92,7 @@ class IDWidgetFactory(private val context: Context) : RemoteViewsService.RemoteV
     }
 
     override fun getItemId(position: Int): Long {
-        return position.toLong()
+        return items.get(position).hashCode().toLong()
     }
 
     override fun getLoadingView(): RemoteViews? {

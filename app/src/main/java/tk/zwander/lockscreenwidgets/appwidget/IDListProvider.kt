@@ -15,25 +15,11 @@ import tk.zwander.lockscreenwidgets.services.IDWidgetService
  */
 class IDListProvider : AppWidgetProvider() {
     companion object {
-        const val ACTION_UPDATE_IDS = "UPDATE_IDS"
-
         fun sendUpdate(context: Context) {
-            val intent = Intent(ACTION_UPDATE_IDS)
-            intent.component = ComponentName(context, IDListProvider::class.java)
-
-            context.sendBroadcast(intent)
-        }
-    }
-
-    override fun onReceive(context: Context, intent: Intent?) {
-        when (intent?.action) {
             //There's a new list of IDs; make sure the factory is notified
-            ACTION_UPDATE_IDS -> {
-                val manager = AppWidgetManager.getInstance(context)
-                val component = ComponentName(context, IDListProvider::class.java)
-                manager.notifyAppWidgetViewDataChanged(manager.getAppWidgetIds(component), R.id.id_list)
-            }
-            else -> super.onReceive(context, intent)
+            val manager = AppWidgetManager.getInstance(context)
+            val component = ComponentName(context, IDListProvider::class.java)
+            manager.notifyAppWidgetViewDataChanged(manager.getAppWidgetIds(component), R.id.id_list)
         }
     }
 

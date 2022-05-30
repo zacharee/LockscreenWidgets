@@ -75,7 +75,7 @@ class WidgetFrameAdapter(
      * Push a new set of widgets to the frame.
      * If there are currently no widgets added,
      * add the new ones and notify the entire set.
-     * Otherwise, calculate the diffeence and notify
+     * Otherwise, calculate the difference and notify
      * accordingly.
      */
     fun updateWidgets(newWidgets: List<WidgetData>) {
