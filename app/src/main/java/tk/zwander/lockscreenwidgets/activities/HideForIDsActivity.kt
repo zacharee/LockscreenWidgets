@@ -181,6 +181,11 @@ class HideForIDsActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
 
         setContentView(activityBinding.root)
+        title = resources.getString(when (type) {
+            Type.PRESENT -> R.string.settings_screen_present_ids
+            Type.NON_PRESENT -> R.string.settings_screen_non_present_ids
+            Type.NONE -> R.string.app_name
+        })
 
         supportActionBar?.apply {
             setDisplayHomeAsUpEnabled(true)

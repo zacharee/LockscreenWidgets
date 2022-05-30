@@ -1,8 +1,6 @@
 package tk.zwander.lockscreenwidgets.tiles.widget
 
 import android.app.PendingIntent
-import android.appwidget.AppWidgetHost
-import android.appwidget.AppWidgetHostView
 import android.appwidget.AppWidgetManager
 import android.appwidget.AppWidgetProviderInfo
 import android.content.Context
@@ -17,13 +15,11 @@ import android.os.Build
 import android.os.ServiceManager
 import android.service.quicksettings.Tile
 import android.service.quicksettings.TileService
-import android.util.Log
 import android.widget.RemoteViews
 import androidx.annotation.RequiresApi
 import androidx.core.content.res.ResourcesCompat
 import androidx.core.graphics.drawable.toBitmap
 import com.android.internal.appwidget.IAppWidgetService
-import tk.zwander.lockscreenwidgets.App
 import tk.zwander.lockscreenwidgets.R
 import tk.zwander.lockscreenwidgets.activities.add.AddTileWidgetActivity
 import tk.zwander.lockscreenwidgets.util.*
@@ -91,6 +87,7 @@ abstract class BaseWidgetTile : TileService(), SharedPreferences.OnSharedPrefere
      * The CharSequence returned here is displayed at the top
      * of the expanded detail view.
      */
+    @Suppress("unused")
     open fun semGetDetailViewTitle(): CharSequence? {
         return qsTile?.label
     }
@@ -98,6 +95,7 @@ abstract class BaseWidgetTile : TileService(), SharedPreferences.OnSharedPrefere
     /**
      * I don't really know what this is for.
      */
+    @Suppress("unused")
     open fun semGetDetailViewSettingButtonName(): CharSequence? {
         return "Test"
     }
@@ -106,6 +104,7 @@ abstract class BaseWidgetTile : TileService(), SharedPreferences.OnSharedPrefere
      * Return true if there should be an on/off switch present
      * in the expanded detail view.
      */
+    @Suppress("unused")
     open fun semIsToggleButtonExists(): Boolean {
         return false
     }
@@ -113,6 +112,7 @@ abstract class BaseWidgetTile : TileService(), SharedPreferences.OnSharedPrefere
     /**
      * Returns true if the switch is present.
      */
+    @Suppress("unused")
     open fun semIsToggleButtonChecked(): Boolean {
         return false
     }
@@ -121,6 +121,7 @@ abstract class BaseWidgetTile : TileService(), SharedPreferences.OnSharedPrefere
      * Get the widget's RemoteViews and pass it onto
      * Samsung's System UI.
      */
+    @Suppress("unused")
     open fun semGetDetailView(): RemoteViews? {
         views.set(generateViews())
         return views.get()
@@ -138,6 +139,7 @@ abstract class BaseWidgetTile : TileService(), SharedPreferences.OnSharedPrefere
      * Called when the switch in the expanded detail view is pressed.
      * By default, used to launch the widget selector for this tile.
      */
+    @Suppress("unused")
     open fun semSetToggleButtonChecked(checked: Boolean) {
         startActivity(semGetSettingsIntent())
     }

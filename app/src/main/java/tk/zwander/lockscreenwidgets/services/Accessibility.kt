@@ -39,10 +39,8 @@ class Accessibility : AccessibilityService(), EventObserver, CoroutineScope by M
             delegate.updateWindowState(wm)
         }
         handler(PrefManager.KEY_ACCESSIBILITY_EVENT_DELAY) {
-            serviceInfo?.let {
-                serviceInfo = serviceInfo.apply {
-                    notificationTimeout = prefManager.accessibilityEventDelay.toLong()
-                }
+            serviceInfo = serviceInfo?.apply {
+                notificationTimeout = prefManager.accessibilityEventDelay.toLong()
             }
         }
         handler(PrefManager.KEY_DEBUG_LOG) {
