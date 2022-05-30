@@ -301,10 +301,7 @@ class Accessibility : AccessibilityService(), EventObserver, CoroutineScope by M
                 }
             }
 
-            delegate.updateState { newState }
-
-            //Check whether the frame can show.
-            delegate.updateWindowState(wm, true)
+            delegate.updateStateAndWindowState(wm, true) { newState }
 
             try {
                 //Make sure to recycle the copy of the event.
@@ -325,9 +322,7 @@ class Accessibility : AccessibilityService(), EventObserver, CoroutineScope by M
                 //notifications not visible on the lock screen.
                 //If the notification count is > 0, and the user has the option enabled,
                 //make sure to hide the widget frame.
-
-                delegate.updateState { it.copy(notificationCount = event.count) }
-                delegate.updateWindowState(wm)
+                delegate.updateStateAndWindowState(wm) { it.copy(notificationCount = event.count) }
             }
             Event.TempHide -> {
                 removeOverlay()
@@ -346,9 +341,8 @@ class Accessibility : AccessibilityService(), EventObserver, CoroutineScope by M
                     //and the current screen content has "frozen," causing the widget frame to show
                     //where it shouldn't. ACTION_SCREEN_OFF is called early enough that we can remove
                     //the frame before it's frozen in place.
-                    removeOverlay()
                     delegate.forceWakelock(wm, false)
-                    delegate.updateState { it.copy(isTempHide = false, isScreenOn = false) }
+                    delegate.updateStateAndWindowState(wm) { it.copy(isTempHide = false, isScreenOn = false) }
                 }
             }
             Event.ScreenOn -> {
@@ -356,9 +350,8 @@ class Accessibility : AccessibilityService(), EventObserver, CoroutineScope by M
 
                 logUtils.debugLog("Screen on")
 
-                delegate.updateState { it.copy(isScreenOn = true) }
                 accessibilityJob?.cancel()
-                delegate.updateWindowState(wm)
+                delegate.updateStateAndWindowState(wm) { it.copy(isScreenOn = true) }
             }
             else -> {}
         }

@@ -409,6 +409,11 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
         state = transform(state)
     }
 
+    fun updateStateAndWindowState(wm: WindowManager, updateAccessibility: Boolean = false, transform: (State) -> State) {
+        state = transform(state)
+        updateWindowState(wm, updateAccessibility)
+    }
+
     /**
      * Make sure the number of rows/columns in the widget frame reflects the user-selected value.
      */
