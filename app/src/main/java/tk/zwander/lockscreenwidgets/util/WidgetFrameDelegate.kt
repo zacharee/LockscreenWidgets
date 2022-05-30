@@ -12,6 +12,7 @@ import android.graphics.drawable.BitmapDrawable
 import android.os.*
 import android.view.*
 import android.widget.ImageView
+import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
@@ -50,6 +51,14 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
             }
 
             return getInstance(context)
+        }
+
+        fun retrieveInstance(context: Context): WidgetFrameDelegate? {
+            return peekInstance(context).also {
+                if (it == null) {
+                    Toast.makeText(context, R.string.accessibility_not_started, Toast.LENGTH_SHORT).show()
+                }
+            }
         }
 
         fun getInstance(context: Context): WidgetFrameDelegate {

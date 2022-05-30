@@ -3,7 +3,6 @@ package tk.zwander.lockscreenwidgets
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
-import android.widget.Toast
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
@@ -50,18 +49,6 @@ import tk.zwander.patreonsupportersretrieval.view.SupporterView
  * this Activity will also make sure to start [OnboardingActivity] in the proper mode.
  */
 class MainActivity : AppCompatActivity(), CoroutineScope by MainScope() {
-    private val frameDelegate: WidgetFrameDelegate?
-        get() {
-            return frameDelegateNoPrompt.also {
-                if (it == null) {
-                    Toast.makeText(this, R.string.accessibility_not_started, Toast.LENGTH_SHORT).show()
-                }
-            }
-        }
-
-    private val frameDelegateNoPrompt: WidgetFrameDelegate?
-        get() = WidgetFrameDelegate.peekInstance(this)
-
     private val introRequest = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         if (result.resultCode != Activity.RESULT_OK) {
             //The intro sequence or permissions request wasn't successful. Quit.
@@ -77,7 +64,7 @@ class MainActivity : AppCompatActivity(), CoroutineScope by MainScope() {
         super.onCreate(savedInstanceState)
 
         setContent {
-            MainContent { frameDelegate }
+            MainContent()
         }
 
         if (prefManager.firstRun || !isAccessibilityEnabled) {
@@ -89,7 +76,7 @@ class MainActivity : AppCompatActivity(), CoroutineScope by MainScope() {
     override fun onStop() {
         super.onStop()
 
-        frameDelegateNoPrompt?.updateState { it.copy(isPreview = false) }
+        WidgetFrameDelegate.peekInstance(this)?.updateState { it.copy(isPreview = false) }
     }
 
     override fun onDestroy() {
@@ -98,10 +85,11 @@ class MainActivity : AppCompatActivity(), CoroutineScope by MainScope() {
     }
 }
 
+@Suppress("OPT_IN_IS_NOT_ENABLED")
 @OptIn(ExperimentalMaterialApi::class)
 @Preview
 @Composable
-fun MainContent(frameDelegate: (() -> WidgetFrameDelegate?)? = null) {
+fun MainContent() {
     val context = LocalContext.current
 
     val buttons = remember {
@@ -110,7 +98,7 @@ fun MainContent(frameDelegate: (() -> WidgetFrameDelegate?)? = null) {
                 R.drawable.ic_baseline_preview_24,
                 R.string.preview
             ) {
-                frameDelegate?.invoke()?.updateState { it.copy(isPreview = !it.isPreview) }
+                WidgetFrameDelegate.retrieveInstance(context)?.updateState { it.copy(isPreview = !it.isPreview) }
             },
             MainPageButton(
                 R.drawable.ic_baseline_settings_24,
