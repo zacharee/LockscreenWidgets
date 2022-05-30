@@ -72,6 +72,9 @@ class PrefManager private constructor(context: Context) : ContextWrapper(context
         const val KEY_BLUR_BACKGROUND = "blur_background"
         const val KEY_BLUR_BACKGROUND_AMOUNT = "blur_background_amount"
         const val KEY_MASKED_MODE_DIM_AMOUNT = "masked_mode_wallpaper_dim_amount"
+        const val KEY_DRAWER_WIDGETS = "drawer_widgets"
+        const val KEY_DRAWER_COL_COUNT = "drawer_col_count"
+        const val KEY_CLOSE_DRAWER_ON_EMPTY_TAP = "close_drawer_on_empty_tap"
 
         const val VALUE_PAGE_INDICATOR_BEHAVIOR_HIDDEN = 0
         const val VALUE_PAGE_INDICATOR_BEHAVIOR_AUTO_HIDE = 1
@@ -109,6 +112,22 @@ class PrefManager private constructor(context: Context) : ContextWrapper(context
         get() = getString(KEY_CURRENT_WIDGETS)
         set(value) {
             putString(KEY_CURRENT_WIDGETS, value)
+        }
+
+    //The widgets currently added to the widget drawer
+    var drawerWidgets: LinkedHashSet<WidgetData>
+        get() = gson.fromJson(
+            drawerWidgetsString,
+            object : TypeToken<LinkedHashSet<WidgetData>>() {}.type
+        ) ?: LinkedHashSet()
+        set(value) {
+            currentWidgetsString = gson.toJson(value)
+        }
+
+    var drawerWidgetsString: String?
+        get() = getString(KEY_DRAWER_WIDGETS)
+        set(value) {
+            putString(KEY_DRAWER_WIDGETS, value)
         }
 
     //The shortcuts currently added to the widget frame
@@ -396,6 +415,12 @@ class PrefManager private constructor(context: Context) : ContextWrapper(context
             putInt(KEY_FRAME_COL_COUNT, value)
         }
 
+    var drawerColCount: Int
+        get() = getInt(KEY_DRAWER_COL_COUNT, 2)
+        set(value) {
+            putInt(KEY_FRAME_COL_COUNT, value)
+        }
+
     //How many rows of widgets should be shown per page.
     var frameRowCount: Int
         get() = getInt(KEY_FRAME_ROW_COUNT, 1)
@@ -496,6 +521,12 @@ class PrefManager private constructor(context: Context) : ContextWrapper(context
         get() = getInt(KEY_DATABASE_VERSION, 0)
         set(value) {
             putInt(KEY_DATABASE_VERSION, value)
+        }
+
+    var closeOnEmptyTap: Boolean
+        get() = getBoolean(KEY_CLOSE_DRAWER_ON_EMPTY_TAP, false)
+        set(value) {
+            putBoolean(KEY_CLOSE_DRAWER_ON_EMPTY_TAP, value)
         }
 
     fun getCorrectFrameWidth(mode: Mode): Float {

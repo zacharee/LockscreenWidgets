@@ -30,6 +30,8 @@ abstract class BaseBindWidgetActivity : AppCompatActivity() {
     protected val widgetHost by lazy { WidgetHostCompat.getInstance(this, 1003) }
     protected val appWidgetManager by lazy { AppWidgetManager.getInstance(this)!! }
     protected val shortcutIdManager by lazy { ShortcutIdManager.getInstance(this, widgetHost) }
+    protected val widgetDelegate: WidgetFrameDelegate?
+        get() = WidgetFrameDelegate.peekInstance(this)
 
     private val permRequest = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         val id = result.data?.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, -1) ?: return@registerForActivityResult
@@ -164,7 +166,23 @@ abstract class BaseBindWidgetActivity : AppCompatActivity() {
      * @param id the ID of the widget to be added
      */
     protected open fun addNewWidget(id: Int, provider: AppWidgetProviderInfo) {
-        val widget = WidgetData.widget(
+        prefManager.currentWidgets = prefManager.currentWidgets.apply {
+            add(createWidgetData(id, provider))
+        }
+        finish()
+    }
+
+    protected open val colCount: Int
+        get() = prefManager.frameColCount
+    protected open val rowCount: Int
+        get() = prefManager.frameRowCount
+    protected open val height: Float
+        get() = prefManager.frameHeightDp
+    protected open val width: Float
+        get() = prefManager.frameWidthDp
+
+    protected open fun createWidgetData(id: Int, provider: AppWidgetProviderInfo): WidgetData {
+        return WidgetData.widget(
             id,
             provider.provider,
             provider.loadLabel(packageManager),
@@ -173,21 +191,17 @@ abstract class BaseBindWidgetActivity : AppCompatActivity() {
                 maxHeight = 512,
             ).toBase64(),
             run {
-                val widthRatio = provider.minWidth.toFloat() / prefManager.frameWidthDp
-                val defaultColSpan = floor((widthRatio * prefManager.frameColCount)).toInt()
-                    .coerceAtMost(prefManager.frameColCount)
+                val widthRatio = provider.minWidth.toFloat() / width
+                val defaultColSpan = floor((widthRatio * colCount)).toInt()
+                    .coerceAtMost(colCount).coerceAtLeast(1)
 
-                val heightRatio = provider.minHeight.toFloat() / prefManager.frameHeightDp
-                val defaultRowSpan = floor((heightRatio * prefManager.frameRowCount)).toInt()
-                    .coerceAtMost(prefManager.frameRowCount)
+                val heightRatio = provider.minHeight.toFloat() / height
+                val defaultRowSpan = floor((heightRatio * rowCount)).toInt()
+                    .coerceAtMost(rowCount).coerceAtLeast(1)
 
                 WidgetSizeData(defaultColSpan, defaultRowSpan)
             }
         )
-        prefManager.currentWidgets = prefManager.currentWidgets.apply {
-            add(widget)
-        }
-        finish()
     }
 
     protected open fun addNewShortcut(shortcut: WidgetData) {

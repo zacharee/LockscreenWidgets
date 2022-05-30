@@ -207,4 +207,9 @@
     <string name="create_shortcut_error">Unable to create shortcut.</string>
     <string name="accessibility_not_started">The Accessibility Service hasn\'t started yet. Please wait.</string>
     <string name="unable_to_restore_widgets">Unable to restore widgets.</string>
+
+    <string name="edit_instructions">Press and hold widgets to reorder.\nSwipe widgets left or right to remove.</string>
+    <string name="open_close_toolbar">Open/Close Toolbar</string>
+    <string name="widget_removed">Widget removed</string>
+    <string name="undo">Undo</string>
 </resources>

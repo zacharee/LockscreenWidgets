@@ -28,14 +28,13 @@ import tk.zwander.lockscreenwidgets.databinding.WidgetFrameBinding
 import tk.zwander.lockscreenwidgets.host.WidgetHostCompat
 import tk.zwander.lockscreenwidgets.services.Accessibility
 import tk.zwander.lockscreenwidgets.views.WidgetFrameView
-import kotlin.math.roundToInt
-import kotlin.math.sign
 
 /**
  * Handle most of the logic involving the widget frame.
  * TODO: make this work with multiple frame "clients" (i.e. a preview in MainActivity).
  */
-class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper(context), EventObserver {
+class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper(context),
+    EventObserver {
     companion object {
         @SuppressLint("StaticFieldLeak")
         private var instance: WidgetFrameDelegate? = null
@@ -56,7 +55,8 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
         fun retrieveInstance(context: Context): WidgetFrameDelegate? {
             return peekInstance(context).also {
                 if (it == null) {
-                    Toast.makeText(context, R.string.accessibility_not_started, Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context, R.string.accessibility_not_started, Toast.LENGTH_SHORT)
+                        .show()
                 }
             }
         }
@@ -85,11 +85,13 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
 
             // Extra state checks //
             if (actualNewState.notificationsPanelFullyExpanded != oldState.notificationsPanelFullyExpanded) {
-                actualNewState = actualNewState.copy(isPendingNotificationStateChange = true, isPreview = false)
+                actualNewState =
+                    actualNewState.copy(isPendingNotificationStateChange = true, isPreview = false)
             }
 
             if (actualNewState.isScreenOn != oldState.isScreenOn && !actualNewState.isScreenOn) {
-                actualNewState = actualNewState.copy(isPreview = false, notificationsPanelFullyExpanded = false)
+                actualNewState =
+                    actualNewState.copy(isPreview = false, notificationsPanelFullyExpanded = false)
             }
 
             if (actualNewState.isTempHide != oldState.isTempHide && actualNewState.isTempHide) {
@@ -152,77 +154,26 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
     private val shortcutIdManager = ShortcutIdManager.getInstance(this, widgetHost)
 
     //The actual frame View
-    private val binding = WidgetFrameBinding.inflate(LayoutInflater.from(ContextThemeWrapper(this, R.style.AppTheme)))
+    private val binding =
+        WidgetFrameBinding.inflate(LayoutInflater.from(ContextThemeWrapper(this, R.style.AppTheme)))
     private val gridLayoutManager = SpannedLayoutManager()
-    private val adapter = WidgetFrameAdapter(widgetManager, widgetHost, params) { _, item ->
+    private val adapter = WidgetFrameAdapter(widgetManager, widgetHost, params) { _, item, _ ->
         binding.removeWidgetConfirmation.root.show(item)
     }
-    private val touchHelperCallback = object : ItemTouchHelper.SimpleCallback(
-        ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT or ItemTouchHelper.UP or ItemTouchHelper.DOWN,
-        0
-    ) {
-        override fun onMove(
-            recyclerView: RecyclerView,
-            viewHolder: RecyclerView.ViewHolder,
-            target: RecyclerView.ViewHolder
-        ): Boolean {
-            return adapter.onMove(viewHolder.bindingAdapterPosition, target.bindingAdapterPosition)
-                .also { moved ->
-                    if (moved) {
-                        updateState { it.copy(updatedForMove = true) }
-                        prefManager.currentWidgets = LinkedHashSet(adapter.widgets)
-                        adapter.currentEditingInterfacePosition = -1
-                    }
-                }
-        }
 
-        override fun getDragDirs(
-            recyclerView: RecyclerView,
-            viewHolder: RecyclerView.ViewHolder
-        ): Int {
-            return if (viewHolder is WidgetFrameAdapter.AddWidgetVH || prefManager.lockWidgetFrame) 0
-            else super.getDragDirs(recyclerView, viewHolder)
-        }
-
-        override fun onSelectedChanged(viewHolder: RecyclerView.ViewHolder?, actionState: Int) {
-            if (actionState != ItemTouchHelper.ACTION_STATE_IDLE) {
-                viewHolder?.itemView?.alpha = 0.5f
-                updateState { it.copy(isHoldingItem = true) }
-
-                //The user has long-pressed a widget. Show the editing UI on that widget.
-                //If the UI is already shown on it, hide it.
-                val adapterPos = viewHolder?.bindingAdapterPosition ?: -1
-                adapter.currentEditingInterfacePosition =
-                    if (adapter.currentEditingInterfacePosition == adapterPos) -1 else adapterPos
+    private val touchHelperCallback = context.createTouchHelperCallback(
+        adapter,
+        widgetMoved = { moved ->
+            if (moved) {
+                updateState { it.copy(updatedForMove = true) }
+                prefManager.currentWidgets = LinkedHashSet(adapter.widgets)
+                adapter.currentEditingInterfacePosition = -1
             }
-
-            super.onSelectedChanged(viewHolder, actionState)
+        },
+        onItemSelected = { selected ->
+            updateState { it.copy(isHoldingItem = selected) }
         }
-
-        override fun clearView(
-            recyclerView: RecyclerView,
-            viewHolder: RecyclerView.ViewHolder
-        ) {
-            super.clearView(recyclerView, viewHolder)
-
-            updateState { it.copy(isHoldingItem = false) }
-            viewHolder.itemView.alpha = 1.0f
-        }
-
-        override fun interpolateOutOfBoundsScroll(
-            recyclerView: RecyclerView,
-            viewSize: Int,
-            viewSizeOutOfBounds: Int,
-            totalSize: Int,
-            msSinceStartScroll: Long
-        ): Int {
-            //The default scrolling speed is *way* too fast. Slow it down a bit.
-            val direction = sign(viewSizeOutOfBounds.toFloat()).toInt()
-            return (viewSize * 0.01f * direction).roundToInt()
-        }
-
-        override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {}
-    }
+    )
 
     private val kgm = context.getSystemService(Context.KEYGUARD_SERVICE) as KeyguardManager
 
@@ -406,7 +357,8 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
         //out-of-bounds error.
         try {
             gridLayoutManager.scrollToPosition(prefManager.currentPage)
-        } catch (_: Exception) {}
+        } catch (_: Exception) {
+        }
 
         eventManager.apply {
             addObserver(this@WidgetFrameDelegate)
@@ -424,7 +376,11 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
         state = transform(state)
     }
 
-    fun updateStateAndWindowState(wm: WindowManager, updateAccessibility: Boolean = false, transform: (State) -> State) {
+    fun updateStateAndWindowState(
+        wm: WindowManager,
+        updateAccessibility: Boolean = false,
+        transform: (State) -> State
+    ) {
         state = transform(state)
         updateWindowState(wm, updateAccessibility)
     }
@@ -541,20 +497,20 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
         }
 
         return (forPreview() || forNotificationCenter() || forLockscreen()).also {
-                logUtils.debugLog(
-                    "canShow: $it\n" +
-                            "state: $state\n " +
-                            "showOnMainLockScreen: ${prefManager.showOnMainLockScreen}\n" +
-                            "widgetFrameEnabled: ${prefManager.widgetFrameEnabled}\n" +
-                            "hideOnSecurityPage: ${prefManager.hideOnSecurityPage}\n" +
-                            "hideOnNotifications: ${prefManager.hideOnNotifications}\n" +
-                            "hideOnNotificationShade: ${prefManager.hideOnNotificationShade}\n" +
-                            "presentIds: ${prefManager.presentIds}\n" +
-                            "nonPresentIds: ${prefManager.nonPresentIds}\n" +
-                            "hideInLandscape: ${prefManager.hideInLandscape}\n" +
-                            "showInNotificationCenter: ${prefManager.showInNotificationCenter}\n"
-                )
-            }
+            logUtils.debugLog(
+                "canShow: $it\n" +
+                        "state: $state\n " +
+                        "showOnMainLockScreen: ${prefManager.showOnMainLockScreen}\n" +
+                        "widgetFrameEnabled: ${prefManager.widgetFrameEnabled}\n" +
+                        "hideOnSecurityPage: ${prefManager.hideOnSecurityPage}\n" +
+                        "hideOnNotifications: ${prefManager.hideOnNotifications}\n" +
+                        "hideOnNotificationShade: ${prefManager.hideOnNotificationShade}\n" +
+                        "presentIds: ${prefManager.presentIds}\n" +
+                        "nonPresentIds: ${prefManager.nonPresentIds}\n" +
+                        "hideInLandscape: ${prefManager.hideInLandscape}\n" +
+                        "showInNotificationCenter: ${prefManager.showInNotificationCenter}\n"
+            )
+        }
     }
 
     /**
@@ -619,7 +575,8 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
             }
 
             val w = if (Build.VERSION.SDK_INT > Build.VERSION_CODES.M) {
-                getWallpaper(WallpaperManager.FLAG_LOCK) ?: getWallpaper(WallpaperManager.FLAG_SYSTEM)
+                getWallpaper(WallpaperManager.FLAG_LOCK)
+                    ?: getWallpaper(WallpaperManager.FLAG_SYSTEM)
             } else null
 
             try {
@@ -642,7 +599,14 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
                     logUtils.debugLog("Setting wallpaper drawable.")
 
                     binding.wallpaperBackground.setImageDrawable(this)
-                    binding.wallpaperBackground.colorFilter = PorterDuffColorFilter(Color.argb(((prefManager.wallpaperDimAmount / 100f) * 255).toInt(), 0, 0, 0), PorterDuff.Mode.SRC_ATOP)
+                    binding.wallpaperBackground.colorFilter = PorterDuffColorFilter(
+                        Color.argb(
+                            ((prefManager.wallpaperDimAmount / 100f) * 255).toInt(),
+                            0,
+                            0,
+                            0
+                        ), PorterDuff.Mode.SRC_ATOP
+                    )
                     binding.wallpaperBackground.scaleType = ImageView.ScaleType.MATRIX
                     binding.wallpaperBackground.imageMatrix = Matrix().apply {
                         val realSize = realResolution

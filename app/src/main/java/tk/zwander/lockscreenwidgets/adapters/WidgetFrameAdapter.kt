@@ -42,11 +42,11 @@ import kotlin.math.min
 /**
  * The adapter for the widget frame itself.
  */
-class WidgetFrameAdapter(
+open class WidgetFrameAdapter(
     private val manager: AppWidgetManager,
     private val host: WidgetHostCompat,
     private val params: WindowManager.LayoutParams,
-    private val onRemoveCallback: (WidgetFrameAdapter, WidgetData) -> Unit
+    private val onRemoveCallback: (WidgetFrameAdapter, WidgetData, Int) -> Unit
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>(), CoroutineScope by MainScope() {
     companion object {
         const val VIEW_TYPE_WIDGET = 0
@@ -70,6 +70,16 @@ class WidgetFrameAdapter(
         RemoveButtonObservable()
 
     private var didResize = false
+
+    protected val colCount: Int
+        get() = host.context.prefManager.frameColCount
+    protected val rowCount: Int
+        get() = host.context.prefManager.frameRowCount
+    protected var currentWidgets: MutableCollection<WidgetData>
+        get() = host.context.prefManager.currentWidgets
+        set(value) {
+            host.context.prefManager.currentWidgets = LinkedHashSet(value)
+        }
 
     /**
      * Push a new set of widgets to the frame.
@@ -170,6 +180,10 @@ class WidgetFrameAdapter(
         notifyItemRangeChanged(0, itemCount)
     }
 
+    protected open fun persistResize() {
+        host.context.prefManager.currentWidgets = LinkedHashSet(widgets)
+    }
+
     /**
      * Represents an individual widget.
      * The item will be properly sized based on the number of columns the user
@@ -183,8 +197,8 @@ class WidgetFrameAdapter(
             get() = binding.widgetEditWrapper.isVisible
             set(value) {
                 binding.widgetEditWrapper.isVisible = value
-                showHorizontalSizers = value && itemView.context.prefManager.frameColCount > 1
-                showVerticalSizers = value && itemView.context.prefManager.frameRowCount > 1
+                showHorizontalSizers = value && colCount > 1
+                showVerticalSizers = value && rowCount > 1
             }
         private var showHorizontalSizers: Boolean
             get() = itemView.run { binding.widgetLeftDragger.isVisible && binding.widgetRightDragger.isVisible }
@@ -209,7 +223,7 @@ class WidgetFrameAdapter(
         init {
             binding.removeWidget.setOnClickListener {
                 currentData?.let {
-                    onRemoveCallback(this@WidgetFrameAdapter, it)
+                    onRemoveCallback(this@WidgetFrameAdapter, it, bindingAdapterPosition)
                 }
             }
 
@@ -309,6 +323,7 @@ class WidgetFrameAdapter(
                     when (data.safeType) {
                         WidgetType.WIDGET -> bindWidget(data)
                         WidgetType.SHORTCUT -> bindShortcut(data)
+                        WidgetType.HEADER -> {}
                     }
                 }
             }
@@ -387,11 +402,10 @@ class WidgetFrameAdapter(
                             resources.getString(R.string.bind_widget_error, widgetInfo.provider),
                             Toast.LENGTH_LONG
                         ).show()
-                        context.prefManager.currentWidgets =
-                            context.prefManager.currentWidgets.apply {
-                                remove(data)
-                                host.deleteAppWidgetId(data.id)
-                            }
+                        currentWidgets = currentWidgets.apply {
+                            remove(data)
+                            host.deleteAppWidgetId(data.id)
+                        }
                     }
                 }
             } else {
@@ -413,7 +427,7 @@ class WidgetFrameAdapter(
                     itemView.context.packageManager.getResourcesForApplication(this.packageName)
                 } catch (e: PackageManager.NameNotFoundException) {
                     host.context.logUtils.debugLog("Unable to bind shortcut", e)
-                    onRemoveCallback(this@WidgetFrameAdapter, data)
+                    onRemoveCallback(this@WidgetFrameAdapter, data, bindingAdapterPosition)
                     return@bindShortcut
                 }
                 ResourcesCompat.getDrawable(
@@ -454,12 +468,12 @@ class WidgetFrameAdapter(
             if (vertical) {
                 sizeInfo.safeWidgetHeightSpan = min(
                     sizeInfo.safeWidgetHeightSpan + step * direction,
-                    itemView.context.prefManager.frameRowCount
+                    rowCount
                 )
             } else {
                 sizeInfo.safeWidgetWidthSpan = min(
                     sizeInfo.safeWidgetWidthSpan + step * direction,
-                    itemView.context.prefManager.frameColCount
+                    colCount
                 )
             }
 
@@ -480,9 +494,7 @@ class WidgetFrameAdapter(
         private fun persistResize() {
             didResize = true
 
-            itemView.context.prefManager.apply {
-                currentWidgets = LinkedHashSet(widgets)
-            }
+            this@WidgetFrameAdapter.persistResize()
         }
     }
 
@@ -507,9 +519,9 @@ class WidgetFrameAdapter(
             val size = widget?.safeSize
 
             SpanSize(
-                size?.safeWidgetWidthSpan?.coerceAtMost(host.context.prefManager.frameColCount)
+                size?.safeWidgetWidthSpan?.coerceAtMost(colCount)
                     ?: 1,
-                size?.safeWidgetHeightSpan?.coerceAtMost(host.context.prefManager.frameRowCount)
+                size?.safeWidgetHeightSpan?.coerceAtMost(rowCount)
                     ?: 1
             )
         }

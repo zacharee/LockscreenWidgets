@@ -4,5 +4,5 @@ enum class Mode {
     LOCK_NORMAL,
     LOCK_NOTIFICATION,
     NOTIFICATION,
-    PREVIEW
+    PREVIEW,
 }

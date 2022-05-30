@@ -333,3 +333,12 @@ val Context.backupRestoreManager: BackupRestoreManager
 
 val Context.eventManager: EventManager
     get() = EventManager.getInstance(this)
+
+val Context.screenSize: Point
+    get() {
+        val display = (getSystemService(Context.WINDOW_SERVICE) as WindowManager).defaultDisplay
+        return Point().apply { display.getRealSize(this) }
+    }
+
+val Context.statusBarHeight: Int
+    get() = resources.getDimensionPixelSize(resources.getIdentifier("status_bar_height", "dimen", "android"))

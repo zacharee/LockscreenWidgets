@@ -76,6 +76,7 @@ dependencies {
     implementation 'com.github.zacharee:CollapsiblePreferenceCategory:2f53f2d367'
     implementation 'com.github.zacharee:colorpicker:c300c66e93'
     implementation 'com.github.zacharee:PatreonSupportersRetrieval:4ce71eb5bf'
+    implementation 'com.github.tingyik90:snackprogressbar:6.1'
 
 //    implementation project(':spannedlm')
     implementation 'com.github.zacharee:SpannedGridLayoutManager:a58b974403'

@@ -52,6 +52,14 @@ open class WidgetData(
                 size
             )
         }
+
+        fun header(): WidgetData {
+            return WidgetData(
+                -1, WidgetType.HEADER, null, null,
+                null, null,
+                null, null
+            )
+        }
     }
 
     val safeType: WidgetType
@@ -83,5 +91,6 @@ open class WidgetData(
 
 enum class WidgetType {
     WIDGET,
-    SHORTCUT
+    SHORTCUT,
+    HEADER
 }
