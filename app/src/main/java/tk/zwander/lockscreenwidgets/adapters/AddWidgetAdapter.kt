@@ -53,6 +53,7 @@ class AddWidgetAdapter(private val picasso: Picasso, private val selectionCallba
 
     override fun getItemCount() = widgets.currentList.size
 
+    @SuppressLint("NotifyDataSetChanged")
     fun setItems(items: List<BaseListInfo>) {
         widgets.submitList(items) {
             notifyDataSetChanged()
@@ -71,7 +72,7 @@ class AddWidgetAdapter(private val picasso: Picasso, private val selectionCallba
             binding.widgetName.text = info.name
             binding.widgetSize.text = if (info is WidgetListInfo) {
                 "${info.providerInfo.minWidth}x${info.providerInfo.minHeight}"
-            } else "1x1"
+            } else itemView.context.resources.getString(R.string.shortcut)
 
             val img = binding.widgetImage
 

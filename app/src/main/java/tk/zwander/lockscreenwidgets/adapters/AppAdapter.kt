@@ -1,5 +1,6 @@
 package tk.zwander.lockscreenwidgets.adapters
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.net.Uri
 import android.view.LayoutInflater
@@ -13,7 +14,6 @@ import com.squareup.picasso.Picasso
 import tk.zwander.lockscreenwidgets.R
 import tk.zwander.lockscreenwidgets.data.AppInfo
 import tk.zwander.lockscreenwidgets.data.list.BaseListInfo
-import tk.zwander.lockscreenwidgets.data.list.WidgetListInfo
 import tk.zwander.lockscreenwidgets.databinding.AppItemBinding
 import tk.zwander.lockscreenwidgets.util.matchesFilter
 
@@ -68,6 +68,7 @@ class AppAdapter(context: Context, private val selectionCallback: (provider: Bas
         refreshFilter()
     }
 
+    @SuppressLint("NotifyDataSetChanged")
     private fun refreshFilter() {
         val newItems = orig.values
             .filter { it.matchesFilter(currentFilter) }

@@ -66,7 +66,14 @@ class ReconfigureWidgetActivity : BaseBindWidgetActivity() {
     override fun addNewWidget(id: Int, provider: AppWidgetProviderInfo) {
         val newSet = prefManager.currentWidgets.toMutableList()
 
-        val oldWidgetIndex = newSet.indexOf(WidgetData.widget(prevId, provider.provider, "", null, WidgetSizeData(1, 1)))
+        val oldWidgetIndex = newSet.indexOf(
+            WidgetData.widget(
+                prevId,
+                provider.provider,
+                "", null,
+                WidgetSizeData(1, 1)
+            )
+        )
 
         val oldWidget = if (oldWidgetIndex != -1) newSet.removeAt(oldWidgetIndex) else null
 

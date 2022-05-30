@@ -115,8 +115,6 @@ open class AddWidgetActivity : BaseBindWidgetActivity(), CoroutineScope by MainS
         cancel()
     }
 
-
-
     /**
      * Populate the selection list with the available widgets.
      * Lockscreen Widgets checks for both home screen and keyguard
