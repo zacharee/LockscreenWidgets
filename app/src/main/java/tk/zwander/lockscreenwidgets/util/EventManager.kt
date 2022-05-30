@@ -97,6 +97,9 @@ sealed class Event {
     object TempHide : Event()
     object LaunchAddWidget : Event()
     object FrameMoveFinished : Event()
+    object ScreenOff : Event()
+    object ScreenOn : Event()
+    object NightModeUpdate : Event()
 
     /**
      * On Android 8.0+, it's pretty easy to dismiss the lock screen with a simple API call.

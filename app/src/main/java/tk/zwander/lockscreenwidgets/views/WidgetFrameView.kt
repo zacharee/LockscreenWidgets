@@ -158,7 +158,7 @@ class WidgetFrameView(context: Context, attrs: AttributeSet) : ConstraintLayout(
     override fun onAttachedToWindow() {
         super.onAttachedToWindow()
 
-        context.prefManager.prefs.registerOnSharedPreferenceChangeListener(sharedPreferencesChangeHandler)
+        sharedPreferencesChangeHandler.register(context)
         if (context.prefManager.touchProtection) {
             registerProxListener()
         }
@@ -178,7 +178,7 @@ class WidgetFrameView(context: Context, attrs: AttributeSet) : ConstraintLayout(
     override fun onDetachedFromWindow() {
         super.onDetachedFromWindow()
 
-        context.prefManager.prefs.unregisterOnSharedPreferenceChangeListener(sharedPreferencesChangeHandler)
+        sharedPreferencesChangeHandler.unregister(context)
         unregisterProxListener()
 
         setEditMode(false)

@@ -2,11 +2,12 @@ package tk.zwander.lockscreenwidgets
 
 import android.annotation.SuppressLint
 import android.app.Application
-import android.content.ComponentName
-import android.content.Context
-import android.content.Intent
+import android.content.*
 import android.content.pm.PackageManager
+import android.database.ContentObserver
+import android.net.Uri
 import android.os.Build
+import android.provider.Settings
 import org.lsposed.hiddenapibypass.HiddenApiBypass
 import tk.zwander.lockscreenwidgets.activities.add.AddWidgetActivity
 import tk.zwander.lockscreenwidgets.tiles.NCTile
@@ -30,11 +31,28 @@ class App : Application() {
             private set
     }
 
-    private val addWidgetListener: (Event.LaunchAddWidget) -> Unit = {
-        val intent = Intent(this, AddWidgetActivity::class.java)
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+    //Listen for the screen turning on and off.
+    //This shouldn't really be necessary, but there are some quirks in how
+    //Android works that makes it helpful.
+    private val screenStateReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context?, intent: Intent?) {
+            when (intent?.action) {
+                Intent.ACTION_SCREEN_OFF -> eventManager.sendEvent(Event.ScreenOff)
+                Intent.ACTION_SCREEN_ON -> eventManager.sendEvent(Event.ScreenOn)
+            }
+        }
+    }
 
-        startActivity(intent)
+    //Some widgets display differently depending on the system's dark mode.
+    //Make sure the widgets are rebound if there's a change.
+    private val nightModeListener = object : ContentObserver(null) {
+        override fun onChange(selfChange: Boolean, uri: Uri?) {
+            when (uri) {
+                Settings.Secure.getUriFor(Settings.Secure.UI_NIGHT_MODE) -> {
+                    eventManager.sendEvent(Event.NightModeUpdate)
+                }
+            }
+        }
     }
 
     override fun onCreate() {
@@ -49,6 +67,16 @@ class App : Application() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
             HiddenApiBypass.setHiddenApiExemptions("L")
         }
+
+        registerReceiver(
+            screenStateReceiver,
+            IntentFilter(Intent.ACTION_SCREEN_OFF).apply { addAction(Intent.ACTION_SCREEN_ON) }
+        )
+        contentResolver.registerContentObserver(
+            Settings.Secure.getUriFor(Settings.Secure.UI_NIGHT_MODE),
+            true,
+            nightModeListener
+        )
 
         migrationManager.runMigrations()
 
@@ -80,6 +108,11 @@ class App : Application() {
             }
         }
 
-        eventManager.addListener(addWidgetListener)
+        eventManager.addListener { _: Event.LaunchAddWidget ->
+            val intent = Intent(this, AddWidgetActivity::class.java)
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+
+            startActivity(intent)
+        }
     }
 }

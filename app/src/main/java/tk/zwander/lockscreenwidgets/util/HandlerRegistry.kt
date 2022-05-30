@@ -1,5 +1,6 @@
 package tk.zwander.lockscreenwidgets.util
 
+import android.content.Context
 import android.content.SharedPreferences
 
 class HandlerRegistry(setup: HandlerRegistry.() -> Unit) : SharedPreferences.OnSharedPreferenceChangeListener {
@@ -31,6 +32,14 @@ class HandlerRegistry(setup: HandlerRegistry.() -> Unit) : SharedPreferences.OnS
 
     override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences, key: String) {
         handle(key)
+    }
+
+    fun register(context: Context) {
+        context.prefManager.registerOnSharedPreferenceChangeListener(this)
+    }
+
+    fun unregister(context: Context) {
+        context.prefManager.unregisterOnSharedPreferenceChangeListener(this)
     }
 
     data class ItemHandler(

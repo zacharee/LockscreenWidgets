@@ -7,12 +7,9 @@ import android.app.WallpaperManager
 import android.appwidget.AppWidgetManager
 import android.content.Context
 import android.content.ContextWrapper
-import android.database.ContentObserver
 import android.graphics.*
 import android.graphics.drawable.BitmapDrawable
-import android.net.Uri
 import android.os.*
-import android.provider.Settings
 import android.view.*
 import android.widget.ImageView
 import androidx.annotation.RequiresApi
@@ -74,11 +71,27 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
 
     var state: State = State()
         private set(newState) {
+            var actualNewState = newState
             val oldState = field
-            field = newState
 
-            if (newState.isPreview != oldState.isPreview) {
-                if (newState.isPreview) {
+            // Extra state checks //
+            if (actualNewState.notificationsPanelFullyExpanded != oldState.notificationsPanelFullyExpanded) {
+                actualNewState = actualNewState.copy(isPendingNotificationStateChange = true, isPreview = false)
+            }
+
+            if (actualNewState.isScreenOn != oldState.isScreenOn && !actualNewState.isScreenOn) {
+                actualNewState = actualNewState.copy(isPreview = false, notificationsPanelFullyExpanded = false)
+            }
+
+            if (actualNewState.isTempHide != oldState.isTempHide && actualNewState.isTempHide) {
+                actualNewState = actualNewState.copy(isPreview = false)
+            }
+            // ------------ //
+
+            field = actualNewState
+
+            if (actualNewState.isPreview != oldState.isPreview) {
+                if (actualNewState.isPreview) {
                     if (canShow()) {
                         addWindow(wm)
                     }
@@ -87,18 +100,6 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
                         removeWindow(wm)
                     }
                 }
-            }
-
-            if (newState.notificationsPanelFullyExpanded != oldState.notificationsPanelFullyExpanded) {
-                updateState { it.copy(isPendingNotificationStateChange = true) }
-            }
-
-            if (newState.isScreenOn != oldState.isScreenOn && !newState.isScreenOn) {
-                updateState { it.copy(isPreview = false, notificationsPanelFullyExpanded = false) }
-            }
-
-            if (newState.isTempHide != oldState.isTempHide && newState.isTempHide) {
-                updateState { it.copy(isPreview = false) }
             }
         }
 
@@ -157,8 +158,8 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
             target: RecyclerView.ViewHolder
         ): Boolean {
             return adapter.onMove(viewHolder.bindingAdapterPosition, target.bindingAdapterPosition)
-                .also {
-                    if (it) {
+                .also { moved ->
+                    if (moved) {
                         updateState { it.copy(updatedForMove = true) }
                         prefManager.currentWidgets = LinkedHashSet(adapter.widgets)
                         adapter.currentEditingInterfacePosition = -1
@@ -212,18 +213,6 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
         }
 
         override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {}
-    }
-
-    //Some widgets display differently depending on the system's dark mode.
-    //Make sure the widgets are rebound if there's a change.
-    private val nightModeListener = object : ContentObserver(null) {
-        override fun onChange(selfChange: Boolean, uri: Uri?) {
-            when (uri) {
-                Settings.Secure.getUriFor(Settings.Secure.UI_NIGHT_MODE) -> {
-                    adapter.updateViews()
-                }
-            }
-        }
     }
 
     private val kgm = context.getSystemService(Context.KEYGUARD_SERVICE) as KeyguardManager
@@ -298,6 +287,9 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
             Event.FrameMoveFinished -> updateWallpaperLayerIfNeeded()
             Event.TempHide -> {
                 updateState { it.copy(isTempHide = true) }
+            }
+            Event.NightModeUpdate -> {
+                adapter.updateViews()
             }
             is Event.FrameResized -> {
                 when (event.which) {
@@ -381,7 +373,7 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
     }
 
     fun onCreate() {
-        prefManager.prefs.registerOnSharedPreferenceChangeListener(sharedPreferencesChangeHandler)
+        sharedPreferencesChangeHandler.register(this)
         gridLayoutManager.spanSizeLookup = adapter.spanSizeLookup
         binding.widgetsPager.apply {
             adapter = this@WidgetFrameDelegate.adapter
@@ -389,11 +381,6 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
             setHasFixedSize(true)
             ItemTouchHelper(touchHelperCallback).attachToRecyclerView(this)
         }
-        contentResolver.registerContentObserver(
-            Settings.Secure.getUriFor(Settings.Secure.UI_NIGHT_MODE),
-            true,
-            nightModeListener
-        )
 
         updateRowColCount()
         adapter.updateWidgets(prefManager.currentWidgets.toList())
@@ -412,8 +399,7 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
     }
 
     fun onDestroy() {
-        prefManager.prefs.unregisterOnSharedPreferenceChangeListener(sharedPreferencesChangeHandler)
-        contentResolver.unregisterContentObserver(nightModeListener)
+        sharedPreferencesChangeHandler.unregister(this)
         eventManager.apply {
             removeObserver(this@WidgetFrameDelegate)
         }

@@ -4,6 +4,7 @@ import android.annotation.IntegerRes
 import android.content.Context
 import android.content.ContextWrapper
 import android.content.Intent
+import android.content.SharedPreferences.OnSharedPreferenceChangeListener
 import android.graphics.Color
 import android.net.Uri
 import androidx.core.content.edit
@@ -11,7 +12,10 @@ import androidx.preference.PreferenceManager
 import com.google.gson.GsonBuilder
 import com.google.gson.reflect.TypeToken
 import tk.zwander.lockscreenwidgets.R
-import tk.zwander.lockscreenwidgets.data.*
+import tk.zwander.lockscreenwidgets.data.Mode
+import tk.zwander.lockscreenwidgets.data.WidgetData
+import tk.zwander.lockscreenwidgets.data.WidgetSizeData
+import tk.zwander.lockscreenwidgets.data.WidgetTileInfo
 
 /**
  * Handle data persistence.
@@ -84,7 +88,7 @@ class PrefManager private constructor(context: Context) : ContextWrapper(context
     }
 
     //The actual SharedPreferences implementation
-    val prefs = PreferenceManager.getDefaultSharedPreferences(this)!!
+    private val prefs = PreferenceManager.getDefaultSharedPreferences(this)!!
     val gson = GsonBuilder()
         .setExclusionStrategies(CrashFixExclusionStrategy())
         .registerTypeAdapter(Uri::class.java, GsonUriHandler())
@@ -595,6 +599,14 @@ class PrefManager private constructor(context: Context) : ContextWrapper(context
             logUtils.normalLog("Error parsing input string $string", e)
             false
         }
+    }
+
+    fun registerOnSharedPreferenceChangeListener(listener: OnSharedPreferenceChangeListener) {
+        prefs.registerOnSharedPreferenceChangeListener(listener)
+    }
+
+    fun unregisterOnSharedPreferenceChangeListener(listener: OnSharedPreferenceChangeListener) {
+        prefs.unregisterOnSharedPreferenceChangeListener(listener)
     }
 
     fun getString(key: String, def: String? = null): String? = prefs.getString(key, def)

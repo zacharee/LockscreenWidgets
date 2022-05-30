@@ -3,10 +3,7 @@ package tk.zwander.lockscreenwidgets.services
 import android.accessibilityservice.AccessibilityService
 import android.annotation.SuppressLint
 import android.app.KeyguardManager
-import android.content.BroadcastReceiver
 import android.content.Context
-import android.content.Intent
-import android.content.IntentFilter
 import android.os.PowerManager
 import android.view.WindowManager
 import android.view.accessibility.AccessibilityEvent
@@ -38,47 +35,6 @@ class Accessibility : AccessibilityService(), EventObserver, CoroutineScope by M
     private val delegate: WidgetFrameDelegate
         get() = WidgetFrameDelegate.getInstance(this)
 
-
-    //Listen for the screen turning on and off.
-    //This shouldn't really be necessary, but there are some quirks in how
-    //Android works that makes it helpful.
-    private val screenStateReceiver = object : BroadcastReceiver() {
-        override fun onReceive(context: Context?, intent: Intent?) {
-            when (intent?.action) {
-                Intent.ACTION_SCREEN_OFF -> {
-                    //Sometimes ACTION_SCREEN_OFF gets received *after* the display turns on,
-                    //so this check is here to make sure the screen is actually off when this
-                    //action is received.
-                    if (!power.isInteractive) {
-                        logUtils.debugLog("Screen off")
-
-                        accessibilityJob?.cancel()
-
-                        //If the device has some sort of AOD or ambient display, by the time we receive
-                        //an accessibility event and see that the display is off, it's usually too late
-                        //and the current screen content has "frozen," causing the widget frame to show
-                        //where it shouldn't. ACTION_SCREEN_OFF is called early enough that we can remove
-                        //the frame before it's frozen in place.
-                        removeOverlay()
-                        delegate.forceWakelock(wm, false)
-                        delegate.updateState { it.copy(isTempHide = false, isScreenOn = false) }
-                    }
-                }
-                Intent.ACTION_SCREEN_ON -> {
-                    latestScreenOnTime = System.currentTimeMillis()
-
-                    logUtils.debugLog("Screen on")
-
-                    delegate.updateState { it.copy(isScreenOn = true) }
-                    if (delegate.canShow()) {
-                        accessibilityJob?.cancel()
-                        addOverlay()
-                    }
-                }
-            }
-        }
-    }
-
     private val sharedPreferencesChangeHandler = HandlerRegistry {
         handler(PrefManager.KEY_WIDGET_FRAME_ENABLED) {
             if (delegate.canShow()) {
@@ -108,12 +64,7 @@ class Accessibility : AccessibilityService(), EventObserver, CoroutineScope by M
         super.onCreate()
 
         delegate.onCreate()
-        prefManager.prefs.registerOnSharedPreferenceChangeListener(sharedPreferencesChangeHandler)
-
-        registerReceiver(
-            screenStateReceiver,
-            IntentFilter(Intent.ACTION_SCREEN_OFF).apply { addAction(Intent.ACTION_SCREEN_ON) }
-        )
+        sharedPreferencesChangeHandler.register(this)
 
         delegate.updateState {
             it.copy(wasOnKeyguard = kgm.isKeyguardLocked, isScreenOn = power.isInteractive)
@@ -399,6 +350,36 @@ class Accessibility : AccessibilityService(), EventObserver, CoroutineScope by M
             Event.TempHide -> {
                 removeOverlay()
             }
+            Event.ScreenOff -> {
+                //Sometimes ACTION_SCREEN_OFF gets received *after* the display turns on,
+                //so this check is here to make sure the screen is actually off when this
+                //action is received.
+                if (!power.isInteractive) {
+                    logUtils.debugLog("Screen off")
+
+                    accessibilityJob?.cancel()
+
+                    //If the device has some sort of AOD or ambient display, by the time we receive
+                    //an accessibility event and see that the display is off, it's usually too late
+                    //and the current screen content has "frozen," causing the widget frame to show
+                    //where it shouldn't. ACTION_SCREEN_OFF is called early enough that we can remove
+                    //the frame before it's frozen in place.
+                    removeOverlay()
+                    delegate.forceWakelock(wm, false)
+                    delegate.updateState { it.copy(isTempHide = false, isScreenOn = false) }
+                }
+            }
+            Event.ScreenOn -> {
+                latestScreenOnTime = System.currentTimeMillis()
+
+                logUtils.debugLog("Screen on")
+
+                delegate.updateState { it.copy(isScreenOn = true) }
+                if (delegate.canShow()) {
+                    accessibilityJob?.cancel()
+                    addOverlay()
+                }
+            }
             else -> {}
         }
     }
@@ -407,8 +388,7 @@ class Accessibility : AccessibilityService(), EventObserver, CoroutineScope by M
         super.onDestroy()
 
         cancel()
-        prefManager.prefs.unregisterOnSharedPreferenceChangeListener(sharedPreferencesChangeHandler)
-        unregisterReceiver(screenStateReceiver)
+        sharedPreferencesChangeHandler.unregister(this)
         delegate.onDestroy()
 
         WidgetFrameDelegate.invalidateInstance()
@@ -423,14 +403,6 @@ class Accessibility : AccessibilityService(), EventObserver, CoroutineScope by M
         mainHandler.postDelayed({
             delegate.addWindow(wm)
         }, 100)
-    }
-
-    /**
-     * Update the window manager on any params changes
-     * that may have occurred.
-     */
-    private fun updateOverlay() {
-        delegate.updateOverlay()
     }
 
     /**
