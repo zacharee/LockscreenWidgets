@@ -493,51 +493,51 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
      * =======
      */
     fun canShow(): Boolean {
-        return (
-                saveMode == Mode.PREVIEW
-                        || (state.isScreenOn
-                        && !state.isTempHide
-                        && (state.notificationsPanelFullyExpanded && prefManager.showInNotificationCenter)
-                        && !state.hideForPresentIds
-                        && !state.hideForNonPresentIds
-                        && prefManager.widgetFrameEnabled
-                        && (!prefManager.hideInLandscape || state.screenOrientation == Surface.ROTATION_0 || state.screenOrientation == Surface.ROTATION_180)
-                        ) || (state.wasOnKeyguard
-                        && state.isScreenOn
-                        && !state.isTempHide
-                        && (prefManager.showOnMainLockScreen || !prefManager.showInNotificationCenter)
-                        && (!prefManager.hideOnFaceWidgets || !state.isOnFaceWidgets)
-                        && state.currentAppLayer < 0
-                        && !state.isOnEdgePanel
-                        && !state.isOnScreenOffMemo
-                        && (state.onMainLockscreen || state.showingNotificationsPanel || !prefManager.hideOnSecurityPage)
-                        && (!state.showingNotificationsPanel || !prefManager.hideOnNotificationShade)
-                        && (state.notificationCount == 0 || !prefManager.hideOnNotifications)
-                        && (!state.hideForPresentIds || prefManager.presentIds.isEmpty())
-                        && (!state.hideForNonPresentIds || prefManager.nonPresentIds.isEmpty())
-                        && (!prefManager.hideInLandscape || state.screenOrientation == Surface.ROTATION_0 || state.screenOrientation == Surface.ROTATION_180)
-                        && prefManager.widgetFrameEnabled
-                        )
-                ).also {
+        fun forPreview(): Boolean {
+            return state.isPreview
+        }
+
+        fun forNotificationCenter(): Boolean {
+            return state.isScreenOn
+                    && !state.isTempHide
+                    && (state.notificationsPanelFullyExpanded && prefManager.showInNotificationCenter)
+                    && !state.hideForPresentIds
+                    && !state.hideForNonPresentIds
+                    && prefManager.widgetFrameEnabled
+                    && (!prefManager.hideInLandscape || state.screenOrientation == Surface.ROTATION_0 || state.screenOrientation == Surface.ROTATION_180)
+        }
+
+        fun forLockscreen(): Boolean {
+            return state.wasOnKeyguard
+                    && state.isScreenOn
+                    && !state.isTempHide
+                    && (prefManager.showOnMainLockScreen || !prefManager.showInNotificationCenter)
+                    && (!prefManager.hideOnFaceWidgets || !state.isOnFaceWidgets)
+                    && state.currentAppLayer < 0
+                    && !state.isOnEdgePanel
+                    && !state.isOnScreenOffMemo
+                    && (state.onMainLockscreen || state.showingNotificationsPanel || !prefManager.hideOnSecurityPage)
+                    && (!state.showingNotificationsPanel || !prefManager.hideOnNotificationShade)
+                    && (state.notificationCount == 0 || !prefManager.hideOnNotifications)
+                    && (!state.hideForPresentIds || prefManager.presentIds.isEmpty())
+                    && (!state.hideForNonPresentIds || prefManager.nonPresentIds.isEmpty())
+                    && (!prefManager.hideInLandscape || state.screenOrientation == Surface.ROTATION_0 || state.screenOrientation == Surface.ROTATION_180)
+                    && prefManager.widgetFrameEnabled
+        }
+
+        return (forPreview() || forNotificationCenter() || forLockscreen()).also {
                 logUtils.debugLog(
-                    "canShow: $it, " +
-                            "isScreenOn: ${state.isScreenOn}, " +
-                            "isTempHide: ${state.isTempHide}, " +
-                            "wasOnKeyguard: ${state.wasOnKeyguard}, " +
-                            "currentSysUiLayer: ${state.currentSysUiLayer}, " +
-                            "currentAppLayer: ${state.currentAppLayer}, " +
-                            "currentSystemLayer: ${state.currentSystemLayer}, " +
-                            "currentAppPackage: ${state.currentAppPackage}, " +
-                            "onMainLockscreen: ${state.onMainLockscreen}, " +
-                            "isOnFaceWidgets: ${state.isOnFaceWidgets}, " +
-                            "showingNotificationsPanel: ${state.onMainLockscreen}, " +
-                            "notificationsPanelFullyExpanded: ${state.notificationsPanelFullyExpanded}, " +
-                            "showOnMainLockScreen: ${prefManager.showOnMainLockScreen}" +
-                            "notificationCount: ${state.notificationCount}, " +
-                            "hideForPresentIds: ${state.hideForPresentIds}, " +
-                            "hideForNonPresentIds: ${state.hideForNonPresentIds}, " +
-                            "screenRotation: ${state.screenOrientation}, " +
-                            "widgetEnabled: ${prefManager.widgetFrameEnabled}"
+                    "canShow: $it\n" +
+                            "state: $state\n " +
+                            "showOnMainLockScreen: ${prefManager.showOnMainLockScreen}\n" +
+                            "widgetFrameEnabled: ${prefManager.widgetFrameEnabled}\n" +
+                            "hideOnSecurityPage: ${prefManager.hideOnSecurityPage}\n" +
+                            "hideOnNotifications: ${prefManager.hideOnNotifications}\n" +
+                            "hideOnNotificationShade: ${prefManager.hideOnNotificationShade}\n" +
+                            "presentIds: ${prefManager.presentIds}\n" +
+                            "nonPresentIds: ${prefManager.nonPresentIds}\n" +
+                            "hideInLandscape: ${prefManager.hideInLandscape}\n" +
+                            "showInNotificationCenter: ${prefManager.showInNotificationCenter}\n"
                 )
             }
     }
