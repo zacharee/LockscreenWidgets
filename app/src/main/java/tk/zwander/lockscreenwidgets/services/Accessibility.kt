@@ -116,7 +116,9 @@ class Accessibility : AccessibilityService(), EventObserver, CoroutineScope by M
             IntentFilter(Intent.ACTION_SCREEN_OFF).apply { addAction(Intent.ACTION_SCREEN_ON) }
         )
 
-        delegate.wasOnKeyguard = kgm.isKeyguardLocked
+        delegate.updateState {
+            it.copy(wasOnKeyguard = kgm.isKeyguardLocked)
+        }
         delegate.isScreenOn = power.isInteractive
 
         eventManager.addObserver(this)
@@ -143,6 +145,8 @@ class Accessibility : AccessibilityService(), EventObserver, CoroutineScope by M
             //so it shouldn't be noticeable to the user. We use this to check the current keyguard
             //state and, if applicable, send the keyguard dismissal broadcast.
 
+            var newState = delegate.state.copy()
+
             //Check if the screen is on.
             val isScreenOn = power.isInteractive
             if (delegate.isScreenOn != isScreenOn) {
@@ -153,8 +157,8 @@ class Accessibility : AccessibilityService(), EventObserver, CoroutineScope by M
 
             //Check if the lock screen is shown.
             val isOnKeyguard = kgm.isKeyguardLocked
-            if (isOnKeyguard != delegate.wasOnKeyguard) {
-                delegate.wasOnKeyguard = isOnKeyguard
+            if (isOnKeyguard != delegate.state.wasOnKeyguard) {
+                newState = newState.copy(wasOnKeyguard = isOnKeyguard)
                 //Update the keyguard dismissal Activity that the lock screen
                 //has been dismissed.
                 if (!isOnKeyguard) {
@@ -162,7 +166,7 @@ class Accessibility : AccessibilityService(), EventObserver, CoroutineScope by M
                 }
             }
 
-            delegate.screenOrientation = defaultDisplayCompat.rotation
+            newState = newState.copy(screenOrientation = defaultDisplayCompat.rotation)
 
             try {
                 logUtils.debugLog("Source Node ID: ${eventCopy.sourceNodeId}, Window ID: ${eventCopy.windowId}, Source ID Name: ${eventCopy.source?.viewIdResourceName}")
@@ -186,7 +190,7 @@ class Accessibility : AccessibilityService(), EventObserver, CoroutineScope by M
 
             //The below block can (very rarely) take over half a second to execute, so only run it
             //if we actually need to (i.e. on the lock screen and screen is on).
-            if ((delegate.wasOnKeyguard || prefManager.showInNotificationCenter) && isScreenOn) {
+            if ((isOnKeyguard || prefManager.showInNotificationCenter) && isScreenOn) {
                 //Retrieve the current window set.
                 val windows = windows.map { WindowRootPair(it, it.safeRoot) }
 
@@ -241,9 +245,9 @@ class Accessibility : AccessibilityService(), EventObserver, CoroutineScope by M
                     //Samsung's Screen-Off Memo is really just a normal Activity that shows over the lock screen.
                     //However, it's not an Application-type window for some reason, so it won't hide with the
                     //currentAppLayer check. Explicitly check for its existence here.
-                    delegate.isOnScreenOffMemo = windows.any { win ->
+                    newState = newState.copy(isOnScreenOffMemo = windows.any { win ->
                         win.root?.packageName == "com.samsung.android.app.notes"
-                    }
+                    })
 
                     //Generate "layer" values for the System UI window and for the topmost app window, if
                     //it exists.
@@ -252,27 +256,25 @@ class Accessibility : AccessibilityService(), EventObserver, CoroutineScope by M
                     //interacted with. The only time it should be anything else (usually 1) is
                     //if an app is displaying above the keyguard, such as the incoming call
                     //screen or the camera.
-                    delegate.currentAppLayer =
-                        if (appIndex != -1) windows.size - appIndex else appIndex
-                    delegate.currentSysUiLayer =
-                        if (sysUiIndex != -1) windows.size - sysUiIndex else sysUiIndex
-                    delegate.currentSystemLayer =
-                        if (systemIndex != -1) windows.size - systemIndex else systemIndex
+                    newState = newState.copy(
+                        currentAppLayer = if (appIndex != -1) windows.size - appIndex else appIndex,
+                        currentSysUiLayer = if (sysUiIndex != -1) windows.size - sysUiIndex else sysUiIndex,
+                        currentSystemLayer = if (systemIndex != -1) windows.size - systemIndex else systemIndex
+                    )
 
-                    if (isTouchWiz) {
+                    newState = newState.copy(isOnEdgePanel = if (isTouchWiz) {
                         val systemRoot = nonAppSystemWindow?.root
 
-                        delegate.isOnEdgePanel =
-                            systemRoot?.packageName == "com.samsung.android.app.cocktailbarservice"
-                                    && systemIndex == 0
+                        systemRoot?.packageName == "com.samsung.android.app.cocktailbarservice"
+                                && systemIndex == 0
                     } else {
-                        delegate.isOnEdgePanel = false
-                    }
+                        false
+                    })
 
                     //This is mostly a debug value to see which app LSWidg thinks is on top.
-                    delegate.currentAppPackage = appWindow?.root?.run {
+                    newState = newState.copy(currentAppPackage = appWindow?.root?.run {
                         packageName?.toString()
-                    }
+                    })
 
                     //If the user has enabled the option to hide the frame on security (pin, pattern, password)
                     //input, we need to check if they're on the main lock screen. This is more reliable than
@@ -280,36 +282,38 @@ class Accessibility : AccessibilityService(), EventObserver, CoroutineScope by M
                     //IDs, and OEMs change them. "notification_panel" and "left_button" are largely unchanged,
                     //although this method isn't perfect.
                     if (prefManager.hideOnSecurityPage) {
-                        delegate.onMainLockscreen = sysUiNodes.any {
+                        newState = newState.copy(onMainLockscreen = sysUiNodes.any {
                             it.hasVisibleIds(
                                 "com.android.systemui:id/notification_panel",
                                 "com.android.systemui:id/left_button"
                             )
-                        }
+                        })
                     }
 
                     if (prefManager.hideOnNotificationShade) {
                         //Used for "Hide When Notification Shade Shown" so we know when it's actually expanded.
                         //Some devices don't even have left shortcuts, so also check for keyguard_indication_area.
                         //Just like the showingSecurityInput check, this is probably unreliable for some devices.
-                        delegate.showingNotificationsPanel = sysUiNodes.any {
+                        newState = newState.copy(showingNotificationsPanel = sysUiNodes.any {
                             it.hasVisibleIds(
                                 "com.android.systemui:id/quick_settings_panel",
                                 "com.android.systemui:id/settings_button",
                                 "com.android.systemui:id/tile_label"
                             )
-                        }
+                        })
                     }
 
                     if (prefManager.hideOnFaceWidgets) {
-                        delegate.isOnFaceWidgets = windows.any {
+                        newState = newState.copy(isOnFaceWidgets = windows.any {
                             it.root?.packageName == "com.samsung.android.app.aodservice"
-                        }
+                        })
                     }
                 } else {
                     //If we're not on the lock screen, whether or not Screen-Off Memo is showing
                     //doesn't matter.
-                    delegate.isOnScreenOffMemo = false
+                    newState = newState.copy(
+                        isOnScreenOffMemo = false
+                    )
                 }
 
                 //If the option to show when the NC is fully expanded is enabled,
@@ -326,17 +330,21 @@ class Accessibility : AccessibilityService(), EventObserver, CoroutineScope by M
                 //If any are, the frame will be hidden.
                 val presentIds = prefManager.presentIds
                 if (presentIds.isNotEmpty()) {
-                    delegate.hideForPresentIds = sysUiNodes.any {
-                        it.hasVisibleIds(presentIds)
-                    }
+                    newState = newState.copy(
+                        hideForPresentIds = sysUiNodes.any {
+                            it.hasVisibleIds(presentIds)
+                        }
+                    )
                 }
 
                 //Check to see if any of the user-specified IDs aren't present
                 //(or are present but not visible). If any aren't, the frame will be hidden.
                 val nonPresentIds = prefManager.nonPresentIds
                 if (nonPresentIds.isNotEmpty()) {
-                    delegate.hideForNonPresentIds = sysUiNodes.none { nonPresentIds.contains(it.viewIdResourceName) }
-                            || sysUiNodes.any { nonPresentIds.contains(it.viewIdResourceName) && !it.isVisibleToUser }
+                    newState = newState.copy(
+                        hideForNonPresentIds = sysUiNodes.none { nonPresentIds.contains(it.viewIdResourceName) }
+                                || sysUiNodes.any { nonPresentIds.contains(it.viewIdResourceName) && !it.isVisibleToUser }
+                    )
                 }
 
                 //Recycle all windows and nodes.
@@ -352,6 +360,8 @@ class Accessibility : AccessibilityService(), EventObserver, CoroutineScope by M
                     } catch (_: IllegalStateException) {}
                 }
             }
+
+            delegate.updateState { newState }
 
             //Check whether the frame can show.
             if (delegate.canShow()) {
@@ -382,7 +392,7 @@ class Accessibility : AccessibilityService(), EventObserver, CoroutineScope by M
                 //If the notification count is > 0, and the user has the option enabled,
                 //make sure to hide the widget frame.
 
-                delegate.notificationCount = event.count
+                delegate.updateState { it.copy(notificationCount = event.count) }
                 if (prefManager.hideOnNotifications && event.count > 0) {
                     removeOverlay()
                 } else if (delegate.canShow()) {

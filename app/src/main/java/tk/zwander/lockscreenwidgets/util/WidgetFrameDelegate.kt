@@ -18,6 +18,7 @@ import android.widget.ImageView
 import androidx.annotation.RequiresApi
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
+import com.android.internal.R.attr.screenOrientation
 import com.arasthel.spannedgridlayoutmanager.SpannedGridLayoutManager
 import tk.zwander.lockscreenwidgets.R
 import tk.zwander.lockscreenwidgets.activities.DismissOrUnlockActivity
@@ -255,20 +256,8 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
 
             field = value
         }
-    var screenOrientation = Surface.ROTATION_0
-    var wasOnKeyguard = false
-    var isOnFaceWidgets = false
-    var currentAppLayer = 0
-    var isOnScreenOffMemo = false
-    var onMainLockscreen = false
-    var showingNotificationsPanel = false
-    var notificationCount = 0
-    var hideForPresentIds = false
-    var hideForNonPresentIds = false
-    var currentSysUiLayer = 1
-    var currentSystemLayer = 0
-    var currentAppPackage: String? = null
-    var isOnEdgePanel = false
+    var state: State = State()
+        private set
     // ******************** //
 
     private val sharedPreferencesChangeHandler = HandlerRegistry {
@@ -462,6 +451,10 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
         }
     }
 
+    fun updateState(transform: (State) -> State) {
+        state = transform(state)
+    }
+
     /**
      * Make sure the number of rows/columns in the widget frame reflects the user-selected value.
      */
@@ -527,19 +520,19 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
                         && (notificationsPanelFullyExpanded && prefManager.showInNotificationCenter)
                         && prefManager.widgetFrameEnabled
                         && (!prefManager.hideInLandscape || screenOrientation == Surface.ROTATION_0 || screenOrientation == Surface.ROTATION_180)
-                        ) || (wasOnKeyguard
+                        ) || (state.wasOnKeyguard
                         && isScreenOn
                         && !isTempHide
                         && (prefManager.showOnMainLockScreen || !prefManager.showInNotificationCenter)
-                        && (!prefManager.hideOnFaceWidgets || !isOnFaceWidgets)
-                        && currentAppLayer < 0
-                        && !isOnEdgePanel
-                        && !isOnScreenOffMemo
-                        && (onMainLockscreen || showingNotificationsPanel || !prefManager.hideOnSecurityPage)
-                        && (!showingNotificationsPanel || !prefManager.hideOnNotificationShade)
-                        && (notificationCount == 0 || !prefManager.hideOnNotifications)
-                        && (!hideForPresentIds || prefManager.presentIds.isEmpty())
-                        && (!hideForNonPresentIds || prefManager.nonPresentIds.isEmpty())
+                        && (!prefManager.hideOnFaceWidgets || !state.isOnFaceWidgets)
+                        && state.currentAppLayer < 0
+                        && !state.isOnEdgePanel
+                        && !state.isOnScreenOffMemo
+                        && (state.onMainLockscreen || state.showingNotificationsPanel || !prefManager.hideOnSecurityPage)
+                        && (!state.showingNotificationsPanel || !prefManager.hideOnNotificationShade)
+                        && (state.notificationCount == 0 || !prefManager.hideOnNotifications)
+                        && (!state.hideForPresentIds || prefManager.presentIds.isEmpty())
+                        && (!state.hideForNonPresentIds || prefManager.nonPresentIds.isEmpty())
                         && (!prefManager.hideInLandscape || screenOrientation == Surface.ROTATION_0 || screenOrientation == Surface.ROTATION_180)
                         && prefManager.widgetFrameEnabled
                         )
@@ -548,19 +541,19 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
                     "canShow: $it, " +
                             "isScreenOn: ${isScreenOn}, " +
                             "isTempHide: ${isTempHide}, " +
-                            "wasOnKeyguard: $wasOnKeyguard, " +
-                            "currentSysUiLayer: $currentSysUiLayer, " +
-                            "currentAppLayer: $currentAppLayer, " +
-                            "currentSystemLayer: $currentSystemLayer, " +
-                            "currentAppPackage: $currentAppPackage, " +
-                            "onMainLockscreen: $onMainLockscreen, " +
-                            "isOnFaceWidgets: $isOnFaceWidgets, " +
-                            "showingNotificationsPanel: $showingNotificationsPanel, " +
+                            "wasOnKeyguard: ${state.wasOnKeyguard}, " +
+                            "currentSysUiLayer: ${state.currentSysUiLayer}, " +
+                            "currentAppLayer: ${state.currentAppLayer}, " +
+                            "currentSystemLayer: ${state.currentSysUiLayer}, " +
+                            "currentAppPackage: ${state.currentAppLayer}, " +
+                            "onMainLockscreen: ${state.onMainLockscreen}, " +
+                            "isOnFaceWidgets: ${state.isOnFaceWidgets}, " +
+                            "showingNotificationsPanel: ${state.onMainLockscreen}, " +
                             "notificationsPanelFullyExpanded: $notificationsPanelFullyExpanded, " +
                             "showOnMainLockScreen: ${prefManager.showOnMainLockScreen}" +
-                            "notificationCount: $notificationCount, " +
-                            "hideForPresentIds: $hideForPresentIds, " +
-                            "hideForNonPresentIds: $hideForNonPresentIds, " +
+                            "notificationCount: ${state.isOnFaceWidgets}, " +
+                            "hideForPresentIds: ${state.isOnFaceWidgets}, " +
+                            "hideForNonPresentIds: ${state.isOnFaceWidgets}, " +
                             "screenRotation: $screenOrientation, " +
                             "widgetEnabled: ${prefManager.widgetFrameEnabled}"
                 )
@@ -843,4 +836,22 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
             return adapter.currentEditingInterfacePosition == -1
         }
     }
+
+    data class State(
+        val screenOrientation: Int = Surface.ROTATION_0,
+        val wasOnKeyguard: Boolean = false,
+        val isOnFaceWidgets: Boolean = false,
+        val currentAppLayer: Int = 0,
+        val isOnScreenOffMemo: Boolean = false,
+        val onMainLockscreen: Boolean = false,
+        val showingNotificationsPanel: Boolean = false,
+        val notificationCount: Int = 0,
+        val hideForPresentIds: Boolean = false,
+        val hideForNonPresentIds: Boolean = false,
+        val currentSysUiLayer: Int = 1,
+        val currentSystemLayer: Int = 0,
+        val currentAppPackage: String? = null,
+        val isOnEdgePanel: Boolean = false,
+        val isPreview: Boolean = false
+    )
 }
