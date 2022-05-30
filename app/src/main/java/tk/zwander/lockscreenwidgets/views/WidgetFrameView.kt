@@ -1,5 +1,6 @@
 package tk.zwander.lockscreenwidgets.views
 
+import android.animation.LayoutTransition
 import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.drawable.GradientDrawable

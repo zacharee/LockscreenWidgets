@@ -1,15 +1,9 @@
 package tk.zwander.lockscreenwidgets.drawable
 
 import android.annotation.ColorInt
-import android.annotation.TargetApi
-import android.content.res.Resources
-import android.graphics.*
 import android.graphics.drawable.Drawable
 import android.os.Build
-import android.util.AttributeSet
-import androidx.annotation.RequiresApi
 import com.android.internal.graphics.drawable.BackgroundBlurDrawable
-import org.xmlpull.v1.XmlPullParser
 
 class BackgroundBlurDrawableCompat12(override val wrapped: BackgroundBlurDrawable?) : BackgroundBlurDrawableCompatDelegate(wrapped) {
     override fun setColor(color: Int) {

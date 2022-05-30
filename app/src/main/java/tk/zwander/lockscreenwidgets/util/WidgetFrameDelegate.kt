@@ -14,6 +14,7 @@ import android.view.*
 import android.widget.ImageView
 import android.widget.Toast
 import androidx.annotation.RequiresApi
+import androidx.core.view.isVisible
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import com.android.internal.R.attr.screenOrientation
@@ -343,13 +344,13 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
                 try {
                     if (event.attached) {
                         widgetHost.startListening()
+                        updateBlur()
+                        updateWallpaperLayerIfNeeded()
                         //Even with the startListening() call above,
                         //it doesn't seem like pending updates always get
                         //dispatched. Rebinding all the widgets forces
                         //them to update.
                         mainHandler.postDelayed({
-                            updateBlur()
-                            updateWallpaperLayerIfNeeded()
                             adapter.updateViews()
                             gridLayoutManager.scrollToPosition(prefManager.currentPage)
                         }, 50)
@@ -574,6 +575,8 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
     fun updateWallpaperLayerIfNeeded() {
         logUtils.debugLog("updateWallpaperLayerIfNeeded() called $showWallpaperLayerCondition")
 
+        binding.wallpaperBackground.isVisible = showWallpaperLayerCondition
+
         if (showWallpaperLayerCondition) {
             val service = IWallpaperManager.Stub.asInterface(ServiceManager.getService("wallpaper"))
 
@@ -711,11 +714,8 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
         val blur = prefManager.blurBackground
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            if (blur && !showWallpaperLayerCondition) {
-                binding.blurBackground.background = binding.frame.blurDrawable?.wrapped
-            } else {
-                binding.blurBackground.background = null
-            }
+            binding.blurBackground.background = binding.frame.blurDrawable?.wrapped
+            binding.blurBackground.isVisible = blur && !showWallpaperLayerCondition
         } else {
             val f = try {
                 params::class.java.getDeclaredField("samsungFlags")
