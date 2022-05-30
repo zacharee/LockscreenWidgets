@@ -42,7 +42,7 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
         @SuppressLint("StaticFieldLeak")
         private var instance: WidgetFrameDelegate? = null
 
-        val hasInstance: Boolean
+        private val hasInstance: Boolean
             get() = instance != null
 
         fun peekInstance(context: Context): WidgetFrameDelegate? {
@@ -72,50 +72,40 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
         }
     }
 
-    //This is used to track when the notification shade has
-    //been expanded/collapsed or when the "show in NC" setting
-    //has been changed. Since the params are different for the
-    //widget frame depending on whether it's showing in the NC
-    //or not, we need to update them. We could do it directly,
-    //but that causes weird shifting and resizing since it happens
-    //before the Accessibility Service hides or shows the frame.
-    //So instead, we set this flag to true when the params should be
-    //updated. The Accessibility Service takes care of calling
-    //the update method after it starts a frame removal or addition.
-    //The method itself checks whether it can run (i.e. the
-    //animation state of the frame is IDLE) and then updates
-    //the params.
-    private var isPendingNotificationStateChange = false
+    var state: State = State()
+        private set(newState) {
+            val oldState = field
+            field = newState
 
-    var updatedForMove = false
-    var isHoldingItem = false
-    var notificationsPanelFullyExpanded = false
-        set(value) {
-            val changed = field != value
-            field = value
-
-            isPendingNotificationStateChange = changed
-        }
-
-    var isPreview = false
-        set(value) {
-            field = value
-
-            if (value) {
-                if (canShow()) {
-                    addWindow(wm)
+            if (newState.isPreview != oldState.isPreview) {
+                if (newState.isPreview) {
+                    if (canShow()) {
+                        addWindow(wm)
+                    }
+                } else {
+                    if (!canShow()) {
+                        removeWindow(wm)
+                    }
                 }
-            } else {
-                if (!canShow()) {
-                    binding.frame.removeWindow(wm)
-                }
+            }
+
+            if (newState.notificationsPanelFullyExpanded != oldState.notificationsPanelFullyExpanded) {
+                updateState { it.copy(isPendingNotificationStateChange = true) }
+            }
+
+            if (newState.isScreenOn != oldState.isScreenOn && !newState.isScreenOn) {
+                updateState { it.copy(isPreview = false, notificationsPanelFullyExpanded = false) }
+            }
+
+            if (newState.isTempHide != oldState.isTempHide && newState.isTempHide) {
+                updateState { it.copy(isPreview = false) }
             }
         }
 
     override val saveMode: Mode
         get() = when {
-            isPreview -> Mode.PREVIEW
-            notificationsPanelFullyExpanded && prefManager.showInNotificationCenter -> {
+            state.isPreview -> Mode.PREVIEW
+            state.notificationsPanelFullyExpanded && prefManager.showInNotificationCenter -> {
                 if (kgm.isKeyguardLocked && prefManager.separatePosForLockNC) {
                     Mode.LOCK_NOTIFICATION
                 } else {
@@ -152,9 +142,9 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
     private val shortcutIdManager = ShortcutIdManager.getInstance(this, widgetHost)
 
     //The actual frame View
-    val binding = WidgetFrameBinding.inflate(LayoutInflater.from(ContextThemeWrapper(this, R.style.AppTheme)))
+    private val binding = WidgetFrameBinding.inflate(LayoutInflater.from(ContextThemeWrapper(this, R.style.AppTheme)))
     private val gridLayoutManager = SpannedLayoutManager()
-    val adapter = WidgetFrameAdapter(widgetManager, widgetHost, params) { _, item ->
+    private val adapter = WidgetFrameAdapter(widgetManager, widgetHost, params) { _, item ->
         binding.removeWidgetConfirmation.root.show(item)
     }
     private val touchHelperCallback = object : ItemTouchHelper.SimpleCallback(
@@ -169,7 +159,7 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
             return adapter.onMove(viewHolder.bindingAdapterPosition, target.bindingAdapterPosition)
                 .also {
                     if (it) {
-                        updatedForMove = true
+                        updateState { it.copy(updatedForMove = true) }
                         prefManager.currentWidgets = LinkedHashSet(adapter.widgets)
                         adapter.currentEditingInterfacePosition = -1
                     }
@@ -187,7 +177,7 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
         override fun onSelectedChanged(viewHolder: RecyclerView.ViewHolder?, actionState: Int) {
             if (actionState != ItemTouchHelper.ACTION_STATE_IDLE) {
                 viewHolder?.itemView?.alpha = 0.5f
-                isHoldingItem = true
+                updateState { it.copy(isHoldingItem = true) }
 
                 //The user has long-pressed a widget. Show the editing UI on that widget.
                 //If the UI is already shown on it, hide it.
@@ -205,7 +195,7 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
         ) {
             super.clearView(recyclerView, viewHolder)
 
-            isHoldingItem = false
+            updateState { it.copy(isHoldingItem = false) }
             viewHolder.itemView.alpha = 1.0f
         }
 
@@ -238,32 +228,10 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
 
     private val kgm = context.getSystemService(Context.KEYGUARD_SERVICE) as KeyguardManager
 
-    // ACCESSIBILITY VALUES //
-    var isScreenOn = false
-        set(value) {
-            field = value
-
-            if (!value) {
-                isPreview = false
-                notificationsPanelFullyExpanded = false
-            }
-        }
-    var isTempHide = false
-        set(value) {
-            if (value) {
-                isPreview = false
-            }
-
-            field = value
-        }
-    var state: State = State()
-        private set
-    // ******************** //
-
     private val sharedPreferencesChangeHandler = HandlerRegistry {
         handler(PrefManager.KEY_CURRENT_WIDGETS) {
             //Make sure the adapter knows of any changes to the widget list
-            if (!updatedForMove) {
+            if (!state.updatedForMove) {
                 //Only run the update if it wasn't generated by a reorder event
                 adapter.updateWidgets(prefManager.currentWidgets.toList())
 
@@ -271,7 +239,7 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
                     gridLayoutManager.scrollToPosition(prefManager.currentPage)
                 }, 50)
             } else {
-                updatedForMove = false
+                updateState { it.copy(updatedForMove = false) }
             }
         }
         handler(PrefManager.KEY_PAGE_INDICATOR_BEHAVIOR) {
@@ -300,7 +268,7 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
             binding.frame.updateDebugIdViewVisibility()
         }
         handler(PrefManager.KEY_SHOW_IN_NOTIFICATION_CENTER) {
-            isPendingNotificationStateChange = true
+            updateState { it.copy(isPendingNotificationStateChange = true) }
         }
         handler(PrefManager.KEY_FRAME_CORNER_RADIUS) {
             binding.frame.updateCornerRadius()
@@ -323,13 +291,13 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
     }
 
     private val showWallpaperLayerCondition: Boolean
-        get() = !isPreview && prefManager.maskedMode && (!notificationsPanelFullyExpanded || !prefManager.showInNotificationCenter)
+        get() = !state.isPreview && prefManager.maskedMode && (!state.notificationsPanelFullyExpanded || !prefManager.showInNotificationCenter)
 
     override fun onEvent(event: Event) {
         when (event) {
             Event.FrameMoveFinished -> updateWallpaperLayerIfNeeded()
             Event.TempHide -> {
-                isTempHide = true
+                updateState { it.copy(isTempHide = true) }
             }
             is Event.FrameResized -> {
                 when (event.which) {
@@ -366,13 +334,13 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
             is Event.FrameAttachmentState -> {
                 try {
                     if (event.attached) {
-                        updateBlur()
                         widgetHost.startListening()
                         //Even with the startListening() call above,
                         //it doesn't seem like pending updates always get
                         //dispatched. Rebinding all the widgets forces
                         //them to update.
                         mainHandler.postDelayed({
+                            updateBlur()
                             updateWallpaperLayerIfNeeded()
                             adapter.updateViews()
                             gridLayoutManager.scrollToPosition(prefManager.currentPage)
@@ -475,6 +443,16 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
         binding.frame.addWindow(wm, params)
     }
 
+    fun removeWindow(wm: WindowManager) {
+        adapter.currentEditingInterfacePosition = -1
+
+        binding.frame.removeWindow(wm)
+    }
+
+    fun setNewDebugIdItems(items: List<String>) {
+        binding.frame.setNewDebugIdItems(items)
+    }
+
     /**
      * Check if the widget frame should show onscreen. There are quite a few conditions for this.
      * This method attempts to check those conditions in increasing order of intensiveness (check simple
@@ -487,27 +465,27 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
      * =======
      * OR
      * =======
-     * - [isScreenOn] is true
-     * - [isTempHide] is false
-     * - [notificationsPanelFullyExpanded] is true AND [PrefManager.showInNotificationCenter] is true
+     * - [State.isScreenOn] is true
+     * - [State.isTempHide] is false
+     * - [State.notificationsPanelFullyExpanded] is true AND [PrefManager.showInNotificationCenter] is true
      * - [PrefManager.widgetFrameEnabled] is true
      * - [PrefManager.hideInLandscape] is false OR [screenOrientation] represents a portrait rotation
      * =======
      * OR
      * =======
-     * - [wasOnKeyguard] is true
-     * - [isScreenOn] is true (i.e. the display is properly on: not in Doze or on the AOD)
-     * - [isTempHide] is false
+     * - [State.wasOnKeyguard] is true
+     * - [State.isScreenOn] is true (i.e. the display is properly on: not in Doze or on the AOD)
+     * - [State.isTempHide] is false
      * - [PrefManager.showOnMainLockScreen] is true OR [PrefManager.showInNotificationCenter] is false
-     * - [PrefManager.hideOnFaceWidgets] is false OR [isOnFaceWidgets] is false
-     * - [currentAppLayer] is less than 0 (i.e. doesn't exist)
-     * - [isOnEdgePanel] is false
-     * - [isOnScreenOffMemo] is false
-     * - [onMainLockscreen] is true OR [showingNotificationsPanel] is true OR [PrefManager.hideOnSecurityPage] is false
-     * - [showingNotificationsPanel] is false OR [PrefManager.hideOnNotificationShade] is false (OR [notificationsPanelFullyExpanded] is true AND [PrefManager.showInNotificationCenter] is true
-     * - [notificationCount] is 0 (i.e. no notifications shown on lock screen, not necessarily no notifications at all) OR [PrefManager.hideOnNotifications] is false
-     * - [hideForPresentIds] is false OR [PrefManager.presentIds] is empty
-     * - [hideForNonPresentIds] is false OR [PrefManager.nonPresentIds] is empty
+     * - [PrefManager.hideOnFaceWidgets] is false OR [State.isOnFaceWidgets] is false
+     * - [State.currentAppLayer] is less than 0 (i.e. doesn't exist)
+     * - [State.isOnEdgePanel] is false
+     * - [State.isOnScreenOffMemo] is false
+     * - [State.onMainLockscreen] is true OR [State.showingNotificationsPanel] is true OR [PrefManager.hideOnSecurityPage] is false
+     * - [State.showingNotificationsPanel] is false OR [PrefManager.hideOnNotificationShade] is false (OR [State.notificationsPanelFullyExpanded] is true AND [PrefManager.showInNotificationCenter] is true
+     * - [State.notificationCount] is 0 (i.e. no notifications shown on lock screen, not necessarily no notifications at all) OR [PrefManager.hideOnNotifications] is false
+     * - [State.hideForPresentIds] is false OR [PrefManager.presentIds] is empty
+     * - [State.hideForNonPresentIds] is false OR [PrefManager.nonPresentIds] is empty
      * - [PrefManager.hideInLandscape] is false OR [screenOrientation] represents a portrait rotation
      * - [PrefManager.widgetFrameEnabled] is true (i.e. the widget frame is actually enabled)
      * =======
@@ -515,14 +493,14 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
     fun canShow(): Boolean {
         return (
                 saveMode == Mode.PREVIEW
-                        || (isScreenOn
-                        && !isTempHide
-                        && (notificationsPanelFullyExpanded && prefManager.showInNotificationCenter)
+                        || (state.isScreenOn
+                        && !state.isTempHide
+                        && (state.notificationsPanelFullyExpanded && prefManager.showInNotificationCenter)
                         && prefManager.widgetFrameEnabled
-                        && (!prefManager.hideInLandscape || screenOrientation == Surface.ROTATION_0 || screenOrientation == Surface.ROTATION_180)
+                        && (!prefManager.hideInLandscape || state.screenOrientation == Surface.ROTATION_0 || state.screenOrientation == Surface.ROTATION_180)
                         ) || (state.wasOnKeyguard
-                        && isScreenOn
-                        && !isTempHide
+                        && state.isScreenOn
+                        && !state.isTempHide
                         && (prefManager.showOnMainLockScreen || !prefManager.showInNotificationCenter)
                         && (!prefManager.hideOnFaceWidgets || !state.isOnFaceWidgets)
                         && state.currentAppLayer < 0
@@ -533,28 +511,28 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
                         && (state.notificationCount == 0 || !prefManager.hideOnNotifications)
                         && (!state.hideForPresentIds || prefManager.presentIds.isEmpty())
                         && (!state.hideForNonPresentIds || prefManager.nonPresentIds.isEmpty())
-                        && (!prefManager.hideInLandscape || screenOrientation == Surface.ROTATION_0 || screenOrientation == Surface.ROTATION_180)
+                        && (!prefManager.hideInLandscape || state.screenOrientation == Surface.ROTATION_0 || state.screenOrientation == Surface.ROTATION_180)
                         && prefManager.widgetFrameEnabled
                         )
                 ).also {
                 logUtils.debugLog(
                     "canShow: $it, " +
-                            "isScreenOn: ${isScreenOn}, " +
-                            "isTempHide: ${isTempHide}, " +
+                            "isScreenOn: ${state.isScreenOn}, " +
+                            "isTempHide: ${state.isTempHide}, " +
                             "wasOnKeyguard: ${state.wasOnKeyguard}, " +
                             "currentSysUiLayer: ${state.currentSysUiLayer}, " +
                             "currentAppLayer: ${state.currentAppLayer}, " +
-                            "currentSystemLayer: ${state.currentSysUiLayer}, " +
-                            "currentAppPackage: ${state.currentAppLayer}, " +
+                            "currentSystemLayer: ${state.currentSystemLayer}, " +
+                            "currentAppPackage: ${state.currentAppPackage}, " +
                             "onMainLockscreen: ${state.onMainLockscreen}, " +
                             "isOnFaceWidgets: ${state.isOnFaceWidgets}, " +
                             "showingNotificationsPanel: ${state.onMainLockscreen}, " +
-                            "notificationsPanelFullyExpanded: $notificationsPanelFullyExpanded, " +
+                            "notificationsPanelFullyExpanded: ${state.notificationsPanelFullyExpanded}, " +
                             "showOnMainLockScreen: ${prefManager.showOnMainLockScreen}" +
-                            "notificationCount: ${state.isOnFaceWidgets}, " +
-                            "hideForPresentIds: ${state.isOnFaceWidgets}, " +
-                            "hideForNonPresentIds: ${state.isOnFaceWidgets}, " +
-                            "screenRotation: $screenOrientation, " +
+                            "notificationCount: ${state.notificationCount}, " +
+                            "hideForPresentIds: ${state.hideForPresentIds}, " +
+                            "hideForNonPresentIds: ${state.hideForNonPresentIds}, " +
+                            "screenRotation: ${state.screenOrientation}, " +
                             "widgetEnabled: ${prefManager.widgetFrameEnabled}"
                 )
             }
@@ -681,9 +659,9 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
      */
     fun updateAccessibilityPass() {
         if (binding.frame.animationState == WidgetFrameView.AnimationState.STATE_IDLE) {
-            if (isPendingNotificationStateChange) {
+            if (state.isPendingNotificationStateChange) {
                 updateParamsIfNeeded()
-                isPendingNotificationStateChange = false
+                updateState { it.copy(isPendingNotificationStateChange = false) }
             }
         }
     }
@@ -791,6 +769,7 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
             binding.frame.updateWindow(wm, params)
             mainHandler.post {
                 updateWallpaperLayerIfNeeded()
+                updateBlur()
                 adapter.updateViews()
                 gridLayoutManager.scrollToPosition(prefManager.currentPage)
             }
@@ -805,7 +784,7 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
         prefManager.frameColCount
     ), ISnappyLayoutManager {
         override fun canScrollHorizontally(): Boolean {
-            return (adapter.currentEditingInterfacePosition == -1 || isHoldingItem) && super.canScrollHorizontally()
+            return (adapter.currentEditingInterfacePosition == -1 || state.isHoldingItem) && super.canScrollHorizontally()
         }
 
         override fun getFixScrollPos(velocityX: Int, velocityY: Int): Int {
@@ -852,6 +831,25 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
         val currentSystemLayer: Int = 0,
         val currentAppPackage: String? = null,
         val isOnEdgePanel: Boolean = false,
-        val isPreview: Boolean = false
+        val isPreview: Boolean = false,
+        val updatedForMove: Boolean = false,
+        val isHoldingItem: Boolean = false,
+        //This is used to track when the notification shade has
+        //been expanded/collapsed or when the "show in NC" setting
+        //has been changed. Since the params are different for the
+        //widget frame depending on whether it's showing in the NC
+        //or not, we need to update them. We could do it directly,
+        //but that causes weird shifting and resizing since it happens
+        //before the Accessibility Service hides or shows the frame.
+        //So instead, we set this flag to true when the params should be
+        //updated. The Accessibility Service takes care of calling
+        //the update method after it starts a frame removal or addition.
+        //The method itself checks whether it can run (i.e. the
+        //animation state of the frame is IDLE) and then updates
+        //the params.
+        val isPendingNotificationStateChange: Boolean = false,
+        val notificationsPanelFullyExpanded: Boolean = false,
+        val isScreenOn: Boolean = false,
+        val isTempHide: Boolean = false,
     )
 }

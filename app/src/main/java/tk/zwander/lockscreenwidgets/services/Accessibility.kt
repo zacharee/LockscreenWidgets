@@ -61,8 +61,7 @@ class Accessibility : AccessibilityService(), EventObserver, CoroutineScope by M
                         //the frame before it's frozen in place.
                         removeOverlay()
                         delegate.forceWakelock(wm, false)
-                        delegate.isTempHide = false
-                        delegate.isScreenOn = false
+                        delegate.updateState { it.copy(isTempHide = false, isScreenOn = false) }
                     }
                 }
                 Intent.ACTION_SCREEN_ON -> {
@@ -70,7 +69,7 @@ class Accessibility : AccessibilityService(), EventObserver, CoroutineScope by M
 
                     logUtils.debugLog("Screen on")
 
-                    delegate.isScreenOn = true
+                    delegate.updateState { it.copy(isScreenOn = true) }
                     if (delegate.canShow()) {
                         accessibilityJob?.cancel()
                         addOverlay()
@@ -117,9 +116,8 @@ class Accessibility : AccessibilityService(), EventObserver, CoroutineScope by M
         )
 
         delegate.updateState {
-            it.copy(wasOnKeyguard = kgm.isKeyguardLocked)
+            it.copy(wasOnKeyguard = kgm.isKeyguardLocked, isScreenOn = power.isInteractive)
         }
-        delegate.isScreenOn = power.isInteractive
 
         eventManager.addObserver(this)
     }
@@ -149,10 +147,9 @@ class Accessibility : AccessibilityService(), EventObserver, CoroutineScope by M
 
             //Check if the screen is on.
             val isScreenOn = power.isInteractive
-            if (delegate.isScreenOn != isScreenOn) {
+            if (delegate.state.isScreenOn != isScreenOn) {
                 //Make sure to turn off temp hide if it was on.
-                delegate.isTempHide = false
-                delegate.isScreenOn = isScreenOn
+                newState = newState.copy(isTempHide = false, isScreenOn = isScreenOn)
             }
 
             //Check if the lock screen is shown.
@@ -227,7 +224,7 @@ class Accessibility : AccessibilityService(), EventObserver, CoroutineScope by M
                             .toString()
                     )
 
-                    delegate.binding.frame.setNewDebugIdItems(items.toList())
+                    delegate.setNewDebugIdItems(items.toList())
                 }
 
                 //The logic in this block only needs to run when on the lock screen.
@@ -321,9 +318,9 @@ class Accessibility : AccessibilityService(), EventObserver, CoroutineScope by M
                 //ID, which is unique to One UI (it's the three-dot button), and is only
                 //visible when the NC is fully expanded.
                 if (prefManager.showInNotificationCenter) {
-                    delegate.notificationsPanelFullyExpanded = sysUiNodes.any {
+                    newState = newState.copy(notificationsPanelFullyExpanded = sysUiNodes.any {
                         it.hasVisibleIds("com.android.systemui:id/more_button")
-                    }
+                    })
                 }
 
                 //Check to see if any of the user-specified IDs are present.
@@ -444,8 +441,7 @@ class Accessibility : AccessibilityService(), EventObserver, CoroutineScope by M
     private fun removeOverlay() {
         logUtils.debugLog("Removing overlay")
 
-        delegate.adapter.currentEditingInterfacePosition = -1
-        delegate.binding.frame.removeWindow(wm)
+        delegate.removeWindow(wm)
     }
 
     /**

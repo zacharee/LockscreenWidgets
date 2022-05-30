@@ -2,12 +2,12 @@ package tk.zwander.lockscreenwidgets
 
 import android.app.Activity
 import android.content.Intent
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AppCompatActivity
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.cancel
@@ -79,9 +79,7 @@ class MainActivity : AppCompatActivity(), CoroutineScope by MainScope() {
                 true
             }
             R.id.preview -> {
-                frameDelegate?.let {
-                    it.isPreview = !it.isPreview
-                }
+                frameDelegate?.updateState { it.copy(isPreview = !it.isPreview) }
                 true
             }
             else -> super.onOptionsItemSelected(item)
@@ -91,7 +89,7 @@ class MainActivity : AppCompatActivity(), CoroutineScope by MainScope() {
     override fun onStop() {
         super.onStop()
 
-        frameDelegateNoPrompt?.isPreview = false
+        frameDelegateNoPrompt?.updateState { it.copy(isPreview = false) }
     }
 
     override fun onDestroy() {
