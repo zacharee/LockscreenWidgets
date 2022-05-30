@@ -497,20 +497,22 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
             return state.isPreview
         }
 
-        fun forNotificationCenter(): Boolean {
+        fun forCommon(): Boolean {
             return state.isScreenOn
                     && !state.isTempHide
-                    && (state.notificationsPanelFullyExpanded && prefManager.showInNotificationCenter)
                     && !state.hideForPresentIds
                     && !state.hideForNonPresentIds
                     && prefManager.widgetFrameEnabled
                     && (!prefManager.hideInLandscape || state.screenOrientation == Surface.ROTATION_0 || state.screenOrientation == Surface.ROTATION_180)
         }
 
+        fun forNotificationCenter(): Boolean {
+            return (state.notificationsPanelFullyExpanded && prefManager.showInNotificationCenter)
+                    && forCommon()
+        }
+
         fun forLockscreen(): Boolean {
             return state.wasOnKeyguard
-                    && state.isScreenOn
-                    && !state.isTempHide
                     && (prefManager.showOnMainLockScreen || !prefManager.showInNotificationCenter)
                     && (!prefManager.hideOnFaceWidgets || !state.isOnFaceWidgets)
                     && state.currentAppLayer < 0
@@ -519,10 +521,7 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
                     && (state.onMainLockscreen || state.showingNotificationsPanel || !prefManager.hideOnSecurityPage)
                     && (!state.showingNotificationsPanel || !prefManager.hideOnNotificationShade)
                     && (state.notificationCount == 0 || !prefManager.hideOnNotifications)
-                    && (!state.hideForPresentIds || prefManager.presentIds.isEmpty())
-                    && (!state.hideForNonPresentIds || prefManager.nonPresentIds.isEmpty())
-                    && (!prefManager.hideInLandscape || state.screenOrientation == Surface.ROTATION_0 || state.screenOrientation == Surface.ROTATION_180)
-                    && prefManager.widgetFrameEnabled
+                    && forCommon()
         }
 
         return (forPreview() || forNotificationCenter() || forLockscreen()).also {
