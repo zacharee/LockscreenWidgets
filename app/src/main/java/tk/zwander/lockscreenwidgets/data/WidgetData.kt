@@ -43,7 +43,7 @@ open class WidgetData(
             widgetProvider: ComponentName,
             label: String,
             icon: String?,
-            size: WidgetSizeData
+            size: WidgetSizeData?
         ): WidgetData {
             return WidgetData(
                 id, WidgetType.WIDGET, label, icon,

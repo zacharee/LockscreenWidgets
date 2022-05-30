@@ -82,7 +82,7 @@ class ReconfigureWidgetActivity : BaseBindWidgetActivity() {
             provider.provider,
             provider.loadLabel(packageManager),
             provider.loadPreviewOrIcon(this, 0)?.toBitmap().toBase64(),
-            oldWidget?.safeSize ?: WidgetSizeData(1, 1)
+            oldWidget?.safeSize
         )
 
         val safeIndex = if (oldWidgetIndex != -1) oldWidgetIndex else newSet.lastIndex

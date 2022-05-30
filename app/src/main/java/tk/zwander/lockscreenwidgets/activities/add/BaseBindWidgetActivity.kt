@@ -20,6 +20,7 @@ import tk.zwander.lockscreenwidgets.data.WidgetSizeData
 import tk.zwander.lockscreenwidgets.data.list.ShortcutListInfo
 import tk.zwander.lockscreenwidgets.host.WidgetHostCompat
 import tk.zwander.lockscreenwidgets.util.*
+import kotlin.math.floor
 
 abstract class BaseBindWidgetActivity : AppCompatActivity() {
     companion object {
@@ -171,7 +172,17 @@ abstract class BaseBindWidgetActivity : AppCompatActivity() {
                 maxWidth = 512,
                 maxHeight = 512,
             ).toBase64(),
-            WidgetSizeData(1, 1)
+            run {
+                val widthRatio = provider.minWidth.toFloat() / prefManager.frameWidthDp
+                val defaultColSpan = floor((widthRatio * prefManager.frameColCount)).toInt()
+                    .coerceAtMost(prefManager.frameColCount)
+
+                val heightRatio = provider.minHeight.toFloat() / prefManager.frameHeightDp
+                val defaultRowSpan = floor((heightRatio * prefManager.frameRowCount)).toInt()
+                    .coerceAtMost(prefManager.frameRowCount)
+
+                WidgetSizeData(defaultColSpan, defaultRowSpan)
+            }
         )
         prefManager.currentWidgets = prefManager.currentWidgets.apply {
             add(widget)
