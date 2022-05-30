@@ -1,8 +1,5 @@
 package tk.zwander.lockscreenwidgets.fragments
 
-import android.appwidget.AppWidgetHost
-import android.appwidget.AppWidgetManager
-import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
@@ -15,9 +12,7 @@ import androidx.preference.SwitchPreference
 import tk.zwander.lockscreenwidgets.R
 import tk.zwander.lockscreenwidgets.activities.HideForIDsActivity
 import tk.zwander.lockscreenwidgets.activities.OnboardingActivity
-import tk.zwander.lockscreenwidgets.host.WidgetHostCompat
 import tk.zwander.lockscreenwidgets.util.*
-import tk.zwander.seekbarpreference.SeekBarPreference
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -107,8 +102,10 @@ class SettingsFragment : PreferenceFragmentCompat() {
         }
 
         val showBlurOptions = requireContext().isOneUI || Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
-        findPreference<SwitchPreference>(PrefManager.KEY_BLUR_BACKGROUND)?.isVisible = showBlurOptions
-        findPreference<SeekBarPreference>(PrefManager.KEY_BLUR_BACKGROUND_AMOUNT)?.isVisible = showBlurOptions
+        if (!showBlurOptions) {
+            preferenceScreen.removePreferenceRecursively(PrefManager.KEY_BLUR_BACKGROUND)
+            preferenceScreen.removePreferenceRecursively(PrefManager.KEY_BLUR_BACKGROUND_AMOUNT)
+        }
 
         findPreference<Preference>("present_ids_launch")?.setOnPreferenceClickListener {
             HideForIDsActivity.start(requireContext(), HideForIDsActivity.Type.PRESENT)
