@@ -468,6 +468,8 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
      * - [State.isScreenOn] is true
      * - [State.isTempHide] is false
      * - [State.notificationsPanelFullyExpanded] is true AND [PrefManager.showInNotificationCenter] is true
+     * - [State.hideForPresentIds] is false
+     * - [State.hideForNonPresentIds] is false
      * - [PrefManager.widgetFrameEnabled] is true
      * - [PrefManager.hideInLandscape] is false OR [screenOrientation] represents a portrait rotation
      * =======
@@ -496,6 +498,8 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
                         || (state.isScreenOn
                         && !state.isTempHide
                         && (state.notificationsPanelFullyExpanded && prefManager.showInNotificationCenter)
+                        && !state.hideForPresentIds
+                        && !state.hideForNonPresentIds
                         && prefManager.widgetFrameEnabled
                         && (!prefManager.hideInLandscape || state.screenOrientation == Surface.ROTATION_0 || state.screenOrientation == Surface.ROTATION_180)
                         ) || (state.wasOnKeyguard
