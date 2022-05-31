@@ -79,7 +79,7 @@ dependencies {
     implementation 'com.github.tingyik90:snackprogressbar:6.1'
 
 //    implementation project(':spannedlm')
-    implementation 'com.github.zacharee:SpannedGridLayoutManager:d6f7a5abf2'
+    implementation 'com.github.zacharee:SpannedGridLayoutManager:c41f8b8c34'
 
     implementation 'com.google.firebase:firebase-analytics:21.0.0'
     implementation 'com.google.firebase:firebase-crashlytics:18.2.11'
