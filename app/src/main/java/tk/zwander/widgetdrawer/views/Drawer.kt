@@ -29,7 +29,6 @@ import tk.zwander.lockscreenwidgets.data.WidgetType
 import tk.zwander.lockscreenwidgets.databinding.DrawerLayoutBinding
 import tk.zwander.lockscreenwidgets.host.WidgetHostCompat
 import tk.zwander.lockscreenwidgets.util.*
-import tk.zwander.widgetdrawer.activities.add.AddDrawerWidgetActivity
 import tk.zwander.widgetdrawer.adapters.DrawerAdapter
 
 class Drawer : FrameLayout, EventObserver {
@@ -94,6 +93,9 @@ class Drawer : FrameLayout, EventObserver {
                 updateState { it.copy(updatedForMove = false) }
             }
         }
+        handler(PrefManager.KEY_DRAWER_BACKGROUND_COLOR) {
+            setBackgroundColor(context.prefManager.drawerBackgroundColor)
+        }
     }
 
     @Suppress("DEPRECATION")
@@ -151,7 +153,7 @@ class Drawer : FrameLayout, EventObserver {
             anim.start()
         }, 10)
 
-//        setBackgroundColor(prefs.drawerBg)
+        setBackgroundColor(context.prefManager.drawerBackgroundColor)
     }
 
     override fun onDetachedFromWindow() {
@@ -215,10 +217,10 @@ class Drawer : FrameLayout, EventObserver {
         }
         anim.addListener(object : AnimatorListenerAdapter() {
             override fun onAnimationEnd(animation: Animator?) {
-                if (callListener) context.eventManager.sendEvent(Event.DrawerHidden)
                 handler?.postDelayed({
                     try {
                         wm.removeView(this@Drawer)
+                        if (callListener) context.eventManager.sendEvent(Event.DrawerHidden)
                     } catch (_: Exception) {
                     }
                 }, 10)
@@ -238,7 +240,7 @@ class Drawer : FrameLayout, EventObserver {
 
     private fun pickWidget() {
         hideDrawer()
-        context.startActivity(Intent(context, AddDrawerWidgetActivity::class.java))
+        context.eventManager.sendEvent(Event.LaunchAddDrawerWidget)
     }
 
     private fun removeWidget(info: WidgetData) {
@@ -246,7 +248,7 @@ class Drawer : FrameLayout, EventObserver {
         else if (info.type == WidgetType.SHORTCUT) shortcutIdManager.removeShortcutId(
             info.id
         )
-        context.prefManager.drawerWidgets = LinkedHashSet(adapter.widgets)
+        context.prefManager.drawerWidgets = LinkedHashSet(adapter.widgets.apply { remove(info) })
     }
 
     private inner class SpannedLayoutManager(context: Context) : SpannedGridLayoutManager(

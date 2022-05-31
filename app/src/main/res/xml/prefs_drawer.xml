@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <SwitchPreference
+        android:title="@string/close_on_empty_tap"
+        android:key="close_drawer_on_empty_tap"
+        android:defaultValue="false"
+        />
+
+    <Preference
+        android:title="@string/open_drawer"
+        android:key="open_drawer"
+        />
+
+    <SwitchPreference
+        android:title="@string/show_drawer_handle"
+        android:key="show_drawer_handle"
+        android:defaultValue="true"
+        />
+
+    <SwitchPreference
+        android:title="@string/show_drawer_handle_shadow"
+        android:key="show_drawer_handle_shadow"
+        android:defaultValue="true"
+        android:dependency="show_drawer_handle"
+        />
+
+    <tk.zwander.seekbarpreference.SeekBarPreference
+        android:title="@string/drawer_handle_height"
+        android:key="drawer_handle_height"
+        android:defaultValue="140"
+        app:minValue="64"
+        app:maxValue="500"
+        app:units="dp"
+        android:dependency="show_drawer_handle"
+        />
+
+    <tk.zwander.seekbarpreference.SeekBarPreference
+        android:title="@string/drawer_handle_width"
+        android:key="drawer_handle_width"
+        android:defaultValue="6"
+        app:minValue="1"
+        app:maxValue="24"
+        app:units="dp"
+        android:dependency="show_drawer_handle"
+        />
+
+    <com.jaredrummler.android.colorpicker.ColorPreferenceCompat
+        android:title="@string/drawer_handle_color"
+        android:key="drawer_handle_color"
+        android:defaultValue="-1"
+        app:cpv_allowCustom="true"
+        app:cpv_showAlphaSlider="true"
+        android:dependency="show_drawer_handle"
+        />
+
+    <com.jaredrummler.android.colorpicker.ColorPreferenceCompat
+        android:title="@string/drawer_background_color"
+        android:key="drawer_background_color"
+        android:defaultValue="@color/drawerBackgroundDefault"
+        app:cpv_allowCustom="true"
+        app:cpv_showAlphaSlider="true"
+        />
+
+    <tk.zwander.seekbarpreference.SeekBarPreference
+        android:title="@string/drawer_column_count"
+        android:defaultValue="2"
+        android:key="drawer_col_count"
+        app:minValue="1"
+        app:maxValue="6"
+        />
+
+</PreferenceScreen>

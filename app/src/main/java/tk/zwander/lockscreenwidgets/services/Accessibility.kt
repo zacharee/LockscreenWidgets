@@ -59,8 +59,6 @@ class Accessibility : AccessibilityService(), EventObserver, CoroutineScope by M
     override fun onCreate() {
         super.onCreate()
 
-        frameDelegate.onCreate()
-        drawerDelegate.onCreate()
         sharedPreferencesChangeHandler.register(this)
 
         frameDelegate.updateState {
@@ -74,6 +72,9 @@ class Accessibility : AccessibilityService(), EventObserver, CoroutineScope by M
         serviceInfo = serviceInfo.apply {
             notificationTimeout = prefManager.accessibilityEventDelay.toLong()
         }
+
+        frameDelegate.onCreate()
+        drawerDelegate.onCreate()
     }
 
     override fun onAccessibilityEvent(event: AccessibilityEvent) {

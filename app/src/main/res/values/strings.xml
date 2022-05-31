@@ -1,5 +1,6 @@
 <resources>
     <string name="app_name">Lockscreen Widgets</string>
+    <string name="widget_drawer">Widget Drawer</string>
 
     <string name="content_desc_widget_image">Widget Image</string>
     <string name="edit_gesture_hint">Tap the widget frame with two fingers to move and resize it.</string>
@@ -216,4 +217,13 @@
     <string name="open_drawer">Open Drawer</string>
     <string name="toggle_opacity">Toggle Opaque Backgrounds</string>
     <string name="close_widget_drawer">Close Drawer</string>
+    <string name="enable_drawer">Enable Drawer</string>
+    <string name="close_on_empty_tap">Tap Empty Space to Close Drawer</string>
+    <string name="show_drawer_handle">Show Drawer Handle</string>
+    <string name="show_drawer_handle_shadow">Show Drawer Handle Shadow</string>
+    <string name="drawer_handle_height">Drawer Handle Height</string>
+    <string name="drawer_handle_width">Drawer Handle Width</string>
+    <string name="drawer_handle_color">Drawer Handle Color</string>
+    <string name="drawer_background_color">Drawer Background Color</string>
+    <string name="drawer_column_count">Drawer Column Count</string>
 </resources>

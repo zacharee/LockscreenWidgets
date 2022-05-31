@@ -163,13 +163,6 @@ fun View.fadeAndScaleIn(endListener: () -> Unit) {
     animator.start()
 }
 
-//Convenience method to calculate the proper widget width
-//based on the frame column count.
-fun View.calculateWidgetWidth(paramWidth: Int, size: WidgetSizeData?): Int {
-    return paramWidth / context.prefManager.frameColCount *
-            (size?.safeWidgetWidthSpan ?: 1)
-}
-
 val Context.widgetBlockWidth: Int
     get() = (dpAsPx(prefManager.frameWidthDp) / prefManager.frameColCount)
 

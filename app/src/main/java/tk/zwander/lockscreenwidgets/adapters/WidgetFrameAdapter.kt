@@ -25,7 +25,6 @@ import com.arasthel.spannedgridlayoutmanager.SpannedGridLayoutManager
 import kotlinx.coroutines.*
 import tk.zwander.lockscreenwidgets.R
 import tk.zwander.lockscreenwidgets.activities.DismissOrUnlockActivity
-import tk.zwander.lockscreenwidgets.activities.add.AddWidgetActivity
 import tk.zwander.lockscreenwidgets.activities.add.ReconfigureWidgetActivity
 import tk.zwander.lockscreenwidgets.data.WidgetData
 import tk.zwander.lockscreenwidgets.data.WidgetType
@@ -184,6 +183,19 @@ open class WidgetFrameAdapter(
         currentWidgets = LinkedHashSet(widgets)
     }
 
+    protected open fun launchAddActivity() {
+        host.context.eventManager.sendEvent(Event.LaunchAddWidget)
+    }
+
+    protected open fun launchReconfigure(id: Int, providerInfo: AppWidgetProviderInfo) {
+        ReconfigureWidgetActivity.launch(host.context, id, providerInfo)
+    }
+
+    protected open fun View.onWidgetResize(data: WidgetData, params: ViewGroup.LayoutParams) {
+        params.width = params.width / context.prefManager.frameColCount * (data.size?.safeWidgetWidthSpan ?: 1)
+        params.height = params.height / context.prefManager.frameRowCount * (data.size?.safeWidgetHeightSpan ?: 1)
+    }
+
     /**
      * Represents an individual widget.
      * The item will be properly sized based on the number of columns the user
@@ -292,7 +304,7 @@ open class WidgetFrameAdapter(
                         //TODO: Notify + debug log
                         it.context.logUtils.normalLog("Unable to reconfigure widget $provider: provider info is null.")
                     } else {
-                        ReconfigureWidgetActivity.launch(it.context, data.id, providerInfo)
+                        launchReconfigure(data.id, providerInfo)
                     }
                 }
             }
@@ -481,13 +493,13 @@ open class WidgetFrameAdapter(
             persistResize()
         }
 
-        //Make sure the item's width is properly updated on a frame resize, or on initial bind
+        //Make sure the item's size is properly updated on a frame resize, or on initial bind
         private fun onResize(data: WidgetData) {
             itemView.apply {
                 layoutParams = (layoutParams as ViewGroup.LayoutParams).apply {
-                    width = calculateWidgetWidth(params.width, data.safeSize)
-//                    height = calculateWidgetHeight(params.height, data.id)
+                    onWidgetResize(data, this)
                 }
+                invalidate()
             }
         }
 
@@ -505,9 +517,7 @@ open class WidgetFrameAdapter(
     inner class AddWidgetVH(view: View) : RecyclerView.ViewHolder(view) {
         init {
             itemView.setOnClickListener {
-                val intent = Intent(view.context, AddWidgetActivity::class.java)
-                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                view.context.startActivity(intent)
+                launchAddActivity()
             }
         }
     }

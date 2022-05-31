@@ -61,6 +61,10 @@
             android:exported="false"
             android:theme="@style/AppTheme.Null"
             />
+        <activity android:name="tk.zwander.widgetdrawer.activities.add.ReconfigureDrawerWidgetActivity"
+            android:exported="false"
+            android:theme="@style/AppTheme.Null"
+            />
         <activity android:name="tk.zwander.widgetdrawer.activities.add.AddDrawerWidgetActivity"
             android:exported="false"
             android:label="@string/add_widget"

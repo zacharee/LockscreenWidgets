@@ -13,6 +13,7 @@ import tk.zwander.lockscreenwidgets.activities.add.AddWidgetActivity
 import tk.zwander.lockscreenwidgets.tiles.NCTile
 import tk.zwander.lockscreenwidgets.tiles.widget.*
 import tk.zwander.lockscreenwidgets.util.*
+import tk.zwander.widgetdrawer.activities.add.AddDrawerWidgetActivity
 
 /**
  * The main application.
@@ -108,8 +109,15 @@ class App : Application() {
             }
         }
 
-        eventManager.addListener { _: Event.LaunchAddWidget ->
+        eventManager.addListener<Event.LaunchAddWidget> {
             val intent = Intent(this, AddWidgetActivity::class.java)
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+
+            startActivity(intent)
+        }
+
+        eventManager.addListener<Event.LaunchAddDrawerWidget> {
+            val intent = Intent(this, AddDrawerWidgetActivity::class.java)
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
 
             startActivity(intent)

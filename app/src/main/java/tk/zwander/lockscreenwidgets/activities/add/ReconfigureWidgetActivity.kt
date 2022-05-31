@@ -14,7 +14,7 @@ import tk.zwander.lockscreenwidgets.util.logUtils
 import tk.zwander.lockscreenwidgets.util.prefManager
 import tk.zwander.lockscreenwidgets.util.toBase64
 
-class ReconfigureWidgetActivity : BaseBindWidgetActivity() {
+open class ReconfigureWidgetActivity : BaseBindWidgetActivity() {
     companion object {
         const val EXTRA_PREVIOUS_ID = "previous_id"
         const val EXTRA_PROVIDER_INFO = "provider_info"
@@ -29,6 +29,12 @@ class ReconfigureWidgetActivity : BaseBindWidgetActivity() {
             context.startActivity(intent)
         }
     }
+
+    protected open var currentWidgets: Collection<WidgetData>
+        get() = prefManager.currentWidgets
+        set(value) {
+            prefManager.currentWidgets = LinkedHashSet(value)
+        }
 
     private val prevId by lazy { intent.getIntExtra(EXTRA_PREVIOUS_ID, -1) }
     private val providerInfo by lazy { intent.getParcelableExtra(EXTRA_PROVIDER_INFO) as AppWidgetProviderInfo? }
@@ -64,7 +70,7 @@ class ReconfigureWidgetActivity : BaseBindWidgetActivity() {
     }
 
     override fun addNewWidget(id: Int, provider: AppWidgetProviderInfo) {
-        val newSet = prefManager.currentWidgets.toMutableList()
+        val newSet = currentWidgets.toMutableList()
 
         val oldWidgetIndex = newSet.indexOf(
             WidgetData.widget(
@@ -91,7 +97,7 @@ class ReconfigureWidgetActivity : BaseBindWidgetActivity() {
 
         logUtils.normalLog("Removed old widget from $oldWidgetIndex ($safeIndex) and added new one $widget")
 
-        prefManager.currentWidgets = LinkedHashSet(newSet)
+        currentWidgets = newSet
 
         finish()
     }

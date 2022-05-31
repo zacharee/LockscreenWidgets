@@ -6,8 +6,8 @@ import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewConfiguration
+import android.widget.FrameLayout
 import android.widget.LinearLayout
-import android.widget.ViewFlipper
 import androidx.dynamicanimation.animation.DynamicAnimation
 import androidx.dynamicanimation.animation.SpringAnimation
 import androidx.dynamicanimation.animation.SpringForce
@@ -21,7 +21,7 @@ class ToolbarAnimHolder : LinearLayout {
     constructor(context: Context, attributeSet: AttributeSet) : super(context, attributeSet)
 
     private val closedTranslation: Int
-        get() = findViewById<ViewFlipper>(R.id.button_wrapper).height
+        get() = findViewById<FrameLayout>(R.id.button_wrapper).height
     private val openedTranslation = -context.dpAsPx(16)
     private val threshold: Float
         get() = (openedTranslation + closedTranslation) / 2f

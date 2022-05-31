@@ -15,4 +15,6 @@
 
     <color name="backdrop">#55000000</color>
     <color name="scroll_track">#55000000</color>
+
+    <color name="drawerBackgroundDefault">#aa000000</color>
 </resources>

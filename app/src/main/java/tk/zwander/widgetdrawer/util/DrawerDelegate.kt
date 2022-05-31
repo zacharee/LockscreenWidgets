@@ -62,6 +62,23 @@ class DrawerDelegate private constructor(private val context: Context) : Context
     private val wm by lazy { getSystemService(Context.WINDOW_SERVICE) as WindowManager }
     private val power by lazy { getSystemService(Context.POWER_SERVICE) as PowerManager }
 
+    private val prefsHandler = HandlerRegistry {
+        handler(PrefManager.KEY_DRAWER_ENABLED) {
+            if (prefManager.drawerEnabled) {
+                tryShowHandle()
+            } else {
+                hideAll()
+            }
+        }
+        handler(PrefManager.KEY_SHOW_DRAWER_HANDLE) {
+            if (prefManager.showDrawerHandle) {
+                tryShowHandle()
+            } else {
+                hideHandle()
+            }
+        }
+    }
+
     override fun onEvent(event: Event) {
         when (event) {
             Event.ShowDrawer -> {
@@ -95,13 +112,16 @@ class DrawerDelegate private constructor(private val context: Context) : Context
 
     fun onCreate() {
         drawer.root.onCreate()
+        tryShowHandle()
         eventManager.addObserver(this)
+        prefsHandler.register(this)
     }
 
     fun onDestroy() {
         eventManager.removeObserver(this)
         drawer.root.hideDrawer(false)
         handle.hide(wm)
+        prefsHandler.unregister(this)
 
         invalidateInstance()
     }
@@ -112,7 +132,7 @@ class DrawerDelegate private constructor(private val context: Context) : Context
     }
 
     fun tryShowHandle() {
-        if (prefManager.showDrawerHandle && power.isInteractive && !drawer.root.isAttachedToWindow) {
+        if (prefManager.drawerEnabled && prefManager.showDrawerHandle && power.isInteractive) {
             handle.show(wm)
         }
     }

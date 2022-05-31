@@ -9,6 +9,7 @@ import android.graphics.Color
 import android.net.Uri
 import android.view.Gravity
 import androidx.core.content.edit
+import androidx.core.content.res.ResourcesCompat
 import androidx.preference.PreferenceManager
 import com.google.gson.GsonBuilder
 import com.google.gson.reflect.TypeToken
@@ -84,6 +85,8 @@ class PrefManager private constructor(context: Context) : ContextWrapper(context
         const val KEY_DRAWER_HANDLE_SIDE = "drawer_handle_side"
         const val KEY_DRAWER_HANDLE_COLOR = "drawer_handle_color"
         const val KEY_SHOW_DRAWER_HANDLE_SHADOW = "show_drawer_handle_shadow"
+        const val KEY_DRAWER_ENABLED = "drawer_enabled"
+        const val KEY_DRAWER_BACKGROUND_COLOR = "drawer_background_color"
 
         const val VALUE_PAGE_INDICATOR_BEHAVIOR_HIDDEN = 0
         const val VALUE_PAGE_INDICATOR_BEHAVIOR_AUTO_HIDE = 1
@@ -130,7 +133,7 @@ class PrefManager private constructor(context: Context) : ContextWrapper(context
             object : TypeToken<LinkedHashSet<WidgetData>>() {}.type
         ) ?: LinkedHashSet()
         set(value) {
-            currentWidgetsString = gson.toJson(value)
+            drawerWidgetsString = gson.toJson(value)
         }
 
     var drawerWidgetsString: String?
@@ -584,6 +587,18 @@ class PrefManager private constructor(context: Context) : ContextWrapper(context
         get() = getBoolean(KEY_SHOW_DRAWER_HANDLE_SHADOW, false)
         set(value) {
             putBoolean(KEY_SHOW_DRAWER_HANDLE_SHADOW, value)
+        }
+
+    var drawerEnabled: Boolean
+        get() = getBoolean(KEY_DRAWER_ENABLED, false)
+        set(value) {
+            putBoolean(KEY_DRAWER_ENABLED, value)
+        }
+
+    var drawerBackgroundColor: Int
+        get() = getInt(KEY_DRAWER_BACKGROUND_COLOR, ResourcesCompat.getColor(resources, R.color.drawerBackgroundDefault, theme))
+        set(value) {
+            putInt(KEY_DRAWER_BACKGROUND_COLOR, value)
         }
 
     fun getCorrectFrameWidth(mode: Mode): Float {

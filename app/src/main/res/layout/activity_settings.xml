@@ -3,11 +3,10 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <androidx.fragment.app.FragmentContainerView
+    <FrameLayout
         android:id="@+id/fragment"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:name="tk.zwander.lockscreenwidgets.fragments.SettingsFragment"
         />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

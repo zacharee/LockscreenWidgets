@@ -7,7 +7,6 @@ import android.graphics.PixelFormat
 import android.os.Handler
 import android.os.Looper
 import android.os.Message
-import android.os.PowerManager
 import android.util.AttributeSet
 import android.view.GestureDetector
 import android.view.Gravity
@@ -30,18 +29,15 @@ class Handle : LinearLayout {
     constructor(context: Context) : super(context)
     constructor(context: Context, attrs: AttributeSet) : super(context, attrs)
 
-    var onOpenListener: (() -> Unit)? = null
-
     private var inMoveMode = false
     private var calledOpen = false
     private var screenWidth = -1
 
     private val gestureManager = GestureManager()
     private val wm = context.getSystemService(Context.WINDOW_SERVICE) as WindowManager
-    private val power = context.getSystemService(Context.POWER_SERVICE) as PowerManager
 
-    private val handleLeft = AppCompatResources.getDrawable(context, R.drawable.handle_left)
-    private val handleRight = AppCompatResources.getDrawable(context, R.drawable.handle_right)
+    private val handleLeft = AppCompatResources.getDrawable(context, R.drawable.drawer_handle_left)
+    private val handleRight = AppCompatResources.getDrawable(context, R.drawable.drawer_handle_right)
 
     private val longClickHandler = @SuppressLint("HandlerLeak")
     object : Handler(Looper.getMainLooper()) {
@@ -207,7 +203,7 @@ class Handle : LinearLayout {
                 ) {
                     if (!calledOpen) {
                         calledOpen = true
-                        onOpenListener?.invoke()
+                        context.eventManager.sendEvent(Event.ShowDrawer)
                         true
                     } else false
                 } else false
@@ -226,7 +222,7 @@ class Handle : LinearLayout {
         override fun onDoubleTap(e: MotionEvent?): Boolean {
             return if (!calledOpen) {
                 calledOpen = true
-                onOpenListener?.invoke()
+                context.eventManager.sendEvent(Event.ShowDrawer)
                 true
             } else false
         }

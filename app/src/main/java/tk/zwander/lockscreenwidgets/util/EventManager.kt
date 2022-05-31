@@ -103,6 +103,7 @@ sealed class Event {
     object NightModeUpdate : Event()
     object CenterFrameHorizontally : Event()
     object CenterFrameVertically : Event()
+    object LaunchAddDrawerWidget : Event()
 
     /**
      * On Android 8.0+, it's pretty easy to dismiss the lock screen with a simple API call.
