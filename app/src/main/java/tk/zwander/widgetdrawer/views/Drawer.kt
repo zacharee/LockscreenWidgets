@@ -23,6 +23,7 @@ import androidx.core.animation.doOnEnd
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import com.arasthel.spannedgridlayoutmanager.SpannedGridLayoutManager
+import tk.zwander.lockscreenwidgets.R
 import tk.zwander.lockscreenwidgets.activities.DismissOrUnlockActivity
 import tk.zwander.lockscreenwidgets.data.WidgetData
 import tk.zwander.lockscreenwidgets.data.WidgetType
@@ -95,6 +96,9 @@ class Drawer : FrameLayout, EventObserver {
         }
         handler(PrefManager.KEY_DRAWER_BACKGROUND_COLOR) {
             setBackgroundColor(context.prefManager.drawerBackgroundColor)
+        }
+        handler(PrefManager.KEY_DRAWER_COL_COUNT) {
+            updateSpanCount()
         }
     }
 
@@ -235,7 +239,7 @@ class Drawer : FrameLayout, EventObserver {
 
     private fun updateSpanCount() {
         gridLayoutManager.columnCount = context.prefManager.drawerColCount
-        gridLayoutManager.customHeight = context.dpAsPx(50f)
+        gridLayoutManager.customHeight = context.resources.getDimensionPixelSize(R.dimen.drawer_row_height)
     }
 
     private fun pickWidget() {

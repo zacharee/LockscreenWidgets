@@ -27,7 +27,6 @@ import kotlinx.coroutines.*
 import tk.zwander.lockscreenwidgets.App
 import tk.zwander.lockscreenwidgets.R
 import tk.zwander.lockscreenwidgets.data.AppInfo
-import tk.zwander.lockscreenwidgets.data.WidgetSizeData
 import tk.zwander.lockscreenwidgets.data.list.WidgetListInfo
 import tk.zwander.lockscreenwidgets.services.Accessibility
 import tk.zwander.lockscreenwidgets.services.NotificationListener
@@ -163,12 +162,6 @@ fun View.fadeAndScaleIn(endListener: () -> Unit) {
     animator.start()
 }
 
-val Context.widgetBlockWidth: Int
-    get() = (dpAsPx(prefManager.frameWidthDp) / prefManager.frameColCount)
-
-val Context.widgetBlockHeight: Int
-    get() = (dpAsPx(prefManager.frameHeightDp) / prefManager.frameRowCount)
-
 val Context.isTouchWiz: Boolean
     get() = packageManager.hasSystemFeature("com.samsung.feature.samsung_experience_mobile")
 
@@ -178,15 +171,9 @@ val Context.isOneUI: Boolean
 val Context.windowManager: WindowManager
     get() = getSystemService(Context.WINDOW_SERVICE) as WindowManager
 
-val Context.realResolution: Point
-    get() = Point().apply {
-        @Suppress("DEPRECATION")
-        defaultDisplayCompat.getRealSize(this)
-    }
-
 fun Context.calculateNCPosXFromRightDefault(): Int {
     val fromRight = dpAsPx(resources.getInteger(R.integer.def_notification_pos_x_from_right_dp))
-    val screenWidth = realResolution.x
+    val screenWidth = screenSize.x
     val frameWidthPx = dpAsPx(prefManager.notificationFrameWidthDp)
 
     val frameRight = (frameWidthPx / 2f)
@@ -197,7 +184,7 @@ fun Context.calculateNCPosXFromRightDefault(): Int {
 
 fun Context.calculateNCPosYFromTopDefault(): Int {
     val fromTop = dpAsPx(resources.getInteger(R.integer.def_notification_pos_y_from_top_dp))
-    val screenHeight = realResolution.y
+    val screenHeight = screenSize.y
     val frameHeightPx = dpAsPx(prefManager.notificationFrameHeightDp)
 
     val frameTop = (frameHeightPx / 2f)
@@ -327,8 +314,10 @@ val Context.eventManager: EventManager
 
 val Context.screenSize: Point
     get() {
-        val display = (getSystemService(Context.WINDOW_SERVICE) as WindowManager).defaultDisplay
-        return Point().apply { display.getRealSize(this) }
+        @Suppress("DEPRECATION")
+        return Point().apply {
+            defaultDisplayCompat.getRealSize(this)
+        }
     }
 
 val Context.statusBarHeight: Int

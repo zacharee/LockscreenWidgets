@@ -5,13 +5,15 @@ import android.appwidget.AppWidgetProviderInfo
 import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
+import tk.zwander.lockscreenwidgets.R
 import tk.zwander.lockscreenwidgets.adapters.WidgetFrameAdapter
 import tk.zwander.lockscreenwidgets.data.WidgetData
 import tk.zwander.lockscreenwidgets.host.WidgetHostCompat
+import tk.zwander.lockscreenwidgets.listeners.WidgetResizeListener
 import tk.zwander.lockscreenwidgets.util.Event
-import tk.zwander.lockscreenwidgets.util.dpAsPx
 import tk.zwander.lockscreenwidgets.util.eventManager
 import tk.zwander.lockscreenwidgets.util.prefManager
+import tk.zwander.lockscreenwidgets.util.screenSize
 import tk.zwander.widgetdrawer.activities.add.ReconfigureDrawerWidgetActivity
 
 class DrawerAdapter(
@@ -24,6 +26,8 @@ class DrawerAdapter(
         get() = host.context.prefManager.drawerColCount
     override val rowCount: Int
         get() = Int.MAX_VALUE
+    override val minRowSpan: Int
+        get() = 5
     override var currentWidgets: MutableCollection<WidgetData>
         get() = host.context.prefManager.drawerWidgets
         set(value) {
@@ -39,7 +43,17 @@ class DrawerAdapter(
         ReconfigureDrawerWidgetActivity.launch(host.context, id, providerInfo)
     }
 
-    override fun View.onWidgetResize(data: WidgetData, params: ViewGroup.LayoutParams) {
-        params.height = (data.size?.safeWidgetHeightSpan ?: 1) * context.dpAsPx(50f)
+    override fun View.onWidgetResize(data: WidgetData, params: ViewGroup.LayoutParams, amount: Int, direction: Int) {
+        params.height = params.height + (amount * direction)
+    }
+
+    override fun getThresholdPx(which: WidgetResizeListener.Which): Int {
+        return host.context.run {
+            if (which == WidgetResizeListener.Which.LEFT || which == WidgetResizeListener.Which.RIGHT) {
+                screenSize.x / prefManager.drawerColCount
+            } else {
+                resources.getDimensionPixelSize(R.dimen.drawer_row_height)
+            }
+        }
     }
 }

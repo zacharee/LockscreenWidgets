@@ -1,11 +1,8 @@
 package tk.zwander.lockscreenwidgets.listeners
 
 import android.annotation.SuppressLint
-import android.content.Context
 import android.view.MotionEvent
 import android.view.View
-import tk.zwander.lockscreenwidgets.util.widgetBlockHeight
-import tk.zwander.lockscreenwidgets.util.widgetBlockWidth
 import kotlin.math.absoluteValue
 import kotlin.math.sign
 
@@ -15,9 +12,9 @@ import kotlin.math.sign
  * an update if the user has dragged far enough.
  */
 class WidgetResizeListener(
-    private val context: Context,
+    private val _thresholdPx: (Which) -> Int,
     private val which: Which,
-    private val resizeCallback: (Int) -> Unit,
+    private val resizeCallback: (Boolean, Int, Int) -> Unit,
     private val liftCallback: () -> Unit
 ) : View.OnTouchListener {
     enum class Which {
@@ -33,13 +30,13 @@ class WidgetResizeListener(
     private var prevX = 0f
     private var prevY = 0f
 
+    private var prevXTrack = 0f
+    private var prevYTrack = 0f
+
     //The threshold for a drag event.
     //Either the standard widget width or
     //height depending on the current handle.
-    private val _thresholdPx: Int
-        get() = context.run { if (which == Which.LEFT || which == Which.RIGHT) widgetBlockWidth else widgetBlockHeight }
-
-    private var thresholdPx: Int = _thresholdPx
+    private var thresholdPx: Int = _thresholdPx(which)
 
     @SuppressLint("ClickableViewAccessibility")
     override fun onTouch(v: View?, event: MotionEvent?): Boolean {
@@ -50,6 +47,8 @@ class WidgetResizeListener(
 
                 prevX = origX
                 prevY = origY
+                prevXTrack = origX
+                prevYTrack = origY
 
                 //The user might change the row/col count
                 //after this class has been initialized,
@@ -57,7 +56,7 @@ class WidgetResizeListener(
                 //While we could just inline the getter with
                 //this variable, it's less resource-intensive
                 //to only update it once per gesture.
-                thresholdPx = _thresholdPx
+                thresholdPx = _thresholdPx(which)
             }
 
             MotionEvent.ACTION_MOVE -> {
@@ -68,17 +67,26 @@ class WidgetResizeListener(
                 val distY = newY - prevY
 
                 if (which == Which.LEFT || which == Which.RIGHT) {
-                    if (distX.absoluteValue > thresholdPx) {
-                        prevX += thresholdPx * distX.sign
+                    val overThreshold = distX.absoluteValue > thresholdPx
 
-                        resizeCallback(distX.sign.toInt())
+                    if (overThreshold) {
+                        prevX += thresholdPx * distX.sign
                     }
+
+                    resizeCallback(overThreshold, (newX - prevXTrack).sign.toInt(), (newX - prevXTrack).absoluteValue.toInt())
+
                 } else {
-                    if (distY.absoluteValue > thresholdPx) {
+                    val overThreshold = distY.absoluteValue > thresholdPx
+
+                    if (overThreshold) {
                         prevY += thresholdPx * distY.sign
-                        resizeCallback(distY.sign.toInt())
                     }
+
+                    resizeCallback(overThreshold, (newY - prevYTrack).sign.toInt(), (newY - prevYTrack).absoluteValue.toInt())
                 }
+
+                prevXTrack = newX
+                prevYTrack = newY
             }
 
             MotionEvent.ACTION_UP -> {

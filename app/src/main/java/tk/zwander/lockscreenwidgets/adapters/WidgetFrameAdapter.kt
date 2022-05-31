@@ -74,6 +74,10 @@ open class WidgetFrameAdapter(
         get() = host.context.prefManager.frameColCount
     protected open val rowCount: Int
         get() = host.context.prefManager.frameRowCount
+    protected open val minColSpan: Int
+        get() = 1
+    protected open val minRowSpan: Int
+        get() = 1
     protected open var currentWidgets: MutableCollection<WidgetData>
         get() = host.context.prefManager.currentWidgets
         set(value) {
@@ -191,9 +195,19 @@ open class WidgetFrameAdapter(
         ReconfigureWidgetActivity.launch(host.context, id, providerInfo)
     }
 
-    protected open fun View.onWidgetResize(data: WidgetData, params: ViewGroup.LayoutParams) {
+    protected open fun View.onWidgetResize(data: WidgetData, params: ViewGroup.LayoutParams, amount: Int, direction: Int) {
         params.width = params.width / context.prefManager.frameColCount * (data.size?.safeWidgetWidthSpan ?: 1)
         params.height = params.height / context.prefManager.frameRowCount * (data.size?.safeWidgetHeightSpan ?: 1)
+    }
+
+    protected open fun getThresholdPx(which: WidgetResizeListener.Which): Int {
+        return host.context.run {
+            if (which == WidgetResizeListener.Which.LEFT || which == WidgetResizeListener.Which.RIGHT) {
+                dpAsPx(prefManager.frameWidthDp) / prefManager.frameColCount
+            } else {
+                dpAsPx(prefManager.frameHeightDp) / prefManager.frameRowCount
+            }
+        }
     }
 
     /**
@@ -240,29 +254,29 @@ open class WidgetFrameAdapter(
             }
 
             itemView.apply {
-                binding.widgetLeftDragger.setOnTouchListener(WidgetResizeListener(context,
+                binding.widgetLeftDragger.setOnTouchListener(WidgetResizeListener(
+                    ::getThresholdPx,
                     WidgetResizeListener.Which.LEFT,
-                    { handleResize(it, -1, false) },
-                    { notifyItemChanged(bindingAdapterPosition) }
-                ))
+                    { overThreshold, step, amount -> handleResize(overThreshold, step, amount, -1, false) }
+                ) { notifyItemChanged(bindingAdapterPosition) })
 
-                binding.widgetTopDragger.setOnTouchListener(WidgetResizeListener(context,
+                binding.widgetTopDragger.setOnTouchListener(WidgetResizeListener(
+                    ::getThresholdPx,
                     WidgetResizeListener.Which.TOP,
-                    { handleResize(it, -1, true) },
-                    { notifyItemChanged(bindingAdapterPosition) }
-                ))
+                    { overThreshold, step, amount -> handleResize(overThreshold, step, amount, -1, true) }
+                ) { notifyItemChanged(bindingAdapterPosition) })
 
-                binding.widgetRightDragger.setOnTouchListener(WidgetResizeListener(context,
+                binding.widgetRightDragger.setOnTouchListener(WidgetResizeListener(
+                    ::getThresholdPx,
                     WidgetResizeListener.Which.RIGHT,
-                    { handleResize(it, 1, false) },
-                    { notifyItemChanged(bindingAdapterPosition) }
-                ))
+                    { overThreshold, step, amount -> handleResize(overThreshold, step, amount, 1, false) }
+                ) { notifyItemChanged(bindingAdapterPosition) })
 
-                binding.widgetBottomDragger.setOnTouchListener(WidgetResizeListener(context,
+                binding.widgetBottomDragger.setOnTouchListener(WidgetResizeListener(
+                    ::getThresholdPx,
                     WidgetResizeListener.Which.BOTTOM,
-                    { handleResize(it, 1, true) },
-                    { notifyItemChanged(bindingAdapterPosition) }
-                ))
+                    { overThreshold, step, amount -> handleResize(overThreshold, step, amount, 1, true) }
+                ) { notifyItemChanged(bindingAdapterPosition) })
             }
 
             binding.widgetReconfigure.setOnClickListener {
@@ -318,7 +332,7 @@ open class WidgetFrameAdapter(
                 val pos = bindingAdapterPosition
 
                 if (pos != -1 && pos < widgets.size) {
-                    onResize(widgets[pos])
+                    onResize(widgets[pos], 0, 1)
                 }
             }
         }
@@ -326,7 +340,7 @@ open class WidgetFrameAdapter(
         fun onBind(data: WidgetData) {
             itemView.apply {
                 launch {
-                    onResize(data)
+                    onResize(data, 0, 1)
                     editingInterfaceShown =
                         currentEditingInterfacePosition != -1 && currentEditingInterfacePosition == bindingAdapterPosition
 
@@ -474,31 +488,35 @@ open class WidgetFrameAdapter(
             binding.widgetHolder.addView(shortcutView.root)
         }
 
-        private fun handleResize(step: Int, direction: Int, vertical: Boolean) {
+        private fun handleResize(overThreshold: Boolean, step: Int, amount: Int, direction: Int, vertical: Boolean) {
             val sizeInfo = currentData?.safeSize ?: return
 
-            if (vertical) {
-                sizeInfo.safeWidgetHeightSpan = min(
-                    sizeInfo.safeWidgetHeightSpan + step * direction,
-                    rowCount
-                )
-            } else {
-                sizeInfo.safeWidgetWidthSpan = min(
-                    sizeInfo.safeWidgetWidthSpan + step * direction,
-                    colCount
-                )
+            if (overThreshold) {
+                if (vertical) {
+                    sizeInfo.safeWidgetHeightSpan = min(
+                        sizeInfo.safeWidgetHeightSpan + step * direction,
+                        rowCount
+                    )
+                } else {
+                    sizeInfo.safeWidgetWidthSpan = min(
+                        sizeInfo.safeWidgetWidthSpan + step * direction,
+                        colCount
+                    )
+                }
             }
 
-            onResize(currentData ?: return)
+            onResize(currentData ?: return, amount, step)
             persistResize()
         }
 
         //Make sure the item's size is properly updated on a frame resize, or on initial bind
-        private fun onResize(data: WidgetData) {
+        private fun onResize(data: WidgetData, amount: Int, direction: Int) {
             itemView.apply {
                 layoutParams = (layoutParams as ViewGroup.LayoutParams).apply {
-                    onWidgetResize(data, this)
+                    onWidgetResize(data, this, amount, direction)
                 }
+
+                forceLayout()
                 invalidate()
             }
         }
@@ -529,10 +547,10 @@ open class WidgetFrameAdapter(
             val size = widget?.safeSize
 
             SpanSize(
-                size?.safeWidgetWidthSpan?.coerceAtMost(colCount)
-                    ?: 1,
-                size?.safeWidgetHeightSpan?.coerceAtMost(rowCount)
-                    ?: 1
+                size?.safeWidgetWidthSpan?.coerceAtMost(colCount)?.coerceAtLeast(minColSpan)
+                    ?: minColSpan,
+                size?.safeWidgetHeightSpan?.coerceAtMost(rowCount)?.coerceAtLeast(minRowSpan)
+                    ?: minRowSpan
             )
         }
     })

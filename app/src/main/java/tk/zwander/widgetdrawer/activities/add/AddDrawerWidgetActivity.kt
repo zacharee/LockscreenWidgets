@@ -1,6 +1,7 @@
 package tk.zwander.widgetdrawer.activities.add
 
 import android.appwidget.AppWidgetProviderInfo
+import tk.zwander.lockscreenwidgets.R
 import tk.zwander.lockscreenwidgets.activities.add.AddWidgetActivity
 import tk.zwander.lockscreenwidgets.data.WidgetData
 import tk.zwander.lockscreenwidgets.data.WidgetSizeData
@@ -53,7 +54,8 @@ class AddDrawerWidgetActivity : AddWidgetActivity() {
                 val defaultColSpan = floor((widthRatio * colCount)).toInt()
                     .coerceAtMost(colCount).coerceAtLeast(1)
 
-                val defaultRowSpan = floor(provider.minHeight.toFloat() / 50f).toInt().coerceAtLeast(1)
+                val defaultRowSpan = floor(provider.minHeight.toFloat() / pxAsDp(resources.getDimensionPixelSize(R.dimen.drawer_row_height))).toInt()
+                    .coerceAtLeast(5)
 
                 WidgetSizeData(defaultColSpan, defaultRowSpan)
             }

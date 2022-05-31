@@ -15,4 +15,5 @@
 
     <dimen name="handle_side_padding">4dp</dimen>
     <dimen name="handle_corner_radius">4dp</dimen>
+    <dimen name="drawer_row_height">10dp</dimen>
 </resources>
