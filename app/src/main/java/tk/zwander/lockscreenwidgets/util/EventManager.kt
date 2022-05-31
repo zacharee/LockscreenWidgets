@@ -2,7 +2,6 @@ package tk.zwander.lockscreenwidgets.util
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.view.WindowManager
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import tk.zwander.lockscreenwidgets.data.WidgetData
@@ -127,9 +126,10 @@ sealed class Event {
 
     //*** Widget Drawer
     object CloseDrawer : Event()
-
-    data class ShowDrawer(val wm: WindowManager? = null) : Event()
-    data class ShowHandle(val wm: WindowManager? = null) : Event()
+    object ShowDrawer : Event()
+    object ShowHandle : Event()
+    object DrawerShown : Event()
+    object DrawerHidden : Event()
 }
 
 interface EventObserver {

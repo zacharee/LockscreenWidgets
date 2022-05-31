@@ -15,9 +15,7 @@ import android.graphics.Paint
 import android.graphics.Point
 import android.graphics.drawable.Drawable
 import android.net.Uri
-import android.os.Build
-import android.os.Handler
-import android.os.Looper
+import android.os.*
 import android.provider.Settings
 import android.util.TypedValue
 import android.view.Display
@@ -342,3 +340,19 @@ val Context.screenSize: Point
 
 val Context.statusBarHeight: Int
     get() = resources.getDimensionPixelSize(resources.getIdentifier("status_bar_height", "dimen", "android"))
+
+fun Context.vibrate(duration: Long = 50L) {
+    val vibrator = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+        (getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager).defaultVibrator
+    } else {
+        @Suppress("DEPRECATION")
+        getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
+    }
+
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+        vibrator.vibrate(VibrationEffect.createOneShot(duration, 100))
+    } else {
+        @Suppress("DEPRECATION")
+        vibrator.vibrate(duration)
+    }
+}

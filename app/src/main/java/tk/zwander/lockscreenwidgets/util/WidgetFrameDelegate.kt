@@ -399,6 +399,8 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
     }
 
     fun addWindow(wm: WindowManager) {
+        logUtils.debugLog("Adding overlay")
+
         if (!binding.frame.isAttachedToWindow) {
             updateParamsIfNeeded()
         }
@@ -406,6 +408,8 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
     }
 
     fun removeWindow(wm: WindowManager) {
+        logUtils.debugLog("Removing overlay")
+
         adapter.currentEditingInterfacePosition = -1
 
         binding.frame.removeWindow(wm)

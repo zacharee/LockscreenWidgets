@@ -11,9 +11,9 @@ import android.widget.ViewFlipper
 import androidx.dynamicanimation.animation.DynamicAnimation
 import androidx.dynamicanimation.animation.SpringAnimation
 import androidx.dynamicanimation.animation.SpringForce
-import tk.zwander.helperlib.dpAsPx
-import tk.zwander.widgetdrawer.R
-import tk.zwander.widgetdrawer.utils.vibrate
+import tk.zwander.lockscreenwidgets.R
+import tk.zwander.lockscreenwidgets.util.dpAsPx
+import tk.zwander.lockscreenwidgets.util.vibrate
 import kotlin.math.absoluteValue
 
 class ToolbarAnimHolder : LinearLayout {
@@ -21,7 +21,7 @@ class ToolbarAnimHolder : LinearLayout {
     constructor(context: Context, attributeSet: AttributeSet) : super(context, attributeSet)
 
     private val closedTranslation: Int
-        get() = findViewById<ViewFlipper>(R.id.action_bar_wrapper).height
+        get() = findViewById<ViewFlipper>(R.id.button_wrapper).height
     private val openedTranslation = -context.dpAsPx(16)
     private val threshold: Float
         get() = (openedTranslation + closedTranslation) / 2f
@@ -53,7 +53,7 @@ class ToolbarAnimHolder : LinearLayout {
         super.onFinishInflate()
 
         findViewById<View>(R.id.open_close_toolbar).setOnTouchListener(touchListener)
-        findViewById<View>(R.id.action_bar_wrapper).setOnTouchListener(touchListener)
+        findViewById<View>(R.id.button_wrapper).setOnTouchListener(touchListener)
     }
 
     private fun transition(isOpen: Boolean = this.isOpen) {
@@ -113,7 +113,7 @@ class ToolbarAnimHolder : LinearLayout {
                         transition(translationY >= threshold)
                     } else if (translationY < openedTranslation) {
                         transition(isOpen)
-                    } else if (v.id != R.id.action_bar_wrapper) {
+                    } else if (v.id != R.id.button_wrapper) {
                         transition()
                         v.performClick()
                     }

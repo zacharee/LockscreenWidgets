@@ -1,6 +1,5 @@
 package tk.zwander.lockscreenwidgets.views
 
-import android.animation.LayoutTransition
 import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.drawable.GradientDrawable
@@ -8,10 +7,6 @@ import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener2
 import android.hardware.SensorManager
-import android.os.Build
-import android.os.VibrationEffect
-import android.os.Vibrator
-import android.os.VibratorManager
 import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
@@ -46,14 +41,6 @@ class WidgetFrameView(context: Context, attrs: AttributeSet) : ConstraintLayout(
 
     var isInEditingMode = false
 
-    private val vibrator by lazy {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            (context.getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager).defaultVibrator
-        } else {
-            @Suppress("DEPRECATION")
-            context.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
-        }
-    }
     private val sensorManager by lazy { context.getSystemService(Context.SENSOR_SERVICE) as SensorManager }
 
     private val proximityListener = object : SensorEventListener2 {
@@ -381,16 +368,6 @@ class WidgetFrameView(context: Context, attrs: AttributeSet) : ConstraintLayout(
         binding.editWrapper.isVisible = editing
     }
 
-    private fun vibrate() {
-        val time = 50L
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            vibrator.vibrate(VibrationEffect.createOneShot(time, 100))
-        } else {
-            @Suppress("DEPRECATION")
-            vibrator.vibrate(time)
-        }
-    }
-
     inner class ExpandTouchListener(private val listener: ((velX: Int, velY: Int, isUp: Boolean) -> Boolean)?) : OnTouchListener {
         private var prevExpandX = 0f
         private var prevExpandY = 0f
@@ -407,7 +384,7 @@ class WidgetFrameView(context: Context, attrs: AttributeSet) : ConstraintLayout(
                     if (!alreadyIndicatedMoving) {
                         alreadyIndicatedMoving = true
 
-                        vibrate()
+                        context.vibrate()
                     }
                     val newX = event.rawX
                     val newY = event.rawY
@@ -459,7 +436,7 @@ class WidgetFrameView(context: Context, attrs: AttributeSet) : ConstraintLayout(
                     if (!alreadyIndicatedMoving) {
                         alreadyIndicatedMoving = true
 
-                        vibrate()
+                        context.vibrate()
                     }
                     val newX = event.rawX
                     val newY = event.rawY

@@ -4,9 +4,8 @@ import android.content.Context
 import android.content.res.ColorStateList
 import android.graphics.Color
 import android.util.AttributeSet
-import android.widget.ImageView
 import androidx.appcompat.widget.AppCompatImageView
-import tk.zwander.helperlib.dpAsPx
+import tk.zwander.lockscreenwidgets.util.dpAsPx
 
 class ButtonImageView : AppCompatImageView {
     constructor(context: Context) : super(context)

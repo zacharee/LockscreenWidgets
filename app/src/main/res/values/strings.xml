@@ -212,4 +212,8 @@
     <string name="open_close_toolbar">Open/Close Toolbar</string>
     <string name="widget_removed">Widget removed</string>
     <string name="undo">Undo</string>
+    <string name="open_widget_drawer">Open Widget Drawer</string>
+    <string name="open_drawer">Open Drawer</string>
+    <string name="toggle_opacity">Toggle Opaque Backgrounds</string>
+    <string name="close_widget_drawer">Close Drawer</string>
 </resources>

@@ -5,6 +5,7 @@ import android.annotation.SuppressLint
 import android.app.KeyguardManager
 import android.content.Context
 import android.os.PowerManager
+import android.view.LayoutInflater
 import android.view.WindowManager
 import android.view.accessibility.AccessibilityEvent
 import android.view.accessibility.AccessibilityNodeInfo
@@ -13,7 +14,9 @@ import kotlinx.coroutines.*
 import tk.zwander.lockscreenwidgets.appwidget.IDListProvider
 import tk.zwander.lockscreenwidgets.data.window.WindowInfo
 import tk.zwander.lockscreenwidgets.data.window.WindowRootPair
+import tk.zwander.lockscreenwidgets.databinding.DrawerLayoutBinding
 import tk.zwander.lockscreenwidgets.util.*
+import tk.zwander.widgetdrawer.views.Handle
 import java.util.concurrent.ConcurrentLinkedQueue
 
 /**
@@ -31,6 +34,8 @@ class Accessibility : AccessibilityService(), EventObserver, CoroutineScope by M
     private val kgm by lazy { getSystemService(Context.KEYGUARD_SERVICE) as KeyguardManager }
     private val wm by lazy { getSystemService(Context.WINDOW_SERVICE) as WindowManager }
     private val power by lazy { getSystemService(Context.POWER_SERVICE) as PowerManager }
+    private val drawer by lazy { DrawerLayoutBinding.inflate(LayoutInflater.from(this)) }
+    private val handle by lazy { Handle(this) }
     private val delegate: WidgetFrameDelegate
         get() = WidgetFrameDelegate.getInstance(this)
 
@@ -64,6 +69,8 @@ class Accessibility : AccessibilityService(), EventObserver, CoroutineScope by M
         }
 
         eventManager.addObserver(this)
+
+        drawer.root.onCreate()
     }
 
     override fun onServiceConnected() {
@@ -323,7 +330,7 @@ class Accessibility : AccessibilityService(), EventObserver, CoroutineScope by M
                 delegate.updateStateAndWindowState(wm) { it.copy(notificationCount = event.count) }
             }
             Event.TempHide -> {
-                removeOverlay()
+                delegate.removeWindow(wm)
             }
             Event.ScreenOff -> {
                 //Sometimes ACTION_SCREEN_OFF gets received *after* the display turns on,
@@ -351,6 +358,18 @@ class Accessibility : AccessibilityService(), EventObserver, CoroutineScope by M
                 accessibilityJob?.cancel()
                 delegate.updateStateAndWindowState(wm) { it.copy(isScreenOn = true) }
             }
+            Event.ShowDrawer -> {
+                drawer.root.showDrawer(wm)
+            }
+            Event.CloseDrawer -> {
+                drawer.root.hideDrawer()
+            }
+            Event.DrawerShown -> {
+                handle.hide(wm)
+            }
+            Event.DrawerHidden -> {
+                handle.hide(wm)
+            }
             else -> {}
         }
     }
@@ -365,26 +384,8 @@ class Accessibility : AccessibilityService(), EventObserver, CoroutineScope by M
         WidgetFrameDelegate.invalidateInstance()
 
         eventManager.removeObserver(this)
-    }
-
-    /**
-     * Add the widget frame to the display.
-     */
-    private fun addOverlay() {
-        mainHandler.postDelayed({
-            delegate.addWindow(wm)
-        }, 100)
-    }
-
-    /**
-     * Remove the widget frame from the display.
-     * Make sure the editing UI is hidden if currently
-     * displayed.
-     */
-    private fun removeOverlay() {
-        logUtils.debugLog("Removing overlay")
-
-        delegate.removeWindow(wm)
+        drawer.root.hideDrawer(false)
+        handle.hide(wm)
     }
 
     /**

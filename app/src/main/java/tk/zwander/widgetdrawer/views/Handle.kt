@@ -2,7 +2,6 @@ package tk.zwander.widgetdrawer.views
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.content.SharedPreferences
 import android.graphics.Color
 import android.graphics.PixelFormat
 import android.os.Build
@@ -16,14 +15,11 @@ import android.view.MotionEvent
 import android.view.WindowManager
 import android.widget.LinearLayout
 import androidx.appcompat.content.res.AppCompatResources
-import tk.zwander.helperlib.dpAsPx
-import tk.zwander.widgetdrawer.R
-import tk.zwander.widgetdrawer.utils.PrefsManager
-import tk.zwander.widgetdrawer.utils.screenSize
-import tk.zwander.widgetdrawer.utils.vibrate
+import tk.zwander.lockscreenwidgets.R
+import tk.zwander.lockscreenwidgets.util.*
 import kotlin.math.absoluteValue
 
-class Handle : LinearLayout, SharedPreferences.OnSharedPreferenceChangeListener {
+class Handle : LinearLayout {
     companion object {
         private const val MSG_LONG_PRESS = 0
 
@@ -41,8 +37,8 @@ class Handle : LinearLayout, SharedPreferences.OnSharedPreferenceChangeListener 
     private var screenWidth = -1
 
     private val gestureManager = GestureManager()
-    private val wm = context.applicationContext.getSystemService(Context.WINDOW_SERVICE) as WindowManager
-    private val prefs = PrefsManager.getInstance(context)
+    private val wm =
+        context.applicationContext.getSystemService(Context.WINDOW_SERVICE) as WindowManager
 
     private val handleLeft = AppCompatResources.getDrawable(context, R.drawable.handle_left)
     private val handleRight = AppCompatResources.getDrawable(context, R.drawable.handle_right)
@@ -57,30 +53,51 @@ class Handle : LinearLayout, SharedPreferences.OnSharedPreferenceChangeListener 
     }
 
     val params = WindowManager.LayoutParams().apply {
-        type = if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) WindowManager.LayoutParams.TYPE_PRIORITY_PHONE
-        else WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
+        type =
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) WindowManager.LayoutParams.TYPE_PRIORITY_PHONE
+            else WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
         flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
-        width = context.dpAsPx(prefs.handleWidthDp)
-        height = context.dpAsPx(prefs.handleHeightDp)
-        gravity = Gravity.TOP or prefs.handleSide
-        y = prefs.handleYPx.toInt()
+        width = context.dpAsPx(context.prefManager.drawerHandleWidth)
+        height = context.dpAsPx(context.prefManager.drawerHandleHeight)
+        gravity = Gravity.TOP or context.prefManager.drawerHandleSide
+        y = context.prefManager.drawerHandleYPosition
         format = PixelFormat.RGBA_8888
+    }
+
+    private val prefsHandler = HandlerRegistry {
+        handler(PrefManager.KEY_DRAWER_HANDLE_HEIGHT) {
+            params.height = context.dpAsPx(context.prefManager.drawerHandleHeight)
+            updateLayout()
+        }
+
+        handler(PrefManager.KEY_DRAWER_HANDLE_WIDTH) {
+            params.width = context.dpAsPx(context.prefManager.drawerHandleWidth)
+            updateLayout()
+        }
+
+        handler(PrefManager.KEY_DRAWER_HANDLE_COLOR) {
+            setTint(context.prefManager.drawerHandleColor)
+        }
+
+        handler(PrefManager.KEY_SHOW_DRAWER_HANDLE_SHADOW) {
+            elevation = if (context.prefManager.drawerHandleShadow) context.dpAsPx(8).toFloat() else 0f
+        }
     }
 
     init {
         setSide()
-        setTint(prefs.handleColor)
+        setTint(context.prefManager.drawerHandleColor)
         isClickable = true
-        prefs.addPrefListener(this)
-        elevation = if (prefs.handleShadow) context.dpAsPx(8).toFloat() else 0f
+        elevation = if (context.prefManager.drawerHandleShadow) context.dpAsPx(8).toFloat() else 0f
         contentDescription = resources.getString(R.string.open_widget_drawer)
+        prefsHandler.register(context)
     }
 
     @SuppressLint("ClickableViewAccessibility")
     override fun onTouchEvent(event: MotionEvent): Boolean {
         when (event.action) {
             MotionEvent.ACTION_DOWN -> {
-                screenWidth = context.screenSize().x
+                screenWidth = context.screenSize.x
                 longClickHandler.sendEmptyMessageAtTime(
                     MSG_LONG_PRESS,
                     event.downTime + LONG_PRESS_DELAY
@@ -89,23 +106,23 @@ class Handle : LinearLayout, SharedPreferences.OnSharedPreferenceChangeListener 
             MotionEvent.ACTION_UP -> {
                 longClickHandler.removeMessages(MSG_LONG_PRESS)
                 setMoveMove(false)
-                prefs.handleYPx = params.y.toFloat()
+                context.prefManager.drawerHandleYPosition = params.y
             }
             MotionEvent.ACTION_MOVE -> {
                 if (inMoveMode) {
                     val gravity = when {
                         event.rawX <= 1 / 3f * screenWidth -> {
-                            PrefsManager.HANDLE_LEFT
+                            Gravity.LEFT
                         }
                         event.rawX >= 2 / 3f * screenWidth -> {
-                            PrefsManager.HANDLE_RIGHT
+                            Gravity.RIGHT
                         }
                         else -> -1
                     }
                     params.y = (event.rawY - params.height / 2f).toInt()
-                    if (gravity != PrefsManager.HANDLE_UNCHANGED) {
+                    if (gravity != -1) {
                         params.gravity = Gravity.TOP or gravity
-                        prefs.handleSide = gravity
+                        context.prefManager.drawerHandleSide = gravity
                         setSide(gravity)
                     }
                     updateLayout()
@@ -118,28 +135,6 @@ class Handle : LinearLayout, SharedPreferences.OnSharedPreferenceChangeListener 
         return true
     }
 
-    override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
-        when (key) {
-            PrefsManager.HANDLE_HEIGHT -> {
-                params.height = context.dpAsPx(prefs.handleHeightDp)
-                updateLayout()
-            }
-
-            PrefsManager.HANDLE_WIDTH -> {
-                params.width = context.dpAsPx(prefs.handleWidthDp)
-                updateLayout()
-            }
-
-            PrefsManager.HANDLE_COLOR -> {
-                setTint(prefs.handleColor)
-            }
-
-            PrefsManager.HANDLE_SHADOW -> {
-                elevation = if (prefs.handleShadow) context.dpAsPx(8).toFloat() else 0f
-            }
-        }
-    }
-
     override fun onDetachedFromWindow() {
         super.onDetachedFromWindow()
 
@@ -148,29 +143,32 @@ class Handle : LinearLayout, SharedPreferences.OnSharedPreferenceChangeListener 
     }
 
     fun onDestroy() {
-        prefs.removePrefListener(this)
+        prefsHandler.unregister(context)
     }
 
-    fun show(wm: WindowManager = this.wm, overrideType: Int = params.type) {
+    fun show(wm: WindowManager = this.wm) {
         try {
-            wm.addView(this, params.apply { type = overrideType })
-        } catch (e: Exception) {}
+            wm.addView(this, params)
+        } catch (e: Exception) {
+        }
     }
 
     fun hide(wm: WindowManager = this.wm) {
         try {
             wm.removeView(this)
-        } catch (e: Exception) {}
+        } catch (e: Exception) {
+        }
     }
 
     private fun updateLayout(params: WindowManager.LayoutParams = this.params) {
         try {
             wm.updateViewLayout(this, params)
-        } catch (e: Exception) {}
+        } catch (e: Exception) {
+        }
     }
 
-    private fun setSide(gravity: Int = prefs.handleSide) {
-        background = if (gravity == PrefsManager.HANDLE_RIGHT) handleRight
+    private fun setSide(gravity: Int = context.prefManager.drawerHandleSide) {
+        background = if (gravity == Gravity.RIGHT) handleRight
         else handleLeft
     }
 
@@ -179,7 +177,7 @@ class Handle : LinearLayout, SharedPreferences.OnSharedPreferenceChangeListener 
         val tint = if (inMoveMode)
             Color.argb(255, 120, 200, 255)
         else
-            prefs.handleColor
+            context.prefManager.drawerHandleColor
 
         setTint(tint)
     }
@@ -199,9 +197,14 @@ class Handle : LinearLayout, SharedPreferences.OnSharedPreferenceChangeListener 
             return gestureDetector.onTouchEvent(event)
         }
 
-        override fun onScroll(e1: MotionEvent?, e2: MotionEvent?, distanceX: Float, distanceY: Float): Boolean {
+        override fun onScroll(
+            e1: MotionEvent?,
+            e2: MotionEvent?,
+            distanceX: Float,
+            distanceY: Float
+        ): Boolean {
             return if (distanceX.absoluteValue > distanceY.absoluteValue && !inMoveMode) {
-                if ((distanceX > SWIPE_THRESHOLD && prefs.handleSide == PrefsManager.HANDLE_RIGHT)
+                if ((distanceX > SWIPE_THRESHOLD && context.prefManager.drawerHandleSide == Gravity.RIGHT)
                     || distanceX < -SWIPE_THRESHOLD
                 ) {
                     if (!calledOpen) {
@@ -218,7 +221,7 @@ class Handle : LinearLayout, SharedPreferences.OnSharedPreferenceChangeListener 
         }
 
         fun onLongPress() {
-            context.vibrate(50)
+            context.vibrate()
             setMoveMove(true)
         }
 

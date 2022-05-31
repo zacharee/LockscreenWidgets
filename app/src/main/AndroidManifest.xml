@@ -61,6 +61,24 @@
             android:exported="false"
             android:theme="@style/AppTheme.Null"
             />
+        <activity android:name=".activities.add.AddDrawerWidgetActivity"
+            android:exported="false"
+            android:label="@string/add_widget"
+            />
+        <activity android:name="tk.zwander.widgetdrawer.activities.TriggerActivity"
+            android:label="@string/open_drawer"
+            android:theme="@style/AppTheme.Null"
+            android:exported="true"
+            />
+        <activity-alias
+            android:name=".activities.LaunchDrawer"
+            android:targetActivity="tk.zwander.widgetdrawer.activities.TriggerActivity"
+            android:exported="true"
+            android:label="@string/open_widget_drawer">
+            <intent-filter>
+                <action android:name="android.intent.action.CREATE_SHORTCUT" />
+            </intent-filter>
+        </activity-alias>
 
         <service
             android:name="tk.zwander.lockscreenwidgets.services.Accessibility"

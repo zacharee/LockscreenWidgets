@@ -7,6 +7,7 @@ import android.content.Intent
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener
 import android.graphics.Color
 import android.net.Uri
+import android.view.Gravity
 import androidx.core.content.edit
 import androidx.preference.PreferenceManager
 import com.google.gson.GsonBuilder
@@ -75,6 +76,14 @@ class PrefManager private constructor(context: Context) : ContextWrapper(context
         const val KEY_DRAWER_WIDGETS = "drawer_widgets"
         const val KEY_DRAWER_COL_COUNT = "drawer_col_count"
         const val KEY_CLOSE_DRAWER_ON_EMPTY_TAP = "close_drawer_on_empty_tap"
+        const val KEY_SHOW_DRAWER_HANDLE = "show_drawer_handle"
+        const val KEY_TRANSPARENT_DRAWER_CARDS = "transparent_drawer_cards"
+        const val KEY_DRAWER_HANDLE_HEIGHT = "drawer_handle_height"
+        const val KEY_DRAWER_HANDLE_WIDTH = "drawer_handle_width"
+        const val KEY_DRAWER_HANDLE_Y_VALUE = "drawer_handle_y_value"
+        const val KEY_DRAWER_HANDLE_SIDE = "drawer_handle_side"
+        const val KEY_DRAWER_HANDLE_COLOR = "drawer_handle_color"
+        const val KEY_SHOW_DRAWER_HANDLE_SHADOW = "show_drawer_handle_shadow"
 
         const val VALUE_PAGE_INDICATOR_BEHAVIOR_HIDDEN = 0
         const val VALUE_PAGE_INDICATOR_BEHAVIOR_AUTO_HIDE = 1
@@ -527,6 +536,54 @@ class PrefManager private constructor(context: Context) : ContextWrapper(context
         get() = getBoolean(KEY_CLOSE_DRAWER_ON_EMPTY_TAP, false)
         set(value) {
             putBoolean(KEY_CLOSE_DRAWER_ON_EMPTY_TAP, value)
+        }
+
+    var transparentDrawerCards: Boolean
+        get() = getBoolean(KEY_TRANSPARENT_DRAWER_CARDS, false)
+        set(value) {
+            putBoolean(KEY_TRANSPARENT_DRAWER_CARDS, value)
+        }
+
+    var showDrawerHandle: Boolean
+        get() = getBoolean(KEY_SHOW_DRAWER_HANDLE, false)
+        set(value) {
+            putBoolean(KEY_SHOW_DRAWER_HANDLE, value)
+        }
+
+    var drawerHandleHeight: Int
+        get() = getInt(KEY_DRAWER_HANDLE_HEIGHT, 100)
+        set(value) {
+            putInt(KEY_DRAWER_HANDLE_HEIGHT, value)
+        }
+
+    var drawerHandleWidth: Int
+        get() = getInt(KEY_DRAWER_HANDLE_WIDTH, 10)
+        set(value) {
+            putInt(KEY_DRAWER_HANDLE_WIDTH, value)
+        }
+
+    var drawerHandleYPosition: Int
+        get() = getInt(KEY_DRAWER_HANDLE_Y_VALUE, 0)
+        set(value) {
+            putInt(KEY_DRAWER_HANDLE_Y_VALUE, value)
+        }
+
+    var drawerHandleSide: Int
+        get() = getInt(KEY_DRAWER_HANDLE_SIDE, Gravity.RIGHT)
+        set(value) {
+            putInt(KEY_DRAWER_HANDLE_SIDE, value)
+        }
+
+    var drawerHandleColor: Int
+        get() = getInt(KEY_DRAWER_HANDLE_COLOR, Color.WHITE)
+        set(value) {
+            putInt(KEY_DRAWER_HANDLE_COLOR, value)
+        }
+
+    var drawerHandleShadow: Boolean
+        get() = getBoolean(KEY_SHOW_DRAWER_HANDLE_SHADOW, false)
+        set(value) {
+            putBoolean(KEY_SHOW_DRAWER_HANDLE_SHADOW, value)
         }
 
     fun getCorrectFrameWidth(mode: Mode): Float {
