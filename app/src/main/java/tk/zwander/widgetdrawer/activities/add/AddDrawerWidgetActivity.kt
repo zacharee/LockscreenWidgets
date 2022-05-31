@@ -1,6 +1,7 @@
-package tk.zwander.lockscreenwidgets.activities.add
+package tk.zwander.widgetdrawer.activities.add
 
 import android.appwidget.AppWidgetProviderInfo
+import tk.zwander.lockscreenwidgets.activities.add.AddWidgetActivity
 import tk.zwander.lockscreenwidgets.data.WidgetData
 import tk.zwander.lockscreenwidgets.util.prefManager
 import tk.zwander.lockscreenwidgets.util.pxAsDp

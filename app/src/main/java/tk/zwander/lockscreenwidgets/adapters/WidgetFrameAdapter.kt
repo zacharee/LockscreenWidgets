@@ -43,10 +43,10 @@ import kotlin.math.min
  * The adapter for the widget frame itself.
  */
 open class WidgetFrameAdapter(
-    private val manager: AppWidgetManager,
-    private val host: WidgetHostCompat,
-    private val params: WindowManager.LayoutParams,
-    private val onRemoveCallback: (WidgetFrameAdapter, WidgetData, Int) -> Unit
+    protected val manager: AppWidgetManager,
+    protected val host: WidgetHostCompat,
+    protected val params: WindowManager.LayoutParams,
+    protected val onRemoveCallback: (WidgetFrameAdapter, WidgetData, Int) -> Unit
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>(), CoroutineScope by MainScope() {
     companion object {
         const val VIEW_TYPE_WIDGET = 0
@@ -71,11 +71,11 @@ open class WidgetFrameAdapter(
 
     private var didResize = false
 
-    protected val colCount: Int
+    protected open val colCount: Int
         get() = host.context.prefManager.frameColCount
-    protected val rowCount: Int
+    protected open val rowCount: Int
         get() = host.context.prefManager.frameRowCount
-    protected var currentWidgets: MutableCollection<WidgetData>
+    protected open var currentWidgets: MutableCollection<WidgetData>
         get() = host.context.prefManager.currentWidgets
         set(value) {
             host.context.prefManager.currentWidgets = LinkedHashSet(value)
@@ -180,8 +180,8 @@ open class WidgetFrameAdapter(
         notifyItemRangeChanged(0, itemCount)
     }
 
-    protected open fun persistResize() {
-        host.context.prefManager.currentWidgets = LinkedHashSet(widgets)
+    protected fun persistResize() {
+        currentWidgets = LinkedHashSet(widgets)
     }
 
     /**

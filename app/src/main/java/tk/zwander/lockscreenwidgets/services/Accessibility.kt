@@ -5,7 +5,6 @@ import android.annotation.SuppressLint
 import android.app.KeyguardManager
 import android.content.Context
 import android.os.PowerManager
-import android.view.LayoutInflater
 import android.view.WindowManager
 import android.view.accessibility.AccessibilityEvent
 import android.view.accessibility.AccessibilityNodeInfo
@@ -14,9 +13,8 @@ import kotlinx.coroutines.*
 import tk.zwander.lockscreenwidgets.appwidget.IDListProvider
 import tk.zwander.lockscreenwidgets.data.window.WindowInfo
 import tk.zwander.lockscreenwidgets.data.window.WindowRootPair
-import tk.zwander.lockscreenwidgets.databinding.DrawerLayoutBinding
 import tk.zwander.lockscreenwidgets.util.*
-import tk.zwander.widgetdrawer.views.Handle
+import tk.zwander.widgetdrawer.util.DrawerDelegate
 import java.util.concurrent.ConcurrentLinkedQueue
 
 /**
@@ -34,14 +32,14 @@ class Accessibility : AccessibilityService(), EventObserver, CoroutineScope by M
     private val kgm by lazy { getSystemService(Context.KEYGUARD_SERVICE) as KeyguardManager }
     private val wm by lazy { getSystemService(Context.WINDOW_SERVICE) as WindowManager }
     private val power by lazy { getSystemService(Context.POWER_SERVICE) as PowerManager }
-    private val drawer by lazy { DrawerLayoutBinding.inflate(LayoutInflater.from(this)) }
-    private val handle by lazy { Handle(this) }
-    private val delegate: WidgetFrameDelegate
+    private val frameDelegate: WidgetFrameDelegate
         get() = WidgetFrameDelegate.getInstance(this)
+    private val drawerDelegate: DrawerDelegate
+        get() = DrawerDelegate.getInstance(this)
 
     private val sharedPreferencesChangeHandler = HandlerRegistry {
         handler(PrefManager.KEY_WIDGET_FRAME_ENABLED) {
-            delegate.updateWindowState(wm)
+            frameDelegate.updateWindowState(wm)
         }
         handler(PrefManager.KEY_ACCESSIBILITY_EVENT_DELAY) {
             serviceInfo = serviceInfo?.apply {
@@ -61,16 +59,15 @@ class Accessibility : AccessibilityService(), EventObserver, CoroutineScope by M
     override fun onCreate() {
         super.onCreate()
 
-        delegate.onCreate()
+        frameDelegate.onCreate()
+        drawerDelegate.onCreate()
         sharedPreferencesChangeHandler.register(this)
 
-        delegate.updateState {
+        frameDelegate.updateState {
             it.copy(wasOnKeyguard = kgm.isKeyguardLocked, isScreenOn = power.isInteractive)
         }
 
         eventManager.addObserver(this)
-
-        drawer.root.onCreate()
     }
 
     override fun onServiceConnected() {
@@ -94,18 +91,18 @@ class Accessibility : AccessibilityService(), EventObserver, CoroutineScope by M
             //so it shouldn't be noticeable to the user. We use this to check the current keyguard
             //state and, if applicable, send the keyguard dismissal broadcast.
 
-            var newState = delegate.state.copy()
+            var newState = frameDelegate.state.copy()
 
             //Check if the screen is on.
             val isScreenOn = power.isInteractive
-            if (delegate.state.isScreenOn != isScreenOn) {
+            if (frameDelegate.state.isScreenOn != isScreenOn) {
                 //Make sure to turn off temp hide if it was on.
                 newState = newState.copy(isTempHide = false, isScreenOn = isScreenOn)
             }
 
             //Check if the lock screen is shown.
             val isOnKeyguard = kgm.isKeyguardLocked
-            if (isOnKeyguard != delegate.state.wasOnKeyguard) {
+            if (isOnKeyguard != frameDelegate.state.wasOnKeyguard) {
                 newState = newState.copy(wasOnKeyguard = isOnKeyguard)
                 //Update the keyguard dismissal Activity that the lock screen
                 //has been dismissed.
@@ -172,7 +169,7 @@ class Accessibility : AccessibilityService(), EventObserver, CoroutineScope by M
                             .toString()
                     )
 
-                    delegate.setNewDebugIdItems(items.toList())
+                    frameDelegate.setNewDebugIdItems(items.toList())
                 }
 
                 //The logic in this block only needs to run when on the lock screen.
@@ -306,7 +303,7 @@ class Accessibility : AccessibilityService(), EventObserver, CoroutineScope by M
                 }
             }
 
-            delegate.updateStateAndWindowState(wm, true) { newState }
+            frameDelegate.updateStateAndWindowState(wm, true) { newState }
 
             try {
                 //Make sure to recycle the copy of the event.
@@ -327,10 +324,10 @@ class Accessibility : AccessibilityService(), EventObserver, CoroutineScope by M
                 //notifications not visible on the lock screen.
                 //If the notification count is > 0, and the user has the option enabled,
                 //make sure to hide the widget frame.
-                delegate.updateStateAndWindowState(wm) { it.copy(notificationCount = event.count) }
+                frameDelegate.updateStateAndWindowState(wm) { it.copy(notificationCount = event.count) }
             }
             Event.TempHide -> {
-                delegate.removeWindow(wm)
+                frameDelegate.removeWindow(wm)
             }
             Event.ScreenOff -> {
                 //Sometimes ACTION_SCREEN_OFF gets received *after* the display turns on,
@@ -346,8 +343,8 @@ class Accessibility : AccessibilityService(), EventObserver, CoroutineScope by M
                     //and the current screen content has "frozen," causing the widget frame to show
                     //where it shouldn't. ACTION_SCREEN_OFF is called early enough that we can remove
                     //the frame before it's frozen in place.
-                    delegate.forceWakelock(wm, false)
-                    delegate.updateStateAndWindowState(wm) { it.copy(isTempHide = false, isScreenOn = false) }
+                    frameDelegate.forceWakelock(wm, false)
+                    frameDelegate.updateStateAndWindowState(wm) { it.copy(isTempHide = false, isScreenOn = false) }
                 }
             }
             Event.ScreenOn -> {
@@ -356,19 +353,7 @@ class Accessibility : AccessibilityService(), EventObserver, CoroutineScope by M
                 logUtils.debugLog("Screen on")
 
                 accessibilityJob?.cancel()
-                delegate.updateStateAndWindowState(wm) { it.copy(isScreenOn = true) }
-            }
-            Event.ShowDrawer -> {
-                drawer.root.showDrawer(wm)
-            }
-            Event.CloseDrawer -> {
-                drawer.root.hideDrawer()
-            }
-            Event.DrawerShown -> {
-                handle.hide(wm)
-            }
-            Event.DrawerHidden -> {
-                handle.hide(wm)
+                frameDelegate.updateStateAndWindowState(wm) { it.copy(isScreenOn = true) }
             }
             else -> {}
         }
@@ -379,13 +364,10 @@ class Accessibility : AccessibilityService(), EventObserver, CoroutineScope by M
 
         cancel()
         sharedPreferencesChangeHandler.unregister(this)
-        delegate.onDestroy()
-
-        WidgetFrameDelegate.invalidateInstance()
+        frameDelegate.onDestroy()
+        drawerDelegate.onDestroy()
 
         eventManager.removeObserver(this)
-        drawer.root.hideDrawer(false)
-        handle.hide(wm)
     }
 
     /**

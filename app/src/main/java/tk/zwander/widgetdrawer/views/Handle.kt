@@ -4,10 +4,10 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Color
 import android.graphics.PixelFormat
-import android.os.Build
 import android.os.Handler
 import android.os.Looper
 import android.os.Message
+import android.os.PowerManager
 import android.util.AttributeSet
 import android.view.GestureDetector
 import android.view.Gravity
@@ -37,8 +37,8 @@ class Handle : LinearLayout {
     private var screenWidth = -1
 
     private val gestureManager = GestureManager()
-    private val wm =
-        context.applicationContext.getSystemService(Context.WINDOW_SERVICE) as WindowManager
+    private val wm = context.getSystemService(Context.WINDOW_SERVICE) as WindowManager
+    private val power = context.getSystemService(Context.POWER_SERVICE) as PowerManager
 
     private val handleLeft = AppCompatResources.getDrawable(context, R.drawable.handle_left)
     private val handleRight = AppCompatResources.getDrawable(context, R.drawable.handle_right)
@@ -53,9 +53,7 @@ class Handle : LinearLayout {
     }
 
     val params = WindowManager.LayoutParams().apply {
-        type =
-            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) WindowManager.LayoutParams.TYPE_PRIORITY_PHONE
-            else WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
+        type = WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY
         flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
         width = context.dpAsPx(context.prefManager.drawerHandleWidth)
         height = context.dpAsPx(context.prefManager.drawerHandleHeight)

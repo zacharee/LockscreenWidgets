@@ -24,13 +24,13 @@ import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import com.arasthel.spannedgridlayoutmanager.SpannedGridLayoutManager
 import tk.zwander.lockscreenwidgets.activities.DismissOrUnlockActivity
-import tk.zwander.lockscreenwidgets.activities.add.AddDrawerWidgetActivity
-import tk.zwander.lockscreenwidgets.adapters.WidgetFrameAdapter
 import tk.zwander.lockscreenwidgets.data.WidgetData
 import tk.zwander.lockscreenwidgets.data.WidgetType
 import tk.zwander.lockscreenwidgets.databinding.DrawerLayoutBinding
 import tk.zwander.lockscreenwidgets.host.WidgetHostCompat
 import tk.zwander.lockscreenwidgets.util.*
+import tk.zwander.widgetdrawer.activities.add.AddDrawerWidgetActivity
+import tk.zwander.widgetdrawer.adapters.DrawerAdapter
 
 class Drawer : FrameLayout, EventObserver {
     companion object {
@@ -39,9 +39,6 @@ class Drawer : FrameLayout, EventObserver {
 
     constructor(context: Context) : super(context)
     constructor(context: Context, attrs: AttributeSet) : super(context, attrs)
-
-    var hideListener: (() -> Unit)? = null
-    var showListener: (() -> Unit)? = null
 
     val params: WindowManager.LayoutParams
         get() = WindowManager.LayoutParams().apply {
@@ -68,7 +65,7 @@ class Drawer : FrameLayout, EventObserver {
     private val manager by lazy { AppWidgetManager.getInstance(context.applicationContext) }
     private val shortcutIdManager by lazy { ShortcutIdManager.getInstance(context, host) }
     private val adapter by lazy {
-        WidgetFrameAdapter(manager, host, params) { _, widget, _ ->
+        DrawerAdapter(manager, host, params) { _, widget, _ ->
             removeWidget(widget)
         }
     }
@@ -122,8 +119,7 @@ class Drawer : FrameLayout, EventObserver {
             binding.addWidget.setOnClickListener { pickWidget() }
             binding.closeDrawer.setOnClickListener { hideDrawer() }
             binding.toggleTransparent.setOnClickListener {
-//                prefs.transparentWidgets = !prefs.transparentWidgets
-//                adapter.transparentWidgets = prefs.transparentWidgets
+                context.prefManager.transparentDrawerCards = !context.prefManager.transparentDrawerCards
             }
 
             binding.widgetGrid.layoutManager = gridLayoutManager
@@ -150,7 +146,7 @@ class Drawer : FrameLayout, EventObserver {
                 alpha = it.animatedValue.toString().toFloat()
             }
             anim.doOnEnd {
-                showListener?.invoke()
+                context.eventManager.sendEvent(Event.DrawerShown)
             }
             anim.start()
         }, 10)
@@ -219,7 +215,7 @@ class Drawer : FrameLayout, EventObserver {
         }
         anim.addListener(object : AnimatorListenerAdapter() {
             override fun onAnimationEnd(animation: Animator?) {
-                if (callListener) hideListener?.invoke()
+                if (callListener) context.eventManager.sendEvent(Event.DrawerHidden)
                 handler?.postDelayed({
                     try {
                         wm.removeView(this@Drawer)

@@ -370,6 +370,7 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
         eventManager.apply {
             removeObserver(this@WidgetFrameDelegate)
         }
+        invalidateInstance()
     }
 
     fun updateState(transform: (State) -> State) {
