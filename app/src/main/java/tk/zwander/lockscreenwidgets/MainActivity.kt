@@ -346,7 +346,7 @@ fun MainContent() {
 
                                 OutlinedButton(
                                     onClick = {
-                                        context.eventManager.sendEvent(Event.LaunchAddDrawerWidget)
+                                        context.eventManager.sendEvent(Event.LaunchAddDrawerWidget(false))
                                     },
                                     colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colors.onSurface),
                                     modifier = Modifier

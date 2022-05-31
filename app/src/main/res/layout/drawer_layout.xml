@@ -4,6 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:animateLayoutChanges="true"
     android:alpha="0"
     android:theme="@style/AppTheme">
 
@@ -12,6 +13,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
+        android:animateLayoutChanges="false"
         />
 
     <tk.zwander.widgetdrawer.views.ToolbarAnimHolder
@@ -91,5 +93,14 @@
         </FrameLayout>
 
     </tk.zwander.widgetdrawer.views.ToolbarAnimHolder>
+
+    <include
+        android:id="@+id/remove_widget_confirmation"
+        android:visibility="gone"
+        android:layout_gravity="center"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        layout="@layout/remove_widget_confirmation_layout"
+        />
 
 </tk.zwander.widgetdrawer.views.Drawer>

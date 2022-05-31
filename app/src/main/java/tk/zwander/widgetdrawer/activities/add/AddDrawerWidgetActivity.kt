@@ -1,6 +1,8 @@
 package tk.zwander.widgetdrawer.activities.add
 
 import android.appwidget.AppWidgetProviderInfo
+import android.content.Context
+import android.content.Intent
 import tk.zwander.lockscreenwidgets.R
 import tk.zwander.lockscreenwidgets.activities.add.AddWidgetActivity
 import tk.zwander.lockscreenwidgets.data.WidgetData
@@ -12,6 +14,18 @@ import kotlin.math.floor
  * Manage selecting the widget for the drawer.
  */
 class AddDrawerWidgetActivity : AddWidgetActivity() {
+    companion object {
+        const val EXTRA_FROM_DRAWER = "from_drawer"
+
+        fun launch(context: Context, fromDrawer: Boolean) {
+            val intent = Intent(context, AddDrawerWidgetActivity::class.java)
+            intent.putExtra(EXTRA_FROM_DRAWER, fromDrawer)
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+
+            context.startActivity(intent)
+        }
+    }
+
     override val colCount: Int
         get() = prefManager.drawerColCount
     override val rowCount: Int
@@ -20,6 +34,8 @@ class AddDrawerWidgetActivity : AddWidgetActivity() {
         get() = pxAsDp(screenSize.x)
     override val height: Float
         get() = pxAsDp(screenSize.y)
+
+    private val fromDrawer by lazy { intent.getBooleanExtra(EXTRA_FROM_DRAWER, false) }
 
     /**
      * Add the specified widget to the drawer and save it to SharedPreferences.
@@ -30,7 +46,6 @@ class AddDrawerWidgetActivity : AddWidgetActivity() {
         prefManager.drawerWidgets = prefManager.drawerWidgets.apply {
             add(createWidgetData(id, provider))
         }
-        eventManager.sendEvent(Event.ShowDrawer)
         finish()
     }
 
@@ -38,7 +53,6 @@ class AddDrawerWidgetActivity : AddWidgetActivity() {
         prefManager.drawerWidgets = prefManager.drawerWidgets.apply {
             add(shortcut)
         }
-        eventManager.sendEvent(Event.ShowDrawer)
         finish()
     }
 
@@ -60,5 +74,13 @@ class AddDrawerWidgetActivity : AddWidgetActivity() {
                 WidgetSizeData(defaultColSpan, defaultRowSpan)
             }
         )
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+
+        if (fromDrawer) {
+            eventManager.sendEvent(Event.ShowDrawer)
+        }
     }
 }

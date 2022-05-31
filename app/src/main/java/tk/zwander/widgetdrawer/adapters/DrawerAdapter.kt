@@ -36,7 +36,7 @@ class DrawerAdapter(
 
     override fun launchAddActivity() {
         host.context.eventManager.sendEvent(Event.CloseDrawer)
-        host.context.eventManager.sendEvent(Event.LaunchAddDrawerWidget)
+        host.context.eventManager.sendEvent(Event.LaunchAddDrawerWidget(true))
     }
 
     override fun launchReconfigure(id: Int, providerInfo: AppWidgetProviderInfo) {

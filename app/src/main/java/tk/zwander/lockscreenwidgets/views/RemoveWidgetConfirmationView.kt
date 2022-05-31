@@ -2,8 +2,8 @@ package tk.zwander.lockscreenwidgets.views
 
 import android.content.Context
 import android.util.AttributeSet
-import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.isVisible
+import com.google.android.material.card.MaterialCardView
 import tk.zwander.lockscreenwidgets.data.WidgetData
 import tk.zwander.lockscreenwidgets.databinding.RemoveWidgetConfirmationLayoutBinding
 import tk.zwander.lockscreenwidgets.util.Event
@@ -14,7 +14,7 @@ import tk.zwander.lockscreenwidgets.util.eventManager
  * button for a widget. It asks the user whether they really want to remove
  * the widget, and passes the result back to the delegate.
  */
-class RemoveWidgetConfirmationView(context: Context, attrs: AttributeSet) : ConstraintLayout(context, attrs) {
+class RemoveWidgetConfirmationView(context: Context, attrs: AttributeSet) : MaterialCardView(context, attrs) {
     val binding by lazy { RemoveWidgetConfirmationLayoutBinding.bind(this) }
 
     private var item: WidgetData? = null

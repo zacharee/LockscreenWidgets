@@ -324,7 +324,7 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
             }
             is Event.FrameIntercept -> forceWakelock(wm, event.down)
             is Event.RemoveWidgetConfirmed -> {
-                if (event.remove) {
+                if (event.remove && prefManager.currentWidgets.contains(event.item)) {
                     prefManager.currentWidgets = prefManager.currentWidgets.apply {
                         remove(event.item)
                         when (event.item?.safeType) {

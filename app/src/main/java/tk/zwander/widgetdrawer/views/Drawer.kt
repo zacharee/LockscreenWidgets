@@ -13,13 +13,16 @@ import android.graphics.PixelFormat
 import android.os.Handler
 import android.os.Looper
 import android.util.AttributeSet
+import android.util.TypedValue
 import android.view.Gravity
 import android.view.KeyEvent
+import android.view.ViewGroup
 import android.view.WindowManager
 import android.view.animation.AccelerateInterpolator
 import android.view.animation.DecelerateInterpolator
 import android.widget.FrameLayout
 import androidx.core.animation.doOnEnd
+import androidx.core.view.updateLayoutParams
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import com.arasthel.spannedgridlayoutmanager.SpannedGridLayoutManager
@@ -180,7 +183,22 @@ class Drawer : FrameLayout, EventObserver {
     }
 
     override fun onEvent(event: Event) {
-
+        when (event) {
+            is Event.RemoveWidgetConfirmed -> {
+                if (event.remove && context.prefManager.drawerWidgets.contains(event.item)) {
+                    context.prefManager.drawerWidgets = context.prefManager.drawerWidgets.apply {
+                        remove(event.item)
+                        when (event.item?.safeType) {
+                            WidgetType.WIDGET -> host.deleteAppWidgetId(event.item.id)
+                            WidgetType.SHORTCUT -> shortcutIdManager.removeShortcutId(event.item.id)
+                            else -> {}
+                        }
+                    }
+                    adapter.currentEditingInterfacePosition = -1
+                }
+            }
+            else -> {}
+        }
     }
 
     fun onCreate() {
@@ -195,6 +213,13 @@ class Drawer : FrameLayout, EventObserver {
         updateSpanCount()
         adapter.updateWidgets(context.prefManager.drawerWidgets.toList())
         context.eventManager.addObserver(this)
+        binding.removeWidgetConfirmation.root.updateLayoutParams<ViewGroup.LayoutParams> {
+            height = (context.screenSize.y / 2f).toInt()
+        }
+        binding.removeWidgetConfirmation.confirmDeleteText.setTextSize(TypedValue.COMPLEX_UNIT_SP, 24f)
+        context.dpAsPx(16).apply {
+            binding.removeWidgetConfirmation.root.setContentPadding(this, this, this, this)
+        }
     }
 
     fun onDestroy() {
@@ -244,15 +269,11 @@ class Drawer : FrameLayout, EventObserver {
 
     private fun pickWidget() {
         hideDrawer()
-        context.eventManager.sendEvent(Event.LaunchAddDrawerWidget)
+        context.eventManager.sendEvent(Event.LaunchAddDrawerWidget(true))
     }
 
     private fun removeWidget(info: WidgetData) {
-        if (info.type == WidgetType.WIDGET) host.deleteAppWidgetId(info.id)
-        else if (info.type == WidgetType.SHORTCUT) shortcutIdManager.removeShortcutId(
-            info.id
-        )
-        context.prefManager.drawerWidgets = LinkedHashSet(adapter.widgets.apply { remove(info) })
+        binding.removeWidgetConfirmation.root.show(info)
     }
 
     private inner class SpannedLayoutManager(context: Context) : SpannedGridLayoutManager(

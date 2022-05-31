@@ -244,7 +244,7 @@ open class WidgetFrameAdapter(
             }
 
         private val currentData: WidgetData?
-            get() = bindingAdapterPosition.let { if (it != -1) widgets[it] else null }
+            get() = bindingAdapterPosition.let { if (it != -1) widgets.getOrNull(it) else null }
 
         init {
             binding.removeWidget.setOnClickListener {
@@ -541,7 +541,7 @@ open class WidgetFrameAdapter(
     }
 
     inner class WidgetSpanSizeLookup : SpannedGridLayoutManager.SpanSizeLookup({ position ->
-        if (widgets.isEmpty()) SpanSize(1, 1)
+        if (widgets.isEmpty()) SpanSize(colCount, minRowSpan)
         else {
             val widget = if (position >= widgets.size) null else widgets[position]
             val size = widget?.safeSize

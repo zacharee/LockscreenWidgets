@@ -117,10 +117,7 @@ class App : Application() {
         }
 
         eventManager.addListener<Event.LaunchAddDrawerWidget> {
-            val intent = Intent(this, AddDrawerWidgetActivity::class.java)
-            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-
-            startActivity(intent)
+            AddDrawerWidgetActivity.launch(this, it.fromDrawer)
         }
     }
 }
