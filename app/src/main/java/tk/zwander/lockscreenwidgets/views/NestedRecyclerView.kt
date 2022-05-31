@@ -4,6 +4,8 @@ import android.content.Context
 import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
+import android.widget.AbsListView
+import android.widget.ListView
 import androidx.core.view.NestedScrollingParent3
 import androidx.core.view.NestedScrollingParentHelper
 import androidx.core.view.ViewCompat
@@ -18,10 +20,11 @@ open class NestedRecyclerView @JvmOverloads constructor(
     private val parentHelper by lazy { NestedScrollingParentHelper(this) }
 
     var nestedScrollingListener: ((Boolean) -> Unit)? = null
+    var selectedItem: Boolean = false
 
     override fun dispatchTouchEvent(ev: MotionEvent): Boolean {
         // Nothing special if no child scrolling target.
-        if (nestedScrollTarget == null) return super.dispatchTouchEvent(ev)
+        if (nestedScrollTarget == null || selectedItem) return super.dispatchTouchEvent(ev)
 
         // Inhibit the execution of our onInterceptTouchEvent for now...
         requestDisallowInterceptTouchEvent(true)
@@ -145,7 +148,24 @@ open class NestedRecyclerView @JvmOverloads constructor(
     }
 
     private fun setTarget(target: View?) {
+        if (target == null) {
+            nestedScrollingListener?.invoke(false)
+        }
         nestedScrollTarget = target
         nestedScrollTargetWasUnableToScroll = false
+
+        (target as? ListView)?.setOnScrollListener(object : AbsListView.OnScrollListener {
+            override fun onScrollStateChanged(view: AbsListView?, scrollState: Int) {
+                nestedScrollingListener?.invoke(scrollState != AbsListView.OnScrollListener.SCROLL_STATE_IDLE)
+            }
+
+            override fun onScroll(
+                view: AbsListView?,
+                firstVisibleItem: Int,
+                visibleItemCount: Int,
+                totalItemCount: Int
+            ) {
+            }
+        })
     }
 }

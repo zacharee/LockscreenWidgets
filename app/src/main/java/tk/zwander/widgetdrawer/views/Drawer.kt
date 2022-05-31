@@ -85,6 +85,7 @@ class Drawer : FrameLayout, EventObserver {
         },
         onItemSelected = { selected ->
             updateState { it.copy(isHoldingItem = selected) }
+            binding.widgetGrid.selectedItem = selected
         }
     )
     private val itemTouchHelper = ItemTouchHelper(touchHelperCallback)
