@@ -87,6 +87,7 @@ class Drawer : FrameLayout, EventObserver {
             updateState { it.copy(isHoldingItem = selected) }
         }
     )
+    private val itemTouchHelper = ItemTouchHelper(touchHelperCallback)
 
     private val preferenceHandler = HandlerRegistry {
         handler(PrefManager.KEY_DRAWER_WIDGETS) {
@@ -133,7 +134,16 @@ class Drawer : FrameLayout, EventObserver {
 
             binding.widgetGrid.layoutManager = gridLayoutManager
             gridLayoutManager.spanSizeLookup = adapter.spanSizeLookup
-            ItemTouchHelper(touchHelperCallback).attachToRecyclerView(binding.widgetGrid)
+            itemTouchHelper.attachToRecyclerView(binding.widgetGrid)
+            binding.widgetGrid.nestedScrollingListener = {
+                itemTouchHelper.attachToRecyclerView(
+                    if (it) {
+                        null
+                    } else {
+                        binding.widgetGrid
+                    }
+                )
+            }
         }
     }
 

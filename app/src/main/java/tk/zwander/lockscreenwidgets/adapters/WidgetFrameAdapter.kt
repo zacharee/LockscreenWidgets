@@ -14,9 +14,11 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
+import android.widget.ListView
 import android.widget.Toast
 import androidx.core.content.res.ResourcesCompat
 import androidx.core.graphics.drawable.toBitmap
+import androidx.core.view.forEach
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
@@ -371,6 +373,20 @@ open class WidgetFrameAdapter(
                         //so this makes the most sense right now.
                         addView(withContext(Dispatchers.Main) {
                             host.createView(itemView.context, data.id, widgetInfo).apply {
+                                findListViewsInHierarchy(this).forEach { list ->
+                                    list.isNestedScrollingEnabled = true
+                                }
+
+                                this.setOnHierarchyChangeListener(object : ViewGroup.OnHierarchyChangeListener {
+                                    override fun onChildViewAdded(parent: View, child: View?) {
+                                        findListViewsInHierarchy(parent).forEach { list ->
+                                            list.isNestedScrollingEnabled = true
+                                        }
+                                    }
+
+                                    override fun onChildViewRemoved(parent: View?, child: View?) {}
+                                })
+
                                 val width = context.pxAsDp(itemView.width)
                                 val height = context.pxAsDp(itemView.height)
 
@@ -486,6 +502,22 @@ open class WidgetFrameAdapter(
             shortcutView.shortcutName.text = data.label
 
             binding.widgetHolder.addView(shortcutView.root)
+        }
+
+        private fun findListViewsInHierarchy(root: View): List<ListView> {
+            val ret = arrayListOf<ListView>()
+
+            if (root is ViewGroup) {
+                root.forEach { child ->
+                    if (child is ListView) {
+                        ret.add(child)
+                    } else if (child is ViewGroup) {
+                        ret.addAll(findListViewsInHierarchy(child))
+                    }
+                }
+            }
+
+            return ret
         }
 
         private fun handleResize(overThreshold: Boolean, step: Int, amount: Int, direction: Int, vertical: Boolean) {

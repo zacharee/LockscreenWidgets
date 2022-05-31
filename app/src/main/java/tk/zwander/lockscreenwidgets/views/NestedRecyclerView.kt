@@ -13,10 +13,11 @@ import androidx.recyclerview.widget.RecyclerView
 open class NestedRecyclerView @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
 ) : RecyclerView(context, attrs, defStyleAttr), NestedScrollingParent3 {
-
     private var nestedScrollTarget: View? = null
     private var nestedScrollTargetWasUnableToScroll = false
     private val parentHelper by lazy { NestedScrollingParentHelper(this) }
+
+    var nestedScrollingListener: ((Boolean) -> Unit)? = null
 
     override fun dispatchTouchEvent(ev: MotionEvent): Boolean {
         // Nothing special if no child scrolling target.
@@ -139,7 +140,9 @@ open class NestedRecyclerView @JvmOverloads constructor(
         velocityX: Float,
         velocityY: Float,
         consumed: Boolean
-    ) = super.onNestedFling(target, velocityX, velocityY, consumed)
+    ) = super.onNestedFling(target, velocityX, velocityY, consumed).also {
+        nestedScrollingListener?.invoke(!it)
+    }
 
     private fun setTarget(target: View?) {
         nestedScrollTarget = target
