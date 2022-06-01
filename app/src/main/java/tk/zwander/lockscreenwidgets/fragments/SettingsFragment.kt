@@ -13,6 +13,7 @@ import tk.zwander.lockscreenwidgets.R
 import tk.zwander.lockscreenwidgets.activities.HideForIDsActivity
 import tk.zwander.lockscreenwidgets.activities.OnboardingActivity
 import tk.zwander.lockscreenwidgets.util.*
+import tk.zwander.lockscreenwidgets.util.backup.BackupRestoreManager
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -34,7 +35,7 @@ class SettingsFragment : PreferenceFragmentCompat() {
         if (uri != null) {
             requireContext().apply {
                 contentResolver.openOutputStream(uri)?.bufferedWriter()?.use { output ->
-                    output.write(backupRestoreManager.createBackupString())
+                    output.write(backupRestoreManager.createBackupString(BackupRestoreManager.Which.FRAME))
                 }
             }
         }
@@ -45,7 +46,7 @@ class SettingsFragment : PreferenceFragmentCompat() {
             requireContext().apply {
                 val input = contentResolver.openInputStream(uri)?.bufferedReader()?.readText()
 
-                if (!backupRestoreManager.restoreBackupString(input)) {
+                if (!backupRestoreManager.restoreBackupString(input, BackupRestoreManager.Which.FRAME)) {
                     Toast.makeText(this, R.string.unable_to_restore_widgets, Toast.LENGTH_SHORT)
                     logUtils.normalLog("Unable to restore widgets")
                 } else {
@@ -132,7 +133,7 @@ class SettingsFragment : PreferenceFragmentCompat() {
         findPreference<Preference>("back_up_widgets")?.setOnPreferenceClickListener {
             val formatter = SimpleDateFormat("yyyy-MM-dd_HH:mm:ss", Locale.getDefault())
 
-            onWidgetBackUp.launch("lockscreen_widgets_backup_${formatter.format(Date())}.lswidg")
+            onWidgetBackUp.launch("lockscreen_widgets_frame_backup_${formatter.format(Date())}.lswidg")
             true
         }
 

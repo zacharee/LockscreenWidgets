@@ -5,10 +5,15 @@
       <map>
         <entry key="../../.gradle/caches/transforms-3/2586cb7656a506fc74c9398090f2706d/transformed/jetified-CollapsiblePreferenceCategory-2f53f2d367/res/drawable/arrow_up.xml" value="0.159" />
         <entry key="app/src/main/java/tk/zwander/lockscreenwidgets/MainActivity.kt" value="0.18707770270270271" />
+        <entry key="app/src/main/res/drawable/border_right.xml" value="0.159" />
         <entry key="app/src/main/res/drawable/card_background.xml" value="0.159" />
         <entry key="app/src/main/res/drawable/drawer_handle_right.xml" value="0.159" />
         <entry key="app/src/main/res/drawable/edit.xml" value="0.159" />
+        <entry key="app/src/main/res/drawable/expand_horiz.xml" value="0.159" />
+        <entry key="app/src/main/res/drawable/expand_vert.xml" value="0.159" />
         <entry key="app/src/main/res/drawable/info.xml" value="0.159" />
+        <entry key="app/src/main/res/drawable/shadow.xml" value="0.159" />
+        <entry key="app/src/main/res/drawable/tap.xml" value="0.159" />
         <entry key="app/src/main/res/drawable/toolbar_background.xml" value="0.159" />
         <entry key="app/src/main/res/drawable/visibility.xml" value="0.159" />
         <entry key="app/src/main/res/layout/activity_main.xml" value="0.21979166666666666" />

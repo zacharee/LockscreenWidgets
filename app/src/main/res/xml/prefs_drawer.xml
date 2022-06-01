@@ -2,73 +2,109 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <SwitchPreference
-        android:title="@string/close_on_empty_tap"
-        android:key="close_drawer_on_empty_tap"
-        android:defaultValue="false"
+    <Preference
+        android:title="@string/settings_screen_back_up_widgets"
+        android:key="back_up_widgets"
+        android:summary="@string/settings_screen_back_up_widgets_desc"
+        android:icon="@drawable/ic_baseline_save_24"
         />
 
     <Preference
-        android:title="@string/open_drawer"
-        android:key="open_drawer"
+        android:title="@string/settings_screen_restore_widgets"
+        android:key="restore_widgets"
+        android:summary="@string/settings_screen_restore_widgets_desc"
+        android:icon="@drawable/ic_baseline_open_in_new_24"
         />
 
-    <SwitchPreference
-        android:title="@string/show_drawer_handle"
-        android:key="show_drawer_handle"
-        android:defaultValue="true"
-        />
+    <tk.zwander.collapsiblepreferencecategory.CollapsiblePreferenceCategoryNew
+        android:title="@string/drawer"
+        android:key="drawer_options">
 
-    <SwitchPreference
-        android:title="@string/show_drawer_handle_shadow"
-        android:key="show_drawer_handle_shadow"
-        android:defaultValue="true"
-        android:dependency="show_drawer_handle"
-        />
+        <SwitchPreference
+            android:title="@string/close_on_empty_tap"
+            android:summary="@string/close_on_empty_tap_desc"
+            android:key="close_drawer_on_empty_tap"
+            android:defaultValue="false"
+            android:icon="@drawable/tap"
+            />
 
-    <tk.zwander.seekbarpreference.SeekBarPreference
-        android:title="@string/drawer_handle_height"
-        android:key="drawer_handle_height"
-        android:defaultValue="140"
-        app:minValue="64"
-        app:maxValue="500"
-        app:units="dp"
-        android:dependency="show_drawer_handle"
-        />
+        <com.jaredrummler.android.colorpicker.ColorPreferenceCompat
+            android:title="@string/drawer_background_color"
+            android:summary="@string/drawer_background_color_desc"
+            android:key="drawer_background_color"
+            android:defaultValue="@color/drawerBackgroundDefault"
+            android:icon="@drawable/ic_baseline_color_lens_24"
+            app:cpv_allowCustom="true"
+            app:cpv_showAlphaSlider="true"
+            />
 
-    <tk.zwander.seekbarpreference.SeekBarPreference
-        android:title="@string/drawer_handle_width"
-        android:key="drawer_handle_width"
-        android:defaultValue="6"
-        app:minValue="1"
-        app:maxValue="24"
-        app:units="dp"
-        android:dependency="show_drawer_handle"
-        />
+        <tk.zwander.seekbarpreference.SeekBarPreference
+            android:title="@string/drawer_column_count"
+            android:defaultValue="2"
+            android:key="drawer_col_count"
+            android:icon="@drawable/ic_baseline_view_column_24"
+            app:minValue="1"
+            app:maxValue="6"
+            />
 
-    <com.jaredrummler.android.colorpicker.ColorPreferenceCompat
-        android:title="@string/drawer_handle_color"
-        android:key="drawer_handle_color"
-        android:defaultValue="-1"
-        app:cpv_allowCustom="true"
-        app:cpv_showAlphaSlider="true"
-        android:dependency="show_drawer_handle"
-        />
+    </tk.zwander.collapsiblepreferencecategory.CollapsiblePreferenceCategoryNew>
 
-    <com.jaredrummler.android.colorpicker.ColorPreferenceCompat
-        android:title="@string/drawer_background_color"
-        android:key="drawer_background_color"
-        android:defaultValue="@color/drawerBackgroundDefault"
-        app:cpv_allowCustom="true"
-        app:cpv_showAlphaSlider="true"
-        />
+    <tk.zwander.collapsiblepreferencecategory.CollapsiblePreferenceCategoryNew
+        android:title="@string/handle"
+        android:key="handle_options">
 
-    <tk.zwander.seekbarpreference.SeekBarPreference
-        android:title="@string/drawer_column_count"
-        android:defaultValue="2"
-        android:key="drawer_col_count"
-        app:minValue="1"
-        app:maxValue="6"
-        />
+        <SwitchPreference
+            android:title="@string/show_drawer_handle"
+            android:summary="@string/show_drawer_handle_desc"
+            android:key="show_drawer_handle"
+            android:defaultValue="true"
+            android:icon="@drawable/border_right"
+            />
+
+        <SwitchPreference
+            android:title="@string/show_drawer_handle_shadow"
+            android:summary="@string/show_drawer_handle_shadow_desc"
+            android:key="show_drawer_handle_shadow"
+            android:defaultValue="true"
+            android:dependency="show_drawer_handle"
+            android:icon="@drawable/shadow"
+            />
+
+        <tk.zwander.seekbarpreference.SeekBarPreference
+            android:title="@string/drawer_handle_height"
+            android:summary="@string/drawer_handle_height_desc"
+            android:key="drawer_handle_height"
+            android:defaultValue="140"
+            android:icon="@drawable/expand_vert"
+            app:minValue="64"
+            app:maxValue="500"
+            app:units="dp"
+            android:dependency="show_drawer_handle"
+            />
+
+        <tk.zwander.seekbarpreference.SeekBarPreference
+            android:title="@string/drawer_handle_width"
+            android:summary="@string/drawer_handle_width_desc"
+            android:key="drawer_handle_width"
+            android:defaultValue="6"
+            android:icon="@drawable/expand_horiz"
+            app:minValue="1"
+            app:maxValue="24"
+            app:units="dp"
+            android:dependency="show_drawer_handle"
+            />
+
+        <com.jaredrummler.android.colorpicker.ColorPreferenceCompat
+            android:title="@string/drawer_handle_color"
+            android:summary="@string/drawer_handle_color_desc"
+            android:key="drawer_handle_color"
+            android:defaultValue="-1"
+            android:icon="@drawable/ic_baseline_color_lens_24"
+            app:cpv_allowCustom="true"
+            app:cpv_showAlphaSlider="true"
+            android:dependency="show_drawer_handle"
+            />
+
+    </tk.zwander.collapsiblepreferencecategory.CollapsiblePreferenceCategoryNew>
 
 </PreferenceScreen>

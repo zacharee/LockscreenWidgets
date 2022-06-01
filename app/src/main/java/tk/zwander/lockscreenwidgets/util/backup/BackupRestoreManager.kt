@@ -23,10 +23,24 @@ class BackupRestoreManager private constructor(context: Context) : ContextWrappe
         }
     }
 
-    fun createBackupString(): String {
-        val currentWidgets = prefManager.currentWidgetsString
-        val rows = prefManager.frameRowCount
-        val cols = prefManager.frameColCount
+    enum class Which {
+        FRAME,
+        DRAWER
+    }
+
+    fun createBackupString(which: Which): String {
+        val currentWidgets = when (which) {
+            Which.FRAME -> prefManager.currentWidgetsString
+            Which.DRAWER -> prefManager.drawerWidgetsString
+        }
+        val rows = when (which) {
+            Which.FRAME -> prefManager.frameRowCount
+            Which.DRAWER -> Int.MAX_VALUE
+        }
+        val cols = when (which) {
+            Which.FRAME -> prefManager.frameColCount
+            Which.DRAWER -> prefManager.drawerColCount
+        }
 
         val data = HashMap<String, String?>()
         data[PrefManager.KEY_CURRENT_WIDGETS] = currentWidgets
@@ -36,7 +50,7 @@ class BackupRestoreManager private constructor(context: Context) : ContextWrappe
         return prefManager.gson.toJson(data)
     }
 
-    fun restoreBackupString(string: String?): Boolean {
+    fun restoreBackupString(string: String?, which: Which): Boolean {
         if (string.isNullOrBlank()) {
             logUtils.debugLog("Backup string is null.")
             return false
@@ -48,16 +62,16 @@ class BackupRestoreManager private constructor(context: Context) : ContextWrappe
                 object : TypeToken<HashMap<String, String?>>(){}.type
             )
 
-            handleDataMap(dataMap)
+            handleDataMap(dataMap, which)
         } catch (e: Exception) {
             logUtils.debugLog("No data map. Trying old restore.", e)
 
-            handleWidgetString(string)
+            handleWidgetString(string, which)
         }
     }
 
-    private fun handleDataMap(dataMap: HashMap<String, String?>): Boolean {
-        if (dataMap.isNullOrEmpty()) {
+    private fun handleDataMap(dataMap: HashMap<String, String?>, which: Which): Boolean {
+        if (dataMap.isEmpty()) {
             logUtils.debugLog("Backup data empty.")
             return false
         }
@@ -66,15 +80,25 @@ class BackupRestoreManager private constructor(context: Context) : ContextWrappe
         val rows = dataMap[PrefManager.KEY_FRAME_ROW_COUNT]
         val cols = dataMap[PrefManager.KEY_FRAME_COL_COUNT]
 
-        return handleWidgetString(newWidgets).also {
+        return handleWidgetString(newWidgets, which).also {
             if (it) {
-                rows?.toIntOrNull()?.let { prefManager.frameRowCount = it }
-                cols?.toIntOrNull()?.let { prefManager.frameColCount = it }
+                rows?.toIntOrNull()?.let {
+                    when (which) {
+                        Which.FRAME -> prefManager.frameRowCount = it
+                        Which.DRAWER -> {}
+                    }
+                }
+                cols?.toIntOrNull()?.let {
+                    when (which) {
+                        Which.FRAME -> prefManager.frameColCount = it
+                        Which.DRAWER -> prefManager.drawerColCount = it
+                    }
+                }
             }
         }
     }
 
-    private fun handleWidgetString(newWidgets: String?): Boolean {
+    private fun handleWidgetString(newWidgets: String?, which: Which): Boolean {
         if (newWidgets.isNullOrBlank()) {
             logUtils.debugLog("Widget string is null.")
             return false
@@ -85,14 +109,20 @@ class BackupRestoreManager private constructor(context: Context) : ContextWrappe
             return false
         }
 
-        val old = prefManager.currentWidgets
+        val old = when (which) {
+            Which.FRAME -> prefManager.currentWidgets
+            Which.DRAWER -> prefManager.drawerWidgets
+        }
         val widgetHost = WidgetHostCompat.getInstance(this, 1003)
 
         old.forEach {
             widgetHost.deleteAppWidgetId(it.id)
         }
 
-        prefManager.currentWidgetsString = newWidgets
+        when (which) {
+            Which.FRAME -> prefManager.currentWidgetsString = newWidgets
+            Which.DRAWER -> prefManager.drawerWidgetsString = newWidgets
+        }
 
         return true
     }

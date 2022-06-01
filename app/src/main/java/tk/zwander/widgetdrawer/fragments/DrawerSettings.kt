@@ -1,13 +1,19 @@
 package tk.zwander.widgetdrawer.fragments
 
 import android.annotation.SuppressLint
+import android.net.Uri
 import android.os.Bundle
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.preference.*
 import androidx.recyclerview.widget.RecyclerView
 import tk.zwander.lockscreenwidgets.R
 import tk.zwander.lockscreenwidgets.util.*
+import tk.zwander.lockscreenwidgets.util.backup.BackupRestoreManager
+import java.text.SimpleDateFormat
+import java.util.*
 
 class DrawerSettings : PreferenceFragmentCompat() {
     private val prefsHandler = HandlerRegistry {
@@ -17,12 +23,44 @@ class DrawerSettings : PreferenceFragmentCompat() {
         }
     }
 
+    private val onWidgetBackUp = registerForActivityResult(ActivityResultContracts.CreateDocument()) { uri: Uri? ->
+        if (uri != null) {
+            requireContext().apply {
+                contentResolver.openOutputStream(uri)?.bufferedWriter()?.use { output ->
+                    output.write(backupRestoreManager.createBackupString(BackupRestoreManager.Which.DRAWER))
+                }
+            }
+        }
+    }
+
+    private val onWidgetRestore = registerForActivityResult(ActivityResultContracts.OpenDocument()) { uri: Uri? ->
+        if (uri != null) {
+            requireContext().apply {
+                val input = contentResolver.openInputStream(uri)?.bufferedReader()?.readText()
+
+                if (!backupRestoreManager.restoreBackupString(input, BackupRestoreManager.Which.DRAWER)) {
+                    Toast.makeText(this, R.string.unable_to_restore_widgets, Toast.LENGTH_SHORT)
+                    logUtils.normalLog("Unable to restore widgets")
+                } else {
+                    requireActivity().finish()
+                }
+            }
+        }
+    }
+
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         setPreferencesFromResource(R.xml.prefs_drawer, rootKey)
         prefsHandler.register(requireContext())
 
-        findPreference<Preference>("open_drawer")?.setOnPreferenceClickListener {
-            requireContext().eventManager.sendEvent(Event.ShowDrawer)
+        findPreference<Preference>("back_up_widgets")?.setOnPreferenceClickListener {
+            val formatter = SimpleDateFormat("yyyy-MM-dd_HH:mm:ss", Locale.getDefault())
+
+            onWidgetBackUp.launch("lockscreen_widgets_drawer_backup_${formatter.format(Date())}.lswidg")
+            true
+        }
+
+        findPreference<Preference>("restore_widgets")?.setOnPreferenceClickListener {
+            onWidgetRestore.launch(arrayOf("*/*"))
             true
         }
     }

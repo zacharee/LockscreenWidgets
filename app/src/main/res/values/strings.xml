@@ -215,15 +215,32 @@
     <string name="undo">Undo</string>
     <string name="open_widget_drawer">Open Widget Drawer</string>
     <string name="open_drawer">Open Drawer</string>
-    <string name="toggle_opacity">Toggle Opaque Backgrounds</string>
     <string name="close_widget_drawer">Close Drawer</string>
     <string name="enable_drawer">Enable Drawer</string>
+    <string name="drawer">Drawer</string>
+    <string name="handle">Handle</string>
+
     <string name="close_on_empty_tap">Tap Empty Space to Close Drawer</string>
+    <string name="close_on_empty_tap_desc">With this enabled, tapping outside of the area of any widgets will cause the drawer to close.</string>
+
     <string name="show_drawer_handle">Show Drawer Handle</string>
+    <string name="show_drawer_handle_desc">Add a handle to the side of the screen that can be swiped to open the drawer.</string>
+
     <string name="show_drawer_handle_shadow">Show Drawer Handle Shadow</string>
+    <string name="show_drawer_handle_shadow_desc">Show a shadow behind the drawer handle.</string>
+
     <string name="drawer_handle_height">Drawer Handle Height</string>
+    <string name="drawer_handle_height_desc">Set how tall the drawer handle should be.</string>
+
     <string name="drawer_handle_width">Drawer Handle Width</string>
+    <string name="drawer_handle_width_desc">Set how wide the drawer handle should be. This can be helpful for displays with curved edges.</string>
+
     <string name="drawer_handle_color">Drawer Handle Color</string>
+    <string name="drawer_handle_color_desc">Set the color of the drawer handle.</string>
+
     <string name="drawer_background_color">Drawer Background Color</string>
+    <string name="drawer_background_color_desc">Set the background color of the drawer.</string>
+
     <string name="drawer_column_count">Drawer Column Count</string>
+    <string name="drawer_column_count_desc">Choose how many columns the drawer layout should have.</string>
 </resources>
