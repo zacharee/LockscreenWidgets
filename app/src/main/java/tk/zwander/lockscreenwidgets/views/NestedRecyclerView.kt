@@ -19,7 +19,35 @@ open class NestedRecyclerView @JvmOverloads constructor(
     private var nestedScrollTargetWasUnableToScroll = false
     private val parentHelper by lazy { NestedScrollingParentHelper(this) }
 
+    /**
+     * Set this wherever you have access to your item touch helper instance.
+     * Using `attachToRecyclerView(null)` resets any long-press timers.
+     *
+     * Example:
+     *
+     * nestedRecyclerView.nestedScrollingListener = {
+     *      itemTouchHelper.attachToRecyclerView(if (!it) nestedRecyclerView else null)
+     * }
+     */
     var nestedScrollingListener: ((Boolean) -> Unit)? = null
+
+    /**
+     * Set this from your item touch helper callback to let the RecyclerView
+     * know when an item is selected (prevents an inverse nested scrolling issue
+     * where the nested view scrolls and the item touch helper doesn't receive
+     * further callbacks).
+     *
+     * Example:
+     * override fun onSelectedChanged(viewHolder: RecyclerView.ViewHolder?, actionState: Int) {
+     *      if (actionState != ItemTouchHelper.ACTION_STATE_IDLE) nestedRecyclerView.selectedItem = true
+     *      ...
+     * }
+     * ...
+     * override fun clearView(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder) {
+     *      nestedRecyclerView.selectedItem = false
+     *      ...
+     * }
+     */
     var selectedItem: Boolean = false
 
     override fun dispatchTouchEvent(ev: MotionEvent): Boolean {
@@ -37,6 +65,9 @@ open class NestedRecyclerView @JvmOverloads constructor(
         // all its descendants once it starts scrolling so we don't have to do that.
         requestDisallowInterceptTouchEvent(false)
         if (ev.action == MotionEvent.ACTION_UP) {
+            // This is to prevent an issue where the item touch helper receives
+            // an ACTION_DOWN but then doesn't later get the ACTION_UP event,
+            // causing it to run any long-press events.
             nestedScrollingListener?.invoke(true)
             nestedScrollingListener?.invoke(false)
         }
@@ -45,6 +76,10 @@ open class NestedRecyclerView @JvmOverloads constructor(
         }
 
         return handled
+    }
+
+    override fun getNestedScrollAxes(): Int {
+        return parentHelper.nestedScrollAxes
     }
 
     // We only support vertical scrolling.
@@ -148,16 +183,23 @@ open class NestedRecyclerView @JvmOverloads constructor(
         velocityY: Float,
         consumed: Boolean
     ) = super.onNestedFling(target, velocityX, velocityY, consumed).also {
+        // If the nested fling wasn't consumed, then the touch helper can act.
+        // Otherwise, disable it.
         nestedScrollingListener?.invoke(!it)
     }
 
     private fun setTarget(target: View?) {
         if (target == null) {
+            // We're not nested scrolling anymore so the touch helper can
+            // do its thing again.
             nestedScrollingListener?.invoke(false)
         }
         nestedScrollTarget = target
         nestedScrollTargetWasUnableToScroll = false
 
+        // My specific implementation has nested ListViews (AppWidgetHost), so this is
+        // also needed. If you have scrollable Views in general, you may need to use
+        // View#setOnScrollChangeListener and check if the scroll change is non-zero.
         (target as? ListView)?.setOnScrollListener(object : AbsListView.OnScrollListener {
             override fun onScrollStateChanged(view: AbsListView?, scrollState: Int) {
                 nestedScrollingListener?.invoke(scrollState != AbsListView.OnScrollListener.SCROLL_STATE_IDLE)
