@@ -245,6 +245,8 @@ class Drawer : FrameLayout, EventObserver {
     }
 
     fun hideDrawer(callListener: Boolean = true) {
+        adapter.currentEditingInterfacePosition = -1
+
         val anim = ValueAnimator.ofFloat(1f, 0f)
         anim.interpolator = AccelerateInterpolator()
         anim.duration = ANIM_DURATION
