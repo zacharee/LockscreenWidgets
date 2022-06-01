@@ -136,7 +136,7 @@ class Accessibility : AccessibilityService(), EventObserver, CoroutineScope by M
 
             //The below block can (very rarely) take over half a second to execute, so only run it
             //if we actually need to (i.e. on the lock screen and screen is on).
-            if ((isOnKeyguard || prefManager.showInNotificationCenter) && isScreenOn) {
+            if ((isOnKeyguard || prefManager.showInNotificationCenter) && isScreenOn && prefManager.widgetFrameEnabled /* This is only needed when the frame is enabled */) {
                 //Retrieve the current window set.
                 val windows = windows.map { WindowRootPair(it, it.safeRoot) }
 
