@@ -338,7 +338,7 @@ class PrefManager private constructor(context: Context) : ContextWrapper(context
 
     //Whether the widget frame is actually enabled.
     var widgetFrameEnabled: Boolean
-        get() = getBoolean(KEY_WIDGET_FRAME_ENABLED, true)
+        get() = getBoolean(KEY_WIDGET_FRAME_ENABLED, false)
         set(value) {
             putBoolean(KEY_WIDGET_FRAME_ENABLED, value)
         }
