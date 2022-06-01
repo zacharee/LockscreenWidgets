@@ -340,7 +340,11 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
                             else -> {}
                         }
                     }
+                }
+
+                if (event.remove) {
                     adapter.currentEditingInterfacePosition = -1
+                    adapter.updateWidgets(prefManager.currentWidgets.toList())
                 }
             }
             else -> {}

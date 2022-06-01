@@ -63,8 +63,6 @@ class Drawer : FrameLayout, EventObserver {
             context,
             1003
         ) {
-            Log.e("LockscreenWIdgets", "click $it")
-
             if (it) {
                 DismissOrUnlockActivity.launch(context)
                 context.eventManager.sendEvent(Event.CloseDrawer)
@@ -201,8 +199,6 @@ class Drawer : FrameLayout, EventObserver {
         when (event) {
             is Event.RemoveWidgetConfirmed -> {
                 if (event.remove && context.prefManager.drawerWidgets.contains(event.item)) {
-                    val index = context.prefManager.drawerWidgets.indexOf(event.item)
-                    adapter.notifyItemRemoved(index)
                     context.prefManager.drawerWidgets = context.prefManager.drawerWidgets.apply {
                         remove(event.item)
                         when (event.item?.safeType) {
@@ -211,7 +207,11 @@ class Drawer : FrameLayout, EventObserver {
                             else -> {}
                         }
                     }
+                }
+
+                if (event.remove) {
                     adapter.currentEditingInterfacePosition = -1
+                    adapter.updateWidgets(context.prefManager.drawerWidgets.toList())
                 }
             }
             else -> {}
