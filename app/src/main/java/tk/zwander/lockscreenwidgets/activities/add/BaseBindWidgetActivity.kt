@@ -181,7 +181,7 @@ abstract class BaseBindWidgetActivity : AppCompatActivity() {
     protected open val width: Float
         get() = prefManager.frameWidthDp
 
-    protected open fun createWidgetData(id: Int, provider: AppWidgetProviderInfo): WidgetData {
+    protected open fun createWidgetData(id: Int, provider: AppWidgetProviderInfo, overrideSize: WidgetSizeData? = null): WidgetData {
         return WidgetData.widget(
             id,
             provider.provider,
@@ -190,7 +190,7 @@ abstract class BaseBindWidgetActivity : AppCompatActivity() {
                 maxWidth = 512,
                 maxHeight = 512,
             ).toBase64(),
-            run {
+            overrideSize ?: run {
                 val widthRatio = provider.minWidth.toFloat() / width
                 val defaultColSpan = floor((widthRatio * colCount)).toInt()
                     .coerceAtMost(colCount).coerceAtLeast(1)

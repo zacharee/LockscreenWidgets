@@ -25,7 +25,7 @@ class DrawerAdapter(
     override val colCount: Int
         get() = host.context.prefManager.drawerColCount
     override val rowCount: Int
-        get() = Int.MAX_VALUE
+        get() = (host.context.screenSize.y / host.context.resources.getDimensionPixelSize(R.dimen.drawer_row_height)) - 5
     override val minRowSpan: Int
         get() = 5
     override var currentWidgets: MutableCollection<WidgetData>
@@ -40,6 +40,7 @@ class DrawerAdapter(
     }
 
     override fun launchReconfigure(id: Int, providerInfo: AppWidgetProviderInfo) {
+        host.context.eventManager.sendEvent(Event.CloseDrawer)
         ReconfigureDrawerWidgetActivity.launch(host.context, id, providerInfo)
     }
 

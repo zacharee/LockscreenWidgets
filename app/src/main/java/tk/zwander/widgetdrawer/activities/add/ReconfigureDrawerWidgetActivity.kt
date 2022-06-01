@@ -3,9 +3,12 @@ package tk.zwander.widgetdrawer.activities.add
 import android.appwidget.AppWidgetProviderInfo
 import android.content.Context
 import android.content.Intent
+import tk.zwander.lockscreenwidgets.R
 import tk.zwander.lockscreenwidgets.activities.add.ReconfigureWidgetActivity
 import tk.zwander.lockscreenwidgets.data.WidgetData
-import tk.zwander.lockscreenwidgets.util.prefManager
+import tk.zwander.lockscreenwidgets.data.WidgetSizeData
+import tk.zwander.lockscreenwidgets.util.*
+import kotlin.math.floor
 
 class ReconfigureDrawerWidgetActivity : ReconfigureWidgetActivity() {
     companion object {
@@ -25,4 +28,33 @@ class ReconfigureDrawerWidgetActivity : ReconfigureWidgetActivity() {
         set(value) {
             prefManager.drawerWidgets = LinkedHashSet(value)
         }
+
+    override fun onDestroy() {
+        super.onDestroy()
+
+        eventManager.sendEvent(Event.ShowDrawer)
+    }
+
+    override fun createWidgetData(id: Int, provider: AppWidgetProviderInfo, overrideSize: WidgetSizeData?): WidgetData {
+        return WidgetData.widget(
+            id,
+            provider.provider,
+            provider.loadLabel(packageManager),
+            provider.loadPreviewOrIcon(this, 0)?.toBitmap(512, 512)
+                .toBase64(),
+            overrideSize ?: run {
+                val widthRatio = provider.minWidth.toFloat() / width
+                val defaultColSpan = floor((widthRatio * colCount)).toInt()
+                    .coerceAtMost(colCount).coerceAtLeast(1)
+
+                val rowHeight = resources.getDimensionPixelSize(R.dimen.drawer_row_height)
+
+                val defaultRowSpan = floor(provider.minHeight.toFloat() / pxAsDp(rowHeight)).toInt()
+                    .coerceAtLeast(10)
+                    .coerceAtMost((screenSize.y / rowHeight) - 10)
+
+                WidgetSizeData(defaultColSpan, defaultRowSpan)
+            }
+        )
+    }
 }

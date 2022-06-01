@@ -5,14 +5,11 @@ import android.appwidget.AppWidgetProviderInfo
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import androidx.core.graphics.drawable.toBitmap
 import tk.zwander.lockscreenwidgets.activities.DismissOrUnlockActivity
 import tk.zwander.lockscreenwidgets.data.WidgetData
 import tk.zwander.lockscreenwidgets.data.WidgetSizeData
-import tk.zwander.lockscreenwidgets.util.loadPreviewOrIcon
 import tk.zwander.lockscreenwidgets.util.logUtils
 import tk.zwander.lockscreenwidgets.util.prefManager
-import tk.zwander.lockscreenwidgets.util.toBase64
 
 open class ReconfigureWidgetActivity : BaseBindWidgetActivity() {
     companion object {
@@ -83,13 +80,7 @@ open class ReconfigureWidgetActivity : BaseBindWidgetActivity() {
 
         val oldWidget = if (oldWidgetIndex != -1) newSet.removeAt(oldWidgetIndex) else null
 
-        val widget = WidgetData.widget(
-            id,
-            provider.provider,
-            provider.loadLabel(packageManager),
-            provider.loadPreviewOrIcon(this, 0)?.toBitmap().toBase64(),
-            oldWidget?.safeSize
-        )
+        val widget = createWidgetData(id, provider, oldWidget?.safeSize)
 
         val safeIndex = if (oldWidgetIndex != -1) oldWidgetIndex else newSet.lastIndex
 

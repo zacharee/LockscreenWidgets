@@ -56,20 +56,23 @@ class AddDrawerWidgetActivity : AddWidgetActivity() {
         finish()
     }
 
-    override fun createWidgetData(id: Int, provider: AppWidgetProviderInfo): WidgetData {
+    override fun createWidgetData(id: Int, provider: AppWidgetProviderInfo, overrideSize: WidgetSizeData?): WidgetData {
         return WidgetData.widget(
             id,
             provider.provider,
             provider.loadLabel(packageManager),
             provider.loadPreviewOrIcon(this, 0)?.toBitmap(512, 512)
                 .toBase64(),
-            run {
+            overrideSize ?: run {
                 val widthRatio = provider.minWidth.toFloat() / width
                 val defaultColSpan = floor((widthRatio * colCount)).toInt()
                     .coerceAtMost(colCount).coerceAtLeast(1)
 
-                val defaultRowSpan = floor(provider.minHeight.toFloat() / pxAsDp(resources.getDimensionPixelSize(R.dimen.drawer_row_height))).toInt()
-                    .coerceAtLeast(5)
+                val rowHeight = resources.getDimensionPixelSize(R.dimen.drawer_row_height)
+
+                val defaultRowSpan = floor(provider.minHeight.toFloat() / pxAsDp(rowHeight)).toInt()
+                    .coerceAtLeast(10)
+                    .coerceAtMost((screenSize.y / rowHeight) - 10)
 
                 WidgetSizeData(defaultColSpan, defaultRowSpan)
             }

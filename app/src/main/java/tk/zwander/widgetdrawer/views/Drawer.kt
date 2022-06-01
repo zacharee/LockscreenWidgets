@@ -201,6 +201,8 @@ class Drawer : FrameLayout, EventObserver {
         when (event) {
             is Event.RemoveWidgetConfirmed -> {
                 if (event.remove && context.prefManager.drawerWidgets.contains(event.item)) {
+                    val index = context.prefManager.drawerWidgets.indexOf(event.item)
+                    adapter.notifyItemRemoved(index)
                     context.prefManager.drawerWidgets = context.prefManager.drawerWidgets.apply {
                         remove(event.item)
                         when (event.item?.safeType) {
