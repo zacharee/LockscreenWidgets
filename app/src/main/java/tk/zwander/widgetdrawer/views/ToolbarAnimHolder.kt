@@ -7,6 +7,7 @@ import android.view.MotionEvent
 import android.view.View
 import android.view.ViewConfiguration
 import android.widget.FrameLayout
+import android.widget.ImageView
 import android.widget.LinearLayout
 import androidx.dynamicanimation.animation.DynamicAnimation
 import androidx.dynamicanimation.animation.SpringAnimation
@@ -66,6 +67,12 @@ class ToolbarAnimHolder : LinearLayout {
                     currentlyTransitioning = false
                 }
             }.start()
+            findViewById<ImageView>(R.id.open_close_toolbar).animate()
+                .apply {
+                    cancel()
+                }
+                .rotation(if (isOpen) 0f else 180f)
+                .start()
 
             this.isOpen = !isOpen
         }

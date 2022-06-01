@@ -78,7 +78,6 @@ class PrefManager private constructor(context: Context) : ContextWrapper(context
         const val KEY_DRAWER_COL_COUNT = "drawer_col_count"
         const val KEY_CLOSE_DRAWER_ON_EMPTY_TAP = "close_drawer_on_empty_tap"
         const val KEY_SHOW_DRAWER_HANDLE = "show_drawer_handle"
-        const val KEY_TRANSPARENT_DRAWER_CARDS = "transparent_drawer_cards"
         const val KEY_DRAWER_HANDLE_HEIGHT = "drawer_handle_height"
         const val KEY_DRAWER_HANDLE_WIDTH = "drawer_handle_width"
         const val KEY_DRAWER_HANDLE_Y_VALUE = "drawer_handle_y_value"
@@ -539,12 +538,6 @@ class PrefManager private constructor(context: Context) : ContextWrapper(context
         get() = getBoolean(KEY_CLOSE_DRAWER_ON_EMPTY_TAP, false)
         set(value) {
             putBoolean(KEY_CLOSE_DRAWER_ON_EMPTY_TAP, value)
-        }
-
-    var transparentDrawerCards: Boolean
-        get() = getBoolean(KEY_TRANSPARENT_DRAWER_CARDS, false)
-        set(value) {
-            putBoolean(KEY_TRANSPARENT_DRAWER_CARDS, value)
         }
 
     var showDrawerHandle: Boolean

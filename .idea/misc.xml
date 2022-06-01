@@ -3,6 +3,7 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
+        <entry key="../../.gradle/caches/transforms-3/2586cb7656a506fc74c9398090f2706d/transformed/jetified-CollapsiblePreferenceCategory-2f53f2d367/res/drawable/arrow_up.xml" value="0.159" />
         <entry key="app/src/main/java/tk/zwander/lockscreenwidgets/MainActivity.kt" value="0.18707770270270271" />
         <entry key="app/src/main/res/drawable/card_background.xml" value="0.159" />
         <entry key="app/src/main/res/drawable/drawer_handle_right.xml" value="0.159" />
@@ -12,7 +13,7 @@
         <entry key="app/src/main/res/drawable/visibility.xml" value="0.159" />
         <entry key="app/src/main/res/layout/activity_main.xml" value="0.21979166666666666" />
         <entry key="app/src/main/res/layout/activity_settings.xml" value="0.2046875" />
-        <entry key="app/src/main/res/layout/drawer_layout.xml" value="0.2046875" />
+        <entry key="app/src/main/res/layout/drawer_layout.xml" value="0.1" />
         <entry key="app/src/main/res/layout/header_layout.xml" value="0.2046875" />
         <entry key="app/src/main/res/layout/remove_widget_confirmation_layout.xml" value="0.2046875" />
         <entry key="app/src/main/res/layout/widget_frame.xml" value="0.21979166666666666" />

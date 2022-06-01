@@ -36,6 +36,10 @@ open class NestedRecyclerView @JvmOverloads constructor(
         // our onInterceptTouchEvent. Note that RecyclerView automatically cancels active touches of
         // all its descendants once it starts scrolling so we don't have to do that.
         requestDisallowInterceptTouchEvent(false)
+        if (ev.action == MotionEvent.ACTION_UP) {
+            nestedScrollingListener?.invoke(true)
+            nestedScrollingListener?.invoke(false)
+        }
         if (!handled || nestedScrollTargetWasUnableToScroll) {
             handled = super.dispatchTouchEvent(ev)
         }

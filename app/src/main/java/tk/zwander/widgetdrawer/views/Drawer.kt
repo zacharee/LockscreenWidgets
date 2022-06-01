@@ -129,10 +129,6 @@ class Drawer : FrameLayout, EventObserver {
         if (!isInEditMode) {
             binding.addWidget.setOnClickListener { pickWidget() }
             binding.closeDrawer.setOnClickListener { hideDrawer() }
-            binding.toggleTransparent.setOnClickListener {
-                context.prefManager.transparentDrawerCards = !context.prefManager.transparentDrawerCards
-            }
-
             binding.widgetGrid.layoutManager = gridLayoutManager
             gridLayoutManager.spanSizeLookup = adapter.spanSizeLookup
             itemTouchHelper.attachToRecyclerView(binding.widgetGrid)

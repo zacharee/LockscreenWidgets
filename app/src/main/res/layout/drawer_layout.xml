@@ -34,7 +34,7 @@
             android:clickable="true"
             android:focusable="true"
             android:src="@drawable/arrow_up"
-            android:tint="@android:color/white"
+            app:tint="@android:color/white"
             android:contentDescription="@string/open_close_toolbar"
             />
 
@@ -55,11 +55,11 @@
                 android:orientation="horizontal">
 
                 <tk.zwander.widgetdrawer.views.ButtonImageView
-                    android:id="@+id/toggle_transparent"
+                    android:id="@+id/add_widget"
                     android:layout_width="48dp"
                     android:layout_height="match_parent"
-                    android:src="@drawable/visibility"
-                    android:contentDescription="@string/toggle_opacity"
+                    android:src="@drawable/ic_baseline_add_24"
+                    android:contentDescription="@string/add_widget"
                     />
 
             </LinearLayout>
@@ -70,14 +70,6 @@
                 android:layout_gravity="end"
                 android:gravity="center_vertical"
                 android:orientation="horizontal">
-
-                <tk.zwander.widgetdrawer.views.ButtonImageView
-                    android:id="@+id/add_widget"
-                    android:layout_width="48dp"
-                    android:layout_height="match_parent"
-                    android:src="@drawable/ic_baseline_add_24"
-                    android:contentDescription="@string/add_widget"
-                    />
 
                 <tk.zwander.widgetdrawer.views.ButtonImageView
                     android:id="@+id/close_drawer"
