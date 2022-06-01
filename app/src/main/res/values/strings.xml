@@ -26,6 +26,10 @@
     <string name="close_app">Close App</string>
     <string name="privacy_policy">Privacy Policy</string>
     <string name="shortcut">Shortcut</string>
+    <string name="enabled">Enabled</string>
+
+    <string name="drawer_enabled">Drawer Enabled</string>
+    <string name="frame_enabled">Frame Enabled</string>
 
     <string name="add_id_hint">com.android.systemui:id/some_id_here</string>
 
@@ -59,9 +63,6 @@
 
     <string name="intro_privacy_policy_desc">Lockscreen Widgets doesn\'t collect any data beyond what\'s needed for crash analysis. Learn more below.</string>
     <string name="main_screen_privacy_policy_desc">Lockscreen Widgets doesn\'t collect any data beyond what\'s needed for crash analysis. Tap here to learn more.</string>
-
-    <string name="settings_screen_enabled">Enabled</string>
-    <string name="settings_screen_enabled_desc">Enable the widget frame.</string>
 
     <string name="settings_screen_hide_when_notifications_shown">Hide when Showing Notifications</string>
     <string name="settings_screen_hide_when_notifications_shown_desc">Hide the widget frame while there are notifications being shown. This requires the use of a Notification Listener Service. You don\'t have to grant this permission right now.</string>

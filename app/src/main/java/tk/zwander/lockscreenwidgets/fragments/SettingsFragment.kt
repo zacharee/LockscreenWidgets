@@ -57,7 +57,7 @@ class SettingsFragment : PreferenceFragmentCompat() {
     }
 
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
-        setPreferencesFromResource(R.xml.prefs_settings, rootKey)
+        setPreferencesFromResource(R.xml.prefs_frame, rootKey)
 
         findPreference<SwitchPreference>(PrefManager.KEY_HIDE_ON_NOTIFICATIONS)?.setOnPreferenceChangeListener { _, newValue ->
             if (newValue.toString().toBoolean() && !requireContext().isNotificationListenerActive) {
