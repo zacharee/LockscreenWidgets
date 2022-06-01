@@ -22,7 +22,8 @@
         android:theme="@style/AppTheme"
         android:name="tk.zwander.lockscreenwidgets.App">
         <activity android:name="tk.zwander.lockscreenwidgets.MainActivity"
-            android:exported="true">
+            android:exported="true"
+            android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
