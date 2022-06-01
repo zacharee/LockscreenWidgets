@@ -21,7 +21,7 @@ import net.bytebuddy.implementation.SuperMethodCall
  * visible to it is an interface, so we can't just create a stub class.
  */
 @SuppressLint("PrivateApi")
-class WidgetHostClass(context: Context, id: Int, unlockCallback: (() -> Unit)?)
+class WidgetHostClass(context: Context, id: Int, unlockCallback: ((Boolean) -> Unit)?)
     : WidgetHostCompat(
     context, id, ByteBuddy()
         .subclass(Class.forName("android.widget.RemoteViews\$OnClickHandler"))
@@ -47,7 +47,7 @@ class WidgetHostClass(context: Context, id: Int, unlockCallback: (() -> Unit)?)
         .loaded
         .newInstance()
 ) {
-    class InnerOnClickHandlerPie(context: Context, unlockCallback: (() -> Unit)?): BaseInnerOnClickHandler(context, unlockCallback) {
+    class InnerOnClickHandlerPie(context: Context, unlockCallback: ((Boolean) -> Unit)?): BaseInnerOnClickHandler(context, unlockCallback) {
         @Suppress("UNUSED_PARAMETER", "unused")
         fun onClickHandler(
             view: View,

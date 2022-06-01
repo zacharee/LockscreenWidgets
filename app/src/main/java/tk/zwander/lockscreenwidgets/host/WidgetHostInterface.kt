@@ -1,9 +1,9 @@
 package tk.zwander.lockscreenwidgets.host
 
-import android.appwidget.AppWidgetHost
 import android.annotation.SuppressLint
 import android.app.ActivityOptions
 import android.app.PendingIntent
+import android.appwidget.AppWidgetHost
 import android.content.Context
 import android.content.Intent
 import android.view.View
@@ -18,7 +18,7 @@ import java.lang.reflect.Proxy
  * it pretty easy to implement interfaces through reflection, so no ByteBuddy needed here.
  */
 @SuppressLint("PrivateApi")
-class WidgetHostInterface(context: Context, id: Int, unlockCallback: (() -> Unit)?)
+class WidgetHostInterface(context: Context, id: Int, unlockCallback: ((Boolean) -> Unit)?)
     : WidgetHostCompat(
     context, id, Proxy.newProxyInstance(
         Class.forName("android.widget.RemoteViews\$OnClickHandler").classLoader,
@@ -26,7 +26,7 @@ class WidgetHostInterface(context: Context, id: Int, unlockCallback: (() -> Unit
         InnerOnClickHandlerQ(context, unlockCallback)
     )
 ) {
-    class InnerOnClickHandlerQ(context: Context, unlockCallback: (() -> Unit)?) : BaseInnerOnClickHandler(context, unlockCallback), InvocationHandler {
+    class InnerOnClickHandlerQ(context: Context, unlockCallback: ((Boolean) -> Unit)?) : BaseInnerOnClickHandler(context, unlockCallback), InvocationHandler {
         @SuppressLint("BlockedPrivateApi", "PrivateApi")
         override fun invoke(proxy: Any?, method: Method?, args: Array<out Any>): Any {
             val view = args[0] as View

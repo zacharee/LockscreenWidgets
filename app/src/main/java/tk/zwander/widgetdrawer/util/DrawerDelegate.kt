@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.content.ContextWrapper
 import android.os.PowerManager
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.WindowManager
 import android.widget.Toast
@@ -57,6 +58,9 @@ class DrawerDelegate private constructor(private val context: Context) : Context
         }
     }
 
+    var state = State()
+        private set
+
     private val drawer by lazy { DrawerLayoutBinding.inflate(LayoutInflater.from(this)) }
     private val handle by lazy { Handle(this) }
     private val wm by lazy { getSystemService(Context.WINDOW_SERVICE) as WindowManager }
@@ -106,6 +110,9 @@ class DrawerDelegate private constructor(private val context: Context) : Context
                     hideAll()
                 }
             }
+            Event.DrawerWidgetClick -> {
+                updateState { it.copy(handlingDrawerClick = true) }
+            }
             else -> {}
         }
     }
@@ -150,4 +157,12 @@ class DrawerDelegate private constructor(private val context: Context) : Context
         drawer.root.hideDrawer()
         tryShowHandle()
     }
+
+    fun updateState(transform: (State) -> State) {
+        state = transform(state)
+    }
+
+    data class State(
+        val handlingDrawerClick: Boolean = false
+    )
 }

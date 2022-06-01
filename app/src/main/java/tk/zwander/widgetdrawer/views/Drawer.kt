@@ -13,6 +13,7 @@ import android.graphics.PixelFormat
 import android.os.Handler
 import android.os.Looper
 import android.util.AttributeSet
+import android.util.Log
 import android.util.TypedValue
 import android.view.Gravity
 import android.view.KeyEvent
@@ -62,7 +63,14 @@ class Drawer : FrameLayout, EventObserver {
             context,
             1003
         ) {
-            DismissOrUnlockActivity.launch(context)
+            Log.e("LockscreenWIdgets", "click $it")
+
+            if (it) {
+                DismissOrUnlockActivity.launch(context)
+                context.eventManager.sendEvent(Event.CloseDrawer)
+            } else {
+                context.eventManager.sendEvent(Event.DrawerWidgetClick)
+            }
         }
     }
     private val manager by lazy { AppWidgetManager.getInstance(context.applicationContext) }

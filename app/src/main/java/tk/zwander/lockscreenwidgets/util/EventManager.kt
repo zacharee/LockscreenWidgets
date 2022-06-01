@@ -82,6 +82,8 @@ class EventManager private constructor(private val context: Context) {
     }
 
     fun sendEvent(event: Event) {
+        context.logUtils.debugLog("Sending event $event")
+
         observers.forEach {
             it.onEvent(event)
         }
@@ -103,6 +105,7 @@ sealed class Event {
     object NightModeUpdate : Event()
     object CenterFrameHorizontally : Event()
     object CenterFrameVertically : Event()
+    object FrameWidgetClick : Event()
 
     /**
      * On Android 8.0+, it's pretty easy to dismiss the lock screen with a simple API call.
@@ -130,6 +133,8 @@ sealed class Event {
     object ShowHandle : Event()
     object DrawerShown : Event()
     object DrawerHidden : Event()
+    object DrawerWidgetClick : Event()
+
     data class LaunchAddDrawerWidget(val fromDrawer: Boolean) : Event()
 }
 

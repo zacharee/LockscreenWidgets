@@ -4,12 +4,14 @@ import android.accessibilityservice.AccessibilityService
 import android.annotation.SuppressLint
 import android.app.KeyguardManager
 import android.content.Context
+import android.os.Build
 import android.os.PowerManager
 import android.view.WindowManager
 import android.view.accessibility.AccessibilityEvent
 import android.view.accessibility.AccessibilityNodeInfo
 import android.view.accessibility.AccessibilityWindowInfo
 import kotlinx.coroutines.*
+import tk.zwander.lockscreenwidgets.activities.DismissOrUnlockActivity
 import tk.zwander.lockscreenwidgets.appwidget.IDListProvider
 import tk.zwander.lockscreenwidgets.data.window.WindowInfo
 import tk.zwander.lockscreenwidgets.data.window.WindowRootPair
@@ -132,7 +134,38 @@ class Accessibility : AccessibilityService(), EventObserver, CoroutineScope by M
                 logUtils.debugLog("Error printing debug info", e)
             }
 
-            logUtils.debugLog("Accessibility event: $eventCopy, isScreenOn: ${isScreenOn}, wasOnKeyguard: $isOnKeyguard")
+            logUtils.debugLog("Accessibility event: $eventCopy, isScreenOn: ${isScreenOn}, wasOnKeyguard: $isOnKeyguard, ${drawerDelegate.state}")
+
+            // Some logic for making the drawer go away or system dialogs dismiss when widgets launch Activities indirectly.
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                val matchesWindowsChanged =
+                    eventCopy.eventType == AccessibilityEvent.TYPE_WINDOWS_CHANGED
+                            && ((eventCopy.windowChanges and AccessibilityEvent.WINDOWS_CHANGE_ADDED != 0)
+                            || (eventCopy.windowChanges and AccessibilityEvent.WINDOWS_CHANGE_ACTIVE != 0))
+                val matchesWindowStateChanged =
+                    eventCopy.eventType == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED
+
+                if ((matchesWindowsChanged || matchesWindowStateChanged)
+                    && eventCopy.packageName != packageName
+                    && (drawerDelegate.state.handlingDrawerClick || frameDelegate.state.handlingFrameClick)
+                ) {
+                    logUtils.debugLog("Starting dismiss Activity because of window change")
+                    DismissOrUnlockActivity.launch(this@Accessibility)
+
+                    if (drawerDelegate.state.handlingDrawerClick) {
+                        logUtils.debugLog("Hiding drawer because of window change")
+                        eventManager.sendEvent(Event.CloseDrawer)
+                    }
+
+                    drawerDelegate.updateState { it.copy(handlingDrawerClick = false) }
+                    frameDelegate.updateState { it.copy(handlingFrameClick = false) }
+                }
+            }
+
+            if (eventCopy.eventType == AccessibilityEvent.TYPE_WINDOWS_CHANGED || eventCopy.eventType == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED) {
+                drawerDelegate.updateState { it.copy(handlingDrawerClick = false) }
+                frameDelegate.updateState { it.copy(handlingFrameClick = false) }
+            }
 
             //The below block can (very rarely) take over half a second to execute, so only run it
             //if we actually need to (i.e. on the lock screen and screen is on).
@@ -205,14 +238,16 @@ class Accessibility : AccessibilityService(), EventObserver, CoroutineScope by M
                         currentSystemLayer = if (systemIndex != -1) windows.size - systemIndex else systemIndex
                     )
 
-                    newState = newState.copy(isOnEdgePanel = if (isTouchWiz) {
-                        val systemRoot = nonAppSystemWindow?.root
+                    newState = newState.copy(
+                        isOnEdgePanel = if (isTouchWiz) {
+                            val systemRoot = nonAppSystemWindow?.root
 
-                        systemRoot?.packageName == "com.samsung.android.app.cocktailbarservice"
-                                && systemIndex == 0
-                    } else {
-                        false
-                    })
+                            systemRoot?.packageName == "com.samsung.android.app.cocktailbarservice"
+                                    && systemIndex == 0
+                        } else {
+                            false
+                        }
+                    )
 
                     //This is mostly a debug value to see which app LSWidg thinks is on top.
                     newState = newState.copy(currentAppPackage = appWindow?.root?.run {
@@ -296,11 +331,13 @@ class Accessibility : AccessibilityService(), EventObserver, CoroutineScope by M
                 windows.forEach {
                     try {
                         it.root?.recycle()
-                    } catch (_: IllegalStateException) {}
+                    } catch (_: IllegalStateException) {
+                    }
 
                     try {
                         it.root?.recycle()
-                    } catch (_: IllegalStateException) {}
+                    } catch (_: IllegalStateException) {
+                    }
                 }
             }
 
@@ -345,7 +382,12 @@ class Accessibility : AccessibilityService(), EventObserver, CoroutineScope by M
                     //where it shouldn't. ACTION_SCREEN_OFF is called early enough that we can remove
                     //the frame before it's frozen in place.
                     frameDelegate.forceWakelock(wm, false)
-                    frameDelegate.updateStateAndWindowState(wm) { it.copy(isTempHide = false, isScreenOn = false) }
+                    frameDelegate.updateStateAndWindowState(wm) {
+                        it.copy(
+                            isTempHide = false,
+                            isScreenOn = false
+                        )
+                    }
                 }
             }
             Event.ScreenOn -> {
@@ -395,7 +437,8 @@ class Accessibility : AccessibilityService(), EventObserver, CoroutineScope by M
 
             if (topNonSysUiWindow == null
                 && window.window.type != AccessibilityWindowInfo.TYPE_APPLICATION
-                && window.window.type != AccessibilityWindowInfo.TYPE_ACCESSIBILITY_OVERLAY) {
+                && window.window.type != AccessibilityWindowInfo.TYPE_ACCESSIBILITY_OVERLAY
+            ) {
                 if (!isSysUi) {
                     topNonSysUiWindow = window
                 }

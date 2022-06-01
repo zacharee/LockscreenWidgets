@@ -149,7 +149,11 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
     private val wm = getSystemService(Context.WINDOW_SERVICE) as WindowManager
     private val widgetManager = AppWidgetManager.getInstance(this)!!
     private val widgetHost = WidgetHostCompat.getInstance(this, 1003) {
-        DismissOrUnlockActivity.launch(this)
+        if (it) {
+            DismissOrUnlockActivity.launch(this)
+        } else {
+            context.eventManager.sendEvent(Event.FrameWidgetClick)
+        }
     }
     private val shortcutIdManager = ShortcutIdManager.getInstance(this, widgetHost)
 
@@ -258,6 +262,9 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
             Event.CenterFrameVertically -> {
                 prefManager.setCorrectFrameY(saveMode, 0)
                 updateParamsIfNeeded()
+            }
+            Event.FrameWidgetClick -> {
+                updateState { it.copy(handlingFrameClick = true) }
             }
             is Event.FrameResized -> {
                 when (event.which) {
@@ -838,5 +845,6 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
         val notificationsPanelFullyExpanded: Boolean = false,
         val isScreenOn: Boolean = false,
         val isTempHide: Boolean = false,
+        val handlingFrameClick: Boolean = false,
     )
 }

@@ -31,7 +31,7 @@ abstract class WidgetHostCompat(
         private var instance: WidgetHostCompat? = null
 
         @SuppressLint("PrivateApi")
-        fun getInstance(context: Context, id: Int, unlockCallback: (() -> Unit)? = null): WidgetHostCompat {
+        fun getInstance(context: Context, id: Int, unlockCallback: ((Boolean) -> Unit)? = null): WidgetHostCompat {
             return instance ?: run {
                 if (!onClickHandlerExists) {
                     WidgetHost12(context.safeApplicationContext, id, unlockCallback)
@@ -68,12 +68,10 @@ abstract class WidgetHostCompat(
             }
     }
 
-    open class BaseInnerOnClickHandler(internal val context: Context, private val unlockCallback: (() -> Unit)?) {
+    open class BaseInnerOnClickHandler(internal val context: Context, private val unlockCallback: ((Boolean) -> Unit)?) {
         @SuppressLint("NewApi")
         fun checkPendingIntent(pendingIntent: PendingIntent) {
-            if (pendingIntent.isActivity && context.prefManager.requestUnlock) {
-                unlockCallback?.invoke()
-            }
+            unlockCallback?.invoke(pendingIntent.isActivity && context.prefManager.requestUnlock)
         }
     }
 
