@@ -4,8 +4,8 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.content.ContextWrapper
 import android.os.PowerManager
-import android.util.Log
 import android.view.LayoutInflater
+import android.view.View
 import android.view.WindowManager
 import android.widget.Toast
 import tk.zwander.lockscreenwidgets.R
@@ -14,7 +14,7 @@ import tk.zwander.lockscreenwidgets.services.Accessibility
 import tk.zwander.lockscreenwidgets.util.*
 import tk.zwander.widgetdrawer.views.Handle
 
-class DrawerDelegate private constructor(private val context: Context) : ContextWrapper(context), EventObserver {
+class DrawerDelegate private constructor(private val context: Context) : ContextWrapper(context), EventObserver, View.OnAttachStateChangeListener {
     companion object {
         @SuppressLint("StaticFieldLeak")
         private var instance: DrawerDelegate? = null
@@ -117,7 +117,14 @@ class DrawerDelegate private constructor(private val context: Context) : Context
         }
     }
 
+    override fun onViewAttachedToWindow(v: View?) {}
+
+    override fun onViewDetachedFromWindow(v: View?) {
+        updateState { it.copy(handlingDrawerClick = false) }
+    }
+
     fun onCreate() {
+        drawer.root.addOnAttachStateChangeListener(this)
         drawer.root.onCreate()
         tryShowHandle()
         eventManager.addObserver(this)
@@ -129,6 +136,7 @@ class DrawerDelegate private constructor(private val context: Context) : Context
         drawer.root.hideDrawer(false)
         handle.hide(wm)
         prefsHandler.unregister(this)
+        drawer.root.removeOnAttachStateChangeListener(this)
 
         invalidateInstance()
     }
