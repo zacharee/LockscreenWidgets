@@ -308,10 +308,8 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
                         //it doesn't seem like pending updates always get
                         //dispatched. Rebinding all the widgets forces
                         //them to update.
-                        mainHandler.postDelayed({
-                            adapter.updateViews()
-                            gridLayoutManager.scrollToPosition(prefManager.currentPage)
-                        }, 50)
+                        adapter.updateViews()
+                        gridLayoutManager.scrollToPosition(prefManager.currentPage)
                     } else {
                         widgetHost.stopListening()
                         updateState { it.copy(handlingFrameClick = false) }
