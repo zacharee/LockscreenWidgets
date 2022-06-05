@@ -24,14 +24,13 @@ class TriggerActivity : AppCompatActivity() {
                 this, R.mipmap.ic_launcher
             )
 
-            intent.putExtra(Intent.EXTRA_SHORTCUT_ICON_RESOURCE, iconRes)
+            resultIntent.putExtra(Intent.EXTRA_SHORTCUT_ICON_RESOURCE, iconRes)
 
             setResult(Activity.RESULT_OK, resultIntent)
-            finish()
         } else {
             eventManager.sendEvent(Event.ShowDrawer)
-
-            finish()
         }
+
+        finish()
     }
 }
