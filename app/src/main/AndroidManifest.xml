@@ -33,10 +33,12 @@
         <activity android:name="tk.zwander.lockscreenwidgets.activities.add.AddWidgetActivity"
             android:exported="true"
             android:label="@string/add_widget"
+            android:excludeFromRecents="true"
             />
         <activity android:name="tk.zwander.lockscreenwidgets.activities.add.AddTileWidgetActivity"
             android:exported="true"
             android:label="@string/add_widget"
+            android:excludeFromRecents="true"
             />
         <activity android:name="tk.zwander.lockscreenwidgets.activities.OnboardingActivity"
             android:exported="false"
@@ -65,10 +67,12 @@
         <activity android:name="tk.zwander.widgetdrawer.activities.add.ReconfigureDrawerWidgetActivity"
             android:exported="false"
             android:theme="@style/AppTheme.Null"
+            android:excludeFromRecents="true"
             />
         <activity android:name="tk.zwander.widgetdrawer.activities.add.AddDrawerWidgetActivity"
             android:exported="false"
             android:label="@string/add_widget"
+            android:excludeFromRecents="true"
             />
         <activity android:name="tk.zwander.widgetdrawer.activities.TriggerActivity"
             android:label="@string/open_drawer"
