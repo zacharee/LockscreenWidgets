@@ -3,6 +3,7 @@ package tk.zwander.lockscreenwidgets.adapters
 import android.annotation.SuppressLint
 import android.appwidget.AppWidgetManager
 import android.appwidget.AppWidgetProviderInfo
+import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Rect
@@ -10,14 +11,14 @@ import android.graphics.RectF
 import android.os.Build
 import android.os.Bundle
 import android.util.SizeF
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
-import android.view.WindowManager
+import android.view.*
+import android.view.LayoutInflater.Factory2
 import android.widget.ListView
 import android.widget.Toast
+import androidx.appcompat.app.AppCompatCallback
 import androidx.core.content.res.ResourcesCompat
 import androidx.core.graphics.drawable.toBitmap
+import androidx.core.view.LayoutInflaterCompat
 import androidx.core.view.forEach
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.DiffUtil
@@ -164,7 +165,14 @@ open class WidgetFrameAdapter(
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
-        val inflater = LayoutInflater.from(parent.context)
+        val inflater = LayoutInflater.from(parent.context).cloneInContext(parent.context)
+        LayoutInflaterCompat.setFactory2(
+            inflater,
+            Class.forName("androidx.appcompat.app.AppCompatDelegateImpl")
+                .getDeclaredConstructor(Context::class.java, Window::class.java, AppCompatCallback::class.java)
+                .apply { isAccessible = true }
+                .newInstance(parent.context, null, null) as Factory2
+        )
         return if (viewType == VIEW_TYPE_ADD) AddWidgetVH(
             inflater.inflate(
                 R.layout.add_widget,
