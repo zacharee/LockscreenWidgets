@@ -33,6 +33,7 @@
                 android:layout_height="0dp"
                 android:layout_weight="1"
                 android:scaleType="fitCenter"
+                android:contentDescription="@null"
                 tools:src="@drawable/ic_baseline_open_in_new_24"
                 />
 
@@ -55,6 +56,7 @@
             android:src="@drawable/ic_baseline_restore_24"
             android:background="#55000000"
             android:scaleType="fitCenter"
+            android:contentDescription="@string/reconfigure"
             />
 
     </FrameLayout>
@@ -83,6 +85,7 @@
             android:src="@drawable/handle_left"
             android:clickable="true"
             android:focusable="true"
+            android:contentDescription="@string/expand_left"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintLeft_toLeftOf="parent"
@@ -95,6 +98,7 @@
             android:src="@drawable/handle_top"
             android:clickable="true"
             android:focusable="true"
+            android:contentDescription="@string/expand_up"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"
@@ -107,6 +111,7 @@
             android:src="@drawable/handle_right"
             android:clickable="true"
             android:focusable="true"
+            android:contentDescription="@string/expand_right"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintRight_toRightOf="parent"
@@ -119,6 +124,7 @@
             android:src="@drawable/handle_bottom"
             android:clickable="true"
             android:focusable="true"
+            android:contentDescription="@string/expand_down"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"
@@ -134,10 +140,10 @@
             android:layout_marginTop="8dp"
             android:layout_marginEnd="8dp"
             android:layout_gravity="top|end"
-            android:tint="@android:color/holo_red_dark"
+            android:contentDescription="@string/remove"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            />
+            app:tint="@android:color/holo_red_dark" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

@@ -40,6 +40,19 @@
     <string name="category_interaction">Interaction</string>
     <string name="category_debug">Debug</string>
 
+    <string name="remove">Remove</string>
+    <string name="expand_down">Expand Down</string>
+    <string name="expand_up">Expand Up</string>
+    <string name="expand_left">Expand Left</string>
+    <string name="expand_right">Expand Right</string>
+    <string name="reconfigure">Reconfigure</string>
+    <string name="center_vertically">Center Vertically</string>
+    <string name="center_horizontally">Center Horizontally</string>
+    <string name="move">Move</string>
+    <string name="hide">Hide</string>
+    <string name="app_icon">App Icon</string>
+    <string name="shortcut_icon">Shortcut Icon</string>
+
     <string name="alert_remove_widget_confirm">Remove Widget?</string>
     <string name="alert_remove_widget_confirm_desc">Are you sure you want to remove this widget?</string>
 

@@ -16,13 +16,28 @@
         <entry key="app/src/main/res/drawable/tap.xml" value="0.159" />
         <entry key="app/src/main/res/drawable/toolbar_background.xml" value="0.159" />
         <entry key="app/src/main/res/drawable/visibility.xml" value="0.159" />
+        <entry key="app/src/main/res/layout/activity_add_widget.xml" value="0.2046875" />
+        <entry key="app/src/main/res/layout/activity_hide_for_ids.xml" value="0.2046875" />
         <entry key="app/src/main/res/layout/activity_main.xml" value="0.21979166666666666" />
         <entry key="app/src/main/res/layout/activity_settings.xml" value="0.2046875" />
+        <entry key="app/src/main/res/layout/activity_usage.xml" value="0.2046875" />
+        <entry key="app/src/main/res/layout/add_id_dialog.xml" value="0.2046875" />
+        <entry key="app/src/main/res/layout/add_widget.xml" value="0.2046875" />
+        <entry key="app/src/main/res/layout/app_item.xml" value="0.2046875" />
+        <entry key="app/src/main/res/layout/default_tile_views.xml" value="0.2046875" />
         <entry key="app/src/main/res/layout/drawer_layout.xml" value="0.1" />
         <entry key="app/src/main/res/layout/frame_shortcut_view.xml" value="0.2046875" />
         <entry key="app/src/main/res/layout/header_layout.xml" value="0.2046875" />
+        <entry key="app/src/main/res/layout/hide_for_ids_item.xml" value="0.2046875" />
+        <entry key="app/src/main/res/layout/id_list_widget_item.xml" value="0.2046875" />
+        <entry key="app/src/main/res/layout/id_list_widget_layout.xml" value="0.2046875" />
         <entry key="app/src/main/res/layout/remove_widget_confirmation_layout.xml" value="0.2046875" />
+        <entry key="app/src/main/res/layout/touch_protection_layer.xml" value="0.2046875" />
         <entry key="app/src/main/res/layout/widget_frame.xml" value="0.21979166666666666" />
+        <entry key="app/src/main/res/layout/widget_frame_gesture_hint.xml" value="0.2046875" />
+        <entry key="app/src/main/res/layout/widget_frame_hide_hint.xml" value="0.2046875" />
+        <entry key="app/src/main/res/layout/widget_frame_id_view.xml" value="0.2046875" />
+        <entry key="app/src/main/res/layout/widget_item.xml" value="0.2046875" />
         <entry key="app/src/main/res/layout/widget_page_holder.xml" value="0.2046875" />
         <entry key="app/src/main/res/menu/main.xml" value="0.21979166666666666" />
         <entry key="app/src/main/res/xml/prefs_main.xml" value="0.21979166666666666" />

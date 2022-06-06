@@ -19,6 +19,7 @@
             android:src="@drawable/ic_baseline_add_24"
             android:scaleType="fitCenter"
             android:background="?android:selectableItemBackgroundBorderless"
+            android:contentDescription="@string/add"
             />
 
     </FrameLayout>
