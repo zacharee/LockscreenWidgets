@@ -5,12 +5,12 @@ apply plugin: 'com.google.gms.google-services'
 apply plugin: 'com.google.firebase.crashlytics'
 
 android {
-    compileSdkVersion 31
+    compileSdkVersion 32
 
     defaultConfig {
         applicationId "tk.zwander.lockscreenwidgets"
         minSdkVersion 22
-        targetSdkVersion 31
+        targetSdkVersion 32
         versionCode 67
         versionName "2.0.0"
     }
