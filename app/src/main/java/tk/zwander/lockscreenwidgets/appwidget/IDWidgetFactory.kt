@@ -92,7 +92,11 @@ class IDWidgetFactory(private val context: Context) : RemoteViewsService.RemoteV
     }
 
     override fun getItemId(position: Int): Long {
-        return items.get(position).hashCode().toLong()
+        return try {
+            items.get(position).hashCode().toLong()
+        } catch (e: IndexOutOfBoundsException) {
+            -1
+        }
     }
 
     override fun getLoadingView(): RemoteViews? {

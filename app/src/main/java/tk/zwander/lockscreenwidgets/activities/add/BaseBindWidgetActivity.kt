@@ -256,7 +256,13 @@ abstract class BaseBindWidgetActivity : AppCompatActivity() {
                     logUtils.debugLog("Successfully configured widget.")
                     //Widget configuration was successful: add the
                     //widget to the frame
-                    addNewWidget(id, appWidgetManager.getAppWidgetInfo(id))
+                    addNewWidget(id, appWidgetManager.getAppWidgetInfo(id) ?: run {
+                        logUtils.debugLog("Unable to get widget info for $id, not adding")
+                        currentConfigId?.let {
+                            widgetHost.deleteAppWidgetId(it)
+                        }
+                        return
+                    })
                 } else {
                     logUtils.debugLog("Failed to configure widget.")
                     currentConfigId?.let {
