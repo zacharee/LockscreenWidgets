@@ -12,6 +12,7 @@ import tk.zwander.lockscreenwidgets.R
 import tk.zwander.lockscreenwidgets.databinding.DrawerLayoutBinding
 import tk.zwander.lockscreenwidgets.services.Accessibility
 import tk.zwander.lockscreenwidgets.util.*
+import tk.zwander.widgetdrawer.views.Drawer
 import tk.zwander.widgetdrawer.views.Handle
 
 class DrawerDelegate private constructor(private val context: Context) : ContextWrapper(context), EventObserver, View.OnAttachStateChangeListener {
@@ -58,8 +59,8 @@ class DrawerDelegate private constructor(private val context: Context) : Context
         }
     }
 
-    var state = State()
-        private set
+    val state: Drawer.State
+        get() = drawer.root.state
 
     private val drawer by lazy { DrawerLayoutBinding.inflate(LayoutInflater.from(this)) }
     private val handle by lazy { Handle(this) }
@@ -119,9 +120,7 @@ class DrawerDelegate private constructor(private val context: Context) : Context
 
     override fun onViewAttachedToWindow(v: View?) {}
 
-    override fun onViewDetachedFromWindow(v: View?) {
-        updateState { it.copy(handlingDrawerClick = false) }
-    }
+    override fun onViewDetachedFromWindow(v: View?) {}
 
     fun onCreate() {
         drawer.root.addOnAttachStateChangeListener(this)
@@ -166,11 +165,7 @@ class DrawerDelegate private constructor(private val context: Context) : Context
         tryShowHandle()
     }
 
-    fun updateState(transform: (State) -> State) {
-        state = transform(state)
+    fun updateState(transform: (Drawer.State) -> Drawer.State) {
+        drawer.root.updateState(transform)
     }
-
-    data class State(
-        val handlingDrawerClick: Boolean = false
-    )
 }

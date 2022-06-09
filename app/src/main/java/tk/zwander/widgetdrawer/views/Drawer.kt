@@ -254,6 +254,7 @@ class Drawer : FrameLayout, EventObserver {
     }
 
     fun hideDrawer(callListener: Boolean = true) {
+        updateState { it.copy(handlingDrawerClick = false) }
         adapter.currentEditingInterfacePosition = -1
 
         val anim = ValueAnimator.ofFloat(1f, 0f)
@@ -308,5 +309,6 @@ class Drawer : FrameLayout, EventObserver {
     data class State(
         val isHoldingItem: Boolean = false,
         val updatedForMove: Boolean = false,
+        val handlingDrawerClick: Boolean = false
     )
 }

@@ -312,7 +312,6 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
                         gridLayoutManager.scrollToPosition(prefManager.currentPage)
                     } else {
                         widgetHost.stopListening()
-                        updateState { it.copy(handlingFrameClick = false) }
                     }
                 } catch (e: NullPointerException) {
                     //The stupid "Attempt to read from field 'com.android.server.appwidget.AppWidgetServiceImpl$ProviderId
@@ -423,6 +422,7 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
 
         adapter.currentEditingInterfacePosition = -1
 
+        updateState { it.copy(handlingFrameClick = false) }
         binding.frame.removeWindow(wm)
     }
 
