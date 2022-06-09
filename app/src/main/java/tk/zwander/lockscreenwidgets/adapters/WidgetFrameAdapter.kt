@@ -87,6 +87,10 @@ open class WidgetFrameAdapter(
             host.context.prefManager.currentWidgets = LinkedHashSet(value)
         }
 
+    init {
+        setHasStableIds(true)
+    }
+
     /**
      * Push a new set of widgets to the frame.
      * If there are currently no widgets added,
@@ -164,6 +168,10 @@ open class WidgetFrameAdapter(
         else VIEW_TYPE_WIDGET
     }
 
+    override fun getItemId(position: Int): Long {
+        return if (widgets.size == 0) VIEW_TYPE_ADD.toLong() else widgets.getOrNull(position)?.id?.toLong() ?: -1
+    }
+
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         val inflater = LayoutInflater.from(parent.context).cloneInContext(parent.context)
         LayoutInflaterCompat.setFactory2(
@@ -190,7 +198,7 @@ open class WidgetFrameAdapter(
     }
 
     fun updateViews() {
-        notifyItemRangeChanged(0, itemCount)
+        notifyItemRangeChanged(0, itemCount, Any())
     }
 
     protected fun persistResize() {
