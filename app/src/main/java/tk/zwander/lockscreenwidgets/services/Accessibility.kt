@@ -136,37 +136,6 @@ class Accessibility : AccessibilityService(), EventObserver, CoroutineScope by M
 
             logUtils.debugLog("Accessibility event: $eventCopy, isScreenOn: ${isScreenOn}, wasOnKeyguard: $isOnKeyguard, ${drawerDelegate.state}")
 
-            // Some logic for making the drawer go away or system dialogs dismiss when widgets launch Activities indirectly.
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-                val matchesWindowsChanged =
-                    eventCopy.eventType == AccessibilityEvent.TYPE_WINDOWS_CHANGED
-                            && ((eventCopy.windowChanges and AccessibilityEvent.WINDOWS_CHANGE_ADDED != 0)
-                            || (eventCopy.windowChanges and AccessibilityEvent.WINDOWS_CHANGE_ACTIVE != 0))
-                val matchesWindowStateChanged =
-                    eventCopy.eventType == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED
-
-                if ((matchesWindowsChanged || matchesWindowStateChanged)
-                    && eventCopy.packageName != packageName
-                    && (drawerDelegate.state.handlingDrawerClick || frameDelegate.state.handlingFrameClick)
-                ) {
-                    logUtils.debugLog("Starting dismiss Activity because of window change")
-                    DismissOrUnlockActivity.launch(this@Accessibility)
-
-                    if (drawerDelegate.state.handlingDrawerClick) {
-                        logUtils.debugLog("Hiding drawer because of window change")
-                        eventManager.sendEvent(Event.CloseDrawer)
-                    }
-
-                    drawerDelegate.updateState { it.copy(handlingDrawerClick = false) }
-                    frameDelegate.updateState { it.copy(handlingFrameClick = false) }
-                }
-            }
-
-            if (eventCopy.eventType == AccessibilityEvent.TYPE_WINDOWS_CHANGED || eventCopy.eventType == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED) {
-                drawerDelegate.updateState { it.copy(handlingDrawerClick = false) }
-                frameDelegate.updateState { it.copy(handlingFrameClick = false) }
-            }
-
             //The below block can (very rarely) take over half a second to execute, so only run it
             //if we actually need to (i.e. on the lock screen and screen is on).
             if ((isOnKeyguard || prefManager.showInNotificationCenter) && isScreenOn && prefManager.widgetFrameEnabled /* This is only needed when the frame is enabled */) {
@@ -342,6 +311,37 @@ class Accessibility : AccessibilityService(), EventObserver, CoroutineScope by M
             }
 
             frameDelegate.updateStateAndWindowState(wm, true) { newState }
+
+            // Some logic for making the drawer go away or system dialogs dismiss when widgets launch Activities indirectly.
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                val matchesWindowsChanged =
+                    eventCopy.eventType == AccessibilityEvent.TYPE_WINDOWS_CHANGED
+                            && ((eventCopy.windowChanges and AccessibilityEvent.WINDOWS_CHANGE_ADDED != 0)
+                            || (eventCopy.windowChanges and AccessibilityEvent.WINDOWS_CHANGE_ACTIVE != 0))
+                val matchesWindowStateChanged =
+                    eventCopy.eventType == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED
+
+                if ((matchesWindowsChanged || matchesWindowStateChanged)
+                    && eventCopy.packageName != packageName
+                    && (drawerDelegate.state.handlingDrawerClick || frameDelegate.state.handlingFrameClick)
+                ) {
+                    logUtils.debugLog("Starting dismiss Activity because of window change")
+                    DismissOrUnlockActivity.launch(this@Accessibility)
+
+                    if (drawerDelegate.state.handlingDrawerClick) {
+                        logUtils.debugLog("Hiding drawer because of window change")
+                        eventManager.sendEvent(Event.CloseDrawer)
+                    }
+
+                    drawerDelegate.updateState { it.copy(handlingDrawerClick = false) }
+                    frameDelegate.updateState { it.copy(handlingFrameClick = false) }
+                }
+            }
+
+            if (eventCopy.eventType == AccessibilityEvent.TYPE_WINDOWS_CHANGED || eventCopy.eventType == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED) {
+                drawerDelegate.updateState { it.copy(handlingDrawerClick = false) }
+                frameDelegate.updateState { it.copy(handlingFrameClick = false) }
+            }
 
             try {
                 //Make sure to recycle the copy of the event.
