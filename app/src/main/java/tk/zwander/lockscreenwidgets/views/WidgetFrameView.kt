@@ -243,11 +243,7 @@ class WidgetFrameView(context: Context, attrs: AttributeSet) : ConstraintLayout(
         binding.frameCard.radius = radius
         blurDrawable?.setCornerRadius(radius)
 
-        //Since all instances of a Drawable are technically the same instance
-        //(unless someone uses mutate()), setting the corner radius for the
-        //editing outline here means it applies to both the main frame editing UI
-        //and each widget editing UI.
-        (binding.editOutline.background as GradientDrawable).apply {
+        binding.editOutline.background = (binding.editOutline.background.mutate() as GradientDrawable).apply {
             this.cornerRadius = radius
         }
     }

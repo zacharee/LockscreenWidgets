@@ -33,6 +33,8 @@ class DrawerAdapter(
         set(value) {
             host.context.prefManager.drawerWidgets = LinkedHashSet(value)
         }
+    override val widgetCornerRadius: Float
+        get() = host.context.prefManager.drawerWidgetCornerRadiusDp
 
     override fun launchAddActivity() {
         host.context.eventManager.sendEvent(Event.CloseDrawer)

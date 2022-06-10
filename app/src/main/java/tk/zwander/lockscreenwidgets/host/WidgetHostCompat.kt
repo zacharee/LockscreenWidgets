@@ -9,7 +9,7 @@ import android.content.Context
 import android.widget.RemoteViews
 import tk.zwander.lockscreenwidgets.util.prefManager
 import tk.zwander.lockscreenwidgets.util.safeApplicationContext
-import tk.zwander.lockscreenwidgets.views.MinPaddingAppWidgetHostView
+import tk.zwander.lockscreenwidgets.views.ZeroPaddingAppWidgetHostView
 
 /**
  * Base widget host class. [WidgetHostClass], [WidgetHostInterface], and [WidgetHost12] extend this class and
@@ -80,10 +80,6 @@ abstract class WidgetHostCompat(
         appWidgetId: Int,
         appWidget: AppWidgetProviderInfo?
     ): AppWidgetHostView {
-        return MinPaddingAppWidgetHostView(context)
-    }
-
-    override fun deleteAppWidgetId(appWidgetId: Int) {
-        super.deleteAppWidgetId(appWidgetId)
+        return ZeroPaddingAppWidgetHostView(context)
     }
 }

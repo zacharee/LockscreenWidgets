@@ -86,6 +86,8 @@ class PrefManager private constructor(context: Context) : ContextWrapper(context
         const val KEY_SHOW_DRAWER_HANDLE_SHADOW = "show_drawer_handle_shadow"
         const val KEY_DRAWER_ENABLED = "drawer_enabled"
         const val KEY_DRAWER_BACKGROUND_COLOR = "drawer_background_color"
+        const val KEY_FRAME_WIDGET_CORNER_RADIUS = "frame_widget_corner_radius"
+        const val KEY_DRAWER_WIDGET_CORNER_RADIUS = "drawer_widget_corner_radius"
 
         const val VALUE_PAGE_INDICATOR_BEHAVIOR_HIDDEN = 0
         const val VALUE_PAGE_INDICATOR_BEHAVIOR_AUTO_HIDE = 1
@@ -478,6 +480,18 @@ class PrefManager private constructor(context: Context) : ContextWrapper(context
         get() = getInt(KEY_FRAME_CORNER_RADIUS, resources.getInteger(R.integer.def_corner_radius_dp_scaled_10x)) / 10f
         set(value) {
             putInt(KEY_FRAME_CORNER_RADIUS, (value * 10f).toInt())
+        }
+
+    var frameWidgetCornerRadiusDp: Float
+        get() = getInt(KEY_FRAME_WIDGET_CORNER_RADIUS, resources.getInteger(R.integer.def_corner_radius_dp_scaled_10x)) / 10f
+        set(value) {
+            putInt(KEY_FRAME_WIDGET_CORNER_RADIUS, (value * 10f).toInt())
+        }
+
+    var drawerWidgetCornerRadiusDp: Float
+        get() = getInt(KEY_DRAWER_WIDGET_CORNER_RADIUS, resources.getInteger(R.integer.def_corner_radius_dp_scaled_10x)) / 10f
+        set(value) {
+            putInt(KEY_DRAWER_WIDGET_CORNER_RADIUS, (value * 10f).toInt())
         }
 
     //Whether to enable touch protection

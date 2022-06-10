@@ -110,6 +110,11 @@ class Drawer : FrameLayout, EventObserver {
         handler(PrefManager.KEY_DRAWER_COL_COUNT) {
             updateSpanCount()
         }
+        handler(PrefManager.KEY_DRAWER_WIDGET_CORNER_RADIUS) {
+            if (isAttachedToWindow) {
+                adapter.updateViews()
+            }
+        }
     }
 
     @Suppress("DEPRECATION")

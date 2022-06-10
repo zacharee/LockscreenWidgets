@@ -8,6 +8,7 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Rect
 import android.graphics.RectF
+import android.graphics.drawable.GradientDrawable
 import android.os.Build
 import android.os.Bundle
 import android.util.SizeF
@@ -86,6 +87,8 @@ open class WidgetFrameAdapter(
         set(value) {
             host.context.prefManager.currentWidgets = LinkedHashSet(value)
         }
+    protected open val widgetCornerRadius: Float
+        get() = host.context.prefManager.frameWidgetCornerRadiusDp
 
     init {
         setHasStableIds(true)
@@ -368,6 +371,11 @@ open class WidgetFrameAdapter(
                         WidgetType.WIDGET -> bindWidget(data)
                         WidgetType.SHORTCUT -> bindShortcut(data)
                         WidgetType.HEADER -> {}
+                    }
+
+                    binding.card.radius = context.dpAsPx(widgetCornerRadius).toFloat()
+                    binding.widgetEditOutline.background = (binding.widgetEditOutline.background.mutate() as GradientDrawable).apply {
+                        this.cornerRadius = binding.card.radius
                     }
                 }
             }

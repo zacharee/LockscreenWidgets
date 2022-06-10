@@ -127,6 +127,9 @@
     <string name="settings_screen_corner_radius">Corner Radius</string>
     <string name="settings_screen_corner_radius_desc">Change how rounded the corners of the widget frame are.</string>
 
+    <string name="settings_screen_widget_corner_radius">Widget Corner Radius</string>
+    <string name="settings_screen_widget_corner_radius_desc">Change how rounded the corners of widgets are.</string>
+
     <string name="settings_screen_background_color">Background Color</string>
     <string name="settings_screen_background_color_desc">Set the background color of the widget frame, including transparency.</string>
 

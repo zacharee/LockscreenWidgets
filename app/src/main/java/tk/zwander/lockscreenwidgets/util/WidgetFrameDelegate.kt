@@ -241,6 +241,13 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
         ) {
             adapter.currentEditingInterfacePosition = -1
         }
+        handler(
+            PrefManager.KEY_FRAME_WIDGET_CORNER_RADIUS
+        ) {
+            if (binding.frame.isAttachedToWindow) {
+                adapter.updateViews()
+            }
+        }
     }
 
     private val showWallpaperLayerCondition: Boolean

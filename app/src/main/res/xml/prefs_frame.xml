@@ -81,6 +81,18 @@
             app:units="dp"
             />
 
+        <tk.zwander.seekbarpreference.SeekBarPreference
+            android:title="@string/settings_screen_widget_corner_radius"
+            android:summary="@string/settings_screen_widget_corner_radius_desc"
+            android:key="frame_widget_corner_radius"
+            android:icon="@drawable/ic_baseline_rounded_corner_24"
+            android:defaultValue="@integer/def_corner_radius_dp_scaled_10x"
+            app:scale="0.1"
+            app:minValue="0"
+            app:maxValue="240"
+            app:units="dp"
+            />
+
     </tk.zwander.collapsiblepreferencecategory.CollapsiblePreferenceCategoryNew>
 
     <tk.zwander.collapsiblepreferencecategory.CollapsiblePreferenceCategoryNew
