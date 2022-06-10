@@ -44,7 +44,7 @@
             android:key="drawer_col_count"
             android:icon="@drawable/ic_baseline_view_column_24"
             app:minValue="1"
-            app:maxValue="6"
+            app:maxValue="8"
             />
 
         <tk.zwander.seekbarpreference.SeekBarPreference
