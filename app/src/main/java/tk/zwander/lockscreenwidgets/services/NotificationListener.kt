@@ -7,6 +7,7 @@ import android.service.notification.NotificationListenerService
 import android.service.notification.StatusBarNotification
 import tk.zwander.lockscreenwidgets.util.Event
 import tk.zwander.lockscreenwidgets.util.eventManager
+import tk.zwander.lockscreenwidgets.util.logUtils
 
 /**
  * Used to notify the Accessibility service about changes in notification count,
@@ -59,7 +60,9 @@ class NotificationListener : NotificationListenerService() {
                     }.size
                 ))
             } catch (e: Exception) {
-                //ignored
+                logUtils.debugLog("Error sending notification count update", e)
+            } catch (e: OutOfMemoryError) {
+                logUtils.debugLog("Error sending notification cound update", e)
             }
         }
     }
