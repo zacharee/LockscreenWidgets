@@ -35,26 +35,13 @@ class AddDrawerWidgetActivity : AddWidgetActivity() {
     override val height: Float
         get() = pxAsDp(screenSize.y)
 
+    override var currentWidgets: MutableSet<WidgetData>
+        get() = prefManager.drawerWidgets
+        set(value) {
+            prefManager.drawerWidgets = LinkedHashSet(value)
+        }
+
     private val fromDrawer by lazy { intent.getBooleanExtra(EXTRA_FROM_DRAWER, false) }
-
-    /**
-     * Add the specified widget to the drawer and save it to SharedPreferences.
-     *
-     * @param id the ID of the widget to be added
-     */
-    override fun addNewWidget(id: Int, provider: AppWidgetProviderInfo) {
-        prefManager.drawerWidgets = prefManager.drawerWidgets.apply {
-            add(createWidgetData(id, provider))
-        }
-        finish()
-    }
-
-    override fun addNewShortcut(shortcut: WidgetData) {
-        prefManager.drawerWidgets = prefManager.drawerWidgets.apply {
-            add(shortcut)
-        }
-        finish()
-    }
 
     override fun createWidgetData(id: Int, provider: AppWidgetProviderInfo, overrideSize: WidgetSizeData?): WidgetData {
         return WidgetData.widget(

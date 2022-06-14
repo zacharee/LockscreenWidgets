@@ -168,7 +168,7 @@ fun FeatureCard(info: FeatureCardInfo) {
 
                     SubduedOutlinedButton(
                         onClick = {
-                            context.eventManager.sendEvent(Event.LaunchAddDrawerWidget(false))
+                            info.onAddWidget()
                         },
                         modifier = Modifier
                             .fillMaxWidth()

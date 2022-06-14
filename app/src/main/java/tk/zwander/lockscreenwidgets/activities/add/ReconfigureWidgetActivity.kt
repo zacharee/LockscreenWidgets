@@ -9,7 +9,6 @@ import tk.zwander.lockscreenwidgets.activities.DismissOrUnlockActivity
 import tk.zwander.lockscreenwidgets.data.WidgetData
 import tk.zwander.lockscreenwidgets.data.WidgetSizeData
 import tk.zwander.lockscreenwidgets.util.logUtils
-import tk.zwander.lockscreenwidgets.util.prefManager
 
 open class ReconfigureWidgetActivity : BaseBindWidgetActivity() {
     companion object {
@@ -26,12 +25,6 @@ open class ReconfigureWidgetActivity : BaseBindWidgetActivity() {
             context.startActivity(intent)
         }
     }
-
-    protected open var currentWidgets: Collection<WidgetData>
-        get() = prefManager.currentWidgets
-        set(value) {
-            prefManager.currentWidgets = LinkedHashSet(value)
-        }
 
     private val prevId by lazy { intent.getIntExtra(EXTRA_PREVIOUS_ID, -1) }
     private val providerInfo by lazy { intent.getParcelableExtra(EXTRA_PROVIDER_INFO) as AppWidgetProviderInfo? }
@@ -88,7 +81,7 @@ open class ReconfigureWidgetActivity : BaseBindWidgetActivity() {
 
         logUtils.normalLog("Removed old widget from $oldWidgetIndex ($safeIndex) and added new one $widget")
 
-        currentWidgets = newSet
+        currentWidgets = LinkedHashSet(newSet)
 
         finish()
     }

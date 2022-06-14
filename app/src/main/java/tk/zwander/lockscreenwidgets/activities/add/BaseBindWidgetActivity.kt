@@ -33,6 +33,15 @@ abstract class BaseBindWidgetActivity : AppCompatActivity() {
     protected val widgetDelegate: WidgetFrameDelegate?
         get() = WidgetFrameDelegate.peekInstance(this)
 
+    protected open var currentWidgets: MutableSet<WidgetData>
+        get() = prefManager.currentWidgets
+        set(value) {
+            prefManager.currentWidgets = LinkedHashSet(value)
+        }
+
+    protected open val currentIds: Collection<Int>
+        get() = currentWidgets.map { it.id }
+
     private val permRequest = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         val id = result.data?.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, -1) ?: return@registerForActivityResult
 
@@ -101,7 +110,7 @@ abstract class BaseBindWidgetActivity : AppCompatActivity() {
         else {
             //Only launch the config Activity if the widget isn't already bound (avoid reconfiguring it
             //every time the app restarts)
-            if (info.configure != null && !prefManager.currentWidgets.map { it.id }.contains(id)) {
+            if (info.configure != null && !currentIds.contains(id)) {
                 configureWidget(id, info)
             } else {
                 addNewWidget(id, info)
@@ -166,7 +175,7 @@ abstract class BaseBindWidgetActivity : AppCompatActivity() {
      * @param id the ID of the widget to be added
      */
     protected open fun addNewWidget(id: Int, provider: AppWidgetProviderInfo) {
-        prefManager.currentWidgets = prefManager.currentWidgets.apply {
+        currentWidgets = currentWidgets.apply {
             add(createWidgetData(id, provider))
         }
         finish()
@@ -205,7 +214,7 @@ abstract class BaseBindWidgetActivity : AppCompatActivity() {
     }
 
     protected open fun addNewShortcut(shortcut: WidgetData) {
-        prefManager.currentWidgets = prefManager.currentWidgets.apply {
+        currentWidgets = currentWidgets.apply {
             add(shortcut)
         }
         finish()

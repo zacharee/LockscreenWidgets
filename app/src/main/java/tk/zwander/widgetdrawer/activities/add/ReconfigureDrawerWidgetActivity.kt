@@ -23,7 +23,7 @@ class ReconfigureDrawerWidgetActivity : ReconfigureWidgetActivity() {
         }
     }
 
-    override var currentWidgets: Collection<WidgetData>
+    override var currentWidgets: MutableSet<WidgetData>
         get() = prefManager.drawerWidgets
         set(value) {
             prefManager.drawerWidgets = LinkedHashSet(value)

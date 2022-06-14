@@ -1,7 +1,6 @@
 package tk.zwander.lockscreenwidgets.activities.add
 
 import android.appwidget.AppWidgetProviderInfo
-import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
@@ -26,6 +25,13 @@ class AddTileWidgetActivity : AddWidgetActivity() {
 
     override val showShortcuts: Boolean
         get() = false
+
+    override var currentWidgets: MutableSet<WidgetData>
+        get() = mutableSetOf()
+        set(_) {}
+
+    override val currentIds: Collection<Int>
+        get() = prefManager.customTiles.values.map { it.widgetId }
 
     private val tileId by lazy { intent.getIntExtra(EXTRA_TILE_ID, -1) }
 
