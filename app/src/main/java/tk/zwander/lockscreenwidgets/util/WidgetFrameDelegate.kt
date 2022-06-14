@@ -28,6 +28,7 @@ import tk.zwander.lockscreenwidgets.databinding.WidgetFrameBinding
 import tk.zwander.lockscreenwidgets.host.WidgetHostCompat
 import tk.zwander.lockscreenwidgets.services.Accessibility
 import tk.zwander.lockscreenwidgets.views.WidgetFrameView
+import java.util.function.Consumer
 
 /**
  * Handle most of the logic involving the widget frame.
@@ -253,6 +254,10 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
     private val showWallpaperLayerCondition: Boolean
         get() = !state.isPreview && prefManager.maskedMode && (!state.notificationsPanelFullyExpanded || !prefManager.showInNotificationCenter)
 
+    private val crossWindowBlurListener = Consumer<Boolean> {
+        updateBlur()
+    }
+
     override fun onEvent(event: Event) {
         when (event) {
             Event.FrameMoveFinished -> updateWallpaperLayerIfNeeded()
@@ -309,7 +314,11 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
                 try {
                     if (event.attached) {
                         widgetHost.startListening()
-                        updateBlur()
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                            wm.addCrossWindowBlurEnabledListener(crossWindowBlurListener)
+                        } else {
+                            updateBlur()
+                        }
                         updateWallpaperLayerIfNeeded()
                         //Even with the startListening() call above,
                         //it doesn't seem like pending updates always get
@@ -319,6 +328,9 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
                         gridLayoutManager.scrollToPosition(prefManager.currentPage)
                     } else {
                         widgetHost.stopListening()
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                            wm.removeCrossWindowBlurEnabledListener(crossWindowBlurListener)
+                        }
                     }
                 } catch (e: NullPointerException) {
                     //The stupid "Attempt to read from field 'com.android.server.appwidget.AppWidgetServiceImpl$ProviderId
@@ -700,8 +712,10 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
         val blur = prefManager.blurBackground
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            binding.blurBackground.background = binding.frame.blurDrawable?.wrapped
-            binding.blurBackground.isVisible = blur && !showWallpaperLayerCondition
+            val hasBlur = wm.isCrossWindowBlurEnabled
+
+            binding.blurBackground.background = if (hasBlur) binding.frame.blurDrawable?.wrapped else null
+            binding.blurBackground.isVisible = hasBlur && blur && !showWallpaperLayerCondition
         } else {
             val f = try {
                 params::class.java.getDeclaredField("samsungFlags")
