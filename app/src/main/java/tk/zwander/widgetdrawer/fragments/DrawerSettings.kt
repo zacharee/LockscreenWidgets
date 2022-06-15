@@ -13,6 +13,7 @@ import tk.zwander.lockscreenwidgets.R
 import tk.zwander.lockscreenwidgets.util.*
 import tk.zwander.lockscreenwidgets.util.backup.BackupRestoreManager
 import tk.zwander.lockscreenwidgets.util.backup.backupRestoreManager
+import java.io.FileNotFoundException
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -37,13 +38,18 @@ class DrawerSettings : PreferenceFragmentCompat() {
     private val onWidgetRestore = registerForActivityResult(ActivityResultContracts.OpenDocument()) { uri: Uri? ->
         if (uri != null) {
             requireContext().apply {
-                val input = contentResolver.openInputStream(uri)?.bufferedReader()?.readText()
+                try {
+                    val input = contentResolver.openInputStream(uri)?.bufferedReader()?.readText()
 
-                if (!backupRestoreManager.restoreBackupString(input, BackupRestoreManager.Which.DRAWER)) {
+                    if (!backupRestoreManager.restoreBackupString(input, BackupRestoreManager.Which.DRAWER)) {
+                        Toast.makeText(this, R.string.unable_to_restore_widgets, Toast.LENGTH_SHORT)
+                        logUtils.normalLog("Unable to restore widgets")
+                    } else {
+                        requireActivity().finish()
+                    }
+                } catch (e: FileNotFoundException) {
                     Toast.makeText(this, R.string.unable_to_restore_widgets, Toast.LENGTH_SHORT)
-                    logUtils.normalLog("Unable to restore widgets")
-                } else {
-                    requireActivity().finish()
+                    logUtils.normalLog("Unable to restore widgets", e)
                 }
             }
         }

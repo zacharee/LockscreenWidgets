@@ -239,7 +239,7 @@ abstract class BaseBindWidgetActivity : AppCompatActivity() {
                     currentConfigId = id
                     return true
                 }
-            } catch (e: Exception) {
+            } catch (e: Throwable) {
                 logUtils.debugLog("Unable to launch widget config IntentSender", e)
             }
 
@@ -250,7 +250,7 @@ abstract class BaseBindWidgetActivity : AppCompatActivity() {
                 )
                 currentConfigId = id
                 return true
-            } catch (e: Exception) {
+            } catch (e: Throwable) {
                 logUtils.debugLog("Unable to startAppWidgetConfigureActivityForResult", e)
             }
 
