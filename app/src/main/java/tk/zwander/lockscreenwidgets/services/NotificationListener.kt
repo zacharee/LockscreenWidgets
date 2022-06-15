@@ -13,7 +13,7 @@ import tk.zwander.lockscreenwidgets.util.logUtils
  * Used to notify the Accessibility service about changes in notification count,
  * along with the actual count. If the number of notifications with
  * [Notification.visibility] == [Notification.VISIBILITY_PUBLIC] or [Notification.VISIBILITY_PRIVATE]
- * AND [Notification.priority] > [Notification.PRIORITY_MIN] (importance for > Nougat) is greater than 0,
+ * AND [Notification.priority] > [Notification.PRIORITY_MIN] (importance for > Nougat),
  * and the user has the option enabled, the widget frame will hide.
  */
 class NotificationListener : NotificationListenerService() {
