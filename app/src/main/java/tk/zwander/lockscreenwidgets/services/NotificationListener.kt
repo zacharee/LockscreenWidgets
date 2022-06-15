@@ -62,7 +62,7 @@ class NotificationListener : NotificationListenerService() {
             } catch (e: Exception) {
                 logUtils.debugLog("Error sending notification count update", e)
             } catch (e: OutOfMemoryError) {
-                logUtils.debugLog("Error sending notification cound update", e)
+                logUtils.debugLog("Error sending notification count update", e)
             }
         }
     }
