@@ -13,8 +13,8 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.heinrichreimersoftware.materialintro.app.IntroActivity
 import com.heinrichreimersoftware.materialintro.slide.SimpleSlide
 import tk.zwander.lockscreenwidgets.R
-import tk.zwander.lockscreenwidgets.util.isAccessibilityEnabled
-import tk.zwander.lockscreenwidgets.util.isNotificationListenerActive
+import tk.zwander.lockscreenwidgets.services.isAccessibilityEnabled
+import tk.zwander.lockscreenwidgets.services.isNotificationListenerActive
 import tk.zwander.lockscreenwidgets.util.launchUrl
 import tk.zwander.lockscreenwidgets.util.logUtils
 

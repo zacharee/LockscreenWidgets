@@ -12,6 +12,7 @@ import androidx.recyclerview.widget.RecyclerView
 import tk.zwander.lockscreenwidgets.R
 import tk.zwander.lockscreenwidgets.util.*
 import tk.zwander.lockscreenwidgets.util.backup.BackupRestoreManager
+import tk.zwander.lockscreenwidgets.util.backup.backupRestoreManager
 import java.text.SimpleDateFormat
 import java.util.*
 

@@ -12,8 +12,12 @@ import androidx.preference.SwitchPreference
 import tk.zwander.lockscreenwidgets.R
 import tk.zwander.lockscreenwidgets.activities.HideForIDsActivity
 import tk.zwander.lockscreenwidgets.activities.OnboardingActivity
-import tk.zwander.lockscreenwidgets.util.*
+import tk.zwander.lockscreenwidgets.services.isNotificationListenerActive
+import tk.zwander.lockscreenwidgets.util.PrefManager
 import tk.zwander.lockscreenwidgets.util.backup.BackupRestoreManager
+import tk.zwander.lockscreenwidgets.util.backup.backupRestoreManager
+import tk.zwander.lockscreenwidgets.util.isOneUI
+import tk.zwander.lockscreenwidgets.util.logUtils
 import java.text.SimpleDateFormat
 import java.util.*
 

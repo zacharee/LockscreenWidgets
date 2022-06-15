@@ -14,8 +14,22 @@ import com.squareup.picasso.Picasso
 import tk.zwander.lockscreenwidgets.R
 import tk.zwander.lockscreenwidgets.data.AppInfo
 import tk.zwander.lockscreenwidgets.data.list.BaseListInfo
+import tk.zwander.lockscreenwidgets.data.list.WidgetListInfo
 import tk.zwander.lockscreenwidgets.databinding.AppItemBinding
-import tk.zwander.lockscreenwidgets.util.matchesFilter
+
+fun AppInfo.matchesFilter(filter: String?): Boolean {
+    if (filter.isNullOrBlank()) return true
+    if (appName.contains(filter, true)) return true
+    if (widgets.any { it.matchesFilter(filter) }) return true
+
+    return false
+}
+
+fun WidgetListInfo.matchesFilter(filter: String?): Boolean {
+    if (filter.isNullOrBlank()) return true
+    if (name.contains(filter, true)) return true
+    return false
+}
 
 /**
  * Handle the hosting of the list of apps that have widgets that can be added to the widget frame.

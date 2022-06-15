@@ -2,12 +2,22 @@ package tk.zwander.lockscreenwidgets.services
 
 import android.app.Notification
 import android.app.NotificationManager
+import android.content.ComponentName
+import android.content.Context
 import android.os.Build
+import android.provider.Settings
 import android.service.notification.NotificationListenerService
 import android.service.notification.StatusBarNotification
 import tk.zwander.lockscreenwidgets.util.Event
 import tk.zwander.lockscreenwidgets.util.eventManager
 import tk.zwander.lockscreenwidgets.util.logUtils
+
+//Check if the notification listener service is enabled
+val Context.isNotificationListenerActive: Boolean
+    get() = Settings.Secure.getString(contentResolver, "enabled_notification_listeners")?.run {
+        val cmp = ComponentName(this@isNotificationListenerActive, NotificationListener::class.java)
+        contains(cmp.flattenToString()) || contains(cmp.flattenToShortString())
+    } ?: false
 
 /**
  * Used to notify the Accessibility service about changes in notification count,
@@ -45,20 +55,26 @@ class NotificationListener : NotificationListenerService() {
             //crash with an "unknown listener" error when trying to retrieve the notification lists.
             //This shouldn't happen, but it does, so catch the Exception.
             try {
-                eventManager.sendEvent(Event.NewNotificationCount(
-                    (activeNotifications ?: arrayOf()).filter {
-                        it.notification.visibility
-                            .run { this == Notification.VISIBILITY_PUBLIC || this == Notification.VISIBILITY_PRIVATE }
-                                && (
-                                if (Build.VERSION.SDK_INT > Build.VERSION_CODES.N_MR1) {
-                                    val ranking = Ranking().apply { currentRanking.getRanking(it.key, this) }
-                                    ranking.importance > NotificationManager.IMPORTANCE_MIN
-                                } else {
-                                    @Suppress("DEPRECATION")
-                                    it.notification.priority > Notification.PRIORITY_MIN
-                                })
-                    }.size
-                ))
+                eventManager.sendEvent(
+                    Event.NewNotificationCount(
+                        (activeNotifications ?: arrayOf()).filter {
+                            it.notification.visibility.run {
+                                this == Notification.VISIBILITY_PUBLIC || this == Notification.VISIBILITY_PRIVATE
+                            } && (if (Build.VERSION.SDK_INT > Build.VERSION_CODES.N_MR1) {
+                                val ranking = Ranking().apply {
+                                    currentRanking.getRanking(
+                                        it.key,
+                                        this
+                                    )
+                                }
+                                ranking.importance > NotificationManager.IMPORTANCE_MIN
+                            } else {
+                                @Suppress("DEPRECATION")
+                                it.notification.priority > Notification.PRIORITY_MIN
+                            })
+                        }.size
+                    )
+                )
             } catch (e: Exception) {
                 logUtils.debugLog("Error sending notification count update", e)
             } catch (e: OutOfMemoryError) {

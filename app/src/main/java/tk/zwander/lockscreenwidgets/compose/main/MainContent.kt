@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -16,12 +15,9 @@ import androidx.compose.ui.unit.dp
 import com.google.android.material.composethemeadapter.MdcTheme
 
 @Suppress("OPT_IN_IS_NOT_ENABLED")
-@OptIn(ExperimentalMaterialApi::class)
 @Preview
 @Composable
 fun MainContent() {
-    val context = LocalContext.current
-
     val features = rememberFeatureCards()
     val links = rememberLinks()
 

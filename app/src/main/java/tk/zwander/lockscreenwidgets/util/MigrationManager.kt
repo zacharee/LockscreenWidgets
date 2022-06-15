@@ -7,6 +7,9 @@ import tk.zwander.lockscreenwidgets.BuildConfig
 import tk.zwander.lockscreenwidgets.util.migrations.AddExtraWidgetInfoMigration
 import tk.zwander.lockscreenwidgets.util.migrations.WidgetSizeMigration
 
+val Context.migrationManager: MigrationManager
+    get() = MigrationManager.getInstance(this)
+
 class MigrationManager private constructor(context: Context) : ContextWrapper(context) {
     companion object {
         @SuppressLint("StaticFieldLeak")

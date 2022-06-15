@@ -3,14 +3,17 @@ package tk.zwander.lockscreenwidgets.services
 import android.accessibilityservice.AccessibilityService
 import android.annotation.SuppressLint
 import android.app.KeyguardManager
+import android.content.ComponentName
 import android.content.Context
 import android.os.Build
 import android.os.PowerManager
+import android.provider.Settings
 import android.view.WindowManager
 import android.view.accessibility.AccessibilityEvent
 import android.view.accessibility.AccessibilityNodeInfo
 import android.view.accessibility.AccessibilityWindowInfo
 import kotlinx.coroutines.*
+import tk.zwander.lockscreenwidgets.App
 import tk.zwander.lockscreenwidgets.activities.DismissOrUnlockActivity
 import tk.zwander.lockscreenwidgets.appwidget.IDListProvider
 import tk.zwander.lockscreenwidgets.data.window.WindowInfo
@@ -18,6 +21,39 @@ import tk.zwander.lockscreenwidgets.data.window.WindowRootPair
 import tk.zwander.lockscreenwidgets.util.*
 import tk.zwander.widgetdrawer.util.DrawerDelegate
 import java.util.concurrent.ConcurrentLinkedQueue
+
+//Check if the Accessibility service is enabled
+val Context.isAccessibilityEnabled: Boolean
+    get() = Settings.Secure.getString(
+        contentResolver,
+        Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES
+    )?.contains(ComponentName(this, Accessibility::class.java).flattenToString()) ?: false
+
+//Sometimes retrieving the root of a window causes an NPE
+//in the framework. Catch that here and return null if it happens.
+val AccessibilityWindowInfo.safeRoot: AccessibilityNodeInfo?
+    get() = try {
+        root
+    } catch (e: NullPointerException) {
+        null
+    } catch (e: Exception) {
+        App.globalContext?.logUtils?.normalLog("Error getting window root", e)
+        null
+    }
+
+fun <T> AccessibilityNodeInfo?.use(block: (AccessibilityNodeInfo?) -> T): T {
+    val result = block(this)
+    this?.recycle()
+    return result
+}
+
+fun AccessibilityNodeInfo.hasVisibleIds(vararg ids: String): Boolean {
+    return ids.contains(viewIdResourceName) && isVisibleToUser
+}
+
+fun AccessibilityNodeInfo.hasVisibleIds(ids: Iterable<String>): Boolean {
+    return ids.contains(viewIdResourceName) && isVisibleToUser
+}
 
 /**
  * This is where a lot of the magic happens.

@@ -19,6 +19,32 @@ import tk.zwander.lockscreenwidgets.data.WidgetData
 import tk.zwander.lockscreenwidgets.data.WidgetSizeData
 import tk.zwander.lockscreenwidgets.data.WidgetTileInfo
 
+//Convenience method for getting the preference store instance
+val Context.prefManager: PrefManager
+    get() = PrefManager.getInstance(this)
+
+fun Context.calculateNCPosXFromRightDefault(): Int {
+    val fromRight = dpAsPx(resources.getInteger(R.integer.def_notification_pos_x_from_right_dp))
+    val screenWidth = screenSize.x
+    val frameWidthPx = dpAsPx(prefManager.notificationFrameWidthDp)
+
+    val frameRight = (frameWidthPx / 2f)
+    val coord = (screenWidth / 2f) - fromRight - frameRight
+
+    return coord.toInt()
+}
+
+fun Context.calculateNCPosYFromTopDefault(): Int {
+    val fromTop = dpAsPx(resources.getInteger(R.integer.def_notification_pos_y_from_top_dp))
+    val screenHeight = screenSize.y
+    val frameHeightPx = dpAsPx(prefManager.notificationFrameHeightDp)
+
+    val frameTop = (frameHeightPx / 2f)
+    val coord = -(screenHeight / 2f) + frameTop + fromTop
+
+    return coord.toInt()
+}
+
 /**
  * Handle data persistence.
  */

@@ -10,8 +10,8 @@ import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.cancel
 import tk.zwander.lockscreenwidgets.activities.OnboardingActivity
 import tk.zwander.lockscreenwidgets.compose.main.MainContent
+import tk.zwander.lockscreenwidgets.services.isAccessibilityEnabled
 import tk.zwander.lockscreenwidgets.util.WidgetFrameDelegate
-import tk.zwander.lockscreenwidgets.util.isAccessibilityEnabled
 import tk.zwander.lockscreenwidgets.util.prefManager
 
 /**

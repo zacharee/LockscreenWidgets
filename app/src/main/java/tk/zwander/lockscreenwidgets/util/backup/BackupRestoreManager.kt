@@ -11,6 +11,9 @@ import tk.zwander.lockscreenwidgets.util.logUtils
 import tk.zwander.lockscreenwidgets.util.prefManager
 import tk.zwander.lockscreenwidgets.util.safeApplicationContext
 
+val Context.backupRestoreManager: BackupRestoreManager
+    get() = BackupRestoreManager.getInstance(this)
+
 class BackupRestoreManager private constructor(context: Context) : ContextWrapper(context) {
     companion object {
         @SuppressLint("StaticFieldLeak")

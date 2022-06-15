@@ -7,6 +7,9 @@ import androidx.lifecycle.LifecycleOwner
 import tk.zwander.lockscreenwidgets.data.WidgetData
 import java.util.concurrent.ConcurrentLinkedQueue
 
+val Context.eventManager: EventManager
+    get() = EventManager.getInstance(this)
+
 class EventManager private constructor(private val context: Context) {
     companion object {
         @Suppress("ObjectPropertyName")

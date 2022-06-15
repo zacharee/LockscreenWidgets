@@ -2,10 +2,11 @@ package tk.zwander.lockscreenwidgets.util
 
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.graphics.Canvas
+import android.graphics.Paint
 import android.graphics.drawable.Drawable
 import android.util.Base64
 import androidx.core.graphics.drawable.toBitmap
-import com.android.internal.R.id.image
 import tk.zwander.lockscreenwidgets.App
 import java.io.ByteArrayOutputStream
 import java.io.IOException
@@ -73,4 +74,47 @@ fun Drawable.toBitmap(maxWidth: Int = intrinsicWidth, maxHeight: Int = intrinsic
     } else {
         image
     }
+}
+
+fun Bitmap.cropBitmapTransparency(): Bitmap {
+    var minX = width
+    var minY = height
+    var maxX = -1
+    var maxY = -1
+    for (y in 0 until height) {
+        for (x in 0 until width) {
+            val alpha = getPixel(x, y) shr 24 and 255
+            if (alpha > 0) // pixel is not 100% transparent
+            {
+                if (x < minX) minX = x
+                if (x > maxX) maxX = x
+                if (y < minY) minY = y
+                if (y > maxY) maxY = y
+            }
+        }
+    }
+    return if (maxX < minX || maxY < minY) {
+        //Fully transparent, return unchanged
+        this
+    } else Bitmap.createBitmap(
+        this,
+        minX,
+        minY,
+        maxX - minX + 1,
+        maxY - minY + 1
+    )
+}
+
+fun String.textAsBitmap(textSize: Float, textColor: Int): Bitmap? {
+    val paint = Paint(Paint.ANTI_ALIAS_FLAG)
+    paint.textSize = textSize
+    paint.color = textColor
+    paint.textAlign = Paint.Align.LEFT
+    val baseline: Float = -paint.ascent() // ascent() is negative
+    val width = (paint.measureText(this) + 0.5f).toInt() // round
+    val height = (baseline + paint.descent() + 0.5f).toInt()
+    val image = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
+    val canvas = Canvas(image)
+    canvas.drawText(this, 0f, baseline, paint)
+    return image
 }
