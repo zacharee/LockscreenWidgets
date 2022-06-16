@@ -58,7 +58,7 @@ class BlurManager(
             val f = try {
                 params::class.java.getDeclaredField("samsungFlags")
             } catch (e: Exception) {
-                null
+                return
             }
 
             if (shouldBlur()) {
