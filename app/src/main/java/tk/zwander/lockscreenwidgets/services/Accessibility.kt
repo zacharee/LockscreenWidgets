@@ -107,6 +107,7 @@ class Accessibility : AccessibilityService(), EventObserver, CoroutineScope by M
     }
 
     override fun onServiceConnected() {
+        eventManager.sendEvent(Event.RequestNotificationCount)
         serviceInfo = serviceInfo.apply {
             notificationTimeout = prefManager.accessibilityEventDelay.toLong()
         }
@@ -281,7 +282,8 @@ class Accessibility : AccessibilityService(), EventObserver, CoroutineScope by M
                             it.hasVisibleIds(
                                 "com.android.systemui:id/quick_settings_panel",
                                 "com.android.systemui:id/settings_button",
-                                "com.android.systemui:id/tile_label"
+                                "com.android.systemui:id/tile_label",
+                                "com.android.systemui:id/header_label"
                             )
                         })
                     }

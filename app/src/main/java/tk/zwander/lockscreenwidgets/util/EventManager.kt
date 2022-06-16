@@ -109,6 +109,7 @@ sealed class Event {
     object CenterFrameHorizontally : Event()
     object CenterFrameVertically : Event()
     object FrameWidgetClick : Event()
+    object RequestNotificationCount : Event()
 
     /**
      * On Android 8.0+, it's pretty easy to dismiss the lock screen with a simple API call.
