@@ -2,6 +2,7 @@ package tk.zwander.widgetdrawer.fragments
 
 import android.annotation.SuppressLint
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.view.View
 import android.view.ViewGroup
@@ -69,6 +70,12 @@ class DrawerSettings : PreferenceFragmentCompat() {
         findPreference<Preference>("restore_widgets")?.setOnPreferenceClickListener {
             onWidgetRestore.launch(arrayOf("*/*"))
             true
+        }
+
+        val showBlurOptions = requireContext().isOneUI || Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
+        if (!showBlurOptions) {
+            preferenceScreen.removePreferenceRecursively(PrefManager.KEY_BLUR_DRAWER_BACKGROUND)
+            preferenceScreen.removePreferenceRecursively(PrefManager.KEY_BLUR_DRAWER_BACKGROUND_AMOUNT)
         }
     }
 

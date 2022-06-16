@@ -7,6 +7,13 @@
     android:alpha="0"
     android:theme="@style/AppTheme">
 
+    <FrameLayout
+        android:id="@+id/blur_background"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="gone"
+        />
+
     <tk.zwander.widgetdrawer.views.DrawerRecycler
         android:id="@+id/widget_grid"
         android:layout_width="match_parent"

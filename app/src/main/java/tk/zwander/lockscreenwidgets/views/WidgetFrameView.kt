@@ -16,7 +16,6 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.isVisible
 import tk.zwander.lockscreenwidgets.adapters.IDAdapter
 import tk.zwander.lockscreenwidgets.databinding.WidgetFrameBinding
-import tk.zwander.lockscreenwidgets.drawable.BackgroundBlurDrawableCompatDelegate
 import tk.zwander.lockscreenwidgets.util.*
 import kotlin.math.roundToInt
 
@@ -68,15 +67,9 @@ class WidgetFrameView(context: Context, attrs: AttributeSet) : ConstraintLayout(
         handler(PrefManager.KEY_LOCK_WIDGET_FRAME) {
             setEditMode(false)
         }
-        handler(PrefManager.KEY_BLUR_BACKGROUND_AMOUNT) {
-            blurDrawable?.setBlurRadius(context.prefManager.backgroundBlurAmount)
-        }
     }
 
     private val binding by lazy { WidgetFrameBinding.bind(this) }
-
-    var blurDrawable: BackgroundBlurDrawableCompatDelegate? = null
-        private set
 
     enum class AnimationState {
         STATE_ADDING,
@@ -91,8 +84,6 @@ class WidgetFrameView(context: Context, attrs: AttributeSet) : ConstraintLayout(
         binding.frameCard.alpha = 0f
         binding.frameCard.scaleX = 0.95f
         binding.frameCard.scaleY = 0.95f
-
-        updateCornerRadius()
 
         binding.move.setOnTouchListener(MoveTouchListener())
         binding.centerHorizontally.setOnClickListener {
@@ -151,10 +142,6 @@ class WidgetFrameView(context: Context, attrs: AttributeSet) : ConstraintLayout(
                 animationState = AnimationState.STATE_IDLE
             }
         }, 50)
-
-        blurDrawable = viewRootImpl.createBackgroundBlurDrawableCompat()
-        blurDrawable?.setBlurRadius(context.prefManager.backgroundBlurAmount)
-        updateCornerRadius()
     }
 
     override fun onDetachedFromWindow() {
@@ -236,16 +223,6 @@ class WidgetFrameView(context: Context, attrs: AttributeSet) : ConstraintLayout(
 
     override fun onInterceptTouchEvent(ev: MotionEvent): Boolean {
         return (maxPointerCount > 1 || isProxTooClose)
-    }
-
-    fun updateCornerRadius() {
-        val radius = context.dpAsPx(context.prefManager.cornerRadiusDp).toFloat()
-        binding.frameCard.radius = radius
-        blurDrawable?.setCornerRadius(radius)
-
-        binding.editOutline.background = (binding.editOutline.background.mutate() as GradientDrawable).apply {
-            this.cornerRadius = radius
-        }
     }
 
     fun updateFrameBackground() {

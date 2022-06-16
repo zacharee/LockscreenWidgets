@@ -170,7 +170,9 @@
     <string name="settings_screen_restore_widgets_desc">Restore widgets and shortcuts from a backup. This will replace existing widgets and shortcuts. This does not include widget tiles.</string>
 
     <string name="settings_screen_blur_background">Blur Background</string>
-    <string name="settings_screen_blur_background_desc">On Samsung devices and Android 12 and later, it\'s possible to blur the background of the frame. This won\'t apply where Masked Mode applies.</string>
+    <string name="settings_screen_blur_background_desc">On Samsung devices and Android 12 and later, it\'s possible to blur the background of the frame. This won\'t apply where Masked Mode applies, and may not work on all devices or in battery saving mode.</string>
+
+    <string name="settings_screen_blur_drawer_background_desc">On Samsung devices and Android 12 and later, it\'s possible to blur the background of the drawer. This may not work on all devices or in battery saving mode.</string>
 
     <string name="settings_screen_blur_background_amount">Blur Amount</string>
     <string name="settings_screen_blur_background_amount_desc">Set how blurred the background should be.</string>

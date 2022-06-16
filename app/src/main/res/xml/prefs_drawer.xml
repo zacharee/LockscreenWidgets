@@ -36,6 +36,25 @@
             android:defaultValue="false"
             />
 
+        <SwitchPreference
+            android:title="@string/settings_screen_blur_background"
+            android:summary="@string/settings_screen_blur_drawer_background_desc"
+            android:key="blur_drawer_background"
+            android:defaultValue="false"
+            android:icon="@drawable/ic_baseline_blur_on_24"
+            />
+
+        <tk.zwander.seekbarpreference.SeekBarPreference
+            android:title="@string/settings_screen_blur_background_amount"
+            android:summary="@string/settings_screen_blur_background_amount_desc"
+            android:icon="@drawable/ic_baseline_deblur_24"
+            android:key="blur_drawer_background_amount"
+            android:defaultValue="100"
+            android:dependency="blur_drawer_background"
+            app:minValue="0"
+            app:maxValue="1000"
+            />
+
         <com.jaredrummler.android.colorpicker.ColorPreferenceCompat
             android:title="@string/drawer_background_color"
             android:summary="@string/drawer_background_color_desc"

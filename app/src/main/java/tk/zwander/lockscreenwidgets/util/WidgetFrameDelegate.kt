@@ -9,6 +9,7 @@ import android.content.Context
 import android.content.ContextWrapper
 import android.graphics.*
 import android.graphics.drawable.BitmapDrawable
+import android.graphics.drawable.GradientDrawable
 import android.os.*
 import android.view.*
 import android.widget.ImageView
@@ -28,7 +29,6 @@ import tk.zwander.lockscreenwidgets.databinding.WidgetFrameBinding
 import tk.zwander.lockscreenwidgets.host.WidgetHostCompat
 import tk.zwander.lockscreenwidgets.services.Accessibility
 import tk.zwander.lockscreenwidgets.views.WidgetFrameView
-import java.util.function.Consumer
 
 /**
  * Handle most of the logic involving the widget frame.
@@ -215,9 +215,6 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
         handler(PrefManager.KEY_FRAME_MASKED_MODE, PrefManager.KEY_MASKED_MODE_DIM_AMOUNT) {
             updateWallpaperLayerIfNeeded()
         }
-        handler(PrefManager.KEY_BLUR_BACKGROUND, PrefManager.KEY_BLUR_BACKGROUND_AMOUNT) {
-            updateBlur()
-        }
         handler(
             PrefManager.KEY_SHOW_DEBUG_ID_VIEW,
             PrefManager.KEY_DEBUG_LOG
@@ -228,7 +225,7 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
             updateState { it.copy(isPendingNotificationStateChange = true) }
         }
         handler(PrefManager.KEY_FRAME_CORNER_RADIUS) {
-            binding.frame.updateCornerRadius()
+            updateCornerRadius()
         }
         handler(
             PrefManager.KEY_POS_X,
@@ -257,9 +254,14 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
     private val showWallpaperLayerCondition: Boolean
         get() = !state.isPreview && prefManager.maskedMode && (!state.notificationsPanelFullyExpanded || !prefManager.showInNotificationCenter)
 
-    private val crossWindowBlurListener = Consumer<Boolean> {
-        updateBlur()
-    }
+    private val blurManager = BlurManager(
+        context = this,
+        params = params,
+        targetView = binding.blurBackground,
+        listenKeys = arrayOf(PrefManager.KEY_BLUR_BACKGROUND, PrefManager.KEY_BLUR_BACKGROUND_AMOUNT),
+        shouldBlur = { prefManager.blurBackground && !showWallpaperLayerCondition },
+        blurAmount = { prefManager.backgroundBlurAmount },
+    ) { binding.frame.updateWindow(wm, params) }
 
     override fun onEvent(event: Event) {
         when (event) {
@@ -317,12 +319,8 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
                 try {
                     if (event.attached) {
                         widgetHost.startListening()
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                            wm.addCrossWindowBlurEnabledListener(crossWindowBlurListener)
-                        } else {
-                            updateBlur()
-                        }
                         updateWallpaperLayerIfNeeded()
+                        updateCornerRadius()
                         //Even with the startListening() call above,
                         //it doesn't seem like pending updates always get
                         //dispatched. Rebinding all the widgets forces
@@ -331,9 +329,6 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
                         gridLayoutManager.scrollToPosition(prefManager.currentPage)
                     } else {
                         widgetHost.stopListening()
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                            wm.removeCrossWindowBlurEnabledListener(crossWindowBlurListener)
-                        }
                     }
                 } catch (e: NullPointerException) {
                     //The stupid "Attempt to read from field 'com.android.server.appwidget.AppWidgetServiceImpl$ProviderId
@@ -380,6 +375,7 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
             setHasFixedSize(true)
             ItemTouchHelper(touchHelperCallback).attachToRecyclerView(this)
         }
+        blurManager.onCreate()
 
         updateRowColCount()
         adapter.updateWidgets(prefManager.currentWidgets.toList())
@@ -402,6 +398,7 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
             removeObserver(this@WidgetFrameDelegate)
         }
         invalidateInstance()
+        blurManager.onDestroy()
     }
 
     fun updateState(transform: (State) -> State) {
@@ -708,38 +705,14 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
         binding.frame.updateWindow(wm, params)
     }
 
-    /**
-     * Updates the params needed to blur or not blur the widget frame background.
-     */
-    private fun updateBlur() {
-        val blur = prefManager.blurBackground
+    private fun updateCornerRadius() {
+        val radius = dpAsPx(prefManager.cornerRadiusDp).toFloat()
+        binding.frameCard.radius = radius
+        blurManager.setCornerRadius(radius)
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            val hasBlur = wm.isCrossWindowBlurEnabled && binding.frame.isHardwareAccelerated
-
-            binding.blurBackground.background = if (hasBlur) binding.frame.blurDrawable?.wrapped else null
-            binding.blurBackground.isVisible = hasBlur && blur && !showWallpaperLayerCondition
-        } else {
-            val f = try {
-                params::class.java.getDeclaredField("samsungFlags")
-            } catch (e: Exception) {
-                null
-            }
-
-            if (blur && !showWallpaperLayerCondition) {
-                params.flags = params.flags or WindowManager.LayoutParams.FLAG_DIM_BEHIND
-
-                f?.set(params, f.get(params) as Int or 64)
-                params.dimAmount = prefManager.backgroundBlurAmount / 1000f
-            } else {
-                params.flags = params.flags and WindowManager.LayoutParams.FLAG_DIM_BEHIND.inv()
-
-                f?.set(params, f.get(params) as Int and 64.inv())
-                params.dimAmount = 0.0f
-            }
+        binding.editOutline.background = (binding.editOutline.background.mutate() as GradientDrawable).apply {
+            this.cornerRadius = radius
         }
-
-        binding.frame.updateWindow(wm, params)
     }
 
     /**
@@ -790,7 +763,7 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
             binding.frame.updateWindow(wm, params)
             mainHandler.post {
                 updateWallpaperLayerIfNeeded()
-                updateBlur()
+                blurManager.updateBlur()
                 adapter.updateViews()
                 gridLayoutManager.scrollToPosition(prefManager.currentPage)
             }

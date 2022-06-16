@@ -264,6 +264,12 @@ class Drawer : FrameLayout, EventObserver {
         } catch (_: Exception) {}
     }
 
+    fun updateDrawer(wm: WindowManager = this.wm) {
+        try {
+            wm.updateViewLayout(this, params)
+        } catch (_: Exception) {}
+    }
+
     fun hideDrawer(callListener: Boolean = true) {
         updateState { it.copy(handlingDrawerClick = false) }
         adapter.currentEditingInterfacePosition = -1

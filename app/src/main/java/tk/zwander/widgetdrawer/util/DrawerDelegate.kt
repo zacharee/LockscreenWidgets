@@ -84,6 +84,15 @@ class DrawerDelegate private constructor(private val context: Context) : Context
         }
     }
 
+    private val blurManager = BlurManager(
+        context = context,
+        params = drawer.root.params,
+        targetView = drawer.blurBackground,
+        listenKeys = arrayOf(PrefManager.KEY_BLUR_DRAWER_BACKGROUND, PrefManager.KEY_BLUR_DRAWER_BACKGROUND_AMOUNT),
+        shouldBlur = { context.prefManager.blurDrawerBackground },
+        blurAmount = { context.prefManager.drawerBackgroundBlurAmount }
+    ) { drawer.root.updateDrawer() }
+
     override fun onEvent(event: Event) {
         when (event) {
             Event.ShowDrawer -> {
@@ -123,6 +132,7 @@ class DrawerDelegate private constructor(private val context: Context) : Context
     override fun onViewDetachedFromWindow(v: View?) {}
 
     fun onCreate() {
+        blurManager.onCreate()
         drawer.root.addOnAttachStateChangeListener(this)
         drawer.root.onCreate()
         tryShowHandle()
@@ -138,6 +148,7 @@ class DrawerDelegate private constructor(private val context: Context) : Context
         drawer.root.removeOnAttachStateChangeListener(this)
 
         invalidateInstance()
+        blurManager.onDestroy()
     }
 
     fun hideAll() {
