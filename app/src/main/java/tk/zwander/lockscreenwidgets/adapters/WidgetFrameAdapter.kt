@@ -32,6 +32,7 @@ import tk.zwander.lockscreenwidgets.activities.DismissOrUnlockActivity
 import tk.zwander.lockscreenwidgets.activities.add.ReconfigureWidgetActivity
 import tk.zwander.lockscreenwidgets.data.WidgetData
 import tk.zwander.lockscreenwidgets.data.WidgetType
+import tk.zwander.lockscreenwidgets.databinding.AddWidgetBinding
 import tk.zwander.lockscreenwidgets.databinding.FrameShortcutViewBinding
 import tk.zwander.lockscreenwidgets.databinding.WidgetPageHolderBinding
 import tk.zwander.lockscreenwidgets.host.WidgetHostCompat
@@ -198,6 +199,8 @@ open class WidgetFrameAdapter(
         if (position < widgets.size) {
             (holder as WidgetVH).onBind(widgets[position])
         }
+
+        (holder as? AddWidgetVH)?.onBind()
     }
 
     fun updateViews() {
@@ -589,10 +592,16 @@ open class WidgetFrameAdapter(
      * added to the frame.
      */
     inner class AddWidgetVH(view: View) : RecyclerView.ViewHolder(view) {
+        private val binding = AddWidgetBinding.bind(view)
+
         init {
-            itemView.setOnClickListener {
+            binding.clickTarget.setOnClickListener {
                 launchAddActivity()
             }
+        }
+
+        fun onBind() {
+            binding.root.radius = itemView.context.dpAsPx(widgetCornerRadius).toFloat()
         }
     }
 

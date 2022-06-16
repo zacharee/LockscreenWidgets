@@ -2,13 +2,13 @@
 <com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    app:cardCornerRadius="12dp"
+    app:cardCornerRadius="@dimen/cardview_default_radius"
     app:cardElevation="0dp"
     app:cardForegroundColor="@android:color/transparent"
     app:cardBackgroundColor="@android:color/transparent"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <FrameLayout
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:clickable="true"
@@ -17,6 +17,7 @@
         android:id="@+id/click_target">
 
         <ImageView
+            android:id="@+id/add_icon"
             android:layout_width="48dp"
             android:layout_height="48dp"
             android:src="@drawable/ic_baseline_add_24"
@@ -27,6 +28,24 @@
             app:layout_constraintEnd_toEndOf="parent"
             />
 
-    </FrameLayout>
+        <TextView
+            android:id="@+id/add_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAlignment="center"
+            android:text="@string/add_widget"
+            android:textStyle="bold"
+            android:shadowColor="@android:color/black"
+            android:shadowRadius="5"
+            android:shadowDy="3"
+            android:shadowDx="3"
+            android:textColor="@android:color/white"
+            android:textSize="20sp"
+            app:layout_constraintTop_toBottomOf="@id/add_icon"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
 </com.google.android.material.card.MaterialCardView>
