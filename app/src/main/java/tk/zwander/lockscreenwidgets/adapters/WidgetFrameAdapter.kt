@@ -83,6 +83,8 @@ open class WidgetFrameAdapter(
         get() = 1
     protected open val minRowSpan: Int
         get() = 1
+    protected open val rowSpanForAddButton: Int
+        get() = rowCount
     protected open var currentWidgets: MutableCollection<WidgetData>
         get() = host.context.prefManager.currentWidgets
         set(value) {
@@ -606,7 +608,7 @@ open class WidgetFrameAdapter(
     }
 
     inner class WidgetSpanSizeLookup : SpannedGridLayoutManager.SpanSizeLookup({ position ->
-        if (widgets.isEmpty()) SpanSize(colCount, minRowSpan)
+        if (widgets.isEmpty()) SpanSize(colCount, rowSpanForAddButton)
         else {
             val widget = if (position >= widgets.size) null else widgets[position]
             val size = widget?.safeSize

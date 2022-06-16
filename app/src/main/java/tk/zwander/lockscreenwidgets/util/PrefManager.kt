@@ -587,13 +587,13 @@ class PrefManager private constructor(context: Context) : ContextWrapper(context
         }
 
     var drawerHandleHeight: Int
-        get() = getInt(KEY_DRAWER_HANDLE_HEIGHT, 100)
+        get() = getInt(KEY_DRAWER_HANDLE_HEIGHT, 140)
         set(value) {
             putInt(KEY_DRAWER_HANDLE_HEIGHT, value)
         }
 
     var drawerHandleWidth: Int
-        get() = getInt(KEY_DRAWER_HANDLE_WIDTH, 10)
+        get() = getInt(KEY_DRAWER_HANDLE_WIDTH, 6)
         set(value) {
             putInt(KEY_DRAWER_HANDLE_WIDTH, value)
         }

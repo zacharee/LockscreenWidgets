@@ -28,6 +28,8 @@ class DrawerAdapter(
         get() = (host.context.screenSize.y / host.context.resources.getDimensionPixelSize(R.dimen.drawer_row_height)) - 5
     override val minRowSpan: Int
         get() = 10
+    override val rowSpanForAddButton: Int
+        get() = 20
     override var currentWidgets: MutableCollection<WidgetData>
         get() = host.context.prefManager.drawerWidgets
         set(value) {
