@@ -65,7 +65,7 @@ class BlurManager(
                 params.flags = params.flags or WindowManager.LayoutParams.FLAG_DIM_BEHIND
 
                 f?.set(params, f.get(params) as Int or 64)
-                params.dimAmount = blurAmount() / 100f
+                params.dimAmount = blurAmount() / 1000f
             } else {
                 params.flags = params.flags and WindowManager.LayoutParams.FLAG_DIM_BEHIND.inv()
 
