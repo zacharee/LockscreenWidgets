@@ -74,31 +74,7 @@ class NotificationListener : NotificationListenerService(), EventObserver {
             //This shouldn't happen, but it does, so catch the Exception.
             try {
                 eventManager.sendEvent(
-                    Event.NewNotificationCount(
-                        (activeNotifications ?: arrayOf()).filter {
-                            it.notification.visibility.run {
-                                this == Notification.VISIBILITY_PUBLIC || this == Notification.VISIBILITY_PRIVATE
-                            } && (if (Build.VERSION.SDK_INT > Build.VERSION_CODES.N_MR1) {
-                                val ranking = Ranking().apply {
-                                    currentRanking.getRanking(
-                                        it.key,
-                                        this
-                                    )
-                                }
-
-                                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && ranking.lockscreenVisibilityOverride == Notification.VISIBILITY_SECRET) {
-                                     false
-                                } else {
-                                    ranking.importance > NotificationManager.IMPORTANCE_LOW ||
-                                            ((Build.VERSION.SDK_INT < Build.VERSION_CODES.Q || !nm.shouldHideSilentStatusBarIcons()) &&
-                                                    ranking.importance > NotificationManager.IMPORTANCE_MIN)
-                                }
-                            } else {
-                                @Suppress("DEPRECATION")
-                                it.notification.priority > Notification.PRIORITY_MIN
-                            })
-                        }.size
-                    )
+                    Event.NewNotificationCount(activeNotifications?.count { it.shouldCount } ?: 0)
                 )
             } catch (e: Exception) {
                 logUtils.debugLog("Error sending notification count update", e)
@@ -107,4 +83,31 @@ class NotificationListener : NotificationListenerService(), EventObserver {
             }
         }
     }
+
+    private val StatusBarNotification.shouldCount: Boolean
+        get() {
+            val nm = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+
+            if (notification.visibility == Notification.VISIBILITY_SECRET) return false
+
+            if (Build.VERSION.SDK_INT > Build.VERSION_CODES.N_MR1) {
+                val ranking = Ranking().apply {
+                    currentRanking.getRanking(key, this)
+                }
+
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S &&
+                    ranking.lockscreenVisibilityOverride == Notification.VISIBILITY_SECRET) return false
+
+                if (ranking.importance <= NotificationManager.IMPORTANCE_MIN) return false
+
+                if (ranking.importance <= NotificationManager.IMPORTANCE_LOW &&
+                    Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q &&
+                    nm.shouldHideSilentStatusBarIcons()) return false
+            } else {
+                @Suppress("DEPRECATION")
+                if (notification.priority <= Notification.PRIORITY_MIN) return false
+            }
+
+            return true
+        }
 }
