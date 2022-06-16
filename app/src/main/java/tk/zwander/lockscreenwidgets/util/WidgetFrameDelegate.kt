@@ -715,7 +715,7 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
         val blur = prefManager.blurBackground
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            val hasBlur = wm.isCrossWindowBlurEnabled
+            val hasBlur = wm.isCrossWindowBlurEnabled && binding.frame.isHardwareAccelerated
 
             binding.blurBackground.background = if (hasBlur) binding.frame.blurDrawable?.wrapped else null
             binding.blurBackground.isVisible = hasBlur && blur && !showWallpaperLayerCondition
