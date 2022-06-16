@@ -4,7 +4,6 @@ import android.appwidget.AppWidgetManager
 import android.appwidget.AppWidgetProviderInfo
 import android.view.View
 import android.view.ViewGroup
-import android.view.WindowManager
 import tk.zwander.lockscreenwidgets.R
 import tk.zwander.lockscreenwidgets.adapters.WidgetFrameAdapter
 import tk.zwander.lockscreenwidgets.data.WidgetData
@@ -19,9 +18,8 @@ import tk.zwander.widgetdrawer.activities.add.ReconfigureDrawerWidgetActivity
 class DrawerAdapter(
     manager: AppWidgetManager,
     host: WidgetHostCompat,
-    params: WindowManager.LayoutParams,
     onRemoveCallback: (WidgetFrameAdapter, WidgetData, Int) -> Unit
-) : WidgetFrameAdapter(manager, host, params, onRemoveCallback) {
+) : WidgetFrameAdapter(manager, host, onRemoveCallback) {
     override val colCount: Int
         get() = host.context.prefManager.drawerColCount
     override val rowCount: Int

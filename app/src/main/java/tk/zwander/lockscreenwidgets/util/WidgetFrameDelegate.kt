@@ -162,11 +162,11 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
     private val binding =
         WidgetFrameBinding.inflate(LayoutInflater.from(ContextThemeWrapper(this, R.style.AppTheme)))
     private val gridLayoutManager = SpannedLayoutManager()
-    private val adapter = WidgetFrameAdapter(widgetManager, widgetHost, params) { _, item, _ ->
+    private val adapter = WidgetFrameAdapter(widgetManager, widgetHost) { _, item, _ ->
         binding.removeWidgetConfirmation.root.show(item)
     }
 
-    private val touchHelperCallback = context.createTouchHelperCallback(
+    private val touchHelperCallback = createTouchHelperCallback(
         adapter,
         widgetMoved = { moved ->
             if (moved) {
@@ -177,6 +177,9 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
         },
         onItemSelected = { selected ->
             updateState { it.copy(isHoldingItem = selected) }
+        },
+        frameLocked = {
+            prefManager.lockWidgetFrame
         }
     )
 

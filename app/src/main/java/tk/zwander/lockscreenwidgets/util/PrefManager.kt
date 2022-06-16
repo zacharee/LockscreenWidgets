@@ -96,6 +96,7 @@ class PrefManager private constructor(context: Context) : ContextWrapper(context
         const val KEY_CUSTOM_TILES = "custom_tiles"
         const val KEY_SHORTCUT_IDS = "shortcut_ids"
         const val KEY_LOCK_WIDGET_FRAME = "lock_widget_frame"
+        const val KEY_LOCK_WIDGET_DRAWER = "lock_widget_drawer"
         const val KEY_DATABASE_VERSION = "database_version"
         const val KEY_BLUR_BACKGROUND = "blur_background"
         const val KEY_BLUR_BACKGROUND_AMOUNT = "blur_background_amount"
@@ -558,6 +559,12 @@ class PrefManager private constructor(context: Context) : ContextWrapper(context
         get() = getBoolean(KEY_LOCK_WIDGET_FRAME, false)
         set(value) {
             putBoolean(KEY_LOCK_WIDGET_FRAME, value)
+        }
+
+    var lockWidgetDrawer: Boolean
+        get() = getBoolean(KEY_LOCK_WIDGET_DRAWER, false)
+        set(value) {
+            putBoolean(KEY_LOCK_WIDGET_DRAWER, value)
         }
 
     //The duration of the fade-in/out animation.

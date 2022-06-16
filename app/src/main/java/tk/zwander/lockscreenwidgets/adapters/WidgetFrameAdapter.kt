@@ -12,8 +12,11 @@ import android.graphics.drawable.GradientDrawable
 import android.os.Build
 import android.os.Bundle
 import android.util.SizeF
-import android.view.*
+import android.view.LayoutInflater
 import android.view.LayoutInflater.Factory2
+import android.view.View
+import android.view.ViewGroup
+import android.view.Window
 import android.widget.ListView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatCallback
@@ -49,7 +52,6 @@ import kotlin.math.min
 open class WidgetFrameAdapter(
     protected val manager: AppWidgetManager,
     protected val host: WidgetHostCompat,
-    protected val params: WindowManager.LayoutParams,
     protected val onRemoveCallback: (WidgetFrameAdapter, WidgetData, Int) -> Unit
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>(), CoroutineScope by MainScope() {
     companion object {

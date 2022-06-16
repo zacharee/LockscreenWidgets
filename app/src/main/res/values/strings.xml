@@ -155,7 +155,10 @@
     <string name="settings_screen_separate_position_for_lock_nc_desc">On One UI 3, the notification center layout is slightly different when locked and unlocked. Enable this to use separate positioning for the widget frame in those two modes.</string>
 
     <string name="settings_screen_lock_widget_frame">Lock Widget Frame</string>
-    <string name="settings_screen_lock_widget_frame_desc">When this is enabled, the widget frame will ignore all touches. You won\'t be able to move it or modify the widgets from the frame, but the three-finger hide gesture will still function.</string>
+    <string name="settings_screen_lock_widget_frame_desc">When this is enabled, the widget frame will ignore all direct touches. You won\'t be able to move it or modify the widgets from the frame, but the three-finger hide gesture will still function and you\'ll still be able to interact with widgets.</string>
+
+    <string name="settings_screen_lock_widget_drawer">Lock Widget Drawer</string>
+    <string name="settings_screen_lock_widget_drawer_desc">When this is enabled, the widget drawer\'s layout will become locked. You won\'t be able to remove, resize, or reorder widgets, but you\'ll still be able to interact with them.</string>
 
     <string name="settings_screen_animation_duration">Animation Duration</string>
     <string name="settings_screen_animation_duration_desc">Set how long it takes for the fade-in/fade-out animation to complete.</string>

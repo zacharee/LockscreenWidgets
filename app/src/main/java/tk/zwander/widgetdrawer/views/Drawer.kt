@@ -73,13 +73,13 @@ class Drawer : FrameLayout, EventObserver {
     private val manager by lazy { AppWidgetManager.getInstance(context.applicationContext) }
     private val shortcutIdManager by lazy { ShortcutIdManager.getInstance(context, host) }
     private val adapter by lazy {
-        DrawerAdapter(manager, host, params) { _, widget, _ ->
+        DrawerAdapter(manager, host) { _, widget, _ ->
             removeWidget(widget)
         }
     }
 
     private val gridLayoutManager = SpannedLayoutManager(context)
-    private val touchHelperCallback = context.createTouchHelperCallback(
+    private val touchHelperCallback = createTouchHelperCallback(
         adapter,
         widgetMoved = { moved ->
             if (moved) {
@@ -91,6 +91,9 @@ class Drawer : FrameLayout, EventObserver {
         onItemSelected = { selected ->
             updateState { it.copy(isHoldingItem = selected) }
             binding.widgetGrid.selectedItem = selected
+        },
+        frameLocked = {
+            context.prefManager.lockWidgetDrawer
         }
     )
     private val itemTouchHelper = ItemTouchHelper(touchHelperCallback)
@@ -114,6 +117,9 @@ class Drawer : FrameLayout, EventObserver {
             if (isAttachedToWindow) {
                 adapter.updateViews()
             }
+        }
+        handler(PrefManager.KEY_LOCK_WIDGET_DRAWER) {
+            adapter.currentEditingInterfacePosition = -1
         }
     }
 

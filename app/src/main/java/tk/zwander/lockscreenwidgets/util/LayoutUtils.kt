@@ -15,7 +15,12 @@ import tk.zwander.lockscreenwidgets.data.WidgetType
 import kotlin.math.roundToInt
 import kotlin.math.sign
 
-fun Context.createTouchHelperCallback(adapter: WidgetFrameAdapter, widgetMoved: (moved: Boolean) -> Unit, onItemSelected: (selected: Boolean) -> Unit): ItemTouchHelper.SimpleCallback {
+fun createTouchHelperCallback(
+    adapter: WidgetFrameAdapter,
+    widgetMoved: (moved: Boolean) -> Unit,
+    onItemSelected: (selected: Boolean) -> Unit,
+    frameLocked: () -> Boolean
+): ItemTouchHelper.SimpleCallback {
     return object : ItemTouchHelper.SimpleCallback(
         ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT or ItemTouchHelper.UP or ItemTouchHelper.DOWN,
         0
@@ -35,7 +40,7 @@ fun Context.createTouchHelperCallback(adapter: WidgetFrameAdapter, widgetMoved: 
             recyclerView: RecyclerView,
             viewHolder: RecyclerView.ViewHolder
         ): Int {
-            return if (viewHolder is WidgetFrameAdapter.AddWidgetVH || prefManager.lockWidgetFrame) 0
+            return if (viewHolder is WidgetFrameAdapter.AddWidgetVH || frameLocked()) 0
             else super.getDragDirs(recyclerView, viewHolder)
         }
 
