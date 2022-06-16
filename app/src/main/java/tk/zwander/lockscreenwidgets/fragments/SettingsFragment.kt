@@ -137,12 +137,22 @@ class SettingsFragment : PreferenceFragmentCompat() {
         findPreference<Preference>("back_up_widgets")?.setOnPreferenceClickListener {
             val formatter = SimpleDateFormat("yyyy-MM-dd_HH:mm:ss", Locale.getDefault())
 
-            onWidgetBackUp.launch("lockscreen_widgets_frame_backup_${formatter.format(Date())}.lswidg")
+            try {
+                onWidgetBackUp.launch("lockscreen_widgets_frame_backup_${formatter.format(Date())}.lswidg")
+            } catch (e: Exception) {
+                context?.logUtils?.debugLog("Unable to back up widgets", e)
+                Toast.makeText(requireContext(), R.string.unable_to_back_up_widgets, Toast.LENGTH_SHORT).show()
+            }
             true
         }
 
         findPreference<Preference>("restore_widgets")?.setOnPreferenceClickListener {
-            onWidgetRestore.launch(arrayOf("*/*"))
+            try {
+                onWidgetRestore.launch(arrayOf("*/*"))
+            } catch (e: Exception) {
+                context?.logUtils?.debugLog("Unable to restore widgets", e)
+                Toast.makeText(requireContext(), R.string.unable_to_restore_widgets, Toast.LENGTH_SHORT).show()
+            }
             true
         }
     }
