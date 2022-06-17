@@ -56,7 +56,6 @@ fun createTouchHelperCallback(
         override fun onSelectedChanged(viewHolder: RecyclerView.ViewHolder?, actionState: Int) {
             if (actionState != ItemTouchHelper.ACTION_STATE_IDLE) {
                 viewHolder?.itemView?.alpha = 0.5f
-                onItemSelected(true)
 
                 //The user has long-pressed a widget. Show the editing UI on that widget.
                 //If the UI is already shown on it, hide it.
@@ -64,6 +63,8 @@ fun createTouchHelperCallback(
                 adapter.currentEditingInterfacePosition =
                     if (adapter.currentEditingInterfacePosition == adapterPos) -1 else adapterPos
             }
+
+            onItemSelected(actionState == ItemTouchHelper.ACTION_STATE_DRAG)
 
             super.onSelectedChanged(viewHolder, actionState)
         }
