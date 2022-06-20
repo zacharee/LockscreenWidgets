@@ -14,6 +14,7 @@
     <uses-permission android:name="android.calendar.huawei.permission.CALENDAR_RECESS" />
     <uses-permission android:name="com.android.calendar.huawei.permission.CALENDAR_RECESS" />
     <uses-permission android:name="com.huawei.calendar.permission.WRITE_CALENDAR_RECESS" />
+    <uses-permission android:name="com.huawei.android.totemweather.permission.ACCESS_WEATHERCLOCK_PROVIDER" />
 
     <application
         android:allowBackup="true"
