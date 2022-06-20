@@ -6,7 +6,6 @@ import android.content.Intent
 import tk.zwander.lockscreenwidgets.R
 import tk.zwander.lockscreenwidgets.activities.add.AddWidgetActivity
 import tk.zwander.lockscreenwidgets.data.WidgetData
-import tk.zwander.lockscreenwidgets.data.WidgetSizeData
 import tk.zwander.lockscreenwidgets.util.*
 import kotlin.math.floor
 
@@ -43,27 +42,12 @@ class AddDrawerWidgetActivity : AddWidgetActivity() {
 
     private val fromDrawer by lazy { intent.getBooleanExtra(EXTRA_FROM_DRAWER, false) }
 
-    override fun createWidgetData(id: Int, provider: AppWidgetProviderInfo, overrideSize: WidgetSizeData?): WidgetData {
-        return WidgetData.widget(
-            id,
-            provider.provider,
-            provider.loadLabel(packageManager),
-            provider.loadPreviewOrIcon(this, 0)?.toBitmap(512, 512)
-                .toBase64(),
-            overrideSize ?: run {
-                val widthRatio = provider.minWidth.toFloat() / width
-                val defaultColSpan = floor((widthRatio * colCount)).toInt()
-                    .coerceAtMost(colCount).coerceAtLeast(1)
+    override fun calculateInitialWidgetRowSpan(provider: AppWidgetProviderInfo): Int {
+        val rowHeight = resources.getDimensionPixelSize(R.dimen.drawer_row_height)
 
-                val rowHeight = resources.getDimensionPixelSize(R.dimen.drawer_row_height)
-
-                val defaultRowSpan = floor(provider.minHeight.toFloat() / pxAsDp(rowHeight)).toInt()
-                    .coerceAtLeast(10)
-                    .coerceAtMost((screenSize.y / rowHeight) - 10)
-
-                WidgetSizeData(defaultColSpan, defaultRowSpan)
-            }
-        )
+        return floor(provider.minHeight.toFloat() / pxAsDp(rowHeight)).toInt()
+            .coerceAtLeast(10)
+            .coerceAtMost((screenSize.y / rowHeight) - 10)
     }
 
     override fun onDestroy() {

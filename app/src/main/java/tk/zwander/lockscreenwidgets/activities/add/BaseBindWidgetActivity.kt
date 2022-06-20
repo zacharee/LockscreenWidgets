@@ -190,6 +190,25 @@ abstract class BaseBindWidgetActivity : AppCompatActivity() {
     protected open val width: Float
         get() = prefManager.frameWidthDp
 
+    protected open fun calculateInitialWidgetColSpan(provider: AppWidgetProviderInfo): Int {
+        val widthRatio = provider.minWidth.toFloat() / width
+        return floor((widthRatio * colCount)).toInt()
+            .coerceAtMost(colCount).coerceAtLeast(1)
+    }
+
+    protected open fun calculateInitialWidgetRowSpan(provider: AppWidgetProviderInfo): Int {
+        val heightRatio = provider.minHeight.toFloat() / height
+        return floor((heightRatio * rowCount)).toInt()
+            .coerceAtMost(rowCount).coerceAtLeast(1)
+    }
+
+    protected open fun calculateInitialWidgetSize(provider: AppWidgetProviderInfo): WidgetSizeData {
+        val defaultColSpan = calculateInitialWidgetColSpan(provider)
+        val defaultRowSpan = calculateInitialWidgetRowSpan(provider)
+
+        return WidgetSizeData(defaultColSpan, defaultRowSpan)
+    }
+
     protected open fun createWidgetData(id: Int, provider: AppWidgetProviderInfo, overrideSize: WidgetSizeData? = null): WidgetData {
         return WidgetData.widget(
             id,
@@ -199,17 +218,7 @@ abstract class BaseBindWidgetActivity : AppCompatActivity() {
                 maxWidth = 512,
                 maxHeight = 512,
             ).toBase64(),
-            overrideSize ?: run {
-                val widthRatio = provider.minWidth.toFloat() / width
-                val defaultColSpan = floor((widthRatio * colCount)).toInt()
-                    .coerceAtMost(colCount).coerceAtLeast(1)
-
-                val heightRatio = provider.minHeight.toFloat() / height
-                val defaultRowSpan = floor((heightRatio * rowCount)).toInt()
-                    .coerceAtMost(rowCount).coerceAtLeast(1)
-
-                WidgetSizeData(defaultColSpan, defaultRowSpan)
-            }
+            overrideSize ?: calculateInitialWidgetSize(provider)
         )
     }
 
