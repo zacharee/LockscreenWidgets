@@ -25,7 +25,7 @@ class LogUtils private constructor(private val context: Context) {
 
     private val logFile = File(context.cacheDir, "log.txt")
 
-    fun debugLog(message: String, throwable: Throwable = Exception()) {
+    fun debugLog(message: String, throwable: Throwable? = Exception()) {
         if (context.isDebug) {
             val fullMessage = generateFullMessage(message, throwable)
 
@@ -35,7 +35,7 @@ class LogUtils private constructor(private val context: Context) {
         }
     }
 
-    fun normalLog(message: String, throwable: Throwable = Exception()) {
+    fun normalLog(message: String, throwable: Throwable? = Exception()) {
         val fullMessage = generateFullMessage(message, throwable)
 
         Log.e(NORMAL_LOG_TAG, fullMessage)
@@ -55,9 +55,11 @@ class LogUtils private constructor(private val context: Context) {
         }
     }
 
-    private fun generateFullMessage(message: String, throwable: Throwable): String {
+    private fun generateFullMessage(message: String, throwable: Throwable?): String {
         val formatter = SimpleDateFormat("yyyy-MM-dd_HH:mm:ss", Locale.getDefault())
 
-        return "${formatter.format(Date())}\n${message}\n${Log.getStackTraceString(throwable)}"
+        return "${formatter.format(Date())}\n${message}${throwable?.let { 
+            "\n${Log.getStackTraceString(it)}"
+        }}"
     }
 }

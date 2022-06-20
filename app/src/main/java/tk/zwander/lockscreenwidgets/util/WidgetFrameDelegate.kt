@@ -402,7 +402,9 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
     }
 
     fun updateState(transform: (State) -> State) {
-        state = transform(state)
+        val newState = transform(state)
+        logUtils.debugLog("Updating state from\n$state\nto\n$newState")
+        state = newState
     }
 
     fun updateStateAndWindowState(
@@ -410,7 +412,7 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
         updateAccessibility: Boolean = false,
         transform: (State) -> State
     ) {
-        state = transform(state)
+        updateState(transform)
         updateWindowState(wm, updateAccessibility)
     }
 

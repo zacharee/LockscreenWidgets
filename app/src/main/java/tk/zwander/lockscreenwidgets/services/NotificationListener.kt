@@ -67,8 +67,6 @@ class NotificationListener : NotificationListenerService(), EventObserver {
 
     private fun sendUpdate() {
         if (isListening) {
-            val nm = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-
             //Even with the check to make sure the notification listener is connected, some devices still
             //crash with an "unknown listener" error when trying to retrieve the notification lists.
             //This shouldn't happen, but it does, so catch the Exception.
@@ -91,16 +89,21 @@ class NotificationListener : NotificationListenerService(), EventObserver {
             if (notification.visibility == Notification.VISIBILITY_SECRET) return false
 
             if (Build.VERSION.SDK_INT > Build.VERSION_CODES.N_MR1) {
-                val ranking = Ranking().apply {
-                    currentRanking.getRanking(key, this)
-                }
+                val ranking = Ranking()
+                val rankingResult = currentRanking.getRanking(key, ranking)
 
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S &&
+                if (rankingResult && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S &&
                     ranking.lockscreenVisibilityOverride == Notification.VISIBILITY_SECRET) return false
 
-                if (ranking.importance <= NotificationManager.IMPORTANCE_MIN) return false
+                val importance = if (!rankingResult || ranking.importance == NotificationManager.IMPORTANCE_NONE) {
+                    nm.getNotificationChannel(notification.channelId).importance
+                } else {
+                    ranking.importance
+                }
 
-                if (ranking.importance <= NotificationManager.IMPORTANCE_LOW &&
+                if (importance <= NotificationManager.IMPORTANCE_MIN) return false
+
+                if (importance <= NotificationManager.IMPORTANCE_LOW &&
                     Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q &&
                     nm.shouldHideSilentStatusBarIcons()) return false
             } else {
