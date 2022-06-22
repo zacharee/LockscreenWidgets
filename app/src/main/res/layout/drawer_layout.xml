@@ -7,7 +7,7 @@
     android:alpha="0"
     android:theme="@style/AppTheme">
 
-    <FrameLayout
+    <tk.zwander.lockscreenwidgets.views.BlurSafeView
         android:id="@+id/blur_background"
         android:layout_width="match_parent"
         android:layout_height="match_parent"

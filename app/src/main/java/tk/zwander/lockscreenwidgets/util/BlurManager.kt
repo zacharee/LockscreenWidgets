@@ -2,9 +2,11 @@ package tk.zwander.lockscreenwidgets.util
 
 import android.content.Context
 import android.content.ContextWrapper
+import android.graphics.drawable.Drawable
 import android.os.Build
 import android.view.View
 import android.view.View.OnAttachStateChangeListener
+import android.view.ViewRootImpl
 import android.view.WindowManager
 import androidx.core.view.isVisible
 import tk.zwander.lockscreenwidgets.drawable.BackgroundBlurDrawableCompatDelegate
@@ -79,5 +81,15 @@ class BlurManager(
 
     fun setCornerRadius(radius: Float) {
         blurDrawable?.setCornerRadius(radius)
+    }
+
+    private fun ViewRootImpl.createBackgroundBlurDrawableCompat(): BackgroundBlurDrawableCompatDelegate {
+        return BackgroundBlurDrawableCompatDelegate.getInstance(
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                createBackgroundBlurDrawable() as Drawable
+            } else {
+                null
+            }
+        )
     }
 }

@@ -4,18 +4,15 @@ import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
 import android.animation.AnimatorSet
 import android.animation.ObjectAnimator
+import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Point
-import android.os.Build
 import android.util.TypedValue
 import android.view.View
-import android.view.WindowManager
-import androidx.core.view.isVisible
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import tk.zwander.lockscreenwidgets.adapters.WidgetFrameAdapter
 import tk.zwander.lockscreenwidgets.data.WidgetType
-import tk.zwander.lockscreenwidgets.drawable.BackgroundBlurDrawableCompatDelegate
 import kotlin.math.roundToInt
 import kotlin.math.sign
 
@@ -159,31 +156,5 @@ val Context.screenSize: Point
     }
 
 val Context.statusBarHeight: Int
+    @SuppressLint("InternalInsetResource")
     get() = resources.getDimensionPixelSize(resources.getIdentifier("status_bar_height", "dimen", "android"))
-
-fun View.updateBlurLayer(wm: WindowManager, blurDrawable: BackgroundBlurDrawableCompatDelegate?, shouldBlur: Boolean, params: WindowManager.LayoutParams, blurAmount: Float) {
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-        val hasBlur = wm.isCrossWindowBlurEnabled && isHardwareAccelerated
-
-        background = if (hasBlur) blurDrawable?.wrapped else null
-        isVisible = hasBlur && shouldBlur
-    } else {
-        val f = try {
-            params::class.java.getDeclaredField("samsungFlags")
-        } catch (e: Exception) {
-            null
-        }
-
-        if (shouldBlur) {
-            params.flags = params.flags or WindowManager.LayoutParams.FLAG_DIM_BEHIND
-
-            f?.set(params, f.get(params) as Int or 64)
-            params.dimAmount = blurAmount
-        } else {
-            params.flags = params.flags and WindowManager.LayoutParams.FLAG_DIM_BEHIND.inv()
-
-            f?.set(params, f.get(params) as Int and 64.inv())
-            params.dimAmount = 0.0f
-        }
-    }
-}
