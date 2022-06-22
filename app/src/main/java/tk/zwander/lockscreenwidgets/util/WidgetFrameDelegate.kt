@@ -305,6 +305,7 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
 
                 prefManager.setCorrectFrameWidth(saveMode, pxAsDp(params.width))
                 prefManager.setCorrectFrameHeight(saveMode, pxAsDp(params.height))
+                prefManager.setCorrectFramePos(saveMode, params.x, params.y)
 
                 updateOverlay()
 
