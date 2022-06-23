@@ -115,7 +115,7 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
             }
         }
 
-    val saveMode: Mode
+    private val saveMode: Mode
         get() = when {
             state.isPreview -> Mode.PREVIEW
             state.notificationsPanelFullyExpanded && prefManager.showInNotificationCenter -> {
