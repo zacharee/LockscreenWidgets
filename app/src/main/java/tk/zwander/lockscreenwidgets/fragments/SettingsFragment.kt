@@ -27,14 +27,6 @@ import java.util.*
  * we need to either request permissions or pass extras to Activities we launch.
  */
 class SettingsFragment : PreferenceFragmentCompat() {
-    private val onDebugExportResult = registerForActivityResult(ActivityResultContracts.CreateDocument()) { uri: Uri? ->
-        if (uri != null) {
-            requireContext().apply {
-                logUtils.exportLog(contentResolver.openOutputStream(uri))
-            }
-        }
-    }
-
     private val onWidgetBackUp = registerForActivityResult(ActivityResultContracts.CreateDocument()) { uri: Uri? ->
         if (uri != null) {
             requireContext().apply {
@@ -119,18 +111,6 @@ class SettingsFragment : PreferenceFragmentCompat() {
 
         findPreference<Preference>("non_present_ids_launch")?.setOnPreferenceClickListener {
             HideForIDsActivity.start(requireContext(), HideForIDsActivity.Type.NON_PRESENT)
-            true
-        }
-
-        findPreference<Preference>("clear_debug_log")?.setOnPreferenceClickListener {
-            context?.logUtils?.resetDebugLog()
-            true
-        }
-
-        findPreference<Preference>("export_debug_log")?.setOnPreferenceClickListener {
-            val formatter = SimpleDateFormat("yyyy-MM-dd_HH:mm:ss", Locale.getDefault())
-
-            onDebugExportResult.launch("lockscreen_widgets_debug_${formatter.format(Date())}.txt")
             true
         }
 

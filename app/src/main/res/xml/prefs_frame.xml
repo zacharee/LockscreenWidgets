@@ -284,39 +284,4 @@
 
     </tk.zwander.collapsiblepreferencecategory.CollapsiblePreferenceCategoryNew>
 
-    <tk.zwander.collapsiblepreferencecategory.CollapsiblePreferenceCategoryNew
-        android:title="@string/category_debug"
-        android:key="category_debug">
-
-        <SwitchPreference
-            android:title="@string/settings_screen_debug_log"
-            android:summary="@string/settings_screen_debug_log_desc"
-            android:icon="@drawable/ic_baseline_short_text_24"
-            android:key="debug_log"
-            />
-
-        <SwitchPreference
-            android:title="@string/settings_screen_show_debug_id_view"
-            android:summary="@string/settings_screen_show_debug_id_view_desc"
-            android:icon="@drawable/ic_baseline_short_text_24"
-            android:key="show_debug_id_view"
-            android:dependency="debug_log"
-            />
-
-        <Preference
-            android:title="@string/settings_screen_clear_debug_log"
-            android:summary="@string/settings_screen_clear_debug_log_desc"
-            android:icon="@drawable/ic_baseline_delete_24"
-            android:key="clear_debug_log"
-            />
-
-        <Preference
-            android:title="@string/settings_screen_export_debug_log"
-            android:summary="@string/settings_screen_export_debug_log_desc"
-            android:icon="@drawable/ic_baseline_save_24"
-            android:key="export_debug_log"
-            />
-
-    </tk.zwander.collapsiblepreferencecategory.CollapsiblePreferenceCategoryNew>
-
 </PreferenceScreen>

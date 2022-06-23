@@ -32,6 +32,10 @@ fun MainContent() {
                     FeatureCard(info = features[it])
                 }
 
+                item {
+                    DebugCard()
+                }
+
                 items(links.size, span = { GridItemSpan(maxLineSpan) }) {
                     LinkItem(option = links[it])
                 }

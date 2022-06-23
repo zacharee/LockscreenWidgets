@@ -52,6 +52,7 @@
     <string name="hide">Hide</string>
     <string name="app_icon">App Icon</string>
     <string name="shortcut_icon">Shortcut Icon</string>
+    <string name="expand">Expand</string>
 
     <string name="alert_remove_widget_confirm">Remove Widget?</string>
     <string name="alert_remove_widget_confirm_desc">Are you sure you want to remove this widget?</string>

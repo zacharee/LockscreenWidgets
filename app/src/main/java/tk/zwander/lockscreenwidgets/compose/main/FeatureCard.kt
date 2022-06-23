@@ -1,13 +1,18 @@
 package tk.zwander.lockscreenwidgets.compose.main
 
 import android.content.Intent
-import android.content.SharedPreferences
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.*
-import androidx.compose.runtime.*
+import androidx.compose.material.Card
+import androidx.compose.material.Divider
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
@@ -24,6 +29,8 @@ import tk.zwander.lockscreenwidgets.BuildConfig
 import tk.zwander.lockscreenwidgets.R
 import tk.zwander.lockscreenwidgets.activities.SettingsActivity
 import tk.zwander.lockscreenwidgets.activities.UsageActivity
+import tk.zwander.lockscreenwidgets.compose.components.CardSwitch
+import tk.zwander.lockscreenwidgets.compose.util.rememberBooleanPreferenceState
 import tk.zwander.lockscreenwidgets.data.FeatureCardInfo
 import tk.zwander.lockscreenwidgets.data.MainPageButton
 import tk.zwander.lockscreenwidgets.fragments.SettingsFragment
@@ -120,47 +127,17 @@ fun FeatureCard(info: FeatureCardInfo) {
                 )
             }
 
-            var enabled by remember {
-                mutableStateOf(info.isEnabled())
-            }
+            var enabled by context.rememberBooleanPreferenceState(
+                key = info.enabledKey,
+                enabled = info.isEnabled,
+                onEnabledChanged = info.onEnabledChanged
+            )
 
-            DisposableEffect(key1 = enabled) {
-                val listener = SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
-                    if (key == info.enabledKey) {
-                        enabled = info.isEnabled()
-                    }
-                }
-
-                info.onEnabledChanged(enabled)
-                context.prefManager.registerOnSharedPreferenceChangeListener(listener)
-
-                onDispose {
-                    context.prefManager.unregisterOnSharedPreferenceChangeListener(listener)
-                }
-            }
-
-            Row {
-                SubduedOutlinedButton(
-                    onClick = {
-                        enabled = !enabled
-                    },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .heightIn(min = 64.dp)
-                        .animateContentSize()
-                ) {
-                    Text(
-                        text = stringResource(id = info.enabledLabel),
-                        style = MaterialTheme.typography.h5,
-                        modifier = Modifier.weight(1f)
-                    )
-                    Spacer(Modifier.size(8.dp))
-                    Switch(
-                        checked = enabled,
-                        onCheckedChange = { enabled = it }
-                    )
-                }
-            }
+            CardSwitch(
+                enabled = enabled,
+                onEnabledChanged = { enabled = it },
+                title = stringResource(id = info.enabledLabel)
+            )
 
             AnimatedVisibility(visible = enabled) {
                 Column {
