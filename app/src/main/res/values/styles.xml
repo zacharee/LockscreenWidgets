@@ -9,6 +9,10 @@
 
         <item name="actionBarStyle">@style/AppTheme.ActionBar</item>
         <item name="android:actionBarStyle">@style/AppTheme.ActionBar</item>
+
+        <item name="shapeAppearanceSmallComponent">@style/ShapeAppearance</item>
+        <item name="shapeAppearanceMediumComponent">@style/ShapeAppearance</item>
+        <item name="shapeAppearanceLargeComponent">@style/ShapeAppearance</item>
     </style>
 
     <style name="AppTheme.NoActionBar" parent="AppTheme">
@@ -44,5 +48,9 @@
 
         <item name="android:windowNoTitle">true</item>
         <item name="windowNoTitle">true</item>
+    </style>
+
+    <style name="ShapeAppearance" parent="ShapeAppearance.MaterialComponents.MediumComponent">
+        <item name="cornerSize">12dp</item>
     </style>
 </resources>

@@ -10,7 +10,6 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Card
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
@@ -89,7 +88,7 @@ fun DebugCard() {
 
                 AnimatedVisibility(visible = expanded) {
                     Column(
-                        verticalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalArrangement = Arrangement.spacedBy(16.dp),
                         modifier = Modifier.fillMaxWidth()
                     ) {
                         val debugEnabled = PreferenceSwitch(
@@ -130,8 +129,7 @@ fun DebugCard() {
                 modifier = Modifier
                     .fillMaxWidth(),
                 backgroundColor = Color.Transparent,
-                elevation = 0.dp,
-                shape = RoundedCornerShape(12.dp)
+                elevation = 0.dp
             ) {
                 Box(
                     modifier = Modifier
