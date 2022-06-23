@@ -117,6 +117,7 @@ class PrefManager private constructor(context: Context) : ContextWrapper(context
         const val KEY_DRAWER_BACKGROUND_COLOR = "drawer_background_color"
         const val KEY_FRAME_WIDGET_CORNER_RADIUS = "frame_widget_corner_radius"
         const val KEY_DRAWER_WIDGET_CORNER_RADIUS = "drawer_widget_corner_radius"
+        const val KEY_FRAME_REMEMBER_POSITION = "frame_remember_position"
 
         const val VALUE_PAGE_INDICATOR_BEHAVIOR_HIDDEN = 0
         const val VALUE_PAGE_INDICATOR_BEHAVIOR_AUTO_HIDE = 1
@@ -653,6 +654,12 @@ class PrefManager private constructor(context: Context) : ContextWrapper(context
         get() = getInt(KEY_DRAWER_BACKGROUND_COLOR, ResourcesCompat.getColor(resources, R.color.drawerBackgroundDefault, theme))
         set(value) {
             putInt(KEY_DRAWER_BACKGROUND_COLOR, value)
+        }
+
+    var rememberFramePosition: Boolean
+        get() = getBoolean(KEY_FRAME_REMEMBER_POSITION, true)
+        set(value) {
+            putBoolean(KEY_FRAME_REMEMBER_POSITION, value)
         }
 
     fun getCorrectFrameWidth(mode: Mode): Float {

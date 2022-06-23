@@ -213,6 +213,14 @@
             />
 
         <SwitchPreference
+            android:title="@string/settings_screen_remember_position"
+            android:summary="@string/settings_screen_remember_position_desc"
+            android:key="frame_remember_position"
+            android:icon="@drawable/swap"
+            android:defaultValue="true"
+            />
+
+        <SwitchPreference
             android:title="@string/settings_screen_animate_show_hide"
             android:summary="@string/settings_screen_animate_show_hide_desc"
             android:key="animate_show_hide"

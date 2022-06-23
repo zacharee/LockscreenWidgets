@@ -193,7 +193,7 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
                 adapter.updateWidgets(prefManager.currentWidgets.toList())
 
                 mainHandler.postDelayed({
-                    gridLayoutManager.scrollToPosition(prefManager.currentPage)
+                    scrollToStoredPosition(true)
                 }, 50)
             } else {
                 updateState { it.copy(updatedForMove = false) }
@@ -327,7 +327,7 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
                         //dispatched. Rebinding all the widgets forces
                         //them to update.
                         adapter.updateViews()
-                        gridLayoutManager.scrollToPosition(prefManager.currentPage)
+                        scrollToStoredPosition(false)
                     } else {
                         widgetHost.stopListening()
                     }
@@ -384,9 +384,8 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
         //Scroll to the stored page, making sure to catch a potential
         //out-of-bounds error.
         try {
-            gridLayoutManager.scrollToPosition(prefManager.currentPage)
-        } catch (_: Exception) {
-        }
+            scrollToStoredPosition(false)
+        } catch (_: Exception) {}
 
         eventManager.apply {
             addObserver(this@WidgetFrameDelegate)
@@ -768,9 +767,13 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
                 updateWallpaperLayerIfNeeded()
                 blurManager.updateBlur()
                 adapter.updateViews()
-                gridLayoutManager.scrollToPosition(prefManager.currentPage)
+                scrollToStoredPosition(true)
             }
         }
+    }
+
+    private fun scrollToStoredPosition(override: Boolean = false) {
+        gridLayoutManager.scrollToPosition(if (override || prefManager.rememberFramePosition) prefManager.currentPage else 0)
     }
 
     //Parts based on https://stackoverflow.com/a/26445064/5496177
