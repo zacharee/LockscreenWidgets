@@ -57,16 +57,16 @@ fun rememberFeatureCards(): List<FeatureCardInfo> {
                             ?.updateState { it.copy(isPreview = !it.isPreview) }
                     },
                     MainPageButton(
-                        R.drawable.ic_baseline_settings_24,
-                        R.string.settings
-                    ) {
-                        SettingsActivity.launch(context, SettingsFragment::class.java)
-                    },
-                    MainPageButton(
                         R.drawable.ic_baseline_help_outline_24,
                         R.string.usage
                     ) {
                         context.startActivity(Intent(context, UsageActivity::class.java))
+                    },
+                    MainPageButton(
+                        R.drawable.ic_baseline_settings_24,
+                        R.string.settings
+                    ) {
+                        SettingsActivity.launch(context, SettingsFragment::class.java)
                     },
                 ),
                 { context.eventManager.sendEvent(Event.LaunchAddWidget) },
