@@ -166,15 +166,25 @@ fun FeatureCard(info: FeatureCardInfo) {
 
                     Spacer(Modifier.size(16.dp))
 
-                    FlowRow(
-                        mainAxisAlignment = FlowMainAxisAlignment.SpaceBetween,
-                        crossAxisAlignment = FlowCrossAxisAlignment.Center,
-                        mainAxisSpacing = 8.dp,
-                        crossAxisSpacing = 8.dp,
-                        mainAxisSize = SizeMode.Expand
-                    ) {
-                        info.buttons.forEach {
-                            ExtraButton(info = it)
+                    BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
+                        val width = this.maxWidth
+
+                        FlowRow(
+                            mainAxisAlignment = FlowMainAxisAlignment.SpaceBetween,
+                            crossAxisAlignment = FlowCrossAxisAlignment.Center,
+                            mainAxisSpacing = 8.dp,
+                            crossAxisSpacing = 8.dp,
+                            mainAxisSize = SizeMode.Expand
+                        ) {
+                            val itemsPerRow = info.buttons.size.coerceAtMost(3)
+                            val columnWidth = (width - (8.dp * (itemsPerRow - 1))) / itemsPerRow
+
+                            info.buttons.forEach {
+                                ExtraButton(
+                                    info = it,
+                                    modifier = Modifier.width(columnWidth)
+                                )
+                            }
                         }
                     }
                 }

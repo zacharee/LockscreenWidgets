@@ -14,9 +14,10 @@ import androidx.compose.ui.unit.dp
 import tk.zwander.lockscreenwidgets.data.MainPageButton
 
 @Composable
-fun ExtraButton(info: MainPageButton) {
+fun ExtraButton(info: MainPageButton, modifier: Modifier = Modifier) {
     SubduedOutlinedButton(
         onClick = { info.onClick() },
+        modifier = modifier
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Image(
