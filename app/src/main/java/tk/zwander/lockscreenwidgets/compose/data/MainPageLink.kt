@@ -1,4 +1,4 @@
-package tk.zwander.lockscreenwidgets.data
+package tk.zwander.lockscreenwidgets.compose.data
 
 import android.annotation.DrawableRes
 import android.annotation.StringRes

@@ -1,4 +1,6 @@
-package tk.zwander.lockscreenwidgets.data
+package tk.zwander.lockscreenwidgets.compose.data
+
+import tk.zwander.lockscreenwidgets.data.MainPageButton
 
 data class FeatureCardInfo(
     val title: Int,

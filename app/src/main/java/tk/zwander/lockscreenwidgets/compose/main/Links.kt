@@ -13,7 +13,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import tk.zwander.lockscreenwidgets.R
-import tk.zwander.lockscreenwidgets.data.MainPageLink
+import tk.zwander.lockscreenwidgets.compose.data.MainPageLink
 import tk.zwander.lockscreenwidgets.util.launchEmail
 import tk.zwander.lockscreenwidgets.util.launchUrl
 import tk.zwander.patreonsupportersretrieval.view.SupporterView

@@ -31,7 +31,7 @@ import tk.zwander.lockscreenwidgets.activities.SettingsActivity
 import tk.zwander.lockscreenwidgets.activities.UsageActivity
 import tk.zwander.lockscreenwidgets.compose.components.CardSwitch
 import tk.zwander.lockscreenwidgets.compose.util.rememberBooleanPreferenceState
-import tk.zwander.lockscreenwidgets.data.FeatureCardInfo
+import tk.zwander.lockscreenwidgets.compose.data.FeatureCardInfo
 import tk.zwander.lockscreenwidgets.data.MainPageButton
 import tk.zwander.lockscreenwidgets.fragments.SettingsFragment
 import tk.zwander.lockscreenwidgets.util.*
