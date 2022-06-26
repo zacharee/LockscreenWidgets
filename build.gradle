@@ -1,5 +1,7 @@
 buildscript {
     ext.kotlin_version = '1.6.21'
+    ext.compose_version = "1.2.0-rc02"
+
     repositories {
         google()
         mavenCentral()
