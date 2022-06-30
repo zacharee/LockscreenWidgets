@@ -82,11 +82,11 @@ dependencies {
     implementation 'com.google.firebase:firebase-analytics:21.0.0'
     implementation 'com.google.firebase:firebase-crashlytics:18.2.11'
 
-    implementation 'androidx.activity:activity-compose:1.4.0'
+    implementation 'androidx.activity:activity-compose:1.5.0'
     implementation "androidx.compose.material:material:${compose_version}"
     implementation "androidx.compose.animation:animation:${compose_version}"
     implementation "androidx.compose.ui:ui-tooling:${compose_version}"
     implementation 'androidx.lifecycle:lifecycle-viewmodel-compose:2.4.1'
-    implementation "com.google.android.material:compose-theme-adapter:1.1.12"
+    implementation "com.google.android.material:compose-theme-adapter:1.1.14"
     implementation 'com.google.accompanist:accompanist-flowlayout:0.24.12-rc'
 }
