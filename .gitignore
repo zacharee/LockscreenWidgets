@@ -14,3 +14,4 @@
 .cxx
 /app/release/app-release.apk
 /app/release/output-metadata.json
+/.idea/deploymentTargetDropDown.xml
