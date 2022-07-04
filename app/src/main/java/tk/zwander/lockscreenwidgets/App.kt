@@ -2,17 +2,20 @@ package tk.zwander.lockscreenwidgets
 
 import android.annotation.SuppressLint
 import android.app.Application
-import android.content.*
-import android.content.pm.PackageManager
+import android.content.BroadcastReceiver
+import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
 import android.database.ContentObserver
 import android.net.Uri
 import android.os.Build
 import android.provider.Settings
 import org.lsposed.hiddenapibypass.HiddenApiBypass
 import tk.zwander.lockscreenwidgets.activities.add.AddWidgetActivity
-import tk.zwander.lockscreenwidgets.tiles.NCTile
-import tk.zwander.lockscreenwidgets.tiles.widget.*
-import tk.zwander.lockscreenwidgets.util.*
+import tk.zwander.lockscreenwidgets.util.Event
+import tk.zwander.lockscreenwidgets.util.GlobalExceptionHandler
+import tk.zwander.lockscreenwidgets.util.eventManager
+import tk.zwander.lockscreenwidgets.util.migrationManager
 import tk.zwander.widgetdrawer.activities.add.AddDrawerWidgetActivity
 
 /**
@@ -80,34 +83,6 @@ class App : Application() {
         )
 
         migrationManager.runMigrations()
-
-        //This should only run on Nougat and above.
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            //We don't want the NC tile to show on non-One UI devices.
-            packageManager.setComponentEnabledSetting(
-                ComponentName(this, NCTile::class.java),
-                if (isOneUI) PackageManager.COMPONENT_ENABLED_STATE_ENABLED
-                else PackageManager.COMPONENT_ENABLED_STATE_DISABLED,
-                0
-            )
-
-            val components = arrayOf(
-                WidgetTileOne::class.java,
-                WidgetTileTwo::class.java,
-                WidgetTileThree::class.java,
-                WidgetTileFour::class.java,
-                WidgetTileFive::class.java
-            )
-
-            components.forEach {
-                packageManager.setComponentEnabledSetting(
-                    ComponentName(this, it),
-                    if (isOneUI) PackageManager.COMPONENT_ENABLED_STATE_ENABLED
-                    else PackageManager.COMPONENT_ENABLED_STATE_DISABLED,
-                    0
-                )
-            }
-        }
 
         eventManager.addListener<Event.LaunchAddWidget> {
             val intent = Intent(this, AddWidgetActivity::class.java)
