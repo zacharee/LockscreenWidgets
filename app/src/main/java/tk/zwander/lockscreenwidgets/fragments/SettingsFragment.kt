@@ -27,7 +27,7 @@ import java.util.*
  * we need to either request permissions or pass extras to Activities we launch.
  */
 class SettingsFragment : PreferenceFragmentCompat() {
-    private val onWidgetBackUp = registerForActivityResult(ActivityResultContracts.CreateDocument()) { uri: Uri? ->
+    private val onWidgetBackUp = registerForActivityResult(ActivityResultContracts.CreateDocument("text/*")) { uri: Uri? ->
         if (uri != null) {
             requireContext().apply {
                 contentResolver.openOutputStream(uri)?.bufferedWriter()?.use { output ->

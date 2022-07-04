@@ -134,7 +134,7 @@ class HideForIDsActivity : AppCompatActivity() {
     private val format = SimpleDateFormat("yyyy-MM-dd_HH:mm:ss", Locale.getDefault())
     private val activityBinding by lazy { ActivityHideForIdsBinding.inflate(layoutInflater) }
 
-    private val saveRequest = registerForActivityResult(ActivityResultContracts.CreateDocument()) { uri ->
+    private val saveRequest = registerForActivityResult(ActivityResultContracts.CreateDocument("text/*")) { uri ->
         //Write the current list of IDs to the specified file
         contentResolver.openOutputStream(uri ?: return@registerForActivityResult)?.use { out ->
             val stringified = gson.toJson(items)
