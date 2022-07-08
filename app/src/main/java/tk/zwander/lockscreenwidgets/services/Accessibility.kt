@@ -284,7 +284,10 @@ class Accessibility : AccessibilityService(), EventObserver, CoroutineScope by M
                                 "com.android.systemui:id/settings_button",
                                 "com.android.systemui:id/tile_label",
                                 "com.android.systemui:id/header_label"
-                            )
+                            ) || ((Build.VERSION.SDK_INT > Build.VERSION_CODES.S_V2) &&
+                                    it.hasVisibleIds(
+                                        "com.android.systemui:id/quick_qs_panel",
+                                    ))
                         })
                     }
 
