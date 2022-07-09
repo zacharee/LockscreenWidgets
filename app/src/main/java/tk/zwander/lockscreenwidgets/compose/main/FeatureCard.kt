@@ -30,8 +30,8 @@ import tk.zwander.lockscreenwidgets.R
 import tk.zwander.lockscreenwidgets.activities.SettingsActivity
 import tk.zwander.lockscreenwidgets.activities.UsageActivity
 import tk.zwander.lockscreenwidgets.compose.components.CardSwitch
-import tk.zwander.lockscreenwidgets.compose.util.rememberBooleanPreferenceState
 import tk.zwander.lockscreenwidgets.compose.data.FeatureCardInfo
+import tk.zwander.lockscreenwidgets.compose.util.rememberBooleanPreferenceState
 import tk.zwander.lockscreenwidgets.data.MainPageButton
 import tk.zwander.lockscreenwidgets.fragments.SettingsFragment
 import tk.zwander.lockscreenwidgets.util.*
@@ -177,7 +177,7 @@ fun FeatureCard(info: FeatureCardInfo) {
                             mainAxisSize = SizeMode.Expand
                         ) {
                             val itemsPerRow = info.buttons.size.coerceAtMost(3)
-                            val columnWidth = (width - (8.dp * (itemsPerRow - 1))) / itemsPerRow
+                            val columnWidth = (width - (12.dp * (itemsPerRow - 1))) / itemsPerRow
 
                             info.buttons.forEach {
                                 ExtraButton(
