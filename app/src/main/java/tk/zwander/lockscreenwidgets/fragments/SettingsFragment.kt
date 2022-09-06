@@ -1,6 +1,5 @@
 package tk.zwander.lockscreenwidgets.fragments
 
-import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -16,6 +15,7 @@ import tk.zwander.lockscreenwidgets.services.isNotificationListenerActive
 import tk.zwander.lockscreenwidgets.util.PrefManager
 import tk.zwander.lockscreenwidgets.util.backup.BackupRestoreManager
 import tk.zwander.lockscreenwidgets.util.backup.backupRestoreManager
+import tk.zwander.lockscreenwidgets.util.hasStoragePermission
 import tk.zwander.lockscreenwidgets.util.isOneUI
 import tk.zwander.lockscreenwidgets.util.logUtils
 import java.text.SimpleDateFormat
@@ -91,8 +91,7 @@ class SettingsFragment : PreferenceFragmentCompat() {
         }
 
         findPreference<SwitchPreference>(PrefManager.KEY_FRAME_MASKED_MODE)?.setOnPreferenceChangeListener { _, newValue ->
-            (if (newValue.toString().toBoolean()
-                && requireContext().checkCallingOrSelfPermission(android.Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+            (if (newValue.toString().toBoolean() && !requireContext().hasStoragePermission) {
                 OnboardingActivity.start(requireContext(), OnboardingActivity.RetroMode.STORAGE)
                 false
             } else true)

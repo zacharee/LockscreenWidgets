@@ -4,17 +4,18 @@ import android.app.Activity
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
 import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.heinrichreimersoftware.materialintro.app.IntroActivity
 import com.heinrichreimersoftware.materialintro.slide.SimpleSlide
 import tk.zwander.lockscreenwidgets.R
 import tk.zwander.lockscreenwidgets.services.isAccessibilityEnabled
 import tk.zwander.lockscreenwidgets.services.isNotificationListenerActive
+import tk.zwander.lockscreenwidgets.util.hasStoragePermission
 import tk.zwander.lockscreenwidgets.util.launchUrl
 import tk.zwander.lockscreenwidgets.util.logUtils
 
@@ -26,8 +27,6 @@ import tk.zwander.lockscreenwidgets.util.logUtils
 class OnboardingActivity : IntroActivity() {
     companion object {
         const val EXTRA_RETRO_MODE = "RETRO_MODE"
-
-        const val REQ_STORAGE_PERM = 100
 
         /**
          * Start [OnboardingActivity] with the requested [RetroMode]
@@ -73,7 +72,9 @@ class OnboardingActivity : IntroActivity() {
         NONE
     }
 
-    val retroMode by lazy { RetroMode.valueOf(intent.getStringExtra(EXTRA_RETRO_MODE) ?: RetroMode.NONE.toString()) }
+    private val retroMode by lazy { RetroMode.valueOf(intent.getStringExtra(EXTRA_RETRO_MODE) ?: RetroMode.NONE.toString()) }
+
+    private val storagePermReq = registerForActivityResult(ActivityResultContracts.RequestPermission()) {}
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -186,7 +187,7 @@ class OnboardingActivity : IntroActivity() {
 
         //Add this slide if we're requesting storage access or if we're running
         //the full intro.
-        if (retroMode == RetroMode.STORAGE || retroMode == RetroMode.NONE) {
+        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.LOLLIPOP_MR1 && (retroMode == RetroMode.STORAGE || retroMode == RetroMode.NONE)) {
             addSlide(
                 object : SimpleSlide(
                     Builder()
@@ -196,14 +197,17 @@ class OnboardingActivity : IntroActivity() {
                         .image(R.drawable.ic_baseline_sd_storage_24)
                         .buttonCtaLabel(R.string.grant)
                         .buttonCtaClickListener {
-                            if (Build.VERSION.SDK_INT > Build.VERSION_CODES.LOLLIPOP_MR1) {
-                                requestPermissions(arrayOf(android.Manifest.permission.READ_EXTERNAL_STORAGE), REQ_STORAGE_PERM)
-                            }
+                            storagePermReq.launch(
+                                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                                    android.Manifest.permission.READ_MEDIA_IMAGES
+                                } else {
+                                    android.Manifest.permission.READ_EXTERNAL_STORAGE
+                                }
+                            )
                         }
                 ) {
                     override fun canGoForward(): Boolean {
-                        return retroMode != RetroMode.STORAGE
-                                || checkCallingOrSelfPermission(android.Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED
+                        return retroMode != RetroMode.STORAGE || hasStoragePermission
                     }
                 }
             )
