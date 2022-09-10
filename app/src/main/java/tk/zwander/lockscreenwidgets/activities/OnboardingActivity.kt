@@ -74,7 +74,7 @@ class OnboardingActivity : IntroActivity() {
 
     private val retroMode by lazy { RetroMode.valueOf(intent.getStringExtra(EXTRA_RETRO_MODE) ?: RetroMode.NONE.toString()) }
 
-    private val storagePermReq = registerForActivityResult(ActivityResultContracts.RequestPermission()) {}
+    private val storagePermReq = registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) {}
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -198,10 +198,15 @@ class OnboardingActivity : IntroActivity() {
                         .buttonCtaLabel(R.string.grant)
                         .buttonCtaClickListener {
                             storagePermReq.launch(
-                                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                                    android.Manifest.permission.READ_MEDIA_IMAGES
+                                if (applicationInfo.targetSdkVersion >= Build.VERSION_CODES.TIRAMISU &&
+                                    Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                                    arrayOf(
+                                        android.Manifest.permission.READ_MEDIA_IMAGES,
+                                        android.Manifest.permission.READ_MEDIA_AUDIO,
+                                        android.Manifest.permission.READ_MEDIA_VIDEO
+                                    )
                                 } else {
-                                    android.Manifest.permission.READ_EXTERNAL_STORAGE
+                                    arrayOf(android.Manifest.permission.READ_EXTERNAL_STORAGE)
                                 }
                             )
                         }
