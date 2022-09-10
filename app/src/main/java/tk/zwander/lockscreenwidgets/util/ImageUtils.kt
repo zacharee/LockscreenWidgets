@@ -10,6 +10,7 @@ import androidx.core.graphics.drawable.toBitmap
 import tk.zwander.lockscreenwidgets.App
 import java.io.ByteArrayOutputStream
 import java.io.IOException
+import java.lang.Integer.max
 
 
 fun Bitmap?.toByteArray(): ByteArray? {
@@ -55,11 +56,12 @@ fun String?.base64ToBitmap(): Bitmap? {
 }
 
 fun Drawable.toBitmap(maxWidth: Int = intrinsicWidth, maxHeight: Int = intrinsicHeight, config: Bitmap.Config? = null): Bitmap {
-    var image = toBitmap(width = intrinsicWidth, height = intrinsicHeight, config = config)
+    var image = toBitmap(width = max(1, intrinsicWidth), height = max(1, intrinsicHeight), config = config)
 
-    return if (maxHeight > 0 && maxWidth > 0) {
-        val width: Int = intrinsicWidth
-        val height: Int = intrinsicHeight
+    val width: Int = intrinsicWidth
+    val height: Int = intrinsicHeight
+
+    return if (maxHeight > 0 && maxWidth > 0 && width > 0 && height > 0) {
         val ratioBitmap = width.toFloat() / height.toFloat()
         val ratioMax = maxWidth.toFloat() / maxHeight.toFloat()
         var finalWidth = maxWidth
