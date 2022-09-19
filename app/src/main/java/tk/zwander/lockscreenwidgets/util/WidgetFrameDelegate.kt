@@ -310,7 +310,7 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
                 updateOverlay()
 
                 if (event.isUp) {
-                    adapter.onResizeObservable.notifyObservers()
+                    eventManager.sendEvent(Event.FrameResizeFinished)
                     updateWallpaperLayerIfNeeded()
                 }
             }

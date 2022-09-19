@@ -110,6 +110,7 @@ sealed class Event {
     object CenterFrameVertically : Event()
     object FrameWidgetClick : Event()
     object RequestNotificationCount : Event()
+    object FrameResizeFinished : Event()
 
     /**
      * On Android 8.0+, it's pretty easy to dismiss the lock screen with a simple API call.
@@ -130,6 +131,7 @@ sealed class Event {
     }
     data class RemoveWidgetConfirmed(val remove: Boolean, val item: WidgetData?) : Event()
     data class DebugIdsUpdated(val ids: Collection<String>) : Event()
+    data class EditingIndexUpdated(val index: Int) : Event()
 
     //*** Widget Drawer
     object CloseDrawer : Event()

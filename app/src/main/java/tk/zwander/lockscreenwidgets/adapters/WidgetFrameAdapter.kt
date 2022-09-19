@@ -40,8 +40,6 @@ import tk.zwander.lockscreenwidgets.databinding.FrameShortcutViewBinding
 import tk.zwander.lockscreenwidgets.databinding.WidgetPageHolderBinding
 import tk.zwander.lockscreenwidgets.host.WidgetHostCompat
 import tk.zwander.lockscreenwidgets.listeners.WidgetResizeListener
-import tk.zwander.lockscreenwidgets.observables.OnResizeObservable
-import tk.zwander.lockscreenwidgets.observables.RemoveButtonObservable
 import tk.zwander.lockscreenwidgets.util.*
 import java.util.*
 import kotlin.math.min
@@ -60,7 +58,6 @@ open class WidgetFrameAdapter(
     }
 
     val widgets = ArrayList<WidgetData>()
-    val onResizeObservable = OnResizeObservable()
 
     val spanSizeLookup = WidgetSpanSizeLookup()
 
@@ -68,12 +65,9 @@ open class WidgetFrameAdapter(
         set(value) {
             field = value
             mainHandler.post {
-                editingInterfaceObservable.notifyObservers(value)
+                host.context.eventManager.sendEvent(Event.EditingIndexUpdated(value))
             }
         }
-
-    private val editingInterfaceObservable =
-        RemoveButtonObservable()
 
     private var didResize = false
 
@@ -207,6 +201,10 @@ open class WidgetFrameAdapter(
         (holder as? AddWidgetVH)?.onBind()
     }
 
+    override fun onViewRecycled(holder: RecyclerView.ViewHolder) {
+        (holder as? WidgetVH)?.onDestroy()
+    }
+
     fun updateViews() {
         notifyItemRangeChanged(0, itemCount, Any())
     }
@@ -244,7 +242,7 @@ open class WidgetFrameAdapter(
      * has specified for the frame.
      */
     @SuppressLint("ClickableViewAccessibility")
-    inner class WidgetVH(view: View) : RecyclerView.ViewHolder(view) {
+    inner class WidgetVH(view: View) : RecyclerView.ViewHolder(view), EventObserver {
         private val binding = WidgetPageHolderBinding.bind(view)
 
         private var editingInterfaceShown: Boolean
@@ -350,23 +348,12 @@ open class WidgetFrameAdapter(
                     }
                 }
             }
-
-            editingInterfaceObservable.addObserver { _, _ ->
-                editingInterfaceShown =
-                    currentEditingInterfacePosition != -1 && (currentEditingInterfacePosition == bindingAdapterPosition)
-            }
-
-            onResizeObservable.addObserver { _, _ ->
-                val pos = bindingAdapterPosition
-
-                if (pos != -1 && pos < widgets.size) {
-                    onResize(widgets[pos], 0, 1)
-                }
-            }
         }
 
         fun onBind(data: WidgetData) {
             itemView.apply {
+                context.eventManager.addObserver(this@WidgetVH)
+
                 launch {
                     onResize(data, 0, 1)
                     editingInterfaceShown =
@@ -386,6 +373,30 @@ open class WidgetFrameAdapter(
                     }
                 }
             }
+        }
+
+        fun onDestroy() {
+            itemView.context.eventManager.removeObserver(this)
+        }
+
+        override fun onEvent(event: Event) {
+            when (event) {
+                Event.FrameMoveFinished -> {
+                    val pos = bindingAdapterPosition
+
+                    if (pos != -1 && pos < widgets.size) {
+                        onResize(widgets[pos], 0, 1)
+                    }
+                }
+                is Event.EditingIndexUpdated -> {
+                    updateEditingUI(event.index)
+                }
+                else -> {}
+            }
+        }
+
+        private fun updateEditingUI(index: Int) {
+            editingInterfaceShown = index != -1 && (index == bindingAdapterPosition)
         }
 
         private suspend fun bindWidget(data: WidgetData) {
