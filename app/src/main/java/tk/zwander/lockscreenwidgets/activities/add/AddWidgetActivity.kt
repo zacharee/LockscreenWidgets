@@ -16,7 +16,9 @@ import tk.zwander.lockscreenwidgets.data.AppInfo
 import tk.zwander.lockscreenwidgets.data.list.ShortcutListInfo
 import tk.zwander.lockscreenwidgets.data.list.WidgetListInfo
 import tk.zwander.lockscreenwidgets.databinding.ActivityAddWidgetBinding
+import tk.zwander.lockscreenwidgets.util.getApplicationInfoCompat
 import tk.zwander.lockscreenwidgets.util.logUtils
+import tk.zwander.lockscreenwidgets.util.queryIntentActivitiesCompat
 
 /**
  * Manage the widget addition flow: selection, permissions, configurations, etc.
@@ -99,15 +101,11 @@ open class AddWidgetActivity : BaseBindWidgetActivity(), CoroutineScope by MainS
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
             android.R.id.home -> {
-                onBackPressed()
+                onBackPressedDispatcher.onBackPressed()
                 true
             }
             else -> super.onOptionsItemSelected(item)
         }
-    }
-
-    override fun onBackPressed() {
-        finish()
     }
 
     override fun onDestroy() {
@@ -131,7 +129,7 @@ open class AddWidgetActivity : BaseBindWidgetActivity(), CoroutineScope by MainS
                     appWidgetManager.getInstalledProviders(AppWidgetProviderInfo.WIDGET_CATEGORY_SEARCHBOX)
             ).forEach {
                 try {
-                    val appInfo = packageManager.getApplicationInfo(it.provider.packageName, 0)
+                    val appInfo = packageManager.getApplicationInfoCompat(it.provider.packageName, 0)
 
                     val appName = packageManager.getApplicationLabel(appInfo)
                     val widgetName = it.loadLabel(packageManager)
@@ -156,12 +154,12 @@ open class AddWidgetActivity : BaseBindWidgetActivity(), CoroutineScope by MainS
             }
 
             if (showShortcuts) {
-                packageManager.queryIntentActivities(
+                packageManager.queryIntentActivitiesCompat(
                     Intent(Intent.ACTION_CREATE_SHORTCUT),
                     PackageManager.GET_RESOLVED_FILTER
                 ).forEach {
                     try {
-                        val appInfo = packageManager.getApplicationInfo(it.activityInfo.packageName, 0)
+                        val appInfo = packageManager.getApplicationInfoCompat(it.activityInfo.packageName)
 
                         val appName = appInfo.loadLabel(packageManager)
                         val shortcutName = it.loadLabel(packageManager)

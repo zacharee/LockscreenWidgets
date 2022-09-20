@@ -73,7 +73,7 @@ class Drawer : FrameLayout, EventObserver {
     private val manager by lazy { AppWidgetManager.getInstance(context.applicationContext) }
     private val shortcutIdManager by lazy { ShortcutIdManager.getInstance(context, host) }
     private val adapter by lazy {
-        DrawerAdapter(manager, host) { _, widget, _ ->
+        DrawerAdapter(manager, host) { widget, _ ->
             removeWidget(widget)
         }
     }

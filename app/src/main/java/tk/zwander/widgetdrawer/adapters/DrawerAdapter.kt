@@ -18,7 +18,7 @@ import tk.zwander.widgetdrawer.activities.add.ReconfigureDrawerWidgetActivity
 class DrawerAdapter(
     manager: AppWidgetManager,
     host: WidgetHostCompat,
-    onRemoveCallback: (WidgetFrameAdapter, WidgetData, Int) -> Unit
+    onRemoveCallback: (WidgetData, Int) -> Unit
 ) : WidgetFrameAdapter(manager, host, onRemoveCallback) {
     override val colCount: Int
         get() = host.context.prefManager.drawerColCount

@@ -50,7 +50,7 @@ import kotlin.math.min
 open class WidgetFrameAdapter(
     protected val manager: AppWidgetManager,
     protected val host: WidgetHostCompat,
-    protected val onRemoveCallback: (WidgetFrameAdapter, WidgetData, Int) -> Unit
+    protected val onRemoveCallback: (WidgetData, Int) -> Unit
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>(), CoroutineScope by MainScope() {
     companion object {
         const val VIEW_TYPE_WIDGET = 0
@@ -90,6 +90,7 @@ open class WidgetFrameAdapter(
         get() = host.context.prefManager.frameWidgetCornerRadiusDp
 
     init {
+        @Suppress("LeakingThis")
         setHasStableIds(true)
     }
 
@@ -275,7 +276,7 @@ open class WidgetFrameAdapter(
         init {
             binding.removeWidget.setOnClickListener {
                 currentData?.let {
-                    onRemoveCallback(this@WidgetFrameAdapter, it, bindingAdapterPosition)
+                    onRemoveCallback(it, bindingAdapterPosition)
                 }
             }
 
@@ -499,7 +500,8 @@ open class WidgetFrameAdapter(
             }
         }
 
-        private suspend fun bindShortcut(data: WidgetData) {
+        @SuppressLint("DiscouragedApi")
+        private fun bindShortcut(data: WidgetData) {
             binding.widgetReconfigure.isVisible = false
             binding.widgetHolder.isVisible = true
 
@@ -511,7 +513,7 @@ open class WidgetFrameAdapter(
                     itemView.context.packageManager.getResourcesForApplication(this.packageName)
                 } catch (e: PackageManager.NameNotFoundException) {
                     host.context.logUtils.debugLog("Unable to bind shortcut", e)
-                    onRemoveCallback(this@WidgetFrameAdapter, data, bindingAdapterPosition)
+                    onRemoveCallback(data, bindingAdapterPosition)
                     return@bindShortcut
                 }
                 ResourcesCompat.getDrawable(

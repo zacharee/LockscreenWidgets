@@ -43,8 +43,18 @@ val AccessibilityWindowInfo.safeRoot: AccessibilityNodeInfo?
 
 fun <T> AccessibilityNodeInfo?.use(block: (AccessibilityNodeInfo?) -> T): T {
     val result = block(this)
+    @Suppress("DEPRECATION")
     this?.recycle()
     return result
+}
+
+fun AccessibilityEvent.copyCompat(): AccessibilityEvent {
+    return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+        AccessibilityEvent(this)
+    } else {
+        @Suppress("DEPRECATION")
+        AccessibilityEvent.obtain(this)
+    }
 }
 
 fun AccessibilityNodeInfo.hasVisibleIds(vararg ids: String): Boolean {
@@ -120,7 +130,7 @@ class Accessibility : AccessibilityService(), EventObserver, CoroutineScope by M
         //Since we're launching our logic on the main Thread, it's possible
         //that [event] will be reused by Android, causing some crash issues.
         //Make a copy that is recycled later.
-        val eventCopy = AccessibilityEvent.obtain(event)
+        val eventCopy = event.copyCompat()
 
         if (System.currentTimeMillis() - latestScreenOnTime < 10)
             return
@@ -336,15 +346,20 @@ class Accessibility : AccessibilityService(), EventObserver, CoroutineScope by M
                 }
 
                 //Recycle all windows and nodes.
-                sysUiNodes.forEach { it.recycle() }
+                sysUiNodes.forEach {
+                    @Suppress("DEPRECATION")
+                    it.recycle()
+                }
 
                 windows.forEach {
                     try {
+                        @Suppress("DEPRECATION")
                         it.root?.recycle()
                     } catch (_: IllegalStateException) {
                     }
 
                     try {
+                        @Suppress("DEPRECATION")
                         it.root?.recycle()
                     } catch (_: IllegalStateException) {
                     }
@@ -386,6 +401,7 @@ class Accessibility : AccessibilityService(), EventObserver, CoroutineScope by M
 
             try {
                 //Make sure to recycle the copy of the event.
+                @Suppress("DEPRECATION")
                 eventCopy.recycle()
             } catch (e: IllegalStateException) {
                 //Sometimes the event is already recycled somehow.

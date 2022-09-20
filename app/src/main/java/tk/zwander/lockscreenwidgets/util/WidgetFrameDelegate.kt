@@ -162,7 +162,7 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
     private val binding =
         WidgetFrameBinding.inflate(LayoutInflater.from(ContextThemeWrapper(this, R.style.AppTheme)))
     private val gridLayoutManager = SpannedLayoutManager()
-    private val adapter = WidgetFrameAdapter(widgetManager, widgetHost) { _, item, _ ->
+    private val adapter = WidgetFrameAdapter(widgetManager, widgetHost) { item, _ ->
         binding.removeWidgetConfirmation.root.show(item)
     }
 

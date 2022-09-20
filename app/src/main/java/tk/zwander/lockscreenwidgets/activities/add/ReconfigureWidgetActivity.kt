@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.appwidget.AppWidgetProviderInfo
 import android.content.Context
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
 import tk.zwander.lockscreenwidgets.activities.DismissOrUnlockActivity
 import tk.zwander.lockscreenwidgets.data.WidgetData
@@ -27,7 +28,14 @@ open class ReconfigureWidgetActivity : BaseBindWidgetActivity() {
     }
 
     private val prevId by lazy { intent.getIntExtra(EXTRA_PREVIOUS_ID, -1) }
-    private val providerInfo by lazy { intent.getParcelableExtra(EXTRA_PROVIDER_INFO) as AppWidgetProviderInfo? }
+    private val providerInfo by lazy {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            intent.getParcelableExtra(EXTRA_PROVIDER_INFO, AppWidgetProviderInfo::class.java)
+        } else {
+            @Suppress("DEPRECATION")
+            intent.getParcelableExtra(EXTRA_PROVIDER_INFO) as? AppWidgetProviderInfo?
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
