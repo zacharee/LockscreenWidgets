@@ -32,7 +32,7 @@ fun MainContent() {
                     FeatureCard(info = features[it])
                 }
 
-                item {
+                item(span = { GridItemSpan(maxLineSpan) }) {
                     DebugCard()
                 }
 
