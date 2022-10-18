@@ -7,11 +7,25 @@ import android.app.WallpaperManager
 import android.appwidget.AppWidgetManager
 import android.content.Context
 import android.content.ContextWrapper
-import android.graphics.*
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.graphics.Color
+import android.graphics.Matrix
+import android.graphics.PixelFormat
+import android.graphics.PorterDuff
+import android.graphics.PorterDuffColorFilter
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.GradientDrawable
-import android.os.*
-import android.view.*
+import android.os.Build
+import android.os.Bundle
+import android.os.ParcelFileDescriptor
+import android.os.ServiceManager
+import android.os.UserHandle
+import android.view.ContextThemeWrapper
+import android.view.Gravity
+import android.view.LayoutInflater
+import android.view.Surface
+import android.view.WindowManager
 import android.widget.ImageView
 import android.widget.Toast
 import androidx.annotation.RequiresApi
@@ -347,6 +361,8 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
             }
             is Event.FrameIntercept -> forceWakelock(wm, event.down)
             is Event.RemoveWidgetConfirmed -> {
+                val position = prefManager.currentWidgets.indexOf(event.item)
+
                 if (event.remove && prefManager.currentWidgets.contains(event.item)) {
                     prefManager.currentWidgets = prefManager.currentWidgets.apply {
                         remove(event.item)
@@ -361,6 +377,15 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
                 if (event.remove) {
                     adapter.currentEditingInterfacePosition = -1
                     adapter.updateWidgets(prefManager.currentWidgets.toList())
+
+                    binding.widgetsPager.post {
+                        val pos = when (val pos = (binding.widgetsPager.layoutManager as? SpannedLayoutManager)?.firstVisiblePosition) {
+                            RecyclerView.NO_POSITION -> (position - 1).coerceAtLeast(0)
+                            else -> pos ?: 0
+                        }
+
+                        binding.widgetsPager.scrollToPosition(pos)
+                    }
                 }
             }
             else -> {}

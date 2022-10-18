@@ -8,6 +8,7 @@ android {
     compileSdkVersion 33
 
     defaultConfig {
+        namespace "tk.zwander.lockscreenwidgets"
         applicationId "tk.zwander.lockscreenwidgets"
         minSdkVersion 22
         targetSdkVersion 32
@@ -48,7 +49,7 @@ android {
     }
 
     composeOptions {
-        kotlinCompilerExtensionVersion "1.3.0"
+        kotlinCompilerExtensionVersion "1.3.2"
     }
 }
 
@@ -77,16 +78,17 @@ dependencies {
     implementation 'com.github.zacharee:colorpicker:c300c66e93'
     implementation 'com.github.zacharee:PatreonSupportersRetrieval:4ce71eb5bf'
     implementation 'com.github.tingyik90:snackprogressbar:6.1'
-    implementation 'com.github.zacharee:SpannedGridLayoutManager:9329bf4ac2'
+    implementation 'com.github.zacharee:SpannedGridLayoutManager:4d21cb327d'
+//    implementation project(':spannedlm')
 
-    implementation 'com.google.firebase:firebase-analytics:21.1.1'
-    implementation 'com.google.firebase:firebase-crashlytics:18.2.13'
+    implementation 'com.google.firebase:firebase-analytics:21.2.0'
+    implementation 'com.google.firebase:firebase-crashlytics:18.3.0'
 
     implementation 'androidx.activity:activity-compose:1.6.0'
     implementation "androidx.compose.material:material:${compose_version}"
     implementation "androidx.compose.animation:animation:${compose_version}"
     implementation "androidx.compose.ui:ui-tooling:${compose_version}"
     implementation 'androidx.lifecycle:lifecycle-viewmodel-compose:2.5.1'
-    implementation "com.google.android.material:compose-theme-adapter:1.1.19"
-    implementation 'com.google.accompanist:accompanist-flowlayout:0.26.3-beta'
+    implementation "com.google.android.material:compose-theme-adapter:1.1.20"
+    implementation 'com.google.accompanist:accompanist-flowlayout:0.26.4-beta'
 }

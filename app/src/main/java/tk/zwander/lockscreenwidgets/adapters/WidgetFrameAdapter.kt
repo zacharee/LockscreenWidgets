@@ -29,7 +29,11 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.arasthel.spannedgridlayoutmanager.SpanSize
 import com.arasthel.spannedgridlayoutmanager.SpannedGridLayoutManager
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import tk.zwander.lockscreenwidgets.R
 import tk.zwander.lockscreenwidgets.activities.DismissOrUnlockActivity
 import tk.zwander.lockscreenwidgets.activities.add.ReconfigureWidgetActivity
@@ -40,8 +44,16 @@ import tk.zwander.lockscreenwidgets.databinding.FrameShortcutViewBinding
 import tk.zwander.lockscreenwidgets.databinding.WidgetPageHolderBinding
 import tk.zwander.lockscreenwidgets.host.WidgetHostCompat
 import tk.zwander.lockscreenwidgets.listeners.WidgetResizeListener
-import tk.zwander.lockscreenwidgets.util.*
-import java.util.*
+import tk.zwander.lockscreenwidgets.util.Event
+import tk.zwander.lockscreenwidgets.util.EventObserver
+import tk.zwander.lockscreenwidgets.util.base64ToBitmap
+import tk.zwander.lockscreenwidgets.util.dpAsPx
+import tk.zwander.lockscreenwidgets.util.eventManager
+import tk.zwander.lockscreenwidgets.util.logUtils
+import tk.zwander.lockscreenwidgets.util.mainHandler
+import tk.zwander.lockscreenwidgets.util.prefManager
+import tk.zwander.lockscreenwidgets.util.pxAsDp
+import java.util.Collections
 import kotlin.math.min
 
 /**
@@ -172,7 +184,11 @@ open class WidgetFrameAdapter(
     }
 
     override fun getItemId(position: Int): Long {
-        return if (widgets.size == 0) VIEW_TYPE_ADD.toLong() else widgets.getOrNull(position)?.id?.toLong() ?: -1
+        return if (widgets.size == 0) {
+            VIEW_TYPE_ADD.toLong()
+        } else {
+            widgets.getOrNull(position)?.id?.toLong() ?: -1
+        }
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
