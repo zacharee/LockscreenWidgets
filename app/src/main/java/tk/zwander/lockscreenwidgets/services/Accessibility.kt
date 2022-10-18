@@ -5,6 +5,7 @@ import android.annotation.SuppressLint
 import android.app.KeyguardManager
 import android.content.ComponentName
 import android.content.Context
+import android.content.Intent
 import android.os.Build
 import android.os.PowerManager
 import android.provider.Settings
@@ -12,13 +13,32 @@ import android.view.WindowManager
 import android.view.accessibility.AccessibilityEvent
 import android.view.accessibility.AccessibilityNodeInfo
 import android.view.accessibility.AccessibilityWindowInfo
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Deferred
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.launch
 import tk.zwander.lockscreenwidgets.App
 import tk.zwander.lockscreenwidgets.activities.DismissOrUnlockActivity
 import tk.zwander.lockscreenwidgets.appwidget.IDListProvider
 import tk.zwander.lockscreenwidgets.data.window.WindowInfo
 import tk.zwander.lockscreenwidgets.data.window.WindowRootPair
-import tk.zwander.lockscreenwidgets.util.*
+import tk.zwander.lockscreenwidgets.util.Event
+import tk.zwander.lockscreenwidgets.util.EventObserver
+import tk.zwander.lockscreenwidgets.util.HandlerRegistry
+import tk.zwander.lockscreenwidgets.util.PrefManager
+import tk.zwander.lockscreenwidgets.util.WidgetFrameDelegate
+import tk.zwander.lockscreenwidgets.util.defaultDisplayCompat
+import tk.zwander.lockscreenwidgets.util.eventManager
+import tk.zwander.lockscreenwidgets.util.handler
+import tk.zwander.lockscreenwidgets.util.isDebug
+import tk.zwander.lockscreenwidgets.util.isTouchWiz
+import tk.zwander.lockscreenwidgets.util.logUtils
+import tk.zwander.lockscreenwidgets.util.prefManager
 import tk.zwander.widgetdrawer.util.DrawerDelegate
 import java.util.concurrent.ConcurrentLinkedQueue
 
@@ -28,6 +48,26 @@ val Context.isAccessibilityEnabled: Boolean
         contentResolver,
         Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES
     )?.contains(ComponentName(this, Accessibility::class.java).flattenToString()) ?: false
+
+fun Context.openAccessibilitySettings() {
+    //Samsung devices have a separate Activity for listing
+    //installed Accessibility Services, for some reason.
+    //It's exported and permission-free, at least on Android 10,
+    //so attempt to launch it. A "dumb" try-catch is simpler
+    //than a check for the existence and state of this Activity.
+    //If the Installed Services Activity can't be launched,
+    //just launch the normal Accessibility Activity.
+    try {
+        val accIntent = Intent(Intent.ACTION_MAIN)
+        accIntent.`package` = "com.android.settings"
+        accIntent.component = ComponentName("com.android.settings", "com.android.settings.Settings\$AccessibilityInstalledServiceActivity")
+        startActivity(accIntent)
+    } catch (e: Exception) {
+        logUtils.debugLog("Error opening Installed Services:", e)
+        val accIntent = Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)
+        startActivity(accIntent)
+    }
+}
 
 //Sometimes retrieving the root of a window causes an NPE
 //in the framework. Catch that here and return null if it happens.

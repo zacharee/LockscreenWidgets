@@ -1,7 +1,6 @@
 package tk.zwander.lockscreenwidgets.activities
 
 import android.app.Activity
-import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.os.Build
@@ -15,9 +14,9 @@ import com.heinrichreimersoftware.materialintro.slide.SimpleSlide
 import tk.zwander.lockscreenwidgets.R
 import tk.zwander.lockscreenwidgets.services.isAccessibilityEnabled
 import tk.zwander.lockscreenwidgets.services.isNotificationListenerActive
+import tk.zwander.lockscreenwidgets.services.openAccessibilitySettings
 import tk.zwander.lockscreenwidgets.util.hasStoragePermission
 import tk.zwander.lockscreenwidgets.util.launchUrl
-import tk.zwander.lockscreenwidgets.util.logUtils
 
 /**
  * The introduction for the app.
@@ -69,6 +68,7 @@ class OnboardingActivity : IntroActivity() {
         ACCESSIBILITY,
         NOTIFICATION,
         STORAGE,
+        BATTERY,
         NONE
     }
 
@@ -131,23 +131,7 @@ class OnboardingActivity : IntroActivity() {
                                 .setTitle(R.string.intro_accessibility_title)
                                 .setMessage(R.string.intro_accessibility_desc)
                                 .setPositiveButton(R.string.grant) { _, _ ->
-                                    //Samsung devices have a separate Activity for listing
-                                    //installed Accessibility Services, for some reason.
-                                    //It's exported and permission-free, at least on Android 10,
-                                    //so attempt to launch it. A "dumb" try-catch is simpler
-                                    //than a check for the existence and state of this Activity.
-                                    //If the Installed Services Activity can't be launched,
-                                    //just launch the normal Accessibility Activity.
-                                    try {
-                                        val accIntent = Intent(Intent.ACTION_MAIN)
-                                        accIntent.`package` = "com.android.settings"
-                                        accIntent.component = ComponentName("com.android.settings", "com.android.settings.Settings\$AccessibilityInstalledServiceActivity")
-                                        startActivity(accIntent)
-                                    } catch (e: Exception) {
-                                        logUtils.debugLog("Error opening Installed Services:", e)
-                                        val accIntent = Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)
-                                        startActivity(accIntent)
-                                    }
+                                    openAccessibilitySettings()
                                 }
                                 .setNegativeButton(R.string.close_app) { _, _ ->
                                     finish()
@@ -218,8 +202,7 @@ class OnboardingActivity : IntroActivity() {
             )
         }
 
-        //Only add the battery optimization and "done" slides if we're running the full intro.
-        if (retroMode == RetroMode.NONE) {
+        if (retroMode == RetroMode.BATTERY || retroMode == RetroMode.NONE) {
             addSlide(
                 SimpleSlide.Builder()
                     .title(R.string.intro_battery_optimization)
@@ -232,7 +215,10 @@ class OnboardingActivity : IntroActivity() {
                     }
                     .build()
             )
+        }
 
+        //Only add the "done" slide if we're running the full intro.
+        if (retroMode == RetroMode.NONE) {
             addSlide(
                 SimpleSlide.Builder()
                     .title(R.string.intro_done_title)

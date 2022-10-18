@@ -12,8 +12,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.google.android.material.composethemeadapter.MdcTheme
+import tk.zwander.lockscreenwidgets.util.WidgetFrameDelegate
 
-@Suppress("OPT_IN_IS_NOT_ENABLED")
 @Preview
 @Composable
 fun MainContent() {
@@ -28,6 +28,12 @@ fun MainContent() {
                 verticalArrangement = Arrangement.spacedBy(8.dp),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
+                if (!WidgetFrameDelegate.hasInstance) {
+                    item(span = { GridItemSpan(maxLineSpan) }) {
+                        AccessibilityCard()
+                    }
+                }
+
                 items(features.size, span = { GridItemSpan(maxLineSpan) }) {
                     FeatureCard(info = features[it])
                 }

@@ -29,6 +29,10 @@ import android.view.WindowManager
 import android.widget.ImageView
 import android.widget.Toast
 import androidx.annotation.RequiresApi
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
@@ -51,11 +55,11 @@ import tk.zwander.lockscreenwidgets.views.WidgetFrameView
 class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper(context),
     EventObserver {
     companion object {
-        @SuppressLint("StaticFieldLeak")
-        private var instance: WidgetFrameDelegate? = null
+        private var instance by mutableStateOf<WidgetFrameDelegate?>(null)
 
-        private val hasInstance: Boolean
-            get() = instance != null
+        val hasInstance: Boolean by derivedStateOf {
+            instance != null
+        }
 
         fun peekInstance(context: Context): WidgetFrameDelegate? {
             if (!hasInstance) {

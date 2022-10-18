@@ -27,6 +27,8 @@
     <string name="privacy_policy">Privacy Policy</string>
     <string name="shortcut">Shortcut</string>
     <string name="enabled">Enabled</string>
+    <string name="accessibility_settings">Accessibility Settings</string>
+    <string name="battery_whitelist">Battery Whitelist</string>
 
     <string name="drawer_enabled">Drawer Enabled</string>
     <string name="frame_enabled">Frame Enabled</string>
@@ -74,6 +76,8 @@
 
     <string name="main_screen_social_patreon">Patreon</string>
     <string name="main_screen_social_patreon_desc">For $1 every month, you get access to all of my paid apps, along with some exclusive stuff.</string>
+
+    <string name="main_screen_accessibility_not_started">The Accessibility Service isn\'t currently running. This may be because you need to whitelist Lockscreen Widgets from your phone\'s battery optimizations, or you may just need to toggle it off and on again in Settings.</string>
 
     <string name="intro_privacy_policy_desc">Lockscreen Widgets doesn\'t collect any data beyond what\'s needed for crash analysis. Learn more below.</string>
     <string name="main_screen_privacy_policy_desc">Lockscreen Widgets doesn\'t collect any data beyond what\'s needed for crash analysis. Tap here to learn more.</string>
