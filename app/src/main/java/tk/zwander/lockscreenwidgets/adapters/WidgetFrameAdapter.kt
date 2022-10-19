@@ -75,9 +75,14 @@ open class WidgetFrameAdapter(
 
     var currentEditingInterfacePosition = -1
         set(value) {
+            val changed = field != value
+
             field = value
-            mainHandler.post {
-                host.context.eventManager.sendEvent(Event.EditingIndexUpdated(value))
+
+            if (changed) {
+                mainHandler.post {
+                    host.context.eventManager.sendEvent(Event.EditingIndexUpdated(value))
+                }
             }
         }
 
@@ -369,12 +374,11 @@ open class WidgetFrameAdapter(
 
         fun onBind(data: WidgetData) {
             itemView.apply {
-                context.eventManager.addObserver(this@WidgetVH)
-
                 launch {
+                    context.eventManager.addObserver(this@WidgetVH)
+
                     onResize(data, 0, 1)
-                    editingInterfaceShown =
-                        currentEditingInterfacePosition != -1 && currentEditingInterfacePosition == bindingAdapterPosition
+                    updateEditingUI(currentEditingInterfacePosition)
 
                     binding.widgetHolder.removeAllViews()
 
