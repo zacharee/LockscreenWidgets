@@ -3,11 +3,11 @@ package tk.zwander.lockscreenwidgets.fragments
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
-import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
 import androidx.preference.SwitchPreference
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import tk.zwander.lockscreenwidgets.R
 import tk.zwander.lockscreenwidgets.activities.HideForIDsActivity
 import tk.zwander.lockscreenwidgets.activities.OnboardingActivity
@@ -19,7 +19,8 @@ import tk.zwander.lockscreenwidgets.util.hasStoragePermission
 import tk.zwander.lockscreenwidgets.util.isOneUI
 import tk.zwander.lockscreenwidgets.util.logUtils
 import java.text.SimpleDateFormat
-import java.util.*
+import java.util.Date
+import java.util.Locale
 
 /**
  * The settings page.
@@ -43,7 +44,11 @@ class SettingsFragment : PreferenceFragmentCompat() {
                 val input = contentResolver.openInputStream(uri)?.bufferedReader()?.readText()
 
                 if (!backupRestoreManager.restoreBackupString(input, BackupRestoreManager.Which.FRAME)) {
-                    Toast.makeText(this, R.string.unable_to_restore_widgets, Toast.LENGTH_SHORT)
+                    MaterialAlertDialogBuilder(this)
+                        .setTitle(R.string.error)
+                        .setMessage(R.string.unable_to_restore_widgets)
+                        .setPositiveButton(android.R.string.ok, null)
+                        .show()
                     logUtils.normalLog("Unable to restore widgets")
                 } else {
                     requireActivity().finish()
@@ -120,7 +125,11 @@ class SettingsFragment : PreferenceFragmentCompat() {
                 onWidgetBackUp.launch("lockscreen_widgets_frame_backup_${formatter.format(Date())}.lswidg")
             } catch (e: Exception) {
                 context?.logUtils?.debugLog("Unable to back up widgets", e)
-                Toast.makeText(requireContext(), R.string.unable_to_back_up_widgets, Toast.LENGTH_SHORT).show()
+                MaterialAlertDialogBuilder(requireContext())
+                    .setTitle(R.string.error)
+                    .setMessage(R.string.unable_to_back_up_widgets)
+                    .setPositiveButton(android.R.string.ok, null)
+                    .show()
             }
             true
         }
@@ -130,7 +139,11 @@ class SettingsFragment : PreferenceFragmentCompat() {
                 onWidgetRestore.launch(arrayOf("*/*"))
             } catch (e: Exception) {
                 context?.logUtils?.debugLog("Unable to restore widgets", e)
-                Toast.makeText(requireContext(), R.string.unable_to_restore_widgets, Toast.LENGTH_SHORT).show()
+                MaterialAlertDialogBuilder(requireContext())
+                    .setTitle(R.string.error)
+                    .setMessage(R.string.unable_to_restore_widgets)
+                    .setPositiveButton(android.R.string.ok, null)
+                    .show()
             }
             true
         }

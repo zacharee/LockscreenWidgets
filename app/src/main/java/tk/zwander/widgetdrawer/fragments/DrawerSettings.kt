@@ -6,10 +6,10 @@ import android.os.Build
 import android.os.Bundle
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.preference.*
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import tk.zwander.lockscreenwidgets.R
 import tk.zwander.lockscreenwidgets.util.*
 import tk.zwander.lockscreenwidgets.util.backup.BackupRestoreManager
@@ -43,13 +43,21 @@ class DrawerSettings : PreferenceFragmentCompat() {
                     val input = contentResolver.openInputStream(uri)?.bufferedReader()?.readText()
 
                     if (!backupRestoreManager.restoreBackupString(input, BackupRestoreManager.Which.DRAWER)) {
-                        Toast.makeText(this, R.string.unable_to_restore_widgets, Toast.LENGTH_SHORT)
+                        MaterialAlertDialogBuilder(requireContext())
+                            .setTitle(R.string.error)
+                            .setMessage(R.string.unable_to_restore_widgets)
+                            .setPositiveButton(android.R.string.ok, null)
+                            .show()
                         logUtils.normalLog("Unable to restore widgets")
                     } else {
                         requireActivity().finish()
                     }
                 } catch (e: FileNotFoundException) {
-                    Toast.makeText(this, R.string.unable_to_restore_widgets, Toast.LENGTH_SHORT)
+                    MaterialAlertDialogBuilder(requireContext())
+                        .setTitle(R.string.error)
+                        .setMessage(R.string.unable_to_restore_widgets)
+                        .setPositiveButton(android.R.string.ok, null)
+                        .show()
                     logUtils.normalLog("Unable to restore widgets", e)
                 }
             }

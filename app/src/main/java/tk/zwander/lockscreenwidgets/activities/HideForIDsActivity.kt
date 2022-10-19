@@ -2,7 +2,11 @@ package tk.zwander.lockscreenwidgets.activities
 
 import android.content.Context
 import android.content.Intent
-import android.graphics.*
+import android.graphics.Canvas
+import android.graphics.Color
+import android.graphics.Paint
+import android.graphics.PorterDuff
+import android.graphics.PorterDuffXfermode
 import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import android.view.Menu
@@ -23,7 +27,8 @@ import tk.zwander.lockscreenwidgets.databinding.AddIdDialogBinding
 import tk.zwander.lockscreenwidgets.util.logUtils
 import tk.zwander.lockscreenwidgets.util.prefManager
 import java.text.SimpleDateFormat
-import java.util.*
+import java.util.Date
+import java.util.Locale
 
 /**
  * Configuration Activity for the "Hide on Present IDs" and "Hide on Non-Present IDs"
@@ -168,7 +173,11 @@ class HideForIDsActivity : AppCompatActivity() {
             }
 
             if (list.isNullOrEmpty()) {
-                Toast.makeText(this, R.string.invalid_id_backup_error, Toast.LENGTH_SHORT).show()
+                MaterialAlertDialogBuilder(this)
+                    .setTitle(R.string.error)
+                    .setMessage(R.string.invalid_id_backup_error)
+                    .setPositiveButton(android.R.string.ok, null)
+                    .show()
             } else {
                 items.clear()
                 items.addAll(list)

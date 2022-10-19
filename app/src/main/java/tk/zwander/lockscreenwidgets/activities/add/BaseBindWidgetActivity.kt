@@ -9,11 +9,11 @@ import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
 import android.os.ServiceManager
-import android.widget.Toast
 import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import com.android.internal.appwidget.IAppWidgetService
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import tk.zwander.lockscreenwidgets.R
 import tk.zwander.lockscreenwidgets.data.WidgetData
 import tk.zwander.lockscreenwidgets.data.WidgetSizeData
@@ -79,7 +79,17 @@ abstract class BaseBindWidgetActivity : AppCompatActivity() {
 
     private val configureLauncher = ConfigureLauncher()
 
-    @Suppress("DeprecatedCallableAddReplaceWith")
+    private var pendingErrors = 0
+        set(value) {
+            val oldValue = field
+
+            field = value
+
+            if (value == 0 && oldValue > 0) {
+                finish()
+            }
+        }
+
     @Deprecated("Deprecated in Java")
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         @Suppress("DEPRECATION")
@@ -131,7 +141,18 @@ abstract class BaseBindWidgetActivity : AppCompatActivity() {
         } catch (e: SecurityException) {
             logUtils.debugLog("Unable to create shortcut", e)
 
-            Toast.makeText(this, R.string.create_shortcut_error, Toast.LENGTH_SHORT).show()
+            pendingErrors++
+
+            MaterialAlertDialogBuilder(this)
+                .setTitle(R.string.error)
+                .setMessage(resources.getString(
+                    R.string.create_shortcut_error,
+                    e.message
+                ))
+                .setPositiveButton(android.R.string.ok) { _, _ ->
+                    pendingErrors--
+                }
+                .show()
         }
     }
 
@@ -157,14 +178,19 @@ abstract class BaseBindWidgetActivity : AppCompatActivity() {
     @SuppressLint("NewApi")
     protected open fun configureWidget(id: Int, provider: AppWidgetProviderInfo) {
         if (!configureLauncher.launch(id)) {
-            Toast.makeText(
-                this,
-                resources.getString(
+            pendingErrors++
+
+            MaterialAlertDialogBuilder(this)
+                .setTitle(R.string.error)
+                .setMessage(resources.getString(
                     R.string.configure_widget_error,
                     provider
-                ),
-                Toast.LENGTH_LONG
-            ).show()
+                ))
+                .setPositiveButton(android.R.string.ok) { _, _ ->
+                    pendingErrors--
+                }
+                .show()
+
             addNewWidget(id, provider)
         }
     }
@@ -178,7 +204,9 @@ abstract class BaseBindWidgetActivity : AppCompatActivity() {
         currentWidgets = currentWidgets.apply {
             add(createWidgetData(id, provider))
         }
-        finish()
+        if (pendingErrors == 0) {
+            finish()
+        }
     }
 
     protected open val colCount: Int
@@ -226,7 +254,9 @@ abstract class BaseBindWidgetActivity : AppCompatActivity() {
         currentWidgets = currentWidgets.apply {
             add(shortcut)
         }
-        finish()
+        if (pendingErrors == 0) {
+            finish()
+        }
     }
 
     private inner class ConfigureLauncher {
@@ -243,13 +273,15 @@ abstract class BaseBindWidgetActivity : AppCompatActivity() {
                 val intentSender = IAppWidgetService.Stub.asInterface(ServiceManager.getService(Context.APPWIDGET_SERVICE))
                     .createAppWidgetConfigIntentSender(opPackageName, id, 0)
 
+                logUtils.debugLog("Intent sender is $intentSender")
+
                 if (intentSender != null) {
                     configLauncher.launch(IntentSenderRequest.Builder(intentSender).build())
                     currentConfigId = id
                     return true
                 }
             } catch (e: Throwable) {
-                logUtils.debugLog("Unable to launch widget config IntentSender", e)
+                logUtils.normalLog("Unable to launch widget config IntentSender", e)
             }
 
             try {
@@ -260,7 +292,7 @@ abstract class BaseBindWidgetActivity : AppCompatActivity() {
                 currentConfigId = id
                 return true
             } catch (e: Throwable) {
-                logUtils.debugLog("Unable to startAppWidgetConfigureActivityForResult", e)
+                logUtils.normalLog("Unable to startAppWidgetConfigureActivityForResult", e)
             }
 
             return false
@@ -268,7 +300,7 @@ abstract class BaseBindWidgetActivity : AppCompatActivity() {
 
         fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
             if (requestCode == CONFIGURE_REQ) {
-                val id = data?.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, -1)
+                val id = data?.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, currentConfigId ?: -1) ?: currentConfigId
 
                 if (resultCode == Activity.RESULT_OK && id != null && id != -1) {
                     logUtils.debugLog("Successfully configured widget.")

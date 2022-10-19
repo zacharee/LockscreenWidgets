@@ -235,7 +235,7 @@
     <string name="enable_debug_log_msg">Please enable the debug log option to see IDs here.</string>
     <string name="touch_protection_active">Touch protection active. Please uncover the proximity sensor.</string>
     <string name="launch_shortcut_error">Unable to launch shortcut.</string>
-    <string name="create_shortcut_error">Unable to create shortcut.</string>
+    <string name="create_shortcut_error">Unable to create shortcut.\n%s</string>
     <string name="accessibility_not_started">The Accessibility Service hasn\'t started yet. Please wait.</string>
     <string name="unable_to_restore_widgets">Unable to restore widgets.</string>
     <string name="unable_to_back_up_widgets">Unable to back up widgets.</string>
@@ -250,6 +250,7 @@
     <string name="enable_drawer">Enable Drawer</string>
     <string name="drawer">Drawer</string>
     <string name="handle">Handle</string>
+    <string name="error">Error</string>
 
     <string name="close_on_empty_tap">Tap Empty Space to Close Drawer</string>
     <string name="close_on_empty_tap_desc">With this enabled, tapping outside of the area of any widgets will cause the drawer to close.</string>
