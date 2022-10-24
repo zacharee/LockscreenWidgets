@@ -41,9 +41,16 @@ class DismissOrUnlockActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        @Suppress("DEPRECATION")
-        window.addFlags(WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED)
+        handle()
+    }
 
+    override fun onNewIntent(intent: Intent?) {
+        super.onNewIntent(intent)
+
+        handle()
+    }
+
+    private fun handle() {
         if (kgm.isKeyguardLocked) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 kgm.requestDismissKeyguard(this, object : KeyguardManager.KeyguardDismissCallback() {
@@ -67,7 +74,8 @@ class DismissOrUnlockActivity : AppCompatActivity() {
                     }
                 }
                 @Suppress("DEPRECATION")
-                window.addFlags(WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD or WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED)
+                window.addFlags(WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD or
+                            WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED)
             }
         } else {
             @SuppressLint("MissingPermission")
@@ -77,12 +85,6 @@ class DismissOrUnlockActivity : AppCompatActivity() {
                 sendBroadcast(i)
             }
 
-            finish()
-        }
-    }
-
-    override fun onWindowFocusChanged(hasFocus: Boolean) {
-        if (!hasFocus) {
             finish()
         }
     }

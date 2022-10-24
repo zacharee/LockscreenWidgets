@@ -40,11 +40,13 @@
             android:exported="true"
             android:label="@string/add_widget"
             android:excludeFromRecents="true"
+            android:launchMode="singleTop"
             />
         <activity android:name="tk.zwander.lockscreenwidgets.activities.add.AddTileWidgetActivity"
             android:exported="true"
             android:label="@string/add_widget"
             android:excludeFromRecents="true"
+            android:launchMode="singleTop"
             />
         <activity android:name="tk.zwander.lockscreenwidgets.activities.OnboardingActivity"
             android:exported="false"
@@ -79,6 +81,7 @@
             android:exported="false"
             android:label="@string/add_widget"
             android:excludeFromRecents="true"
+            android:launchMode="singleTop"
             />
         <activity android:name="tk.zwander.widgetdrawer.activities.TriggerActivity"
             android:label="@string/open_drawer"

@@ -8,7 +8,12 @@ import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import androidx.appcompat.widget.SearchView
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import tk.zwander.lockscreenwidgets.R
 import tk.zwander.lockscreenwidgets.activities.DismissOrUnlockActivity
 import tk.zwander.lockscreenwidgets.adapters.AppAdapter
@@ -51,9 +56,7 @@ open class AddWidgetActivity : BaseBindWidgetActivity(), CoroutineScope by MainS
          * We want the user to unlock the device when adding a widget, since potential configuration Activities
          * won't show on the lock screen.
          */
-        val intent = Intent(this, DismissOrUnlockActivity::class.java)
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-        startActivity(intent)
+        DismissOrUnlockActivity.launch(this)
 
         setContentView(binding.root)
 
@@ -63,6 +66,12 @@ open class AddWidgetActivity : BaseBindWidgetActivity(), CoroutineScope by MainS
         supportActionBar?.setDisplayShowHomeEnabled(true)
 
         populateAsync()
+    }
+
+    override fun onNewIntent(intent: Intent?) {
+        super.onNewIntent(intent)
+
+        DismissOrUnlockActivity.launch(this)
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
