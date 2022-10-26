@@ -27,6 +27,7 @@
     <string name="privacy_policy">Privacy Policy</string>
     <string name="shortcut">Shortcut</string>
     <string name="enabled">Enabled</string>
+    <string name="disabled">Disabled</string>
     <string name="accessibility_settings">Accessibility Settings</string>
     <string name="battery_whitelist">Battery Whitelist</string>
 

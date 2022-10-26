@@ -4,7 +4,15 @@ import android.content.Intent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.material.Card
 import androidx.compose.material.Divider
 import androidx.compose.material.MaterialTheme
@@ -34,7 +42,11 @@ import tk.zwander.lockscreenwidgets.compose.data.FeatureCardInfo
 import tk.zwander.lockscreenwidgets.compose.util.rememberBooleanPreferenceState
 import tk.zwander.lockscreenwidgets.data.MainPageButton
 import tk.zwander.lockscreenwidgets.fragments.SettingsFragment
-import tk.zwander.lockscreenwidgets.util.*
+import tk.zwander.lockscreenwidgets.util.Event
+import tk.zwander.lockscreenwidgets.util.PrefManager
+import tk.zwander.lockscreenwidgets.util.WidgetFrameDelegate
+import tk.zwander.lockscreenwidgets.util.eventManager
+import tk.zwander.lockscreenwidgets.util.prefManager
 import tk.zwander.widgetdrawer.fragments.DrawerSettings
 
 @Composable
@@ -47,6 +59,7 @@ fun rememberFeatureCards(): List<FeatureCardInfo> {
                 R.string.app_name,
                 BuildConfig.VERSION_NAME,
                 R.string.enabled,
+                R.string.disabled,
                 PrefManager.KEY_WIDGET_FRAME_ENABLED,
                 listOf(
                     MainPageButton(
@@ -77,6 +90,7 @@ fun rememberFeatureCards(): List<FeatureCardInfo> {
                 R.string.widget_drawer,
                 BuildConfig.VERSION_NAME,
                 R.string.enabled,
+                R.string.disabled,
                 PrefManager.KEY_DRAWER_ENABLED,
                 listOf(
                     MainPageButton(
@@ -136,7 +150,7 @@ fun FeatureCard(info: FeatureCardInfo) {
             CardSwitch(
                 enabled = enabled,
                 onEnabledChanged = { enabled = it },
-                title = stringResource(id = info.enabledLabel)
+                title = stringResource(id = if (enabled) info.enabledLabel else info.disabledLabel)
             )
 
             AnimatedVisibility(visible = enabled) {
