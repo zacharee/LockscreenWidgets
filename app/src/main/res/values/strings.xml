@@ -30,6 +30,8 @@
     <string name="disabled">Disabled</string>
     <string name="accessibility_settings">Accessibility Settings</string>
     <string name="battery_whitelist">Battery Whitelist</string>
+    <string name="back">Back</string>
+    <string name="clear">Clear</string>
 
     <string name="drawer_enabled">Drawer Enabled</string>
     <string name="frame_enabled">Frame Enabled</string>

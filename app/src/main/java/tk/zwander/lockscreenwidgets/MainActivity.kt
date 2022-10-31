@@ -15,7 +15,11 @@ import tk.zwander.lockscreenwidgets.activities.OnboardingActivity
 import tk.zwander.lockscreenwidgets.compose.main.MainContent
 import tk.zwander.lockscreenwidgets.services.isAccessibilityEnabled
 import tk.zwander.lockscreenwidgets.tiles.NCTile
-import tk.zwander.lockscreenwidgets.tiles.widget.*
+import tk.zwander.lockscreenwidgets.tiles.widget.WidgetTileFive
+import tk.zwander.lockscreenwidgets.tiles.widget.WidgetTileFour
+import tk.zwander.lockscreenwidgets.tiles.widget.WidgetTileOne
+import tk.zwander.lockscreenwidgets.tiles.widget.WidgetTileThree
+import tk.zwander.lockscreenwidgets.tiles.widget.WidgetTileTwo
 import tk.zwander.lockscreenwidgets.util.WidgetFrameDelegate
 import tk.zwander.lockscreenwidgets.util.isOneUI
 import tk.zwander.lockscreenwidgets.util.prefManager

@@ -3,6 +3,7 @@ package tk.zwander.lockscreenwidgets.data
 import android.content.pm.ApplicationInfo
 import tk.zwander.lockscreenwidgets.data.list.ShortcutListInfo
 import tk.zwander.lockscreenwidgets.data.list.WidgetListInfo
+import java.util.TreeSet
 
 /**
  * Hold info for each app that has widgets, along with their
@@ -15,8 +16,8 @@ import tk.zwander.lockscreenwidgets.data.list.WidgetListInfo
 data class AppInfo(
     var appName: String,
     var appInfo: ApplicationInfo,
-    var widgets: ArrayList<WidgetListInfo> = ArrayList(),
-    var shortcuts: ArrayList<ShortcutListInfo> = ArrayList()
+    var widgets: TreeSet<WidgetListInfo> = TreeSet(),
+    var shortcuts: TreeSet<ShortcutListInfo> = TreeSet()
 ) : Comparable<AppInfo> {
     override fun compareTo(other: AppInfo) =
         appName.compareTo(other.appName)

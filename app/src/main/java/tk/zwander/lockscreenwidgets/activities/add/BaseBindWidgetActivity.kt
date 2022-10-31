@@ -9,9 +9,9 @@ import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
 import android.os.ServiceManager
+import androidx.activity.ComponentActivity
 import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.appcompat.app.AppCompatActivity
 import com.android.internal.appwidget.IAppWidgetService
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import tk.zwander.lockscreenwidgets.R
@@ -22,7 +22,7 @@ import tk.zwander.lockscreenwidgets.host.WidgetHostCompat
 import tk.zwander.lockscreenwidgets.util.*
 import kotlin.math.floor
 
-abstract class BaseBindWidgetActivity : AppCompatActivity() {
+abstract class BaseBindWidgetActivity : ComponentActivity() {
     companion object {
         private const val CONFIGURE_REQ = 1000
     }
