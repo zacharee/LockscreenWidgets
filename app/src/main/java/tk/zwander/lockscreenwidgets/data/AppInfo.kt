@@ -20,5 +20,5 @@ data class AppInfo(
     var shortcuts: TreeSet<ShortcutListInfo> = TreeSet()
 ) : Comparable<AppInfo> {
     override fun compareTo(other: AppInfo) =
-        appName.compareTo(other.appName)
+        appName.compareTo(other.appName, true)
 }

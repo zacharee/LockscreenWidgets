@@ -1,7 +1,7 @@
 package tk.zwander.lockscreenwidgets.data.list
 
 import android.content.pm.ApplicationInfo
-import java.util.*
+import java.util.Objects
 
 open class BaseListInfo(
     val name: String,
@@ -9,7 +9,7 @@ open class BaseListInfo(
     val appInfo: ApplicationInfo
 ) : Comparable<BaseListInfo> {
     override fun compareTo(other: BaseListInfo): Int {
-        return name.compareTo(other.name)
+        return name.compareTo(other.name, true)
     }
 
     override fun equals(other: Any?): Boolean {
