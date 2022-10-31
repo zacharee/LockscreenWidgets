@@ -4,11 +4,9 @@ import android.appwidget.AppWidgetManager
 import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.runtime.Composable
@@ -89,8 +87,6 @@ fun AddWidgetLayout(
                                 .fillMaxWidth()
                                 .padding(8.dp)
                         )
-
-                        Spacer(Modifier.size(8.dp))
 
                         AddWidgetScroller(
                             filteredItems = filteredItems,
