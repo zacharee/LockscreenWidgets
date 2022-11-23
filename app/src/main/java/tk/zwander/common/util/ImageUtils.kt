@@ -10,6 +10,7 @@ import tk.zwander.lockscreenwidgets.util.toBitmap
 
 @SuppressLint("DiscouragedApi")
 fun Context.getRemoteDrawable(
+    packageName: String,
     resource: Intent.ShortcutIconResource?
 ) : Bitmap? {
     val remRes = packageManager.getResourcesForApplication(packageName)

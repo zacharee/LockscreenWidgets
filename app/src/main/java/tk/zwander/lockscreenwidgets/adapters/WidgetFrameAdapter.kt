@@ -529,7 +529,7 @@ open class WidgetFrameAdapter(
             )
             val icon = data.icon.base64ToBitmap() ?: data.iconRes?.run {
                 try {
-                    itemView.context.getRemoteDrawable(this)
+                    itemView.context.getRemoteDrawable(this.packageName, this)
                 } catch (e: PackageManager.NameNotFoundException) {
                     host.context.logUtils.debugLog("Unable to bind shortcut", e)
                     onRemoveCallback(data, bindingAdapterPosition)
