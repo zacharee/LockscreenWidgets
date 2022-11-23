@@ -1,4 +1,4 @@
-package tk.zwander.lockscreenwidgets.compose.add
+package tk.zwander.common.compose.add
 
 import android.graphics.Bitmap
 import androidx.compose.foundation.Image
@@ -29,9 +29,9 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
-import androidx.core.content.res.ResourcesCompat
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import tk.zwander.common.util.getRemoteDrawable
 import tk.zwander.lockscreenwidgets.R
 import tk.zwander.lockscreenwidgets.data.AppInfo
 import tk.zwander.lockscreenwidgets.data.list.BaseListInfo
@@ -160,17 +160,10 @@ private fun icon(
 
     LaunchedEffect(key) {
         icon = withContext(Dispatchers.IO) {
-            val remRes =
-                context.packageManager.getResourcesForApplication(
-                    info.appInfo.packageName
-                )
-
-            ResourcesCompat.getDrawable(
-                remRes,
-                info.icon,
-                remRes.newTheme()
-            )!!.mutate().toBitmap()
-                .run { copy(config, false) }
+            context.getRemoteDrawable(
+                info.appInfo.packageName,
+                info.icon
+            )
         }
     }
 

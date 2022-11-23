@@ -20,8 +20,6 @@ import android.view.Window
 import android.widget.ListView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatCallback
-import androidx.core.content.res.ResourcesCompat
-import androidx.core.graphics.drawable.toBitmap
 import androidx.core.view.LayoutInflaterCompat
 import androidx.core.view.forEach
 import androidx.core.view.isVisible
@@ -34,6 +32,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import tk.zwander.common.util.getRemoteDrawable
 import tk.zwander.lockscreenwidgets.R
 import tk.zwander.lockscreenwidgets.activities.DismissOrUnlockActivity
 import tk.zwander.lockscreenwidgets.activities.add.ReconfigureWidgetActivity
@@ -529,18 +528,13 @@ open class WidgetFrameAdapter(
                 LayoutInflater.from(binding.widgetHolder.context)
             )
             val icon = data.icon.base64ToBitmap() ?: data.iconRes?.run {
-                val res = try {
-                    itemView.context.packageManager.getResourcesForApplication(this.packageName)
+                try {
+                    itemView.context.getRemoteDrawable(this)
                 } catch (e: PackageManager.NameNotFoundException) {
                     host.context.logUtils.debugLog("Unable to bind shortcut", e)
                     onRemoveCallback(data, bindingAdapterPosition)
                     return@bindShortcut
                 }
-                ResourcesCompat.getDrawable(
-                    res,
-                    res.getIdentifier(this.resourceName, "drawable", this.packageName),
-                    res.newTheme()
-                )?.toBitmap()
             }
 
             shortcutView.shortcutRoot.setOnClickListener {

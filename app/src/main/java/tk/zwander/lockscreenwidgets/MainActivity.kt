@@ -12,7 +12,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.cancel
 import tk.zwander.lockscreenwidgets.activities.OnboardingActivity
-import tk.zwander.lockscreenwidgets.compose.main.MainContent
+import tk.zwander.common.compose.main.MainContent
 import tk.zwander.lockscreenwidgets.services.isAccessibilityEnabled
 import tk.zwander.lockscreenwidgets.tiles.NCTile
 import tk.zwander.lockscreenwidgets.tiles.widget.WidgetTileFive

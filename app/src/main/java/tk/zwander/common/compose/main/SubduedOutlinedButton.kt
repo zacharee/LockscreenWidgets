@@ -1,4 +1,4 @@
-package tk.zwander.lockscreenwidgets.compose.main
+package tk.zwander.common.compose.main
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.interaction.MutableInteractionSource

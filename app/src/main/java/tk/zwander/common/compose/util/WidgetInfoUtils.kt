@@ -1,4 +1,4 @@
-package tk.zwander.lockscreenwidgets.compose.util
+package tk.zwander.common.compose.util
 
 import tk.zwander.lockscreenwidgets.data.AppInfo
 import tk.zwander.lockscreenwidgets.data.list.WidgetListInfo

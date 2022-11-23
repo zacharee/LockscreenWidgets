@@ -1,4 +1,4 @@
-package tk.zwander.lockscreenwidgets.compose.main
+package tk.zwander.common.compose.main
 
 import android.content.Intent
 import androidx.compose.animation.AnimatedVisibility
@@ -37,9 +37,9 @@ import tk.zwander.lockscreenwidgets.BuildConfig
 import tk.zwander.lockscreenwidgets.R
 import tk.zwander.lockscreenwidgets.activities.SettingsActivity
 import tk.zwander.lockscreenwidgets.activities.UsageActivity
-import tk.zwander.lockscreenwidgets.compose.components.CardSwitch
-import tk.zwander.lockscreenwidgets.compose.data.FeatureCardInfo
-import tk.zwander.lockscreenwidgets.compose.util.rememberBooleanPreferenceState
+import tk.zwander.common.compose.components.CardSwitch
+import tk.zwander.common.compose.data.FeatureCardInfo
+import tk.zwander.common.compose.util.rememberBooleanPreferenceState
 import tk.zwander.lockscreenwidgets.data.MainPageButton
 import tk.zwander.lockscreenwidgets.fragments.SettingsFragment
 import tk.zwander.lockscreenwidgets.util.Event

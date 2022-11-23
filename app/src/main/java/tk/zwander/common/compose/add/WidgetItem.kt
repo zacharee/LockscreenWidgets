@@ -1,4 +1,4 @@
-package tk.zwander.lockscreenwidgets.compose.add
+package tk.zwander.common.compose.add
 
 import android.graphics.Bitmap
 import androidx.compose.foundation.BorderStroke

@@ -1,4 +1,4 @@
-package tk.zwander.lockscreenwidgets.compose.add
+package tk.zwander.common.compose.add
 
 import android.appwidget.AppWidgetManager
 import androidx.compose.animation.Crossfade

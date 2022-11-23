@@ -1,4 +1,4 @@
-package tk.zwander.lockscreenwidgets.compose.util
+package tk.zwander.common.compose.util
 
 import android.content.Context
 import android.content.SharedPreferences

@@ -8,7 +8,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.cancel
 import tk.zwander.lockscreenwidgets.activities.DismissOrUnlockActivity
-import tk.zwander.lockscreenwidgets.compose.add.AddWidgetLayout
+import tk.zwander.common.compose.add.AddWidgetLayout
 import tk.zwander.lockscreenwidgets.data.list.ShortcutListInfo
 import tk.zwander.lockscreenwidgets.data.list.WidgetListInfo
 

@@ -1,4 +1,4 @@
-package tk.zwander.lockscreenwidgets.compose.main
+package tk.zwander.common.compose.main
 
 import android.net.Uri
 import android.view.animation.AnticipateOvershootInterpolator
@@ -27,8 +27,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import tk.zwander.lockscreenwidgets.R
-import tk.zwander.lockscreenwidgets.compose.components.ClickableCard
-import tk.zwander.lockscreenwidgets.compose.components.PreferenceSwitch
+import tk.zwander.common.compose.components.ClickableCard
+import tk.zwander.common.compose.components.PreferenceSwitch
 import tk.zwander.lockscreenwidgets.util.PrefManager
 import tk.zwander.lockscreenwidgets.util.logUtils
 import java.text.SimpleDateFormat

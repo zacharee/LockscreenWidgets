@@ -1,11 +1,11 @@
-package tk.zwander.lockscreenwidgets.compose.components
+package tk.zwander.common.compose.components
 
 import android.annotation.SuppressLint
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
-import tk.zwander.lockscreenwidgets.compose.util.rememberBooleanPreferenceState
+import tk.zwander.common.compose.util.rememberBooleanPreferenceState
 import tk.zwander.lockscreenwidgets.util.prefManager
 
 @SuppressLint("ComposableNaming")

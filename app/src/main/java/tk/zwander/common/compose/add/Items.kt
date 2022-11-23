@@ -1,4 +1,4 @@
-package tk.zwander.lockscreenwidgets.compose.add
+package tk.zwander.common.compose.add
 
 import android.appwidget.AppWidgetManager
 import android.appwidget.AppWidgetProviderInfo
@@ -13,7 +13,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import tk.zwander.lockscreenwidgets.compose.util.matchesFilter
+import tk.zwander.common.compose.util.matchesFilter
 import tk.zwander.lockscreenwidgets.data.AppInfo
 import tk.zwander.lockscreenwidgets.data.list.ShortcutListInfo
 import tk.zwander.lockscreenwidgets.data.list.WidgetListInfo

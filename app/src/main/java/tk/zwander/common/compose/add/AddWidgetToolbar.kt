@@ -1,4 +1,4 @@
-package tk.zwander.lockscreenwidgets.compose.add
+package tk.zwander.common.compose.add
 
 import androidx.compose.foundation.layout.Row
 import androidx.compose.material.Icon
