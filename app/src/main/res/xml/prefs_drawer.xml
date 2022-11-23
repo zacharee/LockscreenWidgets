@@ -2,20 +2,6 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <Preference
-        android:title="@string/settings_screen_back_up_widgets"
-        android:key="back_up_widgets"
-        android:summary="@string/settings_screen_back_up_widgets_desc"
-        android:icon="@drawable/ic_baseline_save_24"
-        />
-
-    <Preference
-        android:title="@string/settings_screen_restore_widgets"
-        android:key="restore_widgets"
-        android:summary="@string/settings_screen_restore_widgets_desc"
-        android:icon="@drawable/ic_baseline_open_in_new_24"
-        />
-
     <tk.zwander.collapsiblepreferencecategory.CollapsiblePreferenceCategoryNew
         android:title="@string/drawer"
         android:key="drawer_options">
