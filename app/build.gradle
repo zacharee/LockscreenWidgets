@@ -49,7 +49,7 @@ android {
     }
 
     composeOptions {
-        kotlinCompilerExtensionVersion "1.3.2"
+        kotlinCompilerExtensionVersion compose_version
     }
 }
 
@@ -67,7 +67,7 @@ dependencies {
     implementation 'androidx.legacy:legacy-support-core-ui:1.0.0'
 
     implementation 'org.lsposed.hiddenapibypass:hiddenapibypass:4.3'
-    implementation 'com.google.code.gson:gson:2.9.1'
+    implementation 'com.google.code.gson:gson:2.10'
     implementation 'com.google.android.material:material:1.8.0-alpha02'
     implementation 'com.github.agrawalsuneet:DotLoadersPack-Android:v1.4.2'
     implementation 'com.squareup.picasso:picasso:2.8'
@@ -82,13 +82,13 @@ dependencies {
 //    implementation project(':spannedlm')
 
     implementation 'com.google.firebase:firebase-analytics:21.2.0'
-    implementation 'com.google.firebase:firebase-crashlytics:18.3.1'
+    implementation 'com.google.firebase:firebase-crashlytics:18.3.2'
 
     implementation 'androidx.activity:activity-compose:1.6.1'
     implementation "androidx.compose.material:material:${compose_version}"
     implementation "androidx.compose.animation:animation:${compose_version}"
     implementation "androidx.compose.ui:ui-tooling:${compose_version}"
     implementation 'androidx.lifecycle:lifecycle-viewmodel-compose:2.5.1'
-    implementation "com.google.android.material:compose-theme-adapter:1.1.21"
-    implementation 'com.google.accompanist:accompanist-flowlayout:0.26.5-rc'
+    implementation "com.google.android.material:compose-theme-adapter:1.2.0"
+    implementation 'com.google.accompanist:accompanist-flowlayout:0.27.0'
 }
