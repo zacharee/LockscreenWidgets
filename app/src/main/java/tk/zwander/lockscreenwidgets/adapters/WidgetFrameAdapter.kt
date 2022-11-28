@@ -327,46 +327,53 @@ open class WidgetFrameAdapter(
             }
 
             binding.widgetReconfigure.setOnClickListener {
-                val data = currentData ?: return@setOnClickListener
-                val provider = data.widgetProviderComponent
+                openWidgetConfig()
+            }
+            binding.openWidgetConfig.setOnClickListener {
+                openWidgetConfig()
+            }
+        }
 
-                if (provider == null) {
+        private fun openWidgetConfig() {
+            val data = currentData ?: return
+            val provider = data.widgetProviderComponent
+
+            if (provider == null) {
+                //TODO: Notify + debug log
+                itemView.context.logUtils.normalLog("Unable to reconfigure widget: provider is null.")
+            } else {
+                val manager = AppWidgetManager.getInstance(itemView.context)
+                val pkg = provider.packageName
+                val providerInfo = run {
+                    val providers = try {
+                        manager.getInstalledProvidersForProfile(
+                            AppWidgetProviderInfo.WIDGET_CATEGORY_HOME_SCREEN,
+                            null,
+                            pkg
+                        ) + manager.getInstalledProvidersForProfile(
+                            AppWidgetProviderInfo.WIDGET_CATEGORY_KEYGUARD,
+                            null,
+                            pkg
+                        ) + manager.getInstalledProvidersForProfile(
+                            AppWidgetProviderInfo.WIDGET_CATEGORY_SEARCHBOX,
+                            null,
+                            pkg
+                        )
+                    } catch (e: NoSuchMethodError) {
+                        itemView.context.logUtils.debugLog("Unable to use getInstalledProvidersForProfile", e)
+
+                        manager.getInstalledProviders(AppWidgetProviderInfo.WIDGET_CATEGORY_HOME_SCREEN) +
+                                manager.getInstalledProviders(AppWidgetProviderInfo.WIDGET_CATEGORY_KEYGUARD) +
+                                manager.getInstalledProviders(AppWidgetProviderInfo.WIDGET_CATEGORY_SEARCHBOX)
+                    }
+                    providers.find { info -> info.provider == provider }
+                }
+
+                if (providerInfo == null) {
                     //TODO: Notify + debug log
-                    it.context.logUtils.normalLog("Unable to reconfigure widget: provider is null.")
+                    itemView.context.logUtils.normalLog("Unable to reconfigure widget $provider: provider info is null.")
                 } else {
-                    val manager = AppWidgetManager.getInstance(itemView.context)
-                    val pkg = provider.packageName
-                    val providerInfo = run {
-                        val providers = try {
-                            manager.getInstalledProvidersForProfile(
-                                AppWidgetProviderInfo.WIDGET_CATEGORY_HOME_SCREEN,
-                                null,
-                                pkg
-                            ) + manager.getInstalledProvidersForProfile(
-                                AppWidgetProviderInfo.WIDGET_CATEGORY_KEYGUARD,
-                                null,
-                                pkg
-                            ) + manager.getInstalledProvidersForProfile(
-                                AppWidgetProviderInfo.WIDGET_CATEGORY_SEARCHBOX,
-                                null,
-                                pkg
-                            )
-                        } catch (e: NoSuchMethodError) {
-                            itemView.context.logUtils.debugLog("Unable to use getInstalledProvidersForProfile", e)
-
-                            manager.getInstalledProviders(AppWidgetProviderInfo.WIDGET_CATEGORY_HOME_SCREEN) +
-                                    manager.getInstalledProviders(AppWidgetProviderInfo.WIDGET_CATEGORY_KEYGUARD) +
-                                    manager.getInstalledProviders(AppWidgetProviderInfo.WIDGET_CATEGORY_SEARCHBOX)
-                        }
-                        providers.find { info -> info.provider == provider }
-                    }
-
-                    if (providerInfo == null) {
-                        //TODO: Notify + debug log
-                        it.context.logUtils.normalLog("Unable to reconfigure widget $provider: provider info is null.")
-                    } else {
-                        launchReconfigure(data.id, providerInfo)
-                    }
+                    launchReconfigure(data.id, providerInfo)
                 }
             }
         }
@@ -416,7 +423,12 @@ open class WidgetFrameAdapter(
         }
 
         private fun updateEditingUI(index: Int) {
-            editingInterfaceShown = index != -1 && (index == bindingAdapterPosition)
+            val oldState = editingInterfaceShown
+            val newState = index != -1 && (index == bindingAdapterPosition)
+            editingInterfaceShown = newState
+            if (oldState != newState && index != -1 && index == bindingAdapterPosition) {
+                notifyItemChanged(bindingAdapterPosition)
+            }
         }
 
         private suspend fun bindWidget(data: WidgetData) {

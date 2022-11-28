@@ -141,6 +141,21 @@
                 />
 
             <ImageView
+                android:id="@+id/open_widget_config"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:src="@drawable/ic_baseline_restore_24"
+                android:clickable="true"
+                android:focusable="true"
+                android:layout_marginTop="8dp"
+                android:layout_marginEnd="8dp"
+                android:layout_gravity="top|end"
+                android:contentDescription="@string/reconfigure"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintEnd_toStartOf="@id/remove_widget"
+                />
+
+            <ImageView
                 android:id="@+id/remove_widget"
                 android:layout_width="32dp"
                 android:layout_height="32dp"
