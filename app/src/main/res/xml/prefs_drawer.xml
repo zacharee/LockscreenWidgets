@@ -53,11 +53,24 @@
 
         <tk.zwander.seekbarpreference.SeekBarPreference
             android:title="@string/drawer_column_count"
+            android:summary="@string/drawer_column_count_desc"
             android:defaultValue="2"
             android:key="drawer_col_count"
             android:icon="@drawable/ic_baseline_view_column_24"
             app:minValue="1"
             app:maxValue="8"
+            />
+
+        <tk.zwander.seekbarpreference.SeekBarPreference
+            android:title="@string/drawer_side_padding"
+            android:summary="@string/drawer_side_padding_desc"
+            android:defaultValue="0"
+            android:key="drawer_side_padding"
+            android:icon="@drawable/expand_horiz"
+            app:units="dp"
+            app:minValue="0"
+            app:maxValue="640"
+            app:scale="0.1"
             />
 
         <tk.zwander.seekbarpreference.SeekBarPreference

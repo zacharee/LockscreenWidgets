@@ -278,4 +278,7 @@
 
     <string name="drawer_column_count">Drawer Column Count</string>
     <string name="drawer_column_count_desc">Choose how many columns the drawer layout should have.</string>
+
+    <string name="drawer_side_padding">Drawer Side Padding</string>
+    <string name="drawer_side_padding_desc">Set how much space should show between the sides of the screen and the edges of the outer widgets.</string>
 </resources>

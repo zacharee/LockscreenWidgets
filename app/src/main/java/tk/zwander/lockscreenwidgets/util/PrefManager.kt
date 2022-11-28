@@ -118,6 +118,7 @@ class PrefManager private constructor(context: Context) : ContextWrapper(context
         const val KEY_FRAME_WIDGET_CORNER_RADIUS = "frame_widget_corner_radius"
         const val KEY_DRAWER_WIDGET_CORNER_RADIUS = "drawer_widget_corner_radius"
         const val KEY_FRAME_REMEMBER_POSITION = "frame_remember_position"
+        const val KEY_DRAWER_SIDE_PADDING = "drawer_side_padding"
 
         const val VALUE_PAGE_INDICATOR_BEHAVIOR_HIDDEN = 0
         const val VALUE_PAGE_INDICATOR_BEHAVIOR_AUTO_HIDE = 1
@@ -660,6 +661,12 @@ class PrefManager private constructor(context: Context) : ContextWrapper(context
         get() = getBoolean(KEY_FRAME_REMEMBER_POSITION, true)
         set(value) {
             putBoolean(KEY_FRAME_REMEMBER_POSITION, value)
+        }
+
+    var drawerSidePadding: Float
+        get() = getInt(KEY_DRAWER_SIDE_PADDING, 0) / 10f
+        set(value) {
+            putInt(KEY_DRAWER_SIDE_PADDING, (value * 10f).toInt())
         }
 
     fun getCorrectFrameWidth(mode: Mode): Float {

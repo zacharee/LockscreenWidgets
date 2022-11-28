@@ -23,6 +23,7 @@ import android.view.animation.DecelerateInterpolator
 import android.widget.FrameLayout
 import androidx.core.animation.doOnEnd
 import androidx.core.view.updateLayoutParams
+import androidx.core.view.updatePaddingRelative
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import com.arasthel.spannedgridlayoutmanager.SpannedGridLayoutManager
@@ -120,6 +121,9 @@ class Drawer : FrameLayout, EventObserver {
         }
         handler(PrefManager.KEY_LOCK_WIDGET_DRAWER) {
             adapter.currentEditingInterfacePosition = -1
+        }
+        handler(PrefManager.KEY_DRAWER_SIDE_PADDING) {
+            updateSidePadding()
         }
     }
 
@@ -247,6 +251,7 @@ class Drawer : FrameLayout, EventObserver {
         context.dpAsPx(16).apply {
             binding.removeWidgetConfirmation.root.setContentPadding(this, this, this, this)
         }
+        updateSidePadding()
     }
 
     fun onDestroy() {
@@ -310,6 +315,15 @@ class Drawer : FrameLayout, EventObserver {
 
     private fun removeWidget(info: WidgetData) {
         binding.removeWidgetConfirmation.root.show(info)
+    }
+
+    private fun updateSidePadding() {
+        val padding = context.dpAsPx(context.prefManager.drawerSidePadding)
+
+        binding.widgetGrid.updatePaddingRelative(
+            start = padding,
+            end = padding
+        )
     }
 
     private inner class SpannedLayoutManager(context: Context) : SpannedGridLayoutManager(
