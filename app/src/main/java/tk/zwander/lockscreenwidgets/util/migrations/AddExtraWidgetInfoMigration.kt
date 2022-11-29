@@ -3,9 +3,9 @@ package tk.zwander.lockscreenwidgets.util.migrations
 import android.appwidget.AppWidgetManager
 import android.content.Context
 import androidx.core.graphics.drawable.toBitmap
+import tk.zwander.common.util.appWidgetManager
 import tk.zwander.lockscreenwidgets.data.WidgetData
 import tk.zwander.lockscreenwidgets.data.WidgetType
-import tk.zwander.lockscreenwidgets.host.WidgetHostCompat
 import tk.zwander.lockscreenwidgets.util.loadPreviewOrIcon
 import tk.zwander.lockscreenwidgets.util.logUtils
 import tk.zwander.lockscreenwidgets.util.prefManager
@@ -16,8 +16,7 @@ class AddExtraWidgetInfoMigration : Migration {
         get() = 1
 
     override fun run(context: Context) {
-        val manager = AppWidgetManager.getInstance(context)
-
+        val manager = context.appWidgetManager
         val currentWidgets = context.prefManager.currentWidgets
 
         currentWidgets.forEach { widget ->

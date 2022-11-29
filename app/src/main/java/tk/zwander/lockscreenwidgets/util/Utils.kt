@@ -77,9 +77,6 @@ suspend inline fun <T> Collection<T>.forEachParallel(crossinline action: suspend
 val Context.safeApplicationContext: Context
     get() = if (this is Application) this else applicationContext
 
-val Context.logUtils: LogUtils
-    get() = LogUtils.getInstance(this)
-
 fun AppWidgetProviderInfo.loadPreviewOrIcon(context: Context, density: Int): Drawable? {
     return loadPreviewImage(context, density) ?: loadIcon(context, density)
 }

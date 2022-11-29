@@ -18,14 +18,14 @@ import java.lang.reflect.Proxy
  * of [RemoteViews.OnClickHandler].
  */
 @SuppressLint("PrivateApi")
-class WidgetHost12(context: Context, id: Int, unlockCallback: ((Boolean) -> Unit)?) : WidgetHostCompat(
-    context, id, Proxy.newProxyInstance(
+class WidgetHost12(context: Context, id: Int) : WidgetHostCompat(context, id) {
+    override val onClickHandler: Any = Proxy.newProxyInstance(
         Class.forName("android.widget.RemoteViews\$InteractionHandler").classLoader,
         arrayOf(Class.forName("android.widget.RemoteViews\$InteractionHandler")),
-        InnerOnClickHandler12(context, unlockCallback)
+        InnerOnClickHandler12()
     )
-) {
-    class InnerOnClickHandler12(context: Context, unlockCallback: ((Boolean) -> Unit)?) : BaseInnerOnClickHandler(context, unlockCallback),
+
+    inner class InnerOnClickHandler12 : BaseInnerOnClickHandler(),
         InvocationHandler {
         @SuppressLint("BlockedPrivateApi", "PrivateApi")
         override fun invoke(proxy: Any?, method: Method?, args: Array<out Any>): Any {

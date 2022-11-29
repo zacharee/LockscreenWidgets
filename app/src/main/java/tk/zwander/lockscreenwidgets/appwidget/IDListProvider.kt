@@ -6,6 +6,7 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.widget.RemoteViews
+import tk.zwander.common.util.appWidgetManager
 import tk.zwander.lockscreenwidgets.R
 import tk.zwander.lockscreenwidgets.services.IDWidgetService
 
@@ -17,7 +18,7 @@ class IDListProvider : AppWidgetProvider() {
     companion object {
         fun sendUpdate(context: Context) {
             //There's a new list of IDs; make sure the factory is notified
-            val manager = AppWidgetManager.getInstance(context)
+            val manager = context.appWidgetManager
             val component = ComponentName(context, IDListProvider::class.java)
             manager.notifyAppWidgetViewDataChanged(manager.getAppWidgetIds(component), R.id.id_list)
         }

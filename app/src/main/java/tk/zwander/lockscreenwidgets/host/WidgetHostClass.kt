@@ -21,15 +21,14 @@ import net.bytebuddy.implementation.SuperMethodCall
  * visible to it is an interface, so we can't just create a stub class.
  */
 @SuppressLint("PrivateApi")
-class WidgetHostClass(context: Context, id: Int, unlockCallback: ((Boolean) -> Unit)?)
-    : WidgetHostCompat(
-    context, id, ByteBuddy()
+class WidgetHostClass(context: Context, id: Int) : WidgetHostCompat(context, id) {
+    override val onClickHandler: Any = ByteBuddy()
         .subclass(Class.forName("android.widget.RemoteViews\$OnClickHandler"))
         .name("OnClickHandlerPieIntercept")
         .defineMethod("onClickHandler", Boolean::class.java)
         .withParameters(View::class.java, PendingIntent::class.java, Intent::class.java)
         .intercept(
-            MethodDelegation.to(InnerOnClickHandlerPie(context, unlockCallback))
+            MethodDelegation.to(InnerOnClickHandlerPie())
                 .andThen(SuperMethodCall.INSTANCE)
         )
         .apply {
@@ -37,8 +36,8 @@ class WidgetHostClass(context: Context, id: Int, unlockCallback: ((Boolean) -> U
                 defineMethod("onClickHandler", Boolean::class.java)
                     .withParameters(View::class.java, PendingIntent::class.java, Intent::class.java, Int::class.java)
                     .intercept(
-                        MethodDelegation.to(InnerOnClickHandlerPie(context, unlockCallback))
-                        .andThen(SuperMethodCall.INSTANCE)
+                        MethodDelegation.to(InnerOnClickHandlerPie())
+                            .andThen(SuperMethodCall.INSTANCE)
                     )
             }
         }
@@ -46,8 +45,8 @@ class WidgetHostClass(context: Context, id: Int, unlockCallback: ((Boolean) -> U
         .load(WidgetHostCompat::class.java.classLoader, AndroidClassLoadingStrategy.Wrapping(context.cacheDir))
         .loaded
         .newInstance()
-) {
-    class InnerOnClickHandlerPie(context: Context, unlockCallback: ((Boolean) -> Unit)?): BaseInnerOnClickHandler(context, unlockCallback) {
+
+    inner class InnerOnClickHandlerPie : BaseInnerOnClickHandler() {
         @Suppress("UNUSED_PARAMETER", "unused")
         fun onClickHandler(
             view: View,

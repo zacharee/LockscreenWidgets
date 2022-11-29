@@ -4,7 +4,6 @@ import android.annotation.SuppressLint
 import android.app.IWallpaperManager
 import android.app.KeyguardManager
 import android.app.WallpaperManager
-import android.appwidget.AppWidgetManager
 import android.content.Context
 import android.content.ContextWrapper
 import android.graphics.Bitmap
@@ -38,6 +37,7 @@ import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import com.android.internal.R.attr.screenOrientation
 import com.arasthel.spannedgridlayoutmanager.SpannedGridLayoutManager
+import tk.zwander.common.util.appWidgetManager
 import tk.zwander.lockscreenwidgets.R
 import tk.zwander.lockscreenwidgets.activities.DismissOrUnlockActivity
 import tk.zwander.lockscreenwidgets.adapters.WidgetFrameAdapter
@@ -45,6 +45,7 @@ import tk.zwander.lockscreenwidgets.data.Mode
 import tk.zwander.lockscreenwidgets.data.WidgetType
 import tk.zwander.lockscreenwidgets.databinding.WidgetFrameBinding
 import tk.zwander.lockscreenwidgets.host.WidgetHostCompat
+import tk.zwander.lockscreenwidgets.host.widgetHostCompat
 import tk.zwander.lockscreenwidgets.services.Accessibility
 import tk.zwander.lockscreenwidgets.views.WidgetFrameView
 
@@ -53,7 +54,7 @@ import tk.zwander.lockscreenwidgets.views.WidgetFrameView
  * TODO: make this work with multiple frame "clients" (i.e. a preview in MainActivity).
  */
 class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper(context),
-    EventObserver {
+    EventObserver, WidgetHostCompat.OnClickCallback {
     companion object {
         private var instance by mutableStateOf<WidgetFrameDelegate?>(null)
 
@@ -166,21 +167,13 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
     }
     private val wallpaper = getSystemService(Context.WALLPAPER_SERVICE) as WallpaperManager
     private val wm = getSystemService(Context.WINDOW_SERVICE) as WindowManager
-    private val widgetManager = AppWidgetManager.getInstance(this)!!
-    private val widgetHost = WidgetHostCompat.getInstance(this, 1003) {
-        if (it) {
-            DismissOrUnlockActivity.launch(this)
-        } else {
-            context.eventManager.sendEvent(Event.FrameWidgetClick)
-        }
-    }
-    private val shortcutIdManager = ShortcutIdManager.getInstance(this, widgetHost)
+    private val widgetHost = widgetHostCompat
 
     //The actual frame View
     private val binding =
         WidgetFrameBinding.inflate(LayoutInflater.from(ContextThemeWrapper(this, R.style.AppTheme)))
     private val gridLayoutManager = SpannedLayoutManager()
-    private val adapter = WidgetFrameAdapter(widgetManager, widgetHost) { item, _ ->
+    private val adapter = WidgetFrameAdapter(appWidgetManager, widgetHost) { item, _ ->
         binding.removeWidgetConfirmation.root.show(item)
     }
 
@@ -396,6 +389,14 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
         }
     }
 
+    override fun onWidgetClick(trigger: Boolean) {
+        if (trigger && prefManager.requestUnlock) {
+            DismissOrUnlockActivity.launch(this)
+        } else {
+            eventManager.sendEvent(Event.FrameWidgetClick)
+        }
+    }
+
     fun onCreate() {
         sharedPreferencesChangeHandler.register(this)
         gridLayoutManager.spanSizeLookup = adapter.spanSizeLookup
@@ -406,6 +407,7 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
             ItemTouchHelper(touchHelperCallback).attachToRecyclerView(this)
         }
         blurManager.onCreate()
+        widgetHost.addOnClickCallback(this)
 
         updateRowColCount()
         adapter.updateWidgets(prefManager.currentWidgets.toList())
@@ -428,6 +430,7 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
         }
         invalidateInstance()
         blurManager.onDestroy()
+        widgetHost.removeOnClickCallback(this)
     }
 
     fun updateState(transform: (State) -> State) {

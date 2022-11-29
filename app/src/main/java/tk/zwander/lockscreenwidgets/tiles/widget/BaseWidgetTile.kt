@@ -1,7 +1,6 @@
 package tk.zwander.lockscreenwidgets.tiles.widget
 
 import android.app.PendingIntent
-import android.appwidget.AppWidgetManager
 import android.appwidget.AppWidgetProviderInfo
 import android.content.Context
 import android.content.Intent
@@ -20,6 +19,7 @@ import androidx.annotation.RequiresApi
 import androidx.core.content.res.ResourcesCompat
 import androidx.core.graphics.drawable.toBitmap
 import com.android.internal.appwidget.IAppWidgetService
+import tk.zwander.common.util.appWidgetManager
 import tk.zwander.lockscreenwidgets.R
 import tk.zwander.lockscreenwidgets.activities.add.AddTileWidgetActivity
 import tk.zwander.lockscreenwidgets.util.*
@@ -36,11 +36,10 @@ import java.util.concurrent.atomic.AtomicReference
  */
 @RequiresApi(Build.VERSION_CODES.N)
 abstract class BaseWidgetTile : TileService(), SharedPreferences.OnSharedPreferenceChangeListener {
-    protected val manager by lazy { AppWidgetManager.getInstance(this) }
     protected val iManager by lazy {
         IAppWidgetService.Stub.asInterface(
             ServiceManager.getService(Context.APPWIDGET_SERVICE)
-        )
+        )!!
     }
 
     protected abstract val tileId: Int
@@ -54,7 +53,7 @@ abstract class BaseWidgetTile : TileService(), SharedPreferences.OnSharedPrefere
             val widgetId = widgetId
             if (widgetId == -1) return null
 
-            return manager.getAppWidgetInfo(widgetId)
+            return appWidgetManager.getAppWidgetInfo(widgetId)
         }
     protected val widgetPackage: String?
         get() = widgetInfo?.providerInfo?.packageName

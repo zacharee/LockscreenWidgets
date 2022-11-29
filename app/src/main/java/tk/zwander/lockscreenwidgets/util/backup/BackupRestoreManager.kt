@@ -5,7 +5,7 @@ import android.content.Context
 import android.content.ContextWrapper
 import com.google.gson.reflect.TypeToken
 import tk.zwander.lockscreenwidgets.data.WidgetData
-import tk.zwander.lockscreenwidgets.host.WidgetHostCompat
+import tk.zwander.lockscreenwidgets.host.widgetHostCompat
 import tk.zwander.lockscreenwidgets.util.PrefManager
 import tk.zwander.lockscreenwidgets.util.logUtils
 import tk.zwander.lockscreenwidgets.util.prefManager
@@ -85,16 +85,16 @@ class BackupRestoreManager private constructor(context: Context) : ContextWrappe
 
         return handleWidgetString(newWidgets, which).also {
             if (it) {
-                rows?.toIntOrNull()?.let {
+                rows?.toIntOrNull()?.let { rows ->
                     when (which) {
-                        Which.FRAME -> prefManager.frameRowCount = it
+                        Which.FRAME -> prefManager.frameRowCount = rows
                         Which.DRAWER -> {}
                     }
                 }
-                cols?.toIntOrNull()?.let {
+                cols?.toIntOrNull()?.let { cols ->
                     when (which) {
-                        Which.FRAME -> prefManager.frameColCount = it
-                        Which.DRAWER -> prefManager.drawerColCount = it
+                        Which.FRAME -> prefManager.frameColCount = cols
+                        Which.DRAWER -> prefManager.drawerColCount = cols
                     }
                 }
             }
@@ -116,7 +116,7 @@ class BackupRestoreManager private constructor(context: Context) : ContextWrappe
             Which.FRAME -> prefManager.currentWidgets
             Which.DRAWER -> prefManager.drawerWidgets
         }
-        val widgetHost = WidgetHostCompat.getInstance(this, 1003)
+        val widgetHost = widgetHostCompat
 
         old.forEach {
             widgetHost.deleteAppWidgetId(it.id)

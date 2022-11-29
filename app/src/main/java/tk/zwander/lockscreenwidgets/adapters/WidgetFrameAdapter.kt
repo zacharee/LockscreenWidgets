@@ -342,7 +342,6 @@ open class WidgetFrameAdapter(
                 //TODO: Notify + debug log
                 itemView.context.logUtils.normalLog("Unable to reconfigure widget: provider is null.")
             } else {
-                val manager = AppWidgetManager.getInstance(itemView.context)
                 val pkg = provider.packageName
                 val providerInfo = run {
                     val providers = try {
@@ -394,6 +393,7 @@ open class WidgetFrameAdapter(
                         WidgetType.HEADER -> {}
                     }
 
+                    binding.openWidgetConfig.isVisible = data.widgetProviderComponent != null
                     binding.card.radius = context.dpAsPx(widgetCornerRadius).toFloat()
                     binding.widgetEditOutline.background = (binding.widgetEditOutline.background.mutate() as GradientDrawable).apply {
                         this.cornerRadius = binding.card.radius

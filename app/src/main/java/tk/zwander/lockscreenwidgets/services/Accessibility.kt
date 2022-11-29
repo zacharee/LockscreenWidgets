@@ -434,7 +434,8 @@ class Accessibility : AccessibilityService(), EventObserver, CoroutineScope by M
                 }
             }
 
-            if (eventCopy.eventType == AccessibilityEvent.TYPE_WINDOWS_CHANGED || eventCopy.eventType == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED) {
+            if (eventCopy.eventType == AccessibilityEvent.TYPE_WINDOWS_CHANGED
+                || eventCopy.eventType == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED) {
                 drawerDelegate.updateState { it.copy(handlingDrawerClick = false) }
                 frameDelegate.updateState { it.copy(handlingFrameClick = false) }
             }

@@ -8,6 +8,9 @@ import java.io.OutputStream
 import java.text.SimpleDateFormat
 import java.util.*
 
+val Context.logUtils: LogUtils
+    get() = LogUtils.getInstance(this)
+
 class LogUtils private constructor(private val context: Context) {
     companion object {
         const val NORMAL_LOG_TAG = "LockscreenWidgets"

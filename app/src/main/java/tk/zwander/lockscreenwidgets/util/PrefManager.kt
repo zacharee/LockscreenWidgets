@@ -86,6 +86,7 @@ class PrefManager private constructor(context: Context) : ContextWrapper(context
         const val KEY_FRAME_MASKED_MODE = "masked_mode"
         const val KEY_TOUCH_PROTECTION = "touch_protection"
         const val KEY_REQUEST_UNLOCK = "request_unlock"
+        const val KEY_REQUEST_UNLOCK_DRAWER = "request_unlock_drawer"
         const val KEY_HIDE_ON_FACEWIDGETS = "hide_on_facewidgets"
         const val KEY_HIDE_IN_LANDSCAPE = "hide_in_landscape"
         const val KEY_SEPARATE_POS_FOR_LOCK_NC = "separate_position_for_lock_notification"
@@ -553,6 +554,12 @@ class PrefManager private constructor(context: Context) : ContextWrapper(context
         get() = getBoolean(KEY_REQUEST_UNLOCK, true)
         set(value) {
             putBoolean(KEY_REQUEST_UNLOCK, value)
+        }
+
+    var requestUnlockDrawer: Boolean
+        get() = getBoolean(KEY_REQUEST_UNLOCK_DRAWER, true)
+        set(value) {
+            putBoolean(KEY_REQUEST_UNLOCK_DRAWER, value)
         }
 
     //Whether to hide the frame when Samsung's FaceWidgets screen is showing.

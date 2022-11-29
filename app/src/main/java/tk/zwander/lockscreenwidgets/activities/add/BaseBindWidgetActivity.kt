@@ -14,11 +14,12 @@ import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import com.android.internal.appwidget.IAppWidgetService
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import tk.zwander.common.util.appWidgetManager
 import tk.zwander.lockscreenwidgets.R
 import tk.zwander.lockscreenwidgets.data.WidgetData
 import tk.zwander.lockscreenwidgets.data.WidgetSizeData
 import tk.zwander.lockscreenwidgets.data.list.ShortcutListInfo
-import tk.zwander.lockscreenwidgets.host.WidgetHostCompat
+import tk.zwander.lockscreenwidgets.host.widgetHostCompat
 import tk.zwander.lockscreenwidgets.util.*
 import kotlin.math.floor
 
@@ -27,9 +28,7 @@ abstract class BaseBindWidgetActivity : ComponentActivity() {
         private const val CONFIGURE_REQ = 1000
     }
 
-    protected val widgetHost by lazy { WidgetHostCompat.getInstance(this, 1003) }
-    protected val appWidgetManager by lazy { AppWidgetManager.getInstance(this)!! }
-    protected val shortcutIdManager by lazy { ShortcutIdManager.getInstance(this, widgetHost) }
+    protected val widgetHost by lazy { widgetHostCompat }
     protected val widgetDelegate: WidgetFrameDelegate?
         get() = WidgetFrameDelegate.peekInstance(this)
 

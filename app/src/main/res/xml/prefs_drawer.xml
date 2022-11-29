@@ -23,6 +23,14 @@
             />
 
         <SwitchPreference
+            android:title="@string/settings_screen_request_unlock"
+            android:summary="@string/settings_screen_request_unlock_desc"
+            android:key="request_unlock_drawer"
+            android:icon="@drawable/ic_baseline_launch_24"
+            android:defaultValue="true"
+            />
+
+        <SwitchPreference
             android:title="@string/settings_screen_blur_background"
             android:summary="@string/settings_screen_blur_drawer_background_desc"
             android:key="blur_drawer_background"

@@ -3,7 +3,6 @@ package tk.zwander.widgetdrawer.views
 import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
 import android.animation.ValueAnimator
-import android.appwidget.AppWidgetManager
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
@@ -27,16 +26,18 @@ import androidx.core.view.updatePaddingRelative
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import com.arasthel.spannedgridlayoutmanager.SpannedGridLayoutManager
+import tk.zwander.common.util.appWidgetManager
 import tk.zwander.lockscreenwidgets.R
 import tk.zwander.lockscreenwidgets.activities.DismissOrUnlockActivity
 import tk.zwander.lockscreenwidgets.data.WidgetData
 import tk.zwander.lockscreenwidgets.data.WidgetType
 import tk.zwander.lockscreenwidgets.databinding.DrawerLayoutBinding
 import tk.zwander.lockscreenwidgets.host.WidgetHostCompat
+import tk.zwander.lockscreenwidgets.host.widgetHostCompat
 import tk.zwander.lockscreenwidgets.util.*
 import tk.zwander.widgetdrawer.adapters.DrawerAdapter
 
-class Drawer : FrameLayout, EventObserver {
+class Drawer : FrameLayout, EventObserver, WidgetHostCompat.OnClickCallback {
     companion object {
         const val ANIM_DURATION = 200L
     }
@@ -58,23 +59,9 @@ class Drawer : FrameLayout, EventObserver {
         }
 
     private val wm by lazy { context.applicationContext.getSystemService(Context.WINDOW_SERVICE) as WindowManager }
-    private val host by lazy {
-        WidgetHostCompat.getInstance(
-            context,
-            1003
-        ) {
-            if (it) {
-                DismissOrUnlockActivity.launch(context)
-                context.eventManager.sendEvent(Event.CloseDrawer)
-            } else {
-                context.eventManager.sendEvent(Event.DrawerWidgetClick)
-            }
-        }
-    }
-    private val manager by lazy { AppWidgetManager.getInstance(context.applicationContext) }
-    private val shortcutIdManager by lazy { ShortcutIdManager.getInstance(context, host) }
+    private val host by lazy { context.widgetHostCompat }
     private val adapter by lazy {
-        DrawerAdapter(manager, host) { widget, _ ->
+        DrawerAdapter(context.appWidgetManager, host) { widget, _ ->
             removeWidget(widget)
         }
     }
@@ -167,6 +154,7 @@ class Drawer : FrameLayout, EventObserver {
     override fun onAttachedToWindow() {
         super.onAttachedToWindow()
 
+        host.addOnClickCallback(this)
         host.startListening()
         Handler(Looper.getMainLooper()).postDelayed({
             adapter.notifyItemRangeChanged(0, adapter.itemCount)
@@ -193,6 +181,8 @@ class Drawer : FrameLayout, EventObserver {
     override fun onDetachedFromWindow() {
         super.onDetachedFromWindow()
 
+        host.removeOnClickCallback(this)
+
         try {
             host.stopListening()
         } catch (e: NullPointerException) {
@@ -217,7 +207,7 @@ class Drawer : FrameLayout, EventObserver {
                         remove(event.item)
                         when (event.item?.safeType) {
                             WidgetType.WIDGET -> host.deleteAppWidgetId(event.item.id)
-                            WidgetType.SHORTCUT -> shortcutIdManager.removeShortcutId(event.item.id)
+                            WidgetType.SHORTCUT -> context.shortcutIdManager.removeShortcutId(event.item.id)
                             else -> {}
                         }
                     }
@@ -229,6 +219,15 @@ class Drawer : FrameLayout, EventObserver {
                 }
             }
             else -> {}
+        }
+    }
+
+    override fun onWidgetClick(trigger: Boolean) {
+        if (trigger && context.prefManager.requestUnlockDrawer) {
+            DismissOrUnlockActivity.launch(context)
+            context.eventManager.sendEvent(Event.CloseDrawer)
+        } else {
+            context.eventManager.sendEvent(Event.DrawerWidgetClick)
         }
     }
 
