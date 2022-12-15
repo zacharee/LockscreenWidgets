@@ -23,12 +23,12 @@ import net.bytebuddy.implementation.SuperMethodCall
 @SuppressLint("PrivateApi")
 class WidgetHostClass(context: Context, id: Int) : WidgetHostCompat(context, id) {
     override val onClickHandler: Any = ByteBuddy()
-        .subclass(Class.forName("android.widget.RemoteViews\$OnClickHandler"))
+        .subclass(ON_CLICK_HANDLER_CLASS)
         .name("OnClickHandlerPieIntercept")
         .defineMethod("onClickHandler", Boolean::class.java)
         .withParameters(View::class.java, PendingIntent::class.java, Intent::class.java)
         .intercept(
-            MethodDelegation.to(InnerOnClickHandlerPie())
+            MethodDelegation.to(InnerOnClickHandlerClass())
                 .andThen(SuperMethodCall.INSTANCE)
         )
         .apply {
@@ -36,7 +36,7 @@ class WidgetHostClass(context: Context, id: Int) : WidgetHostCompat(context, id)
                 defineMethod("onClickHandler", Boolean::class.java)
                     .withParameters(View::class.java, PendingIntent::class.java, Intent::class.java, Int::class.java)
                     .intercept(
-                        MethodDelegation.to(InnerOnClickHandlerPie())
+                        MethodDelegation.to(InnerOnClickHandlerClass())
                             .andThen(SuperMethodCall.INSTANCE)
                     )
             }
@@ -46,7 +46,7 @@ class WidgetHostClass(context: Context, id: Int) : WidgetHostCompat(context, id)
         .loaded
         .newInstance()
 
-    inner class InnerOnClickHandlerPie : BaseInnerOnClickHandler() {
+    inner class InnerOnClickHandlerClass : BaseInnerOnClickHandler() {
         @Suppress("UNUSED_PARAMETER", "unused")
         fun onClickHandler(
             view: View,

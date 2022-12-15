@@ -14,7 +14,7 @@ val Context.widgetHostCompat: WidgetHostCompat
     get() = WidgetHostCompat.getInstance(this)
 
 /**
- * Base widget host class. [WidgetHostClass], [WidgetHostInterface], and [WidgetHost12] extend this class and
+ * Base widget host class. [WidgetHostClass] and [WidgetHostInterface] extend this class and
  * are used conditionally, depending on whether [RemoteViews.OnClickHandler] is a class or interface
  * or [RemoteViews.InteractionHandler] is used on the device.
  *
@@ -29,6 +29,18 @@ abstract class WidgetHostCompat(
 ) : AppWidgetHost(context, id) {
     companion object {
         const val HOST_ID = 1003
+        @SuppressLint("PrivateApi")
+        val ON_CLICK_HANDLER_CLASS = try {
+            Class.forName("android.widget.RemoteViews\$OnClickHandler")
+        } catch (e: ClassNotFoundException) {
+            null
+        }
+        @SuppressLint("PrivateApi")
+        val INTERACTION_HANDLER_CLASS = try {
+            Class.forName("android.widget.RemoteViews\$InteractionHandler")
+        } catch (e: ClassNotFoundException) {
+            null
+        }
 
         @SuppressLint("StaticFieldLeak")
         private var instance: WidgetHostCompat? = null
@@ -36,11 +48,15 @@ abstract class WidgetHostCompat(
         @SuppressLint("PrivateApi")
         fun getInstance(context: Context): WidgetHostCompat {
             return instance ?: run {
+                if (ON_CLICK_HANDLER_CLASS == null && INTERACTION_HANDLER_CLASS == null) {
+                    throw IllegalStateException("Neither OnClickHandler nor InteractionHandler could be found!")
+                }
+
                 if (!onClickHandlerExists) {
-                    WidgetHost12(context.safeApplicationContext, HOST_ID)
+                    WidgetHostInterface(context.safeApplicationContext, HOST_ID, INTERACTION_HANDLER_CLASS!!)
                 } else {
-                    (if (Class.forName("android.widget.RemoteViews\$OnClickHandler").isInterface) {
-                        WidgetHostInterface(context.safeApplicationContext, HOST_ID)
+                    (if (ON_CLICK_HANDLER_CLASS!!.isInterface) {
+                        WidgetHostInterface(context.safeApplicationContext, HOST_ID, ON_CLICK_HANDLER_CLASS)
                     } else {
                         WidgetHostClass(context.safeApplicationContext, HOST_ID)
                     }).also {
@@ -50,16 +66,7 @@ abstract class WidgetHostCompat(
             }
         }
 
-        private val onClickHandlerExists: Boolean
-            @SuppressLint("PrivateApi")
-            get() = try {
-                Class.forName("android.widget.RemoteViews\$OnClickHandler")
-                true
-            } catch (e: ClassNotFoundException) {
-                //Should crash if neither exists
-                Class.forName("android.widget.RemoteViews\$InteractionHandler")
-                false
-            }
+        private val onClickHandlerExists: Boolean = ON_CLICK_HANDLER_CLASS != null
     }
 
     protected abstract val onClickHandler: Any

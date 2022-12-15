@@ -18,14 +18,14 @@ import java.lang.reflect.Proxy
  * it pretty easy to implement interfaces through reflection, so no ByteBuddy needed here.
  */
 @SuppressLint("PrivateApi")
-class WidgetHostInterface(context: Context, id: Int) : WidgetHostCompat(context, id) {
+open class WidgetHostInterface(context: Context, id: Int, clickHandlerClass: Class<*>) : WidgetHostCompat(context, id) {
     override val onClickHandler: Any = Proxy.newProxyInstance(
-        Class.forName("android.widget.RemoteViews\$OnClickHandler").classLoader,
-        arrayOf(Class.forName("android.widget.RemoteViews\$OnClickHandler")),
-        InnerOnClickHandlerQ()
+        clickHandlerClass.classLoader,
+        arrayOf(clickHandlerClass),
+        InnerOnClickHandlerInterface()
     )
 
-    inner class InnerOnClickHandlerQ : BaseInnerOnClickHandler(), InvocationHandler {
+    open inner class InnerOnClickHandlerInterface : BaseInnerOnClickHandler(), InvocationHandler {
         @SuppressLint("BlockedPrivateApi", "PrivateApi")
         override fun invoke(proxy: Any?, method: Method?, args: Array<out Any>): Any {
             val view = args[0] as View
