@@ -65,15 +65,6 @@ abstract class WidgetHostCompat(
     protected abstract val onClickHandler: Any
     protected val onClickCallbacks = mutableSetOf<OnClickCallback>()
 
-    init {
-        AppWidgetHost::class.java
-            .getDeclaredField(if (!onClickHandlerExists) "mInteractionHandler" else "mOnClickHandler")
-            .apply {
-                isAccessible = true
-                set(this@WidgetHostCompat, onClickHandler)
-            }
-    }
-
     fun addOnClickCallback(callback: OnClickCallback) {
         onClickCallbacks.add(callback)
     }
@@ -87,6 +78,13 @@ abstract class WidgetHostCompat(
         appWidgetId: Int,
         appWidget: AppWidgetProviderInfo?
     ): AppWidgetHostView {
+        AppWidgetHost::class.java
+            .getDeclaredField(if (!onClickHandlerExists) "mInteractionHandler" else "mOnClickHandler")
+            .apply {
+                isAccessible = true
+                set(this@WidgetHostCompat, onClickHandler)
+            }
+
         return ZeroPaddingAppWidgetHostView(context)
     }
 
