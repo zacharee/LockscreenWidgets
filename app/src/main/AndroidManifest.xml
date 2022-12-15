@@ -58,6 +58,7 @@
             />
         <activity android:name=".activities.DismissOrUnlockActivity"
             android:exported="false"
+            android:launchMode="singleInstance"
             android:excludeFromRecents="true"
             android:theme="@style/AppTheme.Null"
             />
