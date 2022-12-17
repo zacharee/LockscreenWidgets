@@ -21,7 +21,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import com.agrawalsuneet.dotsloader.loaders.AllianceLoader
-import com.google.android.material.composethemeadapter.MdcTheme
+import com.google.accompanist.themeadapter.material.MdcTheme
 import tk.zwander.lockscreenwidgets.data.list.BaseListInfo
 
 @Composable
