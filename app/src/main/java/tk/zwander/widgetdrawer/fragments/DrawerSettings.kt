@@ -4,11 +4,11 @@ import android.os.Bundle
 import androidx.preference.SwitchPreference
 import tk.zwander.common.fragments.CommonPreferenceFragment
 import tk.zwander.lockscreenwidgets.R
-import tk.zwander.lockscreenwidgets.util.HandlerRegistry
-import tk.zwander.lockscreenwidgets.util.PrefManager
-import tk.zwander.lockscreenwidgets.util.backup.BackupRestoreManager
-import tk.zwander.lockscreenwidgets.util.handler
-import tk.zwander.lockscreenwidgets.util.prefManager
+import tk.zwander.common.util.HandlerRegistry
+import tk.zwander.common.util.PrefManager
+import tk.zwander.common.util.backup.BackupRestoreManager
+import tk.zwander.common.util.handler
+import tk.zwander.common.util.prefManager
 
 class DrawerSettings : CommonPreferenceFragment() {
     override val prefsHandler = HandlerRegistry {

@@ -8,10 +8,10 @@ import android.os.Build
 import android.provider.Settings
 import android.service.notification.NotificationListenerService
 import android.service.notification.StatusBarNotification
-import tk.zwander.lockscreenwidgets.util.Event
-import tk.zwander.lockscreenwidgets.util.EventObserver
-import tk.zwander.lockscreenwidgets.util.eventManager
-import tk.zwander.lockscreenwidgets.util.logUtils
+import tk.zwander.common.util.Event
+import tk.zwander.common.util.EventObserver
+import tk.zwander.common.util.eventManager
+import tk.zwander.common.util.logUtils
 
 //Check if the notification listener service is enabled
 val Context.isNotificationListenerActive: Boolean

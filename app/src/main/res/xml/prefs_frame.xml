@@ -226,7 +226,7 @@
             app:units="ms"
             />
 
-        <tk.zwander.lockscreenwidgets.prefs.AutoSummaryListPreference
+        <tk.zwander.common.prefs.AutoSummaryListPreference
             android:title="@string/settings_screen_page_indicator_behavior"
             android:key="page_indicator_behavior"
             android:icon="@drawable/ic_baseline_visibility_24"

@@ -14,6 +14,15 @@ import android.view.MotionEvent
 import android.view.WindowManager
 import android.widget.LinearLayout
 import androidx.appcompat.content.res.AppCompatResources
+import tk.zwander.common.util.Event
+import tk.zwander.common.util.HandlerRegistry
+import tk.zwander.common.util.PrefManager
+import tk.zwander.common.util.dpAsPx
+import tk.zwander.common.util.eventManager
+import tk.zwander.common.util.handler
+import tk.zwander.common.util.prefManager
+import tk.zwander.common.util.screenSize
+import tk.zwander.common.util.vibrate
 import tk.zwander.lockscreenwidgets.R
 import tk.zwander.lockscreenwidgets.util.*
 import kotlin.math.absoluteValue

@@ -11,18 +11,18 @@ import androidx.appcompat.app.AppCompatActivity
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.cancel
-import tk.zwander.lockscreenwidgets.activities.OnboardingActivity
+import tk.zwander.common.activities.OnboardingActivity
 import tk.zwander.common.compose.main.MainContent
 import tk.zwander.lockscreenwidgets.services.isAccessibilityEnabled
-import tk.zwander.lockscreenwidgets.tiles.NCTile
-import tk.zwander.lockscreenwidgets.tiles.widget.WidgetTileFive
-import tk.zwander.lockscreenwidgets.tiles.widget.WidgetTileFour
-import tk.zwander.lockscreenwidgets.tiles.widget.WidgetTileOne
-import tk.zwander.lockscreenwidgets.tiles.widget.WidgetTileThree
-import tk.zwander.lockscreenwidgets.tiles.widget.WidgetTileTwo
+import tk.zwander.common.tiles.NCTile
+import tk.zwander.common.tiles.widget.WidgetTileFive
+import tk.zwander.common.tiles.widget.WidgetTileFour
+import tk.zwander.common.tiles.widget.WidgetTileOne
+import tk.zwander.common.tiles.widget.WidgetTileThree
+import tk.zwander.common.tiles.widget.WidgetTileTwo
 import tk.zwander.lockscreenwidgets.util.WidgetFrameDelegate
-import tk.zwander.lockscreenwidgets.util.isOneUI
-import tk.zwander.lockscreenwidgets.util.prefManager
+import tk.zwander.common.util.isOneUI
+import tk.zwander.common.util.prefManager
 
 /**
  * Host the main page of the app (the social links). It also hosts the buttons to add a widget, view usage

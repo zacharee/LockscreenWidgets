@@ -6,7 +6,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import tk.zwander.common.compose.util.rememberBooleanPreferenceState
-import tk.zwander.lockscreenwidgets.util.prefManager
+import tk.zwander.common.util.prefManager
 
 @SuppressLint("ComposableNaming")
 @Composable

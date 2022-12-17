@@ -31,11 +31,11 @@ import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import tk.zwander.common.data.AppInfo
 import tk.zwander.common.util.getRemoteDrawable
+import tk.zwander.common.util.toBitmap
 import tk.zwander.lockscreenwidgets.R
-import tk.zwander.lockscreenwidgets.data.AppInfo
 import tk.zwander.lockscreenwidgets.data.list.BaseListInfo
-import tk.zwander.lockscreenwidgets.util.toBitmap
 
 @Composable
 fun AddWidgetScroller(

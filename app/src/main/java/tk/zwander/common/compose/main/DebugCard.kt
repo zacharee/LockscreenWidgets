@@ -29,8 +29,8 @@ import androidx.compose.ui.unit.dp
 import tk.zwander.lockscreenwidgets.R
 import tk.zwander.common.compose.components.ClickableCard
 import tk.zwander.common.compose.components.PreferenceSwitch
-import tk.zwander.lockscreenwidgets.util.PrefManager
-import tk.zwander.lockscreenwidgets.util.logUtils
+import tk.zwander.common.util.PrefManager
+import tk.zwander.common.util.logUtils
 import java.text.SimpleDateFormat
 import java.util.*
 

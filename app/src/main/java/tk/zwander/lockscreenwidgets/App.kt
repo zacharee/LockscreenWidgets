@@ -11,11 +11,11 @@ import android.net.Uri
 import android.os.Build
 import android.provider.Settings
 import org.lsposed.hiddenapibypass.HiddenApiBypass
-import tk.zwander.lockscreenwidgets.activities.add.AddWidgetActivity
-import tk.zwander.lockscreenwidgets.util.Event
-import tk.zwander.lockscreenwidgets.util.GlobalExceptionHandler
-import tk.zwander.lockscreenwidgets.util.eventManager
-import tk.zwander.lockscreenwidgets.util.migrationManager
+import tk.zwander.lockscreenwidgets.activities.add.AddFrameWidgetActivity
+import tk.zwander.common.util.Event
+import tk.zwander.common.util.GlobalExceptionHandler
+import tk.zwander.common.util.eventManager
+import tk.zwander.common.util.migrationManager
 import tk.zwander.widgetdrawer.activities.add.AddDrawerWidgetActivity
 
 /**
@@ -85,7 +85,7 @@ class App : Application() {
         migrationManager.runMigrations()
 
         eventManager.addListener<Event.LaunchAddWidget> {
-            val intent = Intent(this, AddWidgetActivity::class.java)
+            val intent = Intent(this, AddFrameWidgetActivity::class.java)
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
 
             startActivity(intent)

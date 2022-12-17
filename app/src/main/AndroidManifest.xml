@@ -36,19 +36,19 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name="tk.zwander.lockscreenwidgets.activities.add.AddWidgetActivity"
+        <activity android:name="tk.zwander.lockscreenwidgets.activities.add.AddFrameWidgetActivity"
             android:exported="true"
             android:label="@string/add_widget"
             android:excludeFromRecents="true"
             android:launchMode="singleTop"
             />
-        <activity android:name="tk.zwander.lockscreenwidgets.activities.add.AddTileWidgetActivity"
+        <activity android:name="tk.zwander.common.activities.add.AddTileWidgetActivity"
             android:exported="true"
             android:label="@string/add_widget"
             android:excludeFromRecents="true"
             android:launchMode="singleTop"
             />
-        <activity android:name="tk.zwander.lockscreenwidgets.activities.OnboardingActivity"
+        <activity android:name="tk.zwander.common.activities.OnboardingActivity"
             android:exported="false"
             android:theme="@style/AppTheme.Intro"
             />
@@ -56,20 +56,20 @@
             android:exported="false"
             android:label="@string/settings"
             />
-        <activity android:name=".activities.DismissOrUnlockActivity"
+        <activity android:name="tk.zwander.common.activities.DismissOrUnlockActivity"
             android:exported="false"
             android:launchMode="singleInstance"
             android:excludeFromRecents="true"
             android:theme="@style/AppTheme.Null"
             />
-        <activity android:name=".activities.HideForIDsActivity"
+        <activity android:name="tk.zwander.common.activities.HideForIDsActivity"
             android:exported="false"
             />
         <activity android:name=".activities.UsageActivity"
             android:exported="false"
             android:label="@string/usage"
             />
-        <activity android:name=".activities.add.ReconfigureWidgetActivity"
+        <activity android:name="tk.zwander.lockscreenwidgets.activities.add.ReconfigureFrameWidgetActivity"
             android:exported="false"
             android:theme="@style/AppTheme.Null"
             />
@@ -126,7 +126,7 @@
             android:exported="true"
             />
         <service
-            android:name=".tiles.EnableDisableTile"
+            android:name="tk.zwander.common.tiles.EnableDisableTile"
             android:label="@string/frame_enabled"
             android:icon="@drawable/ic_baseline_power_settings_new_24"
             android:permission="android.permission.BIND_QUICK_SETTINGS_TILE"
@@ -136,7 +136,7 @@
             </intent-filter>
         </service>
         <service
-            android:name=".tiles.EnableDisableDrawerTile"
+            android:name="tk.zwander.common.tiles.EnableDisableDrawerTile"
             android:label="@string/drawer_enabled"
             android:icon="@drawable/ic_baseline_power_settings_new_24"
             android:permission="android.permission.BIND_QUICK_SETTINGS_TILE"
@@ -146,7 +146,7 @@
             </intent-filter>
         </service>
         <service
-            android:name=".tiles.NCTile"
+            android:name="tk.zwander.common.tiles.NCTile"
             android:label="@string/tile_show_in_notification_center"
             android:icon="@drawable/ic_baseline_notifications_active_24"
             android:permission="android.permission.BIND_QUICK_SETTINGS_TILE"
@@ -156,7 +156,7 @@
             </intent-filter>
         </service>
         <service
-            android:name=".tiles.widget.WidgetTileOne"
+            android:name="tk.zwander.common.tiles.widget.WidgetTileOne"
             android:label="@string/app_name"
             android:icon="@drawable/ic_baseline_launch_24"
             android:permission="android.permission.BIND_QUICK_SETTINGS_TILE"
@@ -166,7 +166,7 @@
             </intent-filter>
         </service>
         <service
-            android:name=".tiles.widget.WidgetTileTwo"
+            android:name="tk.zwander.common.tiles.widget.WidgetTileTwo"
             android:label="@string/app_name"
             android:icon="@drawable/ic_baseline_launch_24"
             android:permission="android.permission.BIND_QUICK_SETTINGS_TILE"
@@ -176,7 +176,7 @@
             </intent-filter>
         </service>
         <service
-            android:name=".tiles.widget.WidgetTileThree"
+            android:name="tk.zwander.common.tiles.widget.WidgetTileThree"
             android:label="@string/app_name"
             android:icon="@drawable/ic_baseline_launch_24"
             android:permission="android.permission.BIND_QUICK_SETTINGS_TILE"
@@ -186,7 +186,7 @@
             </intent-filter>
         </service>
         <service
-            android:name=".tiles.widget.WidgetTileFour"
+            android:name="tk.zwander.common.tiles.widget.WidgetTileFour"
             android:label="@string/app_name"
             android:icon="@drawable/ic_baseline_launch_24"
             android:permission="android.permission.BIND_QUICK_SETTINGS_TILE"
@@ -196,7 +196,7 @@
             </intent-filter>
         </service>
         <service
-            android:name=".tiles.widget.WidgetTileFive"
+            android:name="tk.zwander.common.tiles.widget.WidgetTileFive"
             android:label="@string/app_name"
             android:icon="@drawable/ic_baseline_launch_24"
             android:permission="android.permission.BIND_QUICK_SETTINGS_TILE"

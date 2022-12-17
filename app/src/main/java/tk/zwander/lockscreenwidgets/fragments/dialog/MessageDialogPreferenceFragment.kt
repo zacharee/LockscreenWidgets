@@ -7,7 +7,7 @@ import android.os.Bundle
 import android.view.WindowManager
 import androidx.preference.PreferenceDialogFragmentCompat
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import tk.zwander.lockscreenwidgets.prefs.MessageDialogPreference
+import tk.zwander.common.prefs.MessageDialogPreference
 
 /**
  * Essentially an AlertDialog implementation in the form of a Fragment.

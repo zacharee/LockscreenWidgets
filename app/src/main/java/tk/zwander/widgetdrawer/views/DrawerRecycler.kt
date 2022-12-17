@@ -5,10 +5,10 @@ import android.content.Context
 import android.util.AttributeSet
 import android.view.GestureDetector
 import android.view.MotionEvent
-import tk.zwander.lockscreenwidgets.util.Event
-import tk.zwander.lockscreenwidgets.util.eventManager
-import tk.zwander.lockscreenwidgets.util.prefManager
-import tk.zwander.lockscreenwidgets.views.NestedRecyclerView
+import tk.zwander.common.util.Event
+import tk.zwander.common.util.eventManager
+import tk.zwander.common.util.prefManager
+import tk.zwander.common.views.NestedRecyclerView
 
 class DrawerRecycler : NestedRecyclerView {
     constructor(context: Context) : super(context)

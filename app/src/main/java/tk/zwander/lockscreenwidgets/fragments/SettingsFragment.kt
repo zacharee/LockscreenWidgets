@@ -6,16 +6,16 @@ import androidx.preference.Preference
 import androidx.preference.SwitchPreference
 import tk.zwander.common.fragments.CommonPreferenceFragment
 import tk.zwander.lockscreenwidgets.R
-import tk.zwander.lockscreenwidgets.activities.HideForIDsActivity
-import tk.zwander.lockscreenwidgets.activities.OnboardingActivity
+import tk.zwander.common.activities.HideForIDsActivity
+import tk.zwander.common.activities.OnboardingActivity
 import tk.zwander.lockscreenwidgets.services.isNotificationListenerActive
-import tk.zwander.lockscreenwidgets.util.HandlerRegistry
-import tk.zwander.lockscreenwidgets.util.PrefManager
-import tk.zwander.lockscreenwidgets.util.backup.BackupRestoreManager
-import tk.zwander.lockscreenwidgets.util.handler
-import tk.zwander.lockscreenwidgets.util.hasStoragePermission
-import tk.zwander.lockscreenwidgets.util.isOneUI
-import tk.zwander.lockscreenwidgets.util.prefManager
+import tk.zwander.common.util.HandlerRegistry
+import tk.zwander.common.util.PrefManager
+import tk.zwander.common.util.backup.BackupRestoreManager
+import tk.zwander.common.util.handler
+import tk.zwander.common.util.hasStoragePermission
+import tk.zwander.common.util.isOneUI
+import tk.zwander.common.util.prefManager
 
 /**
  * The settings page.

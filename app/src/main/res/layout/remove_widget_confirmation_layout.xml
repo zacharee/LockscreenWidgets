@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<tk.zwander.lockscreenwidgets.views.RemoveWidgetConfirmationView xmlns:android="http://schemas.android.com/apk/res/android"
+<tk.zwander.common.views.RemoveWidgetConfirmationView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:layout_width="300dp"
@@ -58,4 +58,4 @@
 
     </LinearLayout>
 
-</tk.zwander.lockscreenwidgets.views.RemoveWidgetConfirmationView>
+</tk.zwander.common.views.RemoveWidgetConfirmationView>

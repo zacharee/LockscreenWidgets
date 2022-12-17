@@ -2,7 +2,7 @@ package tk.zwander.lockscreenwidgets.data.list
 
 import android.content.pm.ApplicationInfo
 import android.content.pm.ResolveInfo
-import tk.zwander.lockscreenwidgets.activities.add.AddWidgetActivity
+import tk.zwander.common.activities.add.AddWidgetActivity
 import java.util.*
 
 /**

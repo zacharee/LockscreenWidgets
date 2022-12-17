@@ -14,13 +14,12 @@ import androidx.compose.ui.platform.LocalContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import tk.zwander.common.compose.util.matchesFilter
-import tk.zwander.common.util.appWidgetManager
-import tk.zwander.lockscreenwidgets.data.AppInfo
+import tk.zwander.common.data.AppInfo
 import tk.zwander.lockscreenwidgets.data.list.ShortcutListInfo
 import tk.zwander.lockscreenwidgets.data.list.WidgetListInfo
-import tk.zwander.lockscreenwidgets.util.getApplicationInfoCompat
-import tk.zwander.lockscreenwidgets.util.logUtils
-import tk.zwander.lockscreenwidgets.util.queryIntentActivitiesCompat
+import tk.zwander.common.util.getApplicationInfoCompat
+import tk.zwander.common.util.logUtils
+import tk.zwander.common.util.queryIntentActivitiesCompat
 
 @Composable
 internal fun items(

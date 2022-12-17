@@ -5,7 +5,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.SortedList
-import tk.zwander.lockscreenwidgets.util.PrefManager
+import tk.zwander.common.util.PrefManager
 import tk.zwander.lockscreenwidgets.R
 import tk.zwander.lockscreenwidgets.databinding.HideForIdsItemBinding
 

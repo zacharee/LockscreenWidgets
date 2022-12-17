@@ -32,26 +32,26 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import tk.zwander.common.activities.DismissOrUnlockActivity
+import tk.zwander.common.data.WidgetData
+import tk.zwander.common.data.WidgetType
+import tk.zwander.common.host.WidgetHostCompat
+import tk.zwander.common.listeners.WidgetResizeListener
+import tk.zwander.common.util.Event
+import tk.zwander.common.util.EventObserver
+import tk.zwander.common.util.base64ToBitmap
+import tk.zwander.common.util.dpAsPx
+import tk.zwander.common.util.eventManager
 import tk.zwander.common.util.getRemoteDrawable
+import tk.zwander.common.util.logUtils
+import tk.zwander.common.util.mainHandler
+import tk.zwander.common.util.prefManager
+import tk.zwander.common.util.pxAsDp
 import tk.zwander.lockscreenwidgets.R
-import tk.zwander.lockscreenwidgets.activities.DismissOrUnlockActivity
-import tk.zwander.lockscreenwidgets.activities.add.ReconfigureWidgetActivity
-import tk.zwander.lockscreenwidgets.data.WidgetData
-import tk.zwander.lockscreenwidgets.data.WidgetType
+import tk.zwander.lockscreenwidgets.activities.add.ReconfigureFrameWidgetActivity
 import tk.zwander.lockscreenwidgets.databinding.AddWidgetBinding
 import tk.zwander.lockscreenwidgets.databinding.FrameShortcutViewBinding
 import tk.zwander.lockscreenwidgets.databinding.WidgetPageHolderBinding
-import tk.zwander.lockscreenwidgets.host.WidgetHostCompat
-import tk.zwander.lockscreenwidgets.listeners.WidgetResizeListener
-import tk.zwander.lockscreenwidgets.util.Event
-import tk.zwander.lockscreenwidgets.util.EventObserver
-import tk.zwander.lockscreenwidgets.util.base64ToBitmap
-import tk.zwander.lockscreenwidgets.util.dpAsPx
-import tk.zwander.lockscreenwidgets.util.eventManager
-import tk.zwander.lockscreenwidgets.util.logUtils
-import tk.zwander.lockscreenwidgets.util.mainHandler
-import tk.zwander.lockscreenwidgets.util.prefManager
-import tk.zwander.lockscreenwidgets.util.pxAsDp
 import java.util.Collections
 import kotlin.math.min
 
@@ -239,7 +239,7 @@ open class WidgetFrameAdapter(
     }
 
     protected open fun launchReconfigure(id: Int, providerInfo: AppWidgetProviderInfo) {
-        ReconfigureWidgetActivity.launch(host.context, id, providerInfo)
+        ReconfigureFrameWidgetActivity.launch(host.context, id, providerInfo)
     }
 
     protected open fun View.onWidgetResize(data: WidgetData, params: ViewGroup.LayoutParams, amount: Int, direction: Int) {

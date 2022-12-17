@@ -1,6 +1,6 @@
 package tk.zwander.common.compose.util
 
-import tk.zwander.lockscreenwidgets.data.AppInfo
+import tk.zwander.common.data.AppInfo
 import tk.zwander.lockscreenwidgets.data.list.WidgetListInfo
 
 fun AppInfo.matchesFilter(filter: String?): Boolean {

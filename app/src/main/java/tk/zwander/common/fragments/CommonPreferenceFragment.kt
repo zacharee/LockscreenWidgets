@@ -17,11 +17,11 @@ import androidx.preference.PreferenceViewHolder
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import tk.zwander.lockscreenwidgets.R
-import tk.zwander.lockscreenwidgets.util.HandlerRegistry
-import tk.zwander.lockscreenwidgets.util.backup.BackupRestoreManager
-import tk.zwander.lockscreenwidgets.util.backup.backupRestoreManager
-import tk.zwander.lockscreenwidgets.util.isOneUI
-import tk.zwander.lockscreenwidgets.util.logUtils
+import tk.zwander.common.util.HandlerRegistry
+import tk.zwander.common.util.backup.BackupRestoreManager
+import tk.zwander.common.util.backup.backupRestoreManager
+import tk.zwander.common.util.isOneUI
+import tk.zwander.common.util.logUtils
 import java.io.FileNotFoundException
 import java.text.SimpleDateFormat
 import java.util.Date

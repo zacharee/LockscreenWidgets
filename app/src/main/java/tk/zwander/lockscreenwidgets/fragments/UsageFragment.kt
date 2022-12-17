@@ -5,8 +5,8 @@ import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
 import tk.zwander.lockscreenwidgets.R
 import tk.zwander.lockscreenwidgets.fragments.dialog.MessageDialogPreferenceFragment
-import tk.zwander.lockscreenwidgets.prefs.MessageDialogPreference
-import tk.zwander.lockscreenwidgets.util.isOneUI
+import tk.zwander.common.prefs.MessageDialogPreference
+import tk.zwander.common.util.isOneUI
 
 /**
  * The usage page.

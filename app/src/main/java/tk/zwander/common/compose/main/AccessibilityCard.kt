@@ -25,7 +25,7 @@ import com.google.accompanist.flowlayout.FlowMainAxisAlignment
 import com.google.accompanist.flowlayout.FlowRow
 import com.google.accompanist.flowlayout.SizeMode
 import tk.zwander.lockscreenwidgets.R
-import tk.zwander.lockscreenwidgets.activities.OnboardingActivity
+import tk.zwander.common.activities.OnboardingActivity
 import tk.zwander.lockscreenwidgets.services.openAccessibilitySettings
 
 @Preview

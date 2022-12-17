@@ -5,8 +5,8 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import tk.zwander.lockscreenwidgets.R
-import tk.zwander.lockscreenwidgets.util.Event
-import tk.zwander.lockscreenwidgets.util.eventManager
+import tk.zwander.common.util.Event
+import tk.zwander.common.util.eventManager
 
 class TriggerActivity : AppCompatActivity() {
     @Suppress("DEPRECATION")

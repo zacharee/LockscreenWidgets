@@ -4,9 +4,13 @@ import android.appwidget.AppWidgetProviderInfo
 import android.content.Context
 import android.content.Intent
 import tk.zwander.lockscreenwidgets.R
-import tk.zwander.lockscreenwidgets.activities.add.AddWidgetActivity
-import tk.zwander.lockscreenwidgets.data.WidgetData
-import tk.zwander.lockscreenwidgets.util.*
+import tk.zwander.common.activities.add.AddWidgetActivity
+import tk.zwander.common.data.WidgetData
+import tk.zwander.common.util.Event
+import tk.zwander.common.util.eventManager
+import tk.zwander.common.util.prefManager
+import tk.zwander.common.util.pxAsDp
+import tk.zwander.common.util.screenSize
 import kotlin.math.floor
 
 /**

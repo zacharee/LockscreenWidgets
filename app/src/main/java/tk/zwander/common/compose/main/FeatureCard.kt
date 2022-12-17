@@ -40,13 +40,13 @@ import tk.zwander.lockscreenwidgets.activities.UsageActivity
 import tk.zwander.common.compose.components.CardSwitch
 import tk.zwander.common.compose.data.FeatureCardInfo
 import tk.zwander.common.compose.util.rememberBooleanPreferenceState
-import tk.zwander.lockscreenwidgets.data.MainPageButton
+import tk.zwander.common.data.MainPageButton
 import tk.zwander.lockscreenwidgets.fragments.SettingsFragment
-import tk.zwander.lockscreenwidgets.util.Event
-import tk.zwander.lockscreenwidgets.util.PrefManager
+import tk.zwander.common.util.Event
+import tk.zwander.common.util.PrefManager
 import tk.zwander.lockscreenwidgets.util.WidgetFrameDelegate
-import tk.zwander.lockscreenwidgets.util.eventManager
-import tk.zwander.lockscreenwidgets.util.prefManager
+import tk.zwander.common.util.eventManager
+import tk.zwander.common.util.prefManager
 import tk.zwander.widgetdrawer.fragments.DrawerSettings
 
 @Composable

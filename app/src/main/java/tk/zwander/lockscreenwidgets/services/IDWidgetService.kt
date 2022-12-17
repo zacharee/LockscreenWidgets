@@ -3,9 +3,9 @@ package tk.zwander.lockscreenwidgets.services
 import android.content.Intent
 import android.widget.RemoteViewsService
 import tk.zwander.lockscreenwidgets.appwidget.IDWidgetFactory
-import tk.zwander.lockscreenwidgets.util.Event
-import tk.zwander.lockscreenwidgets.util.EventObserver
-import tk.zwander.lockscreenwidgets.util.eventManager
+import tk.zwander.common.util.Event
+import tk.zwander.common.util.EventObserver
+import tk.zwander.common.util.eventManager
 
 /**
  * Service for the ID list widget for populating its data.

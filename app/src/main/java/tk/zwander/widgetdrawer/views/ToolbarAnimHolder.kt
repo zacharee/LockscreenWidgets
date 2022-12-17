@@ -13,8 +13,8 @@ import androidx.dynamicanimation.animation.DynamicAnimation
 import androidx.dynamicanimation.animation.SpringAnimation
 import androidx.dynamicanimation.animation.SpringForce
 import tk.zwander.lockscreenwidgets.R
-import tk.zwander.lockscreenwidgets.util.dpAsPx
-import tk.zwander.lockscreenwidgets.util.vibrate
+import tk.zwander.common.util.dpAsPx
+import tk.zwander.common.util.vibrate
 import kotlin.math.absoluteValue
 
 class ToolbarAnimHolder : LinearLayout {

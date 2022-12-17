@@ -6,13 +6,13 @@ import android.view.View
 import android.view.ViewGroup
 import tk.zwander.lockscreenwidgets.R
 import tk.zwander.lockscreenwidgets.adapters.WidgetFrameAdapter
-import tk.zwander.lockscreenwidgets.data.WidgetData
-import tk.zwander.lockscreenwidgets.host.WidgetHostCompat
-import tk.zwander.lockscreenwidgets.listeners.WidgetResizeListener
-import tk.zwander.lockscreenwidgets.util.Event
-import tk.zwander.lockscreenwidgets.util.eventManager
-import tk.zwander.lockscreenwidgets.util.prefManager
-import tk.zwander.lockscreenwidgets.util.screenSize
+import tk.zwander.common.data.WidgetData
+import tk.zwander.common.host.WidgetHostCompat
+import tk.zwander.common.listeners.WidgetResizeListener
+import tk.zwander.common.util.Event
+import tk.zwander.common.util.eventManager
+import tk.zwander.common.util.prefManager
+import tk.zwander.common.util.screenSize
 import tk.zwander.widgetdrawer.activities.add.ReconfigureDrawerWidgetActivity
 
 class DrawerAdapter(

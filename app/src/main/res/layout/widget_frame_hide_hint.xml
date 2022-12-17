@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<tk.zwander.lockscreenwidgets.views.WidgetFrameHideHintView
+<tk.zwander.common.views.WidgetFrameHideHintView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
@@ -58,4 +58,4 @@
 
     </LinearLayout>
 
-</tk.zwander.lockscreenwidgets.views.WidgetFrameHideHintView>
+</tk.zwander.common.views.WidgetFrameHideHintView>

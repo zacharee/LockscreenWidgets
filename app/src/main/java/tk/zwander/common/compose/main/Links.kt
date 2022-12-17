@@ -14,8 +14,8 @@ import androidx.compose.ui.unit.dp
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import tk.zwander.lockscreenwidgets.R
 import tk.zwander.common.compose.data.MainPageLink
-import tk.zwander.lockscreenwidgets.util.launchEmail
-import tk.zwander.lockscreenwidgets.util.launchUrl
+import tk.zwander.common.util.launchEmail
+import tk.zwander.common.util.launchUrl
 import tk.zwander.patreonsupportersretrieval.view.SupporterView
 
 @Composable

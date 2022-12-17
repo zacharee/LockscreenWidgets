@@ -8,6 +8,15 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.WindowManager
 import android.widget.Toast
+import tk.zwander.common.util.BlurManager
+import tk.zwander.common.util.Event
+import tk.zwander.common.util.EventObserver
+import tk.zwander.common.util.HandlerRegistry
+import tk.zwander.common.util.PrefManager
+import tk.zwander.common.util.eventManager
+import tk.zwander.common.util.handler
+import tk.zwander.common.util.logUtils
+import tk.zwander.common.util.prefManager
 import tk.zwander.lockscreenwidgets.R
 import tk.zwander.lockscreenwidgets.databinding.DrawerLayoutBinding
 import tk.zwander.lockscreenwidgets.services.Accessibility
@@ -15,7 +24,8 @@ import tk.zwander.lockscreenwidgets.util.*
 import tk.zwander.widgetdrawer.views.Drawer
 import tk.zwander.widgetdrawer.views.Handle
 
-class DrawerDelegate private constructor(private val context: Context) : ContextWrapper(context), EventObserver, View.OnAttachStateChangeListener {
+class DrawerDelegate private constructor(private val context: Context) : ContextWrapper(context),
+    EventObserver, View.OnAttachStateChangeListener {
     companion object {
         @SuppressLint("StaticFieldLeak")
         private var instance: DrawerDelegate? = null

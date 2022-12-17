@@ -7,7 +7,7 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import tk.zwander.lockscreenwidgets.util.prefManager
+import tk.zwander.common.util.prefManager
 
 @Composable
 fun Context.rememberBooleanPreferenceState(

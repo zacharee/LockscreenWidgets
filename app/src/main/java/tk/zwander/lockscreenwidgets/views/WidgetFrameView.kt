@@ -2,7 +2,6 @@ package tk.zwander.lockscreenwidgets.views
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.graphics.drawable.GradientDrawable
 import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener2
@@ -14,6 +13,20 @@ import android.view.ViewConfiguration
 import android.view.WindowManager
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.isVisible
+import tk.zwander.common.util.Event
+import tk.zwander.common.util.HandlerRegistry
+import tk.zwander.common.util.PrefManager
+import tk.zwander.common.util.eventManager
+import tk.zwander.common.util.fadeAndScaleIn
+import tk.zwander.common.util.fadeAndScaleOut
+import tk.zwander.common.util.handler
+import tk.zwander.common.util.logUtils
+import tk.zwander.common.util.makeEven
+import tk.zwander.common.util.prefManager
+import tk.zwander.common.util.safeAddView
+import tk.zwander.common.util.safeRemoveView
+import tk.zwander.common.util.safeUpdateViewLayout
+import tk.zwander.common.util.vibrate
 import tk.zwander.lockscreenwidgets.adapters.IDAdapter
 import tk.zwander.lockscreenwidgets.databinding.WidgetFrameBinding
 import tk.zwander.lockscreenwidgets.util.*
