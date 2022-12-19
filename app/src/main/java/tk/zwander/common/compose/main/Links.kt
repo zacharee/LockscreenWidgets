@@ -12,10 +12,10 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import tk.zwander.lockscreenwidgets.R
 import tk.zwander.common.compose.data.MainPageLink
 import tk.zwander.common.util.launchEmail
 import tk.zwander.common.util.launchUrl
+import tk.zwander.lockscreenwidgets.R
 import tk.zwander.patreonsupportersretrieval.view.SupporterView
 
 @Composable
@@ -31,10 +31,10 @@ fun rememberLinks(): List<MainPageLink> {
                 "https://github.com/zacharee/LockscreenWidgets/blob/master/PRIVACY.md"
             ),
             MainPageLink(
-                R.drawable.ic_baseline_twitter_24,
-                R.string.main_screen_social_twitter,
-                R.string.main_screen_social_twitter_desc,
-                "https://twitter.com/Wander1236"
+                R.drawable.ic_baseline_mastodon_24,
+                R.string.main_screen_social_mastodon,
+                R.string.main_screen_social_mastodon_desc,
+                "https://androiddev.social/@wander1236"
             ),
             MainPageLink(
                 R.drawable.ic_baseline_earth_24,
@@ -80,7 +80,6 @@ fun rememberLinks(): List<MainPageLink> {
     }
 }
 
-@Suppress("OPT_IN_IS_NOT_ENABLED")
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun LinkItem(option: MainPageLink) {
