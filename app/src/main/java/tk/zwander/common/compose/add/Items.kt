@@ -15,11 +15,11 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import tk.zwander.common.compose.util.matchesFilter
 import tk.zwander.common.data.AppInfo
-import tk.zwander.lockscreenwidgets.data.list.ShortcutListInfo
-import tk.zwander.lockscreenwidgets.data.list.WidgetListInfo
 import tk.zwander.common.util.getApplicationInfoCompat
 import tk.zwander.common.util.logUtils
 import tk.zwander.common.util.queryIntentActivitiesCompat
+import tk.zwander.lockscreenwidgets.data.list.ShortcutListInfo
+import tk.zwander.lockscreenwidgets.data.list.WidgetListInfo
 
 @Composable
 internal fun items(
@@ -51,8 +51,12 @@ internal fun items(
 
                         var app = apps[appInfo.packageName]
                         if (app == null) {
-                            apps[appInfo.packageName] = AppInfo(appName.toString(), appInfo)
-                            app = apps[appInfo.packageName]!!
+                            app = AppInfo(appName.toString(), appInfo)
+                            apps[appInfo.packageName] = app
+                        }
+
+                        if (appInfo.packageName.contains("overdrop")) {
+                            context.logUtils.normalLog("Adding overdrop info $it")
                         }
 
                         app.widgets.add(

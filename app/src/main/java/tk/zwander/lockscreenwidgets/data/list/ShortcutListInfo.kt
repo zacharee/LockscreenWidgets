@@ -18,13 +18,13 @@ class ShortcutListInfo(
     icon: Int,
     var shortcutInfo: ResolveInfo,
     appInfo: ApplicationInfo
-) : BaseListInfo(
+) : BaseListInfo<ShortcutListInfo>(
     shortcutName, icon, appInfo
 ) {
     override fun equals(other: Any?): Boolean {
         return super.equals(other) &&
-                shortcutInfo.componentInfo.componentName ==
-                (other as ShortcutListInfo).shortcutInfo.componentInfo.componentName
+                other is ShortcutListInfo &&
+                shortcutInfo.componentInfo.componentName == other.shortcutInfo.componentInfo.componentName
     }
 
     override fun hashCode(): Int {

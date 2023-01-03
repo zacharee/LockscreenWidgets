@@ -18,15 +18,40 @@ class WidgetListInfo(
     previewImg: Int,
     var providerInfo: AppWidgetProviderInfo,
     appInfo: ApplicationInfo
-) : BaseListInfo(
+) : BaseListInfo<WidgetListInfo>(
     widgetName, previewImg, appInfo
 ) {
+    override fun compareTo(other: WidgetListInfo): Int {
+        val nameResult = super.compareTo(other)
+
+        return if (nameResult == 0) {
+            val widthResult = providerInfo.minWidth.compareTo(other.providerInfo.minWidth)
+
+            if (widthResult == 0) {
+                providerInfo.minHeight.compareTo(other.providerInfo.minHeight)
+            } else {
+                widthResult
+            }
+        } else {
+            nameResult
+        }
+    }
+
     override fun equals(other: Any?): Boolean {
         return super.equals(other) &&
-                providerInfo.provider == (other as WidgetListInfo).providerInfo.provider
+                other is WidgetListInfo &&
+                providerInfo.provider == other.providerInfo.provider &&
+                providerInfo.configure == other.providerInfo.configure &&
+                providerInfo.minWidth == other.providerInfo.minWidth &&
+                providerInfo.minHeight == other.providerInfo.minHeight
     }
 
     override fun hashCode(): Int {
-        return super.hashCode() + Objects.hash(providerInfo.provider)
+        return super.hashCode() + Objects.hash(
+            providerInfo.provider,
+            providerInfo.configure,
+            providerInfo.minWidth,
+            providerInfo.minHeight
+        )
     }
 }

@@ -40,7 +40,7 @@ import tk.zwander.lockscreenwidgets.data.list.BaseListInfo
 @Composable
 fun AddWidgetScroller(
     filteredItems: List<AppInfo>,
-    onSelected: (BaseListInfo) -> Unit,
+    onSelected: (BaseListInfo<*>) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
@@ -63,7 +63,7 @@ fun AddWidgetScroller(
                 ) {
                     items(
                         items = app.widgets.toList(),
-                        key = { it.providerInfo.provider }
+                        key = { it.providerInfo.hashCode() }
                     ) { widget ->
                         val icon = icon(
                             info = widget,
@@ -149,7 +149,7 @@ private fun AppHeader(
 
 @Composable
 private fun icon(
-    info: BaseListInfo,
+    info: BaseListInfo<*>,
     key: Any?,
 ): Bitmap? {
     val context = LocalContext.current

@@ -29,7 +29,7 @@ fun AddWidgetLayout(
     appWidgetManager: AppWidgetManager,
     showShortcuts: Boolean,
     onBack: () -> Unit,
-    onSelected: (BaseListInfo) -> Unit,
+    onSelected: (BaseListInfo<*>) -> Unit,
 ) {
     var filter by remember {
         mutableStateOf<String?>(null)
