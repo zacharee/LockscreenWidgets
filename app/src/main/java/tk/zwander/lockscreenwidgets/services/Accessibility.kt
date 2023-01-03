@@ -22,16 +22,13 @@ import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
-import tk.zwander.lockscreenwidgets.App
 import tk.zwander.common.activities.DismissOrUnlockActivity
-import tk.zwander.lockscreenwidgets.appwidget.IDListProvider
 import tk.zwander.common.data.window.WindowInfo
 import tk.zwander.common.data.window.WindowRootPair
 import tk.zwander.common.util.Event
 import tk.zwander.common.util.EventObserver
 import tk.zwander.common.util.HandlerRegistry
 import tk.zwander.common.util.PrefManager
-import tk.zwander.lockscreenwidgets.util.WidgetFrameDelegate
 import tk.zwander.common.util.defaultDisplayCompat
 import tk.zwander.common.util.eventManager
 import tk.zwander.common.util.handler
@@ -39,6 +36,9 @@ import tk.zwander.common.util.isDebug
 import tk.zwander.common.util.isTouchWiz
 import tk.zwander.common.util.logUtils
 import tk.zwander.common.util.prefManager
+import tk.zwander.lockscreenwidgets.App
+import tk.zwander.lockscreenwidgets.appwidget.IDListProvider
+import tk.zwander.lockscreenwidgets.util.WidgetFrameDelegate
 import tk.zwander.widgetdrawer.util.DrawerDelegate
 import java.util.concurrent.ConcurrentLinkedQueue
 
@@ -417,11 +417,18 @@ class Accessibility : AccessibilityService(), EventObserver, CoroutineScope by M
                 val matchesWindowStateChanged =
                     eventCopy.eventType == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED
 
+                logUtils.debugLog("Checking for dismiss eligibility.\n" +
+                        "matchesWindowsChanges: $matchesWindowsChanged\n" +
+                        "matchesWindowStateChanged: $matchesWindowStateChanged\n" +
+                        "packageName: ${eventCopy.packageName}\n" +
+                        "handlingDrawerClick: ${drawerDelegate.state.handlingDrawerClick}\n" +
+                        "handlingFrameClick: ${frameDelegate.state.handlingFrameClick}")
+
                 if ((matchesWindowsChanged || matchesWindowStateChanged)
                     && eventCopy.packageName != packageName
                     && (drawerDelegate.state.handlingDrawerClick || frameDelegate.state.handlingFrameClick)
                 ) {
-                    logUtils.debugLog("Starting dismiss Activity because of window change")
+                    logUtils.debugLog("Starting dismiss Activity because of window change.")
                     DismissOrUnlockActivity.launch(this@Accessibility)
 
                     if (drawerDelegate.state.handlingDrawerClick) {
@@ -434,8 +441,9 @@ class Accessibility : AccessibilityService(), EventObserver, CoroutineScope by M
                 }
             }
 
-            if (eventCopy.eventType == AccessibilityEvent.TYPE_WINDOWS_CHANGED
-                || eventCopy.eventType == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED) {
+            if ((eventCopy.eventType == AccessibilityEvent.TYPE_WINDOWS_CHANGED
+                || eventCopy.eventType == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED)
+                && eventCopy.packageName != null) {
                 drawerDelegate.updateState { it.copy(handlingDrawerClick = false) }
                 frameDelegate.updateState { it.copy(handlingFrameClick = false) }
             }
