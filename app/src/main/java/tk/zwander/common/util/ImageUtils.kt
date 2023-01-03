@@ -54,7 +54,16 @@ fun Context.getRemoteDrawable(
         }
     }
 
-    return drawable?.mutate()?.toBitmap()?.run { copy(config, false) }
+    return drawable?.mutate()?.run {
+        val width = intrinsicWidth
+        val height = intrinsicHeight
+
+        if (width <= 0 || height <= 0) {
+            null
+        } else {
+            toBitmap().run { copy(config, false) }
+        }
+    }
 }
 
 fun Bitmap?.toByteArray(): ByteArray? {

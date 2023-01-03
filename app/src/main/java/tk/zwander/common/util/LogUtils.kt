@@ -52,8 +52,12 @@ class LogUtils private constructor(private val context: Context) {
 
     fun exportLog(out: OutputStream) {
         out.use { output ->
-            logFile.inputStream().use { input ->
-                input.copyTo(output)
+            try {
+                logFile.inputStream().use { input ->
+                    input.copyTo(output)
+                }
+            } catch (e: Exception) {
+                normalLog("Failed to export log.", e)
             }
         }
     }
