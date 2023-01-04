@@ -17,6 +17,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
@@ -44,11 +45,13 @@ fun WidgetItem(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
-                text = label ?: ""
+                text = label ?: "",
+                textAlign = TextAlign.Center
             )
             Text(
                 text = subLabel ?: "",
-                fontSize = 12.sp
+                fontSize = 12.sp,
+                textAlign = TextAlign.Center
             )
 
             Spacer(Modifier.size(8.dp))
