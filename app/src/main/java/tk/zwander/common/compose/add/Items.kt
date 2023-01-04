@@ -63,8 +63,8 @@ internal fun items(
                             WidgetListInfo(
                                 widgetName,
                                 it.previewImage.run { if (this != 0) this else appInfo.icon },
+                                appInfo,
                                 it,
-                                appInfo
                             )
                         )
                     } catch (e: PackageManager.NameNotFoundException) {
@@ -94,8 +94,8 @@ internal fun items(
                             ShortcutListInfo(
                                 shortcutName.toString(),
                                 it.iconResource,
+                                appInfo,
                                 it,
-                                appInfo
                             )
                         )
                     } catch (e: PackageManager.NameNotFoundException) {

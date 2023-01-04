@@ -10,24 +10,24 @@ import java.util.*
  *
  * @property shortcutName the label of the shortcut
  * @property icon the preview image of the widget
- * @property shortcutInfo the information about the shortcut
  * @property appInfo the information about the application this shortcut belongs to
+ * @property itemInfo the information about the shortcut
  */
 class ShortcutListInfo(
     shortcutName: String,
     icon: Int,
-    var shortcutInfo: ResolveInfo,
-    appInfo: ApplicationInfo
-) : BaseListInfo<ShortcutListInfo>(
-    shortcutName, icon, appInfo
+    appInfo: ApplicationInfo,
+    itemInfo: ResolveInfo
+) : BaseListInfo<ResolveInfo>(
+    shortcutName, icon, appInfo, itemInfo
 ) {
     override fun equals(other: Any?): Boolean {
         return super.equals(other) &&
                 other is ShortcutListInfo &&
-                shortcutInfo.componentInfo.componentName == other.shortcutInfo.componentInfo.componentName
+                itemInfo.componentInfo.componentName == other.itemInfo.componentInfo.componentName
     }
 
     override fun hashCode(): Int {
-        return super.hashCode() + Objects.hash(shortcutInfo.componentInfo.componentName)
+        return super.hashCode() + Objects.hash(itemInfo.componentInfo.componentName)
     }
 }

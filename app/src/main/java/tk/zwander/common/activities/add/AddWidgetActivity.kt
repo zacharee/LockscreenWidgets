@@ -37,7 +37,7 @@ abstract class AddWidgetActivity : BaseBindWidgetActivity(), CoroutineScope by M
                 }
             ) {
                 if (it is WidgetListInfo) {
-                    tryBindWidget(it.providerInfo)
+                    tryBindWidget(it.itemInfo)
                 } else if (it is ShortcutListInfo) {
                     tryBindShortcut(it)
                 }

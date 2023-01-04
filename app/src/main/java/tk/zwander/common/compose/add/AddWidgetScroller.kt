@@ -1,5 +1,6 @@
 package tk.zwander.common.compose.add
 
+import android.content.ComponentName
 import android.graphics.Bitmap
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
@@ -63,17 +64,17 @@ fun AddWidgetScroller(
                 ) {
                     items(
                         items = app.widgets.toList(),
-                        key = { it.providerInfo.hashCode() }
+                        key = { it.itemInfo.hashCode() }
                     ) { widget ->
                         val icon = icon(
                             info = widget,
-                            key = widget.providerInfo.provider
+                            key = widget.itemInfo.provider
                         )
 
                         WidgetItem(
                             image = icon,
-                            label = widget.providerInfo.loadLabel(context.packageManager),
-                            subLabel = "${widget.providerInfo.minWidth}x${widget.providerInfo.minHeight}"
+                            label = widget.itemInfo.loadLabel(context.packageManager),
+                            subLabel = "${widget.itemInfo.minWidth}x${widget.itemInfo.minHeight}"
                         ) {
                             onSelected(widget)
                         }
@@ -81,16 +82,16 @@ fun AddWidgetScroller(
 
                     items(
                         items = app.shortcuts.toList(),
-                        key = { it.shortcutInfo.activityInfo.componentName }
+                        key = { it.itemInfo.activityInfo.run { ComponentName(packageName, name) } }
                     ) { shortcut ->
                         val icon = icon(
                             info = shortcut,
-                            key = shortcut.shortcutInfo.activityInfo.componentName
+                            key = shortcut.itemInfo.activityInfo.componentName
                         )
 
                         WidgetItem(
                             image = icon,
-                            label = shortcut.shortcutInfo.loadLabel(context.packageManager)
+                            label = shortcut.itemInfo.loadLabel(context.packageManager)
                                 .toString(),
                             subLabel = stringResource(id = R.string.shortcut)
                         ) {

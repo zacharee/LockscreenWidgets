@@ -134,9 +134,9 @@ abstract class BaseBindWidgetActivity : ComponentActivity() {
     ) {
         try {
             val configureIntent = Intent(Intent.ACTION_CREATE_SHORTCUT)
-            configureIntent.`package` = info.shortcutInfo.activityInfo.packageName
-            configureIntent.component = ComponentName(info.shortcutInfo.activityInfo.packageName,
-                info.shortcutInfo.activityInfo.name)
+            configureIntent.`package` = info.itemInfo.activityInfo.packageName
+            configureIntent.component = ComponentName(info.itemInfo.activityInfo.packageName,
+                info.itemInfo.activityInfo.name)
 
             configShortcutRequest.launch(configureIntent)
         } catch (e: SecurityException) {

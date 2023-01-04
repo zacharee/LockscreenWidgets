@@ -10,25 +10,25 @@ import java.util.*
  *
  * @property widgetName the label of the widget
  * @property previewImg the preview image of the widget
- * @property providerInfo the information about the widget
  * @property appInfo the information about the application this widget belongs to
+ * @property itemInfo the information about the widget
  */
 class WidgetListInfo(
     widgetName: String,
     previewImg: Int,
-    var providerInfo: AppWidgetProviderInfo,
-    appInfo: ApplicationInfo
-) : BaseListInfo<WidgetListInfo>(
-    widgetName, previewImg, appInfo
+    appInfo: ApplicationInfo,
+    itemInfo: AppWidgetProviderInfo,
+) : BaseListInfo<AppWidgetProviderInfo>(
+    widgetName, previewImg, appInfo, itemInfo,
 ) {
-    override fun compareTo(other: WidgetListInfo): Int {
+    override fun compareTo(other: BaseListInfo<AppWidgetProviderInfo>): Int {
         val nameResult = super.compareTo(other)
 
         return if (nameResult == 0) {
-            val widthResult = providerInfo.minWidth.compareTo(other.providerInfo.minWidth)
+            val widthResult = itemInfo.minWidth.compareTo(other.itemInfo.minWidth)
 
             if (widthResult == 0) {
-                providerInfo.minHeight.compareTo(other.providerInfo.minHeight)
+                itemInfo.minHeight.compareTo(other.itemInfo.minHeight)
             } else {
                 widthResult
             }
@@ -40,18 +40,18 @@ class WidgetListInfo(
     override fun equals(other: Any?): Boolean {
         return super.equals(other) &&
                 other is WidgetListInfo &&
-                providerInfo.provider == other.providerInfo.provider &&
-                providerInfo.configure == other.providerInfo.configure &&
-                providerInfo.minWidth == other.providerInfo.minWidth &&
-                providerInfo.minHeight == other.providerInfo.minHeight
+                itemInfo.provider == other.itemInfo.provider &&
+                itemInfo.configure == other.itemInfo.configure &&
+                itemInfo.minWidth == other.itemInfo.minWidth &&
+                itemInfo.minHeight == other.itemInfo.minHeight
     }
 
     override fun hashCode(): Int {
         return super.hashCode() + Objects.hash(
-            providerInfo.provider,
-            providerInfo.configure,
-            providerInfo.minWidth,
-            providerInfo.minHeight
+            itemInfo.provider,
+            itemInfo.configure,
+            itemInfo.minWidth,
+            itemInfo.minHeight
         )
     }
 }

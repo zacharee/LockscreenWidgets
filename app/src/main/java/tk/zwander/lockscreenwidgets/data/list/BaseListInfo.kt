@@ -1,14 +1,16 @@
 package tk.zwander.lockscreenwidgets.data.list
 
 import android.content.pm.ApplicationInfo
+import android.os.Parcelable
 import java.util.Objects
 
-open class BaseListInfo<T : BaseListInfo<T>>(
+sealed class BaseListInfo<ItemInfo : Parcelable>(
     val name: String,
     val icon: Int,
-    val appInfo: ApplicationInfo
-) : Comparable<T> {
-    override fun compareTo(other: T): Int {
+    val appInfo: ApplicationInfo,
+    val itemInfo: ItemInfo,
+) : Comparable<BaseListInfo<ItemInfo>> {
+    override fun compareTo(other: BaseListInfo<ItemInfo>): Int {
         return name.compareTo(other.name, true)
     }
 
