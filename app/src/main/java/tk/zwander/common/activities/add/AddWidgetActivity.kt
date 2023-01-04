@@ -4,6 +4,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.view.MenuItem
 import androidx.activity.compose.setContent
+import androidx.core.view.WindowCompat
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.cancel
@@ -27,6 +28,8 @@ abstract class AddWidgetActivity : BaseBindWidgetActivity(), CoroutineScope by M
          * won't show on the lock screen.
          */
         DismissOrUnlockActivity.launch(this)
+
+        WindowCompat.setDecorFitsSystemWindows(window, false)
 
         setContent {
             AddWidgetLayout(
