@@ -31,7 +31,7 @@ class DismissOrUnlockActivity : AppCompatActivity() {
 
         private fun launch(context: Context) {
             val intent = Intent(context, DismissOrUnlockActivity::class.java)
-            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_MULTIPLE_TASK)
             context.startActivity(intent)
         }
     }

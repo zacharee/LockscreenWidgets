@@ -58,7 +58,7 @@
             />
         <activity android:name="tk.zwander.common.activities.DismissOrUnlockActivity"
             android:exported="false"
-            android:launchMode="singleInstance"
+            android:launchMode="singleInstancePerTask"
             android:excludeFromRecents="true"
             android:theme="@style/AppTheme.Null"
             />
