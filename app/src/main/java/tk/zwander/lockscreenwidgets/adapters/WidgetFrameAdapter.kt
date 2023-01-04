@@ -442,24 +442,20 @@ open class WidgetFrameAdapter(
                     isVisible = true
 
                     try {
-                        //We're recreating the AppWidgetHostView here each time, which probably isn't the most efficient
-                        //way to do things. However, it's not trivial to just set a new source on an AppWidgetHostView,
-                        //so this makes the most sense right now.
+                        // We're recreating the AppWidgetHostView here each time, which probably isn't the most efficient
+                        // way to do things. However, it's not trivial to just set a new source on an AppWidgetHostView,
+                        // so this makes the most sense right now.
                         addView(withContext(Dispatchers.Main) {
-                            host.createView(itemView.context, data.id, widgetInfo).apply {
+                            host.createView(itemView.context, data.id, widgetInfo).apply hostView@ {
                                 findListViewsInHierarchy(this).forEach { list ->
                                     list.isNestedScrollingEnabled = true
                                 }
 
-                                this.setOnHierarchyChangeListener(object : ViewGroup.OnHierarchyChangeListener {
-                                    override fun onChildViewAdded(parent: View, child: View?) {
-                                        findListViewsInHierarchy(parent).forEach { list ->
-                                            list.isNestedScrollingEnabled = true
-                                        }
+                                this.viewTreeObserver.addOnGlobalLayoutListener {
+                                    findListViewsInHierarchy(this).forEach { list ->
+                                        list.isNestedScrollingEnabled = true
                                     }
-
-                                    override fun onChildViewRemoved(parent: View?, child: View?) {}
-                                })
+                                }
 
                                 val width = context.pxAsDp(itemView.width)
                                 val height = context.pxAsDp(itemView.height)
@@ -578,6 +574,10 @@ open class WidgetFrameAdapter(
             val ret = arrayListOf<ListView>()
 
             if (root is ViewGroup) {
+                if (root is ListView) {
+                    ret.add(root)
+                }
+
                 root.forEach { child ->
                     if (child is ListView) {
                         ret.add(child)
