@@ -86,7 +86,7 @@ fun AddWidgetScroller(
                     ) { shortcut ->
                         val icon = icon(
                             info = shortcut,
-                            key = shortcut.itemInfo.activityInfo.componentName
+                            key = shortcut.itemInfo.activityInfo.run { ComponentName(packageName, name) }
                         )
 
                         WidgetItem(
