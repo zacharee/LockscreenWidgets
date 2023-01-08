@@ -17,4 +17,8 @@
     <color name="scroll_track">#55000000</color>
 
     <color name="drawerBackgroundDefault">#aa000000</color>
+
+    <color name="launcher_icon_foreground">@android:color/white</color>
+    <color name="launcher_icon_background_start">#0EB6CC</color>
+    <color name="launcher_icon_background_end">#5226E7</color>
 </resources>

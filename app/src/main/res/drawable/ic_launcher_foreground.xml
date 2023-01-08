@@ -2,7 +2,8 @@
     android:width="108dp"
     android:height="108dp"
     android:viewportWidth="108"
-    android:viewportHeight="108">
+    android:viewportHeight="108"
+    android:tint="@color/launcher_icon_foreground">
   <group android:scaleX="0.5925"
       android:scaleY="0.5925"
       android:translateX="11.34"
