@@ -5,6 +5,7 @@ import android.app.NotificationManager
 import android.content.ComponentName
 import android.content.Context
 import android.os.Build
+import android.os.SystemProperties
 import android.provider.Settings
 import android.service.notification.NotificationListenerService
 import android.service.notification.StatusBarNotification
@@ -49,6 +50,7 @@ class NotificationListener : NotificationListenerService(), EventObserver {
             Event.RequestNotificationCount -> {
                 sendUpdate()
             }
+
             else -> {}
         }
     }
@@ -86,6 +88,12 @@ class NotificationListener : NotificationListenerService(), EventObserver {
         get() {
             val nm = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                if (notification.flags and Notification.FLAG_BUBBLE != 0 &&
+                    notification.bubbleMetadata.isNotificationSuppressed
+                ) return false
+            }
+
             if (notification.visibility == Notification.VISIBILITY_SECRET) return false
 
             if (Build.VERSION.SDK_INT > Build.VERSION_CODES.N_MR1) {
@@ -93,19 +101,32 @@ class NotificationListener : NotificationListenerService(), EventObserver {
                 val rankingResult = currentRanking.getRanking(key, ranking)
 
                 if (rankingResult && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S &&
-                    ranking.lockscreenVisibilityOverride == Notification.VISIBILITY_SECRET) return false
+                    ranking.lockscreenVisibilityOverride == Notification.VISIBILITY_SECRET
+                ) return false
 
-                val importance = if (!rankingResult || ranking.importance == NotificationManager.IMPORTANCE_NONE) {
-                    nm.getNotificationChannel(notification.channelId).importance
-                } else {
-                    ranking.importance
-                }
+                val importance =
+                    if (!rankingResult || ranking.importance == NotificationManager.IMPORTANCE_NONE) {
+                        nm.getNotificationChannel(notification.channelId).importance
+                    } else {
+                        ranking.importance
+                    }
 
                 if (importance <= NotificationManager.IMPORTANCE_MIN) return false
 
                 if (importance <= NotificationManager.IMPORTANCE_LOW &&
                     Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q &&
-                    nm.shouldHideSilentStatusBarIcons()) return false
+                    nm.shouldHideSilentStatusBarIcons()
+                ) return false
+
+                // There's a bug in Pixel UI 13 where silent notifications don't
+                // show on the lock screen even if they're set to do so.
+                if (importance <= NotificationManager.IMPORTANCE_LOW &&
+                    Build.VERSION.SDK_INT == Build.VERSION_CODES.TIRAMISU &&
+                    SystemProperties.get("ro.vendor.camera.extensions.service")
+                        .contains("com.google.android.apps.camera.services.extensions.service.PixelExtensions")
+                ) {
+                    return false
+                }
             } else {
                 @Suppress("DEPRECATION")
                 if (notification.priority <= Notification.PRIORITY_MIN) return false
