@@ -58,10 +58,25 @@ fun Context.getRemoteDrawable(
         val width = intrinsicWidth
         val height = intrinsicHeight
 
+        val ratio = width.toDouble() / height.toDouble()
+        val scaledWidth = when {
+            width > 512 -> 512
+            height > 512 -> 512 * ratio
+            else -> width
+        }
+        val scaledHeight = when {
+            width > 512 -> 512 / ratio
+            height > 512 -> 512
+            else -> height
+        }
+
         if (width <= 0 || height <= 0) {
             null
         } else {
-            toBitmap().run { copy(config, false) }
+            toBitmap(
+                scaledWidth.toInt(),
+                scaledHeight.toInt()
+            ).run { copy(config, false) }
         }
     }
 }
