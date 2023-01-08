@@ -7,10 +7,10 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.size
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Switch
-import androidx.compose.material.SwitchDefaults
-import androidx.compose.material.Text
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Switch
+import androidx.compose.material3.SwitchDefaults
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -39,7 +39,7 @@ fun CardSwitch(
             ) {
                 Text(
                     text = title,
-                    style = MaterialTheme.typography.h5
+                    style = MaterialTheme.typography.headlineSmall
                 )
 
                 if (!summary.isNullOrBlank()) {
@@ -47,7 +47,7 @@ fun CardSwitch(
 
                     Text(
                         text = summary,
-                        style = MaterialTheme.typography.caption
+                        style = MaterialTheme.typography.bodyMedium
                     )
                 }
             }
@@ -56,7 +56,7 @@ fun CardSwitch(
                 checked = enabled,
                 onCheckedChange = onEnabledChanged,
                 colors = SwitchDefaults.colors(
-                    uncheckedThumbColor = MaterialTheme.colors.onSurface
+                    uncheckedThumbColor = MaterialTheme.colorScheme.onSurface
                 )
             )
         }

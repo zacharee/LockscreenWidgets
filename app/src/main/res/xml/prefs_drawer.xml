@@ -6,7 +6,7 @@
         android:title="@string/drawer"
         android:key="drawer_options">
 
-        <SwitchPreference
+        <tk.zwander.common.prefs.MaterialSwitchPreference
             android:title="@string/close_on_empty_tap"
             android:summary="@string/close_on_empty_tap_desc"
             android:key="close_drawer_on_empty_tap"
@@ -14,7 +14,7 @@
             android:icon="@drawable/tap"
             />
 
-        <SwitchPreference
+        <tk.zwander.common.prefs.MaterialSwitchPreference
             android:title="@string/settings_screen_lock_widget_drawer"
             android:summary="@string/settings_screen_lock_widget_drawer_desc"
             android:key="lock_widget_drawer"
@@ -22,7 +22,7 @@
             android:defaultValue="false"
             />
 
-        <SwitchPreference
+        <tk.zwander.common.prefs.MaterialSwitchPreference
             android:title="@string/settings_screen_request_unlock"
             android:summary="@string/settings_screen_request_unlock_desc"
             android:key="request_unlock_drawer"
@@ -30,7 +30,7 @@
             android:defaultValue="true"
             />
 
-        <SwitchPreference
+        <tk.zwander.common.prefs.MaterialSwitchPreference
             android:title="@string/settings_screen_blur_background"
             android:summary="@string/settings_screen_blur_drawer_background_desc"
             android:key="blur_drawer_background"
@@ -99,7 +99,7 @@
         android:title="@string/handle"
         android:key="handle_options">
 
-        <SwitchPreference
+        <tk.zwander.common.prefs.MaterialSwitchPreference
             android:title="@string/show_drawer_handle"
             android:summary="@string/show_drawer_handle_desc"
             android:key="show_drawer_handle"
@@ -107,7 +107,7 @@
             android:icon="@drawable/border_right"
             />
 
-        <SwitchPreference
+        <tk.zwander.common.prefs.MaterialSwitchPreference
             android:title="@string/show_drawer_handle_shadow"
             android:summary="@string/show_drawer_handle_shadow_desc"
             android:key="show_drawer_handle_shadow"

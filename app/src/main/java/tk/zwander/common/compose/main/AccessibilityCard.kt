@@ -5,12 +5,13 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.ButtonDefaults
-import androidx.compose.material.Card
-import androidx.compose.material.Icon
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.OutlinedButton
-import androidx.compose.material.Text
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -24,8 +25,8 @@ import androidx.compose.ui.unit.dp
 import com.google.accompanist.flowlayout.FlowMainAxisAlignment
 import com.google.accompanist.flowlayout.FlowRow
 import com.google.accompanist.flowlayout.SizeMode
-import tk.zwander.lockscreenwidgets.R
 import tk.zwander.common.activities.OnboardingActivity
+import tk.zwander.lockscreenwidgets.R
 import tk.zwander.lockscreenwidgets.services.openAccessibilitySettings
 
 @Preview
@@ -36,7 +37,9 @@ fun AccessibilityCard() {
     Card(
         modifier = Modifier
             .fillMaxWidth(),
-        backgroundColor = MaterialTheme.colors.error
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.errorContainer
+        )
     ) {
         Column(
             modifier = Modifier
@@ -58,7 +61,8 @@ fun AccessibilityCard() {
             }
 
             FlowRow(
-                modifier = Modifier.align(Alignment.CenterHorizontally)
+                modifier = Modifier
+                    .align(Alignment.CenterHorizontally)
                     .fillMaxWidth(),
                 crossAxisSpacing = 0.dp,
                 mainAxisSpacing = 4.dp,
@@ -73,10 +77,10 @@ fun AccessibilityCard() {
                         )
                     },
                     colors = ButtonDefaults.outlinedButtonColors(
-                        backgroundColor = Color.Transparent,
-                        contentColor = MaterialTheme.colors.onError
+                        containerColor = Color.Transparent,
+                        contentColor = MaterialTheme.colorScheme.onErrorContainer
                     ),
-                    border = ButtonDefaults.outlinedBorder.copy(brush = SolidColor(MaterialTheme.colors.onError))
+                    border = ButtonDefaults.outlinedButtonBorder.copy(brush = SolidColor(MaterialTheme.colorScheme.onErrorContainer))
                 ) {
                     Text(text = stringResource(id = R.string.battery_whitelist))
                 }
@@ -84,10 +88,10 @@ fun AccessibilityCard() {
                 OutlinedButton(
                     onClick = { context.openAccessibilitySettings() },
                     colors = ButtonDefaults.outlinedButtonColors(
-                        backgroundColor = Color.Transparent,
-                        contentColor = MaterialTheme.colors.onError
+                        containerColor = Color.Transparent,
+                        contentColor = MaterialTheme.colorScheme.onErrorContainer
                     ),
-                    border = ButtonDefaults.outlinedBorder.copy(brush = SolidColor(MaterialTheme.colors.onError))
+                    border = ButtonDefaults.outlinedButtonBorder.copy(brush = SolidColor(MaterialTheme.colorScheme.onErrorContainer))
                 ) {
                     Text(text = stringResource(id = R.string.accessibility_settings))
                 }

@@ -68,10 +68,9 @@ dependencies {
     implementation 'androidx.legacy:legacy-support-core-ui:1.0.0'
 
     implementation 'org.lsposed.hiddenapibypass:hiddenapibypass:4.3'
-    implementation 'com.google.code.gson:gson:2.10'
+    implementation 'com.google.code.gson:gson:2.10.1'
     implementation 'com.google.android.material:material:1.8.0-beta01'
     implementation 'com.github.agrawalsuneet:DotLoadersPack-Android:v1.4.2'
-    implementation 'com.squareup.picasso:picasso:2.8'
     implementation 'com.heinrichreimersoftware:material-intro:2.0.0'
     implementation 'net.bytebuddy:byte-buddy-android:1.12.20'
     implementation 'com.github.zacharee:SeekBarPreference:46a6643c79'
@@ -86,9 +85,10 @@ dependencies {
     implementation 'com.google.firebase:firebase-crashlytics:18.3.2'
 
     implementation 'androidx.activity:activity-compose:1.6.1'
-    implementation "androidx.compose.material:material:${compose_version}"
     implementation "androidx.compose.animation:animation:${compose_version}"
+    implementation "androidx.compose.foundation:foundation:${compose_version}"
     implementation "androidx.compose.ui:ui-tooling:${compose_version}"
+    implementation "androidx.compose.material3:material3:1.1.0-alpha03"
     implementation 'androidx.lifecycle:lifecycle-viewmodel-compose:2.5.1'
     implementation 'com.google.android.material:compose-theme-adapter:1.2.1'
 

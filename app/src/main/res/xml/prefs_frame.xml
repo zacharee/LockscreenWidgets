@@ -15,7 +15,7 @@
             app:cpv_showAlphaSlider="true"
             />
 
-        <SwitchPreference
+        <tk.zwander.common.prefs.MaterialSwitchPreference
             android:title="@string/settings_screen_blur_background"
             android:summary="@string/settings_screen_blur_background_desc"
             android:icon="@drawable/ic_baseline_blur_on_24"
@@ -34,7 +34,7 @@
             app:maxValue="1000"
             />
 
-        <SwitchPreference
+        <tk.zwander.common.prefs.MaterialSwitchPreference
             android:title="@string/settings_screen_masked_mode"
             android:summary="@string/settings_screen_masked_mode_desc"
             android:icon="@drawable/ic_baseline_opacity_24"
@@ -103,7 +103,7 @@
             app:maxValue="8"
             />
 
-        <SwitchPreference
+        <tk.zwander.common.prefs.MaterialSwitchPreference
             android:title="@string/settings_screen_lock_widget_frame"
             android:summary="@string/settings_screen_lock_widget_frame_desc"
             android:key="lock_widget_frame"
@@ -117,35 +117,35 @@
         android:title="@string/category_visibility"
         android:key="settings_visibility_category">
 
-        <SwitchPreference
+        <tk.zwander.common.prefs.MaterialSwitchPreference
             android:title="@string/settings_screen_hide_when_notifications_shown"
             android:summary="@string/settings_screen_hide_when_notifications_shown_desc"
             android:key="hide_on_notifications"
             android:icon="@drawable/ic_baseline_notifications_off_24"
             />
 
-        <SwitchPreference
+        <tk.zwander.common.prefs.MaterialSwitchPreference
             android:title="@string/settings_screen_hide_on_notification_shade"
             android:summary="@string/settings_screen_hide_on_notification_shade_desc"
             android:key="hide_on_notification_shade"
             android:icon="@drawable/ic_baseline_clear_all_24"
             />
 
-        <SwitchPreference
+        <tk.zwander.common.prefs.MaterialSwitchPreference
             android:title="@string/settings_screen_hide_on_security_input"
             android:summary="@string/settings_screen_hide_on_security_input_desc"
             android:key="hide_on_security_page"
             android:icon="@drawable/is_baseline_password_24"
             />
 
-        <SwitchPreference
+        <tk.zwander.common.prefs.MaterialSwitchPreference
             android:title="@string/settings_screen_hide_on_facewidgets"
             android:summary="@string/settings_screen_hide_on_facewidgets_desc"
             android:key="hide_on_facewidgets"
             android:icon="@drawable/ic_baseline_widgets_24"
             />
 
-        <SwitchPreference
+        <tk.zwander.common.prefs.MaterialSwitchPreference
             android:title="@string/settings_screen_hide_in_landscape"
             android:summary="@string/settings_screen_hide_in_landscape_desc"
             android:key="hide_in_landscape"
@@ -172,7 +172,7 @@
         android:title="@string/category_behavior"
         android:key="settings_behavior_category">
 
-        <SwitchPreference
+        <tk.zwander.common.prefs.MaterialSwitchPreference
             android:title="@string/settings_screen_show_in_notification_center"
             android:summary="@string/settings_screen_show_in_notification_center_desc"
             android:key="show_in_notification_center"
@@ -180,7 +180,7 @@
             android:defaultValue="false"
             />
 
-        <SwitchPreference
+        <tk.zwander.common.prefs.MaterialSwitchPreference
             android:title="@string/settings_screen_show_on_main_lock_screen"
             android:summary="@string/settings_screen_show_on_main_lock_screen_desc"
             android:key="show_on_main_lock_screen"
@@ -189,7 +189,7 @@
             android:dependency="show_in_notification_center"
             />
 
-        <SwitchPreference
+        <tk.zwander.common.prefs.MaterialSwitchPreference
             android:title="@string/settings_screen_separate_position_for_lock_nc"
             android:summary="@string/settings_screen_separate_position_for_lock_nc_desc"
             android:key="separate_position_for_lock_notification"
@@ -198,7 +198,7 @@
             android:dependency="show_in_notification_center"
             />
 
-        <SwitchPreference
+        <tk.zwander.common.prefs.MaterialSwitchPreference
             android:title="@string/settings_screen_remember_position"
             android:summary="@string/settings_screen_remember_position_desc"
             android:key="frame_remember_position"
@@ -206,7 +206,7 @@
             android:defaultValue="true"
             />
 
-        <SwitchPreference
+        <tk.zwander.common.prefs.MaterialSwitchPreference
             android:title="@string/settings_screen_animate_show_hide"
             android:summary="@string/settings_screen_animate_show_hide_desc"
             android:key="animate_show_hide"
@@ -252,7 +252,7 @@
         android:title="@string/category_interaction"
         android:key="settings_interaction_category">
 
-        <SwitchPreference
+        <tk.zwander.common.prefs.MaterialSwitchPreference
             android:title="@string/settings_screen_touch_protection"
             android:summary="@string/settings_screen_touch_protection_desc"
             android:icon="@drawable/ic_baseline_block_24"
@@ -260,7 +260,7 @@
             android:defaultValue="false"
             />
 
-        <SwitchPreference
+        <tk.zwander.common.prefs.MaterialSwitchPreference
             android:title="@string/settings_screen_request_unlock"
             android:summary="@string/settings_screen_request_unlock_desc"
             android:key="request_unlock"

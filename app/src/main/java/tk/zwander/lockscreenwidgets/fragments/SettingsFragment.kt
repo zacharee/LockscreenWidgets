@@ -3,12 +3,10 @@ package tk.zwander.lockscreenwidgets.fragments
 import android.os.Build
 import android.os.Bundle
 import androidx.preference.Preference
-import androidx.preference.SwitchPreference
-import tk.zwander.common.fragments.CommonPreferenceFragment
-import tk.zwander.lockscreenwidgets.R
+import androidx.preference.SwitchPreferenceCompat
 import tk.zwander.common.activities.HideForIDsActivity
 import tk.zwander.common.activities.OnboardingActivity
-import tk.zwander.lockscreenwidgets.services.isNotificationListenerActive
+import tk.zwander.common.fragments.CommonPreferenceFragment
 import tk.zwander.common.util.HandlerRegistry
 import tk.zwander.common.util.PrefManager
 import tk.zwander.common.util.backup.BackupRestoreManager
@@ -16,6 +14,8 @@ import tk.zwander.common.util.handler
 import tk.zwander.common.util.hasStoragePermission
 import tk.zwander.common.util.isOneUI
 import tk.zwander.common.util.prefManager
+import tk.zwander.lockscreenwidgets.R
+import tk.zwander.lockscreenwidgets.services.isNotificationListenerActive
 
 /**
  * The settings page.
@@ -25,7 +25,7 @@ import tk.zwander.common.util.prefManager
 class SettingsFragment : CommonPreferenceFragment() {
     override val prefsHandler = HandlerRegistry {
         handler(PrefManager.KEY_WIDGET_FRAME_ENABLED) {
-            findPreference<SwitchPreference>(PrefManager.KEY_WIDGET_FRAME_ENABLED)?.isChecked =
+            findPreference<SwitchPreferenceCompat>(PrefManager.KEY_WIDGET_FRAME_ENABLED)?.isChecked =
                 requireContext().prefManager.widgetFrameEnabled
         }
     }
@@ -40,7 +40,7 @@ class SettingsFragment : CommonPreferenceFragment() {
 
         addPreferencesFromResource(R.xml.prefs_frame)
 
-        findPreference<SwitchPreference>(PrefManager.KEY_HIDE_ON_NOTIFICATIONS)?.setOnPreferenceChangeListener { _, newValue ->
+        findPreference<SwitchPreferenceCompat>(PrefManager.KEY_HIDE_ON_NOTIFICATIONS)?.setOnPreferenceChangeListener { _, newValue ->
             if (newValue.toString().toBoolean() && !requireContext().isNotificationListenerActive) {
                 OnboardingActivity.start(requireContext(), OnboardingActivity.RetroMode.NOTIFICATION)
                 false
@@ -51,31 +51,31 @@ class SettingsFragment : CommonPreferenceFragment() {
         //for Samsung One UI 1.0 and above, so we need to hide the relevant toggles.
         val ncCondition = requireContext().isOneUI
 
-        findPreference<SwitchPreference>(PrefManager.KEY_SHOW_IN_NOTIFICATION_CENTER)?.apply {
+        findPreference<SwitchPreferenceCompat>(PrefManager.KEY_SHOW_IN_NOTIFICATION_CENTER)?.apply {
             if (!ncCondition) {
                 preferenceScreen.removePreferenceRecursively(key)
             }
         }
 
-        findPreference<SwitchPreference>(PrefManager.KEY_SHOW_ON_MAIN_LOCK_SCREEN)?.apply {
+        findPreference<SwitchPreferenceCompat>(PrefManager.KEY_SHOW_ON_MAIN_LOCK_SCREEN)?.apply {
             if (!ncCondition) {
                 preferenceScreen.removePreferenceRecursively(key)
             }
         }
 
-        findPreference<SwitchPreference>(PrefManager.KEY_SEPARATE_POS_FOR_LOCK_NC)?.apply {
+        findPreference<SwitchPreferenceCompat>(PrefManager.KEY_SEPARATE_POS_FOR_LOCK_NC)?.apply {
             if (!ncCondition) {
                 preferenceScreen.removePreferenceRecursively(key)
             }
         }
 
-        findPreference<SwitchPreference>(PrefManager.KEY_HIDE_ON_FACEWIDGETS)?.apply {
+        findPreference<SwitchPreferenceCompat>(PrefManager.KEY_HIDE_ON_FACEWIDGETS)?.apply {
             if (!requireContext().isOneUI || Build.VERSION.SDK_INT <= Build.VERSION_CODES.Q) {
                 preferenceScreen.removePreferenceRecursively(key)
             }
         }
 
-        findPreference<SwitchPreference>(PrefManager.KEY_FRAME_MASKED_MODE)?.setOnPreferenceChangeListener { _, newValue ->
+        findPreference<SwitchPreferenceCompat>(PrefManager.KEY_FRAME_MASKED_MODE)?.setOnPreferenceChangeListener { _, newValue ->
             (if (newValue.toString().toBoolean() && !requireContext().hasStoragePermission) {
                 OnboardingActivity.start(requireContext(), OnboardingActivity.RetroMode.STORAGE)
                 false

@@ -9,8 +9,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBarsPadding
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Surface
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -23,7 +23,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import com.agrawalsuneet.dotsloader.loaders.AllianceLoader
-import com.google.accompanist.themeadapter.material.MdcTheme
+import tk.zwander.common.compose.AppTheme
 import tk.zwander.lockscreenwidgets.data.list.BaseListInfo
 
 @Composable
@@ -43,9 +43,10 @@ fun AddWidgetLayout(
         appWidgetManager = appWidgetManager
     )
 
-    MdcTheme {
+    AppTheme {
         Surface(
-            modifier = Modifier.fillMaxSize()
+            modifier = Modifier
+                .fillMaxSize()
                 .imePadding()
                 .systemBarsPadding()
         ) {
@@ -64,7 +65,7 @@ fun AddWidgetLayout(
                         val dp8 = with (LocalDensity.current) {
                             8.dp.roundToPx()
                         }
-                        val dotColor = MaterialTheme.colors.secondary.toArgb()
+                        val dotColor = MaterialTheme.colorScheme.secondary.toArgb()
 
                         AndroidView(
                             factory = { ctx ->
@@ -87,7 +88,7 @@ fun AddWidgetLayout(
                     ) {
                         AddWidgetToolbar(
                             filter = filter,
-                            onFilterChanged = { filter = it },
+                            onFilterChanged = { f -> filter = f },
                             onBack = onBack,
                             modifier = Modifier
                                 .fillMaxWidth()

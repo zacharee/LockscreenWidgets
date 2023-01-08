@@ -12,6 +12,7 @@
         android:id="@+id/card"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        app:strokeWidth="0dp"
         app:cardElevation="0dp"
         app:cardForegroundColor="@android:color/transparent"
         app:cardBackgroundColor="@android:color/transparent">

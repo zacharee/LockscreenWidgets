@@ -13,9 +13,11 @@
         android:layout_height="match_parent"
         android:background="@android:color/transparent"
         android:animateLayoutChanges="true"
+        app:strokeWidth="0dp"
         app:cardElevation="0dp"
         app:cardCornerRadius="2dp"
-        app:cardBackgroundColor="@android:color/transparent">
+        app:cardBackgroundColor="@android:color/transparent"
+        app:cardForegroundColor="@android:color/transparent">
 
         <tk.zwander.common.views.BlurSafeView
             android:id="@+id/blur_background"

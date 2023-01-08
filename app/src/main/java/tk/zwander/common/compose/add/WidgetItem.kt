@@ -1,27 +1,24 @@
 package tk.zwander.common.compose.add
 
 import android.graphics.Bitmap
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.material.Card
-import androidx.compose.material.ContentAlpha
-import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.OutlinedCard
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
-@OptIn(ExperimentalMaterialApi::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun WidgetItem(
     image: Bitmap?,
@@ -29,14 +26,9 @@ fun WidgetItem(
     subLabel: String?,
     onClick: () -> Unit
 ) {
-    Card(
+    OutlinedCard(
         onClick = onClick,
-        backgroundColor = Color.Transparent,
-        border = BorderStroke(
-            1.dp,
-            MaterialTheme.colors.onSurface.copy(alpha = ContentAlpha.disabled)
-        ),
-        elevation = 0.dp
+        border = CardDefaults.outlinedCardBorder(true)
     ) {
         Column(
             modifier = Modifier

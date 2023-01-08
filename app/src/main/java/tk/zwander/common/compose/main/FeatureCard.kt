@@ -13,10 +13,10 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.material.Card
-import androidx.compose.material.Divider
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
+import androidx.compose.material3.Card
+import androidx.compose.material3.Divider
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -33,20 +33,20 @@ import com.google.accompanist.flowlayout.FlowCrossAxisAlignment
 import com.google.accompanist.flowlayout.FlowMainAxisAlignment
 import com.google.accompanist.flowlayout.FlowRow
 import com.google.accompanist.flowlayout.SizeMode
-import tk.zwander.lockscreenwidgets.BuildConfig
-import tk.zwander.lockscreenwidgets.R
-import tk.zwander.lockscreenwidgets.activities.SettingsActivity
-import tk.zwander.lockscreenwidgets.activities.UsageActivity
 import tk.zwander.common.compose.components.CardSwitch
 import tk.zwander.common.compose.data.FeatureCardInfo
 import tk.zwander.common.compose.util.rememberBooleanPreferenceState
 import tk.zwander.common.data.MainPageButton
-import tk.zwander.lockscreenwidgets.fragments.SettingsFragment
 import tk.zwander.common.util.Event
 import tk.zwander.common.util.PrefManager
-import tk.zwander.lockscreenwidgets.util.WidgetFrameDelegate
 import tk.zwander.common.util.eventManager
 import tk.zwander.common.util.prefManager
+import tk.zwander.lockscreenwidgets.BuildConfig
+import tk.zwander.lockscreenwidgets.R
+import tk.zwander.lockscreenwidgets.activities.SettingsActivity
+import tk.zwander.lockscreenwidgets.activities.UsageActivity
+import tk.zwander.lockscreenwidgets.fragments.SettingsFragment
+import tk.zwander.lockscreenwidgets.util.WidgetFrameDelegate
 import tk.zwander.widgetdrawer.fragments.DrawerSettings
 
 @Composable
@@ -132,7 +132,7 @@ fun FeatureCard(info: FeatureCardInfo) {
             Text(
                 text = stringResource(id = info.title),
                 textAlign = TextAlign.Center,
-                style = MaterialTheme.typography.h4
+                style = MaterialTheme.typography.titleMedium
             )
 
             Box(modifier = Modifier.fillMaxWidth(0.25f)) {
@@ -174,7 +174,7 @@ fun FeatureCard(info: FeatureCardInfo) {
                         Spacer(Modifier.size(16.dp))
                         Text(
                             text = stringResource(id = R.string.add_widget),
-                            style = MaterialTheme.typography.h5
+                            style = MaterialTheme.typography.headlineSmall
                         )
                     }
 

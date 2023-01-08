@@ -1,12 +1,14 @@
 <resources>
-    <style name="AppTheme" parent="Theme.MaterialComponents">
+    <style name="BaseTheme" parent="Theme.MaterialComponents">
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
         <item name="android:windowDrawsSystemBarBackgrounds">true</item>
         <item name="android:statusBarColor">@android:color/transparent</item>
         <item name="android:navigationBarColor">?colorSurface</item>
+    </style>
 
+    <style name="AppTheme" parent="BaseTheme">
         <item name="actionBarStyle">@style/AppTheme.ActionBar</item>
         <item name="android:actionBarStyle">@style/AppTheme.ActionBar</item>
 

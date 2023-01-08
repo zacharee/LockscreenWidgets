@@ -1,19 +1,19 @@
 package tk.zwander.widgetdrawer.fragments
 
 import android.os.Bundle
-import androidx.preference.SwitchPreference
+import androidx.preference.SwitchPreferenceCompat
 import tk.zwander.common.fragments.CommonPreferenceFragment
-import tk.zwander.lockscreenwidgets.R
 import tk.zwander.common.util.HandlerRegistry
 import tk.zwander.common.util.PrefManager
 import tk.zwander.common.util.backup.BackupRestoreManager
 import tk.zwander.common.util.handler
 import tk.zwander.common.util.prefManager
+import tk.zwander.lockscreenwidgets.R
 
 class DrawerSettings : CommonPreferenceFragment() {
     override val prefsHandler = HandlerRegistry {
         handler(PrefManager.KEY_DRAWER_ENABLED) {
-            findPreference<SwitchPreference>(PrefManager.KEY_DRAWER_ENABLED)?.isChecked =
+            findPreference<SwitchPreferenceCompat>(PrefManager.KEY_DRAWER_ENABLED)?.isChecked =
                 requireContext().prefManager.drawerEnabled
         }
     }

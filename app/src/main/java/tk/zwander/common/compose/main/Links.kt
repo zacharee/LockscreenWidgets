@@ -2,6 +2,11 @@ package tk.zwander.common.compose.main
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
+import androidx.compose.material3.Card
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -80,7 +85,7 @@ fun rememberLinks(): List<MainPageLink> {
     }
 }
 
-@OptIn(ExperimentalMaterialApi::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LinkItem(option: MainPageLink) {
     val context = LocalContext.current
@@ -120,7 +125,7 @@ fun LinkItem(option: MainPageLink) {
             ) {
                 Text(
                     text = stringResource(id = option.title),
-                    color = MaterialTheme.colors.onSurface,
+                    color = MaterialTheme.colorScheme.onSurface,
                     fontWeight = FontWeight.Bold
                 )
 
@@ -128,7 +133,7 @@ fun LinkItem(option: MainPageLink) {
 
                 Text(
                     text = stringResource(id = option.desc),
-                    style = MaterialTheme.typography.caption
+                    style = MaterialTheme.typography.bodyMedium
                 )
             }
         }
