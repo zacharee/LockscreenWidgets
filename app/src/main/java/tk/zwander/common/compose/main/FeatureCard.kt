@@ -132,12 +132,13 @@ fun FeatureCard(info: FeatureCardInfo) {
             Text(
                 text = stringResource(id = info.title),
                 textAlign = TextAlign.Center,
-                style = MaterialTheme.typography.titleMedium
+                style = MaterialTheme.typography.headlineLarge
             )
 
             Box(modifier = Modifier.fillMaxWidth(0.25f)) {
                 Divider(
-                    modifier = Modifier.padding(top = 24.dp, bottom = 24.dp)
+                    modifier = Modifier.padding(top = 24.dp, bottom = 24.dp),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
 

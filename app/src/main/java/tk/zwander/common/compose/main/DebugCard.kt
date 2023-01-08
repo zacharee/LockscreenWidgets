@@ -94,7 +94,7 @@ fun DebugCard() {
                 Text(
                     text = stringResource(id = R.string.category_debug),
                     textAlign = TextAlign.Center,
-                    style = MaterialTheme.typography.titleMedium,
+                    style = MaterialTheme.typography.headlineLarge,
                 )
 
                 Text(
