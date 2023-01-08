@@ -3,7 +3,6 @@ package tk.zwander.widgetdrawer.activities.add
 import android.appwidget.AppWidgetProviderInfo
 import android.content.Context
 import android.content.Intent
-import tk.zwander.common.activities.DismissOrUnlockActivity
 import tk.zwander.common.activities.add.ReconfigureWidgetActivity
 import tk.zwander.common.data.WidgetData
 import tk.zwander.common.data.WidgetSizeData
@@ -21,8 +20,6 @@ import kotlin.math.floor
 class ReconfigureDrawerWidgetActivity : ReconfigureWidgetActivity() {
     companion object {
         fun launch(context: Context, id: Int, providerInfo: AppWidgetProviderInfo) {
-            DismissOrUnlockActivity.launch(context)
-
             val intent = Intent(context, ReconfigureDrawerWidgetActivity::class.java)
 
             intent.putExtra(EXTRA_PREVIOUS_ID, id)

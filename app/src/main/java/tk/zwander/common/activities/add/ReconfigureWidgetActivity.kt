@@ -5,9 +5,9 @@ import android.appwidget.AppWidgetProviderInfo
 import android.os.Build
 import android.os.Bundle
 import tk.zwander.common.activities.DismissOrUnlockActivity
-import tk.zwander.common.util.appWidgetManager
 import tk.zwander.common.data.WidgetData
 import tk.zwander.common.data.WidgetSizeData
+import tk.zwander.common.util.appWidgetManager
 import tk.zwander.common.util.logUtils
 
 abstract class ReconfigureWidgetActivity : BaseBindWidgetActivity() {
@@ -33,6 +33,8 @@ abstract class ReconfigureWidgetActivity : BaseBindWidgetActivity() {
             finish()
             return
         }
+
+        DismissOrUnlockActivity.launch(this)
 
         tryBindWidget(providerInfo!!, widgetHost.allocateAppWidgetId())
     }
