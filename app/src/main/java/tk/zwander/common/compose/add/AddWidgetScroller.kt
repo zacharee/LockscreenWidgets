@@ -1,6 +1,5 @@
 package tk.zwander.common.compose.add
 
-import android.content.ComponentName
 import android.graphics.Bitmap
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
@@ -33,6 +32,7 @@ import androidx.core.content.ContextCompat
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import tk.zwander.common.data.AppInfo
+import tk.zwander.common.util.componentNameCompat
 import tk.zwander.common.util.getRemoteDrawable
 import tk.zwander.common.util.toBitmap
 import tk.zwander.lockscreenwidgets.R
@@ -82,11 +82,11 @@ fun AddWidgetScroller(
 
                     items(
                         items = app.shortcuts.toList(),
-                        key = { it.itemInfo.activityInfo.run { ComponentName(packageName, name) } }
+                        key = { it.itemInfo.activityInfo.componentNameCompat }
                     ) { shortcut ->
                         val icon = icon(
                             info = shortcut,
-                            key = shortcut.itemInfo.activityInfo.run { ComponentName(packageName, name) }
+                            key = shortcut.itemInfo.activityInfo.componentNameCompat
                         )
 
                         WidgetItem(

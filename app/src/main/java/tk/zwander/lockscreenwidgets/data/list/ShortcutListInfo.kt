@@ -3,6 +3,7 @@ package tk.zwander.lockscreenwidgets.data.list
 import android.content.pm.ApplicationInfo
 import android.content.pm.ResolveInfo
 import tk.zwander.common.activities.add.AddWidgetActivity
+import tk.zwander.common.util.componentNameCompat
 import java.util.*
 
 /**
@@ -24,10 +25,10 @@ class ShortcutListInfo(
     override fun equals(other: Any?): Boolean {
         return super.equals(other) &&
                 other is ShortcutListInfo &&
-                itemInfo.componentInfo.componentName == other.itemInfo.componentInfo.componentName
+                itemInfo.activityInfo.componentNameCompat == other.itemInfo.activityInfo.componentNameCompat
     }
 
     override fun hashCode(): Int {
-        return super.hashCode() + Objects.hash(itemInfo.componentInfo.componentName)
+        return super.hashCode() + Objects.hash(itemInfo.activityInfo.componentNameCompat)
     }
 }

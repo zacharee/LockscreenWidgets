@@ -18,6 +18,7 @@ import tk.zwander.common.data.WidgetData
 import tk.zwander.common.data.WidgetSizeData
 import tk.zwander.common.host.widgetHostCompat
 import tk.zwander.common.util.appWidgetManager
+import tk.zwander.common.util.componentNameCompat
 import tk.zwander.common.util.loadPreviewOrIcon
 import tk.zwander.common.util.logUtils
 import tk.zwander.common.util.prefManager
@@ -135,8 +136,7 @@ abstract class BaseBindWidgetActivity : ComponentActivity() {
         try {
             val configureIntent = Intent(Intent.ACTION_CREATE_SHORTCUT)
             configureIntent.`package` = info.itemInfo.activityInfo.packageName
-            configureIntent.component = ComponentName(info.itemInfo.activityInfo.packageName,
-                info.itemInfo.activityInfo.name)
+            configureIntent.component = info.itemInfo.activityInfo.componentNameCompat
 
             configShortcutRequest.launch(configureIntent)
         } catch (e: SecurityException) {
