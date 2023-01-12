@@ -226,60 +226,43 @@ class Accessibility : AccessibilityService(), EventObserver, CoroutineScope by M
             //The below block can (very rarely) take over half a second to execute, so only run it
             //if we actually need to (i.e. on the lock screen and screen is on).
             if ((isOnKeyguard || prefManager.showInNotificationCenter) && isScreenOn && prefManager.widgetFrameEnabled /* This is only needed when the frame is enabled */) {
-                //Retrieve the current window set.
-                val windows = windows.map { WindowRootPair(it, it.safeRoot) }
-
-                //Get all windows with the System UI package name.
-                //Get the topmost application window.
-                //Get the topmost window that isn't an application and doesn't belong to System UI.
-                val (sysUiWindows, appWindow, nonAppSystemWindow) = getWindows(windows)
-
-                //Flatted the nodes/Views in the System UI windows into
-                //a single list for easier handling.
-                val sysUiNodes = ConcurrentLinkedQueue<AccessibilityNodeInfo>()
-                //Get all View IDs from successfully-flattened System UI nodes.
-                val items = ConcurrentLinkedQueue<String>()
-                val awaits = ConcurrentLinkedQueue<Deferred<*>>()
-                sysUiWindows.forEach {
-                    it.root?.let { root ->
-                        addAllNodesToList(root, sysUiNodes, items, awaits)
-                    }
-                }
-                awaits.awaitAll()
+                val (
+                    windows, appWindow,
+                    nonAppSystemWindow, minSysUiWindowIndex,
+                    hasScreenOffMemoWindow, hasFaceWidgetsWindow,
+                    edgePanelWindows, sysUiWindowViewIds,
+                    sysUiWindowNodes,
+                ) = getWindows(windows)
 
                 //Update any ID list widgets on the new IDs
                 launch {
-                    eventManager.sendEvent(Event.DebugIdsUpdated(items))
+                    eventManager.sendEvent(Event.DebugIdsUpdated(sysUiWindowViewIds))
                     IDListProvider.sendUpdate(this@Accessibility)
                 }
 
                 if (isDebug) {
                     logUtils.debugLog(
-                        sysUiNodes.filter { it.isVisibleToUser }.map { it.viewIdResourceName }
+                        sysUiWindowNodes.filter { it.isVisibleToUser }.map { it.viewIdResourceName }
                             .toString()
                     )
 
-                    frameDelegate.setNewDebugIdItems(items.toList())
+                    frameDelegate.setNewDebugIdItems(sysUiWindowViewIds.toList())
                 }
 
                 //The logic in this block only needs to run when on the lock screen.
                 //Put it in an if-check to help performance.
                 if (isOnKeyguard) {
                     //Find index of the topmost application window in the set of all windows.
-                    val appIndex = windows.indexOf(appWindow)
+                    val appIndex = appWindow?.index ?: -1
                     //Find the *least* index of the System UI windows in the set of all windows.
-                    val sysUiIndex = sysUiWindows.mapNotNull {
-                        windows.indexOf(it).run { if (this > -1) this else null }
-                    }.minOrNull() ?: -1
+                    val sysUiIndex = minSysUiWindowIndex
                     //Find index of the topmost system window.
-                    val systemIndex = windows.indexOf(nonAppSystemWindow)
+                    val systemIndex = nonAppSystemWindow?.index ?: -1
 
                     //Samsung's Screen-Off Memo is really just a normal Activity that shows over the lock screen.
                     //However, it's not an Application-type window for some reason, so it won't hide with the
                     //currentAppLayer check. Explicitly check for its existence here.
-                    newState = newState.copy(isOnScreenOffMemo = windows.any { win ->
-                        win.root?.packageName == "com.samsung.android.app.notes"
-                    })
+                    newState = newState.copy(isOnScreenOffMemo = hasScreenOffMemoWindow)
 
                     //Generate "layer" values for the System UI window and for the topmost app window, if
                     //it exists.
@@ -296,10 +279,7 @@ class Accessibility : AccessibilityService(), EventObserver, CoroutineScope by M
 
                     newState = newState.copy(
                         isOnEdgePanel = if (isTouchWiz) {
-                            windows.any { wrp ->
-                                wrp.root?.packageName == "com.samsung.android.app.cocktailbarservice" &&
-                                        wrp.window.isActive && wrp.window.isFocused
-                            }
+                            edgePanelWindows.any { it.window.isActive && it.window.isFocused }
                         } else {
                             false
                         }
@@ -316,7 +296,7 @@ class Accessibility : AccessibilityService(), EventObserver, CoroutineScope by M
                     //IDs, and OEMs change them. "notification_panel" and "left_button" are largely unchanged,
                     //although this method isn't perfect.
                     if (prefManager.hideOnSecurityPage) {
-                        newState = newState.copy(onMainLockscreen = sysUiNodes.any {
+                        newState = newState.copy(onMainLockscreen = sysUiWindowNodes.any {
                             it.hasVisibleIds(
                                 "com.android.systemui:id/notification_panel",
                                 "com.android.systemui:id/left_button"
@@ -328,7 +308,7 @@ class Accessibility : AccessibilityService(), EventObserver, CoroutineScope by M
                         //Used for "Hide When Notification Shade Shown" so we know when it's actually expanded.
                         //Some devices don't even have left shortcuts, so also check for keyguard_indication_area.
                         //Just like the showingSecurityInput check, this is probably unreliable for some devices.
-                        newState = newState.copy(showingNotificationsPanel = sysUiNodes.any {
+                        newState = newState.copy(showingNotificationsPanel = sysUiWindowNodes.any {
                             it.hasVisibleIds(
                                 "com.android.systemui:id/quick_settings_panel",
                                 "com.android.systemui:id/settings_button",
@@ -342,9 +322,7 @@ class Accessibility : AccessibilityService(), EventObserver, CoroutineScope by M
                     }
 
                     if (prefManager.hideOnFaceWidgets) {
-                        newState = newState.copy(isOnFaceWidgets = windows.any {
-                            it.root?.packageName == "com.samsung.android.app.aodservice"
-                        })
+                        newState = newState.copy(isOnFaceWidgets = hasFaceWidgetsWindow)
                     }
                 } else {
                     //If we're not on the lock screen, whether or not Screen-Off Memo is showing
@@ -359,7 +337,7 @@ class Accessibility : AccessibilityService(), EventObserver, CoroutineScope by M
                 //ID, which is unique to One UI (it's the three-dot button), and is only
                 //visible when the NC is fully expanded.
                 if (prefManager.showInNotificationCenter) {
-                    newState = newState.copy(notificationsPanelFullyExpanded = sysUiNodes.any {
+                    newState = newState.copy(notificationsPanelFullyExpanded = sysUiWindowNodes.any {
                         it.hasVisibleIds("com.android.systemui:id/more_button")
                     })
                 }
@@ -369,7 +347,7 @@ class Accessibility : AccessibilityService(), EventObserver, CoroutineScope by M
                 val presentIds = prefManager.presentIds
                 if (presentIds.isNotEmpty()) {
                     newState = newState.copy(
-                        hideForPresentIds = sysUiNodes.any {
+                        hideForPresentIds = sysUiWindowNodes.any {
                             it.hasVisibleIds(presentIds)
                         }
                     )
@@ -380,13 +358,13 @@ class Accessibility : AccessibilityService(), EventObserver, CoroutineScope by M
                 val nonPresentIds = prefManager.nonPresentIds
                 if (nonPresentIds.isNotEmpty()) {
                     newState = newState.copy(
-                        hideForNonPresentIds = sysUiNodes.none { nonPresentIds.contains(it.viewIdResourceName) }
-                                || sysUiNodes.any { nonPresentIds.contains(it.viewIdResourceName) && !it.isVisibleToUser }
+                        hideForNonPresentIds = sysUiWindowNodes.none { nonPresentIds.contains(it.viewIdResourceName) }
+                                || sysUiWindowNodes.any { nonPresentIds.contains(it.viewIdResourceName) && !it.isVisibleToUser }
                     )
                 }
 
                 //Recycle all windows and nodes.
-                sysUiNodes.forEach {
+                sysUiWindowNodes.forEach {
                     @Suppress("DEPRECATION")
                     it.recycle()
                 }
@@ -524,17 +502,37 @@ class Accessibility : AccessibilityService(), EventObserver, CoroutineScope by M
      * Find the [AccessibilityWindowInfo] and [AccessibilityNodeInfo] corresponding to the topmost app window.
      * Find the [AccessibilityWindowInfo] and [AccessibilityNodeInfo] corresponding to the topmost non-System UI window.
      */
-    private fun getWindows(windows: List<WindowRootPair>): WindowInfo {
+    private suspend fun getWindows(windows: List<AccessibilityWindowInfo>): WindowInfo {
         val systemUiWindows = ArrayList<WindowRootPair>()
+        val edgePanelWindows = ArrayList<WindowRootPair>()
+
+        val sysUiWindowViewIds = ConcurrentLinkedQueue<String>()
+        val sysUiWindowNodes = ConcurrentLinkedQueue<AccessibilityNodeInfo>()
+        val sysUiWindowAwaits = ConcurrentLinkedQueue<Deferred<*>>()
+
         var topAppWindow: WindowRootPair? = null
         var topNonSysUiWindow: WindowRootPair? = null
 
-        windows.forEach { window ->
+        var hasScreenOffMemoWindow = false
+        var hasFaceWidgetsWindow = false
+
+        var minSysUiWindowIndex = -1
+
+        val processed = windows.mapIndexed { index, rawWindow ->
+            val window = WindowRootPair(rawWindow, rawWindow.safeRoot, index)
             val safeRoot = window.root
             val isSysUi = safeRoot?.packageName == "com.android.systemui"
 
             if (isSysUi) {
                 systemUiWindows.add(window)
+
+                if (minSysUiWindowIndex == -1) {
+                    minSysUiWindowIndex = index
+                }
+
+                safeRoot?.let { root ->
+                    addAllNodesToList(root, sysUiWindowNodes, sysUiWindowViewIds, sysUiWindowAwaits)
+                }
             }
 
             if (topAppWindow == null && window.window.type == AccessibilityWindowInfo.TYPE_APPLICATION) {
@@ -549,9 +547,35 @@ class Accessibility : AccessibilityService(), EventObserver, CoroutineScope by M
                     topNonSysUiWindow = window
                 }
             }
+
+            if (safeRoot?.packageName == "com.samsung.android.app.cocktailbarservice") {
+                edgePanelWindows.add(window)
+            }
+
+            if (safeRoot?.packageName == "com.samsung.android.app.notes") {
+                hasScreenOffMemoWindow = true
+            }
+
+            if (safeRoot?.packageName == "com.samsung.android.app.aodservice") {
+                hasFaceWidgetsWindow = true
+            }
+
+            window
         }
 
-        return WindowInfo(systemUiWindows, topAppWindow, topNonSysUiWindow)
+        sysUiWindowAwaits.awaitAll()
+
+        return WindowInfo(
+            windows = processed,
+            topAppWindow = topAppWindow,
+            topNonSysUiWindow = topNonSysUiWindow,
+            edgePanelWindows = edgePanelWindows,
+            hasScreenOffMemoWindow = hasScreenOffMemoWindow,
+            hasFaceWidgetsWindow = hasFaceWidgetsWindow,
+            minSysUiWindowIndex = minSysUiWindowIndex,
+            sysUiWindowNodes = sysUiWindowNodes,
+            sysUiWindowViewIds = sysUiWindowViewIds
+        )
     }
 
     /**

@@ -9,5 +9,6 @@ import android.view.accessibility.AccessibilityWindowInfo
  */
 data class WindowRootPair(
     val window: AccessibilityWindowInfo,
-    val root: AccessibilityNodeInfo?
+    val root: AccessibilityNodeInfo?,
+    val index: Int
 )
