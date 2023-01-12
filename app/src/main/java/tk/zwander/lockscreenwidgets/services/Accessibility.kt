@@ -531,9 +531,9 @@ class Accessibility : AccessibilityService(), EventObserver, CoroutineScope by M
         var minSysUiWindowIndex = -1
 
         val processed = windows.mapIndexed { index, rawWindow ->
-            val window = WindowRootPair(rawWindow, rawWindow.safeRoot, index)
-            val safeRoot = window.root
+            val safeRoot = rawWindow.safeRoot
             val isSysUi = safeRoot?.packageName == "com.android.systemui"
+            val window = WindowRootPair(rawWindow, safeRoot, index)
 
             if (isSysUi) {
                 systemUiWindows.add(window)
