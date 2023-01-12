@@ -537,7 +537,7 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
      * - [PrefManager.showOnMainLockScreen] is true OR [PrefManager.showInNotificationCenter] is false
      * - [PrefManager.hideOnFaceWidgets] is false OR [State.isOnFaceWidgets] is false
      * - [State.currentAppLayer] is less than 0 (i.e. doesn't exist)
-     * - [State.isOnEdgePanel] is false
+     * - [State.isOnEdgePanel] is false OR [PrefManager.hideOnEdgePanel] is false
      * - [State.isOnScreenOffMemo] is false
      * - [State.onMainLockscreen] is true OR [State.showingNotificationsPanel] is true OR [PrefManager.hideOnSecurityPage] is false
      * - [State.showingNotificationsPanel] is false OR [PrefManager.hideOnNotificationShade] is false (OR [State.notificationsPanelFullyExpanded] is true AND [PrefManager.showInNotificationCenter] is true
@@ -572,7 +572,7 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
                     && (prefManager.showOnMainLockScreen || !prefManager.showInNotificationCenter)
                     && (!prefManager.hideOnFaceWidgets || !state.isOnFaceWidgets)
                     && state.currentAppLayer < 0
-                    && !state.isOnEdgePanel
+                    && (!state.isOnEdgePanel || !prefManager.hideOnEdgePanel)
                     && !state.isOnScreenOffMemo
                     && (state.onMainLockscreen || state.showingNotificationsPanel || !prefManager.hideOnSecurityPage)
                     && (!state.showingNotificationsPanel || !prefManager.hideOnNotificationShade)
@@ -592,7 +592,8 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
                         "presentIds: ${prefManager.presentIds}\n" +
                         "nonPresentIds: ${prefManager.nonPresentIds}\n" +
                         "hideInLandscape: ${prefManager.hideInLandscape}\n" +
-                        "showInNotificationCenter: ${prefManager.showInNotificationCenter}\n"
+                        "showInNotificationCenter: ${prefManager.showInNotificationCenter}\n" +
+                        "hideOnEdgePanel: ${prefManager.hideOnEdgePanel}\n"
             )
         }
     }

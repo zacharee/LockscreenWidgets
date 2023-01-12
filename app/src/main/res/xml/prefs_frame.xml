@@ -152,6 +152,14 @@
             android:icon="@drawable/ic_baseline_crop_landscape_24"
             />
 
+        <tk.zwander.common.prefs.MaterialSwitchPreference
+            android:title="@string/settings_screen_hide_on_edge_panels"
+            android:summary="@string/settings_screen_hide_on_edge_panels_desc"
+            android:key="frame_hide_on_edge_panel"
+            android:icon="@drawable/border_right"
+            android:defaultValue="true"
+            />
+
         <Preference
             android:title="@string/settings_screen_present_ids"
             android:summary="@string/settings_screen_present_ids_desc"

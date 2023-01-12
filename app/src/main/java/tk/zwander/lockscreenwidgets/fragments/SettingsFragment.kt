@@ -13,6 +13,7 @@ import tk.zwander.common.util.backup.BackupRestoreManager
 import tk.zwander.common.util.handler
 import tk.zwander.common.util.hasStoragePermission
 import tk.zwander.common.util.isOneUI
+import tk.zwander.common.util.isTouchWiz
 import tk.zwander.common.util.prefManager
 import tk.zwander.lockscreenwidgets.R
 import tk.zwander.lockscreenwidgets.services.isNotificationListenerActive
@@ -90,6 +91,12 @@ class SettingsFragment : CommonPreferenceFragment() {
         findPreference<Preference>("non_present_ids_launch")?.setOnPreferenceClickListener {
             HideForIDsActivity.start(requireContext(), HideForIDsActivity.Type.NON_PRESENT)
             true
+        }
+
+        findPreference<Preference>(PrefManager.KEY_HIDE_ON_EDGE_PANEL)?.apply {
+            if (!requireContext().isTouchWiz) {
+                preferenceScreen.removePreferenceRecursively(key)
+            }
         }
     }
 }

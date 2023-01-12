@@ -189,6 +189,9 @@
     <string name="settings_screen_remember_position">Remember Position</string>
     <string name="settings_screen_remember_position_desc">By default, Lockscreen Widgets remembers which page it was on the last time it was on-screen and scrolls to that position every time it shows. Disable this option to have Lockscreen Widgets always show the first page when it appears.</string>
 
+    <string name="settings_screen_hide_on_edge_panels">Hide on Edge Panels</string>
+    <string name="settings_screen_hide_on_edge_panels_desc">Hide the widget frame when Samsung\'s Edge Panels are open.</string>
+
     <string name="intro_welcome_title">Welcome!</string>
     <string name="intro_welcome_desc">Lockscreen Widgets is a simple app with a simple purpose: to bring back Android KitKat\'s lock screen widgets. Your widgets will show up in a simple paged slider on the lockscreen.</string>
 

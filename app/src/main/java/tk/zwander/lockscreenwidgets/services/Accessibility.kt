@@ -296,10 +296,10 @@ class Accessibility : AccessibilityService(), EventObserver, CoroutineScope by M
 
                     newState = newState.copy(
                         isOnEdgePanel = if (isTouchWiz) {
-                            val systemRoot = nonAppSystemWindow?.root
-
-                            systemRoot?.packageName == "com.samsung.android.app.cocktailbarservice"
-                                    && systemIndex == 0
+                            windows.any { wrp ->
+                                wrp.root?.packageName == "com.samsung.android.app.cocktailbarservice" &&
+                                        wrp.window.isActive && wrp.window.isFocused
+                            }
                         } else {
                             false
                         }

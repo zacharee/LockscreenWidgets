@@ -13,11 +13,11 @@ import androidx.core.content.res.ResourcesCompat
 import androidx.preference.PreferenceManager
 import com.google.gson.GsonBuilder
 import com.google.gson.reflect.TypeToken
-import tk.zwander.lockscreenwidgets.R
-import tk.zwander.lockscreenwidgets.data.Mode
 import tk.zwander.common.data.WidgetData
 import tk.zwander.common.data.WidgetSizeData
 import tk.zwander.common.data.WidgetTileInfo
+import tk.zwander.lockscreenwidgets.R
+import tk.zwander.lockscreenwidgets.data.Mode
 
 //Convenience method for getting the preference store instance
 val Context.prefManager: PrefManager
@@ -120,6 +120,7 @@ class PrefManager private constructor(context: Context) : ContextWrapper(context
         const val KEY_DRAWER_WIDGET_CORNER_RADIUS = "drawer_widget_corner_radius"
         const val KEY_FRAME_REMEMBER_POSITION = "frame_remember_position"
         const val KEY_DRAWER_SIDE_PADDING = "drawer_side_padding"
+        const val KEY_HIDE_ON_EDGE_PANEL = "frame_hide_on_edge_panel"
 
         const val VALUE_PAGE_INDICATOR_BEHAVIOR_HIDDEN = 0
         const val VALUE_PAGE_INDICATOR_BEHAVIOR_AUTO_HIDE = 1
@@ -614,6 +615,12 @@ class PrefManager private constructor(context: Context) : ContextWrapper(context
         get() = getBoolean(KEY_SHOW_DRAWER_HANDLE, false)
         set(value) {
             putBoolean(KEY_SHOW_DRAWER_HANDLE, value)
+        }
+
+    var hideOnEdgePanel: Boolean
+        get() = getBoolean(KEY_HIDE_ON_EDGE_PANEL, true)
+        set(value) {
+            putBoolean(KEY_HIDE_ON_EDGE_PANEL, value)
         }
 
     var drawerHandleHeight: Int

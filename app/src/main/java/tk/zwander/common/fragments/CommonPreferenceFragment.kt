@@ -16,12 +16,12 @@ import androidx.preference.PreferenceScreen
 import androidx.preference.PreferenceViewHolder
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import tk.zwander.lockscreenwidgets.R
 import tk.zwander.common.util.HandlerRegistry
 import tk.zwander.common.util.backup.BackupRestoreManager
 import tk.zwander.common.util.backup.backupRestoreManager
 import tk.zwander.common.util.isOneUI
 import tk.zwander.common.util.logUtils
+import tk.zwander.lockscreenwidgets.R
 import java.io.FileNotFoundException
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -131,8 +131,11 @@ abstract class CommonPreferenceFragment : PreferenceFragmentCompat() {
         return object : PreferenceGroupAdapter(preferenceScreen) {
             @SuppressLint("RestrictedApi")
             override fun onBindViewHolder(holder: PreferenceViewHolder, position: Int) {
-                super.onBindViewHolder(holder, position)
                 val preference = getItem(position)
+                preference?.isSingleLineTitle = false
+
+                super.onBindViewHolder(holder, position)
+
                 if (preference is PreferenceCategory)
                     setZeroPaddingToLayoutChildren(holder.itemView)
                 else
