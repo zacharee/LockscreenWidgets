@@ -203,22 +203,25 @@ class Accessibility : AccessibilityService(), EventObserver, CoroutineScope by M
 
             newState = newState.copy(screenOrientation = defaultDisplayCompat.rotation)
 
-            try {
-                logUtils.debugLog("Source Node ID: ${eventCopy.sourceNodeId}, Window ID: ${eventCopy.windowId}, Source ID Name: ${eventCopy.source?.viewIdResourceName}")
-                logUtils.debugLog(
-                    "Records: ${
-                        run {
-                            val records = ArrayList<String>()
-                            for (i in 0 until eventCopy.recordCount) {
-                                val record = eventCopy.getRecord(i)
-                                records.add("$record ${record.sourceNodeId} ${record.windowId} ${record.source?.viewIdResourceName}")
+            if (isDebug) {
+                // Nest this in the debug check so that loop doesn't have to run always.
+                try {
+                    logUtils.debugLog("Source Node ID: ${eventCopy.sourceNodeId}, Window ID: ${eventCopy.windowId}, Source ID Name: ${eventCopy.source?.viewIdResourceName}")
+                    logUtils.debugLog(
+                        "Records: ${
+                            run {
+                                val records = ArrayList<String>()
+                                for (i in 0 until eventCopy.recordCount) {
+                                    val record = eventCopy.getRecord(i)
+                                    records.add("$record ${record.sourceNodeId} ${record.windowId} ${record.source?.viewIdResourceName}")
+                                }
+                                records.joinToString(",,,,,,,,")
                             }
-                            records.joinToString(",,,,,,,,")
-                        }
-                    }"
-                )
-            } catch (e: Exception) {
-                logUtils.debugLog("Error printing debug info", e)
+                        }"
+                    )
+                } catch (e: Exception) {
+                    logUtils.debugLog("Error printing debug info", e)
+                }
             }
 
             logUtils.debugLog("Accessibility event: $eventCopy, isScreenOn: ${isScreenOn}, wasOnKeyguard: $isOnKeyguard, ${drawerDelegate.state}")
