@@ -13,7 +13,7 @@ data class WindowInfo(
     val minSysUiWindowIndex: Int,
     val hasScreenOffMemoWindow: Boolean,
     val hasFaceWidgetsWindow: Boolean,
-    val edgePanelWindows: List<WindowRootPair>,
+    val hasEdgePanelWindow: Boolean,
     val sysUiWindowViewIds: ConcurrentLinkedQueue<String>,
     val sysUiWindowNodes: ConcurrentLinkedQueue<AccessibilityNodeInfo>,
 )
