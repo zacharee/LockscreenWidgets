@@ -298,7 +298,6 @@ class Accessibility : AccessibilityService(), EventObserver, CoroutineScope by M
                     hideForNonPresentIds = false
                 )
 
-                //Recycle all windows and nodes.
                 sysUiWindowNodes.forEach { node ->
                     //If the user has enabled the option to hide the frame on security (pin, pattern, password)
                     //input, we need to check if they're on the main lock screen. This is more reliable than
@@ -362,8 +361,7 @@ class Accessibility : AccessibilityService(), EventObserver, CoroutineScope by M
                     //(or are present but not visible). If any aren't, the frame will be hidden.
                     val nonPresentIds = prefManager.nonPresentIds
                     if (nonPresentIds.isNotEmpty()) {
-                        if (nonPresentIds.contains(node.viewIdResourceName)
-                            || nonPresentIds.contains(node.viewIdResourceName) && !node.isVisibleToUser) {
+                        if (!node.hasVisibleIds(nonPresentIds)) {
                             tempState = tempState.copy(
                                 hideForNonPresentIds = true
                             )
