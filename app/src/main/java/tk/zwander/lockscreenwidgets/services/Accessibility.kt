@@ -232,11 +232,11 @@ class Accessibility : AccessibilityService(), EventObserver, CoroutineScope by M
             //if we actually need to (i.e. on the lock screen and screen is on).
             if ((isOnKeyguard || prefManager.showInNotificationCenter) && isScreenOn && prefManager.widgetFrameEnabled /* This is only needed when the frame is enabled */) {
                 val (
-                    windows, appWindow,
-                    nonAppSystemWindow, minSysUiWindowIndex,
+                    windows, appWindowIndex,
+                    nonAppSystemWindowIndex, minSysUiWindowIndex,
                     hasScreenOffMemoWindow, hasFaceWidgetsWindow,
                     hasEdgePanelWindow, sysUiWindowViewIds,
-                    sysUiWindowNodes,
+                    sysUiWindowNodes, topAppWindowPackageName
                 ) = getWindows(windows)
 
                 //Update any ID list widgets on the new IDs
@@ -254,41 +254,26 @@ class Accessibility : AccessibilityService(), EventObserver, CoroutineScope by M
                     frameDelegate.setNewDebugIdItems(sysUiWindowViewIds.toList())
                 }
 
-                //The logic in this block only needs to run when on the lock screen.
-                //Put it in an if-check to help performance.
-                if (isOnKeyguard) {
-                    //Find index of the topmost application window in the set of all windows.
-                    val appIndex = appWindow?.index ?: -1
-                    //Find index of the topmost system window.
-                    val systemIndex = nonAppSystemWindow?.index ?: -1
-
-                    newState = newState.copy(
-                        //Samsung's Screen-Off Memo is really just a normal Activity that shows over the lock screen.
-                        //However, it's not an Application-type window for some reason, so it won't hide with the
-                        //currentAppLayer check. Explicitly check for its existence here.
-                        isOnScreenOffMemo = hasScreenOffMemoWindow,
-                        isOnEdgePanel = hasEdgePanelWindow,
-                        isOnFaceWidgets = hasFaceWidgetsWindow,
-                        //Generate "layer" values for the System UI window and for the topmost app window, if
-                        //it exists.
-                        //currentAppLayer *should* be -1 even if there's an app open in the background,
-                        //since getWindows() is only meant to return windows that can actually be
-                        //interacted with. The only time it should be anything else (usually 1) is
-                        //if an app is displaying above the keyguard, such as the incoming call
-                        //screen or the camera.
-                        currentAppLayer = if (appIndex != -1) windows.size - appIndex else appIndex,
-                        currentSysUiLayer = if (minSysUiWindowIndex != -1) windows.size - minSysUiWindowIndex else minSysUiWindowIndex,
-                        currentSystemLayer = if (systemIndex != -1) windows.size - systemIndex else systemIndex,
-                        //This is mostly a debug value to see which app LSWidg thinks is on top.
-                        currentAppPackage = appWindow?.root?.packageName?.toString(),
-                    )
-                } else {
-                    //If we're not on the lock screen, whether or not Screen-Off Memo is showing
-                    //doesn't matter.
-                    newState = newState.copy(
-                        isOnScreenOffMemo = false
-                    )
-                }
+                newState = newState.copy(
+                    //Samsung's Screen-Off Memo is really just a normal Activity that shows over the lock screen.
+                    //However, it's not an Application-type window for some reason, so it won't hide with the
+                    //currentAppLayer check. Explicitly check for its existence here.
+                    isOnScreenOffMemo = isOnKeyguard && hasScreenOffMemoWindow,
+                    isOnEdgePanel = hasEdgePanelWindow,
+                    isOnFaceWidgets = hasFaceWidgetsWindow,
+                    //Generate "layer" values for the System UI window and for the topmost app window, if
+                    //it exists.
+                    //currentAppLayer *should* be -1 even if there's an app open in the background,
+                    //since getWindows() is only meant to return windows that can actually be
+                    //interacted with. The only time it should be anything else (usually 1) is
+                    //if an app is displaying above the keyguard, such as the incoming call
+                    //screen or the camera.
+                    currentAppLayer = if (appWindowIndex != -1) windows.size - appWindowIndex else appWindowIndex,
+                    currentSysUiLayer = if (minSysUiWindowIndex != -1) windows.size - minSysUiWindowIndex else minSysUiWindowIndex,
+                    currentSystemLayer = if (nonAppSystemWindowIndex != -1) windows.size - nonAppSystemWindowIndex else nonAppSystemWindowIndex,
+                    //This is mostly a debug value to see which app LSWidg thinks is on top.
+                    currentAppPackage = topAppWindowPackageName,
+                )
 
                 var tempState = newState.copy(
                     onMainLockscreen = false,
@@ -521,8 +506,10 @@ class Accessibility : AccessibilityService(), EventObserver, CoroutineScope by M
         val sysUiWindowNodes = ConcurrentLinkedQueue<AccessibilityNodeInfo>()
         val sysUiWindowAwaits = ConcurrentLinkedQueue<Deferred<*>>()
 
-        var topAppWindow: WindowRootPair? = null
-        var topNonSysUiWindow: WindowRootPair? = null
+        var topAppWindowIndex: Int = -1
+        var topNonSysUiWindowIndex: Int = -1
+
+        var topAppWindowPackageName: String? = null
 
         var hasScreenOffMemoWindow = false
         var hasFaceWidgetsWindow = false
@@ -547,17 +534,18 @@ class Accessibility : AccessibilityService(), EventObserver, CoroutineScope by M
                 }
             }
 
-            if (topAppWindow == null && window.window.type == AccessibilityWindowInfo.TYPE_APPLICATION) {
-                topAppWindow = window
+            if (topAppWindowIndex == -1 && window.window.type == AccessibilityWindowInfo.TYPE_APPLICATION) {
+                topAppWindowIndex = index
+                topAppWindowPackageName = safeRoot?.packageName?.toString()
             }
 
             if (
-                topNonSysUiWindow == null &&
+                topNonSysUiWindowIndex == -1 &&
                 window.window.type != AccessibilityWindowInfo.TYPE_APPLICATION &&
                 window.window.type != AccessibilityWindowInfo.TYPE_ACCESSIBILITY_OVERLAY &&
                 !isSysUi
             ) {
-                topNonSysUiWindow = window
+                topNonSysUiWindowIndex = index
             }
 
             if (
@@ -582,14 +570,15 @@ class Accessibility : AccessibilityService(), EventObserver, CoroutineScope by M
 
         return WindowInfo(
             windows = processed,
-            topAppWindow = topAppWindow,
-            topNonSysUiWindow = topNonSysUiWindow,
+            topAppWindowIndex = topAppWindowIndex,
+            topNonSysUiWindowIndex = topNonSysUiWindowIndex,
             hasScreenOffMemoWindow = hasScreenOffMemoWindow,
             hasFaceWidgetsWindow = hasFaceWidgetsWindow,
             minSysUiWindowIndex = minSysUiWindowIndex,
             sysUiWindowNodes = sysUiWindowNodes,
             sysUiWindowViewIds = sysUiWindowViewIds,
-            hasEdgePanelWindow = hasEdgePanelWindow
+            hasEdgePanelWindow = hasEdgePanelWindow,
+            topAppWindowPackageName = topAppWindowPackageName
         )
     }
 

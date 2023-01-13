@@ -8,12 +8,13 @@ import java.util.concurrent.ConcurrentLinkedQueue
  */
 data class WindowInfo(
     val windows: List<WindowRootPair>,
-    val topAppWindow: WindowRootPair?,
-    val topNonSysUiWindow: WindowRootPair?,
+    val topAppWindowIndex: Int,
+    val topNonSysUiWindowIndex: Int,
     val minSysUiWindowIndex: Int,
     val hasScreenOffMemoWindow: Boolean,
     val hasFaceWidgetsWindow: Boolean,
     val hasEdgePanelWindow: Boolean,
     val sysUiWindowViewIds: ConcurrentLinkedQueue<String>,
     val sysUiWindowNodes: ConcurrentLinkedQueue<AccessibilityNodeInfo>,
+    val topAppWindowPackageName: String?,
 )
