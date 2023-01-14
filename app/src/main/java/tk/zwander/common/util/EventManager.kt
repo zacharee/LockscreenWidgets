@@ -140,8 +140,10 @@ sealed class Event {
     object DrawerShown : Event()
     object DrawerHidden : Event()
     object DrawerWidgetClick : Event()
+    object DrawerBackButtonClick : Event()
 
     data class LaunchAddDrawerWidget(val fromDrawer: Boolean) : Event()
+    data class DrawerAttachmentState(val attached: Boolean) : Event()
 }
 
 interface EventObserver {

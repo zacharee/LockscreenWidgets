@@ -9,6 +9,7 @@ import android.content.Context
 import android.widget.RemoteViews
 import tk.zwander.common.util.safeApplicationContext
 import tk.zwander.common.views.ZeroPaddingAppWidgetHostView
+import java.util.concurrent.atomic.AtomicInteger
 
 val Context.widgetHostCompat: WidgetHostCompat
     get() = WidgetHostCompat.getInstance(this)
@@ -72,12 +73,25 @@ abstract class WidgetHostCompat(
     protected abstract val onClickHandler: Any
     protected val onClickCallbacks = mutableSetOf<OnClickCallback>()
 
+    protected val listeningCount = AtomicInteger(0)
+
     fun addOnClickCallback(callback: OnClickCallback) {
         onClickCallbacks.add(callback)
     }
 
     fun removeOnClickCallback(callback: OnClickCallback) {
         onClickCallbacks.remove(callback)
+    }
+
+    override fun startListening() {
+        listeningCount.getAndIncrement()
+        super.startListening()
+    }
+
+    override fun stopListening() {
+        if (listeningCount.decrementAndGet() == 0) {
+            super.stopListening()
+        }
     }
 
     override fun onCreateView(

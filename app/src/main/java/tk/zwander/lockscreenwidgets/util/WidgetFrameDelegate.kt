@@ -2,10 +2,8 @@ package tk.zwander.lockscreenwidgets.util
 
 import android.annotation.SuppressLint
 import android.app.IWallpaperManager
-import android.app.KeyguardManager
 import android.app.WallpaperManager
 import android.content.Context
-import android.content.ContextWrapper
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Color
@@ -24,6 +22,7 @@ import android.view.ContextThemeWrapper
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.Surface
+import android.view.View
 import android.view.WindowManager
 import android.widget.ImageView
 import android.widget.Toast
@@ -36,14 +35,11 @@ import androidx.core.view.isVisible
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import com.android.internal.R.attr.screenOrientation
-import com.arasthel.spannedgridlayoutmanager.SpannedGridLayoutManager
 import tk.zwander.common.activities.DismissOrUnlockActivity
 import tk.zwander.common.data.WidgetType
-import tk.zwander.common.host.WidgetHostCompat
-import tk.zwander.common.host.widgetHostCompat
+import tk.zwander.common.util.BaseDelegate
 import tk.zwander.common.util.BlurManager
 import tk.zwander.common.util.Event
-import tk.zwander.common.util.EventObserver
 import tk.zwander.common.util.HandlerRegistry
 import tk.zwander.common.util.ISnappyLayoutManager
 import tk.zwander.common.util.PrefManager
@@ -69,8 +65,7 @@ import tk.zwander.lockscreenwidgets.views.WidgetFrameView
  * Handle most of the logic involving the widget frame.
  * TODO: make this work with multiple frame "clients" (i.e. a preview in MainActivity).
  */
-class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper(context),
-    EventObserver, WidgetHostCompat.OnClickCallback {
+class WidgetFrameDelegate private constructor(context: Context) : BaseDelegate<WidgetFrameDelegate.State>(context) {
     companion object {
         private var instance by mutableStateOf<WidgetFrameDelegate?>(null)
 
@@ -114,8 +109,8 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
         }
     }
 
-    var state: State = State()
-        private set(newState) {
+    override var state: State = State()
+        set(newState) {
             var actualNewState = newState
             val oldState = field
 
@@ -164,7 +159,7 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
         }
 
     //The size, position, and such of the widget frame on the lock screen.
-    private val params = WindowManager.LayoutParams().apply {
+    override val params = WindowManager.LayoutParams().apply {
         type = WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY
         width = dpAsPx(prefManager.getCorrectFrameWidth(saveMode))
         height = dpAsPx(prefManager.getCorrectFrameHeight(saveMode))
@@ -181,19 +176,17 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
                     WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER
         format = PixelFormat.RGBA_8888
     }
-    private val wallpaper = getSystemService(Context.WALLPAPER_SERVICE) as WallpaperManager
-    private val wm = getSystemService(Context.WINDOW_SERVICE) as WindowManager
-    private val widgetHost = widgetHostCompat
+    override val rootView: View
+        get() = binding.root
 
     //The actual frame View
     private val binding =
         WidgetFrameBinding.inflate(LayoutInflater.from(ContextThemeWrapper(this, R.style.AppTheme)))
-    private val gridLayoutManager = SpannedLayoutManager()
-    private val adapter = WidgetFrameAdapter(appWidgetManager, widgetHost) { item, _ ->
+    override val gridLayoutManager = SpannedLayoutManager()
+    override val adapter = WidgetFrameAdapter(appWidgetManager, widgetHost) { item, _ ->
         binding.removeWidgetConfirmation.root.show(item)
     }
-
-    private val touchHelperCallback = createTouchHelperCallback(
+    override val touchHelperCallback = createTouchHelperCallback(
         adapter,
         widgetMoved = { moved ->
             if (moved) {
@@ -210,9 +203,7 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
         }
     )
 
-    private val kgm = context.getSystemService(Context.KEYGUARD_SERVICE) as KeyguardManager
-
-    private val sharedPreferencesChangeHandler = HandlerRegistry {
+    override val prefsHandler = HandlerRegistry {
         handler(PrefManager.KEY_CURRENT_WIDGETS) {
             //Make sure the adapter knows of any changes to the widget list
             if (!state.updatedForMove) {
@@ -281,7 +272,7 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
     private val showWallpaperLayerCondition: Boolean
         get() = !state.isPreview && prefManager.maskedMode && (!state.notificationsPanelFullyExpanded || !prefManager.showInNotificationCenter)
 
-    private val blurManager = BlurManager(
+    override val blurManager = BlurManager(
         context = this,
         params = params,
         targetView = binding.blurBackground,
@@ -413,8 +404,9 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
         }
     }
 
-    fun onCreate() {
-        sharedPreferencesChangeHandler.register(this)
+    override fun onCreate() {
+        super.onCreate()
+
         gridLayoutManager.spanSizeLookup = adapter.spanSizeLookup
         binding.widgetsPager.apply {
             adapter = this@WidgetFrameDelegate.adapter
@@ -422,8 +414,6 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
             setHasFixedSize(true)
             ItemTouchHelper(touchHelperCallback).attachToRecyclerView(this)
         }
-        blurManager.onCreate()
-        widgetHost.addOnClickCallback(this)
 
         updateRowColCount()
         adapter.updateWidgets(prefManager.currentWidgets.toList())
@@ -433,26 +423,12 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
         try {
             scrollToStoredPosition(false)
         } catch (_: Exception) {}
-
-        eventManager.apply {
-            addObserver(this@WidgetFrameDelegate)
-        }
     }
 
-    fun onDestroy() {
-        sharedPreferencesChangeHandler.unregister(this)
-        eventManager.apply {
-            removeObserver(this@WidgetFrameDelegate)
-        }
+    override fun onDestroy() {
+        super.onDestroy()
+
         invalidateInstance()
-        blurManager.onDestroy()
-        widgetHost.removeOnClickCallback(this)
-    }
-
-    fun updateState(transform: (State) -> State) {
-        val newState = transform(state)
-        logUtils.debugLog("Updating state from\n$state\nto\n$newState")
-        state = newState
     }
 
     fun updateStateAndWindowState(
@@ -826,7 +802,7 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
     }
 
     //Parts based on https://stackoverflow.com/a/26445064/5496177
-    inner class SpannedLayoutManager : SpannedGridLayoutManager(
+    inner class SpannedLayoutManager : LayoutManager(
         this@WidgetFrameDelegate,
         RecyclerView.HORIZONTAL,
         prefManager.frameRowCount,
@@ -901,5 +877,5 @@ class WidgetFrameDelegate private constructor(context: Context) : ContextWrapper
         val isScreenOn: Boolean = false,
         val isTempHide: Boolean = false,
         val handlingFrameClick: Boolean = false,
-    )
+    ) : BaseState()
 }
