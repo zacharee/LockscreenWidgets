@@ -680,15 +680,10 @@ class WidgetFrameDelegate private constructor(context: Context) : BaseDelegate<W
             } else null
 
             try {
-                val fastW = run {
-                    if (w == null) null
-                    else {
-                        val fd = w.fileDescriptor
-                        if (fd == null) null
-                        else {
-                            val bmp = BitmapFactory.decodeFileDescriptor(fd)
-                            if (bmp == null) null
-                            else BitmapDrawable(resources, bmp)
+                val fastW = w?.let {
+                    it.fileDescriptor?.let { fd ->
+                        BitmapFactory.decodeFileDescriptor(fd)?.let { bmp ->
+                            BitmapDrawable(resources, bmp)
                         }
                     }
                 } ?: wallpaper.drawable
