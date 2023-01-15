@@ -192,6 +192,9 @@ class WidgetFrameDelegate private constructor(context: Context) : BaseDelegate<W
     override val adapter = WidgetFrameAdapter(appWidgetManager, widgetHost) { item, _ ->
         binding.removeWidgetConfirmation.root.show(item)
     }
+    private val wallpaperService by lazy {
+        IWallpaperManager.Stub.asInterface(ServiceManager.getService("wallpaper"))
+    }
 
     override val prefsHandler = HandlerRegistry {
         handler(PrefManager.KEY_CURRENT_WIDGETS) {
@@ -626,13 +629,13 @@ class WidgetFrameDelegate private constructor(context: Context) : BaseDelegate<W
      */
     @SuppressLint("MissingPermission")
     fun updateWallpaperLayerIfNeeded() {
-        logUtils.debugLog("updateWallpaperLayerIfNeeded() called $showWallpaperLayerCondition")
+        val showWallpaperLayer = showWallpaperLayerCondition
 
-        binding.wallpaperBackground.isVisible = showWallpaperLayerCondition
+        logUtils.debugLog("updateWallpaperLayerIfNeeded() called $showWallpaperLayer")
 
-        if (showWallpaperLayerCondition) {
-            val service = IWallpaperManager.Stub.asInterface(ServiceManager.getService("wallpaper"))
+        binding.wallpaperBackground.isVisible = showWallpaperLayer
 
+        if (showWallpaperLayer) {
             logUtils.debugLog("Trying to retrieve wallpaper")
 
             @RequiresApi(Build.VERSION_CODES.N)
@@ -644,7 +647,7 @@ class WidgetFrameDelegate private constructor(context: Context) : BaseDelegate<W
                 //always work. Thus the try-catch.
                 return try {
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                        service.getWallpaperWithFeature(
+                        wallpaperService.getWallpaperWithFeature(
                             packageName,
                             attributionTag,
                             null,
@@ -654,7 +657,7 @@ class WidgetFrameDelegate private constructor(context: Context) : BaseDelegate<W
                         )
                     } else {
                         @Suppress("DEPRECATION")
-                        service.getWallpaper(
+                        wallpaperService.getWallpaper(
                             packageName,
                             null,
                             flag,
