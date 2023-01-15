@@ -9,7 +9,9 @@ import android.view.View
 import android.view.WindowManager
 import androidx.annotation.CallSuper
 import androidx.recyclerview.widget.ItemTouchHelper
+import androidx.recyclerview.widget.RecyclerView
 import com.arasthel.spannedgridlayoutmanager.SpannedGridLayoutManager
+import tk.zwander.common.data.WidgetData
 import tk.zwander.common.host.WidgetHostCompat
 import tk.zwander.common.host.widgetHostCompat
 import tk.zwander.lockscreenwidgets.adapters.WidgetFrameAdapter
@@ -29,9 +31,22 @@ abstract class BaseDelegate<State : BaseDelegate.BaseState>(context: Context) : 
     protected abstract val blurManager: BlurManager
     protected abstract val adapter: WidgetFrameAdapter
     protected abstract val gridLayoutManager: LayoutManager
-    protected abstract val touchHelperCallback: ItemTouchHelper.Callback
     protected abstract val params: WindowManager.LayoutParams
     protected abstract val rootView: View
+    protected abstract val recyclerView: RecyclerView
+    protected abstract var currentWidgets: List<WidgetData>
+
+    private val touchHelperCallback by lazy {
+        createTouchHelperCallback(
+            adapter = adapter,
+            widgetMoved = this::onWidgetMoved,
+            onItemSelected = this::onItemSelected,
+            frameLocked = this::isLocked
+        )
+    }
+    protected val itemTouchHelper by lazy {
+        ItemTouchHelper(touchHelperCallback)
+    }
 
     @CallSuper
     open fun onCreate() {
@@ -39,6 +54,14 @@ abstract class BaseDelegate<State : BaseDelegate.BaseState>(context: Context) : 
         eventManager.addObserver(this)
         blurManager.onCreate()
         widgetHost.addOnClickCallback(this)
+        gridLayoutManager.spanSizeLookup = adapter.spanSizeLookup
+        recyclerView.setHasFixedSize(true)
+        recyclerView.adapter = adapter
+        recyclerView.layoutManager = gridLayoutManager
+        itemTouchHelper.attachToRecyclerView(recyclerView)
+        adapter.updateWidgets(currentWidgets)
+
+        updateCounts()
     }
 
     @CallSuper
@@ -47,6 +70,9 @@ abstract class BaseDelegate<State : BaseDelegate.BaseState>(context: Context) : 
         prefsHandler.unregister(this)
         blurManager.onDestroy()
         widgetHost.removeOnClickCallback(this)
+        itemTouchHelper.attachToRecyclerView(null)
+
+        currentWidgets = ArrayList(adapter.widgets)
     }
 
     open fun updateState(transform: (State) -> State) {
@@ -55,7 +81,16 @@ abstract class BaseDelegate<State : BaseDelegate.BaseState>(context: Context) : 
         state = newState
     }
 
-    abstract class BaseState
+    protected abstract fun onWidgetMoved(moved: Boolean)
+    protected abstract fun onItemSelected(selected: Boolean)
+    protected abstract fun isLocked(): Boolean
+    protected abstract fun updateCounts()
+
+    abstract class BaseState {
+        abstract val isHoldingItem: Boolean
+        abstract val updatedForMove: Boolean
+        abstract val handlingClick: Boolean
+    }
 
     abstract class LayoutManager(
         context: Context,
