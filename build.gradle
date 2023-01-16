@@ -1,6 +1,6 @@
 buildscript {
     ext.kotlin_version = '1.7.21'
-    ext.compose_version = '1.4.0-alpha03'
+    ext.compose_version = '1.4.0-alpha04'
 
     repositories {
         google()
