@@ -290,6 +290,7 @@ class DrawerDelegate private constructor(context: Context) : BaseDelegate<Drawer
         }
     }
 
+    @SuppressLint("UnspecifiedRegisterReceiverFlag")
     override fun onCreate() {
         super.onCreate()
 
@@ -328,7 +329,9 @@ class DrawerDelegate private constructor(context: Context) : BaseDelegate<Drawer
         hideDrawer(false)
         handle.hide(wm)
 
-        unregisterReceiver(globalReceiver)
+        try {
+            unregisterReceiver(globalReceiver)
+        } catch (ignored: IllegalArgumentException) {}
         invalidateInstance()
     }
 
