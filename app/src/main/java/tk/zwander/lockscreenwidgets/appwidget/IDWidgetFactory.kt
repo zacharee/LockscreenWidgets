@@ -71,10 +71,12 @@ class IDWidgetFactory(private val context: Context) : RemoteViewsService.RemoteV
     override fun onDestroy() {}
     override fun onDataSetChanged() {}
 
+    @Synchronized
     override fun getCount(): Int {
         return items.size()
     }
 
+    @Synchronized
     override fun getViewAt(position: Int): RemoteViews? {
         //The list might be replaced before onDataSetChanged() is called,
         //which can lead to indexing issues.
@@ -91,6 +93,7 @@ class IDWidgetFactory(private val context: Context) : RemoteViewsService.RemoteV
         }
     }
 
+    @Synchronized
     override fun getItemId(position: Int): Long {
         return try {
             items.get(position).hashCode().toLong()
