@@ -84,13 +84,11 @@ internal fun items(
                         val appName = appInfo.loadLabel(packageManager)
                         val shortcutName = it.loadLabel(packageManager)
 
-                        var app = apps[appInfo.packageName]
-                        if (app == null) {
-                            apps[appInfo.packageName] = AppInfo(appName.toString(), appInfo)
-                            app = apps[appInfo.packageName]!!
+                        val app = apps[appInfo.packageName] ?: AppInfo(appName.toString(), appInfo).apply {
+                            apps[appInfo.packageName] = this
                         }
 
-                        app!!.shortcuts.add(
+                        app.shortcuts.add(
                             ShortcutListInfo(
                                 shortcutName.toString(),
                                 it.iconResource,

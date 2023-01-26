@@ -32,7 +32,7 @@ class BackgroundBlurDrawableCompatPre12(wrapped: Drawable?) : BackgroundBlurDraw
 
 sealed class BackgroundBlurDrawableCompatDelegate(open val wrapped: Drawable?) {
     companion object {
-        fun getInstance(wrapped: Drawable?): BackgroundBlurDrawableCompatDelegate {
+        fun createInstance(wrapped: Drawable?): BackgroundBlurDrawableCompatDelegate {
             return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                 BackgroundBlurDrawableCompat12(wrapped as? BackgroundBlurDrawable)
             } else {

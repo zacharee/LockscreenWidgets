@@ -4,6 +4,7 @@ import android.annotation.IntegerRes
 import android.content.Context
 import android.content.ContextWrapper
 import android.content.Intent
+import android.content.SharedPreferences
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener
 import android.graphics.Color
 import android.net.Uri
@@ -11,6 +12,7 @@ import android.view.Gravity
 import androidx.core.content.edit
 import androidx.core.content.res.ResourcesCompat
 import androidx.preference.PreferenceManager
+import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.google.gson.reflect.TypeToken
 import tk.zwander.common.data.WidgetData
@@ -128,21 +130,21 @@ class PrefManager private constructor(context: Context) : ContextWrapper(context
 
         private var instance: PrefManager? = null
 
+        @Synchronized
         fun getInstance(context: Context): PrefManager {
-            return instance ?: run {
-                instance = PrefManager(context.safeApplicationContext)
-                instance!!
+            return instance ?: PrefManager(context.safeApplicationContext).apply {
+                instance = this
             }
         }
     }
 
     //The actual SharedPreferences implementation
-    private val prefs = PreferenceManager.getDefaultSharedPreferences(this)!!
-    val gson = GsonBuilder()
+    private val prefs: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(this)
+    val gson: Gson = GsonBuilder()
         .setExclusionStrategies(CrashFixExclusionStrategy())
         .registerTypeAdapter(Uri::class.java, GsonUriHandler())
         .registerTypeAdapter(Intent::class.java, GsonIntentHandler())
-        .create()!!
+        .create()
 
     //The widgets currently added to the widget frame
     var currentWidgets: LinkedHashSet<WidgetData>
@@ -425,7 +427,7 @@ class PrefManager private constructor(context: Context) : ContextWrapper(context
 
     //How the page indicator (scrollbar) should behave (always show, fade out on inactivity, never show).
     var pageIndicatorBehavior: Int
-        get() = getString(KEY_PAGE_INDICATOR_BEHAVIOR, VALUE_PAGE_INDICATOR_BEHAVIOR_AUTO_HIDE.toString())!!.toInt()
+        get() = getString(KEY_PAGE_INDICATOR_BEHAVIOR, VALUE_PAGE_INDICATOR_BEHAVIOR_AUTO_HIDE.toString()).toInt()
         set(value) {
             putString(KEY_PAGE_INDICATOR_BEHAVIOR, value.toString())
         }
@@ -795,6 +797,7 @@ class PrefManager private constructor(context: Context) : ContextWrapper(context
     }
 
     fun getString(key: String, def: String? = null): String? = prefs.getString(key, def)
+    fun getString(key: String, def: String): String = prefs.getString(key, def)
     fun getFloat(key: String, def: Float): Float = prefs.getFloat(key, def)
     fun getInt(key: String, def: Int): Int = prefs.getInt(key, def)
     fun getBoolean(key: String, def: Boolean): Boolean = prefs.getBoolean(key, def)

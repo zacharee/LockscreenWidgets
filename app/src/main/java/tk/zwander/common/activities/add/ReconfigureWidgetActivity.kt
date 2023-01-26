@@ -29,6 +29,8 @@ abstract class ReconfigureWidgetActivity : BaseBindWidgetActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        val providerInfo = providerInfo
+
         if (prevId == -1 || providerInfo == null) {
             finish()
             return
@@ -36,7 +38,7 @@ abstract class ReconfigureWidgetActivity : BaseBindWidgetActivity() {
 
         DismissOrUnlockActivity.launch(this)
 
-        tryBindWidget(providerInfo!!, widgetHost.allocateAppWidgetId())
+        tryBindWidget(providerInfo, widgetHost.allocateAppWidgetId())
     }
 
     @SuppressLint("NewApi")

@@ -12,10 +12,10 @@ val Context.eventManager: EventManager
 
 class EventManager private constructor(private val context: Context) {
     companion object {
-        @Suppress("ObjectPropertyName")
         @SuppressLint("StaticFieldLeak")
         private var _instance: EventManager? = null
 
+        @Synchronized
         fun getInstance(context: Context): EventManager {
             return _instance ?: EventManager(context.safeApplicationContext).apply {
                 _instance = this

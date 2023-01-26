@@ -19,6 +19,7 @@ class LogUtils private constructor(private val context: Context) {
         @SuppressLint("StaticFieldLeak")
         private var instance: LogUtils? = null
 
+        @Synchronized
         fun getInstance(context: Context): LogUtils {
             return instance ?: LogUtils(context.safeApplicationContext).also {
                 instance = it

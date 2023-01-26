@@ -41,10 +41,10 @@ import java.util.concurrent.atomic.AtomicReference
  */
 @RequiresApi(Build.VERSION_CODES.N)
 abstract class BaseWidgetTile : TileService(), SharedPreferences.OnSharedPreferenceChangeListener {
-    protected val iManager by lazy {
+    protected val iManager: IAppWidgetService by lazy {
         IAppWidgetService.Stub.asInterface(
             ServiceManager.getService(Context.APPWIDGET_SERVICE)
-        )!!
+        )
     }
 
     protected abstract val tileId: Int

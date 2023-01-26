@@ -30,6 +30,8 @@ class SettingsActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        val fragmentClass = fragmentClass
+
         if (fragmentClass == null) {
             finish()
             return
@@ -40,7 +42,7 @@ class SettingsActivity : AppCompatActivity() {
 
         val fragment = supportFragmentManager.fragmentFactory.instantiate(
             classLoader,
-            fragmentClass!!.canonicalName!!
+            fragmentClass.canonicalName ?: throw IllegalStateException("Unable to instantiate $fragmentClass. Canonical name null!")
         )
         supportFragmentManager.beginTransaction()
             .setReorderingAllowed(true)

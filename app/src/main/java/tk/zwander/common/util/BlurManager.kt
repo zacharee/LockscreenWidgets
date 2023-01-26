@@ -84,7 +84,7 @@ class BlurManager(
     }
 
     private fun ViewRootImpl.createBackgroundBlurDrawableCompat(): BackgroundBlurDrawableCompatDelegate {
-        return BackgroundBlurDrawableCompatDelegate.getInstance(
+        return BackgroundBlurDrawableCompatDelegate.createInstance(
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                 createBackgroundBlurDrawable() as Drawable
             } else {

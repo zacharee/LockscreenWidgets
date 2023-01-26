@@ -26,9 +26,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.core.content.ContextCompat
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import tk.zwander.common.data.AppInfo
@@ -134,14 +134,21 @@ private fun AppHeader(
                 }
             }
 
-            Image(
-                bitmap = icon?.asImageBitmap()
-                    ?: ContextCompat.getDrawable(
-                        context, R.drawable.ic_launcher_foreground
-                    )!!.toBitmap().asImageBitmap(),
-                contentDescription = app.appName,
-                modifier = Modifier.size(36.dp)
-            )
+            val image = icon?.asImageBitmap()
+
+            if (image != null) {
+                Image(
+                    bitmap = image,
+                    contentDescription = app.appName,
+                    modifier = Modifier.size(36.dp)
+                )
+            } else {
+                Image(
+                    painter = painterResource(id = R.drawable.ic_launcher_foreground),
+                    contentDescription = app.appName,
+                    modifier = Modifier.size(36.dp)
+                )
+            }
 
             Text(text = app.appName)
         }

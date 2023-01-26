@@ -19,12 +19,12 @@ import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.gson.reflect.TypeToken
+import tk.zwander.common.util.logUtils
+import tk.zwander.common.util.prefManager
 import tk.zwander.lockscreenwidgets.R
 import tk.zwander.lockscreenwidgets.adapters.HideForIDsAdapter
 import tk.zwander.lockscreenwidgets.databinding.ActivityHideForIdsBinding
 import tk.zwander.lockscreenwidgets.databinding.AddIdDialogBinding
-import tk.zwander.common.util.logUtils
-import tk.zwander.common.util.prefManager
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -62,9 +62,9 @@ class HideForIDsActivity : AppCompatActivity() {
      * Modified from: https://github.com/kitek/android-rv-swipe-delete/blob/master/app/src/main/java/pl/kitek/rvswipetodelete/SwipeToDeleteCallback.kt
      */
     abstract class SwipeToDeleteCallback(context: Context) : ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT) {
-        private val deleteIcon = ContextCompat.getDrawable(context, R.drawable.ic_baseline_delete_24)!!
-        private val intrinsicWidth = deleteIcon.intrinsicWidth
-        private val intrinsicHeight = deleteIcon.intrinsicHeight
+        private val deleteIcon = ContextCompat.getDrawable(context, R.drawable.ic_baseline_delete_24)
+        private val intrinsicWidth = deleteIcon?.intrinsicWidth ?: 1
+        private val intrinsicHeight = deleteIcon?.intrinsicHeight ?: 1
         private val background = ColorDrawable()
         private val backgroundColor = Color.parseColor("#f44336")
         private val clearPaint = Paint().apply { xfermode = PorterDuffXfermode(PorterDuff.Mode.CLEAR) }
@@ -114,8 +114,8 @@ class HideForIDsActivity : AppCompatActivity() {
             val deleteIconBottom = deleteIconTop + intrinsicHeight
 
             //Draw the delete icon
-            deleteIcon.setBounds(deleteIconLeft, deleteIconTop, deleteIconRight, deleteIconBottom)
-            deleteIcon.draw(c)
+            deleteIcon?.setBounds(deleteIconLeft, deleteIconTop, deleteIconRight, deleteIconBottom)
+            deleteIcon?.draw(c)
 
             super.onChildDraw(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive)
         }

@@ -59,6 +59,7 @@ class DrawerDelegate private constructor(context: Context) : BaseDelegate<Drawer
         private val hasInstance: Boolean
             get() = instance != null
 
+        @Synchronized
         fun peekInstance(context: Context): DrawerDelegate? {
             if (!hasInstance) {
                 context.logUtils.debugLog("Accessibility isn't running yet")
@@ -69,6 +70,7 @@ class DrawerDelegate private constructor(context: Context) : BaseDelegate<Drawer
             return getInstance(context)
         }
 
+        @Synchronized
         fun retrieveInstance(context: Context): DrawerDelegate? {
             return peekInstance(context).also {
                 if (it == null) {
@@ -78,6 +80,7 @@ class DrawerDelegate private constructor(context: Context) : BaseDelegate<Drawer
             }
         }
 
+        @Synchronized
         fun getInstance(context: Context): DrawerDelegate {
             return instance ?: run {
                 if (context !is Accessibility) {

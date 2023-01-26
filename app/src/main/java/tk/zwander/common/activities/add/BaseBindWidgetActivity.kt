@@ -63,20 +63,21 @@ abstract class BaseBindWidgetActivity : ComponentActivity() {
     @Suppress("DEPRECATION")
     private val configShortcutRequest = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         try {
-            val shortcutIntent = result.data?.getParcelableExtra<Intent>(Intent.EXTRA_SHORTCUT_INTENT)
+            result.data?.let { data ->
+                data.getParcelableExtra<Intent>(Intent.EXTRA_SHORTCUT_INTENT)?.let { shortcutIntent ->
+                    val name = data.getStringExtra(Intent.EXTRA_SHORTCUT_NAME)
+                    val iconRes =
+                        data.getParcelableExtra<Intent.ShortcutIconResource?>(Intent.EXTRA_SHORTCUT_ICON_RESOURCE)
+                    val iconBmp = data.getParcelableExtra<Bitmap?>(Intent.EXTRA_SHORTCUT_ICON)
 
-            if (shortcutIntent != null) {
-                val name = result.data!!.getStringExtra(Intent.EXTRA_SHORTCUT_NAME)
-                val iconRes = result.data!!.getParcelableExtra<Intent.ShortcutIconResource?>(Intent.EXTRA_SHORTCUT_ICON_RESOURCE)
-                val iconBmp = result.data!!.getParcelableExtra<Bitmap?>(Intent.EXTRA_SHORTCUT_ICON)
+                    val shortcut = WidgetData.shortcut(
+                        shortcutIdManager.allocateShortcutId(),
+                        name, iconBmp.toBase64(), iconRes, shortcutIntent,
+                        WidgetSizeData(1, 1)
+                    )
 
-                val shortcut = WidgetData.shortcut(
-                    shortcutIdManager.allocateShortcutId(),
-                    name, iconBmp.toBase64(), iconRes, shortcutIntent,
-                    WidgetSizeData(1, 1)
-                )
-
-                addNewShortcut(shortcut)
+                    addNewShortcut(shortcut)
+                }
             }
         } catch (e: Exception) {
             logUtils.normalLog("Error configuring shortcut.", e)

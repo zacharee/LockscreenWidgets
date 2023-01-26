@@ -19,6 +19,7 @@ class BackupRestoreManager private constructor(context: Context) : ContextWrappe
         @SuppressLint("StaticFieldLeak")
         private var instance: BackupRestoreManager? = null
 
+        @Synchronized
         fun getInstance(context: Context): BackupRestoreManager {
             return instance ?: BackupRestoreManager(context.safeApplicationContext).apply {
                 instance = this

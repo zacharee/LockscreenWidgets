@@ -72,6 +72,7 @@ class WidgetFrameDelegate private constructor(context: Context) : BaseDelegate<W
             instance != null
         }
 
+        @Synchronized
         fun peekInstance(context: Context): WidgetFrameDelegate? {
             if (!hasInstance) {
                 context.logUtils.debugLog("Accessibility isn't running yet")
@@ -82,6 +83,7 @@ class WidgetFrameDelegate private constructor(context: Context) : BaseDelegate<W
             return getInstance(context)
         }
 
+        @Synchronized
         fun retrieveInstance(context: Context): WidgetFrameDelegate? {
             return peekInstance(context).also {
                 if (it == null) {
@@ -91,6 +93,7 @@ class WidgetFrameDelegate private constructor(context: Context) : BaseDelegate<W
             }
         }
 
+        @Synchronized
         fun getInstance(context: Context): WidgetFrameDelegate {
             return instance ?: run {
                 if (context !is Accessibility) {
@@ -103,6 +106,7 @@ class WidgetFrameDelegate private constructor(context: Context) : BaseDelegate<W
             }
         }
 
+        @Synchronized
         fun invalidateInstance() {
             instance = null
         }

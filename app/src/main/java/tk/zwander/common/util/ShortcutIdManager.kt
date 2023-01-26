@@ -13,9 +13,11 @@ class ShortcutIdManager private constructor(private val context: Context) {
         @SuppressLint("StaticFieldLeak")
         private var instance: ShortcutIdManager? = null
 
+        @Synchronized
         fun getInstance(context: Context): ShortcutIdManager {
-            if (instance == null) instance = ShortcutIdManager(context.safeApplicationContext)
-            return instance!!
+            return instance ?: ShortcutIdManager(context.safeApplicationContext).apply {
+                instance = this
+            }
         }
     }
 
