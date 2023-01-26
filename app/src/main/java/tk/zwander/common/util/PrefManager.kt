@@ -427,7 +427,10 @@ class PrefManager private constructor(context: Context) : ContextWrapper(context
 
     //How the page indicator (scrollbar) should behave (always show, fade out on inactivity, never show).
     var pageIndicatorBehavior: Int
-        get() = getString(KEY_PAGE_INDICATOR_BEHAVIOR, VALUE_PAGE_INDICATOR_BEHAVIOR_AUTO_HIDE.toString()).toInt()
+        get() {
+            val defaultValue = VALUE_PAGE_INDICATOR_BEHAVIOR_AUTO_HIDE
+            return getString(KEY_PAGE_INDICATOR_BEHAVIOR, defaultValue.toString())?.toInt() ?: defaultValue
+        }
         set(value) {
             putString(KEY_PAGE_INDICATOR_BEHAVIOR, value.toString())
         }
@@ -797,7 +800,6 @@ class PrefManager private constructor(context: Context) : ContextWrapper(context
     }
 
     fun getString(key: String, def: String? = null): String? = prefs.getString(key, def)
-    fun getString(key: String, def: String): String = prefs.getString(key, def)
     fun getFloat(key: String, def: Float): Float = prefs.getFloat(key, def)
     fun getInt(key: String, def: Int): Int = prefs.getInt(key, def)
     fun getBoolean(key: String, def: Boolean): Boolean = prefs.getBoolean(key, def)
