@@ -21,7 +21,6 @@ val Context.widgetHostCompat: WidgetHostCompat
  *
  * @param context a Context object
  * @param id the ID of this widget host
- * @param onClickHandler the [RemoteViews.OnClickHandler] or [RemoteViews.InteractionHandler]
  * implementation defined in the subclass
  */
 abstract class WidgetHostCompat(
@@ -29,7 +28,8 @@ abstract class WidgetHostCompat(
     id: Int,
 ) : AppWidgetHost(context, id) {
     companion object {
-        const val HOST_ID = 1003
+        private const val HOST_ID = 1003
+
         @SuppressLint("PrivateApi")
         val ON_CLICK_HANDLER_CLASS = try {
             Class.forName("android.widget.RemoteViews\$OnClickHandler")
@@ -47,33 +47,40 @@ abstract class WidgetHostCompat(
         private var instance: WidgetHostCompat? = null
 
         @SuppressLint("PrivateApi")
+        @Synchronized
         fun getInstance(context: Context): WidgetHostCompat {
             return instance ?: run {
-                if (ON_CLICK_HANDLER_CLASS == null && INTERACTION_HANDLER_CLASS == null) {
-                    throw IllegalStateException("Neither OnClickHandler nor InteractionHandler could be found!")
-                }
+                val onClickHandlerClass = ON_CLICK_HANDLER_CLASS
+                val interactionHandlerClass = INTERACTION_HANDLER_CLASS
 
-                if (!onClickHandlerExists) {
-                    WidgetHostInterface(context.safeApplicationContext, HOST_ID, INTERACTION_HANDLER_CLASS!!)
-                } else {
-                    (if (ON_CLICK_HANDLER_CLASS!!.isInterface) {
-                        WidgetHostInterface(context.safeApplicationContext, HOST_ID, ON_CLICK_HANDLER_CLASS)
-                    } else {
-                        WidgetHostClass(context.safeApplicationContext, HOST_ID)
-                    }).also {
-                        instance = it
+                val newInstance = when {
+                    interactionHandlerClass != null && interactionHandlerClass.isInterface -> {
+                        WidgetHostInterface(context.safeApplicationContext, HOST_ID, interactionHandlerClass)
+                    }
+                    onClickHandlerClass != null && onClickHandlerClass.isInterface -> {
+                        WidgetHostInterface(context.safeApplicationContext, HOST_ID, onClickHandlerClass)
+                    }
+                    onClickHandlerClass != null && !onClickHandlerClass.isInterface -> {
+                        WidgetHostClass(context.safeApplicationContext, HOST_ID, onClickHandlerClass)
+                    }
+                    else -> {
+                        throw IllegalStateException("Unable to find correct click/interaction handler!\n" +
+                                "Interaction Handler: ${interactionHandlerClass?.run { "$canonicalName / $isInterface" }}\n" +
+                                "Click Handler: ${onClickHandlerClass?.run { "$canonicalName / $isInterface" }}")
                     }
                 }
+
+                instance = newInstance
+
+                newInstance
             }
         }
-
-        private val onClickHandlerExists: Boolean = ON_CLICK_HANDLER_CLASS != null
     }
 
     protected abstract val onClickHandler: Any
     protected val onClickCallbacks = mutableSetOf<OnClickCallback>()
 
-    protected val listeningCount = AtomicInteger(0)
+    private val listeningCount = AtomicInteger(0)
 
     fun addOnClickCallback(callback: OnClickCallback) {
         onClickCallbacks.add(callback)
@@ -100,7 +107,7 @@ abstract class WidgetHostCompat(
         appWidget: AppWidgetProviderInfo?
     ): AppWidgetHostView {
         AppWidgetHost::class.java
-            .getDeclaredField(if (!onClickHandlerExists) "mInteractionHandler" else "mOnClickHandler")
+            .getDeclaredField(if (ON_CLICK_HANDLER_CLASS == null) "mInteractionHandler" else "mOnClickHandler")
             .apply {
                 isAccessible = true
                 set(this@WidgetHostCompat, onClickHandler)

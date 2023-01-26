@@ -21,9 +21,9 @@ import net.bytebuddy.implementation.SuperMethodCall
  * visible to it is an interface, so we can't just create a stub class.
  */
 @SuppressLint("PrivateApi")
-class WidgetHostClass(context: Context, id: Int) : WidgetHostCompat(context, id) {
+class WidgetHostClass(context: Context, id: Int, clickHandlerClass: Class<*>) : WidgetHostCompat(context, id) {
     override val onClickHandler: Any = ByteBuddy()
-        .subclass(ON_CLICK_HANDLER_CLASS)
+        .subclass(clickHandlerClass)
         .name("OnClickHandlerPieIntercept")
         .defineMethod("onClickHandler", Boolean::class.java)
         .withParameters(View::class.java, PendingIntent::class.java, Intent::class.java)
