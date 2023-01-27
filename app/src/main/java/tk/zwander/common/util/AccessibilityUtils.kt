@@ -9,10 +9,12 @@ import android.view.accessibility.AccessibilityEvent
 import android.view.accessibility.AccessibilityNodeInfo
 import android.view.accessibility.AccessibilityWindowInfo
 import kotlinx.coroutines.Deferred
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import tk.zwander.common.activities.DismissOrUnlockActivity
 import tk.zwander.common.data.window.WindowInfo
 import tk.zwander.common.data.window.WindowRootPair
@@ -232,148 +234,150 @@ object AccessibilityUtils {
 
         //The below block can (very rarely) take over half a second to execute, so only run it
         //if we actually need to (i.e. on the lock screen and screen is on).
-        if ((isOnKeyguard || prefManager.showInNotificationCenter) && isScreenOn && prefManager.widgetFrameEnabled /* This is only needed when the frame is enabled */) {
-            val (
-                windows, appWindowIndex,
-                nonAppSystemWindowIndex, minSysUiWindowIndex,
-                hasScreenOffMemoWindow, hasFaceWidgetsWindow,
-                hasEdgePanelWindow, sysUiWindowViewIds,
-                sysUiWindowNodes, topAppWindowPackageName
-            ) = getWindows(getWindows())
+        withContext(Dispatchers.IO) {
+            if ((isOnKeyguard || prefManager.showInNotificationCenter) && isScreenOn && prefManager.widgetFrameEnabled /* This is only needed when the frame is enabled */) {
+                val (
+                    windows, appWindowIndex,
+                    nonAppSystemWindowIndex, minSysUiWindowIndex,
+                    hasScreenOffMemoWindow, hasFaceWidgetsWindow,
+                    hasEdgePanelWindow, sysUiWindowViewIds,
+                    sysUiWindowNodes, topAppWindowPackageName
+                ) = getWindows(getWindows())
 
-            //Update any ID list widgets on the new IDs
-            coroutineScope {
-                launch {
-                    eventManager.sendEvent(Event.DebugIdsUpdated(sysUiWindowViewIds))
-                    IDListProvider.sendUpdate(this@runAccessibilityJob)
+                //Update any ID list widgets on the new IDs
+                coroutineScope {
+                    launch {
+                        eventManager.sendEvent(Event.DebugIdsUpdated(sysUiWindowViewIds))
+                        IDListProvider.sendUpdate(this@runAccessibilityJob)
+                    }
                 }
-            }
 
-            if (isDebug) {
-                logUtils.debugLog(
-                    sysUiWindowNodes.filter { it.isVisibleToUser }.map { it.viewIdResourceName }
-                        .toString()
+                if (isDebug) {
+                    logUtils.debugLog(
+                        sysUiWindowNodes.filter { it.isVisibleToUser }.map { it.viewIdResourceName }
+                            .toString()
+                    )
+
+                    frameDelegate.setNewDebugIdItems(sysUiWindowViewIds.toList())
+                }
+
+                newState = newState.copy(
+                    //Samsung's Screen-Off Memo is really just a normal Activity that shows over the lock screen.
+                    //However, it's not an Application-type window for some reason, so it won't hide with the
+                    //currentAppLayer check. Explicitly check for its existence here.
+                    isOnScreenOffMemo = isOnKeyguard && hasScreenOffMemoWindow,
+                    isOnEdgePanel = hasEdgePanelWindow,
+                    isOnFaceWidgets = hasFaceWidgetsWindow,
+                    //Generate "layer" values for the System UI window and for the topmost app window, if
+                    //it exists.
+                    //currentAppLayer *should* be -1 even if there's an app open in the background,
+                    //since getWindows() is only meant to return windows that can actually be
+                    //interacted with. The only time it should be anything else (usually 1) is
+                    //if an app is displaying above the keyguard, such as the incoming call
+                    //screen or the camera.
+                    currentAppLayer = if (appWindowIndex != -1) windows.size - appWindowIndex else appWindowIndex,
+                    currentSysUiLayer = if (minSysUiWindowIndex != -1) windows.size - minSysUiWindowIndex else minSysUiWindowIndex,
+                    currentSystemLayer = if (nonAppSystemWindowIndex != -1) windows.size - nonAppSystemWindowIndex else nonAppSystemWindowIndex,
+                    //This is mostly a debug value to see which app LSWidg thinks is on top.
+                    currentAppPackage = topAppWindowPackageName,
                 )
 
-                frameDelegate.setNewDebugIdItems(sysUiWindowViewIds.toList())
-            }
+                var tempState = newState.copy(
+                    onMainLockscreen = false,
+                    showingNotificationsPanel = false,
+                    notificationsPanelFullyExpanded = false,
+                    hideForPresentIds = false,
+                    hideForNonPresentIds = false
+                )
 
-            newState = newState.copy(
-                //Samsung's Screen-Off Memo is really just a normal Activity that shows over the lock screen.
-                //However, it's not an Application-type window for some reason, so it won't hide with the
-                //currentAppLayer check. Explicitly check for its existence here.
-                isOnScreenOffMemo = isOnKeyguard && hasScreenOffMemoWindow,
-                isOnEdgePanel = hasEdgePanelWindow,
-                isOnFaceWidgets = hasFaceWidgetsWindow,
-                //Generate "layer" values for the System UI window and for the topmost app window, if
-                //it exists.
-                //currentAppLayer *should* be -1 even if there's an app open in the background,
-                //since getWindows() is only meant to return windows that can actually be
-                //interacted with. The only time it should be anything else (usually 1) is
-                //if an app is displaying above the keyguard, such as the incoming call
-                //screen or the camera.
-                currentAppLayer = if (appWindowIndex != -1) windows.size - appWindowIndex else appWindowIndex,
-                currentSysUiLayer = if (minSysUiWindowIndex != -1) windows.size - minSysUiWindowIndex else minSysUiWindowIndex,
-                currentSystemLayer = if (nonAppSystemWindowIndex != -1) windows.size - nonAppSystemWindowIndex else nonAppSystemWindowIndex,
-                //This is mostly a debug value to see which app LSWidg thinks is on top.
-                currentAppPackage = topAppWindowPackageName,
-            )
-
-            var tempState = newState.copy(
-                onMainLockscreen = false,
-                showingNotificationsPanel = false,
-                notificationsPanelFullyExpanded = false,
-                hideForPresentIds = false,
-                hideForNonPresentIds = false
-            )
-
-            sysUiWindowNodes.forEach { node ->
-                //If the user has enabled the option to hide the frame on security (pin, pattern, password)
-                //input, we need to check if they're on the main lock screen. This is more reliable than
-                //checking for the existence of a security input, since there are a lot of different possible
-                //IDs, and OEMs change them. "notification_panel" and "left_button" are largely unchanged,
-                //although this method isn't perfect.
-                if (isOnKeyguard && prefManager.hideOnSecurityPage) {
-                    if (node.hasVisibleIds(
-                            "com.android.systemui:id/notification_panel",
-                            "com.android.systemui:id/left_button"
-                        )) {
-                        tempState = tempState.copy(
-                            onMainLockscreen = true
-                        )
+                sysUiWindowNodes.forEach { node ->
+                    //If the user has enabled the option to hide the frame on security (pin, pattern, password)
+                    //input, we need to check if they're on the main lock screen. This is more reliable than
+                    //checking for the existence of a security input, since there are a lot of different possible
+                    //IDs, and OEMs change them. "notification_panel" and "left_button" are largely unchanged,
+                    //although this method isn't perfect.
+                    if (isOnKeyguard && prefManager.hideOnSecurityPage) {
+                        if (node.hasVisibleIds(
+                                "com.android.systemui:id/notification_panel",
+                                "com.android.systemui:id/left_button"
+                            )) {
+                            tempState = tempState.copy(
+                                onMainLockscreen = true
+                            )
+                        }
                     }
-                }
 
-                if (isOnKeyguard && prefManager.hideOnNotificationShade) {
-                    if (node.hasVisibleIds(
-                            "com.android.systemui:id/quick_settings_panel",
-                            "com.android.systemui:id/settings_button",
-                            "com.android.systemui:id/tile_label",
-                            "com.android.systemui:id/header_label"
-                        ) || ((Build.VERSION.SDK_INT > Build.VERSION_CODES.S_V2) &&
-                                node.hasVisibleIds(
-                                    "com.android.systemui:id/quick_qs_panel",
-                                ))) {
-                        //Used for "Hide When Notification Shade Shown" so we know when it's actually expanded.
-                        //Some devices don't even have left shortcuts, so also check for keyguard_indication_area.
-                        //Just like the showingSecurityInput check, this is probably unreliable for some devices.
-                        tempState = tempState.copy(
-                            showingNotificationsPanel = true
-                        )
+                    if (isOnKeyguard && prefManager.hideOnNotificationShade) {
+                        if (node.hasVisibleIds(
+                                "com.android.systemui:id/quick_settings_panel",
+                                "com.android.systemui:id/settings_button",
+                                "com.android.systemui:id/tile_label",
+                                "com.android.systemui:id/header_label"
+                            ) || ((Build.VERSION.SDK_INT > Build.VERSION_CODES.S_V2) &&
+                                    node.hasVisibleIds(
+                                        "com.android.systemui:id/quick_qs_panel",
+                                    ))) {
+                            //Used for "Hide When Notification Shade Shown" so we know when it's actually expanded.
+                            //Some devices don't even have left shortcuts, so also check for keyguard_indication_area.
+                            //Just like the showingSecurityInput check, this is probably unreliable for some devices.
+                            tempState = tempState.copy(
+                                showingNotificationsPanel = true
+                            )
+                        }
                     }
-                }
 
-                //If the option to show when the NC is fully expanded is enabled,
-                //check if the frame can actually show. This checks to the "more_button"
-                //ID, which is unique to One UI (it's the three-dot button), and is only
-                //visible when the NC is fully expanded.
-                if (prefManager.showInNotificationCenter) {
-                    if (node.hasVisibleIds("com.android.systemui:id/more_button")) {
-                        tempState = tempState.copy(
-                            notificationsPanelFullyExpanded = true
-                        )
+                    //If the option to show when the NC is fully expanded is enabled,
+                    //check if the frame can actually show. This checks to the "more_button"
+                    //ID, which is unique to One UI (it's the three-dot button), and is only
+                    //visible when the NC is fully expanded.
+                    if (prefManager.showInNotificationCenter) {
+                        if (node.hasVisibleIds("com.android.systemui:id/more_button")) {
+                            tempState = tempState.copy(
+                                notificationsPanelFullyExpanded = true
+                            )
+                        }
                     }
-                }
 
-                //Check to see if any of the user-specified IDs are present.
-                //If any are, the frame will be hidden.
-                val presentIds = prefManager.presentIds
-                if (presentIds.isNotEmpty()) {
-                    if (node.hasVisibleIds(presentIds)) {
-                        newState = newState.copy(
-                            hideForPresentIds = true
-                        )
+                    //Check to see if any of the user-specified IDs are present.
+                    //If any are, the frame will be hidden.
+                    val presentIds = prefManager.presentIds
+                    if (presentIds.isNotEmpty()) {
+                        if (node.hasVisibleIds(presentIds)) {
+                            newState = newState.copy(
+                                hideForPresentIds = true
+                            )
+                        }
                     }
-                }
 
-                //Check to see if any of the user-specified IDs aren't present
-                //(or are present but not visible). If any aren't, the frame will be hidden.
-                val nonPresentIds = prefManager.nonPresentIds
-                if (nonPresentIds.isNotEmpty()) {
-                    if (!node.hasVisibleIds(nonPresentIds)) {
-                        tempState = tempState.copy(
-                            hideForNonPresentIds = true
-                        )
+                    //Check to see if any of the user-specified IDs aren't present
+                    //(or are present but not visible). If any aren't, the frame will be hidden.
+                    val nonPresentIds = prefManager.nonPresentIds
+                    if (nonPresentIds.isNotEmpty()) {
+                        if (!node.hasVisibleIds(nonPresentIds)) {
+                            tempState = tempState.copy(
+                                hideForNonPresentIds = true
+                            )
+                        }
                     }
-                }
 
-                @Suppress("DEPRECATION")
-                node.recycle()
-            }
-
-            newState = tempState
-
-            windows.forEach {
-                try {
                     @Suppress("DEPRECATION")
-                    it.root?.recycle()
-                } catch (_: IllegalStateException) {
+                    node.recycle()
                 }
 
-                try {
-                    @Suppress("DEPRECATION")
-                    it.root?.recycle()
-                } catch (_: IllegalStateException) {
+                newState = tempState
+
+                windows.forEach {
+                    try {
+                        @Suppress("DEPRECATION")
+                        it.root?.recycle()
+                    } catch (_: IllegalStateException) {
+                    }
+
+                    try {
+                        @Suppress("DEPRECATION")
+                        it.root?.recycle()
+                    } catch (_: IllegalStateException) {
+                    }
                 }
             }
         }
