@@ -66,7 +66,15 @@ object AccessibilityUtils {
                 }
             }
 
-            if (topAppWindowIndex == -1 && window.window.type == AccessibilityWindowInfo.TYPE_APPLICATION) {
+            if (topAppWindowIndex == -1 &&
+                (window.window.type == AccessibilityWindowInfo.TYPE_APPLICATION || (
+                        // This is a workaround for the Google Assistant popup on Pixel devices.
+                        // It reports a window type of "-1" since the popup's real type is TYPE_VOICE_INTERACTION,
+                        // but AccessibilityWindowManager#getTypeForWindowManagerWindowType() doesn't filter
+                        // for this type and returns "-1" or "unknown".
+                        // The package name check is just to lessen the scope of this filter.
+                        safeRoot?.packageName != null && window.window.type == -1))
+            ) {
                 topAppWindowIndex = index
                 topAppWindowPackageName = safeRoot?.packageName?.toString()
             }
@@ -242,7 +250,9 @@ object AccessibilityUtils {
                     hasScreenOffMemoWindow, hasFaceWidgetsWindow,
                     hasEdgePanelWindow, sysUiWindowViewIds,
                     sysUiWindowNodes, topAppWindowPackageName
-                ) = getWindows(getWindows())
+                ) = getWindows(getWindows()).also {
+                    logUtils.debugLog("Got windows $it", null)
+                }
 
                 //Update any ID list widgets on the new IDs
                 coroutineScope {
@@ -282,6 +292,8 @@ object AccessibilityUtils {
                     currentAppPackage = topAppWindowPackageName,
                 )
 
+                logUtils.debugLog("NewState $newState", null)
+
                 var tempState = newState.copy(
                     onMainLockscreen = false,
                     showingNotificationsPanel = false,
@@ -300,7 +312,8 @@ object AccessibilityUtils {
                         if (node.hasVisibleIds(
                                 "com.android.systemui:id/notification_panel",
                                 "com.android.systemui:id/left_button"
-                            )) {
+                            )
+                        ) {
                             tempState = tempState.copy(
                                 onMainLockscreen = true
                             )
@@ -316,7 +329,8 @@ object AccessibilityUtils {
                             ) || ((Build.VERSION.SDK_INT > Build.VERSION_CODES.S_V2) &&
                                     node.hasVisibleIds(
                                         "com.android.systemui:id/quick_qs_panel",
-                                    ))) {
+                                    ))
+                        ) {
                             //Used for "Hide When Notification Shade Shown" so we know when it's actually expanded.
                             //Some devices don't even have left shortcuts, so also check for keyguard_indication_area.
                             //Just like the showingSecurityInput check, this is probably unreliable for some devices.

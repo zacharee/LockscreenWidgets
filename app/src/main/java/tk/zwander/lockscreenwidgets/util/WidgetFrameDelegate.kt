@@ -590,7 +590,7 @@ class WidgetFrameDelegate private constructor(context: Context) : BaseDelegate<W
             return state.wasOnKeyguard
                     && (prefManager.showOnMainLockScreen || !prefManager.showInNotificationCenter)
                     && (!prefManager.hideOnFaceWidgets || !state.isOnFaceWidgets)
-                    && state.currentAppLayer < 0
+                    && (state.currentAppLayer < 0 && state.currentAppPackage == null)
                     && (!state.isOnEdgePanel || !prefManager.hideOnEdgePanel)
                     && !state.isOnScreenOffMemo
                     && (state.onMainLockscreen || state.showingNotificationsPanel || !prefManager.hideOnSecurityPage)
