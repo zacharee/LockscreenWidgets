@@ -31,7 +31,7 @@ object AccessibilityUtils {
      * Find the [AccessibilityWindowInfo] and [AccessibilityNodeInfo] corresponding to the topmost app window.
      * Find the [AccessibilityWindowInfo] and [AccessibilityNodeInfo] corresponding to the topmost non-System UI window.
      */
-    private suspend fun getWindows(windows: List<AccessibilityWindowInfo>): WindowInfo {
+    private suspend fun Context.getWindows(windows: List<AccessibilityWindowInfo>): WindowInfo {
         val systemUiWindows = ArrayList<WindowRootPair>()
 
         val sysUiWindowViewIds = ConcurrentLinkedQueue<String>()
@@ -72,9 +72,10 @@ object AccessibilityUtils {
                         // It reports a window type of "-1" since the popup's real type is TYPE_VOICE_INTERACTION,
                         // but AccessibilityWindowManager#getTypeForWindowManagerWindowType() doesn't filter
                         // for this type and returns "-1" or "unknown".
-                        // The package name check is just to lessen the scope of this filter.
-                        safeRoot?.packageName != null && window.window.type == -1))
+                        // The package name check is because Samsung's One Handed Mode+ gesture window also reports an unknown type.
+                        safeRoot?.packageName == "com.google.android.googlequicksearchbox" && window.window.type == -1))
             ) {
+                logUtils.debugLog("Found app window $window", null)
                 topAppWindowIndex = index
                 topAppWindowPackageName = safeRoot?.packageName?.toString()
             }
