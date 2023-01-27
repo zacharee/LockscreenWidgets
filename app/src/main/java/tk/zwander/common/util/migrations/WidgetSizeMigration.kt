@@ -10,6 +10,7 @@ class WidgetSizeMigration : Migration {
 
     override fun run(context: Context) {
         context.apply {
+            @Suppress("DEPRECATION")
             val sizeInfos = prefManager.widgetSizes
             val widgets = prefManager.currentWidgets
 

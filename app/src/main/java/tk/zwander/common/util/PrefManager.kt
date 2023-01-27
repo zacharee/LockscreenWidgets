@@ -212,6 +212,7 @@ class PrefManager private constructor(context: Context) : ContextWrapper(context
         }
 
     //If any widgets have custom sizes, those sizes are stored here.
+    @Deprecated("Widget sizes are stored inline with the widget info.")
     var widgetSizes: HashMap<Int, WidgetSizeData>
         get() = gson.fromJson(
             getString(KEY_WIDGET_SIZES),
