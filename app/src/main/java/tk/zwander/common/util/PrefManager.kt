@@ -18,6 +18,7 @@ import com.google.gson.reflect.TypeToken
 import tk.zwander.common.data.WidgetData
 import tk.zwander.common.data.WidgetSizeData
 import tk.zwander.common.data.WidgetTileInfo
+import tk.zwander.lockscreenwidgets.BuildConfig
 import tk.zwander.lockscreenwidgets.R
 import tk.zwander.lockscreenwidgets.data.Mode
 
@@ -605,7 +606,7 @@ class PrefManager private constructor(context: Context) : ContextWrapper(context
 
     //The current widget database version. Used for migrations.
     var databaseVersion: Int
-        get() = getInt(KEY_DATABASE_VERSION, 0)
+        get() = getInt(KEY_DATABASE_VERSION, BuildConfig.DATABASE_VERSION)
         set(value) {
             putInt(KEY_DATABASE_VERSION, value)
         }
