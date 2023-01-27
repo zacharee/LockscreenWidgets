@@ -500,9 +500,9 @@ class PrefManager private constructor(context: Context) : ContextWrapper(context
 
     //How much to dim the masked mode wallpaper (in percent)
     var wallpaperDimAmount: Float
-        get() = getInt(KEY_MASKED_MODE_DIM_AMOUNT, 0) / 10f
+        get() = getInt(KEY_MASKED_MODE_DIM_AMOUNT, 0) / 100f
         set(value) {
-            putInt(KEY_MASKED_MODE_DIM_AMOUNT, (value * 10f).toInt())
+            putInt(KEY_MASKED_MODE_DIM_AMOUNT, (value * 100f).toInt())
         }
 
     //Whether to show in the notification center.

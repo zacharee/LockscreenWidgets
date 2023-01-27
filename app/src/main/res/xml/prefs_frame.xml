@@ -50,8 +50,8 @@
             android:defaultValue="0"
             android:dependency="masked_mode"
             app:minValue="0"
-            app:maxValue="1000"
-            app:scale="0.1"
+            app:maxValue="10000"
+            app:scale="0.01"
             app:units="%"
             />
 
