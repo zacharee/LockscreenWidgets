@@ -85,10 +85,29 @@ abstract class BaseDelegate<State : BaseDelegate.BaseState>(context: Context) : 
         state = newState
     }
 
-    protected abstract fun onWidgetMoved(moved: Boolean)
+    @CallSuper
+    protected open fun onWidgetMoved(moved: Boolean) {
+        if (moved) {
+            currentWidgets = adapter.widgets
+            adapter.currentEditingInterfacePosition = -1
+        }
+    }
+
+    /**
+     * Make sure the number of rows/columns in the frame/drawer reflects the user-selected value.
+     */
+    protected fun updateCounts() {
+        val counts = retrieveCounts()
+
+        gridLayoutManager.apply {
+            counts.first?.let { rowCount = it }
+            counts.second?.let { columnCount = it }
+        }
+    }
+
     protected abstract fun onItemSelected(selected: Boolean)
     protected abstract fun isLocked(): Boolean
-    protected abstract fun updateCounts()
+    protected abstract fun retrieveCounts(): Pair<Int?, Int?>
 
     abstract class BaseState {
         abstract val isHoldingItem: Boolean

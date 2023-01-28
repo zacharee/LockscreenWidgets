@@ -384,6 +384,7 @@ class DrawerDelegate private constructor(context: Context) : BaseDelegate<Drawer
         tryShowHandle()
 
         displayManager.registerDisplayListener(displayListener, mainHandler)
+        gridLayoutManager.customHeight = resources.getDimensionPixelSize(R.dimen.drawer_row_height)
     }
 
     override fun onDestroy() {
@@ -401,10 +402,9 @@ class DrawerDelegate private constructor(context: Context) : BaseDelegate<Drawer
     }
 
     override fun onWidgetMoved(moved: Boolean) {
+        super.onWidgetMoved(moved)
         if (moved) {
             updateState { it.copy(updatedForMove = true) }
-            currentWidgets = adapter.widgets
-            adapter.currentEditingInterfacePosition = -1
         }
     }
 
@@ -417,7 +417,7 @@ class DrawerDelegate private constructor(context: Context) : BaseDelegate<Drawer
         return prefManager.lockWidgetDrawer
     }
 
-    fun hideAll() {
+    private fun hideAll() {
         hideDrawer(false)
         handle.hide(wm)
     }
@@ -448,7 +448,7 @@ class DrawerDelegate private constructor(context: Context) : BaseDelegate<Drawer
         } catch (_: Exception) {}
     }
 
-    fun hideDrawer(callListener: Boolean = true) {
+    private fun hideDrawer(callListener: Boolean = true) {
         updateState { it.copy(handlingClick = false) }
         adapter.currentEditingInterfacePosition = -1
 
@@ -476,9 +476,8 @@ class DrawerDelegate private constructor(context: Context) : BaseDelegate<Drawer
         tryShowHandle()
     }
 
-    override fun updateCounts() {
-        gridLayoutManager.columnCount = prefManager.drawerColCount
-        gridLayoutManager.customHeight = resources.getDimensionPixelSize(R.dimen.drawer_row_height)
+    override fun retrieveCounts(): Pair<Int?, Int?> {
+        return null to prefManager.drawerColCount
     }
 
     private fun pickWidget() {

@@ -457,10 +457,9 @@ class WidgetFrameDelegate private constructor(context: Context) : BaseDelegate<W
     }
 
     override fun onWidgetMoved(moved: Boolean) {
+        super.onWidgetMoved(moved)
         if (moved) {
             updateState { it.copy(updatedForMove = true) }
-            currentWidgets = adapter.widgets
-            adapter.currentEditingInterfacePosition = -1
         }
     }
 
@@ -481,17 +480,8 @@ class WidgetFrameDelegate private constructor(context: Context) : BaseDelegate<W
         updateWindowState(wm, updateAccessibility)
     }
 
-    /**
-     * Make sure the number of rows/columns in the widget frame reflects the user-selected value.
-     */
-    override fun updateCounts() {
-        gridLayoutManager.apply {
-            val rowCount = prefManager.frameRowCount
-            val colCount = prefManager.frameColCount
-
-            this.rowCount = rowCount
-            this.columnCount = colCount
-        }
+    override fun retrieveCounts(): Pair<Int?, Int?> {
+        return prefManager.frameRowCount to prefManager.frameColCount
     }
 
     private fun addWindow(wm: WindowManager) {
