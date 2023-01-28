@@ -128,7 +128,11 @@ abstract class WidgetHostCompat(
         fun checkPendingIntent(pendingIntent: PendingIntent) {
             val triggerUnlockOrDismiss = pendingIntent.isActivity
 
-            onClickCallbacks.forEach { it.onWidgetClick(triggerUnlockOrDismiss) }
+            // This package check is so the frame/drawer doesn't dismiss itself when the
+            // Open Drawer widget is tapped.
+            if (pendingIntent.creatorPackage != context.packageName) {
+                onClickCallbacks.forEach { it.onWidgetClick(triggerUnlockOrDismiss) }
+            }
         }
     }
 
