@@ -31,7 +31,7 @@ class Handle : LinearLayout {
     companion object {
         private const val MSG_LONG_PRESS = 0
 
-        private const val LONG_PRESS_DELAY = 500
+        private const val LONG_PRESS_DELAY = 300
         private const val SWIPE_THRESHOLD = 20
     }
 
@@ -43,7 +43,8 @@ class Handle : LinearLayout {
     var scrollingOpen = false
         private set
     private var scrollTotalX = 0f
-    private var initialRawX = 0f
+    private var initialScrollRawX = 0f
+    private var moveRawY = 0f
     private var screenWidth = -1
 
     private val gestureManager = GestureManager()
@@ -109,7 +110,8 @@ class Handle : LinearLayout {
                     MSG_LONG_PRESS,
                     event.downTime + LONG_PRESS_DELAY
                 )
-                initialRawX = event.rawX
+                initialScrollRawX = event.rawX
+                moveRawY = event.rawY
             }
             MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
                 longClickHandler.removeMessages(MSG_LONG_PRESS)
@@ -127,7 +129,8 @@ class Handle : LinearLayout {
                         }
                         else -> -1
                     }
-                    params.y = (event.rawY - params.height / 2f).toInt()
+                    params.y += (event.rawY - moveRawY).toInt()
+                    moveRawY = event.rawY
                     if (gravity != -1) {
                         params.gravity = Gravity.TOP or gravity
                         context.prefManager.drawerHandleSide = gravity
@@ -135,8 +138,8 @@ class Handle : LinearLayout {
                     }
                     updateLayout()
                 } else if (scrollingOpen) {
-                    scrollTotalX += (event.rawX - initialRawX)
-                    initialRawX = event.rawX
+                    scrollTotalX += (event.rawX - initialScrollRawX)
+                    initialScrollRawX = event.rawX
 
                     context.eventManager.sendEvent(Event.ScrollInDrawer(
                         context.prefManager.drawerHandleSide,
@@ -232,7 +235,7 @@ class Handle : LinearLayout {
             distanceX: Float,
             distanceY: Float
         ): Boolean {
-            return if (distanceX.absoluteValue > distanceY.absoluteValue && !inMoveMode) {
+            return if (distanceX.absoluteValue > distanceY.absoluteValue && !inMoveMode && distanceX.absoluteValue > SWIPE_THRESHOLD) {
                 val initial = !scrollingOpen
 
                 if (initial) {
@@ -256,7 +259,7 @@ class Handle : LinearLayout {
         }
 
         fun onLongPress() {
-            if (!scrollingOpen && !calledOpen) {
+            if (!scrollingOpen && !calledOpen && !inMoveMode) {
                 context.vibrate()
                 setMoveMode(true)
             }

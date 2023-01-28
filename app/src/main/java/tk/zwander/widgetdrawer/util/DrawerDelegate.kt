@@ -308,6 +308,7 @@ class DrawerDelegate private constructor(context: Context) : BaseDelegate<Drawer
                     params.x = it.animatedValue as Int
                     updateDrawer()
                 }
+                animator.duration = ANIM_DURATION
                 animator.interpolator = if (metThreshold) DecelerateInterpolator() else AccelerateInterpolator()
                 animator.addListener(object : AnimatorListenerAdapter() {
                     override fun onAnimationEnd(animation: Animator?) {
@@ -400,17 +401,17 @@ class DrawerDelegate private constructor(context: Context) : BaseDelegate<Drawer
         handle.hide(wm)
     }
 
-    fun tryShowHandle() {
+    private fun tryShowHandle() {
         if (prefManager.drawerEnabled && prefManager.showDrawerHandle && power.isInteractive) {
             handle.show(wm)
         }
     }
 
-    fun hideHandle() {
+    private fun hideHandle() {
         handle.hide(wm)
     }
 
-    fun showDrawer(wm: WindowManager = this.wm, hideHandle: Boolean = true) {
+    private fun showDrawer(wm: WindowManager = this.wm, hideHandle: Boolean = true) {
         try {
             wm.addView(drawer.root, params)
         } catch (_: Exception) {}
@@ -420,7 +421,7 @@ class DrawerDelegate private constructor(context: Context) : BaseDelegate<Drawer
         }
     }
 
-    fun updateDrawer(wm: WindowManager = this.wm) {
+    private fun updateDrawer(wm: WindowManager = this.wm) {
         try {
             wm.updateViewLayout(drawer.root, params)
         } catch (_: Exception) {}
