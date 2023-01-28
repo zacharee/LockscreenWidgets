@@ -31,7 +31,6 @@ import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
 import com.android.internal.R.attr.screenOrientation
 import tk.zwander.common.activities.DismissOrUnlockActivity
@@ -337,7 +336,7 @@ class WidgetFrameDelegate private constructor(context: Context) : BaseDelegate<W
             is Event.FrameAttachmentState -> {
                 try {
                     if (event.attached) {
-                        widgetHost.startListening()
+                        widgetHost.startListening(this)
                         updateWallpaperLayerIfNeeded()
                         updateCornerRadius()
                         //Even with the startListening() call above,
@@ -347,7 +346,7 @@ class WidgetFrameDelegate private constructor(context: Context) : BaseDelegate<W
                         adapter.updateViews()
                         scrollToStoredPosition(false)
                     } else {
-                        widgetHost.stopListening()
+                        widgetHost.stopListening(this)
                     }
                 } catch (e: NullPointerException) {
                     //The stupid "Attempt to read from field 'com.android.server.appwidget.AppWidgetServiceImpl$ProviderId
@@ -636,8 +635,6 @@ class WidgetFrameDelegate private constructor(context: Context) : BaseDelegate<W
         val showWallpaperLayer = showWallpaperLayerCondition
 
         logUtils.debugLog("updateWallpaperLayerIfNeeded() called $showWallpaperLayer")
-
-        binding.wallpaperBackground.isVisible = showWallpaperLayer
 
         if (showWallpaperLayer) {
             logUtils.debugLog("Trying to retrieve wallpaper")

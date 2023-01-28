@@ -242,9 +242,9 @@ class DrawerDelegate private constructor(context: Context) : BaseDelegate<Drawer
                 if (event.attached) {
                     if (!handle.scrollingOpen) {
                         Handler(Looper.getMainLooper()).postDelayed({
-                            adapter.notifyItemRangeChanged(0, adapter.itemCount)
+                            adapter.notifyItemRangeChanged(0, adapter.itemCount, Any())
                         }, 50)
-                        widgetHost.startListening()
+                        widgetHost.startListening(this)
                     }
 
                     drawer.root.setPadding(
@@ -257,7 +257,7 @@ class DrawerDelegate private constructor(context: Context) : BaseDelegate<Drawer
                     if (!handle.scrollingOpen) {
                         drawer.root.handler?.postDelayed({
                             currentVisibilityAnim?.cancel()
-                            val anim = ValueAnimator.ofFloat(0f, 1f)
+                            val anim = ValueAnimator.ofFloat(drawer.root.alpha, 1f)
                             currentVisibilityAnim = anim
 
                             anim.interpolator = DecelerateInterpolator()
@@ -277,7 +277,7 @@ class DrawerDelegate private constructor(context: Context) : BaseDelegate<Drawer
                     drawer.root.setBackgroundColor(prefManager.drawerBackgroundColor)
                 } else {
                     try {
-                        widgetHost.stopListening()
+                        widgetHost.stopListening(this)
                     } catch (e: NullPointerException) {
                         //AppWidgetServiceImpl$ProviderId NPE
                     }
@@ -332,6 +332,7 @@ class DrawerDelegate private constructor(context: Context) : BaseDelegate<Drawer
                             hideDrawer()
                         } else {
                             eventManager.sendEvent(Event.DrawerShown)
+                            eventManager.sendEvent(Event.DrawerAttachmentState(true))
                         }
                     }
                 })

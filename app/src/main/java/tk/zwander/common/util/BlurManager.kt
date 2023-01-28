@@ -29,7 +29,7 @@ class BlurManager(
     private var blurDrawable: BackgroundBlurDrawableCompatDelegate? = null
 
     override fun onViewAttachedToWindow(v: View?) {
-        blurDrawable = targetView.viewRootImpl.createBackgroundBlurDrawableCompat()
+        blurDrawable = targetView.viewRootImpl?.createBackgroundBlurDrawableCompat()
         updateBlur()
     }
 
@@ -55,7 +55,6 @@ class BlurManager(
             blurDrawable?.setBlurRadius(blurAmount())
 
             targetView.background = if (hasBlur) blurDrawable?.wrapped else null
-            targetView.isVisible = hasBlur && shouldBlur()
         } else {
             val f = try {
                 params::class.java.getDeclaredField("samsungFlags")

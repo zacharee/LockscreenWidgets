@@ -257,13 +257,13 @@ class Handle : LinearLayout {
             when (event?.action) {
                 MotionEvent.ACTION_UP -> {
                     if (scrollingOpen) {
+                        scrollingOpen = false
                         context.eventManager.sendEvent(Event.ScrollOpenFinish(
                             context.prefManager.drawerHandleSide
                         ))
                     }
 
                     calledOpen = false
-                    scrollingOpen = false
                     scrollTotalX = 0f
                 }
             }
