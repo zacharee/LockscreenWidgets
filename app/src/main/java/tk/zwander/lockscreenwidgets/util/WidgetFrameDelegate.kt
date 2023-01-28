@@ -14,10 +14,7 @@ import android.graphics.PorterDuffColorFilter
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.GradientDrawable
 import android.os.Build
-import android.os.Bundle
-import android.os.ParcelFileDescriptor
 import android.os.ServiceManager
-import android.os.UserHandle
 import android.view.ContextThemeWrapper
 import android.view.Gravity
 import android.view.LayoutInflater
@@ -26,7 +23,6 @@ import android.view.View
 import android.view.WindowManager
 import android.widget.ImageView
 import android.widget.Toast
-import androidx.annotation.RequiresApi
 import androidx.recyclerview.widget.RecyclerView
 import com.android.internal.R.attr.screenOrientation
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -42,6 +38,7 @@ import tk.zwander.common.util.PrefManager
 import tk.zwander.common.util.appWidgetManager
 import tk.zwander.common.util.dpAsPx
 import tk.zwander.common.util.eventManager
+import tk.zwander.common.util.getWallpaper
 import tk.zwander.common.util.handler
 import tk.zwander.common.util.logUtils
 import tk.zwander.common.util.mainHandler
@@ -610,45 +607,9 @@ class WidgetFrameDelegate private constructor(context: Context) : BaseDelegate<W
         if (showWallpaperLayer) {
             logUtils.debugLog("Trying to retrieve wallpaper")
 
-            @RequiresApi(Build.VERSION_CODES.N)
-            fun getWallpaper(flag: Int): ParcelFileDescriptor? {
-                val bundle = Bundle()
-
-                //Even though this hidden method was added in Android Nougat,
-                //some devices (SAMSUNG >_>) removed or changed it, so it won't
-                //always work. Thus the try-catch.
-                return try {
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                        wallpaperService.getWallpaperWithFeature(
-                            packageName,
-                            attributionTag,
-                            null,
-                            flag,
-                            bundle,
-                            UserHandle.getCallingUserId()
-                        )
-                    } else {
-                        @Suppress("DEPRECATION")
-                        wallpaperService.getWallpaper(
-                            packageName,
-                            null,
-                            flag,
-                            bundle,
-                            UserHandle.getCallingUserId()
-                        )
-                    }
-                } catch (e: Exception) {
-                    logUtils.debugLog("Error retrieving wallpaper", e)
-                    null
-                } catch (e: NoSuchMethodError) {
-                    logUtils.debugLog("Error retrieving wallpaper", e)
-                    null
-                }
-            }
-
             val w = if (Build.VERSION.SDK_INT > Build.VERSION_CODES.M) {
-                getWallpaper(WallpaperManager.FLAG_LOCK)
-                    ?: getWallpaper(WallpaperManager.FLAG_SYSTEM)
+                getWallpaper(WallpaperManager.FLAG_LOCK, wallpaperService)
+                    ?: getWallpaper(WallpaperManager.FLAG_SYSTEM, wallpaperService)
             } else null
 
             try {
