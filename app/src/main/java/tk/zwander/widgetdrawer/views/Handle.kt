@@ -108,7 +108,7 @@ class Handle : LinearLayout {
             }
             MotionEvent.ACTION_UP -> {
                 longClickHandler.removeMessages(MSG_LONG_PRESS)
-                setMoveMove(false)
+                setMoveMode(false)
                 context.prefManager.drawerHandleYPosition = params.y
             }
             MotionEvent.ACTION_MOVE -> {
@@ -142,7 +142,7 @@ class Handle : LinearLayout {
         super.onDetachedFromWindow()
 
         longClickHandler.removeMessages(MSG_LONG_PRESS)
-        setMoveMove(false)
+        setMoveMode(false)
     }
 
     fun onDestroy() {
@@ -175,7 +175,7 @@ class Handle : LinearLayout {
         else handleLeft
     }
 
-    private fun setMoveMove(inMoveMode: Boolean) {
+    private fun setMoveMode(inMoveMode: Boolean) {
         this.inMoveMode = inMoveMode
         val tint = if (inMoveMode)
             Color.argb(255, 120, 200, 255)
@@ -225,7 +225,7 @@ class Handle : LinearLayout {
 
         fun onLongPress() {
             context.vibrate()
-            setMoveMove(true)
+            setMoveMode(true)
         }
 
         override fun onDoubleTap(e: MotionEvent?): Boolean {
