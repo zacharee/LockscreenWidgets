@@ -242,7 +242,7 @@ class DrawerDelegate private constructor(context: Context) : BaseDelegate<Drawer
                 if (event.attached) {
                     if (!handle.scrollingOpen) {
                         Handler(Looper.getMainLooper()).postDelayed({
-                            adapter.notifyItemRangeChanged(0, adapter.itemCount, Any())
+                            adapter.updateViews()
                         }, 50)
                         widgetHost.startListening(this)
                     }
