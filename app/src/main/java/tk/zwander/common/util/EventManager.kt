@@ -144,6 +144,8 @@ sealed class Event {
 
     data class LaunchAddDrawerWidget(val fromDrawer: Boolean) : Event()
     data class DrawerAttachmentState(val attached: Boolean) : Event()
+    data class ScrollInDrawer(val from: Int, val dist: Float, val initial: Boolean) : Event()
+    data class ScrollOpenFinish(val from: Int) : Event()
 }
 
 interface EventObserver {

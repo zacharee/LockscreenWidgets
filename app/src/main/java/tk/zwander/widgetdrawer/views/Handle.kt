@@ -31,8 +31,8 @@ class Handle : LinearLayout {
     companion object {
         private const val MSG_LONG_PRESS = 0
 
-        private const val LONG_PRESS_DELAY = 300
-        private const val SWIPE_THRESHOLD = 50
+        private const val LONG_PRESS_DELAY = 500
+        private const val SWIPE_THRESHOLD = 20
     }
 
     constructor(context: Context) : super(context)
@@ -40,6 +40,10 @@ class Handle : LinearLayout {
 
     private var inMoveMode = false
     private var calledOpen = false
+    var scrollingOpen = false
+        private set
+    private var scrollTotalX = 0f
+    private var initialRawX = 0f
     private var screenWidth = -1
 
     private val gestureManager = GestureManager()
@@ -105,8 +109,9 @@ class Handle : LinearLayout {
                     MSG_LONG_PRESS,
                     event.downTime + LONG_PRESS_DELAY
                 )
+                initialRawX = event.rawX
             }
-            MotionEvent.ACTION_UP -> {
+            MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
                 longClickHandler.removeMessages(MSG_LONG_PRESS)
                 setMoveMode(false)
                 context.prefManager.drawerHandleYPosition = params.y
@@ -129,6 +134,15 @@ class Handle : LinearLayout {
                         setSide(gravity)
                     }
                     updateLayout()
+                } else if (scrollingOpen) {
+                    scrollTotalX += (event.rawX - initialRawX)
+                    initialRawX = event.rawX
+
+                    context.eventManager.sendEvent(Event.ScrollInDrawer(
+                        context.prefManager.drawerHandleSide,
+                        scrollTotalX.absoluteValue,
+                        false
+                    ))
                 }
             }
         }
@@ -143,6 +157,8 @@ class Handle : LinearLayout {
 
         longClickHandler.removeMessages(MSG_LONG_PRESS)
         setMoveMode(false)
+        calledOpen = false
+        scrollingOpen = false
     }
 
     fun onDestroy() {
@@ -195,7 +211,17 @@ class Handle : LinearLayout {
 
         fun onTouchEvent(event: MotionEvent?): Boolean {
             when (event?.action) {
-                MotionEvent.ACTION_UP -> calledOpen = false
+                MotionEvent.ACTION_UP -> {
+                    if (scrollingOpen) {
+                        context.eventManager.sendEvent(Event.ScrollOpenFinish(
+                            context.prefManager.drawerHandleSide
+                        ))
+                    }
+
+                    calledOpen = false
+                    scrollingOpen = false
+                    scrollTotalX = 0f
+                }
             }
             return gestureDetector.onTouchEvent(event)
         }
@@ -207,30 +233,39 @@ class Handle : LinearLayout {
             distanceY: Float
         ): Boolean {
             return if (distanceX.absoluteValue > distanceY.absoluteValue && !inMoveMode) {
-                if ((distanceX > SWIPE_THRESHOLD && context.prefManager.drawerHandleSide == Gravity.RIGHT)
-                    || distanceX < -SWIPE_THRESHOLD
-                ) {
-                    if (!calledOpen) {
-                        calledOpen = true
-                        context.eventManager.sendEvent(Event.ShowDrawer)
+                val initial = !scrollingOpen
+
+                if (initial) {
+                    context.vibrate(25L)
+                    scrollingOpen = true
+
+                    context.eventManager.sendEvent(Event.ScrollInDrawer(
+                        context.prefManager.drawerHandleSide,
+                        scrollTotalX.absoluteValue,
                         true
-                    } else false
-                } else false
+                    ))
+                }
+                true
             } else false
         }
 
         override fun onLongPress(e: MotionEvent?) {
-            onLongPress()
+            if (isAttachedToWindow) {
+                onLongPress()
+            }
         }
 
         fun onLongPress() {
-            context.vibrate()
-            setMoveMode(true)
+            if (!scrollingOpen && !calledOpen) {
+                context.vibrate()
+                setMoveMode(true)
+            }
         }
 
         override fun onDoubleTap(e: MotionEvent?): Boolean {
             return if (!calledOpen) {
                 calledOpen = true
+                context.vibrate(25L)
                 context.eventManager.sendEvent(Event.ShowDrawer)
                 true
             } else false

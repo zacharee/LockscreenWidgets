@@ -48,6 +48,7 @@ import tk.zwander.lockscreenwidgets.services.Accessibility
 import tk.zwander.lockscreenwidgets.util.*
 import tk.zwander.widgetdrawer.adapters.DrawerAdapter
 import tk.zwander.widgetdrawer.views.Handle
+import kotlin.math.absoluteValue
 
 class DrawerDelegate private constructor(context: Context) : BaseDelegate<DrawerDelegate.State>(context) {
     companion object {
@@ -108,7 +109,7 @@ class DrawerDelegate private constructor(context: Context) : BaseDelegate<Drawer
         width = displaySize.x
         height = WindowManager.LayoutParams.MATCH_PARENT
         format = PixelFormat.RGBA_8888
-        gravity = Gravity.TOP
+        gravity = Gravity.TOP or Gravity.CENTER
         screenOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
     }
     override val rootView: View
@@ -196,6 +197,7 @@ class DrawerDelegate private constructor(context: Context) : BaseDelegate<Drawer
     override fun onEvent(event: Event) {
         when (event) {
             Event.ShowDrawer -> {
+                params.x = 0
                 showDrawer()
             }
             Event.CloseDrawer -> {
@@ -225,31 +227,36 @@ class DrawerDelegate private constructor(context: Context) : BaseDelegate<Drawer
             }
             is Event.DrawerAttachmentState -> {
                 if (event.attached) {
-                    Handler(Looper.getMainLooper()).postDelayed({
-                        adapter.notifyItemRangeChanged(0, adapter.itemCount)
-                    }, 50)
+                    if (!handle.scrollingOpen) {
+                        Handler(Looper.getMainLooper()).postDelayed({
+                            adapter.notifyItemRangeChanged(0, adapter.itemCount)
+                        }, 50)
+                        widgetHost.startListening()
+                    }
 
-                    widgetHost.startListening()
-                    
                     drawer.root.setPadding(
-                        drawer.root.paddingLeft, 
-                        statusBarHeight, 
+                        drawer.root.paddingLeft,
+                        statusBarHeight,
                         drawer.root.paddingRight,
                         drawer.root.paddingBottom
                     )
 
-                    drawer.root.handler?.postDelayed({
-                        val anim = ValueAnimator.ofFloat(0f, 1f)
-                        anim.interpolator = DecelerateInterpolator()
-                        anim.duration = ANIM_DURATION
-                        anim.addUpdateListener {
-                            drawer.root.alpha = it.animatedValue.toString().toFloat()
-                        }
-                        anim.doOnEnd {
-                            eventManager.sendEvent(Event.DrawerShown)
-                        }
-                        anim.start()
-                    }, 10)
+                    if (!handle.scrollingOpen) {
+                        drawer.root.handler?.postDelayed({
+                            val anim = ValueAnimator.ofFloat(0f, 1f)
+                            anim.interpolator = DecelerateInterpolator()
+                            anim.duration = ANIM_DURATION
+                            anim.addUpdateListener {
+                                drawer.root.alpha = it.animatedValue.toString().toFloat()
+                            }
+                            anim.doOnEnd {
+                                eventManager.sendEvent(Event.DrawerShown)
+                            }
+                            anim.start()
+                        }, 10)
+                    } else {
+                        drawer.root.alpha = 1f
+                    }
 
                     drawer.root.setBackgroundColor(prefManager.drawerBackgroundColor)
                 } else {
@@ -279,6 +286,39 @@ class DrawerDelegate private constructor(context: Context) : BaseDelegate<Drawer
             }
             Event.DrawerBackButtonClick -> {
                 hideDrawer()
+            }
+            is Event.ScrollInDrawer -> {
+                val distanceFromEdge = (params.width - event.dist)
+
+                params.gravity = event.from
+                params.x = -distanceFromEdge.toInt()
+
+                if (event.initial) {
+                    showDrawer(hideHandle = false)
+                } else {
+                    updateDrawer()
+                }
+            }
+            is Event.ScrollOpenFinish -> {
+                val distanceFromEdge = (params.width + params.x).absoluteValue
+                val metThreshold = distanceFromEdge > dpAsPx(100)
+
+                val animator = ValueAnimator.ofInt(params.x, if (metThreshold) 0 else -params.width)
+                animator.addUpdateListener {
+                    params.x = it.animatedValue as Int
+                    updateDrawer()
+                }
+                animator.interpolator = if (metThreshold) DecelerateInterpolator() else AccelerateInterpolator()
+                animator.addListener(object : AnimatorListenerAdapter() {
+                    override fun onAnimationEnd(animation: Animator?) {
+                        if (!metThreshold) {
+                            hideDrawer()
+                        } else {
+                            eventManager.sendEvent(Event.DrawerShown)
+                        }
+                    }
+                })
+                animator.start()
             }
             else -> {}
         }
@@ -370,11 +410,14 @@ class DrawerDelegate private constructor(context: Context) : BaseDelegate<Drawer
         handle.hide(wm)
     }
 
-    fun showDrawer(wm: WindowManager = this.wm) {
+    fun showDrawer(wm: WindowManager = this.wm, hideHandle: Boolean = true) {
         try {
             wm.addView(drawer.root, params)
         } catch (_: Exception) {}
-        handle.hide(wm)
+
+        if (hideHandle) {
+            handle.hide(wm)
+        }
     }
 
     fun updateDrawer(wm: WindowManager = this.wm) {
