@@ -1,5 +1,8 @@
 package tk.zwander.widgetdrawer.views
 
+import android.animation.Animator
+import android.animation.AnimatorListenerAdapter
+import android.animation.ValueAnimator
 import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Color
@@ -12,6 +15,8 @@ import android.view.GestureDetector
 import android.view.Gravity
 import android.view.MotionEvent
 import android.view.WindowManager
+import android.view.animation.AccelerateInterpolator
+import android.view.animation.DecelerateInterpolator
 import android.widget.LinearLayout
 import androidx.appcompat.content.res.AppCompatResources
 import tk.zwander.common.util.Event
@@ -25,6 +30,7 @@ import tk.zwander.common.util.screenSize
 import tk.zwander.common.util.vibrate
 import tk.zwander.lockscreenwidgets.R
 import tk.zwander.lockscreenwidgets.util.*
+import tk.zwander.widgetdrawer.util.DrawerDelegate
 import kotlin.math.absoluteValue
 
 class Handle : LinearLayout {
@@ -46,6 +52,8 @@ class Handle : LinearLayout {
     private var initialScrollRawX = 0f
     private var moveRawY = 0f
     private var screenWidth = -1
+
+    private var currentVisibilityAnim: Animator? = null
 
     private val gestureManager = GestureManager()
     private val wm = context.getSystemService(Context.WINDOW_SERVICE) as WindowManager
@@ -155,6 +163,23 @@ class Handle : LinearLayout {
         return true
     }
 
+    override fun onAttachedToWindow() {
+        super.onAttachedToWindow()
+
+        handler?.postDelayed({
+            currentVisibilityAnim?.cancel()
+            val anim = ValueAnimator.ofFloat(0f, 1f)
+            currentVisibilityAnim = anim
+
+            anim.interpolator = DecelerateInterpolator()
+            anim.duration = DrawerDelegate.ANIM_DURATION
+            anim.addUpdateListener {
+                alpha = it.animatedValue.toString().toFloat()
+            }
+            anim.start()
+        }, 10)
+    }
+
     override fun onDetachedFromWindow() {
         super.onDetachedFromWindow()
 
@@ -176,10 +201,26 @@ class Handle : LinearLayout {
     }
 
     fun hide(wm: WindowManager = this.wm) {
-        try {
-            wm.removeView(this)
-        } catch (e: Exception) {
+        currentVisibilityAnim?.cancel()
+        val anim = ValueAnimator.ofFloat(1f, 0f)
+        currentVisibilityAnim = anim
+
+        anim.interpolator = AccelerateInterpolator()
+        anim.duration = DrawerDelegate.ANIM_DURATION
+        anim.addUpdateListener {
+            this.alpha = it.animatedValue.toString().toFloat()
         }
+        anim.addListener(object : AnimatorListenerAdapter() {
+            override fun onAnimationEnd(animation: Animator?) {
+                handler?.postDelayed({
+                    try {
+                        wm.removeView(this@Handle)
+                    } catch (e: Exception) {
+                    }
+                }, 10)
+            }
+        })
+        anim.start()
     }
 
     private fun updateLayout(params: WindowManager.LayoutParams = this.params) {

@@ -194,6 +194,8 @@ class DrawerDelegate private constructor(context: Context) : BaseDelegate<Drawer
         }
     }
 
+    private var currentVisibilityAnim: Animator? = null
+
     override fun onEvent(event: Event) {
         when (event) {
             Event.ShowDrawer -> {
@@ -243,7 +245,10 @@ class DrawerDelegate private constructor(context: Context) : BaseDelegate<Drawer
 
                     if (!handle.scrollingOpen) {
                         drawer.root.handler?.postDelayed({
+                            currentVisibilityAnim?.cancel()
                             val anim = ValueAnimator.ofFloat(0f, 1f)
+                            currentVisibilityAnim = anim
+
                             anim.interpolator = DecelerateInterpolator()
                             anim.duration = ANIM_DURATION
                             anim.addUpdateListener {
@@ -431,7 +436,10 @@ class DrawerDelegate private constructor(context: Context) : BaseDelegate<Drawer
         updateState { it.copy(handlingClick = false) }
         adapter.currentEditingInterfacePosition = -1
 
+        currentVisibilityAnim?.cancel()
         val anim = ValueAnimator.ofFloat(1f, 0f)
+        currentVisibilityAnim = anim
+
         anim.interpolator = AccelerateInterpolator()
         anim.duration = ANIM_DURATION
         anim.addUpdateListener {
