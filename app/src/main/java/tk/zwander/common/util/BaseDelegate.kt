@@ -4,6 +4,7 @@ import android.app.KeyguardManager
 import android.app.WallpaperManager
 import android.content.Context
 import android.content.ContextWrapper
+import android.hardware.display.DisplayManager
 import android.os.PowerManager
 import android.view.View
 import android.view.WindowManager
@@ -23,6 +24,9 @@ abstract class BaseDelegate<State : BaseDelegate.BaseState>(context: Context) : 
     protected val kgm by lazy { getSystemService(Context.KEYGUARD_SERVICE) as KeyguardManager }
     protected val wallpaper by lazy { getSystemService(Context.WALLPAPER_SERVICE) as WallpaperManager }
     protected val widgetHost by lazy { widgetHostCompat }
+    protected val displayManager by lazy {
+        getSystemService(Context.DISPLAY_SERVICE) as DisplayManager
+    }
 
     abstract var state: State
         protected set

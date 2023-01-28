@@ -10,6 +10,7 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.content.pm.ActivityInfo
 import android.graphics.PixelFormat
+import android.hardware.display.DisplayManager
 import android.os.Handler
 import android.os.Looper
 import android.util.TypedValue
@@ -38,6 +39,7 @@ import tk.zwander.common.util.dpAsPx
 import tk.zwander.common.util.eventManager
 import tk.zwander.common.util.handler
 import tk.zwander.common.util.logUtils
+import tk.zwander.common.util.mainHandler
 import tk.zwander.common.util.prefManager
 import tk.zwander.common.util.screenSize
 import tk.zwander.common.util.shortcutIdManager
@@ -192,6 +194,15 @@ class DrawerDelegate private constructor(context: Context) : BaseDelegate<Drawer
                 }
             }
         }
+    }
+    private val displayListener = object : DisplayManager.DisplayListener {
+        override fun onDisplayChanged(displayId: Int) {
+            params.width = screenSize.x
+            updateDrawer()
+        }
+
+        override fun onDisplayAdded(displayId: Int) {}
+        override fun onDisplayRemoved(displayId: Int) {}
     }
 
     private var currentVisibilityAnim: Animator? = null
@@ -370,6 +381,8 @@ class DrawerDelegate private constructor(context: Context) : BaseDelegate<Drawer
 
         updateSidePadding()
         tryShowHandle()
+
+        displayManager.registerDisplayListener(displayListener, mainHandler)
     }
 
     override fun onDestroy() {
@@ -382,6 +395,8 @@ class DrawerDelegate private constructor(context: Context) : BaseDelegate<Drawer
             unregisterReceiver(globalReceiver)
         } catch (ignored: IllegalArgumentException) {}
         invalidateInstance()
+
+        displayManager.unregisterDisplayListener(displayListener)
     }
 
     override fun onWidgetMoved(moved: Boolean) {
