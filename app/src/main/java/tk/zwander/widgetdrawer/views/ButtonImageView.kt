@@ -23,7 +23,5 @@ class ButtonImageView : AppCompatImageView {
 
         val padding = context.dpAsPx(8)
         setPadding(padding, padding, padding, padding)
-
-        imageTintList = ColorStateList.valueOf(Color.WHITE)
     }
 }
