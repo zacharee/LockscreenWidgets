@@ -619,7 +619,7 @@ class PrefManager private constructor(context: Context) : ContextWrapper(context
         }
 
     var showDrawerHandle: Boolean
-        get() = getBoolean(KEY_SHOW_DRAWER_HANDLE, false)
+        get() = getBoolean(KEY_SHOW_DRAWER_HANDLE, true)
         set(value) {
             putBoolean(KEY_SHOW_DRAWER_HANDLE, value)
         }

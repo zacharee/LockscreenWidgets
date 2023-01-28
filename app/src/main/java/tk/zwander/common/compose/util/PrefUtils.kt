@@ -15,7 +15,7 @@ fun Context.rememberBooleanPreferenceState(
     enabled: () -> Boolean,
     onEnabledChanged: (Boolean) -> Unit
 ): MutableState<Boolean> {
-    val enabledState = remember {
+    val enabledState = remember(key) {
         mutableStateOf(enabled())
     }
 
