@@ -20,6 +20,7 @@ import tk.zwander.common.util.logUtils
 import tk.zwander.common.util.queryIntentActivitiesCompat
 import tk.zwander.lockscreenwidgets.data.list.ShortcutListInfo
 import tk.zwander.lockscreenwidgets.data.list.WidgetListInfo
+import java.util.TreeSet
 
 @Composable
 internal fun items(
@@ -110,7 +111,16 @@ internal fun items(
 
     val filteredItems by remember(filter) {
         derivedStateOf {
-            items.filter { it.matchesFilter(filter) }
+            items.mapNotNull { app ->
+                if (app.matchesFilter(filter)) {
+                    app.copy(
+                        widgets = TreeSet(app.widgets.filter { it.matchesFilter(filter) }),
+                        shortcuts = TreeSet(app.shortcuts.filter { it.matchesFilter(filter) })
+                    )
+                } else {
+                    null
+                }
+            }
         }
     }
 

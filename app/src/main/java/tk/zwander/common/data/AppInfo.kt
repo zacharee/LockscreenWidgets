@@ -14,10 +14,10 @@ import java.util.TreeSet
  * @property widgets the widgets Lockscreen Widgets found for this app
  */
 data class AppInfo(
-    var appName: String,
-    var appInfo: ApplicationInfo,
-    var widgets: TreeSet<WidgetListInfo> = TreeSet(),
-    var shortcuts: TreeSet<ShortcutListInfo> = TreeSet()
+    val appName: String,
+    val appInfo: ApplicationInfo,
+    val widgets: TreeSet<WidgetListInfo> = TreeSet(),
+    val shortcuts: TreeSet<ShortcutListInfo> = TreeSet()
 ) : Comparable<AppInfo> {
     override fun compareTo(other: AppInfo) =
         appName.compareTo(other.appName, true)
