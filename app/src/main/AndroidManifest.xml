@@ -216,6 +216,24 @@
                 android:resource="@xml/id_list_provider_info" />
         </receiver>
 
+        <receiver android:name="tk.zwander.common.appwidget.OpenDrawerProvider"
+            android:label="@string/open_drawer"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data android:name="android.appwidget.provider"
+                android:resource="@xml/open_drawer_provider_info" />
+        </receiver>
+
+        <receiver android:name="tk.zwander.common.receivers.OpenDrawerReceiver"
+            android:label="@string/open_drawer"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="${applicationId}.action.OPEN_DRAWER" />
+            </intent-filter>
+        </receiver>
+
         <meta-data android:name="google_analytics_adid_collection_enabled" android:value="false" />
     </application>
 
