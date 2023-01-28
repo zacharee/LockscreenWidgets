@@ -26,6 +26,8 @@ import androidx.core.animation.doOnEnd
 import androidx.core.view.updateLayoutParams
 import androidx.core.view.updatePaddingRelative
 import androidx.recyclerview.widget.RecyclerView
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import tk.zwander.common.activities.DismissOrUnlockActivity
 import tk.zwander.common.data.WidgetData
 import tk.zwander.common.util.BaseDelegate
@@ -55,14 +57,13 @@ class DrawerDelegate private constructor(context: Context) : BaseDelegate<Drawer
         const val ANIM_DURATION = 200L
 
         @SuppressLint("StaticFieldLeak")
-        private var instance: DrawerDelegate? = null
+        private val instance = MutableStateFlow<DrawerDelegate?>(null)
 
-        private val hasInstance: Boolean
-            get() = instance != null
+        val readOnlyInstance = instance.asStateFlow()
 
         @Synchronized
         fun peekInstance(context: Context): DrawerDelegate? {
-            if (!hasInstance) {
+            if (instance.value == null) {
                 context.logUtils.debugLog("Accessibility isn't running yet")
 
                 return null
@@ -83,19 +84,19 @@ class DrawerDelegate private constructor(context: Context) : BaseDelegate<Drawer
 
         @Synchronized
         fun getInstance(context: Context): DrawerDelegate {
-            return instance ?: run {
+            return instance.value ?: run {
                 if (context !is Accessibility) {
                     throw IllegalStateException("Delegate can only be initialized by Accessibility Service!")
                 } else {
                     DrawerDelegate(context).also {
-                        instance = it
+                        instance.value = it
                     }
                 }
             }
         }
 
         fun invalidateInstance() {
-            instance = null
+            instance.value = null
         }
     }
 

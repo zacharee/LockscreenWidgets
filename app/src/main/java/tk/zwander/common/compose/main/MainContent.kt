@@ -8,17 +8,22 @@ import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import tk.zwander.common.compose.AppTheme
 import tk.zwander.lockscreenwidgets.util.WidgetFrameDelegate
+import tk.zwander.widgetdrawer.util.DrawerDelegate
 
 @Preview
 @Composable
 fun MainContent() {
     val features = rememberFeatureCards()
     val links = rememberLinks()
+
+    val hasFrameDelegateInstance = WidgetFrameDelegate.readOnlyInstance.collectAsState().value != null
+    val hasDrawerDelegateInstance = DrawerDelegate.readOnlyInstance.collectAsState().value != null
 
     AppTheme {
         Surface(modifier = Modifier.fillMaxSize()) {
@@ -28,7 +33,7 @@ fun MainContent() {
                 verticalArrangement = Arrangement.spacedBy(8.dp),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                if (!WidgetFrameDelegate.hasInstance) {
+                if (!hasFrameDelegateInstance || !hasDrawerDelegateInstance) {
                     item(span = { GridItemSpan(maxLineSpan) }) {
                         AccessibilityCard()
                     }

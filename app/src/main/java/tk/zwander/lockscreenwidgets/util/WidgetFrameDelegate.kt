@@ -27,12 +27,10 @@ import android.view.WindowManager
 import android.widget.ImageView
 import android.widget.Toast
 import androidx.annotation.RequiresApi
-import androidx.compose.runtime.derivedStateOf
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.recyclerview.widget.RecyclerView
 import com.android.internal.R.attr.screenOrientation
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import tk.zwander.common.activities.DismissOrUnlockActivity
 import tk.zwander.common.data.WidgetData
 import tk.zwander.common.util.BaseDelegate
@@ -63,15 +61,13 @@ import tk.zwander.lockscreenwidgets.views.WidgetFrameView
  */
 class WidgetFrameDelegate private constructor(context: Context) : BaseDelegate<WidgetFrameDelegate.State>(context) {
     companion object {
-        private var instance by mutableStateOf<WidgetFrameDelegate?>(null)
+        private val instance = MutableStateFlow<WidgetFrameDelegate?>(null)
 
-        val hasInstance: Boolean by derivedStateOf {
-            instance != null
-        }
+        val readOnlyInstance = instance.asStateFlow()
 
         @Synchronized
         fun peekInstance(context: Context): WidgetFrameDelegate? {
-            if (!hasInstance) {
+            if (instance.value == null) {
                 context.logUtils.debugLog("Accessibility isn't running yet")
 
                 return null
@@ -92,12 +88,12 @@ class WidgetFrameDelegate private constructor(context: Context) : BaseDelegate<W
 
         @Synchronized
         fun getInstance(context: Context): WidgetFrameDelegate {
-            return instance ?: run {
+            return instance.value ?: run {
                 if (context !is Accessibility) {
                     throw IllegalStateException("Delegate can only be initialized by Accessibility Service!")
                 } else {
                     WidgetFrameDelegate(context).also {
-                        instance = it
+                        instance.value = it
                     }
                 }
             }
@@ -105,7 +101,7 @@ class WidgetFrameDelegate private constructor(context: Context) : BaseDelegate<W
 
         @Synchronized
         fun invalidateInstance() {
-            instance = null
+            instance.value = null
         }
     }
 
