@@ -88,12 +88,12 @@
             android:label="@string/open_drawer"
             android:theme="@style/AppTheme.Null"
             android:exported="true"
-            android:launchMode="singleInstance"
+            android:launchMode="singleInstancePerTask"
             />
         <activity-alias
             android:name=".activities.LaunchDrawer"
             android:targetActivity="tk.zwander.widgetdrawer.activities.TriggerActivity"
-            android:launchMode="singleInstance"
+            android:launchMode="singleInstancePerTask"
             android:exported="true"
             android:label="@string/open_widget_drawer">
             <intent-filter>
