@@ -55,10 +55,6 @@ internal fun items(
                             apps[appInfo.packageName] = app
                         }
 
-                        if (appInfo.packageName.contains("overdrop")) {
-                            context.logUtils.normalLog("Adding overdrop info $it")
-                        }
-
                         app.widgets.add(
                             WidgetListInfo(
                                 widgetName,
