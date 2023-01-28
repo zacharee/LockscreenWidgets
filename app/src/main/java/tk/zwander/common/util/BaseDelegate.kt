@@ -13,6 +13,7 @@ import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import com.arasthel.spannedgridlayoutmanager.SpannedGridLayoutManager
 import tk.zwander.common.data.WidgetData
+import tk.zwander.common.data.WidgetType
 import tk.zwander.common.host.WidgetHostCompat
 import tk.zwander.common.host.widgetHostCompat
 import tk.zwander.lockscreenwidgets.adapters.WidgetFrameAdapter
@@ -79,6 +80,32 @@ abstract class BaseDelegate<State : BaseDelegate.BaseState>(context: Context) : 
         currentWidgets = ArrayList(adapter.widgets)
     }
 
+    @CallSuper
+    override fun onEvent(event: Event) {
+        when (event) {
+            is Event.RemoveWidgetConfirmed -> {
+                val position = currentWidgets.indexOf(event.item)
+
+                if (event.remove && currentWidgets.contains(event.item)) {
+                    currentWidgets = currentWidgets.toMutableList().apply {
+                        remove(event.item)
+                        when (event.item?.safeType) {
+                            WidgetType.WIDGET -> widgetHost.deleteAppWidgetId(event.item.id)
+                            WidgetType.SHORTCUT -> shortcutIdManager.removeShortcutId(event.item.id)
+                            else -> {}
+                        }
+                    }
+
+                    adapter.currentEditingInterfacePosition = -1
+                    adapter.updateWidgets(currentWidgets.toList())
+                }
+
+                widgetRemovalConfirmed(event, position)
+            }
+            else -> {}
+        }
+    }
+
     open fun updateState(transform: (State) -> State) {
         val newState = transform(state)
         logUtils.debugLog("Updating state from\n$state\nto\n$newState")
@@ -108,6 +135,8 @@ abstract class BaseDelegate<State : BaseDelegate.BaseState>(context: Context) : 
     protected abstract fun onItemSelected(selected: Boolean)
     protected abstract fun isLocked(): Boolean
     protected abstract fun retrieveCounts(): Pair<Int?, Int?>
+
+    protected open fun widgetRemovalConfirmed(event: Event.RemoveWidgetConfirmed, position: Int) {}
 
     abstract class BaseState {
         abstract val isHoldingItem: Boolean

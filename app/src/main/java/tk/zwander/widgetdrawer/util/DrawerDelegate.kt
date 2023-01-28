@@ -28,7 +28,6 @@ import androidx.core.view.updatePaddingRelative
 import androidx.recyclerview.widget.RecyclerView
 import tk.zwander.common.activities.DismissOrUnlockActivity
 import tk.zwander.common.data.WidgetData
-import tk.zwander.common.data.WidgetType
 import tk.zwander.common.util.BaseDelegate
 import tk.zwander.common.util.BlurManager
 import tk.zwander.common.util.Event
@@ -42,7 +41,6 @@ import tk.zwander.common.util.logUtils
 import tk.zwander.common.util.mainHandler
 import tk.zwander.common.util.prefManager
 import tk.zwander.common.util.screenSize
-import tk.zwander.common.util.shortcutIdManager
 import tk.zwander.common.util.statusBarHeight
 import tk.zwander.lockscreenwidgets.R
 import tk.zwander.lockscreenwidgets.databinding.DrawerLayoutBinding
@@ -208,6 +206,8 @@ class DrawerDelegate private constructor(context: Context) : BaseDelegate<Drawer
     private var currentVisibilityAnim: Animator? = null
 
     override fun onEvent(event: Event) {
+        super.onEvent(event)
+
         when (event) {
             Event.ShowDrawer -> {
                 params.x = 0
@@ -281,23 +281,6 @@ class DrawerDelegate private constructor(context: Context) : BaseDelegate<Drawer
                     } catch (e: NullPointerException) {
                         //AppWidgetServiceImpl$ProviderId NPE
                     }
-                }
-            }
-            is Event.RemoveWidgetConfirmed -> {
-                if (event.remove && currentWidgets.contains(event.item)) {
-                    currentWidgets = currentWidgets.toMutableList().apply {
-                        remove(event.item)
-                        when (event.item?.safeType) {
-                            WidgetType.WIDGET -> widgetHost.deleteAppWidgetId(event.item.id)
-                            WidgetType.SHORTCUT -> shortcutIdManager.removeShortcutId(event.item.id)
-                            else -> {}
-                        }
-                    }
-                }
-
-                if (event.remove) {
-                    adapter.currentEditingInterfacePosition = -1
-                    adapter.updateWidgets(currentWidgets.toList())
                 }
             }
             Event.DrawerBackButtonClick -> {

@@ -35,7 +35,6 @@ import androidx.recyclerview.widget.RecyclerView
 import com.android.internal.R.attr.screenOrientation
 import tk.zwander.common.activities.DismissOrUnlockActivity
 import tk.zwander.common.data.WidgetData
-import tk.zwander.common.data.WidgetType
 import tk.zwander.common.util.BaseDelegate
 import tk.zwander.common.util.BlurManager
 import tk.zwander.common.util.Event
@@ -51,7 +50,6 @@ import tk.zwander.common.util.mainHandler
 import tk.zwander.common.util.prefManager
 import tk.zwander.common.util.pxAsDp
 import tk.zwander.common.util.screenSize
-import tk.zwander.common.util.shortcutIdManager
 import tk.zwander.lockscreenwidgets.R
 import tk.zwander.lockscreenwidgets.adapters.WidgetFrameAdapter
 import tk.zwander.lockscreenwidgets.data.Mode
@@ -281,6 +279,8 @@ class WidgetFrameDelegate private constructor(context: Context) : BaseDelegate<W
     ) { binding.frame.updateWindow(wm, params) }
 
     override fun onEvent(event: Event) {
+        super.onEvent(event)
+
         when (event) {
             Event.FrameMoveFinished -> updateWallpaperLayerIfNeeded()
             Event.TempHide -> {
@@ -363,34 +363,6 @@ class WidgetFrameDelegate private constructor(context: Context) : BaseDelegate<W
                 prefManager.setCorrectFramePos(saveMode, params.x, params.y)
             }
             is Event.FrameIntercept -> forceWakelock(wm, event.down)
-            is Event.RemoveWidgetConfirmed -> {
-                val position = currentWidgets.indexOf(event.item)
-
-                if (event.remove && currentWidgets.contains(event.item)) {
-                    currentWidgets = currentWidgets.toMutableList().apply {
-                        remove(event.item)
-                        when (event.item?.safeType) {
-                            WidgetType.WIDGET -> widgetHost.deleteAppWidgetId(event.item.id)
-                            WidgetType.SHORTCUT -> shortcutIdManager.removeShortcutId(event.item.id)
-                            else -> {}
-                        }
-                    }
-                }
-
-                if (event.remove) {
-                    adapter.currentEditingInterfacePosition = -1
-                    adapter.updateWidgets(currentWidgets.toList())
-
-                    binding.widgetsPager.post {
-                        val pos = when (val pos = (binding.widgetsPager.layoutManager as? SpannedLayoutManager)?.firstVisiblePosition) {
-                            RecyclerView.NO_POSITION -> (position - 1).coerceAtLeast(0)
-                            else -> pos ?: 0
-                        }
-
-                        binding.widgetsPager.scrollToPosition(pos)
-                    }
-                }
-            }
             Event.TempHide -> {
                 removeWindow(wm)
             }
@@ -482,6 +454,19 @@ class WidgetFrameDelegate private constructor(context: Context) : BaseDelegate<W
 
     override fun retrieveCounts(): Pair<Int?, Int?> {
         return prefManager.frameRowCount to prefManager.frameColCount
+    }
+
+    override fun widgetRemovalConfirmed(event: Event.RemoveWidgetConfirmed, position: Int) {
+        if (event.remove) {
+            binding.widgetsPager.post {
+                val pos = when (val pos = (binding.widgetsPager.layoutManager as? SpannedLayoutManager)?.firstVisiblePosition) {
+                    RecyclerView.NO_POSITION -> (position - 1).coerceAtLeast(0)
+                    else -> pos ?: 0
+                }
+
+                binding.widgetsPager.scrollToPosition(pos)
+            }
+        }
     }
 
     private fun addWindow(wm: WindowManager) {
