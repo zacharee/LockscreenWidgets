@@ -295,7 +295,9 @@ object AccessibilityUtils {
 
                 logUtils.debugLog("NewState $newState", null)
 
-                var tempState = newState.copy(
+                // If any other checks get added to the `sysUiWindowNodes` loop
+                // set their state to false here.
+                newState = newState.copy(
                     onMainLockscreen = false,
                     showingNotificationsPanel = false,
                     notificationsPanelFullyExpanded = false,
@@ -315,7 +317,7 @@ object AccessibilityUtils {
                                 "com.android.systemui:id/left_button"
                             )
                         ) {
-                            tempState = tempState.copy(
+                            newState = newState.copy(
                                 onMainLockscreen = true
                             )
                         }
@@ -335,7 +337,7 @@ object AccessibilityUtils {
                             //Used for "Hide When Notification Shade Shown" so we know when it's actually expanded.
                             //Some devices don't even have left shortcuts, so also check for keyguard_indication_area.
                             //Just like the showingSecurityInput check, this is probably unreliable for some devices.
-                            tempState = tempState.copy(
+                            newState = newState.copy(
                                 showingNotificationsPanel = true
                             )
                         }
@@ -347,7 +349,7 @@ object AccessibilityUtils {
                     //visible when the NC is fully expanded.
                     if (prefManager.showInNotificationCenter) {
                         if (node.hasVisibleIds("com.android.systemui:id/more_button")) {
-                            tempState = tempState.copy(
+                            newState = newState.copy(
                                 notificationsPanelFullyExpanded = true
                             )
                         }
@@ -369,7 +371,7 @@ object AccessibilityUtils {
                     val nonPresentIds = prefManager.nonPresentIds
                     if (nonPresentIds.isNotEmpty()) {
                         if (!node.hasVisibleIds(nonPresentIds)) {
-                            tempState = tempState.copy(
+                            newState = newState.copy(
                                 hideForNonPresentIds = true
                             )
                         }
@@ -378,8 +380,6 @@ object AccessibilityUtils {
                     @Suppress("DEPRECATION")
                     node.recycle()
                 }
-
-                newState = tempState
 
                 windows.forEach {
                     try {
