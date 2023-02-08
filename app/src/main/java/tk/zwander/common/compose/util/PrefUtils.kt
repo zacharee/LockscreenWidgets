@@ -4,29 +4,33 @@ import android.content.Context
 import android.content.SharedPreferences
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import tk.zwander.common.util.prefManager
 
 @Composable
-fun Context.rememberBooleanPreferenceState(
+fun <T> Context.rememberPreferenceState(
     key: String,
-    enabled: () -> Boolean,
-    onEnabledChanged: (Boolean) -> Unit
-): MutableState<Boolean> {
-    val enabledState = remember(key) {
-        mutableStateOf(enabled())
+    value: () -> T,
+    onChanged: (T) -> Unit
+): MutableState<T> {
+    val state = remember(key) {
+        mutableStateOf(value())
     }
 
-    DisposableEffect(key1 = enabledState.value) {
+    LaunchedEffect(key1 = state.value) {
+        onChanged(state.value)
+    }
+
+    DisposableEffect(key1 = key) {
         val listener = SharedPreferences.OnSharedPreferenceChangeListener { _, k ->
             if (key == k) {
-                enabledState.value = enabled()
+                state.value = value()
             }
         }
 
-        onEnabledChanged(enabledState.value)
         prefManager.registerOnSharedPreferenceChangeListener(listener)
 
         onDispose {
@@ -34,5 +38,18 @@ fun Context.rememberBooleanPreferenceState(
         }
     }
 
-    return enabledState
+    return state
+}
+
+@Composable
+fun Context.rememberBooleanPreferenceState(
+    key: String,
+    enabled: () -> Boolean,
+    onEnabledChanged: (Boolean) -> Unit
+): MutableState<Boolean> {
+    return rememberPreferenceState(
+        key = key,
+        value = enabled,
+        onChanged = onEnabledChanged
+    )
 }

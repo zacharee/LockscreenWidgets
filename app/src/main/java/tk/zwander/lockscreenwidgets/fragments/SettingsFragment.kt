@@ -5,6 +5,7 @@ import android.os.Bundle
 import androidx.preference.Preference
 import androidx.preference.SwitchPreferenceCompat
 import tk.zwander.common.activities.HideForIDsActivity
+import tk.zwander.common.activities.HideOnAppsChooserActivity
 import tk.zwander.common.activities.OnboardingActivity
 import tk.zwander.common.fragments.CommonPreferenceFragment
 import tk.zwander.common.util.HandlerRegistry
@@ -90,6 +91,11 @@ class SettingsFragment : CommonPreferenceFragment() {
 
         findPreference<Preference>("non_present_ids_launch")?.setOnPreferenceClickListener {
             HideForIDsActivity.start(requireContext(), HideForIDsActivity.Type.NON_PRESENT)
+            true
+        }
+
+        findPreference<Preference>("hide_on_present_apps")?.setOnPreferenceClickListener {
+            HideOnAppsChooserActivity.start(requireContext())
             true
         }
 

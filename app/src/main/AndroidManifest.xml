@@ -100,6 +100,11 @@
                 <action android:name="android.intent.action.CREATE_SHORTCUT" />
             </intent-filter>
         </activity-alias>
+        <activity android:name="tk.zwander.common.activities.HideOnAppsChooserActivity"
+            android:label="@string/settings_screen_hide_on_present_apps"
+            android:exported="false"
+            android:theme="@style/AppTheme.NoActionBar"
+            />
 
         <service
             android:name="tk.zwander.lockscreenwidgets.services.Accessibility"

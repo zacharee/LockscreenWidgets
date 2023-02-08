@@ -563,6 +563,7 @@ class WidgetFrameDelegate private constructor(context: Context) : BaseDelegate<W
                     && (state.onMainLockscreen || state.showingNotificationsPanel || !prefManager.hideOnSecurityPage)
                     && (!state.showingNotificationsPanel || !prefManager.hideOnNotificationShade)
                     && (state.notificationCount == 0 || !prefManager.hideOnNotifications)
+                    && !state.hidingForPresentApp
                     && forCommon()
         }
 
@@ -843,6 +844,7 @@ class WidgetFrameDelegate private constructor(context: Context) : BaseDelegate<W
         val notificationsPanelFullyExpanded: Boolean = false,
         val isScreenOn: Boolean = false,
         val isTempHide: Boolean = false,
+        val hidingForPresentApp: Boolean = false,
         override val handlingClick: Boolean = false,
     ) : BaseState()
 }

@@ -1,6 +1,7 @@
 package tk.zwander.common.compose.components
 
 import androidx.compose.animation.animateContentSize
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -13,6 +14,8 @@ import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import tk.zwander.common.compose.main.SubduedOutlinedButton
 
@@ -23,6 +26,10 @@ fun CardSwitch(
     title: String,
     modifier: Modifier = Modifier,
     summary: String? = null,
+    icon: Painter? = null,
+    contentDescription: String? = null,
+    titleTextStyle: TextStyle = MaterialTheme.typography.headlineSmall,
+    summaryTextStyle: TextStyle = MaterialTheme.typography.bodyMedium,
 ) {
     Row(modifier = modifier) {
         SubduedOutlinedButton(
@@ -34,12 +41,21 @@ fun CardSwitch(
                 .heightIn(min = 64.dp)
                 .animateContentSize()
         ) {
+            icon?.let {
+                Image(
+                    painter = icon,
+                    contentDescription = contentDescription,
+                    modifier = Modifier.size(48.dp)
+                )
+                Spacer(Modifier.size(8.dp))
+            }
+
             Column(
                 modifier = Modifier.weight(1f)
             ) {
                 Text(
                     text = title,
-                    style = MaterialTheme.typography.headlineSmall
+                    style = titleTextStyle
                 )
 
                 if (!summary.isNullOrBlank()) {
@@ -47,7 +63,7 @@ fun CardSwitch(
 
                     Text(
                         text = summary,
-                        style = MaterialTheme.typography.bodyMedium
+                        style = summaryTextStyle
                     )
                 }
             }

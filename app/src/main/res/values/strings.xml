@@ -192,6 +192,9 @@
     <string name="settings_screen_hide_on_edge_panels">Hide on Edge Panels</string>
     <string name="settings_screen_hide_on_edge_panels_desc">Hide the widget frame when Samsung\'s Edge Panels are open.</string>
 
+    <string name="settings_screen_hide_on_present_apps">Hide on Present Apps</string>
+    <string name="settings_screen_hide_on_present_apps_desc">Choose which apps should cause the widget frame to hide if they\'re shown on the lock screen.</string>
+
     <string name="intro_welcome_title">Welcome!</string>
     <string name="intro_welcome_desc">Lockscreen Widgets is a simple app with a simple purpose: to bring back Android KitKat\'s lock screen widgets. Your widgets will show up in a simple paged slider on the lockscreen.</string>
 

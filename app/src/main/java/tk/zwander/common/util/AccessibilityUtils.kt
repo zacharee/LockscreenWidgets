@@ -45,6 +45,7 @@ object AccessibilityUtils {
         var hasScreenOffMemoWindow = false
         var hasFaceWidgetsWindow = false
         var hasEdgePanelWindow = false
+        var hasHideForPresentApp = false
 
         var minSysUiWindowIndex = -1
 
@@ -103,6 +104,10 @@ object AccessibilityUtils {
                 hasFaceWidgetsWindow = true
             }
 
+            if (prefManager.hideFrameOnApps.contains(safeRoot?.packageName)) {
+                hasHideForPresentApp = true
+            }
+
             window
         }
 
@@ -118,7 +123,8 @@ object AccessibilityUtils {
             sysUiWindowNodes = sysUiWindowNodes,
             sysUiWindowViewIds = sysUiWindowViewIds,
             hasEdgePanelWindow = hasEdgePanelWindow,
-            topAppWindowPackageName = topAppWindowPackageName
+            topAppWindowPackageName = topAppWindowPackageName,
+            hasHideForPresentApp = hasHideForPresentApp
         )
     }
 
@@ -255,7 +261,8 @@ object AccessibilityUtils {
                 nonAppSystemWindowIndex, minSysUiWindowIndex,
                 hasScreenOffMemoWindow, hasFaceWidgetsWindow,
                 hasEdgePanelWindow, sysUiWindowViewIds,
-                sysUiWindowNodes, topAppWindowPackageName
+                sysUiWindowNodes, topAppWindowPackageName,
+                hasHideForPresentApp,
             ) = getWindows(getWindows()).also {
                 logUtils.debugLog("Got windows $it", null)
             }
@@ -300,6 +307,7 @@ object AccessibilityUtils {
                 currentSystemLayer = if (nonAppSystemWindowIndex != -1) windows.size - nonAppSystemWindowIndex else nonAppSystemWindowIndex,
                 //This is mostly a debug value to see which app LSWidg thinks is on top.
                 currentAppPackage = topAppWindowPackageName,
+                hidingForPresentApp = hasHideForPresentApp,
             )
 
             logUtils.debugLog("NewState $newState", null)

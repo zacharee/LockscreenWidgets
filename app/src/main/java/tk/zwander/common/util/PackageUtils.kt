@@ -23,3 +23,11 @@ fun PackageManager.queryIntentActivitiesCompat(intent: Intent, flags: Int = 0): 
         queryIntentActivities(intent, flags)
     }
 }
+
+fun PackageManager.getInstalledApplicationsCompat(flags: Int = 0): List<ApplicationInfo> {
+    return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+        getInstalledApplications(PackageManager.ApplicationInfoFlags.of(flags.toLong()))
+    } else {
+        getInstalledApplications(flags)
+    }
+}

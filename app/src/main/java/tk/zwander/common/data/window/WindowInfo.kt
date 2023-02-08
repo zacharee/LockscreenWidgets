@@ -17,4 +17,5 @@ data class WindowInfo(
     val sysUiWindowViewIds: ConcurrentLinkedQueue<String>,
     val sysUiWindowNodes: ConcurrentLinkedQueue<AccessibilityNodeInfo>,
     val topAppWindowPackageName: String?,
+    val hasHideForPresentApp: Boolean,
 )

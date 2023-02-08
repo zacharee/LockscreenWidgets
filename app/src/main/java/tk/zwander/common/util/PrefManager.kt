@@ -124,6 +124,7 @@ class PrefManager private constructor(context: Context) : ContextWrapper(context
         const val KEY_FRAME_REMEMBER_POSITION = "frame_remember_position"
         const val KEY_DRAWER_SIDE_PADDING = "drawer_side_padding"
         const val KEY_HIDE_ON_EDGE_PANEL = "frame_hide_on_edge_panel"
+        const val KEY_HIDE_FRAME_ON_APPS = "frame_hide_on_apps"
 
         const val VALUE_PAGE_INDICATOR_BEHAVIOR_HIDDEN = 0
         const val VALUE_PAGE_INDICATOR_BEHAVIOR_AUTO_HIDE = 1
@@ -690,6 +691,12 @@ class PrefManager private constructor(context: Context) : ContextWrapper(context
             putInt(KEY_DRAWER_SIDE_PADDING, (value * 10f).toInt())
         }
 
+    var hideFrameOnApps: Set<String>
+        get() = getStringSet(KEY_HIDE_FRAME_ON_APPS, setOf())
+        set(value) {
+            putStringSet(KEY_HIDE_FRAME_ON_APPS, value)
+        }
+
     fun getCorrectFrameWidth(mode: Mode): Float {
         return when (mode) {
             Mode.LOCK_NORMAL -> frameWidthDp
@@ -805,7 +812,7 @@ class PrefManager private constructor(context: Context) : ContextWrapper(context
     fun getFloat(key: String, def: Float): Float = prefs.getFloat(key, def)
     fun getInt(key: String, def: Int): Int = prefs.getInt(key, def)
     fun getBoolean(key: String, def: Boolean): Boolean = prefs.getBoolean(key, def)
-    fun getStringSet(key: String, def: Set<String>): Set<String> = prefs.getStringSet(key, def)
+    fun getStringSet(key: String, def: Set<String>): Set<String> = prefs.getStringSet(key, def).toSet()
 
     fun putString(key: String, value: String?) = prefs.edit(true) { putString(key, value) }
     fun putFloat(key: String, value: Float) = prefs.edit(true) { putFloat(key, value) }

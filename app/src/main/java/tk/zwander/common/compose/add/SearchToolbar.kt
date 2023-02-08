@@ -15,7 +15,7 @@ import tk.zwander.lockscreenwidgets.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AddWidgetToolbar(
+fun SearchToolbar(
     filter: String?,
     onFilterChanged: (String?) -> Unit,
     onBack: () -> Unit,
