@@ -580,7 +580,8 @@ class WidgetFrameDelegate private constructor(context: Context) : BaseDelegate<W
                         "nonPresentIds: ${prefManager.nonPresentIds}\n" +
                         "hideInLandscape: ${prefManager.hideInLandscape}\n" +
                         "showInNotificationCenter: ${prefManager.showInNotificationCenter}\n" +
-                        "hideOnEdgePanel: ${prefManager.hideOnEdgePanel}\n"
+                        "hideOnEdgePanel: ${prefManager.hideOnEdgePanel}\n" +
+                        "hidingForPresentApp: ${state.hidingForPresentApp}\n"
             )
         }
     }
