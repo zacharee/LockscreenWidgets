@@ -169,7 +169,7 @@ class Accessibility : AccessibilityService(), EventObserver, CoroutineScope by M
                         power = power,
                         kgm = kgm,
                         wm = wm,
-                        getWindows = { windows }
+                        getWindows = { ArrayList(windows) }
                     )
                 }
             )
