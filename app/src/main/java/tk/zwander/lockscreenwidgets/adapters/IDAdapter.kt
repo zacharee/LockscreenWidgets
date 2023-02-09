@@ -58,9 +58,9 @@ class IDAdapter : RecyclerView.Adapter<IDAdapter.BaseVH>() {
         if (newItems.containsAll(oldItems) && oldItems.containsAll(newItems))
             return
 
-        val removed = oldItems - newItems
-        val added = newItems - oldItems
-        val same = oldItems - removed - added
+        val removed = oldItems - newItems.toSet()
+        val added = newItems - oldItems.toSet()
+        val same = oldItems - removed.toSet() - added.toSet()
 
         val newList = ArrayList<IDData>()
 
