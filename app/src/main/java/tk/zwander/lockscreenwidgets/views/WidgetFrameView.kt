@@ -11,8 +11,12 @@ import android.view.MotionEvent
 import android.view.View
 import android.view.ViewConfiguration
 import android.view.WindowManager
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.isVisible
+import androidx.lifecycle.setViewTreeLifecycleOwner
+import kotlinx.coroutines.flow.MutableStateFlow
 import tk.zwander.common.util.Event
 import tk.zwander.common.util.HandlerRegistry
 import tk.zwander.common.util.PrefManager
@@ -27,7 +31,7 @@ import tk.zwander.common.util.safeAddView
 import tk.zwander.common.util.safeRemoveView
 import tk.zwander.common.util.safeUpdateViewLayout
 import tk.zwander.common.util.vibrate
-import tk.zwander.lockscreenwidgets.adapters.IDAdapter
+import tk.zwander.lockscreenwidgets.compose.IDListLayout
 import tk.zwander.lockscreenwidgets.databinding.WidgetFrameBinding
 import tk.zwander.lockscreenwidgets.util.*
 import kotlin.math.roundToInt
@@ -51,7 +55,11 @@ class WidgetFrameView(context: Context, attrs: AttributeSet) : ConstraintLayout(
             updateProximity(value)
         }
 
-    var isInEditingMode = false
+    private var isInEditingMode = false
+        set(value) {
+            field = value
+            binding.editWrapper.isVisible = value
+        }
 
     private val sensorManager by lazy { context.getSystemService(Context.SENSOR_SERVICE) as SensorManager }
 
@@ -78,11 +86,13 @@ class WidgetFrameView(context: Context, attrs: AttributeSet) : ConstraintLayout(
             }
         }
         handler(PrefManager.KEY_LOCK_WIDGET_FRAME) {
-            setEditMode(false)
+            isInEditingMode = false
         }
     }
 
     private val binding by lazy { WidgetFrameBinding.bind(this) }
+
+    private val debugIdItems = MutableStateFlow<Set<String>>(setOf())
 
     enum class AnimationState {
         STATE_ADDING,
@@ -133,8 +143,13 @@ class WidgetFrameView(context: Context, attrs: AttributeSet) : ConstraintLayout(
             binding.gestureHintView.root.isVisible = true
         }
 
-        binding.idView.idList.adapter = IDAdapter()
-        binding.idView.idList.itemAnimator = null
+        binding.idView.idList.setContent {
+            val items by debugIdItems.collectAsState()
+
+            IDListLayout(
+                items = items
+            )
+        }
 
         updateDebugIdViewVisibility()
         updatePageIndicatorBehavior()
@@ -163,7 +178,7 @@ class WidgetFrameView(context: Context, attrs: AttributeSet) : ConstraintLayout(
         sharedPreferencesChangeHandler.unregister(context)
         unregisterProxListener()
 
-        setEditMode(false)
+        isInEditingMode = false
         context.eventManager.sendEvent(Event.FrameAttachmentState(false))
         animationState = AnimationState.STATE_IDLE
     }
@@ -194,7 +209,7 @@ class WidgetFrameView(context: Context, attrs: AttributeSet) : ConstraintLayout(
                     when (max) {
                         2 -> {
                             if (!context.prefManager.lockWidgetFrame) {
-                                setEditMode(!isInEditingMode)
+                                isInEditingMode = !isInEditingMode
                                 if (binding.gestureHintView.root.isVisible) {
                                     val ghv = binding.gestureHintView.root
                                     if (!ghv.stage2) {
@@ -219,7 +234,7 @@ class WidgetFrameView(context: Context, attrs: AttributeSet) : ConstraintLayout(
 
                     if (ev.buttonState == MotionEvent.BUTTON_SECONDARY
                         || ev.buttonState == MotionEvent.BUTTON_STYLUS_SECONDARY) {
-                        setEditMode(!isInEditingMode)
+                        isInEditingMode = !isInEditingMode
                         return true
                     }
 
@@ -264,7 +279,7 @@ class WidgetFrameView(context: Context, attrs: AttributeSet) : ConstraintLayout(
     }
 
     fun setNewDebugIdItems(items: List<String>) {
-        (binding.idView.idList.adapter as IDAdapter).setItems(items)
+        debugIdItems.value = items.toSet()
     }
 
     fun updateDebugIdViewVisibility() {
@@ -347,11 +362,6 @@ class WidgetFrameView(context: Context, attrs: AttributeSet) : ConstraintLayout(
             }
             else -> false
         }
-    }
-
-    private fun setEditMode(editing: Boolean) {
-        isInEditingMode = editing
-        binding.editWrapper.isVisible = editing
     }
 
     inner class ExpandTouchListener(private val listener: ((velX: Int, velY: Int, isUp: Boolean) -> Boolean)?) : OnTouchListener {

@@ -9,8 +9,15 @@ import android.os.PowerManager
 import android.view.View
 import android.view.WindowManager
 import androidx.annotation.CallSuper
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleRegistry
+import androidx.lifecycle.setViewTreeLifecycleOwner
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
+import androidx.savedstate.SavedStateRegistry
+import androidx.savedstate.SavedStateRegistryController
+import androidx.savedstate.SavedStateRegistryOwner
+import androidx.savedstate.setViewTreeSavedStateRegistryOwner
 import com.arasthel.spannedgridlayoutmanager.SpannedGridLayoutManager
 import tk.zwander.common.data.WidgetData
 import tk.zwander.common.data.WidgetType
@@ -19,7 +26,7 @@ import tk.zwander.common.host.widgetHostCompat
 import tk.zwander.lockscreenwidgets.adapters.WidgetFrameAdapter
 
 abstract class BaseDelegate<State : BaseDelegate.BaseState>(context: Context) : ContextWrapper(context),
-    EventObserver, WidgetHostCompat.OnClickCallback {
+    EventObserver, WidgetHostCompat.OnClickCallback, SavedStateRegistryOwner {
     protected val wm by lazy { getSystemService(WINDOW_SERVICE) as WindowManager }
     protected val power by lazy { getSystemService(POWER_SERVICE) as PowerManager }
     protected val kgm by lazy { getSystemService(Context.KEYGUARD_SERVICE) as KeyguardManager }
@@ -40,6 +47,11 @@ abstract class BaseDelegate<State : BaseDelegate.BaseState>(context: Context) : 
     protected abstract val rootView: View
     protected abstract val recyclerView: RecyclerView
     protected abstract var currentWidgets: List<WidgetData>
+
+    protected val lifecycleRegistry by lazy { LifecycleRegistry(this) }
+    protected val savedStateRegistryController by lazy { SavedStateRegistryController.create(this) }
+    override val lifecycle: Lifecycle = lifecycleRegistry
+    override val savedStateRegistry: SavedStateRegistry by lazy { savedStateRegistryController.savedStateRegistry }
 
     private val touchHelperCallback by lazy {
         createTouchHelperCallback(
@@ -67,6 +79,11 @@ abstract class BaseDelegate<State : BaseDelegate.BaseState>(context: Context) : 
         adapter.updateWidgets(currentWidgets)
 
         updateCounts()
+        savedStateRegistryController.performAttach()
+        savedStateRegistryController.performRestore(null)
+        lifecycleRegistry.currentState = Lifecycle.State.CREATED
+        rootView.setViewTreeLifecycleOwner(this)
+        rootView.setViewTreeSavedStateRegistryOwner(this)
     }
 
     @CallSuper
@@ -78,6 +95,7 @@ abstract class BaseDelegate<State : BaseDelegate.BaseState>(context: Context) : 
         itemTouchHelper.attachToRecyclerView(null)
 
         currentWidgets = ArrayList(adapter.widgets)
+        lifecycleRegistry.currentState = Lifecycle.State.DESTROYED
     }
 
     @CallSuper

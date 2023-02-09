@@ -23,6 +23,7 @@ import android.view.View
 import android.view.WindowManager
 import android.widget.ImageView
 import android.widget.Toast
+import androidx.lifecycle.Lifecycle
 import androidx.recyclerview.widget.RecyclerView
 import com.android.internal.R.attr.screenOrientation
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -338,8 +339,10 @@ class WidgetFrameDelegate private constructor(context: Context) : BaseDelegate<W
                         //them to update.
                         adapter.updateViews()
                         scrollToStoredPosition(false)
+                        lifecycleRegistry.currentState = Lifecycle.State.RESUMED
                     } else {
                         widgetHost.stopListening(this)
+                        lifecycleRegistry.currentState = Lifecycle.State.STARTED
                     }
                 } catch (e: NullPointerException) {
                     //The stupid "Attempt to read from field 'com.android.server.appwidget.AppWidgetServiceImpl$ProviderId

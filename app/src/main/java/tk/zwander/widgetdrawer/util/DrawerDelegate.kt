@@ -25,6 +25,7 @@ import android.widget.Toast
 import androidx.core.animation.doOnEnd
 import androidx.core.view.updateLayoutParams
 import androidx.core.view.updatePaddingRelative
+import androidx.lifecycle.Lifecycle
 import androidx.recyclerview.widget.RecyclerView
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -276,12 +277,14 @@ class DrawerDelegate private constructor(context: Context) : BaseDelegate<Drawer
                     }
 
                     drawer.root.setBackgroundColor(prefManager.drawerBackgroundColor)
+                    lifecycleRegistry.currentState = Lifecycle.State.RESUMED
                 } else {
                     try {
                         widgetHost.stopListening(this)
                     } catch (e: NullPointerException) {
                         //AppWidgetServiceImpl$ProviderId NPE
                     }
+                    lifecycleRegistry.currentState = Lifecycle.State.STARTED
                 }
             }
             Event.DrawerBackButtonClick -> {
