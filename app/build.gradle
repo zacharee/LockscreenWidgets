@@ -48,7 +48,7 @@ android {
     packagingOptions.exclude('META-INF/library_release.kotlin_module')
 
     composeOptions {
-        kotlinCompilerExtensionVersion '1.4.0'
+        kotlinCompilerExtensionVersion '1.4.2'
     }
 }
 
@@ -86,7 +86,7 @@ dependencies {
     implementation "androidx.compose.animation:animation:${compose_version}"
     implementation "androidx.compose.foundation:foundation:${compose_version}"
     implementation "androidx.compose.ui:ui-tooling:${compose_version}"
-    implementation "androidx.compose.material3:material3:1.1.0-alpha05"
+    implementation "androidx.compose.material3:material3:1.1.0-alpha06"
     implementation 'androidx.lifecycle:lifecycle-viewmodel-compose:2.6.0-alpha05'
     implementation 'com.google.android.material:compose-theme-adapter:1.2.1'
     implementation 'com.google.accompanist:accompanist-drawablepainter:0.29.1-alpha'
