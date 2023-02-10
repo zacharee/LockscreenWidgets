@@ -2,32 +2,27 @@ package tk.zwander.common.activities
 
 import android.content.Context
 import android.content.Intent
-import android.graphics.Canvas
-import android.graphics.Color
-import android.graphics.Paint
-import android.graphics.PorterDuff
-import android.graphics.PorterDuffXfermode
-import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.ContextCompat
-import androidx.recyclerview.widget.DividerItemDecoration
-import androidx.recyclerview.widget.ItemTouchHelper
-import androidx.recyclerview.widget.RecyclerView
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.gson.reflect.TypeToken
+import kotlinx.coroutines.flow.MutableStateFlow
+import tk.zwander.common.compose.AppTheme
 import tk.zwander.common.util.logUtils
 import tk.zwander.common.util.prefManager
 import tk.zwander.lockscreenwidgets.R
-import tk.zwander.lockscreenwidgets.adapters.HideForIDsAdapter
+import tk.zwander.lockscreenwidgets.compose.HideForIDsLayout
 import tk.zwander.lockscreenwidgets.databinding.ActivityHideForIdsBinding
 import tk.zwander.lockscreenwidgets.databinding.AddIdDialogBinding
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import java.util.TreeSet
 
 /**
  * Configuration Activity for the "Hide on Present IDs" and "Hide on Non-Present IDs"
@@ -57,83 +52,18 @@ class HideForIDsActivity : AppCompatActivity() {
         NONE
     }
 
-    /**
-     * An implementation of [ItemTouchHelper.SimpleCallback] that provides a framework for swipe-to-delete in either direction.
-     * Modified from: https://github.com/kitek/android-rv-swipe-delete/blob/master/app/src/main/java/pl/kitek/rvswipetodelete/SwipeToDeleteCallback.kt
-     */
-    abstract class SwipeToDeleteCallback(context: Context) : ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT) {
-        private val deleteIcon = ContextCompat.getDrawable(context, R.drawable.ic_baseline_delete_24)
-        private val intrinsicWidth = deleteIcon?.intrinsicWidth ?: 1
-        private val intrinsicHeight = deleteIcon?.intrinsicHeight ?: 1
-        private val background = ColorDrawable()
-        private val backgroundColor = Color.parseColor("#f44336")
-        private val clearPaint = Paint().apply { xfermode = PorterDuffXfermode(PorterDuff.Mode.CLEAR) }
-
-        override fun onMove(
-            recyclerView: RecyclerView,
-            viewHolder: RecyclerView.ViewHolder,
-            target: RecyclerView.ViewHolder
-        ): Boolean {
-            //This callback implementation isn't for moving items.
-            return false
-        }
-
-        /**
-         * Take care of drawing the delete icon behind the item
-         * being swiped.
-         */
-        override fun onChildDraw(
-            c: Canvas,
-            recyclerView: RecyclerView,
-            viewHolder: RecyclerView.ViewHolder,
-            dX: Float,
-            dY: Float,
-            actionState: Int,
-            isCurrentlyActive: Boolean
-        ) {
-            val itemView = viewHolder.itemView
-            val itemHeight = itemView.bottom - itemView.top
-            val isCanceled = dX == 0f && !isCurrentlyActive
-
-            if (isCanceled) {
-                clearCanvas(c, itemView.right + dX, itemView.top.toFloat(), itemView.right.toFloat(), itemView.bottom.toFloat())
-                super.onChildDraw(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive)
-                return
-            }
-
-            //Draw the red delete background
-            background.color = backgroundColor
-            background.setBounds(itemView.left, itemView.top, itemView.right, itemView.bottom)
-            background.draw(c)
-
-            //Calculate position of delete icon
-            val deleteIconTop = itemView.top + (itemHeight - intrinsicHeight) / 2
-            val deleteIconMargin = (itemHeight - intrinsicHeight) / 2
-            val deleteIconLeft = if (dX < 0) itemView.right - deleteIconMargin - intrinsicWidth else itemView.left + deleteIconMargin
-            val deleteIconRight = if (dX < 0) itemView.right - deleteIconMargin else itemView.left + deleteIconMargin + intrinsicWidth
-            val deleteIconBottom = deleteIconTop + intrinsicHeight
-
-            //Draw the delete icon
-            deleteIcon?.setBounds(deleteIconLeft, deleteIconTop, deleteIconRight, deleteIconBottom)
-            deleteIcon?.draw(c)
-
-            super.onChildDraw(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive)
-        }
-
-        private fun clearCanvas(c: Canvas?, left: Float, top: Float, right: Float, bottom: Float) {
-            c?.drawRect(left, top, right, bottom, clearPaint)
-        }
-    }
-
-    private val adapter by lazy { HideForIDsAdapter() }
     private val type by lazy { intent?.getStringExtra(EXTRA_TYPE).run { if (this == null) Type.NONE else Type.valueOf(this) } }
+
     private val items by lazy {
-        when (type) {
-            Type.PRESENT -> prefManager.presentIds
-            Type.NON_PRESENT -> prefManager.nonPresentIds
-            else -> HashSet()
-        }
+        MutableStateFlow(
+            when (type) {
+                Type.PRESENT -> TreeSet(prefManager.presentIds)
+                Type.NON_PRESENT -> TreeSet(prefManager.nonPresentIds)
+                else -> TreeSet()
+            }
+        )
     }
+
     private val gson by lazy { prefManager.gson }
     private val format = SimpleDateFormat("yyyy-MM-dd_HH:mm:ss", Locale.getDefault())
     private val activityBinding by lazy { ActivityHideForIdsBinding.inflate(layoutInflater) }
@@ -141,7 +71,7 @@ class HideForIDsActivity : AppCompatActivity() {
     private val saveRequest = registerForActivityResult(ActivityResultContracts.CreateDocument("text/*")) { uri ->
         //Write the current list of IDs to the specified file
         contentResolver.openOutputStream(uri ?: return@registerForActivityResult)?.use { out ->
-            val stringified = gson.toJson(items)
+            val stringified = gson.toJson(items.value)
 
             out.bufferedWriter().use { writer ->
                 writer.append(stringified)
@@ -178,9 +108,7 @@ class HideForIDsActivity : AppCompatActivity() {
                     .setPositiveButton(android.R.string.ok, null)
                     .show()
             } else {
-                items.clear()
-                items.addAll(list)
-                adapter.items.replaceAll(list)
+                items.value = TreeSet(list)
             }
         }
     }
@@ -200,18 +128,18 @@ class HideForIDsActivity : AppCompatActivity() {
             setDisplayShowHomeEnabled(true)
         }
 
-        adapter.items.replaceAll(items)
-        activityBinding.list.adapter = adapter
-        activityBinding.list.addItemDecoration(DividerItemDecoration(this, RecyclerView.VERTICAL))
+        activityBinding.list.setContent {
+            val items by this.items.collectAsState()
 
-        val swipeHandler = object : SwipeToDeleteCallback(this) {
-            override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
-                //Make sure we remove the swiped item from all lists.
-                items.remove(adapter.items.removeItemAt(viewHolder.bindingAdapterPosition))
+            AppTheme {
+                HideForIDsLayout(
+                    items = items,
+                    onRemove = {
+                        this.items.value = TreeSet(items - it)
+                    }
+                )
             }
         }
-
-        ItemTouchHelper(swipeHandler).attachToRecyclerView(activityBinding.list)
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -238,11 +166,9 @@ class HideForIDsActivity : AppCompatActivity() {
                         val input = inputBinding.idInput.text?.toString()
                         if (input.isNullOrBlank()) return@setPositiveButton
                         if (input.contains(":id/")) {
-                            items.add(input)
-                            adapter.items.add(input)
+                            items.value = TreeSet(items.value + input)
                         } else {
-                            items.add("com.android.systemui:id/$input")
-                            adapter.items.add("com.android.systemui:id/$input")
+                            items.value = TreeSet(items.value + "com.android.systemui:id/$input")
                         }
                     }
                     .setNegativeButton(android.R.string.cancel, null)
@@ -268,8 +194,8 @@ class HideForIDsActivity : AppCompatActivity() {
 
         //Persist the current list to the proper preference
         when (type) {
-            Type.PRESENT -> prefManager.presentIds = items
-            Type.NON_PRESENT -> prefManager.nonPresentIds = items
+            Type.PRESENT -> prefManager.presentIds = items.value.toHashSet()
+            Type.NON_PRESENT -> prefManager.nonPresentIds = items.value.toHashSet()
             else -> {}
         }
     }
