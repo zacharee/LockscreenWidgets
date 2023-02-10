@@ -8,12 +8,14 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.size
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
@@ -30,6 +32,7 @@ fun CardSwitch(
     contentDescription: String? = null,
     titleTextStyle: TextStyle = MaterialTheme.typography.headlineSmall,
     summaryTextStyle: TextStyle = MaterialTheme.typography.bodyMedium,
+    backgroundColor: Color = Color.Transparent,
 ) {
     Row(modifier = modifier) {
         SubduedOutlinedButton(
@@ -39,7 +42,11 @@ fun CardSwitch(
             modifier = Modifier
                 .fillMaxWidth()
                 .heightIn(min = 64.dp)
-                .animateContentSize()
+                .animateContentSize(),
+            colors = ButtonDefaults.outlinedButtonColors(
+                contentColor = MaterialTheme.colorScheme.onSurface,
+                containerColor = backgroundColor,
+            )
         ) {
             icon?.let {
                 Image(

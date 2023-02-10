@@ -50,7 +50,8 @@ fun HideOnAppsChooserScroller(
                 ),
                 titleTextStyle = MaterialTheme.typography.titleMedium,
                 summaryTextStyle = MaterialTheme.typography.bodySmall,
-                modifier = Modifier.animateItemPlacement()
+                modifier = Modifier.animateItemPlacement(),
+                backgroundColor = MaterialTheme.colorScheme.surface,
             )
         }
     }
