@@ -4,8 +4,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -14,12 +15,21 @@ import tk.zwander.common.util.getInstalledApplicationsCompat
 
 @Composable
 internal fun items(
-    filter: String?
-): Pair<List<BasicAppInfo>, List<BasicAppInfo>> {
+    filter: String?,
+    checked: Set<String>,
+): Pair<Collection<BasicAppInfo>, Collection<BasicAppInfo>> {
     val context = LocalContext.current
 
-    val items = remember {
-        mutableStateListOf<BasicAppInfo>()
+    var items by remember {
+        mutableStateOf<Set<BasicAppInfo>>(setOf())
+    }
+
+    LaunchedEffect(key1 = checked) {
+        items = items.map {
+            it.copy(
+                isChecked = checked.contains(it.appInfo.packageName)
+            )
+        }.toSortedSet()
     }
 
     LaunchedEffect(null) {
@@ -27,13 +37,13 @@ internal fun items(
             context.packageManager.getInstalledApplicationsCompat().map {
                 BasicAppInfo(
                     appName = it.loadLabel(context.packageManager).toString(),
-                    appInfo = it
+                    appInfo = it,
+                    isChecked = checked.contains(it.packageName)
                 )
             }
         }
 
-        items.clear()
-        items.addAll(apps)
+        items = apps.toSortedSet()
     }
 
     val filteredItems by remember(filter) {

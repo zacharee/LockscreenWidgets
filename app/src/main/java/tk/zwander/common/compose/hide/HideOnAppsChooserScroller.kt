@@ -1,54 +1,47 @@
 package tk.zwander.common.compose.hide
 
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.google.accompanist.drawablepainter.rememberDrawablePainter
 import tk.zwander.common.compose.components.CardSwitch
-import tk.zwander.common.compose.util.rememberPreferenceState
 import tk.zwander.common.data.BasicAppInfo
-import tk.zwander.common.util.PrefManager
-import tk.zwander.common.util.prefManager
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun HideOnAppsChooserScroller(
-    filteredItems: List<BasicAppInfo>,
+    filteredItems: Collection<BasicAppInfo>,
+    checked: Set<String>,
+    onCheckedChanged: (Set<String>) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
-
-    var checked by context.rememberPreferenceState(
-        key = PrefManager.KEY_HIDE_FRAME_ON_APPS,
-        value = { context.prefManager.hideFrameOnApps.toMutableSet() },
-        onChanged = {
-            context.prefManager.hideFrameOnApps = it
-        }
-    )
 
     LazyColumn(
         modifier = modifier,
         verticalArrangement = Arrangement.spacedBy(8.dp),
         contentPadding = PaddingValues(8.dp)
     ) {
-        items(filteredItems, key = { it.appInfo.packageName }) {
+        items(filteredItems.toList(), key = { it.appInfo.packageName }) {
             CardSwitch(
-                enabled = checked.contains(it.appInfo.packageName),
+                enabled = it.isChecked,
                 onEnabledChanged = { enabled ->
-                   checked = checked.toMutableSet().apply {
-                       if (enabled) {
-                           add(it.appInfo.packageName)
-                       } else {
-                           remove(it.appInfo.packageName)
-                       }
-                   }
+                    onCheckedChanged(
+                        checked.run {
+                            if (enabled) {
+                                plus(it.appInfo.packageName)
+                            } else {
+                                minus(it.appInfo.packageName)
+                            }
+                        }
+                    )
                 },
                 title = it.appName,
                 summary = it.appInfo.packageName,
@@ -56,7 +49,8 @@ fun HideOnAppsChooserScroller(
                     drawable = it.appInfo.loadIcon(context.packageManager)
                 ),
                 titleTextStyle = MaterialTheme.typography.titleMedium,
-                summaryTextStyle = MaterialTheme.typography.bodySmall
+                summaryTextStyle = MaterialTheme.typography.bodySmall,
+                modifier = Modifier.animateItemPlacement()
             )
         }
     }

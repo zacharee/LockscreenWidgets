@@ -14,21 +14,36 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import tk.zwander.common.compose.AppTheme
 import tk.zwander.common.compose.add.SearchToolbar
 import tk.zwander.common.compose.components.Loader
+import tk.zwander.common.compose.util.rememberPreferenceState
+import tk.zwander.common.util.PrefManager
+import tk.zwander.common.util.prefManager
 
 @Composable
 fun HideOnAppsChooserLayout(
     onBack: () -> Unit,
 ) {
+    val context = LocalContext.current
+
     var filter by remember {
         mutableStateOf<String?>(null)
     }
 
+    var checked by context.rememberPreferenceState<Set<String>>(
+        key = PrefManager.KEY_HIDE_FRAME_ON_APPS,
+        value = { context.prefManager.hideFrameOnApps.toMutableSet() },
+        onChanged = {
+            context.prefManager.hideFrameOnApps = it
+        }
+    )
+
     val (items, filteredItems) = items(
-        filter = filter
+        filter = filter,
+        checked = checked
     )
 
     AppTheme {
@@ -59,6 +74,8 @@ fun HideOnAppsChooserLayout(
 
                         HideOnAppsChooserScroller(
                             filteredItems = filteredItems,
+                            checked = checked,
+                            onCheckedChanged = { newChecked -> checked = newChecked },
                             modifier = Modifier.fillMaxWidth()
                                 .weight(1f)
                         )

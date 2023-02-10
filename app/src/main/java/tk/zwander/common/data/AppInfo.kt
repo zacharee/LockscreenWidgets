@@ -18,18 +18,33 @@ data class AppInfo(
     override val appInfo: ApplicationInfo,
     val widgets: TreeSet<WidgetListInfo> = TreeSet(),
     val shortcuts: TreeSet<ShortcutListInfo> = TreeSet()
-) : BaseAppInfo()
+) : BaseAppInfo<AppInfo>()
 
 data class BasicAppInfo(
     override val appName: String,
-    override val appInfo: ApplicationInfo
-) : BaseAppInfo()
+    override val appInfo: ApplicationInfo,
+    val isChecked: Boolean,
+) : BaseAppInfo<BasicAppInfo>() {
+    override fun compareTo(other: BasicAppInfo): Int {
+        val checkedComparison = when {
+            isChecked && !other.isChecked -> -1
+            !isChecked && other.isChecked -> 1
+            else -> 0
+        }
 
-abstract class BaseAppInfo : Comparable<BaseAppInfo> {
+        if (checkedComparison != 0) {
+            return checkedComparison
+        }
+
+        return super.compareTo(other)
+    }
+}
+
+abstract class BaseAppInfo<T : BaseAppInfo<T>> : Comparable<T> {
     abstract val appName: String
     abstract val appInfo: ApplicationInfo
 
-    override fun compareTo(other: BaseAppInfo): Int {
+    override fun compareTo(other: T): Int {
         return appName.compareTo(other.appName, true)
     }
 }
