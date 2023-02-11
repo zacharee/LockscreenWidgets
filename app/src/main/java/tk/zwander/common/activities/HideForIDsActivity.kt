@@ -5,6 +5,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
+import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.runtime.collectAsState
@@ -17,7 +18,6 @@ import tk.zwander.common.util.logUtils
 import tk.zwander.common.util.prefManager
 import tk.zwander.lockscreenwidgets.R
 import tk.zwander.lockscreenwidgets.compose.HideForIDsLayout
-import tk.zwander.lockscreenwidgets.databinding.ActivityHideForIdsBinding
 import tk.zwander.lockscreenwidgets.databinding.AddIdDialogBinding
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -66,7 +66,6 @@ class HideForIDsActivity : AppCompatActivity() {
 
     private val gson by lazy { prefManager.gson }
     private val format = SimpleDateFormat("yyyy-MM-dd_HH:mm:ss", Locale.getDefault())
-    private val activityBinding by lazy { ActivityHideForIdsBinding.inflate(layoutInflater) }
 
     private val saveRequest = registerForActivityResult(ActivityResultContracts.CreateDocument("text/*")) { uri ->
         //Write the current list of IDs to the specified file
@@ -116,7 +115,6 @@ class HideForIDsActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        setContentView(activityBinding.root)
         title = resources.getString(when (type) {
             Type.PRESENT -> R.string.settings_screen_present_ids
             Type.NON_PRESENT -> R.string.settings_screen_non_present_ids
@@ -128,7 +126,7 @@ class HideForIDsActivity : AppCompatActivity() {
             setDisplayShowHomeEnabled(true)
         }
 
-        activityBinding.list.setContent {
+        setContent {
             val items by this.items.collectAsState()
 
             AppTheme {

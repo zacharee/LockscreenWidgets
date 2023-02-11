@@ -57,10 +57,12 @@
             layout="@layout/widget_frame_gesture_hint"
             />
 
-        <include
-            android:id="@+id/id_view"
+        <androidx.compose.ui.platform.ComposeView
+            android:id="@+id/id_list"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="?colorSurface"
             android:visibility="gone"
-            layout="@layout/widget_frame_id_view"
             />
 
         <androidx.constraintlayout.widget.ConstraintLayout

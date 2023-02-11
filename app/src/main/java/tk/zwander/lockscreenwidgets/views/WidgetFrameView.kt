@@ -15,7 +15,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.isVisible
-import androidx.lifecycle.setViewTreeLifecycleOwner
 import kotlinx.coroutines.flow.MutableStateFlow
 import tk.zwander.common.util.Event
 import tk.zwander.common.util.HandlerRegistry
@@ -143,7 +142,7 @@ class WidgetFrameView(context: Context, attrs: AttributeSet) : ConstraintLayout(
             binding.gestureHintView.root.isVisible = true
         }
 
-        binding.idView.idList.setContent {
+        binding.idList.setContent {
             val items by debugIdItems.collectAsState()
 
             IDListLayout(
@@ -283,7 +282,7 @@ class WidgetFrameView(context: Context, attrs: AttributeSet) : ConstraintLayout(
     }
 
     fun updateDebugIdViewVisibility() {
-        binding.idView.root.isVisible = context.prefManager.showDebugIdView
+        binding.idList.isVisible = context.prefManager.showDebugIdView
     }
 
     fun addWindow(wm: WindowManager, params: WindowManager.LayoutParams) {
