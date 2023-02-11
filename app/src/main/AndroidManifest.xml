@@ -64,6 +64,7 @@
             />
         <activity android:name="tk.zwander.common.activities.HideForIDsActivity"
             android:exported="false"
+            android:theme="@style/AppTheme.NoActionBar"
             />
         <activity android:name=".activities.UsageActivity"
             android:exported="false"

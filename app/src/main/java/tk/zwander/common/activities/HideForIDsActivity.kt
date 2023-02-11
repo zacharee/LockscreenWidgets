@@ -3,13 +3,16 @@ package tk.zwander.common.activities
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import android.view.Menu
-import android.view.MenuItem
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Modifier
+import androidx.core.view.WindowCompat
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.gson.reflect.TypeToken
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -18,7 +21,6 @@ import tk.zwander.common.util.logUtils
 import tk.zwander.common.util.prefManager
 import tk.zwander.lockscreenwidgets.R
 import tk.zwander.lockscreenwidgets.compose.HideForIDsLayout
-import tk.zwander.lockscreenwidgets.databinding.AddIdDialogBinding
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -126,64 +128,36 @@ class HideForIDsActivity : AppCompatActivity() {
             setDisplayShowHomeEnabled(true)
         }
 
+        WindowCompat.setDecorFitsSystemWindows(window, false)
+
         setContent {
             val items by this.items.collectAsState()
 
             AppTheme {
                 HideForIDsLayout(
                     items = items,
+                    title = title.toString(),
+                    onAdd = {
+                        if (it.contains(":id/")) {
+                            this.items.value = TreeSet(items + it)
+                        } else {
+                            this.items.value = TreeSet(items + "com.android.systemui:id/$it")
+                        }
+                    },
                     onRemove = {
                         this.items.value = TreeSet(items - it)
-                    }
+                    },
+                    onBackUpClicked = {
+                        saveRequest.launch("LockscreenWidgets_ID_Backup_${format.format(Date())}.lsw")
+                    },
+                    onRestoreClicked = {
+                        openRequest.launch(arrayOf("*/*"))
+                    },
+                    modifier = Modifier.fillMaxSize()
+                        .systemBarsPadding()
+                        .imePadding()
                 )
             }
-        }
-    }
-
-    override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        menuInflater.inflate(R.menu.hide_for_ids, menu)
-        return true
-    }
-
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        return when (item.itemId) {
-            android.R.id.home -> {
-                onBackPressedDispatcher.onBackPressed()
-                true
-            }
-            R.id.add -> {
-                //Show the add ID dialog.
-                //The user can either enter a fully-qualified ID,
-                //or just the ID itself. A basic ID will have the System UI
-                //namespace prepended. A fully-qualified ID will be entered as-is
-                //(useful if the ID isn't part of the System UI namespace).
-                val inputBinding = AddIdDialogBinding.inflate(layoutInflater, null, false)
-                MaterialAlertDialogBuilder(this)
-                    .setView(inputBinding.root)
-                    .setPositiveButton(android.R.string.ok) { _, _ ->
-                        val input = inputBinding.idInput.text?.toString()
-                        if (input.isNullOrBlank()) return@setPositiveButton
-                        if (input.contains(":id/")) {
-                            items.value = TreeSet(items.value + input)
-                        } else {
-                            items.value = TreeSet(items.value + "com.android.systemui:id/$input")
-                        }
-                    }
-                    .setNegativeButton(android.R.string.cancel, null)
-                    .show()
-                true
-            }
-            R.id.backup -> {
-                //Start the list backup flow.
-                saveRequest.launch("LockscreenWidgets_ID_Backup_${format.format(Date())}.lsw")
-                true
-            }
-            R.id.restore -> {
-                //Start the list restore flow.
-                openRequest.launch(arrayOf("*/*"))
-                true
-            }
-            else -> return super.onOptionsItemSelected(item)
         }
     }
 
