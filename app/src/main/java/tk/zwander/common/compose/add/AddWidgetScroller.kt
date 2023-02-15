@@ -129,7 +129,7 @@ private fun AppHeader(
 
             LaunchedEffect(key1 = app.appInfo.packageName) {
                 icon = withContext(Dispatchers.IO) {
-                    context.packageManager.getApplicationIcon(app.appInfo.packageName)
+                    app.appInfo.loadIcon(context.packageManager)
                         .mutate().toBitmap()
                 }
             }
