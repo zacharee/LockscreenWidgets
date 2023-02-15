@@ -79,9 +79,11 @@ abstract class BaseDelegate<State : BaseDelegate.BaseState>(context: Context) : 
         adapter.updateWidgets(currentWidgets)
 
         updateCounts()
-        savedStateRegistryController.performAttach()
-        savedStateRegistryController.performRestore(null)
-        lifecycleRegistry.currentState = Lifecycle.State.CREATED
+        if (lifecycleRegistry.currentState == Lifecycle.State.INITIALIZED) {
+            savedStateRegistryController.performAttach()
+            savedStateRegistryController.performRestore(null)
+            lifecycleRegistry.currentState = Lifecycle.State.CREATED
+        }
         rootView.setViewTreeLifecycleOwner(this)
         rootView.setViewTreeSavedStateRegistryOwner(this)
     }
