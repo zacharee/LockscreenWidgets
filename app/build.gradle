@@ -82,7 +82,7 @@ dependencies {
     implementation 'com.google.firebase:firebase-analytics:21.2.0'
     implementation 'com.google.firebase:firebase-crashlytics:18.3.4'
 
-    implementation 'androidx.activity:activity-compose:1.8.0-alpha01'
+    implementation 'androidx.activity:activity-compose:1.7.0-beta01'
     implementation "androidx.compose.animation:animation:${compose_version}"
     implementation "androidx.compose.foundation:foundation:${compose_version}"
     implementation "androidx.compose.ui:ui-tooling:${compose_version}"
