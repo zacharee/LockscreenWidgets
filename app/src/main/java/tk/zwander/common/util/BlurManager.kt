@@ -8,7 +8,6 @@ import android.view.View
 import android.view.View.OnAttachStateChangeListener
 import android.view.ViewRootImpl
 import android.view.WindowManager
-import androidx.core.view.isVisible
 import tk.zwander.common.drawable.BackgroundBlurDrawableCompatDelegate
 
 class BlurManager(
@@ -50,7 +49,7 @@ class BlurManager(
 
     fun updateBlur() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            val hasBlur = targetView.isHardwareAccelerated
+            val hasBlur = targetView.isHardwareAccelerated && shouldBlur()
 
             blurDrawable?.setBlurRadius(blurAmount())
 
