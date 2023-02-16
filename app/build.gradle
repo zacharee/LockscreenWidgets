@@ -79,8 +79,9 @@ dependencies {
     implementation 'com.github.zacharee:SpannedGridLayoutManager:4d21cb327d'
 //    implementation project(':spannedlm')
 
-    implementation 'com.google.firebase:firebase-analytics:21.2.0'
-    implementation 'com.google.firebase:firebase-crashlytics:18.3.4'
+    implementation platform('com.google.firebase:firebase-bom:31.2.1')
+    implementation 'com.google.firebase:firebase-analytics'
+    implementation 'com.google.firebase:firebase-crashlytics'
 
     implementation 'androidx.activity:activity-compose:1.7.0-beta01'
     implementation "androidx.compose.animation:animation:${compose_version}"
