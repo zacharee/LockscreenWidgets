@@ -12,7 +12,7 @@ import java.util.Objects
  * @property id the ID of the widget
  */
 @Parcelize
-open class WidgetData(
+data class WidgetData(
     val id: Int,
     val type: WidgetType? = WidgetType.WIDGET,
     var label: String?,
