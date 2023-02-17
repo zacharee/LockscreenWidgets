@@ -146,13 +146,15 @@ class Handle : LinearLayout {
                     }
                     updateLayout()
                 } else if (scrollingOpen) {
-                    scrollTotalX += (event.rawX - initialScrollRawX)
+                    val velocity = (event.rawX - initialScrollRawX)
+                    scrollTotalX += velocity
                     initialScrollRawX = event.rawX
 
                     context.eventManager.sendEvent(Event.ScrollInDrawer(
                         context.prefManager.drawerHandleSide,
                         scrollTotalX.absoluteValue,
-                        false
+                        false,
+                        velocity
                     ))
                 }
             }
@@ -286,7 +288,8 @@ class Handle : LinearLayout {
                     context.eventManager.sendEvent(Event.ScrollInDrawer(
                         context.prefManager.drawerHandleSide,
                         scrollTotalX.absoluteValue,
-                        true
+                        true,
+                        distanceX,
                     ))
                 }
                 true

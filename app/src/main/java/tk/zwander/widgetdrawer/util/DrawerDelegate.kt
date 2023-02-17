@@ -17,6 +17,7 @@ import android.util.TypedValue
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewConfiguration
 import android.view.ViewGroup
 import android.view.WindowManager
 import android.view.animation.AccelerateInterpolator
@@ -52,6 +53,7 @@ import tk.zwander.lockscreenwidgets.util.*
 import tk.zwander.widgetdrawer.adapters.DrawerAdapter
 import tk.zwander.widgetdrawer.views.Handle
 import kotlin.math.absoluteValue
+import kotlin.math.sign
 
 class DrawerDelegate private constructor(context: Context) : BaseDelegate<DrawerDelegate.State>(context) {
     companion object {
@@ -206,7 +208,9 @@ class DrawerDelegate private constructor(context: Context) : BaseDelegate<Drawer
     }
 
     private var currentVisibilityAnim: Animator? = null
+    private var latestScrollInVelocity: Float = 0f
 
+    @SuppressLint("RtlHardcoded")
     override fun onEvent(event: Event) {
         super.onEvent(event)
 
@@ -291,6 +295,12 @@ class DrawerDelegate private constructor(context: Context) : BaseDelegate<Drawer
                 hideDrawer()
             }
             is Event.ScrollInDrawer -> {
+                if (event.velocity.sign != latestScrollInVelocity.sign) {
+                    latestScrollInVelocity = 0f
+                }
+
+                latestScrollInVelocity += event.velocity
+
                 val distanceFromEdge = (params.width - event.dist)
 
                 params.gravity = event.from
@@ -304,7 +314,13 @@ class DrawerDelegate private constructor(context: Context) : BaseDelegate<Drawer
             }
             is Event.ScrollOpenFinish -> {
                 val distanceFromEdge = (params.width + params.x).absoluteValue
-                val metThreshold = distanceFromEdge > dpAsPx(100)
+                val touchSlop = ViewConfiguration.get(this).scaledTouchSlop
+                val velocityMatches = when {
+                    latestScrollInVelocity.absoluteValue < touchSlop -> true
+                    event.from == Gravity.LEFT -> latestScrollInVelocity > 0
+                    else -> latestScrollInVelocity < 0
+                }
+                val metThreshold = distanceFromEdge > dpAsPx(100) && velocityMatches
 
                 val animator = ValueAnimator.ofInt(params.x, if (metThreshold) 0 else -params.width)
                 animator.addUpdateListener {
