@@ -80,7 +80,7 @@ abstract class ReconfigureWidgetActivity : BaseBindWidgetActivity() {
 
         newSet.add(safeIndex, widget)
 
-        logUtils.normalLog("Removed old widget from $oldWidgetIndex ($safeIndex) and added new one $widget")
+        logUtils.debugLog("Removed old widget from $oldWidgetIndex ($safeIndex) and added new one $widget")
 
         currentWidgets = LinkedHashSet(newSet)
 
