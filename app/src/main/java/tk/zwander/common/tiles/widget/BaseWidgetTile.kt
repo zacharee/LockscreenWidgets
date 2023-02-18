@@ -23,6 +23,7 @@ import tk.zwander.common.activities.add.AddTileWidgetActivity
 import tk.zwander.common.util.PrefManager
 import tk.zwander.common.util.appWidgetManager
 import tk.zwander.common.util.cropBitmapTransparency
+import tk.zwander.common.util.getApplicationInfoInAnyState
 import tk.zwander.common.util.logUtils
 import tk.zwander.common.util.prefManager
 import tk.zwander.common.util.textAsBitmap
@@ -65,8 +66,9 @@ abstract class BaseWidgetTile : TileService(), SharedPreferences.OnSharedPrefere
     protected val remoteResources: Resources?
         get() {
             return try {
-                val packageName = widgetPackage
-                packageManager.getResourcesForApplication(packageName)
+                val packageName = widgetPackage ?: return null
+                val appInfo = packageManager.getApplicationInfoInAnyState(packageName)
+                packageManager.getResourcesForApplication(appInfo)
             } catch (e: Exception) {
                 null
             }

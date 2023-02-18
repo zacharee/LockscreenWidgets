@@ -2,10 +2,12 @@
 
 package tk.zwander.common.util
 
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
 import android.content.pm.ResolveInfo
+import android.content.res.Resources
 import android.os.Build
 
 fun PackageManager.getApplicationInfoCompat(packageName: String, flags: Int = 0): ApplicationInfo {
@@ -30,4 +32,16 @@ fun PackageManager.getInstalledApplicationsCompat(flags: Int = 0): List<Applicat
     } else {
         getInstalledApplications(flags)
     }
+}
+
+fun PackageManager.getResourcesForApplicationInAnyState(packageName: String): Resources {
+    return getResourcesForApplication(getApplicationInfoInAnyState(packageName))
+}
+
+@SuppressLint("InlinedApi")
+fun PackageManager.getApplicationInfoInAnyState(packageName: String): ApplicationInfo {
+    return getApplicationInfoCompat(
+        packageName = packageName,
+        flags = PackageManager.MATCH_DISABLED_COMPONENTS or PackageManager.MATCH_ALL
+    )
 }

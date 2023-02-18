@@ -16,12 +16,13 @@ import tk.zwander.lockscreenwidgets.App
 import java.io.ByteArrayOutputStream
 import java.io.IOException
 
-@SuppressLint("DiscouragedApi")
+@SuppressLint("DiscouragedApi", "InlinedApi")
 fun Context.getRemoteDrawable(
     packageName: String,
     resource: Intent.ShortcutIconResource?
 ) : Bitmap? {
-    val remRes = packageManager.getResourcesForApplication(packageName)
+    val appInfo = packageManager.getApplicationInfoInAnyState(packageName)
+    val remRes = packageManager.getResourcesForApplication(appInfo)
 
     return getRemoteDrawable(
         packageName,
@@ -33,16 +34,15 @@ fun Context.getRemoteDrawable(
             )
         } ?: 0,
         remRes
-    )
+    ) { packageManager.getApplicationIcon(appInfo) }
 }
 
 fun Context.getRemoteDrawable(
     packageName: String,
     resourceId: Int,
-    remRes: Resources = packageManager.getResourcesForApplication(packageName)
+    remRes: Resources,
+    defaultGetter: () -> Drawable = { packageManager.getApplicationIcon(packageName) }
 ): Bitmap? {
-    val defaultGetter = { packageManager.getApplicationIcon(packageName) }
-
     val drawable = when (resourceId) {
         0 -> defaultGetter()
         else -> {

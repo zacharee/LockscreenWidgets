@@ -170,8 +170,9 @@ private fun icon(
         icon = withContext(Dispatchers.IO) {
             context.getRemoteDrawable(
                 info.appInfo.packageName,
-                info.icon
-            )
+                info.icon,
+                context.packageManager.getResourcesForApplication(info.appInfo)
+            ) { context.packageManager.getApplicationIcon(info.appInfo) }
         }
     }
 
