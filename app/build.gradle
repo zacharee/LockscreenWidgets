@@ -1,8 +1,9 @@
-apply plugin: 'com.android.application'
-apply plugin: 'kotlin-android'
-apply plugin: 'kotlin-parcelize'
-apply plugin: 'com.google.gms.google-services'
-apply plugin: 'com.google.firebase.crashlytics'
+plugins {
+    id 'com.android.application'
+    id 'kotlin-android'
+    id 'kotlin-parcelize'
+    id 'com.bugsnag.android.gradle'
+}
 
 android {
     compileSdk 33
@@ -79,10 +80,6 @@ dependencies {
     implementation 'com.github.zacharee:SpannedGridLayoutManager:0c56d2019a'
 //    implementation project(':spannedlm')
 
-    implementation platform('com.google.firebase:firebase-bom:31.2.1')
-    implementation 'com.google.firebase:firebase-analytics'
-    implementation 'com.google.firebase:firebase-crashlytics'
-
     implementation 'androidx.activity:activity-compose:1.7.0-beta01'
     implementation "androidx.compose.animation:animation:${compose_version}"
     implementation "androidx.compose.foundation:foundation:${compose_version}"
@@ -94,4 +91,6 @@ dependencies {
 
     implementation 'com.google.accompanist:accompanist-flowlayout:0.28.0'
     implementation 'com.google.accompanist:accompanist-themeadapter-material:0.28.0'
+
+    implementation "com.bugsnag:bugsnag-android:5.28.4"
 }

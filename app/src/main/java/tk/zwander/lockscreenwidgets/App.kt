@@ -10,12 +10,13 @@ import android.database.ContentObserver
 import android.net.Uri
 import android.os.Build
 import android.provider.Settings
+import com.bugsnag.android.Bugsnag
 import org.lsposed.hiddenapibypass.HiddenApiBypass
-import tk.zwander.lockscreenwidgets.activities.add.AddFrameWidgetActivity
 import tk.zwander.common.util.Event
 import tk.zwander.common.util.GlobalExceptionHandler
 import tk.zwander.common.util.eventManager
 import tk.zwander.common.util.migrationManager
+import tk.zwander.lockscreenwidgets.activities.add.AddFrameWidgetActivity
 import tk.zwander.widgetdrawer.activities.add.AddDrawerWidgetActivity
 
 /**
@@ -61,6 +62,8 @@ class App : Application() {
 
     override fun onCreate() {
         super.onCreate()
+
+        Bugsnag.start(this)
 
         globalContext = this
 

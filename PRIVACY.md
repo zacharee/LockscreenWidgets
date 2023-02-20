@@ -1,5 +1,5 @@
 # Data
-Lockscreen Widgets collects only the data necessary to function and provide crash reports. Any data not collected by Google's Firebase is kept strictly on-device. This can be confirmed by browsing the source code.
+Lockscreen Widgets collects only the data necessary to function and provide crash reports. Any data not collected by Bugsnag is kept strictly on-device. This can be confirmed by browsing the source code.
 
 # Permissions
 ## Accessibility
