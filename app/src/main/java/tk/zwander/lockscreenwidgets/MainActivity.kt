@@ -9,20 +9,22 @@ import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.launch
 import tk.zwander.common.activities.OnboardingActivity
 import tk.zwander.common.compose.main.MainContent
-import tk.zwander.lockscreenwidgets.services.isAccessibilityEnabled
 import tk.zwander.common.tiles.NCTile
 import tk.zwander.common.tiles.widget.WidgetTileFive
 import tk.zwander.common.tiles.widget.WidgetTileFour
 import tk.zwander.common.tiles.widget.WidgetTileOne
 import tk.zwander.common.tiles.widget.WidgetTileThree
 import tk.zwander.common.tiles.widget.WidgetTileTwo
-import tk.zwander.lockscreenwidgets.util.WidgetFrameDelegate
 import tk.zwander.common.util.isOneUI
 import tk.zwander.common.util.prefManager
+import tk.zwander.lockscreenwidgets.services.isAccessibilityEnabled
+import tk.zwander.lockscreenwidgets.util.WidgetFrameDelegate
 
 /**
  * Host the main page of the app (the social links). It also hosts the buttons to add a widget, view usage
@@ -50,28 +52,30 @@ class MainActivity : AppCompatActivity(), CoroutineScope by MainScope() {
         //This should only run on Nougat and above.
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             //We don't want the NC tile to show on non-One UI devices.
-            packageManager.setComponentEnabledSetting(
-                ComponentName(this, NCTile::class.java),
-                if (isOneUI) PackageManager.COMPONENT_ENABLED_STATE_ENABLED
-                else PackageManager.COMPONENT_ENABLED_STATE_DISABLED,
-                0
-            )
-
-            val components = arrayOf(
-                WidgetTileOne::class.java,
-                WidgetTileTwo::class.java,
-                WidgetTileThree::class.java,
-                WidgetTileFour::class.java,
-                WidgetTileFive::class.java
-            )
-
-            components.forEach {
+            launch(Dispatchers.IO) {
                 packageManager.setComponentEnabledSetting(
-                    ComponentName(this, it),
+                    ComponentName(this@MainActivity, NCTile::class.java),
                     if (isOneUI) PackageManager.COMPONENT_ENABLED_STATE_ENABLED
                     else PackageManager.COMPONENT_ENABLED_STATE_DISABLED,
-                    0
+                    PackageManager.DONT_KILL_APP or PackageManager.SYNCHRONOUS
                 )
+
+                val components = arrayOf(
+                    WidgetTileOne::class.java,
+                    WidgetTileTwo::class.java,
+                    WidgetTileThree::class.java,
+                    WidgetTileFour::class.java,
+                    WidgetTileFive::class.java
+                )
+
+                components.forEach {
+                    packageManager.setComponentEnabledSetting(
+                        ComponentName(this@MainActivity, it),
+                        if (isOneUI) PackageManager.COMPONENT_ENABLED_STATE_ENABLED
+                        else PackageManager.COMPONENT_ENABLED_STATE_DISABLED,
+                        PackageManager.DONT_KILL_APP or PackageManager.SYNCHRONOUS
+                    )
+                }
             }
         }
 
