@@ -43,6 +43,7 @@ abstract class BaseBindWidgetActivity : ComponentActivity() {
 
     protected open val currentIds: Collection<Int>
         get() = currentWidgets.map { it.id }
+    protected open val deleteOnConfigureError: Boolean = true
 
     private val permRequest = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         val id = result.data?.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, -1) ?: return@registerForActivityResult
@@ -314,17 +315,27 @@ abstract class BaseBindWidgetActivity : ComponentActivity() {
                     //widget to the frame
                     addNewWidget(id, appWidgetManager.getAppWidgetInfo(id) ?: run {
                         logUtils.debugLog("Unable to get widget info for $id, not adding")
-                        currentConfigId?.let {
-                            widgetHost.deleteAppWidgetId(it)
+                        if (deleteOnConfigureError) {
+                            currentConfigId?.let {
+                                widgetHost.deleteAppWidgetId(it)
+                            }
+                        }
+                        if (pendingErrors == 0) {
+                            finish()
                         }
                         return
                     })
                 } else {
                     logUtils.debugLog("Failed to configure widget.")
-                    currentConfigId?.let {
-                        //Widget configuration was canceled: delete the
-                        //allocated ID
-                        widgetHost.deleteAppWidgetId(it)
+                    if (deleteOnConfigureError) {
+                        currentConfigId?.let {
+                            //Widget configuration was canceled: delete the
+                            //allocated ID
+                            widgetHost.deleteAppWidgetId(it)
+                        }
+                    }
+                    if (pendingErrors == 0) {
+                        finish()
                     }
                 }
 

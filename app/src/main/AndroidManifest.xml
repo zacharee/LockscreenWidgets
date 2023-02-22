@@ -73,6 +73,7 @@
         <activity android:name="tk.zwander.lockscreenwidgets.activities.add.ReconfigureFrameWidgetActivity"
             android:exported="false"
             android:theme="@style/AppTheme.Null"
+            android:excludeFromRecents="true"
             />
         <activity android:name="tk.zwander.widgetdrawer.activities.add.ReconfigureDrawerWidgetActivity"
             android:exported="false"

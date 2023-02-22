@@ -25,6 +25,7 @@ abstract class ReconfigureWidgetActivity : BaseBindWidgetActivity() {
             intent.getParcelableExtra(EXTRA_PROVIDER_INFO) as? AppWidgetProviderInfo?
         }
     }
+    override val deleteOnConfigureError: Boolean = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
