@@ -54,7 +54,7 @@ fun Context.getRemoteDrawable(
         }
     }
 
-    return drawable?.mutate()?.run {
+    return drawable.mutate()?.run {
         val width = intrinsicWidth
         val height = intrinsicHeight
 

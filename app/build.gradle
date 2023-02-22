@@ -65,6 +65,7 @@ dependencies {
     implementation 'androidx.recyclerview:recyclerview:1.2.1'
     implementation 'androidx.preference:preference-ktx:1.2.0'
     implementation 'androidx.legacy:legacy-support-core-ui:1.0.0'
+    runtimeOnly 'androidx.emoji2:emoji2-views-helper:1.3.0-beta02'
 
     implementation 'org.lsposed.hiddenapibypass:hiddenapibypass:4.3'
     implementation 'com.google.code.gson:gson:2.10.1'

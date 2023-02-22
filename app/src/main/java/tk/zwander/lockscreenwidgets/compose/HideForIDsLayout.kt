@@ -38,7 +38,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -159,17 +159,7 @@ fun HideForIDsLayout(
                     value = "",
                     onValueChange = {},
                     enabled = false,
-                    colors = TextFieldDefaults.outlinedTextFieldColors(
-                        disabledBorderColor = Color.Transparent,
-                        errorBorderColor = Color.Transparent,
-                        focusedBorderColor = Color.Transparent,
-                        unfocusedBorderColor = Color.Transparent,
-                        textColor = Color.Transparent,
-                        disabledLabelColor = Color.Transparent,
-                        errorLabelColor = Color.Transparent,
-                        focusedLabelColor = Color.Transparent,
-                        unfocusedLabelColor = Color.Transparent,
-                    ),
+                    modifier = Modifier.alpha(0f),
                     label = { Text(text = "") }
                 )
 
