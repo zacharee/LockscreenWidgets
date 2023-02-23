@@ -125,13 +125,15 @@ abstract class WidgetHostCompat(
 
     abstract inner class BaseInnerOnClickHandler {
         @SuppressLint("NewApi")
-        fun checkPendingIntent(pendingIntent: PendingIntent) {
-            val triggerUnlockOrDismiss = pendingIntent.isActivity
+        fun checkPendingIntent(pendingIntent: PendingIntent?) {
+            if (pendingIntent != null) {
+                val triggerUnlockOrDismiss = pendingIntent.isActivity
 
-            // This package check is so the frame/drawer doesn't dismiss itself when the
-            // Open Drawer widget is tapped.
-            if (pendingIntent.creatorPackage != context.packageName) {
-                onClickCallbacks.forEach { it.onWidgetClick(triggerUnlockOrDismiss) }
+                // This package check is so the frame/drawer doesn't dismiss itself when the
+                // Open Drawer widget is tapped.
+                if (pendingIntent.creatorPackage != context.packageName) {
+                    onClickCallbacks.forEach { it.onWidgetClick(triggerUnlockOrDismiss) }
+                }
             }
         }
     }

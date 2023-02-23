@@ -97,7 +97,9 @@ abstract class BaseDelegate<State : BaseDelegate.BaseState>(context: Context) : 
         itemTouchHelper.attachToRecyclerView(null)
 
         currentWidgets = ArrayList(adapter.widgets)
-        lifecycleRegistry.currentState = Lifecycle.State.DESTROYED
+        if (lifecycleRegistry.currentState.isAtLeast(Lifecycle.State.CREATED)) {
+            lifecycleRegistry.currentState = Lifecycle.State.DESTROYED
+        }
     }
 
     @CallSuper

@@ -27,10 +27,10 @@ open class WidgetHostInterface(context: Context, id: Int, clickHandlerClass: Cla
 
     open inner class InnerOnClickHandlerInterface : BaseInnerOnClickHandler(), InvocationHandler {
         @SuppressLint("BlockedPrivateApi", "PrivateApi")
-        override fun invoke(proxy: Any?, method: Method?, args: Array<out Any>): Any {
-            val view = args[0] as View
-            val pi = args[1] as PendingIntent
-            val response = args[2]
+        override fun invoke(proxy: Any?, method: Method?, args: Array<out Any>?): Any {
+            val view = args?.getOrNull(0) as? View
+            val pi = args?.getOrNull(1) as? PendingIntent
+            val response = args?.getOrNull(2)
 
             val responseClass = Class.forName("android.widget.RemoteViews\$RemoteResponse")
 

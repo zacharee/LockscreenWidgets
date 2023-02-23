@@ -139,7 +139,7 @@ open class WidgetFrameAdapter(
                         oldItemPosition: Int,
                         newItemPosition: Int
                     ): Boolean {
-                        return oldWidgets[oldItemPosition] == newWidgets[newItemPosition]
+                        return oldWidgets[oldItemPosition].id == newWidgets[newItemPosition].id
                     }
 
                     override fun getNewListSize(): Int {
