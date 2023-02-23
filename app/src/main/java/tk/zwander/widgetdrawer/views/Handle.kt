@@ -109,7 +109,7 @@ class Handle : LinearLayout {
         prefsHandler.register(context)
     }
 
-    @SuppressLint("ClickableViewAccessibility")
+    @SuppressLint("ClickableViewAccessibility", "RtlHardcoded")
     override fun onTouchEvent(event: MotionEvent): Boolean {
         when (event.action) {
             MotionEvent.ACTION_DOWN -> {
@@ -198,8 +198,7 @@ class Handle : LinearLayout {
     fun show(wm: WindowManager = this.wm) {
         try {
             wm.addView(this, params)
-        } catch (e: Exception) {
-        }
+        } catch (_: Exception) {}
     }
 
     fun hide(wm: WindowManager = this.wm) {
@@ -217,8 +216,7 @@ class Handle : LinearLayout {
                 handler?.postDelayed({
                     try {
                         wm.removeView(this@Handle)
-                    } catch (e: Exception) {
-                    }
+                    } catch (_: Exception) {}
                 }, 10)
             }
         })
@@ -228,10 +226,10 @@ class Handle : LinearLayout {
     private fun updateLayout(params: WindowManager.LayoutParams = this.params) {
         try {
             wm.updateViewLayout(this, params)
-        } catch (e: Exception) {
-        }
+        } catch (_: Exception) {}
     }
 
+    @SuppressLint("RtlHardcoded")
     private fun setSide(gravity: Int = context.prefManager.drawerHandleSide) {
         background = if (gravity == Gravity.RIGHT) handleRight
         else handleLeft

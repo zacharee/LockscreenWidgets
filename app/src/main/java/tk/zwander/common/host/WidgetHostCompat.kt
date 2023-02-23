@@ -10,7 +10,6 @@ import android.widget.RemoteViews
 import tk.zwander.common.util.safeApplicationContext
 import tk.zwander.common.views.ZeroPaddingAppWidgetHostView
 import java.util.concurrent.ConcurrentLinkedQueue
-import java.util.concurrent.atomic.AtomicInteger
 
 val Context.widgetHostCompat: WidgetHostCompat
     get() = WidgetHostCompat.getInstance(this)
@@ -81,7 +80,6 @@ abstract class WidgetHostCompat(
     protected abstract val onClickHandler: Any
     protected val onClickCallbacks = mutableSetOf<OnClickCallback>()
 
-    private val listeningCount = AtomicInteger(0)
     private val listeners = ConcurrentLinkedQueue<Any>()
 
     fun addOnClickCallback(callback: OnClickCallback) {

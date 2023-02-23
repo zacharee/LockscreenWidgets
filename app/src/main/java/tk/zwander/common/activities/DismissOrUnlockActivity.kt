@@ -10,6 +10,7 @@ import android.view.WindowManager
 import androidx.appcompat.app.AppCompatActivity
 import tk.zwander.common.util.Event
 import tk.zwander.common.util.eventManager
+import tk.zwander.common.util.keyguardManager
 import tk.zwander.common.util.mainHandler
 
 /**
@@ -36,7 +37,7 @@ class DismissOrUnlockActivity : AppCompatActivity() {
         }
     }
 
-    private val kgm by lazy { getSystemService(KEYGUARD_SERVICE) as KeyguardManager }
+    private val kgm by lazy { keyguardManager }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

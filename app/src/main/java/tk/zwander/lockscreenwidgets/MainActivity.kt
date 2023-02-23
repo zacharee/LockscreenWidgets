@@ -1,5 +1,6 @@
 package tk.zwander.lockscreenwidgets
 
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.ComponentName
 import android.content.pm.PackageManager
@@ -46,6 +47,7 @@ class MainActivity : AppCompatActivity(), CoroutineScope by MainScope() {
             }
         }
 
+    @SuppressLint("InlinedApi")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 

@@ -2,7 +2,6 @@ package tk.zwander.lockscreenwidgets.services
 
 import android.accessibilityservice.AccessibilityService
 import android.annotation.SuppressLint
-import android.app.KeyguardManager
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
@@ -25,6 +24,7 @@ import tk.zwander.common.util.HandlerRegistry
 import tk.zwander.common.util.PrefManager
 import tk.zwander.common.util.eventManager
 import tk.zwander.common.util.handler
+import tk.zwander.common.util.keyguardManager
 import tk.zwander.common.util.logUtils
 import tk.zwander.common.util.prefManager
 import tk.zwander.lockscreenwidgets.App
@@ -110,7 +110,7 @@ fun AccessibilityNodeInfo.hasVisibleIds(ids: Iterable<String>): Boolean {
  * is shown.
  */
 class Accessibility : AccessibilityService(), EventObserver, CoroutineScope by MainScope() {
-    private val kgm by lazy { getSystemService(Context.KEYGUARD_SERVICE) as KeyguardManager }
+    private val kgm by lazy { keyguardManager }
     private val wm by lazy { getSystemService(Context.WINDOW_SERVICE) as WindowManager }
     private val power by lazy { getSystemService(Context.POWER_SERVICE) as PowerManager }
     private val frameDelegate: WidgetFrameDelegate

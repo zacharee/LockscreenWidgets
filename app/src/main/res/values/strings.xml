@@ -3,7 +3,6 @@
     <string name="widget_drawer">Widget Drawer</string>
     <string name="version_template">v%s</string>
 
-    <string name="content_desc_widget_image">Widget Image</string>
     <string name="edit_gesture_hint">Tap the widget frame with two fingers to move and resize it.</string>
     <string name="edit_gesture_hint_2">Great! Tap with two fingers to hide the editing UI.</string>
     <string name="hide_gesture_hint">Tap the widget frame with three fingers to temporarily hide it. It will remain hidden until you turn the display off and on again.</string>
@@ -56,7 +55,6 @@
     <string name="center_horizontally">Center Horizontally</string>
     <string name="move">Move</string>
     <string name="hide">Hide</string>
-    <string name="app_icon">App Icon</string>
     <string name="shortcut_icon">Shortcut Icon</string>
     <string name="expand">Expand</string>
 
@@ -250,14 +248,10 @@
     <string name="unable_to_restore_widgets">Unable to restore widgets.</string>
     <string name="unable_to_back_up_widgets">Unable to back up widgets.</string>
 
-    <string name="edit_instructions">Press and hold widgets to reorder.\nSwipe widgets left or right to remove.</string>
     <string name="open_close_toolbar">Open/Close Toolbar</string>
-    <string name="widget_removed">Widget removed</string>
-    <string name="undo">Undo</string>
     <string name="open_widget_drawer">Open Widget Drawer</string>
     <string name="open_drawer">Open Drawer</string>
     <string name="close_widget_drawer">Close Drawer</string>
-    <string name="enable_drawer">Enable Drawer</string>
     <string name="drawer">Drawer</string>
     <string name="handle">Handle</string>
     <string name="error">Error</string>

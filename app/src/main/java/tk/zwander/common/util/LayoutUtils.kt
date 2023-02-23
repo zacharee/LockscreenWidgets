@@ -11,8 +11,8 @@ import android.util.TypedValue
 import android.view.View
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
-import tk.zwander.lockscreenwidgets.adapters.WidgetFrameAdapter
 import tk.zwander.common.data.WidgetType
+import tk.zwander.lockscreenwidgets.adapters.WidgetFrameAdapter
 import kotlin.math.roundToInt
 import kotlin.math.sign
 
@@ -156,5 +156,5 @@ val Context.screenSize: Point
     }
 
 val Context.statusBarHeight: Int
-    @SuppressLint("InternalInsetResource")
+    @SuppressLint("InternalInsetResource", "DiscouragedApi")
     get() = resources.getDimensionPixelSize(resources.getIdentifier("status_bar_height", "dimen", "android"))

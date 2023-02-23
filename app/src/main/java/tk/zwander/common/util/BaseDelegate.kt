@@ -1,6 +1,5 @@
 package tk.zwander.common.util
 
-import android.app.KeyguardManager
 import android.app.WallpaperManager
 import android.content.Context
 import android.content.ContextWrapper
@@ -29,7 +28,7 @@ abstract class BaseDelegate<State : BaseDelegate.BaseState>(context: Context) : 
     EventObserver, WidgetHostCompat.OnClickCallback, SavedStateRegistryOwner {
     protected val wm by lazy { getSystemService(WINDOW_SERVICE) as WindowManager }
     protected val power by lazy { getSystemService(POWER_SERVICE) as PowerManager }
-    protected val kgm by lazy { getSystemService(Context.KEYGUARD_SERVICE) as KeyguardManager }
+    protected val kgm by lazy { keyguardManager }
     protected val wallpaper by lazy { getSystemService(Context.WALLPAPER_SERVICE) as WallpaperManager }
     protected val widgetHost by lazy { widgetHostCompat }
     protected val displayManager by lazy {

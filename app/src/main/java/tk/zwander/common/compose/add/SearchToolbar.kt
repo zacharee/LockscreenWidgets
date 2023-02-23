@@ -1,7 +1,6 @@
 package tk.zwander.common.compose.add
 
 import androidx.compose.foundation.layout.Row
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
@@ -13,7 +12,6 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import tk.zwander.lockscreenwidgets.R
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SearchToolbar(
     filter: String?,

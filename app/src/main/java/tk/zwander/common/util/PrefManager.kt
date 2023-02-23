@@ -1,6 +1,7 @@
 package tk.zwander.common.util
 
 import android.annotation.IntegerRes
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.ContextWrapper
 import android.content.Intent
@@ -650,6 +651,7 @@ class PrefManager private constructor(context: Context) : ContextWrapper(context
         }
 
     var drawerHandleSide: Int
+        @SuppressLint("RtlHardcoded")
         get() = getInt(KEY_DRAWER_HANDLE_SIDE, Gravity.RIGHT)
         set(value) {
             putInt(KEY_DRAWER_HANDLE_SIDE, value)
