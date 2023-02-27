@@ -9,6 +9,7 @@ import android.os.Bundle
 import android.view.WindowManager
 import androidx.appcompat.app.AppCompatActivity
 import tk.zwander.common.util.Event
+import tk.zwander.common.util.EventObserver
 import tk.zwander.common.util.eventManager
 import tk.zwander.common.util.keyguardManager
 import tk.zwander.common.util.mainHandler
@@ -18,7 +19,7 @@ import tk.zwander.common.util.mainHandler
  * This is either started when the add widget button is tapped from the lock screen/NC
  * or when Lockscreen Widgets detects an Activity being launched from a widget.
  */
-class DismissOrUnlockActivity : AppCompatActivity() {
+class DismissOrUnlockActivity : AppCompatActivity(), EventObserver {
     companion object {
         fun launch(context: Context, runOnMain: Boolean = true) {
             if (runOnMain) {
@@ -42,6 +43,7 @@ class DismissOrUnlockActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        eventManager.addObserver(this)
         handle()
     }
 
@@ -49,6 +51,21 @@ class DismissOrUnlockActivity : AppCompatActivity() {
         super.onNewIntent(intent)
 
         handle()
+    }
+
+    override fun onEvent(event: Event) {
+        when (event) {
+            Event.ScreenOff -> {
+                finish()
+            }
+            else -> {}
+        }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+
+        eventManager.removeObserver(this)
     }
 
     private fun handle() {
