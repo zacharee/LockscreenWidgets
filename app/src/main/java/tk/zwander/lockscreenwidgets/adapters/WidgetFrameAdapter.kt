@@ -32,7 +32,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import tk.zwander.common.activities.DismissOrUnlockActivity
+import tk.zwander.common.activities.PermissionIntentLaunchActivity
 import tk.zwander.common.data.WidgetData
 import tk.zwander.common.data.WidgetType
 import tk.zwander.common.host.WidgetHostCompat
@@ -549,19 +549,11 @@ open class WidgetFrameAdapter(
                 data.shortcutIntent?.apply {
                     addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
 
-                    mainHandler.post {
-                        try {
-                            itemView.context.startActivity(this)
-                            DismissOrUnlockActivity.launch(itemView.context, false)
-                        } catch (e: Exception) {
-                            it.context.logUtils.normalLog("Unable to launch shortcut", e)
-                            Toast.makeText(
-                                itemView.context,
-                                R.string.launch_shortcut_error,
-                                Toast.LENGTH_SHORT
-                            ).show()
-                        }
-                    }
+                    PermissionIntentLaunchActivity.start(
+                        context = itemView.context,
+                        intent = this,
+                        launchType = PermissionIntentLaunchActivity.LaunchType.ACTIVITY
+                    )
                 }
             }
             shortcutView.shortcutIcon.setImageBitmap(icon)

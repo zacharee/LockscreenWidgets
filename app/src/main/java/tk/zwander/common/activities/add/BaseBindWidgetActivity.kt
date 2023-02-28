@@ -7,8 +7,12 @@ import android.appwidget.AppWidgetProviderInfo
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
+import android.content.pm.LauncherApps
 import android.graphics.Bitmap
+import android.net.Uri
+import android.os.Build
 import android.os.ServiceManager
+import android.telephony.PhoneNumberUtils
 import androidx.activity.ComponentActivity
 import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts
@@ -65,6 +69,37 @@ abstract class BaseBindWidgetActivity : ComponentActivity() {
     private val configShortcutRequest = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         try {
             result.data?.let { data ->
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    data.getParcelableExtra<LauncherApps.PinItemRequest>(LauncherApps.EXTRA_PIN_ITEM_REQUEST)?.let { pinItemRequest ->
+                        val name = pinItemRequest.shortcutInfo.label.toString()
+                        val icon = pinItemRequest.shortcutInfo.icon
+                            .loadDrawable(this)
+                            .toBitmap(maxWidth = 512, maxHeight = 512)
+
+                        val intent = pinItemRequest.shortcutInfo.intent ?: run {
+                            val number = pinItemRequest.shortcutInfo.extras["phoneNumber"]
+                            val action = pinItemRequest.shortcutInfo.extras["shortcutAction"]
+
+                            if (number != null) {
+                                Intent().apply {
+                                    action?.let { this.action = it.toString() }
+                                    setData(Uri.parse("tel://${PhoneNumberUtils.convertAndStrip(number.toString())}"))
+                                }
+                            } else {
+                                null
+                            }
+                        }
+
+                        val shortcut = WidgetData.shortcut(
+                            shortcutIdManager.allocateShortcutId(),
+                            name, icon.toBase64(), null, intent,
+                            WidgetSizeData(1, 1),
+                        )
+
+                        addNewShortcut(shortcut)
+                    }
+                }
+
                 data.getParcelableExtra<Intent>(Intent.EXTRA_SHORTCUT_INTENT)?.let { shortcutIntent ->
                     val name = data.getStringExtra(Intent.EXTRA_SHORTCUT_NAME)
                     val iconRes =

@@ -20,7 +20,7 @@ data class WidgetData(
     var iconRes: Intent.ShortcutIconResource?,
     var shortcutIntent: Intent?,
     var widgetProvider: String?,
-    var size: WidgetSizeData?
+    var size: WidgetSizeData?,
 ) : Parcelable {
     companion object {
         fun shortcut(
@@ -28,13 +28,13 @@ data class WidgetData(
             label: String,
             icon: String?,
             iconRes: Intent.ShortcutIconResource?,
-            shortcutIntent: Intent,
-            size: WidgetSizeData
+            shortcutIntent: Intent?,
+            size: WidgetSizeData,
         ): WidgetData {
             return WidgetData(
                 id, WidgetType.SHORTCUT,
                 label, icon, iconRes, shortcutIntent,
-                null, size
+                null, size,
             )
         }
 
@@ -49,15 +49,7 @@ data class WidgetData(
                 id, WidgetType.WIDGET, label, icon,
                 null, null,
                 widgetProvider.flattenToString(),
-                size
-            )
-        }
-
-        fun header(): WidgetData {
-            return WidgetData(
-                -1, WidgetType.HEADER, null, null,
-                null, null,
-                null, null
+                size,
             )
         }
     }

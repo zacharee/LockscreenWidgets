@@ -18,3 +18,6 @@ Lockscreen Widgets uses this permission to get the user's wallpaper for Masked F
 
 ## QUERY_ALL_PACKAGES
 Lockscreen Widgets uses this permission to display the list of available widgets to the user, as well as interact with the widgets as needed.
+
+## CALL_PHONE
+This permission will only be requested if needed (e.g., when tapping a direct dial shortcut).

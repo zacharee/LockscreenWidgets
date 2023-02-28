@@ -3,6 +3,10 @@
     xmlns:tools="http://schemas.android.com/tools"
     package="tk.zwander.lockscreenwidgets">
 
+    <uses-feature
+        android:name="android.hardware.telephony"
+        android:required="false" />
+
     <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="android.permission.DISABLE_KEYGUARD" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
@@ -11,6 +15,7 @@
     <uses-permission android:name="android.permission.READ_MEDIA_AUDIO" />
     <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES"
         tools:ignore="QueryAllPackagesPermission" />
+    <uses-permission android:name="android.permission.CALL_PHONE" />
 
     <uses-permission android:name="com.huawei.android.totemweather.permission.ACCESS_WEATHERCLOCK_PROVIDER" />
     <uses-permission android:name="android.permission.ACCESS_WEATHERCLOCK_PROVIDER" />
@@ -106,6 +111,12 @@
             android:label="@string/settings_screen_hide_on_present_apps"
             android:exported="false"
             android:theme="@style/AppTheme.NoActionBar"
+            />
+        <activity android:name="tk.zwander.common.activities.PermissionIntentLaunchActivity"
+            android:exported="false"
+            android:theme="@style/AppTheme.Null"
+            android:launchMode="singleInstancePerTask"
+            android:excludeFromRecents="true"
             />
 
         <service

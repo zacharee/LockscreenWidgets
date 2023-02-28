@@ -247,6 +247,7 @@
     <string name="accessibility_not_started">The Accessibility Service hasn\'t started yet. Please wait.</string>
     <string name="unable_to_restore_widgets">Unable to restore widgets.</string>
     <string name="unable_to_back_up_widgets">Unable to back up widgets.</string>
+    <string name="unable_to_launch">Unable to launch.</string>
 
     <string name="open_close_toolbar">Open/Close Toolbar</string>
     <string name="open_widget_drawer">Open Widget Drawer</string>
