@@ -1,15 +1,16 @@
 package tk.zwander.common.views
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
 import android.widget.AbsListView
-import android.widget.ListView
 import androidx.core.view.NestedScrollingParent3
 import androidx.core.view.NestedScrollingParentHelper
 import androidx.core.view.ViewCompat
 import androidx.recyclerview.widget.RecyclerView
+import kotlin.math.absoluteValue
 
 //https://stackoverflow.com/a/68318211/5496177
 open class NestedRecyclerView @JvmOverloads constructor(
@@ -188,6 +189,7 @@ open class NestedRecyclerView @JvmOverloads constructor(
         nestedScrollingListener?.invoke(!it)
     }
 
+    @SuppressLint("NewApi")
     private fun setTarget(target: View?) {
         if (target == null) {
             // We're not nested scrolling anymore so the touch helper can
@@ -197,10 +199,7 @@ open class NestedRecyclerView @JvmOverloads constructor(
         nestedScrollTarget = target
         nestedScrollTargetWasUnableToScroll = false
 
-        // My specific implementation has nested ListViews (AppWidgetHost), so this is
-        // also needed. If you have scrollable Views in general, you may need to use
-        // View#setOnScrollChangeListener and check if the scroll change is non-zero.
-        (target as? ListView)?.setOnScrollListener(object : AbsListView.OnScrollListener {
+        val listScrollListener = object : AbsListView.OnScrollListener {
             override fun onScrollStateChanged(view: AbsListView?, scrollState: Int) {
                 nestedScrollingListener?.invoke(scrollState != AbsListView.OnScrollListener.SCROLL_STATE_IDLE)
             }
@@ -210,8 +209,19 @@ open class NestedRecyclerView @JvmOverloads constructor(
                 firstVisibleItem: Int,
                 visibleItemCount: Int,
                 totalItemCount: Int
-            ) {
+            ) {}
+        }
+
+        when (target) {
+            is AbsListView -> {
+                target.setOnScrollListener(listScrollListener)
             }
-        })
+            else -> {
+                // Only public on Android 6 and later but exists on Android 5.1.
+                target?.setOnScrollChangeListener { _, _, scrollY, _, oldScrollY ->
+                    nestedScrollingListener?.invoke((scrollY - oldScrollY).absoluteValue > 0)
+                }
+            }
+        }
     }
 }
