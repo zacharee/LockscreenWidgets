@@ -68,7 +68,7 @@ dependencies {
 
     implementation 'org.lsposed.hiddenapibypass:hiddenapibypass:4.3'
     implementation 'com.google.code.gson:gson:2.10.1'
-    implementation 'com.google.android.material:material:1.9.0-alpha01'
+    implementation 'com.google.android.material:material:1.9.0-alpha02'
     implementation 'com.github.agrawalsuneet:DotLoadersPack-Android:v1.4.2'
     implementation 'com.heinrichreimersoftware:material-intro:2.0.0'
     implementation 'net.bytebuddy:byte-buddy-android:1.14.0'
