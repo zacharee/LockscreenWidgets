@@ -447,12 +447,12 @@ open class WidgetFrameAdapter(
                         // so this makes the most sense right now.
                         addView(withContext(Dispatchers.Main) {
                             host.createView(itemView.context, data.id, widgetInfo).apply hostView@ {
-                                findListViewsInHierarchy(this).forEach { list ->
+                                findScrollableViewsInHierarchy(this).forEach { list ->
                                     list.isNestedScrollingEnabled = true
                                 }
 
                                 this.viewTreeObserver.addOnGlobalLayoutListener {
-                                    findListViewsInHierarchy(this).forEach { list ->
+                                    findScrollableViewsInHierarchy(this).forEach { list ->
                                         list.isNestedScrollingEnabled = true
                                     }
                                 }
@@ -570,8 +570,8 @@ open class WidgetFrameAdapter(
             binding.widgetHolder.addView(shortcutView.root)
         }
 
-        private fun findListViewsInHierarchy(root: View): List<ListView> {
-            val ret = arrayListOf<ListView>()
+        private fun findScrollableViewsInHierarchy(root: View): List<View> {
+            val ret = arrayListOf<View>()
 
             if (root is ViewGroup) {
                 if (root is ListView) {
@@ -579,10 +579,10 @@ open class WidgetFrameAdapter(
                 }
 
                 root.forEach { child ->
-                    if (child is ListView) {
+                    if (child.canScrollVertically(1) || child.canScrollVertically(-1)) {
                         ret.add(child)
                     } else if (child is ViewGroup) {
-                        ret.addAll(findListViewsInHierarchy(child))
+                        ret.addAll(findScrollableViewsInHierarchy(child))
                     }
                 }
             }
