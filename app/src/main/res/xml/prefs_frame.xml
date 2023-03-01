@@ -91,7 +91,7 @@
             android:icon="@drawable/ic_baseline_view_column_24"
             android:defaultValue="1"
             app:minValue="1"
-            app:maxValue="8"
+            app:maxValue="20"
             />
 
         <tk.zwander.seekbarpreference.SeekBarPreference
@@ -100,7 +100,7 @@
             android:icon="@drawable/ic_baseline_view_row_24"
             android:defaultValue="1"
             app:minValue="1"
-            app:maxValue="8"
+            app:maxValue="20"
             />
 
         <tk.zwander.common.prefs.MaterialSwitchPreference
