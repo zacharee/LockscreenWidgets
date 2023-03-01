@@ -478,6 +478,14 @@ open class WidgetFrameAdapter(
                                     )
                                 }
 
+                                // Workaround to fix the One UI 5.1 battery grid widget on some devices.
+                                if (widgetInfo.provider.packageName == "com.android.settings.intelligence") {
+                                    updateAppWidgetOptions(Bundle().apply {
+                                        putBoolean("hsIsHorizontalIcon", false)
+                                        putInt("semAppWidgetRowSpan", 1)
+                                    })
+                                }
+
                                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                                     updateAppWidgetSize(
                                         Bundle(),
