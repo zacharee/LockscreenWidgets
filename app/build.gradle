@@ -89,8 +89,8 @@ dependencies {
     implementation 'com.google.android.material:compose-theme-adapter:1.2.1'
     implementation 'com.google.accompanist:accompanist-drawablepainter:0.29.1-alpha'
 
-    implementation 'com.google.accompanist:accompanist-flowlayout:0.28.0'
-    implementation 'com.google.accompanist:accompanist-themeadapter-material:0.28.0'
+    implementation 'com.google.accompanist:accompanist-flowlayout:0.29.1-alpha'
+    implementation 'com.google.accompanist:accompanist-themeadapter-material:0.29.1-alpha'
 
     implementation "com.bugsnag:bugsnag-android:5.28.4"
 }
