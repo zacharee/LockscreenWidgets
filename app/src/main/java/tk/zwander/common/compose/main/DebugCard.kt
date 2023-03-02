@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
@@ -81,7 +82,8 @@ fun DebugCard() {
                     easing = {
                         AnticipateOvershootInterpolator().getInterpolation(it)
                     }
-                )
+                ),
+                label = "expandedRotation"
             )
 
             Column(
@@ -104,7 +106,10 @@ fun DebugCard() {
 
                 Spacer(Modifier.size(if (expanded) 8.dp else 0.dp))
 
-                AnimatedVisibility(visible = expanded) {
+                AnimatedVisibility(
+                    visible = expanded,
+                    modifier = Modifier.wrapContentHeight()
+                ) {
                     Column(
                         verticalArrangement = Arrangement.spacedBy(16.dp),
                         modifier = Modifier.fillMaxWidth()
