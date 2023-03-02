@@ -1,5 +1,5 @@
 <resources>
-    <style name="BaseTheme" parent="Theme.MaterialComponents">
+    <style name="BaseTheme" parent="Theme.Material3.DynamicColors.DayNight">
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
@@ -35,7 +35,7 @@
         <item name="android:backgroundDimEnabled">false</item>
     </style>
 
-    <style name="AppTheme.ActionBar" parent="Widget.MaterialComponents.ActionBar.Surface">
+    <style name="AppTheme.ActionBar" parent="Widget.Material3.Toolbar.Surface">
         <item name="android:background">?colorSurface</item>
         <item name="background">?colorSurface</item>
 
