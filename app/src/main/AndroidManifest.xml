@@ -55,7 +55,7 @@
             />
         <activity android:name="tk.zwander.common.activities.OnboardingActivity"
             android:exported="false"
-            android:theme="@style/AppTheme.Intro"
+            android:theme="@style/AppTheme"
             />
         <activity android:name="tk.zwander.lockscreenwidgets.activities.SettingsActivity"
             android:exported="false"

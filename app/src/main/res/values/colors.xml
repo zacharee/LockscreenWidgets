@@ -13,6 +13,15 @@
     <color name="slide_7">#307199</color>
     <color name="slide_8">#4caf50</color>
 
+    <color name="slide_1_text">#000000</color>
+    <color name="slide_2_text">#ffffff</color>
+    <color name="slide_3_text">#000000</color>
+    <color name="slide_4_text">#ffffff</color>
+    <color name="slide_5_text">#000000</color>
+    <color name="slide_6_text">#ffffff</color>
+    <color name="slide_7_text">#ffffff</color>
+    <color name="slide_8_text">#000000</color>
+
     <color name="backdrop">#55000000</color>
     <color name="scroll_track">#55000000</color>
 

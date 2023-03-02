@@ -7,7 +7,7 @@ import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
-import com.google.accompanist.themeadapter.material.MdcTheme
+import com.google.accompanist.themeadapter.material3.Mdc3Theme
 
 @Composable
 fun AppTheme(
@@ -25,7 +25,7 @@ fun AppTheme(
             content = content
         )
     } else {
-        MdcTheme(
+        Mdc3Theme(
             content = content
         )
     }
