@@ -71,7 +71,7 @@ abstract class BaseBindWidgetActivity : ComponentActivity() {
             result.data?.let { data ->
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                     data.getParcelableExtra<LauncherApps.PinItemRequest>(LauncherApps.EXTRA_PIN_ITEM_REQUEST)?.let { pinItemRequest ->
-                        val name = pinItemRequest.shortcutInfo.label.toString()
+                        val name = pinItemRequest.shortcutInfo.run { longLabel ?: shortLabel }.toString()
                         val icon = pinItemRequest.shortcutInfo.icon
                             .loadDrawable(this)
                             .toBitmap(maxWidth = 512, maxHeight = 512)
