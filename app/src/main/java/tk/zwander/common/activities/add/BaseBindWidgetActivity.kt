@@ -17,6 +17,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import com.android.internal.appwidget.IAppWidgetService
+import com.bugsnag.android.Bugsnag
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import tk.zwander.common.data.WidgetData
 import tk.zwander.common.data.WidgetSizeData
@@ -88,6 +89,15 @@ abstract class BaseBindWidgetActivity : ComponentActivity() {
                             } else {
                                 null
                             }
+                        }
+
+                        if (intent == null) {
+                            val msg = "Unable to find intent for pin request.\n" +
+                                    "Request Extras: ${pinItemRequest.extras.keySet().map { it to pinItemRequest.extras[it] }}\n" +
+                                    "Shortcut Info Extras: ${pinItemRequest.shortcutInfo.extras.keySet().map { it to pinItemRequest.shortcutInfo.extras[it] }}\n" +
+                                    "Shortcut Info: ${pinItemRequest.shortcutInfo}"
+                            logUtils.normalLog(msg)
+                            Bugsnag.notify(Exception(msg))
                         }
 
                         val shortcut = WidgetData.shortcut(
