@@ -29,6 +29,7 @@ import androidx.compose.ui.unit.sp
 import kotlin.math.absoluteValue
 import kotlin.math.ceil
 
+// https://stackoverflow.com/a/71416530/5496177
 @Composable
 fun AutoSizeText(
     text: String,
