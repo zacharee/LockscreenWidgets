@@ -95,7 +95,7 @@ abstract class BaseBindWidgetActivity : ComponentActivity() {
                             val msg = "Unable to find intent for pin request.\n" +
                                     "Request Extras: ${pinItemRequest.extras.keySet().map { it to pinItemRequest.extras[it] }}\n" +
                                     "Shortcut Info Extras: ${pinItemRequest.shortcutInfo.extras.keySet().map { it to pinItemRequest.shortcutInfo.extras[it] }}\n" +
-                                    "Shortcut Info: ${pinItemRequest.shortcutInfo}"
+                                    "Shortcut Info: ${pinItemRequest.shortcutInfo.toInsecureString()}"
                             logUtils.normalLog(msg)
                             Bugsnag.notify(Exception(msg))
                         }
