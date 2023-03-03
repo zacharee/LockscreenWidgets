@@ -35,7 +35,7 @@
         <item name="android:backgroundDimEnabled">false</item>
     </style>
 
-    <style name="AppTheme.ActionBar" parent="Widget.Material3.Toolbar.Surface">
+    <style name="AppTheme.ActionBar" parent="Widget.Material3.Light.ActionBar.Solid">
         <item name="android:background">?colorSurface</item>
         <item name="background">?colorSurface</item>
 
