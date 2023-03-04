@@ -55,14 +55,8 @@ class MainActivity : AppCompatActivity(), CoroutineScope by MainScope() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             //We don't want the NC tile to show on non-One UI devices.
             launch(Dispatchers.IO) {
-                packageManager.setComponentEnabledSetting(
-                    ComponentName(this@MainActivity, NCTile::class.java),
-                    if (isOneUI) PackageManager.COMPONENT_ENABLED_STATE_ENABLED
-                    else PackageManager.COMPONENT_ENABLED_STATE_DISABLED,
-                    PackageManager.DONT_KILL_APP or PackageManager.SYNCHRONOUS
-                )
-
                 val components = arrayOf(
+                    NCTile::class.java,
                     WidgetTileOne::class.java,
                     WidgetTileTwo::class.java,
                     WidgetTileThree::class.java,
