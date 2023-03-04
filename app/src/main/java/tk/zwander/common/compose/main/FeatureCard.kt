@@ -32,9 +32,9 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.isUnspecified
+import androidx.compose.ui.unit.sp
 import com.google.accompanist.flowlayout.FlowCrossAxisAlignment
 import com.google.accompanist.flowlayout.FlowMainAxisAlignment
 import com.google.accompanist.flowlayout.FlowRow
@@ -194,7 +194,7 @@ fun FeatureCard(info: FeatureCardInfo) {
                             mutableStateOf(0)
                         }
                         var minTextSize by remember(info.buttons.toList()) {
-                            mutableStateOf(TextUnit.Unspecified)
+                            mutableStateOf(16.sp)
                         }
 
                         FlowRow(
