@@ -255,12 +255,6 @@ class WidgetFrameDelegate private constructor(context: Context) : BaseDelegate<W
             updateCornerRadius()
         }
         handler(
-            FrameSizeAndPosition.KEY_SIZES_MAP,
-            FrameSizeAndPosition.KEY_POSITIONS_MAP,
-        ) {
-            updateParamsIfNeeded()
-        }
-        handler(
             PrefManager.KEY_LOCK_WIDGET_FRAME
         ) {
             adapter.currentEditingInterfacePosition = -1
@@ -343,16 +337,16 @@ class WidgetFrameDelegate private constructor(context: Context) : BaseDelegate<W
                     }
                 }
 
-                frameSizeAndPosition.setSizeForType(
-                    saveMode,
-                    PointF(pxAsDp(params.width), pxAsDp(params.height))
-                )
+                updateOverlay()
+
                 frameSizeAndPosition.setPositionForType(
                     saveMode,
                     Point(params.x, params.y)
                 )
-
-                updateOverlay()
+                frameSizeAndPosition.setSizeForType(
+                    saveMode,
+                    PointF(pxAsDp(params.width), pxAsDp(params.height))
+                )
 
                 if (event.isUp) {
                     eventManager.sendEvent(Event.FrameResizeFinished)
