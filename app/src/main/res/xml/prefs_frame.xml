@@ -111,6 +111,23 @@
             android:defaultValue="false"
             />
 
+        <tk.zwander.common.prefs.MaterialSwitchPreference
+            android:title="@string/settings_screen_separate_position_for_lock_nc"
+            android:summary="@string/settings_screen_separate_position_for_lock_nc_desc"
+            android:key="separate_position_for_lock_notification"
+            android:icon="@drawable/ic_baseline_layers_24"
+            android:defaultValue="false"
+            android:dependency="show_in_notification_center"
+            />
+
+        <tk.zwander.common.prefs.MaterialSwitchPreference
+            android:title="@string/settings_screen_separate_layout"
+            android:summary="@string/settings_screen_separate_layout_desc"
+            android:key="frame_separate_layout_for_landscape"
+            android:icon="@drawable/baseline_screen_rotation_24"
+            android:defaultValue="false"
+            />
+
     </tk.zwander.collapsiblepreferencecategory.CollapsiblePreferenceCategoryNew>
 
     <tk.zwander.collapsiblepreferencecategory.CollapsiblePreferenceCategoryNew
@@ -201,15 +218,6 @@
             android:key="show_on_main_lock_screen"
             android:icon="@drawable/ic_baseline_lock_24"
             android:defaultValue="true"
-            android:dependency="show_in_notification_center"
-            />
-
-        <tk.zwander.common.prefs.MaterialSwitchPreference
-            android:title="@string/settings_screen_separate_position_for_lock_nc"
-            android:summary="@string/settings_screen_separate_position_for_lock_nc_desc"
-            android:key="separate_position_for_lock_notification"
-            android:icon="@drawable/ic_baseline_layers_24"
-            android:defaultValue="false"
             android:dependency="show_in_notification_center"
             />
 

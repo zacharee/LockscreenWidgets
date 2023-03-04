@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.ContextWrapper
 import tk.zwander.common.util.migrations.AddExtraWidgetInfoMigration
 import tk.zwander.common.util.migrations.FrameDimAmountMigration
+import tk.zwander.common.util.migrations.FrameSizeAndPositionMigration
 import tk.zwander.common.util.migrations.WidgetSizeMigration
 import tk.zwander.lockscreenwidgets.BuildConfig
 
@@ -27,7 +28,8 @@ class MigrationManager private constructor(context: Context) : ContextWrapper(co
     private val migrations = listOf(
         AddExtraWidgetInfoMigration(),
         WidgetSizeMigration(),
-        FrameDimAmountMigration()
+        FrameDimAmountMigration(),
+        FrameSizeAndPositionMigration(),
     )
 
     fun runMigrations() {

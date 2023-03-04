@@ -9,6 +9,8 @@ import android.graphics.BitmapFactory
 import android.graphics.Color
 import android.graphics.Matrix
 import android.graphics.PixelFormat
+import android.graphics.Point
+import android.graphics.PointF
 import android.graphics.PorterDuff
 import android.graphics.PorterDuffColorFilter
 import android.graphics.drawable.BitmapDrawable
@@ -23,6 +25,8 @@ import android.view.View
 import android.view.WindowManager
 import android.widget.ImageView
 import android.widget.Toast
+import androidx.core.graphics.component1
+import androidx.core.graphics.component2
 import androidx.lifecycle.Lifecycle
 import androidx.recyclerview.widget.RecyclerView
 import com.android.internal.R.attr.screenOrientation
@@ -33,12 +37,14 @@ import tk.zwander.common.data.WidgetData
 import tk.zwander.common.util.BaseDelegate
 import tk.zwander.common.util.BlurManager
 import tk.zwander.common.util.Event
+import tk.zwander.common.util.FrameSizeAndPosition
 import tk.zwander.common.util.HandlerRegistry
 import tk.zwander.common.util.ISnappyLayoutManager
 import tk.zwander.common.util.PrefManager
 import tk.zwander.common.util.appWidgetManager
 import tk.zwander.common.util.dpAsPx
 import tk.zwander.common.util.eventManager
+import tk.zwander.common.util.frameSizeAndPosition
 import tk.zwander.common.util.getWallpaper
 import tk.zwander.common.util.handler
 import tk.zwander.common.util.logUtils
@@ -139,27 +145,37 @@ class WidgetFrameDelegate private constructor(context: Context) : BaseDelegate<W
             }
         }
 
-    private val saveMode: Mode
-        get() = when {
-            state.isPreview -> Mode.PREVIEW
-            state.notificationsPanelFullyExpanded && prefManager.showInNotificationCenter -> {
-                if (kgm.isKeyguardLocked && prefManager.separatePosForLockNC) {
-                    Mode.LOCK_NOTIFICATION
-                } else {
-                    Mode.NOTIFICATION
+    private val saveMode: FrameSizeAndPosition.FrameType
+        get() {
+            val isLandscape = prefManager.separateFrameLayoutForLandscape &&
+                    (state.screenOrientation == Surface.ROTATION_90 ||
+                        state.screenOrientation == Surface.ROTATION_270)
+
+            return when {
+                state.isPreview -> FrameSizeAndPosition.FrameType.Preview.select(!isLandscape)
+                state.notificationsPanelFullyExpanded && prefManager.showInNotificationCenter -> {
+                    if (kgm.isKeyguardLocked && prefManager.separatePosForLockNC) {
+                        FrameSizeAndPosition.FrameType.LockNotification.select(!isLandscape)
+                    } else {
+                        FrameSizeAndPosition.FrameType.NotificationNormal.select(!isLandscape)
+                    }
                 }
+                else -> FrameSizeAndPosition.FrameType.LockNormal.select(!isLandscape)
             }
-            else -> Mode.LOCK_NORMAL
         }
 
     //The size, position, and such of the widget frame on the lock screen.
     override val params = WindowManager.LayoutParams().apply {
         type = WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY
-        width = dpAsPx(prefManager.getCorrectFrameWidth(saveMode))
-        height = dpAsPx(prefManager.getCorrectFrameHeight(saveMode))
 
-        x = prefManager.getCorrectFrameX(saveMode)
-        y = prefManager.getCorrectFrameY(saveMode)
+        frameSizeAndPosition.getSizeForType(saveMode).let { size ->
+            width = dpAsPx(size.x)
+            height = dpAsPx(size.y)
+        }
+        frameSizeAndPosition.getPositionForType(saveMode).let { pos ->
+            x = pos.x
+            y = pos.y
+        }
 
         gravity = Gravity.CENTER
 
@@ -234,12 +250,8 @@ class WidgetFrameDelegate private constructor(context: Context) : BaseDelegate<W
             updateCornerRadius()
         }
         handler(
-            PrefManager.KEY_POS_X,
-            PrefManager.KEY_POS_Y,
-            PrefManager.KEY_NOTIFICATION_POS_X,
-            PrefManager.KEY_NOTIFICATION_POS_Y,
-            PrefManager.KEY_LOCK_NOTIFICATION_POS_X,
-            PrefManager.KEY_LOCK_NOTIFICATION_POS_Y
+            FrameSizeAndPosition.KEY_SIZES_MAP,
+            FrameSizeAndPosition.KEY_POSITIONS_MAP,
         ) {
             updateParamsIfNeeded()
         }
@@ -284,11 +296,23 @@ class WidgetFrameDelegate private constructor(context: Context) : BaseDelegate<W
                 adapter.updateViews()
             }
             Event.CenterFrameHorizontally -> {
-                prefManager.setCorrectFrameX(saveMode, 0)
+                frameSizeAndPosition.setPositionForType(
+                    saveMode,
+                    Point(
+                        0,
+                        frameSizeAndPosition.getPositionForType(saveMode).y
+                    )
+                )
                 updateParamsIfNeeded()
             }
             Event.CenterFrameVertically -> {
-                prefManager.setCorrectFrameY(saveMode, 0)
+                frameSizeAndPosition.setPositionForType(
+                    saveMode,
+                    Point(
+                        frameSizeAndPosition.getPositionForType(saveMode).x,
+                        0
+                    )
+                )
                 updateParamsIfNeeded()
             }
             Event.FrameWidgetClick -> {
@@ -314,9 +338,14 @@ class WidgetFrameDelegate private constructor(context: Context) : BaseDelegate<W
                     }
                 }
 
-                prefManager.setCorrectFrameWidth(saveMode, pxAsDp(params.width))
-                prefManager.setCorrectFrameHeight(saveMode, pxAsDp(params.height))
-                prefManager.setCorrectFramePos(saveMode, params.x, params.y)
+                frameSizeAndPosition.setSizeForType(
+                    saveMode,
+                    PointF(pxAsDp(params.width), pxAsDp(params.height))
+                )
+                frameSizeAndPosition.setPositionForType(
+                    saveMode,
+                    Point(params.x, params.y)
+                )
 
                 updateOverlay()
 
@@ -356,7 +385,10 @@ class WidgetFrameDelegate private constructor(context: Context) : BaseDelegate<W
 
                 updateOverlay()
 
-                prefManager.setCorrectFramePos(saveMode, params.x, params.y)
+                frameSizeAndPosition.setPositionForType(
+                    saveMode,
+                    Point(params.x, params.y)
+                )
             }
             is Event.FrameIntercept -> forceWakelock(wm, event.down)
             Event.TempHide -> {
@@ -721,10 +753,10 @@ class WidgetFrameDelegate private constructor(context: Context) : BaseDelegate<W
     private fun updateParamsIfNeeded() {
         logUtils.debugLog("Checking if params need to be updated")
 
-        val newX = prefManager.getCorrectFrameX(saveMode)
-        val newY = prefManager.getCorrectFrameY(saveMode)
-        val newW = dpAsPx(prefManager.getCorrectFrameWidth(saveMode))
-        val newH = dpAsPx(prefManager.getCorrectFrameHeight(saveMode))
+        val (newX, newY) = frameSizeAndPosition.getPositionForType(saveMode)
+        val (newW, newH) = frameSizeAndPosition.getSizeForType(saveMode).run {
+            Point(dpAsPx(x), dpAsPx(y))
+        }
 
         var changed = false
 

@@ -126,6 +126,7 @@ class PrefManager private constructor(context: Context) : ContextWrapper(context
         const val KEY_DRAWER_SIDE_PADDING = "drawer_side_padding"
         const val KEY_HIDE_ON_EDGE_PANEL = "frame_hide_on_edge_panel"
         const val KEY_HIDE_FRAME_ON_APPS = "frame_hide_on_apps"
+        const val KEY_SEPARATE_LAYOUT_FOR_LANDSCAPE = "frame_separate_layout_for_landscape"
 
         const val VALUE_PAGE_INDICATOR_BEHAVIOR_HIDDEN = 0
         const val VALUE_PAGE_INDICATOR_BEHAVIOR_AUTO_HIDE = 1
@@ -697,6 +698,12 @@ class PrefManager private constructor(context: Context) : ContextWrapper(context
         get() = getStringSet(KEY_HIDE_FRAME_ON_APPS, setOf())
         set(value) {
             putStringSet(KEY_HIDE_FRAME_ON_APPS, value)
+        }
+
+    var separateFrameLayoutForLandscape: Boolean
+        get() = getBoolean(KEY_SEPARATE_LAYOUT_FOR_LANDSCAPE, false)
+        set(value) {
+            putBoolean(KEY_SEPARATE_LAYOUT_FOR_LANDSCAPE, value)
         }
 
     fun getCorrectFrameWidth(mode: Mode): Float {
