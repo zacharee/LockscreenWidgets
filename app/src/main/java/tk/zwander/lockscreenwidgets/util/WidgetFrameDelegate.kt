@@ -120,6 +120,11 @@ class WidgetFrameDelegate private constructor(context: Context) : BaseDelegate<W
                     actualNewState.copy(isPendingNotificationStateChange = true, isPreview = false)
             }
 
+            if (actualNewState.screenOrientation != oldState.screenOrientation) {
+                actualNewState =
+                    actualNewState.copy(isPendingOrientationStateChange = true, isPreview = false)
+            }
+
             if (actualNewState.isScreenOn != oldState.isScreenOn && !actualNewState.isScreenOn) {
                 actualNewState =
                     actualNewState.copy(isPreview = false, notificationsPanelFullyExpanded = false)
@@ -709,9 +714,14 @@ class WidgetFrameDelegate private constructor(context: Context) : BaseDelegate<W
      */
     private fun updateAccessibilityPass() {
         if (binding.frame.animationState == WidgetFrameView.AnimationState.STATE_IDLE) {
-            if (state.isPendingNotificationStateChange) {
+            if (state.isPendingNotificationStateChange || state.isPendingOrientationStateChange) {
                 updateParamsIfNeeded()
-                updateState { it.copy(isPendingNotificationStateChange = false) }
+                updateState {
+                    it.copy(
+                        isPendingNotificationStateChange = false,
+                        isPendingOrientationStateChange = false,
+                    )
+                }
             }
         }
     }
@@ -877,6 +887,7 @@ class WidgetFrameDelegate private constructor(context: Context) : BaseDelegate<W
         //animation state of the frame is IDLE) and then updates
         //the params.
         val isPendingNotificationStateChange: Boolean = false,
+        val isPendingOrientationStateChange: Boolean = false,
         val notificationsPanelFullyExpanded: Boolean = false,
         val isScreenOn: Boolean = false,
         val isTempHide: Boolean = false,
