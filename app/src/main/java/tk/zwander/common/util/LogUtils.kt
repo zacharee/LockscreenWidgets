@@ -11,6 +11,9 @@ import java.util.*
 val Context.logUtils: LogUtils
     get() = LogUtils.getInstance(this)
 
+val peekLogUtils: LogUtils?
+    get() = LogUtils.peekInstance()
+
 class LogUtils private constructor(private val context: Context) {
     companion object {
         const val NORMAL_LOG_TAG = "LockscreenWidgets"
@@ -20,10 +23,24 @@ class LogUtils private constructor(private val context: Context) {
         private var instance: LogUtils? = null
 
         @Synchronized
+        fun createInstance(context: Context) {
+            if (instance != null) {
+                return
+            }
+
+            instance = LogUtils(context.safeApplicationContext)
+        }
+
+        @Synchronized
         fun getInstance(context: Context): LogUtils {
             return instance ?: LogUtils(context.safeApplicationContext).also {
                 instance = it
             }
+        }
+
+        @Synchronized
+        fun peekInstance(): LogUtils? {
+            return instance
         }
     }
 

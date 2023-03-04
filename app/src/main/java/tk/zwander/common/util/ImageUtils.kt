@@ -12,7 +12,6 @@ import android.graphics.drawable.Drawable
 import android.util.Base64
 import androidx.core.content.res.ResourcesCompat
 import androidx.core.graphics.drawable.toBitmap
-import tk.zwander.lockscreenwidgets.App
 import java.io.ByteArrayOutputStream
 import java.io.IOException
 
@@ -92,7 +91,7 @@ fun Bitmap?.toByteArray(): ByteArray? {
         out.close()
         out.toByteArray()
     } catch (e: IOException) {
-        App.globalContext?.logUtils?.normalLog("Could not write bitmap", e)
+        peekLogUtils?.normalLog("Could not write bitmap", e)
         null
     }
 }

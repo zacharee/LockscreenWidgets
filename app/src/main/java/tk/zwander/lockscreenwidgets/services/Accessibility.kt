@@ -62,18 +62,6 @@ fun Context.openAccessibilitySettings() {
     }
 }
 
-//Sometimes retrieving the root of a window causes an NPE
-//in the framework. Catch that here and return null if it happens.
-val AccessibilityWindowInfo.safeRoot: AccessibilityNodeInfo?
-    get() = try {
-        root
-    } catch (e: NullPointerException) {
-        null
-    } catch (e: Exception) {
-        App.globalContext?.logUtils?.normalLog("Error getting window root", e)
-        null
-    }
-
 fun <T> AccessibilityNodeInfo?.use(block: (AccessibilityNodeInfo?) -> T): T {
     val result = block(this)
     @Suppress("DEPRECATION")

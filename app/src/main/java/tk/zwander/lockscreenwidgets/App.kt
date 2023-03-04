@@ -1,6 +1,5 @@
 package tk.zwander.lockscreenwidgets
 
-import android.annotation.SuppressLint
 import android.app.Application
 import android.content.BroadcastReceiver
 import android.content.Context
@@ -14,6 +13,7 @@ import com.bugsnag.android.Bugsnag
 import org.lsposed.hiddenapibypass.HiddenApiBypass
 import tk.zwander.common.util.Event
 import tk.zwander.common.util.GlobalExceptionHandler
+import tk.zwander.common.util.LogUtils
 import tk.zwander.common.util.eventManager
 import tk.zwander.common.util.migrationManager
 import tk.zwander.lockscreenwidgets.activities.add.AddFrameWidgetActivity
@@ -30,12 +30,6 @@ import tk.zwander.widgetdrawer.activities.add.AddDrawerWidgetActivity
  * running One UI or not.
  */
 class App : Application() {
-    companion object {
-        @SuppressLint("StaticFieldLeak")
-        var globalContext: Context? = null
-            private set
-    }
-
     //Listen for the screen turning on and off.
     //This shouldn't really be necessary, but there are some quirks in how
     //Android works that makes it helpful.
@@ -65,8 +59,6 @@ class App : Application() {
 
         Bugsnag.start(this)
 
-        globalContext = this
-
         val previousHandler = Thread.getDefaultUncaughtExceptionHandler()
         Thread.setDefaultUncaughtExceptionHandler(GlobalExceptionHandler(this, previousHandler))
 
@@ -74,6 +66,8 @@ class App : Application() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
             HiddenApiBypass.setHiddenApiExemptions("L")
         }
+
+        LogUtils.createInstance(this)
 
         registerReceiver(
             screenStateReceiver,

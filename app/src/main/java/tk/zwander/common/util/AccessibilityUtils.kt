@@ -19,7 +19,6 @@ import tk.zwander.common.data.window.WindowInfo
 import tk.zwander.common.data.window.WindowRootPair
 import tk.zwander.lockscreenwidgets.appwidget.IDListProvider
 import tk.zwander.lockscreenwidgets.services.hasVisibleIds
-import tk.zwander.lockscreenwidgets.services.safeRoot
 import tk.zwander.lockscreenwidgets.util.WidgetFrameDelegate
 import tk.zwander.widgetdrawer.util.DrawerDelegate
 import java.util.concurrent.ConcurrentLinkedQueue
@@ -50,7 +49,14 @@ object AccessibilityUtils {
         var minSysUiWindowIndex = -1
 
         val processed = windows.mapIndexed { index, rawWindow ->
-            val safeRoot = rawWindow.safeRoot
+            val safeRoot = try {
+                rawWindow.root
+            } catch (e: NullPointerException) {
+                null
+            } catch (e: Exception) {
+                logUtils.normalLog("Error getting window root", e)
+                null
+            }
             val isSysUi = safeRoot?.packageName == "com.android.systemui"
             val window = WindowRootPair(rawWindow, safeRoot, index)
 
