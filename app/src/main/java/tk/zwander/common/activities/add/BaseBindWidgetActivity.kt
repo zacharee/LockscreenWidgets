@@ -8,6 +8,7 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.pm.LauncherApps
+import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Build
@@ -24,6 +25,7 @@ import tk.zwander.common.data.WidgetSizeData
 import tk.zwander.common.host.widgetHostCompat
 import tk.zwander.common.util.appWidgetManager
 import tk.zwander.common.util.componentNameCompat
+import tk.zwander.common.util.getReceiverInfoCompat
 import tk.zwander.common.util.loadPreviewOrIcon
 import tk.zwander.common.util.logUtils
 import tk.zwander.common.util.prefManager
@@ -315,11 +317,35 @@ abstract class BaseBindWidgetActivity : ComponentActivity() {
         private val configLauncher = registerForActivityResult(ActivityResultContracts.StartIntentSenderForResult()) { result ->
             onActivityResult(CONFIGURE_REQ, result.resultCode, result.data)
         }
+        private val samsungConfigLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            onActivityResult(CONFIGURE_REQ, result.resultCode, result.data)
+        }
 
         private var currentConfigId: Int? = null
 
         @SuppressLint("NewApi")
         fun launch(id: Int): Boolean {
+            try {
+                val info = appWidgetManager.getAppWidgetInfo(id)
+                val samsungConfigComponent = packageManager.getReceiverInfoCompat(
+                    info.provider,
+                    PackageManager.GET_META_DATA
+                )
+                    .metaData.getString("android.appwidget.provider.semConfigureActivity")
+                    .run { ComponentName.unflattenFromString("${info.provider.packageName}/$this") }
+
+                if (samsungConfigComponent != null) {
+                    val launchIntent = Intent(AppWidgetManager.ACTION_APPWIDGET_CONFIGURE)
+                    launchIntent.component = samsungConfigComponent
+                    launchIntent.putExtra("appWidgetId", id)
+
+                    samsungConfigLauncher.launch(launchIntent)
+                    return true
+                }
+            } catch (e: Throwable) {
+                logUtils.normalLog("Error configuring Samsung widget", e)
+            }
+
             //Use the system API instead of ACTION_APPWIDGET_CONFIGURE to try to avoid some permissions issues
             try {
                 val intentSender = IAppWidgetService.Stub.asInterface(ServiceManager.getService(Context.APPWIDGET_SERVICE))

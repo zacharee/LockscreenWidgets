@@ -85,6 +85,6 @@ class LogUtils private constructor(private val context: Context) {
 
         return "${formatter.format(Date())}\n${message}${throwable?.let { 
             "\n${Log.getStackTraceString(it)}"
-        }}"
+        } ?: ""}"
     }
 }

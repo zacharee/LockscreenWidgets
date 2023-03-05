@@ -3,7 +3,9 @@
 package tk.zwander.common.util
 
 import android.annotation.SuppressLint
+import android.content.ComponentName
 import android.content.Intent
+import android.content.pm.ActivityInfo
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
 import android.content.pm.ResolveInfo
@@ -44,4 +46,12 @@ fun PackageManager.getApplicationInfoInAnyState(packageName: String): Applicatio
         packageName = packageName,
         flags = PackageManager.MATCH_DISABLED_COMPONENTS or PackageManager.MATCH_ALL
     )
+}
+
+fun PackageManager.getReceiverInfoCompat(componentName: ComponentName, flags: Int = 0): ActivityInfo {
+    return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+        getReceiverInfo(componentName, PackageManager.ComponentInfoFlags.of(flags.toLong()))
+    } else {
+        getReceiverInfo(componentName, flags)
+    }
 }
