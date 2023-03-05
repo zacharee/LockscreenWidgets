@@ -394,7 +394,6 @@ open class WidgetFrameAdapter(
                         WidgetType.HEADER -> {}
                     }
 
-                    binding.openWidgetConfig.isVisible = manager.getAppWidgetInfo(data.id).hasConfiguration(context) == true
                     binding.card.radius = context.dpAsPx(widgetCornerRadius).toFloat()
                     binding.widgetEditOutline.background = (binding.widgetEditOutline.background.mutate() as GradientDrawable).apply {
                         this.cornerRadius = binding.card.radius
@@ -436,6 +435,8 @@ open class WidgetFrameAdapter(
             val widgetInfo = withContext(Dispatchers.Main) {
                 manager.getAppWidgetInfo(data.id)
             }
+
+            binding.openWidgetConfig.isVisible = widgetInfo.hasConfiguration(itemView.context) == true
 
             if (widgetInfo != null) {
                 binding.widgetReconfigure.isVisible = false
@@ -540,6 +541,7 @@ open class WidgetFrameAdapter(
         private fun bindShortcut(data: WidgetData) {
             binding.widgetReconfigure.isVisible = false
             binding.widgetHolder.isVisible = true
+            binding.openWidgetConfig.isVisible = false
 
             val shortcutView = FrameShortcutViewBinding.inflate(
                 LayoutInflater.from(binding.widgetHolder.context)
