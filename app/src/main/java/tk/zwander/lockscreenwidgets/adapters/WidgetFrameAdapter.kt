@@ -43,6 +43,7 @@ import tk.zwander.common.util.base64ToBitmap
 import tk.zwander.common.util.dpAsPx
 import tk.zwander.common.util.eventManager
 import tk.zwander.common.util.getRemoteDrawable
+import tk.zwander.common.util.hasConfiguration
 import tk.zwander.common.util.logUtils
 import tk.zwander.common.util.mainHandler
 import tk.zwander.common.util.prefManager
@@ -393,7 +394,7 @@ open class WidgetFrameAdapter(
                         WidgetType.HEADER -> {}
                     }
 
-                    binding.openWidgetConfig.isVisible = data.widgetProviderComponent != null
+                    binding.openWidgetConfig.isVisible = manager.getAppWidgetInfo(data.id).hasConfiguration(context) == true
                     binding.card.radius = context.dpAsPx(widgetCornerRadius).toFloat()
                     binding.widgetEditOutline.background = (binding.widgetEditOutline.background.mutate() as GradientDrawable).apply {
                         this.cornerRadius = binding.card.radius

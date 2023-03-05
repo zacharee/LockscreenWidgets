@@ -8,7 +8,6 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.pm.LauncherApps
-import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Build
@@ -25,7 +24,7 @@ import tk.zwander.common.data.WidgetSizeData
 import tk.zwander.common.host.widgetHostCompat
 import tk.zwander.common.util.appWidgetManager
 import tk.zwander.common.util.componentNameCompat
-import tk.zwander.common.util.getReceiverInfoCompat
+import tk.zwander.common.util.getSamsungConfigureComponent
 import tk.zwander.common.util.loadPreviewOrIcon
 import tk.zwander.common.util.logUtils
 import tk.zwander.common.util.prefManager
@@ -326,13 +325,8 @@ abstract class BaseBindWidgetActivity : ComponentActivity() {
         @SuppressLint("NewApi")
         fun launch(id: Int): Boolean {
             try {
-                val info = appWidgetManager.getAppWidgetInfo(id)
-                val samsungConfigComponent = packageManager.getReceiverInfoCompat(
-                    info.provider,
-                    PackageManager.GET_META_DATA
-                )
-                    .metaData.getString("android.appwidget.provider.semConfigureActivity")
-                    .run { ComponentName.unflattenFromString("${info.provider.packageName}/$this") }
+                val samsungConfigComponent = appWidgetManager.getAppWidgetInfo(id)
+                    .getSamsungConfigureComponent(this@BaseBindWidgetActivity)
 
                 if (samsungConfigComponent != null) {
                     val launchIntent = Intent(AppWidgetManager.ACTION_APPWIDGET_CONFIGURE)
