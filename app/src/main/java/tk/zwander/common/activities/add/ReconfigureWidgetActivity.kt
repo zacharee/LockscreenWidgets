@@ -39,7 +39,11 @@ abstract class ReconfigureWidgetActivity : BaseBindWidgetActivity() {
 
         DismissOrUnlockActivity.launch(this)
 
-        tryBindWidget(providerInfo, widgetHost.allocateAppWidgetId())
+        if (appWidgetManager.getAppWidgetInfo(prevId)?.provider == providerInfo.provider) {
+            configureWidget(prevId, providerInfo)
+        } else {
+            tryBindWidget(providerInfo, widgetHost.allocateAppWidgetId())
+        }
     }
 
     @SuppressLint("NewApi")
