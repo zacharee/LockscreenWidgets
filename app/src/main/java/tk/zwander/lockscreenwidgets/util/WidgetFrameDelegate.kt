@@ -290,6 +290,7 @@ class WidgetFrameDelegate private constructor(context: Context) : BaseDelegate<W
             Event.FrameMoveFinished -> updateWallpaperLayerIfNeeded()
             Event.TempHide -> {
                 updateState { it.copy(isTempHide = true) }
+                updateWindowState(wm)
             }
             Event.NightModeUpdate -> {
                 adapter.updateViews()
