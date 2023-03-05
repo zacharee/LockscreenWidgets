@@ -51,25 +51,27 @@ fun IDListLayout(
 
     LaunchedEffect(items.toList()) {
         withContext(Dispatchers.IO) {
-            val oldIds = displayItems
-                .filterNot { it.type == IDData.IDType.REMOVED }
+            val oldIdsFull = displayItems.map { it.id }
+            val oldIdsWithoutRemoved = displayItems
+                .filter { it.type != IDData.IDType.REMOVED }
                 .map { it.id }
+            if (!oldIdsWithoutRemoved.containsAll(items) || !items.containsAll(oldIdsWithoutRemoved)) {
+                val newItems = TreeSet<IDData>()
+                newItems.addAll(
+                    (items + oldIdsFull).map { id ->
+                        IDData(
+                            id = id,
+                            type = when {
+                                !items.contains(id) -> IDData.IDType.REMOVED
+                                !oldIdsWithoutRemoved.contains(id) -> IDData.IDType.ADDED
+                                else -> IDData.IDType.SAME
+                            }
+                        )
+                    }
+                )
 
-            val newItems = TreeSet<IDData>()
-            newItems.addAll(
-                (items + oldIds).map { id ->
-                    IDData(
-                        id = id,
-                        type = when {
-                            !items.contains(id) -> IDData.IDType.REMOVED
-                            !oldIds.contains(id) -> IDData.IDType.ADDED
-                            else -> IDData.IDType.SAME
-                        }
-                    )
-                }
-            )
-
-            displayItems = newItems
+                displayItems = newItems
+            }
         }
     }
 
