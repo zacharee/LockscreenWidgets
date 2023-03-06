@@ -401,6 +401,10 @@ object AccessibilityUtils {
                 }
 
                 try {
+                    node.isSealed = false
+                } catch (_: Throwable) {}
+
+                try {
                     @Suppress("DEPRECATION")
                     node.recycle()
                 } catch (_: IllegalStateException) {
@@ -409,10 +413,8 @@ object AccessibilityUtils {
 
             windows.forEach {
                 try {
-                    @Suppress("DEPRECATION")
-                    it.root?.recycle()
-                } catch (_: IllegalStateException) {
-                }
+                    it.root?.isSealed = false
+                } catch (_: Throwable) {}
 
                 try {
                     @Suppress("DEPRECATION")
