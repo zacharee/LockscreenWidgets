@@ -1,5 +1,6 @@
 package tk.zwander.common.compose.add
 
+import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
@@ -34,6 +35,7 @@ import kotlinx.coroutines.withContext
 import tk.zwander.common.data.AppInfo
 import tk.zwander.common.util.componentNameCompat
 import tk.zwander.common.util.getRemoteDrawable
+import tk.zwander.common.util.logUtils
 import tk.zwander.common.util.toBitmap
 import tk.zwander.lockscreenwidgets.R
 import tk.zwander.lockscreenwidgets.data.list.BaseListInfo
@@ -167,12 +169,17 @@ private fun icon(
     }
 
     LaunchedEffect(key) {
-        icon = withContext(Dispatchers.IO) {
-            context.getRemoteDrawable(
-                info.appInfo.packageName,
-                info.icon,
-                context.packageManager.getResourcesForApplication(info.appInfo)
-            ) { context.packageManager.getApplicationIcon(info.appInfo) }
+        icon = try {
+            withContext(Dispatchers.IO) {
+                context.getRemoteDrawable(
+                    info.appInfo.packageName,
+                    info.icon,
+                    context.packageManager.getResourcesForApplication(info.appInfo)
+                ) { context.packageManager.getApplicationIcon(info.appInfo) }
+            }
+        } catch (e: PackageManager.NameNotFoundException) {
+            context.logUtils.normalLog("Unable to load icon for ${info.appInfo.packageName}.", e)
+            null
         }
     }
 
