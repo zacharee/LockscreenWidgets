@@ -1,7 +1,5 @@
 package tk.zwander.common.compose.add
 
-import android.appwidget.AppWidgetManager
-import android.appwidget.AppWidgetProviderInfo
 import android.content.Intent
 import android.content.pm.PackageManager
 import androidx.compose.runtime.Composable
@@ -15,6 +13,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import tk.zwander.common.compose.util.matchesFilter
 import tk.zwander.common.data.AppInfo
+import tk.zwander.common.util.getAllInstalledWidgetProviders
 import tk.zwander.common.util.getApplicationInfoCompat
 import tk.zwander.common.util.logUtils
 import tk.zwander.common.util.queryIntentActivitiesCompat
@@ -25,7 +24,6 @@ import java.util.TreeSet
 @Composable
 internal fun items(
     filter: String?,
-    appWidgetManager: AppWidgetManager,
     showShortcuts: Boolean
 ): Pair<List<AppInfo>, List<AppInfo>> {
     val context = LocalContext.current
@@ -39,10 +37,7 @@ internal fun items(
             val apps = HashMap<String, AppInfo>()
             val packageManager = context.packageManager
 
-            (appWidgetManager.installedProviders +
-                    appWidgetManager.getInstalledProviders(AppWidgetProviderInfo.WIDGET_CATEGORY_KEYGUARD) +
-                    appWidgetManager.getInstalledProviders(AppWidgetProviderInfo.WIDGET_CATEGORY_SEARCHBOX)
-                    ).forEach {
+            context.getAllInstalledWidgetProviders().forEach {
                     try {
                         val appInfo =
                             packageManager.getApplicationInfoCompat(it.provider.packageName, 0)

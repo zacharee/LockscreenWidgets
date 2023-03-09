@@ -1,6 +1,5 @@
 package tk.zwander.common.compose.add
 
-import android.appwidget.AppWidgetManager
 import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -22,7 +21,6 @@ import tk.zwander.lockscreenwidgets.data.list.BaseListInfo
 
 @Composable
 fun AddWidgetLayout(
-    appWidgetManager: AppWidgetManager,
     showShortcuts: Boolean,
     onBack: () -> Unit,
     onSelected: (BaseListInfo<*>) -> Unit,
@@ -34,7 +32,6 @@ fun AddWidgetLayout(
     val (items, filteredItems) = items(
         filter = filter,
         showShortcuts = showShortcuts,
-        appWidgetManager = appWidgetManager
     )
 
     AppTheme {
@@ -46,7 +43,8 @@ fun AddWidgetLayout(
         ) {
             Crossfade(
                 modifier = Modifier.fillMaxSize(),
-                targetState = items.isEmpty()
+                targetState = items.isEmpty(),
+                label = "AddWidget"
             ) {
                 if (it) {
                     Loader(modifier = Modifier.fillMaxSize())

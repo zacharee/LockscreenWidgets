@@ -10,7 +10,6 @@ import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.cancel
 import tk.zwander.common.activities.DismissOrUnlockActivity
 import tk.zwander.common.compose.add.AddWidgetLayout
-import tk.zwander.common.util.appWidgetManager
 import tk.zwander.lockscreenwidgets.data.list.ShortcutListInfo
 import tk.zwander.lockscreenwidgets.data.list.WidgetListInfo
 
@@ -33,11 +32,8 @@ abstract class AddWidgetActivity : BaseBindWidgetActivity(), CoroutineScope by M
 
         setContent {
             AddWidgetLayout(
-                appWidgetManager = appWidgetManager,
                 showShortcuts = showShortcuts,
-                onBack = {
-                    onBackPressedDispatcher.onBackPressed()
-                }
+                onBack = onBackPressedDispatcher::onBackPressed
             ) {
                 if (it is WidgetListInfo) {
                     tryBindWidget(it.itemInfo)

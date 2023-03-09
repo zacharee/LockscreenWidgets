@@ -42,6 +42,7 @@ import tk.zwander.common.util.EventObserver
 import tk.zwander.common.util.base64ToBitmap
 import tk.zwander.common.util.dpAsPx
 import tk.zwander.common.util.eventManager
+import tk.zwander.common.util.getAllInstalledWidgetProviders
 import tk.zwander.common.util.getRemoteDrawable
 import tk.zwander.common.util.hasConfiguration
 import tk.zwander.common.util.logUtils
@@ -201,7 +202,11 @@ open class WidgetFrameAdapter(
         LayoutInflaterCompat.setFactory2(
             inflater,
             Class.forName("androidx.appcompat.app.AppCompatDelegateImpl")
-                .getDeclaredConstructor(Context::class.java, Window::class.java, AppCompatCallback::class.java)
+                .getDeclaredConstructor(
+                    Context::class.java,
+                    Window::class.java,
+                    AppCompatCallback::class.java
+                )
                 .apply { isAccessible = true }
                 .newInstance(parent.context, null, null) as Factory2
         )
@@ -243,9 +248,17 @@ open class WidgetFrameAdapter(
         ReconfigureFrameWidgetActivity.launch(host.context, id, providerInfo)
     }
 
-    protected open fun View.onWidgetResize(data: WidgetData, params: ViewGroup.LayoutParams, amount: Int, direction: Int) {
-        params.width = params.width / context.prefManager.frameColCount * (data.size?.safeWidgetWidthSpan ?: 1)
-        params.height = params.height / context.prefManager.frameRowCount * (data.size?.safeWidgetHeightSpan ?: 1)
+    protected open fun View.onWidgetResize(
+        data: WidgetData,
+        params: ViewGroup.LayoutParams,
+        amount: Int,
+        direction: Int
+    ) {
+        params.width =
+            params.width / context.prefManager.frameColCount * (data.size?.safeWidgetWidthSpan ?: 1)
+        params.height =
+            params.height / context.prefManager.frameRowCount * (data.size?.safeWidgetHeightSpan
+                ?: 1)
     }
 
     protected open fun getThresholdPx(which: WidgetResizeListener.Which): Int {
@@ -305,25 +318,57 @@ open class WidgetFrameAdapter(
                 binding.widgetLeftDragger.setOnTouchListener(WidgetResizeListener(
                     ::getThresholdPx,
                     WidgetResizeListener.Which.LEFT,
-                    { overThreshold, step, amount -> handleResize(overThreshold, step, amount, -1, false) }
+                    { overThreshold, step, amount ->
+                        handleResize(
+                            overThreshold,
+                            step,
+                            amount,
+                            -1,
+                            false
+                        )
+                    }
                 ) { notifyItemChanged(bindingAdapterPosition) })
 
                 binding.widgetTopDragger.setOnTouchListener(WidgetResizeListener(
                     ::getThresholdPx,
                     WidgetResizeListener.Which.TOP,
-                    { overThreshold, step, amount -> handleResize(overThreshold, step, amount, -1, true) }
+                    { overThreshold, step, amount ->
+                        handleResize(
+                            overThreshold,
+                            step,
+                            amount,
+                            -1,
+                            true
+                        )
+                    }
                 ) { notifyItemChanged(bindingAdapterPosition) })
 
                 binding.widgetRightDragger.setOnTouchListener(WidgetResizeListener(
                     ::getThresholdPx,
                     WidgetResizeListener.Which.RIGHT,
-                    { overThreshold, step, amount -> handleResize(overThreshold, step, amount, 1, false) }
+                    { overThreshold, step, amount ->
+                        handleResize(
+                            overThreshold,
+                            step,
+                            amount,
+                            1,
+                            false
+                        )
+                    }
                 ) { notifyItemChanged(bindingAdapterPosition) })
 
                 binding.widgetBottomDragger.setOnTouchListener(WidgetResizeListener(
                     ::getThresholdPx,
                     WidgetResizeListener.Which.BOTTOM,
-                    { overThreshold, step, amount -> handleResize(overThreshold, step, amount, 1, true) }
+                    { overThreshold, step, amount ->
+                        handleResize(
+                            overThreshold,
+                            step,
+                            amount,
+                            1,
+                            true
+                        )
+                    }
                 ) { notifyItemChanged(bindingAdapterPosition) })
             }
 
@@ -344,30 +389,9 @@ open class WidgetFrameAdapter(
                 itemView.context.logUtils.normalLog("Unable to reconfigure widget: provider is null.")
             } else {
                 val pkg = provider.packageName
-                val providerInfo = run {
-                    val providers = try {
-                        manager.getInstalledProvidersForProfile(
-                            AppWidgetProviderInfo.WIDGET_CATEGORY_HOME_SCREEN,
-                            null,
-                            pkg
-                        ) + manager.getInstalledProvidersForProfile(
-                            AppWidgetProviderInfo.WIDGET_CATEGORY_KEYGUARD,
-                            null,
-                            pkg
-                        ) + manager.getInstalledProvidersForProfile(
-                            AppWidgetProviderInfo.WIDGET_CATEGORY_SEARCHBOX,
-                            null,
-                            pkg
-                        )
-                    } catch (e: NoSuchMethodError) {
-                        itemView.context.logUtils.debugLog("Unable to use getInstalledProvidersForProfile", e)
-
-                        manager.getInstalledProviders(AppWidgetProviderInfo.WIDGET_CATEGORY_HOME_SCREEN) +
-                                manager.getInstalledProviders(AppWidgetProviderInfo.WIDGET_CATEGORY_KEYGUARD) +
-                                manager.getInstalledProviders(AppWidgetProviderInfo.WIDGET_CATEGORY_SEARCHBOX)
-                    }
-                    providers.find { info -> info.provider == provider }
-                }
+                val providerInfo = manager.getAppWidgetInfo(data.id)
+                    ?: (itemView.context.getAllInstalledWidgetProviders(pkg)
+                        .find { info -> info.provider == provider })
 
                 if (providerInfo == null) {
                     //TODO: Notify + debug log
@@ -395,9 +419,10 @@ open class WidgetFrameAdapter(
                     }
 
                     binding.card.radius = context.dpAsPx(widgetCornerRadius).toFloat()
-                    binding.widgetEditOutline.background = (binding.widgetEditOutline.background.mutate() as GradientDrawable).apply {
-                        this.cornerRadius = binding.card.radius
-                    }
+                    binding.widgetEditOutline.background =
+                        (binding.widgetEditOutline.background.mutate() as GradientDrawable).apply {
+                            this.cornerRadius = binding.card.radius
+                        }
                 }
             }
         }
@@ -415,9 +440,11 @@ open class WidgetFrameAdapter(
                         onResize(widgets[pos], 0, 1)
                     }
                 }
+
                 is Event.EditingIndexUpdated -> {
                     updateEditingUI(event.index)
                 }
+
                 else -> {}
             }
         }
@@ -436,7 +463,8 @@ open class WidgetFrameAdapter(
                 manager.getAppWidgetInfo(data.id)
             }
 
-            binding.openWidgetConfig.isVisible = widgetInfo.hasConfiguration(itemView.context) == true
+            binding.openWidgetConfig.isVisible =
+                widgetInfo.hasConfiguration(itemView.context) == true
 
             if (widgetInfo != null) {
                 binding.widgetReconfigure.isVisible = false
@@ -448,7 +476,7 @@ open class WidgetFrameAdapter(
                         // way to do things. However, it's not trivial to just set a new source on an AppWidgetHostView,
                         // so this makes the most sense right now.
                         addView(withContext(Dispatchers.Main) {
-                            host.createView(itemView.context, data.id, widgetInfo).apply hostView@ {
+                            host.createView(itemView.context, data.id, widgetInfo).apply hostView@{
                                 findScrollableViewsInHierarchy(this).forEach { list ->
                                     list.isNestedScrollingEnabled = true
                                 }
@@ -593,7 +621,13 @@ open class WidgetFrameAdapter(
             return ret
         }
 
-        private fun handleResize(overThreshold: Boolean, step: Int, amount: Int, direction: Int, vertical: Boolean) {
+        private fun handleResize(
+            overThreshold: Boolean,
+            step: Int,
+            amount: Int,
+            direction: Int,
+            vertical: Boolean
+        ) {
             val sizeInfo = currentData?.safeSize ?: return
 
             if (overThreshold) {
