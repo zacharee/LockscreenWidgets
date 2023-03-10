@@ -9,6 +9,7 @@ import android.net.Uri
 import android.os.*
 import android.view.Display
 import kotlinx.coroutines.*
+import java.util.concurrent.ConcurrentSkipListMap
 
 
 /**
@@ -71,6 +72,19 @@ suspend inline fun <T> Collection<T>.forEachParallel(crossinline action: suspend
         forEach { awaits.add(async { action(it) }) }
 
         awaits.awaitAll()
+    }
+}
+
+suspend inline fun <T, S> Collection<T>.mapIndexedParallel(crossinline action: suspend CoroutineScope.(Int, T) -> S): List<S> {
+    return coroutineScope {
+        val awaits = ArrayList<Deferred<*>>(size)
+        val results = ConcurrentSkipListMap<Int, S>()
+
+        forEachIndexed { index, item -> awaits.add(async { results[index] = action(index, item) }) }
+
+        awaits.awaitAll()
+
+        results.values.toList()
     }
 }
 

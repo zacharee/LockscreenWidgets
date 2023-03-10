@@ -8,12 +8,15 @@ import android.view.WindowManager
 import android.view.accessibility.AccessibilityEvent
 import android.view.accessibility.AccessibilityNodeInfo
 import android.view.accessibility.AccessibilityWindowInfo
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import tk.zwander.common.activities.DismissOrUnlockActivity
 import tk.zwander.common.data.window.WindowInfo
 import tk.zwander.common.data.window.WindowRootPair
@@ -24,13 +27,112 @@ import tk.zwander.widgetdrawer.util.DrawerDelegate
 import java.util.concurrent.ConcurrentLinkedQueue
 
 object AccessibilityUtils {
+    data class NodeState(
+        val onMainLockscreen: Boolean = false,
+        val showingNotificationsPanel: Boolean = false,
+        val notificationsPanelFullyExpanded: Boolean = false,
+        val hideForPresentIds: Boolean = false,
+        val hideForNonPresentIds: Boolean = false,
+    )
+
+    private suspend fun Context.processNode(
+        initialState: NodeState,
+        node: AccessibilityNodeInfo?,
+        isOnKeyguard: Boolean,
+    ): NodeState {
+        var newState = initialState
+
+        if (node == null) {
+            return initialState
+        }
+
+        //If the user has enabled the option to hide the frame on security (pin, pattern, password)
+        //input, we need to check if they're on the main lock screen. This is more reliable than
+        //checking for the existence of a security input, since there are a lot of different possible
+        //IDs, and OEMs change them. "notification_panel" and "left_button" are largely unchanged,
+        //although this method isn't perfect.
+        if (isOnKeyguard && prefManager.hideOnSecurityPage && !newState.onMainLockscreen) {
+            if (node.hasVisibleIds(
+                    "com.android.systemui:id/notification_panel",
+                    "com.android.systemui:id/left_button"
+                )
+            ) {
+                newState = newState.copy(
+                    onMainLockscreen = true
+                )
+            }
+        }
+
+        if (isOnKeyguard && prefManager.hideOnNotificationShade && !newState.showingNotificationsPanel) {
+            if (node.hasVisibleIds(
+                    "com.android.systemui:id/quick_settings_panel",
+                    "com.android.systemui:id/settings_button",
+                    "com.android.systemui:id/tile_label",
+                    "com.android.systemui:id/header_label"
+                ) || ((Build.VERSION.SDK_INT > Build.VERSION_CODES.S_V2) &&
+                        node.hasVisibleIds(
+                            "com.android.systemui:id/quick_qs_panel",
+                        ))
+            ) {
+                //Used for "Hide When Notification Shade Shown" so we know when it's actually expanded.
+                //Some devices don't even have left shortcuts, so also check for keyguard_indication_area.
+                //Just like the showingSecurityInput check, this is probably unreliable for some devices.
+                newState = newState.copy(
+                    showingNotificationsPanel = true
+                )
+            }
+        }
+
+        //If the option to show when the NC is fully expanded is enabled,
+        //check if the frame can actually show. This checks to the "more_button"
+        //ID, which is unique to One UI (it's the three-dot button), and is only
+        //visible when the NC is fully expanded.
+        if (prefManager.showInNotificationCenter && !newState.notificationsPanelFullyExpanded) {
+            if (node.hasVisibleIds("com.android.systemui:id/more_button")) {
+                newState = newState.copy(
+                    notificationsPanelFullyExpanded = true
+                )
+            }
+        }
+
+        //Check to see if any of the user-specified IDs are present.
+        //If any are, the frame will be hidden.
+        val presentIds = prefManager.presentIds
+        if (!newState.hideForPresentIds && presentIds.isNotEmpty()) {
+            if (node.hasVisibleIds(presentIds)) {
+                newState = newState.copy(
+                    hideForPresentIds = true
+                )
+            }
+        }
+
+        //Check to see if any of the user-specified IDs aren't present
+        //(or are present but not visible). If any aren't, the frame will be hidden.
+        val nonPresentIds = prefManager.nonPresentIds
+        if (!newState.hideForNonPresentIds && nonPresentIds.isNotEmpty()) {
+            if (!node.hasVisibleIds(nonPresentIds)) {
+                newState = newState.copy(
+                    hideForNonPresentIds = true
+                )
+            }
+        }
+
+        return newState
+    }
+
     /**
      * Find the [AccessibilityWindowInfo] and [AccessibilityNodeInfo] objects corresponding to the System UI windows.
      * Find the [AccessibilityWindowInfo] and [AccessibilityNodeInfo] corresponding to the topmost app window.
      * Find the [AccessibilityWindowInfo] and [AccessibilityNodeInfo] corresponding to the topmost non-System UI window.
      */
-    private suspend fun Context.getWindows(windows: List<AccessibilityWindowInfo>): WindowInfo {
-        val systemUiWindows = ArrayList<WindowRootPair>()
+    private suspend fun Context.getWindows(
+        windows: List<AccessibilityWindowInfo>,
+        isOnKeyguard: Boolean,
+    ): WindowInfo {
+        val systemUiWindows = ConcurrentLinkedQueue<WindowRootPair>()
+
+        val stateMutex = Mutex()
+        var nodeState = NodeState()
 
         val sysUiWindowViewIds = ConcurrentLinkedQueue<String>()
         val sysUiWindowNodes = ConcurrentLinkedQueue<AccessibilityNodeInfo>()
@@ -48,7 +150,7 @@ object AccessibilityUtils {
 
         var minSysUiWindowIndex = -1
 
-        val processed = windows.mapIndexed { index, rawWindow ->
+        val processed = windows.mapIndexedParallel { index, rawWindow ->
             val safeRoot = try {
                 rawWindow.root
             } catch (e: NullPointerException) {
@@ -68,7 +170,13 @@ object AccessibilityUtils {
                 }
 
                 safeRoot?.let { root ->
-                    addAllNodesToList(root, sysUiWindowNodes, sysUiWindowViewIds, sysUiWindowAwaits)
+                    addAllNodesToList(root, sysUiWindowNodes, sysUiWindowViewIds, sysUiWindowAwaits) { node ->
+                        launch(Dispatchers.IO) {
+                            stateMutex.withLock {
+                                nodeState = processNode(nodeState, node, isOnKeyguard)
+                            }
+                        }
+                    }
                 }
             }
 
@@ -130,7 +238,8 @@ object AccessibilityUtils {
             sysUiWindowViewIds = sysUiWindowViewIds,
             hasEdgePanelWindow = hasEdgePanelWindow,
             topAppWindowPackageName = topAppWindowPackageName,
-            hasHideForPresentApp = hasHideForPresentApp
+            hasHideForPresentApp = hasHideForPresentApp,
+            nodeState = nodeState,
         )
     }
 
@@ -154,55 +263,57 @@ object AccessibilityUtils {
         parentNode: AccessibilityNodeInfo,
         list: ConcurrentLinkedQueue<AccessibilityNodeInfo>,
         ids: ConcurrentLinkedQueue<String>,
-        awaits: ConcurrentLinkedQueue<Deferred<*>>
+        awaits: ConcurrentLinkedQueue<Deferred<*>>,
+        nodeAddedCallback: (suspend CoroutineScope.(AccessibilityNodeInfo) -> Unit)
     ) {
         coroutineScope {
-            awaits.add(async {
-                list.add(parentNode)
-                if (parentNode.isVisibleToUser && parentNode.viewIdResourceName != null) {
-                    ids.add(parentNode.viewIdResourceName)
-                }
+            list.add(parentNode)
+            nodeAddedCallback(parentNode)
 
-                for (i in 0 until parentNode.childCount) {
-                    awaits.add(async {
-                        val child = try {
+            if (parentNode.isVisibleToUser && parentNode.viewIdResourceName != null) {
+                ids.add(parentNode.viewIdResourceName)
+            }
+
+            for (i in 0 until parentNode.childCount) {
+                awaits.add(async {
+                    val child = try {
+                        parentNode.getChild(i)
+                    } catch (e: SecurityException) {
+                        //Sometimes a SecurityException gets thrown here (on Huawei devices)
+                        //so just return null if it happens
+                        null
+                    } catch (e: NullPointerException) {
+                        //Sometimes a NullPointerException is thrown here with this error:
+                        //"Attempt to read from field 'com.android.server.appwidget.AppWidgetServiceImpl$ProviderId
+                        //com.android.server.appwidget.AppWidgetServiceImpl$Provider.id' on a null object reference"
+                        //so just return null if that happens.
+                        null
+                    } catch (e: IllegalStateException) {
+                        try {
+                            parentNode.isSealed = true
                             parentNode.getChild(i)
-                        } catch (e: SecurityException) {
-                            //Sometimes a SecurityException gets thrown here (on Huawei devices)
-                            //so just return null if it happens
+                        } catch (e: Exception) {
                             null
-                        } catch (e: NullPointerException) {
-                            //Sometimes a NullPointerException is thrown here with this error:
-                            //"Attempt to read from field 'com.android.server.appwidget.AppWidgetServiceImpl$ProviderId
-                            //com.android.server.appwidget.AppWidgetServiceImpl$Provider.id' on a null object reference"
-                            //so just return null if that happens.
-                            null
-                        } catch (e: IllegalStateException) {
-                            try {
-                                parentNode.isSealed = true
-                                parentNode.getChild(i)
-                            } catch (e: Exception) {
-                                null
+                        }
+                    }
+                    if (child != null) {
+                        if (child.childCount > 0) {
+                            addAllNodesToList(child, list, ids, awaits, nodeAddedCallback)
+                        } else {
+                            list.add(child)
+                            nodeAddedCallback(child)
+                            if (child.isVisibleToUser && child.viewIdResourceName != null) {
+                                ids.add(child.viewIdResourceName)
                             }
                         }
-                        if (child != null) {
-                            if (child.childCount > 0) {
-                                addAllNodesToList(child, list, ids, awaits)
-                            } else {
-                                list.add(child)
-                                if (child.isVisibleToUser && child.viewIdResourceName != null) {
-                                    ids.add(child.viewIdResourceName)
-                                }
-                            }
-                        }
-                    })
-                }
-            })
+                    }
+                })
+            }
         }
     }
 
     suspend fun Context.runAccessibilityJob(
-        event: AccessibilityEvent,
+        event: AccessibilityEvent?,
         frameDelegate: WidgetFrameDelegate,
         drawerDelegate: DrawerDelegate,
         power: PowerManager,
@@ -236,7 +347,7 @@ object AccessibilityUtils {
 
         newState = newState.copy(screenOrientation = defaultDisplayCompat.rotation)
 
-        if (isDebug) {
+        if (isDebug && event != null) {
             // Nest this in the debug check so that loop doesn't have to run always.
             try {
                 logUtils.debugLog("Source Node ID: ${event.sourceNodeId}, Window ID: ${event.windowId}, Source ID Name: ${event.source?.viewIdResourceName}")
@@ -268,8 +379,8 @@ object AccessibilityUtils {
                 hasScreenOffMemoWindow, hasFaceWidgetsWindow,
                 hasEdgePanelWindow, sysUiWindowViewIds,
                 sysUiWindowNodes, topAppWindowPackageName,
-                hasHideForPresentApp,
-            ) = getWindows(getWindows()).also {
+                hasHideForPresentApp, nodeState,
+            ) = getWindows(getWindows(), isOnKeyguard).also {
                 logUtils.debugLog("Got windows $it", null)
             }
 
@@ -314,92 +425,16 @@ object AccessibilityUtils {
                 //This is mostly a debug value to see which app LSWidg thinks is on top.
                 currentAppPackage = topAppWindowPackageName,
                 hidingForPresentApp = hasHideForPresentApp,
+                onMainLockscreen = nodeState.onMainLockscreen,
+                showingNotificationsPanel = nodeState.showingNotificationsPanel,
+                notificationsPanelFullyExpanded = nodeState.notificationsPanelFullyExpanded,
+                hideForPresentIds = nodeState.hideForPresentIds,
+                hideForNonPresentIds = nodeState.hideForNonPresentIds,
             )
 
             logUtils.debugLog("NewState $newState", null)
 
-            // If any other checks get added to the `sysUiWindowNodes` loop
-            // set their state to false here.
-            newState = newState.copy(
-                onMainLockscreen = false,
-                showingNotificationsPanel = false,
-                notificationsPanelFullyExpanded = false,
-                hideForPresentIds = false,
-                hideForNonPresentIds = false
-            )
-
-            sysUiWindowNodes.forEach { node ->
-                //If the user has enabled the option to hide the frame on security (pin, pattern, password)
-                //input, we need to check if they're on the main lock screen. This is more reliable than
-                //checking for the existence of a security input, since there are a lot of different possible
-                //IDs, and OEMs change them. "notification_panel" and "left_button" are largely unchanged,
-                //although this method isn't perfect.
-                if (isOnKeyguard && prefManager.hideOnSecurityPage) {
-                    if (node.hasVisibleIds(
-                            "com.android.systemui:id/notification_panel",
-                            "com.android.systemui:id/left_button"
-                        )
-                    ) {
-                        newState = newState.copy(
-                            onMainLockscreen = true
-                        )
-                    }
-                }
-
-                if (isOnKeyguard && prefManager.hideOnNotificationShade) {
-                    if (node.hasVisibleIds(
-                            "com.android.systemui:id/quick_settings_panel",
-                            "com.android.systemui:id/settings_button",
-                            "com.android.systemui:id/tile_label",
-                            "com.android.systemui:id/header_label"
-                        ) || ((Build.VERSION.SDK_INT > Build.VERSION_CODES.S_V2) &&
-                                node.hasVisibleIds(
-                                    "com.android.systemui:id/quick_qs_panel",
-                                ))
-                    ) {
-                        //Used for "Hide When Notification Shade Shown" so we know when it's actually expanded.
-                        //Some devices don't even have left shortcuts, so also check for keyguard_indication_area.
-                        //Just like the showingSecurityInput check, this is probably unreliable for some devices.
-                        newState = newState.copy(
-                            showingNotificationsPanel = true
-                        )
-                    }
-                }
-
-                //If the option to show when the NC is fully expanded is enabled,
-                //check if the frame can actually show. This checks to the "more_button"
-                //ID, which is unique to One UI (it's the three-dot button), and is only
-                //visible when the NC is fully expanded.
-                if (prefManager.showInNotificationCenter) {
-                    if (node.hasVisibleIds("com.android.systemui:id/more_button")) {
-                        newState = newState.copy(
-                            notificationsPanelFullyExpanded = true
-                        )
-                    }
-                }
-
-                //Check to see if any of the user-specified IDs are present.
-                //If any are, the frame will be hidden.
-                val presentIds = prefManager.presentIds
-                if (presentIds.isNotEmpty()) {
-                    if (node.hasVisibleIds(presentIds)) {
-                        newState = newState.copy(
-                            hideForPresentIds = true
-                        )
-                    }
-                }
-
-                //Check to see if any of the user-specified IDs aren't present
-                //(or are present but not visible). If any aren't, the frame will be hidden.
-                val nonPresentIds = prefManager.nonPresentIds
-                if (nonPresentIds.isNotEmpty()) {
-                    if (!node.hasVisibleIds(nonPresentIds)) {
-                        newState = newState.copy(
-                            hideForNonPresentIds = true
-                        )
-                    }
-                }
-
+            sysUiWindowNodes.forEachParallel { node ->
                 try {
                     node.isSealed = false
                 } catch (_: Throwable) {}
@@ -411,7 +446,7 @@ object AccessibilityUtils {
                 }
             }
 
-            windows.forEach {
+            windows.forEachParallel {
                 try {
                     it.root?.isSealed = false
                 } catch (_: Throwable) {}
@@ -427,7 +462,7 @@ object AccessibilityUtils {
         frameDelegate.updateStateAndWindowState(wm, true) { newState }
 
         // Some logic for making the drawer go away or system dialogs dismiss when widgets launch Activities indirectly.
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P && event != null) {
             val matchesWindowsChanged =
                 event.eventType == AccessibilityEvent.TYPE_WINDOWS_CHANGED
                         && ((event.windowChanges and AccessibilityEvent.WINDOWS_CHANGE_ADDED != 0)
@@ -461,7 +496,7 @@ object AccessibilityUtils {
             }
         }
 
-        if ((event.eventType == AccessibilityEvent.TYPE_WINDOWS_CHANGED
+        if (event != null && (event.eventType == AccessibilityEvent.TYPE_WINDOWS_CHANGED
                     || event.eventType == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED)
             && event.packageName != null
         ) {
@@ -472,7 +507,7 @@ object AccessibilityUtils {
         try {
             //Make sure to recycle the copy of the event.
             @Suppress("DEPRECATION")
-            event.recycle()
+            event?.recycle()
         } catch (e: IllegalStateException) {
             //Sometimes the event is already recycled somehow.
         }

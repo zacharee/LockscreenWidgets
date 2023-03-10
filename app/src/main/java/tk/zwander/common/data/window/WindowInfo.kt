@@ -1,6 +1,7 @@
 package tk.zwander.common.data.window
 
 import android.view.accessibility.AccessibilityNodeInfo
+import tk.zwander.common.util.AccessibilityUtils
 import java.util.concurrent.ConcurrentLinkedQueue
 
 /**
@@ -18,4 +19,5 @@ data class WindowInfo(
     val sysUiWindowNodes: ConcurrentLinkedQueue<AccessibilityNodeInfo>,
     val topAppWindowPackageName: String?,
     val hasHideForPresentApp: Boolean,
+    val nodeState: AccessibilityUtils.NodeState,
 )

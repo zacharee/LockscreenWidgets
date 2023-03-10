@@ -11,7 +11,6 @@ import android.provider.Settings
 import android.view.WindowManager
 import android.view.accessibility.AccessibilityEvent
 import android.view.accessibility.AccessibilityNodeInfo
-import android.view.accessibility.AccessibilityWindowInfo
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.MainScope
@@ -27,7 +26,6 @@ import tk.zwander.common.util.handler
 import tk.zwander.common.util.keyguardManager
 import tk.zwander.common.util.logUtils
 import tk.zwander.common.util.prefManager
-import tk.zwander.lockscreenwidgets.App
 import tk.zwander.lockscreenwidgets.appwidget.IDListProvider
 import tk.zwander.lockscreenwidgets.util.WidgetFrameDelegate
 import tk.zwander.widgetdrawer.util.DrawerDelegate
@@ -188,7 +186,7 @@ class Accessibility : AccessibilityService(), EventObserver, CoroutineScope by M
 
                 logUtils.debugLog("Screen on")
 
-                state.accessibilityJob?.cancel()
+//                state.accessibilityJob?.cancel()
             }
 
             else -> {}
