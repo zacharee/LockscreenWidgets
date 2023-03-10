@@ -1,13 +1,18 @@
 package tk.zwander.common.compose.add
 
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.layout.Row
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import tk.zwander.lockscreenwidgets.R
@@ -23,15 +28,30 @@ fun SearchToolbar(
         verticalAlignment = Alignment.CenterVertically,
         modifier = modifier
     ) {
+        val focusManager = LocalFocusManager.current
+
+        val state = remember {
+            MutableInteractionSource()
+        }
+        val isFocused by state.collectIsFocusedAsState()
+
         OutlinedTextField(
             value = filter ?: "",
             onValueChange = onFilterChanged,
             modifier = Modifier.weight(1f),
             maxLines = 1,
             label = { Text(text = stringResource(id = R.string.search)) },
-            trailingIcon = if (!filter.isNullOrBlank()) {
+            trailingIcon = if (!filter.isNullOrBlank() || isFocused) {
                 {
-                    IconButton(onClick = { onFilterChanged(null) }) {
+                    IconButton(
+                        onClick = {
+                            if (filter.isNullOrBlank()) {
+                                focusManager.clearFocus(true)
+                            } else {
+                                onFilterChanged(null)
+                            }
+                        }
+                    ) {
                         Icon(
                             painter = painterResource(id = R.drawable.baseline_clear_24),
                             contentDescription = stringResource(id = R.string.clear)
@@ -46,7 +66,8 @@ fun SearchToolbar(
                         contentDescription = stringResource(id = R.string.back)
                     )
                 }
-            }
+            },
+            interactionSource = state
         )
     }
 }

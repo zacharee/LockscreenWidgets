@@ -74,6 +74,7 @@
         <activity android:name=".activities.UsageActivity"
             android:exported="false"
             android:label="@string/usage"
+            android:theme="@style/AppTheme.NoActionBar"
             />
         <activity android:name="tk.zwander.lockscreenwidgets.activities.add.ReconfigureFrameWidgetActivity"
             android:exported="false"

@@ -3,9 +3,13 @@ package tk.zwander.common.compose.main
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.add
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.ime
+import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridItemSpan
@@ -30,10 +34,18 @@ fun MainContent() {
     val hasDrawerDelegateInstance = DrawerDelegate.readOnlyInstance.collectAsState().value != null
 
     AppTheme {
-        Surface(modifier = Modifier.fillMaxSize()) {
+        Surface(
+            modifier = Modifier.fillMaxSize()
+        ) {
+            val padding = WindowInsets.Companion.systemBars.add(
+                WindowInsets.Companion.ime
+            ).add(
+                WindowInsets(16.dp, 16.dp, 16.dp, 16.dp)
+            ).asPaddingValues()
+
             LazyVerticalStaggeredGrid(
                 columns = StaggeredGridCells.Adaptive(400.dp),
-                contentPadding = PaddingValues(16.dp),
+                contentPadding = padding,
                 verticalItemSpacing = 8.dp,
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
             ) {

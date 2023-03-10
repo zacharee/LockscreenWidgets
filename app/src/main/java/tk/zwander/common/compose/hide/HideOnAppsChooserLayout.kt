@@ -55,7 +55,8 @@ fun HideOnAppsChooserLayout(
         ) {
             Crossfade(
                 modifier = Modifier.fillMaxSize(),
-                targetState = items.isEmpty()
+                targetState = items.isEmpty(),
+                label = "HideChooser"
             ) {
                 if (it) {
                     Loader(modifier = Modifier.fillMaxSize())
@@ -76,7 +77,8 @@ fun HideOnAppsChooserLayout(
                             filteredItems = filteredItems,
                             checked = checked,
                             onCheckedChanged = { newChecked -> checked = newChecked },
-                            modifier = Modifier.fillMaxWidth()
+                            modifier = Modifier
+                                .fillMaxWidth()
                                 .weight(1f)
                         )
                     }

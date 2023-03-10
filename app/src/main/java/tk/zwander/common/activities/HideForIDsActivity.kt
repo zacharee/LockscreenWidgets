@@ -5,14 +5,12 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.core.view.WindowCompat
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.gson.reflect.TypeToken
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -32,7 +30,7 @@ import java.util.TreeSet
  *
  * The user can add, remove, back-up, and restore IDs from this Activity.
  */
-class HideForIDsActivity : AppCompatActivity() {
+class HideForIDsActivity : BaseActivity() {
     companion object {
         const val EXTRA_TYPE = "type"
 
@@ -122,13 +120,6 @@ class HideForIDsActivity : AppCompatActivity() {
             Type.NON_PRESENT -> R.string.settings_screen_non_present_ids
             Type.NONE -> R.string.app_name
         })
-
-        supportActionBar?.apply {
-            setDisplayHomeAsUpEnabled(true)
-            setDisplayShowHomeEnabled(true)
-        }
-
-        WindowCompat.setDecorFitsSystemWindows(window, false)
 
         setContent {
             val items by this.items.collectAsState()

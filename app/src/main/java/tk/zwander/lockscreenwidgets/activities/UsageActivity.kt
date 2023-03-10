@@ -1,34 +1,31 @@
 package tk.zwander.lockscreenwidgets.activities
 
 import android.os.Bundle
-import android.view.MenuItem
-import androidx.appcompat.app.AppCompatActivity
-import tk.zwander.lockscreenwidgets.R
+import androidx.activity.compose.setContent
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.ui.Modifier
+import tk.zwander.common.activities.BaseActivity
+import tk.zwander.common.compose.AppTheme
+import tk.zwander.lockscreenwidgets.compose.UsageLayout
 import tk.zwander.lockscreenwidgets.fragments.UsageFragment
 
 /**
  * Host the usage instructions for Lockscreen Widgets.
  * See [UsageFragment]
  */
-class UsageActivity : AppCompatActivity() {
+class UsageActivity : BaseActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        setContentView(R.layout.activity_usage)
-
-        supportActionBar?.apply {
-            setDisplayShowHomeEnabled(true)
-            setDisplayHomeAsUpEnabled(true)
-        }
-    }
-
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        return when (item.itemId) {
-            android.R.id.home -> {
-                onBackPressedDispatcher.onBackPressed()
-                true
+        setContent {
+            AppTheme {
+                UsageLayout(
+                    title = title.toString(),
+                    modifier = Modifier.fillMaxSize()
+                        .statusBarsPadding()
+                )
             }
-            else -> super.onOptionsItemSelected(item)
         }
     }
 }

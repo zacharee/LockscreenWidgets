@@ -8,12 +8,12 @@ import android.os.Build
 import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.appcompat.app.AppCompatActivity
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
+import tk.zwander.common.activities.BaseActivity
 import tk.zwander.common.activities.OnboardingActivity
 import tk.zwander.common.compose.main.MainContent
 import tk.zwander.common.tiles.NCTile
@@ -34,7 +34,7 @@ import tk.zwander.lockscreenwidgets.util.WidgetFrameDelegate
  * If it's the user's first time running the app, or a required permission is missing (i.e. Accessibility),
  * this Activity will also make sure to start [OnboardingActivity] in the proper mode.
  */
-class MainActivity : AppCompatActivity(), CoroutineScope by MainScope() {
+class MainActivity : BaseActivity(), CoroutineScope by MainScope() {
     private val introRequest =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
             if (result.resultCode != Activity.RESULT_OK) {

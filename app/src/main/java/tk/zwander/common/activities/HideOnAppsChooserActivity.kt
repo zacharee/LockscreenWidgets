@@ -3,12 +3,10 @@ package tk.zwander.common.activities
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.core.view.WindowCompat
 import tk.zwander.common.compose.hide.HideOnAppsChooserLayout
 
-class HideOnAppsChooserActivity : ComponentActivity() {
+class HideOnAppsChooserActivity : BaseActivity() {
     companion object {
         fun start(context: Context) {
             val intent = Intent(context, HideOnAppsChooserActivity::class.java)
@@ -20,8 +18,6 @@ class HideOnAppsChooserActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        WindowCompat.setDecorFitsSystemWindows(window, false)
 
         setContent {
             HideOnAppsChooserLayout(onBackPressedDispatcher::onBackPressed)

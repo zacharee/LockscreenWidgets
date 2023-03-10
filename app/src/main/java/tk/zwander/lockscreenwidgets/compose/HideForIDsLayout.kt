@@ -1,6 +1,5 @@
 package tk.zwander.lockscreenwidgets.compose
 
-import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.expandHorizontally
 import androidx.compose.animation.fadeIn
@@ -42,6 +41,7 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import tk.zwander.common.compose.components.TitleBar
 import tk.zwander.lockscreenwidgets.R
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
@@ -55,8 +55,6 @@ fun HideForIDsLayout(
     onRestoreClicked: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val backPressedDispatcher = LocalOnBackPressedDispatcherOwner.current?.onBackPressedDispatcher
-
     var isAdding by remember(items) {
         mutableStateOf(false)
     }
@@ -70,28 +68,7 @@ fun HideForIDsLayout(
         Column(
             modifier = Modifier.fillMaxSize()
         ) {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .heightIn(min = 56.dp)
-                    .padding(8.dp),
-                contentAlignment = Alignment.Center
-            ) {
-                IconButton(
-                    onClick = { backPressedDispatcher?.onBackPressed() },
-                    modifier = Modifier.align(Alignment.CenterStart)
-                ) {
-                    Icon(
-                        painter = painterResource(id = R.drawable.baseline_arrow_back_24),
-                        contentDescription = stringResource(id = R.string.back)
-                    )
-                }
-
-                Text(
-                    text = title,
-                    style = MaterialTheme.typography.titleLarge
-                )
-            }
+            TitleBar(title = title)
 
             LazyColumn(
                 modifier = Modifier

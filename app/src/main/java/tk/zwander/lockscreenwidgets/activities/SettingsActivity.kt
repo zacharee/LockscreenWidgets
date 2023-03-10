@@ -4,8 +4,8 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.view.MenuItem
-import androidx.appcompat.app.AppCompatActivity
 import androidx.preference.PreferenceFragmentCompat
+import tk.zwander.common.activities.BaseActivity
 import tk.zwander.lockscreenwidgets.databinding.ActivitySettingsBinding
 import tk.zwander.lockscreenwidgets.fragments.SettingsFragment
 
@@ -13,7 +13,7 @@ import tk.zwander.lockscreenwidgets.fragments.SettingsFragment
  * Host the app's settings. Most of the logic is either in [SettingsFragment]
  * or behind-the-scenes in AndroidX.
  */
-class SettingsActivity : AppCompatActivity() {
+class SettingsActivity : BaseActivity(true) {
     companion object {
         private const val EXTRA_FRAGMENT_CLASS = "fragment_class"
 
