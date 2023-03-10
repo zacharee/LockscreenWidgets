@@ -1,45 +1,135 @@
 package tk.zwander.common.util
 
+import android.annotation.SuppressLint
+import android.annotation.TargetApi
 import android.app.IWallpaperManager
+import android.app.IWallpaperManagerCallback
+import android.app.WallpaperColors
+import android.app.WallpaperManager
 import android.content.Context
+import android.content.ContextWrapper
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.graphics.drawable.BitmapDrawable
+import android.graphics.drawable.Drawable
 import android.os.Build
 import android.os.Bundle
 import android.os.ParcelFileDescriptor
+import android.os.ServiceManager
 import android.os.UserHandle
 import androidx.annotation.RequiresApi
 
-@RequiresApi(Build.VERSION_CODES.N)
-fun Context.getWallpaper(flag: Int, wallpaperService: IWallpaperManager): ParcelFileDescriptor? {
-    val bundle = Bundle()
+val Context.wallpaperUtils: WallpaperUtils
+    get() = WallpaperUtils.getInstance(this)
 
-    //Even though this hidden method was added in Android Nougat,
-    //some devices (SAMSUNG >_>) removed or changed it, so it won't
-    //always work. Thus the try-catch.
-    return try {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            wallpaperService.getWallpaperWithFeature(
-                packageName,
-                attributionTag,
-                null,
-                flag,
-                bundle,
-                UserHandle.getCallingUserId()
-            )
+class WallpaperUtils private constructor(context: Context) : ContextWrapper(context) {
+    companion object {
+        @SuppressLint("StaticFieldLeak")
+        private var instance: WallpaperUtils? = null
+
+        @Synchronized
+        fun getInstance(context: Context): WallpaperUtils {
+            return instance ?: WallpaperUtils(context.safeApplicationContext).apply {
+                instance = this
+            }
+        }
+    }
+
+    private val iWallpaper = IWallpaperManager.Stub.asInterface(
+        ServiceManager.getService(Context.WALLPAPER_SERVICE)
+    )
+    private val wallpaper = getSystemService(Context.WALLPAPER_SERVICE) as WallpaperManager
+    private val callback = object : IWallpaperManagerCallback.Stub() {
+        override fun onWallpaperColorsChanged(colors: WallpaperColors?, which: Int, userId: Int) {}
+
+        override fun onWallpaperChanged() {
+            logUtils.debugLog("Wallpaper changed, clearing cache.")
+            cachedWallpaper = null
+        }
+    }
+
+    private var cachedWallpaper: Bitmap? = null
+
+    val wallpaperDrawable: Drawable?
+        @SuppressLint("MissingPermission")
+        get() {
+            return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                peekWallpaperBitmap()?.let {
+                    BitmapDrawable(resources, it)
+                } ?: wallpaper.drawable
+            } else {
+                wallpaper.drawable
+            }
+        }
+
+    @RequiresApi(Build.VERSION_CODES.N)
+    private fun peekWallpaperBitmap(): Bitmap? {
+        return if (cachedWallpaper != null && cachedWallpaper?.isRecycled == false) {
+            logUtils.debugLog("Using cached wallpaper.")
+            cachedWallpaper
         } else {
-            @Suppress("DEPRECATION")
-            wallpaperService.getWallpaper(
+            logUtils.debugLog("Retrieving new wallpaper; isRecycled: ${cachedWallpaper?.isRecycled}.")
+            val desc = getWallpaper(WallpaperManager.FLAG_LOCK)
+                ?: getWallpaper(WallpaperManager.FLAG_SYSTEM)
+
+            desc?.use { pfd ->
+                pfd.fileDescriptor?.let { fd ->
+                    BitmapFactory.decodeFileDescriptor(fd)?.also { bmp ->
+                        logUtils.debugLog("Caching new wallpaper $bmp.")
+                        cachedWallpaper = bmp
+                    }
+                }
+            }
+        }
+    }
+
+    @RequiresApi(Build.VERSION_CODES.N)
+    private fun getWallpaper(flag: Int): ParcelFileDescriptor? {
+        val bundle = Bundle()
+
+        @Suppress("DEPRECATION")
+        fun old(): ParcelFileDescriptor? {
+            return iWallpaper.getWallpaper(
                 packageName,
-                null,
+                callback,
                 flag,
                 bundle,
                 UserHandle.getCallingUserId()
             )
         }
-    } catch (e: Exception) {
-        logUtils.debugLog("Error retrieving wallpaper", e)
-        null
-    } catch (e: NoSuchMethodError) {
-        logUtils.debugLog("Error retrieving wallpaper", e)
-        null
+
+        @RequiresApi(Build.VERSION_CODES.R)
+        fun withFeature(): ParcelFileDescriptor? {
+            return try {
+                iWallpaper.getWallpaperWithFeature(
+                    packageName,
+                    attributionTag,
+                    callback,
+                    flag,
+                    bundle,
+                    UserHandle.getCallingUserId()
+                )
+            } catch (e: NoSuchMethodError) {
+                logUtils.debugLog("Missing getWallpaperWithFeature, using getWallpaper instead.")
+                old()
+            }
+        }
+
+        //Even though this hidden method was added in Android Nougat,
+        //some devices (SAMSUNG >_>) removed or changed it, so it won't
+        //always work. Thus the try-catch.
+        return try {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                withFeature()
+            } else {
+                old()
+            }
+        } catch (e: Exception) {
+            logUtils.normalLog("Error retrieving wallpaper", e)
+            null
+        } catch (e: NoSuchMethodError) {
+            logUtils.normalLog("Error retrieving wallpaper", e)
+            null
+        }
     }
 }

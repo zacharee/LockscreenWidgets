@@ -2,10 +2,8 @@ package tk.zwander.lockscreenwidgets.util
 
 import android.annotation.SuppressLint
 import android.app.IWallpaperManager
-import android.app.WallpaperManager
 import android.content.Context
 import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import android.graphics.Color
 import android.graphics.Matrix
 import android.graphics.PixelFormat
@@ -13,9 +11,7 @@ import android.graphics.Point
 import android.graphics.PointF
 import android.graphics.PorterDuff
 import android.graphics.PorterDuffColorFilter
-import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.GradientDrawable
-import android.os.Build
 import android.os.ServiceManager
 import android.view.ContextThemeWrapper
 import android.view.Gravity
@@ -45,13 +41,13 @@ import tk.zwander.common.util.appWidgetManager
 import tk.zwander.common.util.dpAsPx
 import tk.zwander.common.util.eventManager
 import tk.zwander.common.util.frameSizeAndPosition
-import tk.zwander.common.util.getWallpaper
 import tk.zwander.common.util.handler
 import tk.zwander.common.util.logUtils
 import tk.zwander.common.util.mainHandler
 import tk.zwander.common.util.prefManager
 import tk.zwander.common.util.pxAsDp
 import tk.zwander.common.util.screenSize
+import tk.zwander.common.util.wallpaperUtils
 import tk.zwander.lockscreenwidgets.R
 import tk.zwander.lockscreenwidgets.adapters.WidgetFrameAdapter
 import tk.zwander.lockscreenwidgets.data.Mode
@@ -644,23 +640,12 @@ class WidgetFrameDelegate private constructor(context: Context) : BaseDelegate<W
         if (showWallpaperLayer) {
             logUtils.debugLog("Trying to retrieve wallpaper")
 
-            val w = if (Build.VERSION.SDK_INT > Build.VERSION_CODES.M) {
-                getWallpaper(WallpaperManager.FLAG_LOCK, wallpaperService)
-                    ?: getWallpaper(WallpaperManager.FLAG_SYSTEM, wallpaperService)
-            } else null
-
             try {
-                val fastW = w?.let {
-                    it.fileDescriptor?.let { fd ->
-                        BitmapFactory.decodeFileDescriptor(fd)?.let { bmp ->
-                            BitmapDrawable(resources, bmp)
-                        }
-                    }
-                } ?: wallpaper.drawable
+                val drawable = wallpaperUtils.wallpaperDrawable
 
-                logUtils.debugLog("Retrieved fast wallpaper w: $w, fastW: $fastW")
+                logUtils.debugLog("Retrieved wallpaper: $drawable")
 
-                fastW?.mutate()?.apply {
+                drawable?.mutate()?.apply {
                     logUtils.debugLog("Setting wallpaper drawable.")
 
                     binding.wallpaperBackground.setImageDrawable(this)
@@ -691,7 +676,7 @@ class WidgetFrameDelegate private constructor(context: Context) : BaseDelegate<W
                     }
                 } ?: binding.wallpaperBackground.setImageDrawable(null)
             } catch (e: Exception) {
-                logUtils.debugLog("Error setting wallpaper", e)
+                logUtils.normalLog("Error setting wallpaper", e)
                 binding.wallpaperBackground.setImageDrawable(null)
             }
         } else {
