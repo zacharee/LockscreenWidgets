@@ -34,8 +34,8 @@ fun MainContent() {
             LazyVerticalStaggeredGrid(
                 columns = StaggeredGridCells.Adaptive(400.dp),
                 contentPadding = PaddingValues(16.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                verticalItemSpacing = 8.dp,
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 if (!hasFrameDelegateInstance || !hasDrawerDelegateInstance) {
                     item {
