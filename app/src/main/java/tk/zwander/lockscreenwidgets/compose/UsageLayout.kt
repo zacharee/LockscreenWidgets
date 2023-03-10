@@ -3,9 +3,8 @@ package tk.zwander.lockscreenwidgets.compose
 import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.add
-import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.ime
@@ -29,6 +28,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import tk.zwander.common.compose.components.TitleBar
+import tk.zwander.common.compose.util.insetsContentPadding
 import tk.zwander.lockscreenwidgets.R
 
 private data class UsageInfo(
@@ -90,16 +90,14 @@ fun UsageLayout(
         ) {
             TitleBar(title = title)
 
-            val padding = WindowInsets.Companion.navigationBars.add(
-                WindowInsets.Companion.ime
-            ).add(
-                WindowInsets(16.dp, 16.dp, 16.dp, 16.dp)
-            ).asPaddingValues()
-
             LazyColumn(
                 modifier = Modifier.fillMaxWidth(),
                 verticalArrangement = Arrangement.spacedBy(8.dp),
-                contentPadding = padding
+                contentPadding = insetsContentPadding(
+                    WindowInsets.navigationBars,
+                    WindowInsets.ime,
+                    extraPadding = PaddingValues(16.dp)
+                )
             ) {
                 items(items, { it.hashCode() }) { item ->
                     OutlinedCard(

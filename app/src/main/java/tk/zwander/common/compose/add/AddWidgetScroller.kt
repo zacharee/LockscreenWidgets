@@ -7,8 +7,11 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.ime
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
@@ -32,6 +35,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import tk.zwander.common.compose.util.insetsContentPadding
 import tk.zwander.common.data.AppInfo
 import tk.zwander.common.util.componentNameCompat
 import tk.zwander.common.util.getRemoteDrawable
@@ -49,7 +53,11 @@ fun AddWidgetScroller(
     val context = LocalContext.current
 
     LazyColumn(
-        modifier = modifier
+        modifier = modifier,
+        contentPadding = insetsContentPadding(
+            WindowInsets.navigationBars,
+            WindowInsets.ime
+        )
     ) {
         items(items = filteredItems, key = { it.appInfo.packageName }) { app ->
             Column(modifier = Modifier.fillMaxWidth()) {

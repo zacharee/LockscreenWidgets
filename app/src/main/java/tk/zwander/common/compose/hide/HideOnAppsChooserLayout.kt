@@ -4,9 +4,8 @@ import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.systemBarsPadding
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -50,8 +49,7 @@ fun HideOnAppsChooserLayout(
         Surface(
             modifier = Modifier
                 .fillMaxSize()
-                .imePadding()
-                .systemBarsPadding()
+                .statusBarsPadding()
         ) {
             Crossfade(
                 modifier = Modifier.fillMaxSize(),

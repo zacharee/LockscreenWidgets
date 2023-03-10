@@ -3,6 +3,9 @@ package tk.zwander.common.compose.hide
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.ime
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.MaterialTheme
@@ -12,6 +15,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.google.accompanist.drawablepainter.rememberDrawablePainter
 import tk.zwander.common.compose.components.CardSwitch
+import tk.zwander.common.compose.util.insetsContentPadding
 import tk.zwander.common.data.BasicAppInfo
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -27,7 +31,11 @@ fun HideOnAppsChooserScroller(
     LazyColumn(
         modifier = modifier,
         verticalArrangement = Arrangement.spacedBy(8.dp),
-        contentPadding = PaddingValues(8.dp)
+        contentPadding = insetsContentPadding(
+            WindowInsets.navigationBars,
+            WindowInsets.ime,
+            extraPadding = PaddingValues(8.dp)
+        )
     ) {
         items(filteredItems.toList(), key = { it.appInfo.packageName }) {
             CardSwitch(
