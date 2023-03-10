@@ -14,6 +14,8 @@ import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
 import android.os.Build
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.os.ParcelFileDescriptor
 import android.os.ServiceManager
 import android.os.UserHandle
@@ -47,8 +49,15 @@ class WallpaperUtils private constructor(context: Context) : ContextWrapper(cont
             cachedWallpaper = null
         }
     }
+    private val handler = Handler(Looper.getMainLooper())
 
     private var cachedWallpaper: Bitmap? = null
+
+    init {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
+            wallpaper.addOnColorsChangedListener({ _, _ -> cachedWallpaper = null }, handler)
+        }
+    }
 
     val wallpaperDrawable: Drawable?
         @SuppressLint("MissingPermission")
@@ -69,16 +78,22 @@ class WallpaperUtils private constructor(context: Context) : ContextWrapper(cont
             cachedWallpaper
         } else {
             logUtils.debugLog("Retrieving new wallpaper; isRecycled: ${cachedWallpaper?.isRecycled}.")
-            val desc = getWallpaper(WallpaperManager.FLAG_LOCK)
-                ?: getWallpaper(WallpaperManager.FLAG_SYSTEM)
+            val lockWallpaper = getWallpaper(WallpaperManager.FLAG_LOCK)
+            val systemWallpaper = getWallpaper(WallpaperManager.FLAG_SYSTEM)
+            val desc = lockWallpaper ?: systemWallpaper
 
-            desc?.use { pfd ->
-                pfd.fileDescriptor?.let { fd ->
-                    BitmapFactory.decodeFileDescriptor(fd)?.also { bmp ->
-                        logUtils.debugLog("Caching new wallpaper $bmp.")
-                        cachedWallpaper = bmp
+            try {
+                desc?.let { pfd ->
+                    pfd.fileDescriptor?.let { fd ->
+                        BitmapFactory.decodeFileDescriptor(fd)?.also { bmp ->
+                            logUtils.debugLog("Caching new wallpaper $bmp.")
+                            cachedWallpaper = bmp
+                        }
                     }
                 }
+            } finally {
+                lockWallpaper?.close()
+                systemWallpaper?.close()
             }
         }
     }
