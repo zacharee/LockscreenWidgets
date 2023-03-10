@@ -163,12 +163,10 @@ class WidgetFrameView(context: Context, attrs: AttributeSet) : ConstraintLayout(
             registerProxListener()
         }
 
-        postDelayed({
-            binding.frameCard.fadeAndScaleIn {
-                context.eventManager.sendEvent(Event.FrameAttachmentState(true))
-                animationState = AnimationState.STATE_IDLE
-            }
-        }, 50)
+        binding.frameCard.fadeAndScaleIn {
+            context.eventManager.sendEvent(Event.FrameAttachmentState(true))
+            animationState = AnimationState.STATE_IDLE
+        }
     }
 
     override fun onDetachedFromWindow() {

@@ -1,6 +1,5 @@
 package tk.zwander.lockscreenwidgets.util
 
-import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Color
@@ -24,8 +23,6 @@ import androidx.core.graphics.component2
 import androidx.lifecycle.Lifecycle
 import androidx.recyclerview.widget.RecyclerView
 import com.android.internal.R.attr.screenOrientation
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import tk.zwander.common.activities.DismissOrUnlockActivity
@@ -628,59 +625,55 @@ class WidgetFrameDelegate private constructor(context: Context) : BaseDelegate<W
      *
      * TODO: You can only specifically retrieve the lock screen wallpaper on Nougat and up.
      */
-    @SuppressLint("MissingPermission")
-    fun updateWallpaperLayerIfNeeded() {
-        @Suppress("DeferredResultUnused")
-        scope.async(Dispatchers.Main) {
-            val showWallpaperLayer = showWallpaperLayerCondition
+    private fun updateWallpaperLayerIfNeeded() {
+        val showWallpaperLayer = showWallpaperLayerCondition
 
-            logUtils.debugLog("updateWallpaperLayerIfNeeded() called $showWallpaperLayer")
+        logUtils.debugLog("updateWallpaperLayerIfNeeded() called $showWallpaperLayer")
 
-            if (showWallpaperLayer) {
-                logUtils.debugLog("Trying to retrieve wallpaper")
+        if (showWallpaperLayer) {
+            logUtils.debugLog("Trying to retrieve wallpaper")
 
-                try {
-                    val drawable = wallpaperUtils.wallpaperDrawable
+            try {
+                val drawable = wallpaperUtils.wallpaperDrawable
 
-                    logUtils.debugLog("Retrieved wallpaper: $drawable")
+                logUtils.debugLog("Retrieved wallpaper: $drawable")
 
-                    drawable?.mutate()?.apply {
-                        logUtils.debugLog("Setting wallpaper drawable.")
+                drawable?.mutate()?.apply {
+                    logUtils.debugLog("Setting wallpaper drawable.")
 
-                        binding.wallpaperBackground.setImageDrawable(this)
-                        binding.wallpaperBackground.colorFilter = PorterDuffColorFilter(
-                            Color.argb(
-                                ((prefManager.wallpaperDimAmount / 100f) * 255).toInt(),
-                                0, 0, 0
-                            ), PorterDuff.Mode.SRC_ATOP
+                    binding.wallpaperBackground.setImageDrawable(this)
+                    binding.wallpaperBackground.colorFilter = PorterDuffColorFilter(
+                        Color.argb(
+                            ((prefManager.wallpaperDimAmount / 100f) * 255).toInt(),
+                            0, 0, 0
+                        ), PorterDuff.Mode.SRC_ATOP
+                    )
+                    binding.wallpaperBackground.scaleType = ImageView.ScaleType.MATRIX
+                    binding.wallpaperBackground.imageMatrix = Matrix().apply {
+                        val realSize = screenSize
+                        val loc = binding.root.locationOnScreen ?: intArrayOf(0, 0)
+
+                        val dWidth: Int = intrinsicWidth
+                        val dHeight: Int = intrinsicHeight
+
+                        val wallpaperAdjustmentX = (dWidth - realSize.x) / 2f
+                        val wallpaperAdjustmentY = (dHeight - realSize.y) / 2f
+
+                        setTranslate(
+                            (-loc[0].toFloat() - wallpaperAdjustmentX),
+                            //TODO: a bunch of skins don't like this
+                            (-loc[1].toFloat() - wallpaperAdjustmentY)
                         )
-                        binding.wallpaperBackground.scaleType = ImageView.ScaleType.MATRIX
-                        binding.wallpaperBackground.imageMatrix = Matrix().apply {
-                            val realSize = screenSize
-                            val loc = binding.root.locationOnScreen ?: intArrayOf(0, 0)
-
-                            val dWidth: Int = intrinsicWidth
-                            val dHeight: Int = intrinsicHeight
-
-                            val wallpaperAdjustmentX = (dWidth - realSize.x) / 2f
-                            val wallpaperAdjustmentY = (dHeight - realSize.y) / 2f
-
-                            setTranslate(
-                                (-loc[0].toFloat() - wallpaperAdjustmentX),
-                                //TODO: a bunch of skins don't like this
-                                (-loc[1].toFloat() - wallpaperAdjustmentY)
-                            )
-                        }
-                    } ?: binding.wallpaperBackground.setImageDrawable(null)
-                } catch (e: Exception) {
-                    logUtils.normalLog("Error setting wallpaper", e)
-                    binding.wallpaperBackground.setImageDrawable(null)
-                }
-            } else {
-                logUtils.debugLog("Removing wallpaper")
-
+                    }
+                } ?: binding.wallpaperBackground.setImageDrawable(null)
+            } catch (e: Exception) {
+                logUtils.normalLog("Error setting wallpaper", e)
                 binding.wallpaperBackground.setImageDrawable(null)
             }
+        } else {
+            logUtils.debugLog("Removing wallpaper")
+
+            binding.wallpaperBackground.setImageDrawable(null)
         }
     }
 
