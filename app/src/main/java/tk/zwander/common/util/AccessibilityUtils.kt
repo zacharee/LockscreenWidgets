@@ -35,7 +35,7 @@ object AccessibilityUtils {
         val hideForNonPresentIds: Boolean = false,
     )
 
-    private suspend fun Context.processNode(
+    private fun Context.processNode(
         initialState: NodeState,
         node: AccessibilityNodeInfo?,
         isOnKeyguard: Boolean,
@@ -320,7 +320,7 @@ object AccessibilityUtils {
         kgm: KeyguardManager,
         wm: WindowManager,
         getWindows: () -> List<AccessibilityWindowInfo>
-    ) {
+    ) = coroutineScope {
         //This block here runs even when unlocked, but it only takes a millisecond at most,
         //so it shouldn't be noticeable to the user. We use this to check the current keyguard
         //state and, if applicable, send the keyguard dismissal broadcast.
@@ -434,6 +434,10 @@ object AccessibilityUtils {
 
             logUtils.debugLog("NewState $newState", null)
 
+            launch {
+                frameDelegate.updateStateAndWindowState(wm, true) { newState }
+            }
+
             sysUiWindowNodes.forEachParallel { node ->
                 try {
                     node.isSealed = false
@@ -457,9 +461,9 @@ object AccessibilityUtils {
                 } catch (_: IllegalStateException) {
                 }
             }
+        } else {
+            frameDelegate.updateStateAndWindowState(wm, true) { newState }
         }
-
-        frameDelegate.updateStateAndWindowState(wm, true) { newState }
 
         // Some logic for making the drawer go away or system dialogs dismiss when widgets launch Activities indirectly.
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P && event != null) {
@@ -484,7 +488,7 @@ object AccessibilityUtils {
                 && (drawerDelegate.state.handlingClick || frameDelegate.state.handlingClick)
             ) {
                 logUtils.debugLog("Starting dismiss Activity because of window change.")
-                DismissOrUnlockActivity.launch(this)
+                DismissOrUnlockActivity.launch(this@runAccessibilityJob)
 
                 if (drawerDelegate.state.handlingClick) {
                     logUtils.debugLog("Hiding drawer because of window change")

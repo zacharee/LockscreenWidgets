@@ -18,6 +18,9 @@ import androidx.savedstate.SavedStateRegistryController
 import androidx.savedstate.SavedStateRegistryOwner
 import androidx.savedstate.setViewTreeSavedStateRegistryOwner
 import com.arasthel.spannedgridlayoutmanager.SpannedGridLayoutManager
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.cancel
 import tk.zwander.common.data.WidgetData
 import tk.zwander.common.data.WidgetType
 import tk.zwander.common.host.WidgetHostCompat
@@ -64,8 +67,13 @@ abstract class BaseDelegate<State : BaseDelegate.BaseState>(context: Context) : 
         ItemTouchHelper(touchHelperCallback)
     }
 
+    protected var scope: CoroutineScope = MainScope()
+        private set
+
     @CallSuper
     open fun onCreate() {
+        scope = MainScope()
+
         prefsHandler.register(this)
         eventManager.addObserver(this)
         blurManager.onCreate()
@@ -99,6 +107,8 @@ abstract class BaseDelegate<State : BaseDelegate.BaseState>(context: Context) : 
         if (lifecycleRegistry.currentState.isAtLeast(Lifecycle.State.CREATED)) {
             lifecycleRegistry.currentState = Lifecycle.State.DESTROYED
         }
+
+        scope.cancel()
     }
 
     @CallSuper
