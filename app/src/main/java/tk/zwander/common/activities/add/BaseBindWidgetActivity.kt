@@ -328,11 +328,14 @@ abstract class BaseBindWidgetActivity : ComponentActivity() {
                 val samsungConfigComponent = appWidgetManager.getAppWidgetInfo(id)
                     .getSamsungConfigureComponent(this@BaseBindWidgetActivity)
 
+                logUtils.debugLog("Found Samsung config component $samsungConfigComponent.")
+
                 if (samsungConfigComponent != null) {
                     val launchIntent = Intent(AppWidgetManager.ACTION_APPWIDGET_CONFIGURE)
                     launchIntent.component = samsungConfigComponent
                     launchIntent.putExtra("appWidgetId", id)
 
+                    currentConfigId = id
                     samsungConfigLauncher.launch(launchIntent)
                     return true
                 }
@@ -391,7 +394,7 @@ abstract class BaseBindWidgetActivity : ComponentActivity() {
                         return
                     })
                 } else {
-                    logUtils.debugLog("Failed to configure widget.")
+                    logUtils.debugLog("Failed to configure widget. Result code $resultCode, id $id.")
                     if (deleteOnConfigureError) {
                         currentConfigId?.let {
                             //Widget configuration was canceled: delete the
