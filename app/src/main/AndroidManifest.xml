@@ -247,7 +247,8 @@
 
         <receiver android:name="tk.zwander.common.receivers.OpenDrawerReceiver"
             android:label="@string/open_drawer"
-            android:exported="true">
+            android:exported="true"
+            tools:ignore="ExportedReceiver">
             <intent-filter>
                 <action android:name="${applicationId}.action.OPEN_DRAWER" />
             </intent-filter>
