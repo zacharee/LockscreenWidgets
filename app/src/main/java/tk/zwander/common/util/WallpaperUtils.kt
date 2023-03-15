@@ -1,7 +1,6 @@
 package tk.zwander.common.util
 
 import android.annotation.SuppressLint
-import android.annotation.TargetApi
 import android.app.IWallpaperManager
 import android.app.IWallpaperManagerCallback
 import android.app.WallpaperColors
@@ -42,6 +41,9 @@ class WallpaperUtils private constructor(context: Context) : ContextWrapper(cont
     )
     private val wallpaper = getSystemService(Context.WALLPAPER_SERVICE) as WallpaperManager
     private val callback = object : IWallpaperManagerCallback.Stub() {
+        // "Fix" for Huawei.
+        @Suppress("unused")
+        fun onBlurWallpaperChanged() {}
         override fun onWallpaperColorsChanged(colors: WallpaperColors?, which: Int, userId: Int) {}
 
         override fun onWallpaperChanged() {
