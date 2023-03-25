@@ -31,6 +31,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.rememberDismissState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -78,8 +79,11 @@ fun HideForIDsLayout(
                 items(items.toList(), { it }) { id ->
                     val state = rememberDismissState()
 
-                    if (state.currentValue != DismissValue.Default) {
-                        onRemove(id)
+                    LaunchedEffect(key1 = state.currentValue, key2 = state.targetValue) {
+                        if (state.currentValue != DismissValue.Default &&
+                            state.targetValue != DismissValue.Default) {
+                            onRemove(id)
+                        }
                     }
 
                     SwipeToDismiss(
