@@ -90,5 +90,5 @@ dependencies {
     implementation "com.google.accompanist:accompanist-themeadapter-material:${accompanist_version}"
     implementation "com.google.accompanist:accompanist-themeadapter-material3:${accompanist_version}"
 
-    implementation "com.bugsnag:bugsnag-android:5.28.4"
+    implementation "com.bugsnag:bugsnag-android:5.29.0"
 }
