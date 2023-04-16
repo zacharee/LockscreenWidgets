@@ -77,7 +77,7 @@ abstract class BaseDelegate<State : BaseDelegate.BaseState>(context: Context) : 
         prefsHandler.register(this)
         eventManager.addObserver(this)
         blurManager.onCreate()
-        widgetHost.addOnClickCallback(this)
+        widgetHost.addOnClickCallback(this) { currentWidgets.map { it.id } }
         gridLayoutManager.spanSizeLookup = adapter.spanSizeLookup
         recyclerView.setHasFixedSize(true)
         recyclerView.adapter = adapter

@@ -242,7 +242,7 @@ class DrawerDelegate private constructor(context: Context) : BaseDelegate<Drawer
                 }
             }
             Event.DrawerWidgetClick -> {
-                updateState { it.copy(handlingClick = true) }
+                updateState { it.copy(handlingClick = prefManager.requestUnlockDrawer) }
             }
             is Event.DrawerAttachmentState -> {
                 if (event.attached) {

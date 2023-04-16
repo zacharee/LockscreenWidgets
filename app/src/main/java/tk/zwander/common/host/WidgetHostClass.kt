@@ -21,39 +21,41 @@ import net.bytebuddy.implementation.SuperMethodCall
  * visible to it is an interface, so we can't just create a stub class.
  */
 @SuppressLint("PrivateApi")
-class WidgetHostClass(context: Context, id: Int, clickHandlerClass: Class<*>) : WidgetHostCompat(context, id) {
-    override val onClickHandler: Any = ByteBuddy()
-        .subclass(clickHandlerClass)
-        .name("OnClickHandlerPieIntercept")
-        .defineMethod("onClickHandler", Boolean::class.java)
-        .withParameters(View::class.java, PendingIntent::class.java, Intent::class.java)
-        .intercept(
-            MethodDelegation.to(InnerOnClickHandlerClass())
-                .andThen(SuperMethodCall.INSTANCE)
-        )
-        .apply {
-            if (Build.VERSION.SDK_INT > Build.VERSION_CODES.M) {
-                defineMethod("onClickHandler", Boolean::class.java)
-                    .withParameters(View::class.java, PendingIntent::class.java, Intent::class.java, Int::class.java)
-                    .intercept(
-                        MethodDelegation.to(InnerOnClickHandlerClass())
-                            .andThen(SuperMethodCall.INSTANCE)
-                    )
+class WidgetHostClass(context: Context, id: Int, private val clickHandlerClass: Class<*>) : WidgetHostCompat(context, id) {
+    override fun createOnClickHandlerForWidget(widgetId: Int): Any {
+        return ByteBuddy()
+            .subclass(clickHandlerClass)
+            .name("OnClickHandlerPieIntercept")
+            .defineMethod("onClickHandler", Boolean::class.java)
+            .withParameters(View::class.java, PendingIntent::class.java, Intent::class.java)
+            .intercept(
+                MethodDelegation.to(InnerOnClickHandlerClass(widgetId))
+                    .andThen(SuperMethodCall.INSTANCE)
+            )
+            .apply {
+                if (Build.VERSION.SDK_INT > Build.VERSION_CODES.M) {
+                    defineMethod("onClickHandler", Boolean::class.java)
+                        .withParameters(View::class.java, PendingIntent::class.java, Intent::class.java, Int::class.java)
+                        .intercept(
+                            MethodDelegation.to(InnerOnClickHandlerClass(widgetId))
+                                .andThen(SuperMethodCall.INSTANCE)
+                        )
+                }
             }
-        }
-        .make()
-        .load(WidgetHostCompat::class.java.classLoader, AndroidClassLoadingStrategy.Wrapping(context.cacheDir))
-        .loaded
-        .newInstance()
+            .make()
+            .load(WidgetHostCompat::class.java.classLoader, AndroidClassLoadingStrategy.Wrapping(context.cacheDir))
+            .loaded
+            .newInstance()
+    }
 
-    inner class InnerOnClickHandlerClass : BaseInnerOnClickHandler() {
+    inner class InnerOnClickHandlerClass(private val widgetId: Int) : BaseInnerOnClickHandler() {
         @Suppress("UNUSED_PARAMETER", "unused")
         fun onClickHandler(
             view: View,
             pendingIntent: PendingIntent,
             fillInIntent: Intent
         ): Boolean {
-            checkPendingIntent(pendingIntent)
+            checkPendingIntent(pendingIntent, widgetId)
 
             return true
         }
@@ -65,7 +67,7 @@ class WidgetHostClass(context: Context, id: Int, clickHandlerClass: Class<*>) : 
             fillInIntent: Intent,
             windowingMode: Int
         ): Boolean {
-            checkPendingIntent(pendingIntent)
+            checkPendingIntent(pendingIntent, widgetId)
 
             return true
         }

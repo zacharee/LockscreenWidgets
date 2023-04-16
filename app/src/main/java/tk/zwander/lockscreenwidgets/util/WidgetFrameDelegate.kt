@@ -306,7 +306,7 @@ class WidgetFrameDelegate private constructor(context: Context) : BaseDelegate<W
                 updateParamsIfNeeded()
             }
             Event.FrameWidgetClick -> {
-                updateState { it.copy(handlingClick = true) }
+                updateState { it.copy(handlingClick = prefManager.requestUnlock) }
             }
             is Event.FrameResized -> {
                 when (event.which) {

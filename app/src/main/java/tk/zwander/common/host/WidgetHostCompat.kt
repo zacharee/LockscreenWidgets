@@ -77,13 +77,14 @@ abstract class WidgetHostCompat(
         }
     }
 
-    protected abstract val onClickHandler: Any
-    protected val onClickCallbacks = mutableSetOf<OnClickCallback>()
+    protected val onClickCallbacks = mutableMapOf<OnClickCallback, () -> Collection<Int>>()
 
     private val listeners = ConcurrentLinkedQueue<Any>()
 
-    fun addOnClickCallback(callback: OnClickCallback) {
-        onClickCallbacks.add(callback)
+    protected abstract fun createOnClickHandlerForWidget(widgetId: Int): Any
+
+    fun addOnClickCallback(callback: OnClickCallback, idsGetter: () -> Collection<Int>) {
+        onClickCallbacks[callback] = idsGetter
     }
 
     fun removeOnClickCallback(callback: OnClickCallback) {
@@ -115,7 +116,7 @@ abstract class WidgetHostCompat(
             .getDeclaredField(if (ON_CLICK_HANDLER_CLASS == null) "mInteractionHandler" else "mOnClickHandler")
             .apply {
                 isAccessible = true
-                set(this@WidgetHostCompat, onClickHandler)
+                set(this@WidgetHostCompat, createOnClickHandlerForWidget(appWidgetId))
             }
 
         return ZeroPaddingAppWidgetHostView(context)
@@ -123,14 +124,17 @@ abstract class WidgetHostCompat(
 
     abstract inner class BaseInnerOnClickHandler {
         @SuppressLint("NewApi")
-        fun checkPendingIntent(pendingIntent: PendingIntent?) {
+        fun checkPendingIntent(pendingIntent: PendingIntent?, widgetId: Int) {
             if (pendingIntent != null) {
                 val triggerUnlockOrDismiss = pendingIntent.isActivity
-
                 // This package check is so the frame/drawer doesn't dismiss itself when the
                 // Open Drawer widget is tapped.
                 if (pendingIntent.creatorPackage != context.packageName) {
-                    onClickCallbacks.forEach { it.onWidgetClick(triggerUnlockOrDismiss) }
+                    onClickCallbacks.forEach { (callback, idsGetter) ->
+                        if (idsGetter().contains(widgetId)) {
+                            callback.onWidgetClick(triggerUnlockOrDismiss)
+                        }
+                    }
                 }
             }
         }

@@ -18,14 +18,16 @@ import java.lang.reflect.Proxy
  * it pretty easy to implement interfaces through reflection, so no ByteBuddy needed here.
  */
 @SuppressLint("PrivateApi")
-open class WidgetHostInterface(context: Context, id: Int, clickHandlerClass: Class<*>) : WidgetHostCompat(context, id) {
-    override val onClickHandler: Any = Proxy.newProxyInstance(
-        clickHandlerClass.classLoader,
-        arrayOf(clickHandlerClass),
-        InnerOnClickHandlerInterface()
-    )
+open class WidgetHostInterface(context: Context, id: Int, private val clickHandlerClass: Class<*>) : WidgetHostCompat(context, id) {
+    override fun createOnClickHandlerForWidget(widgetId: Int): Any {
+        return Proxy.newProxyInstance(
+            clickHandlerClass.classLoader,
+            arrayOf(clickHandlerClass),
+            InnerOnClickHandlerInterface(widgetId)
+        )
+    }
 
-    open inner class InnerOnClickHandlerInterface : BaseInnerOnClickHandler(), InvocationHandler {
+    open inner class InnerOnClickHandlerInterface(private val widgetId: Int) : BaseInnerOnClickHandler(), InvocationHandler {
         @SuppressLint("BlockedPrivateApi", "PrivateApi")
         override fun invoke(proxy: Any?, method: Method?, args: Array<out Any>?): Any {
             val view = args?.getOrNull(0) as? View
@@ -41,7 +43,7 @@ open class WidgetHostInterface(context: Context, id: Int, clickHandlerClass: Cla
             @Suppress("UNCHECKED_CAST")
             val launchOptions = getLaunchOptions.invoke(response, view) as android.util.Pair<Intent, ActivityOptions>
 
-            checkPendingIntent(pi)
+            checkPendingIntent(pi, widgetId)
 
             return startPendingIntent.invoke(null, view, pi, launchOptions) as Boolean
         }
