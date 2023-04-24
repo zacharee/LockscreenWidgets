@@ -78,11 +78,11 @@ dependencies {
     implementation 'com.github.zacharee:ComposeIntroSlider:cdd18d55b0'
 //    implementation project(':spannedlm')
 
-    implementation 'androidx.activity:activity-compose:1.7.0'
+    implementation 'androidx.activity:activity-compose:1.7.1'
     implementation "androidx.compose.animation:animation:${compose_version}"
     implementation "androidx.compose.foundation:foundation:${compose_version}"
     implementation "androidx.compose.ui:ui-tooling:${compose_version}"
-    implementation 'androidx.compose.material3:material3:1.1.0-beta02'
+    implementation 'androidx.compose.material3:material3:1.1.0-rc01'
     implementation 'androidx.lifecycle:lifecycle-viewmodel-compose:2.6.1'
 
     implementation "com.google.accompanist:accompanist-drawablepainter:${accompanist_version}"
