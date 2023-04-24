@@ -30,9 +30,10 @@ object AccessibilityUtils {
     data class NodeState(
         val onMainLockscreen: Boolean = false,
         val showingNotificationsPanel: Boolean = false,
-        val notificationsPanelFullyExpanded: Boolean = false,
+        val hasMoreButton: Boolean = false,
         val hideForPresentIds: Boolean = false,
         val hideForNonPresentIds: Boolean = false,
+        val hasClearAllButton: Boolean = false,
     )
 
     private fun Context.processNode(
@@ -87,10 +88,18 @@ object AccessibilityUtils {
         //check if the frame can actually show. This checks to the "more_button"
         //ID, which is unique to One UI (it's the three-dot button), and is only
         //visible when the NC is fully expanded.
-        if (prefManager.showInNotificationCenter && !newState.notificationsPanelFullyExpanded) {
+        if (prefManager.showInNotificationCenter && !newState.hasMoreButton) {
             if (node.hasVisibleIds("com.android.systemui:id/more_button")) {
                 newState = newState.copy(
-                    notificationsPanelFullyExpanded = true
+                    hasMoreButton = true
+                )
+            }
+        }
+
+        if (prefManager.showInNotificationCenter && !newState.hasClearAllButton) {
+            if (node.hasVisibleIds("com.android.systemui:id/clear_all")) {
+                newState = newState.copy(
+                    hasClearAllButton = true
                 )
             }
         }
@@ -128,6 +137,7 @@ object AccessibilityUtils {
     private suspend fun Context.getWindows(
         windows: List<AccessibilityWindowInfo>,
         isOnKeyguard: Boolean,
+        startingFrameState: WidgetFrameDelegate.State,
     ): WindowInfo {
         val systemUiWindows = ConcurrentLinkedQueue<WindowRootPair>()
 
@@ -170,7 +180,12 @@ object AccessibilityUtils {
                 }
 
                 safeRoot?.let { root ->
-                    addAllNodesToList(root, sysUiWindowNodes, sysUiWindowViewIds, sysUiWindowAwaits) { node ->
+                    addAllNodesToList(
+                        root,
+                        sysUiWindowNodes,
+                        sysUiWindowViewIds,
+                        sysUiWindowAwaits
+                    ) { node ->
                         launch(Dispatchers.IO) {
                             stateMutex.withLock {
                                 nodeState = processNode(nodeState, node, isOnKeyguard)
@@ -325,6 +340,7 @@ object AccessibilityUtils {
         //so it shouldn't be noticeable to the user. We use this to check the current keyguard
         //state and, if applicable, send the keyguard dismissal broadcast.
 
+        val startingState = frameDelegate.state.copy()
         var newState = frameDelegate.state.copy()
 
         //Check if the screen is on.
@@ -380,7 +396,7 @@ object AccessibilityUtils {
                 hasEdgePanelWindow, sysUiWindowViewIds,
                 sysUiWindowNodes, topAppWindowPackageName,
                 hasHideForPresentApp, nodeState,
-            ) = getWindows(getWindows(), isOnKeyguard).also {
+            ) = getWindows(getWindows(), isOnKeyguard, startingState).also {
                 logUtils.debugLog("Got windows $it", null)
             }
 
@@ -427,7 +443,7 @@ object AccessibilityUtils {
                 hidingForPresentApp = hasHideForPresentApp,
                 onMainLockscreen = nodeState.onMainLockscreen,
                 showingNotificationsPanel = nodeState.showingNotificationsPanel,
-                notificationsPanelFullyExpanded = nodeState.notificationsPanelFullyExpanded,
+                notificationsPanelFullyExpanded = nodeState.hasMoreButton && !nodeState.hasClearAllButton,
                 hideForPresentIds = nodeState.hideForPresentIds,
                 hideForNonPresentIds = nodeState.hideForNonPresentIds,
             )
@@ -441,7 +457,8 @@ object AccessibilityUtils {
             sysUiWindowNodes.forEachParallel { node ->
                 try {
                     node.isSealed = false
-                } catch (_: Throwable) {}
+                } catch (_: Throwable) {
+                }
 
                 try {
                     @Suppress("DEPRECATION")
@@ -453,7 +470,8 @@ object AccessibilityUtils {
             windows.forEachParallel {
                 try {
                     it.root?.isSealed = false
-                } catch (_: Throwable) {}
+                } catch (_: Throwable) {
+                }
 
                 try {
                     @Suppress("DEPRECATION")
