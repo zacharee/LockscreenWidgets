@@ -25,10 +25,10 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.SwipeToDismiss
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.rememberDismissState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -218,8 +218,10 @@ fun HideForIDsLayout(
                             } else {
                                 null
                             },
-                            colors = TextFieldDefaults.outlinedTextFieldColors(
-                                containerColor = MaterialTheme.colorScheme.surfaceVariant,
+                            colors = OutlinedTextFieldDefaults.colors(
+                                unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                                focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                                errorContainerColor = MaterialTheme.colorScheme.surfaceVariant,
                             ),
                             modifier = Modifier.fillMaxWidth()
                         )
