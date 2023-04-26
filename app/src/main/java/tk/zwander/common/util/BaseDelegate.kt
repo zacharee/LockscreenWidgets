@@ -77,7 +77,7 @@ abstract class BaseDelegate<State : BaseDelegate.BaseState>(context: Context) : 
         prefsHandler.register(this)
         eventManager.addObserver(this)
         blurManager.onCreate()
-        widgetHost.addOnClickCallback(this) { currentWidgets.map { it.id } }
+        widgetHost.addOnClickCallback(this)
         gridLayoutManager.spanSizeLookup = adapter.spanSizeLookup
         recyclerView.setHasFixedSize(true)
         recyclerView.adapter = adapter
@@ -135,6 +135,10 @@ abstract class BaseDelegate<State : BaseDelegate.BaseState>(context: Context) : 
             }
             else -> {}
         }
+    }
+
+    override fun hasWidgetId(id: Int): Boolean {
+        return currentWidgets.any { it.id == id }
     }
 
     open fun updateState(transform: (State) -> State) {

@@ -77,14 +77,14 @@ abstract class WidgetHostCompat(
         }
     }
 
-    protected val onClickCallbacks = mutableMapOf<OnClickCallback, () -> Collection<Int>>()
+    protected val onClickCallbacks = mutableSetOf<OnClickCallback>()
 
     private val listeners = ConcurrentLinkedQueue<Any>()
 
     protected abstract fun createOnClickHandlerForWidget(widgetId: Int): Any
 
-    fun addOnClickCallback(callback: OnClickCallback, idsGetter: () -> Collection<Int>) {
-        onClickCallbacks[callback] = idsGetter
+    fun addOnClickCallback(callback: OnClickCallback) {
+        onClickCallbacks.add(callback)
     }
 
     fun removeOnClickCallback(callback: OnClickCallback) {
@@ -130,8 +130,8 @@ abstract class WidgetHostCompat(
                 // This package check is so the frame/drawer doesn't dismiss itself when the
                 // Open Drawer widget is tapped.
                 if (pendingIntent.creatorPackage != context.packageName) {
-                    onClickCallbacks.forEach { (callback, idsGetter) ->
-                        if (idsGetter().contains(widgetId)) {
+                    onClickCallbacks.forEach { callback ->
+                        if (callback.hasWidgetId(widgetId)) {
                             callback.onWidgetClick(triggerUnlockOrDismiss)
                         }
                     }
@@ -141,6 +141,7 @@ abstract class WidgetHostCompat(
     }
 
     interface OnClickCallback {
+        fun hasWidgetId(id: Int): Boolean
         fun onWidgetClick(trigger: Boolean)
     }
 }
