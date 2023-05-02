@@ -4,8 +4,10 @@ import android.content.Context
 import android.util.AttributeSet
 import android.view.KeyEvent
 import android.widget.FrameLayout
+import com.joaomgcd.taskerpluginlibrary.extensions.requestQuery
 import tk.zwander.common.util.Event
 import tk.zwander.common.util.eventManager
+import tk.zwander.widgetdrawer.activities.TaskerIsShowingDrawer
 
 class Drawer : FrameLayout {
     constructor(context: Context) : super(context)
@@ -14,12 +16,14 @@ class Drawer : FrameLayout {
     override fun onAttachedToWindow() {
         super.onAttachedToWindow()
 
+        TaskerIsShowingDrawer::class.java.requestQuery(context)
         context.eventManager.sendEvent(Event.DrawerAttachmentState(true))
     }
 
     override fun onDetachedFromWindow() {
         super.onDetachedFromWindow()
 
+        TaskerIsShowingDrawer::class.java.requestQuery(context)
         context.eventManager.sendEvent(Event.DrawerAttachmentState(false))
     }
 

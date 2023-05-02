@@ -16,6 +16,7 @@
     <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES"
         tools:ignore="QueryAllPackagesPermission" />
     <uses-permission android:name="android.permission.CALL_PHONE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
 
     <uses-permission android:name="com.huawei.android.totemweather.permission.ACCESS_WEATHERCLOCK_PROVIDER" />
     <uses-permission android:name="android.permission.ACCESS_WEATHERCLOCK_PROVIDER" />
@@ -119,6 +120,86 @@
             android:launchMode="singleInstancePerTask"
             android:excludeFromRecents="true"
             />
+        <activity android:name=".activities.TaskerCanShowActivity"
+            android:exported="true"
+            android:label="@string/allow_show_frame"
+            android:theme="@style/AppTheme.Null">
+            <intent-filter>
+                <action android:name="com.twofortyfouram.locale.intent.action.EDIT_SETTING" />
+            </intent-filter>
+        </activity>
+        <activity android:name=".activities.TaskerCanNotShowActivity"
+            android:exported="true"
+            android:label="@string/disallow_show_frame"
+            android:theme="@style/AppTheme.Null">
+            <intent-filter>
+                <action android:name="com.twofortyfouram.locale.intent.action.EDIT_SETTING" />
+            </intent-filter>
+        </activity>
+        <activity android:name=".activities.TaskerForceShowActivity"
+            android:exported="true"
+            android:label="@string/force_show_frame"
+            android:theme="@style/AppTheme.Null">
+            <intent-filter>
+                <action android:name="com.twofortyfouram.locale.intent.action.EDIT_SETTING" />
+            </intent-filter>
+        </activity>
+        <activity android:name=".activities.TaskerUnForceShowActivity"
+            android:exported="true"
+            android:label="@string/unforce_show_frame"
+            android:theme="@style/AppTheme.Null">
+            <intent-filter>
+                <action android:name="com.twofortyfouram.locale.intent.action.EDIT_SETTING" />
+            </intent-filter>
+        </activity>
+        <activity android:name=".activities.TaskerIsAllowedToShowFrame"
+            android:exported="true"
+            android:label="@string/frame_allowed_to_show"
+            android:theme="@style/AppTheme.Null">
+            <intent-filter>
+                <action android:name="com.twofortyfouram.locale.intent.action.EDIT_CONDITION" />
+            </intent-filter>
+        </activity>
+        <activity android:name=".activities.TaskerIsShowingFrame"
+            android:exported="true"
+            android:label="@string/is_showing_frame"
+            android:theme="@style/AppTheme.Null">
+            <intent-filter>
+                <action android:name="com.twofortyfouram.locale.intent.action.EDIT_CONDITION" />
+            </intent-filter>
+        </activity>
+        <activity android:name=".activities.TaskerIsForceShowingFrame"
+            android:exported="true"
+            android:label="@string/frame_forced_to_show"
+            android:theme="@style/AppTheme.Null">
+            <intent-filter>
+                <action android:name="com.twofortyfouram.locale.intent.action.EDIT_CONDITION" />
+            </intent-filter>
+        </activity>
+        <activity android:name="tk.zwander.widgetdrawer.activities.TaskerShowDrawerActivity"
+            android:exported="true"
+            android:label="@string/open_drawer"
+            android:theme="@style/AppTheme.Null">
+            <intent-filter>
+                <action android:name="com.twofortyfouram.locale.intent.action.EDIT_SETTING" />
+            </intent-filter>
+        </activity>
+        <activity android:name="tk.zwander.widgetdrawer.activities.TaskerHideDrawerActivity"
+            android:exported="true"
+            android:label="@string/close_widget_drawer"
+            android:theme="@style/AppTheme.Null">
+            <intent-filter>
+                <action android:name="com.twofortyfouram.locale.intent.action.EDIT_SETTING" />
+            </intent-filter>
+        </activity>
+        <activity android:name="tk.zwander.widgetdrawer.activities.TaskerIsShowingDrawer"
+            android:exported="true"
+            android:label="@string/is_showing_drawer"
+            android:theme="@style/AppTheme.Null">
+            <intent-filter>
+                <action android:name="com.twofortyfouram.locale.intent.action.EDIT_CONDITION" />
+            </intent-filter>
+        </activity>
 
         <service
             android:name="tk.zwander.lockscreenwidgets.services.Accessibility"

@@ -259,6 +259,9 @@ class WidgetFrameDelegate private constructor(context: Context) : BaseDelegate<W
         handler(PrefManager.KEY_WIDGET_FRAME_ENABLED) {
             updateWindowState(wm)
         }
+        handler(PrefManager.KEY_CAN_SHOW_FRAME_FROM_TASKER, PrefManager.KEY_FORCE_SHOW_FRAME) {
+            updateWindowState(wm)
+        }
     }
 
     private val showWallpaperLayerCondition: Boolean
@@ -571,6 +574,7 @@ class WidgetFrameDelegate private constructor(context: Context) : BaseDelegate<W
                     && !state.hideForNonPresentIds
                     && prefManager.widgetFrameEnabled
                     && (!prefManager.hideInLandscape || state.screenOrientation == Surface.ROTATION_0 || state.screenOrientation == Surface.ROTATION_180)
+                    && prefManager.canShowFrameFromTasker
         }
 
         fun forNotificationCenter(): Boolean {
@@ -592,7 +596,11 @@ class WidgetFrameDelegate private constructor(context: Context) : BaseDelegate<W
                     && forCommon()
         }
 
-        return (forPreview() || forNotificationCenter() || forLockscreen()).also {
+        fun forced(): Boolean {
+            return prefManager.forceShowFrame
+        }
+
+        return (forced() || forPreview() || forNotificationCenter() || forLockscreen()).also {
             logUtils.debugLog(
                 "canShow: $it\n" +
                         "state: $state\n " +
@@ -606,7 +614,9 @@ class WidgetFrameDelegate private constructor(context: Context) : BaseDelegate<W
                         "hideInLandscape: ${prefManager.hideInLandscape}\n" +
                         "showInNotificationCenter: ${prefManager.showInNotificationCenter}\n" +
                         "hideOnEdgePanel: ${prefManager.hideOnEdgePanel}\n" +
-                        "hidingForPresentApp: ${state.hidingForPresentApp}\n"
+                        "hidingForPresentApp: ${state.hidingForPresentApp}\n" +
+                        "canShowFrameFromTasker: ${prefManager.canShowFrameFromTasker}\n" +
+                        "forceShowFrame: ${prefManager.forceShowFrame}\n"
             )
         }
     }

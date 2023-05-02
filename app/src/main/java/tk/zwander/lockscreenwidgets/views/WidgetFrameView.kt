@@ -15,6 +15,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.isVisible
+import com.joaomgcd.taskerpluginlibrary.extensions.requestQuery
 import kotlinx.coroutines.flow.MutableStateFlow
 import tk.zwander.common.util.Event
 import tk.zwander.common.util.HandlerRegistry
@@ -30,6 +31,7 @@ import tk.zwander.common.util.safeAddView
 import tk.zwander.common.util.safeRemoveView
 import tk.zwander.common.util.safeUpdateViewLayout
 import tk.zwander.common.util.vibrate
+import tk.zwander.lockscreenwidgets.activities.TaskerIsShowingFrame
 import tk.zwander.lockscreenwidgets.compose.IDListLayout
 import tk.zwander.lockscreenwidgets.databinding.WidgetFrameBinding
 import tk.zwander.lockscreenwidgets.util.*
@@ -158,6 +160,8 @@ class WidgetFrameView(context: Context, attrs: AttributeSet) : ConstraintLayout(
     override fun onAttachedToWindow() {
         super.onAttachedToWindow()
 
+        TaskerIsShowingFrame::class.java.requestQuery(context)
+
         sharedPreferencesChangeHandler.register(context)
         if (context.prefManager.touchProtection) {
             registerProxListener()
@@ -171,6 +175,8 @@ class WidgetFrameView(context: Context, attrs: AttributeSet) : ConstraintLayout(
 
     override fun onDetachedFromWindow() {
         super.onDetachedFromWindow()
+
+        TaskerIsShowingFrame::class.java.requestQuery(context)
 
         sharedPreferencesChangeHandler.unregister(context)
         unregisterProxListener()

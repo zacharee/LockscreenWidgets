@@ -73,7 +73,7 @@ dependencies {
     implementation 'com.github.zacharee:SeekBarPreference:46a6643c79'
     implementation 'com.github.zacharee:CollapsiblePreferenceCategory:2f53f2d367'
     implementation 'com.github.zacharee:colorpicker:c300c66e93'
-    implementation 'com.github.zacharee:PatreonSupportersRetrieval:4ce71eb5bf'
+    implementation 'com.github.zacharee:PatreonSupportersRetrieval:8436bbdbdc'
     implementation 'com.github.zacharee:SpannedGridLayoutManager:0c56d2019a'
     implementation 'com.github.zacharee:ComposeIntroSlider:cdd18d55b0'
 //    implementation project(':spannedlm')
@@ -91,4 +91,5 @@ dependencies {
     implementation "com.google.accompanist:accompanist-themeadapter-material3:${accompanist_version}"
 
     implementation "com.bugsnag:bugsnag-android:5.29.0"
+    implementation 'com.joaomgcd:taskerpluginlibrary:0.4.4'
 }

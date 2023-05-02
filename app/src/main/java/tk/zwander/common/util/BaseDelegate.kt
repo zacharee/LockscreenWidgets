@@ -70,6 +70,9 @@ abstract class BaseDelegate<State : BaseDelegate.BaseState>(context: Context) : 
     protected var scope: CoroutineScope = MainScope()
         private set
 
+    val isAttached: Boolean
+        get() = rootView.isAttachedToWindow
+
     @CallSuper
     open fun onCreate() {
         scope = MainScope()
