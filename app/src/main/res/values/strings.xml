@@ -209,7 +209,7 @@
     <string name="intro_notification_listener_desc">Lockscreen Widgets can hide the widget frame while there are notifications displayed. To do so, you\'ll need to enable the Notification Listener. You don\'t have to grant this right now.</string>
 
     <string name="intro_read_storage_title">Read External Storage</string>
-    <string name="intro_read_storage_desc">Lockscreen Widgets has a \"masking\" mode, where it will use your wallpaper as the widget frame background, causing it to seem transparent, while also being able to cover lock screen elements. To do this, Lockscreen Widgets needs permission to be able to read your device\'s storage. You don\'t have to grant this right now. If you\'re running Lollipop, this permission is already granted.</string>
+    <string name="intro_read_storage_desc">Lockscreen Widgets has a \"masking\" mode, where it will use your wallpaper as the widget frame background, causing it to seem transparent, while also being able to cover lock screen elements. To do this, Lockscreen Widgets needs permission to be able to read your device\'s storage. You don\'t have to grant this right now. If you\'re running Lollipop, this permission is already granted. On Android 13 and later, you will be asked to grant \"All files access\". More details are available in the privacy policy.</string>
 
     <string name="intro_battery_optimization">Battery Optimization</string>
     <string name="intro_battery_optimization_desc">Many devices, including those running MIUI and EMUI, have incredibly aggressive battery management. This can cause Lockscreen Widgets to be killed when you don\'t want it to be. Click the button below to read how you can whitelist Lockscreen Widgets on your particular device.</string>

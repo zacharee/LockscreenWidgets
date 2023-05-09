@@ -60,10 +60,11 @@ fun rememberIntroSlides(
         )
     }
 
-    val storagePermissionLauncher = rememberLauncherForActivityResult(contract = ActivityResultContracts.RequestMultiplePermissions()) {
-        hasStoragePermission = startReason != OnboardingActivity.RetroMode.STORAGE ||
-                context.hasStoragePermission
-    }
+    val storagePermissionLauncher =
+        rememberLauncherForActivityResult(contract = ActivityResultContracts.RequestMultiplePermissions()) {
+            hasStoragePermission = startReason != OnboardingActivity.RetroMode.STORAGE ||
+                    context.hasStoragePermission
+        }
 
     DisposableEffect(key1 = startReason) {
         val listenUri = Settings.Secure.getUriFor(Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES)
@@ -94,8 +95,9 @@ fun rememberIntroSlides(
                 super.onChange(selfChange, uri)
 
                 if (listenUri == uri) {
-                    hasNotificationAccess = startReason != OnboardingActivity.RetroMode.NOTIFICATION ||
-                            context.isNotificationListenerActive
+                    hasNotificationAccess =
+                        startReason != OnboardingActivity.RetroMode.NOTIFICATION ||
+                                context.isNotificationListenerActive
                 }
             }
         }
@@ -113,13 +115,15 @@ fun rememberIntroSlides(
 
     LaunchedEffect(key1 = startReason) {
         if (startReason == OnboardingActivity.RetroMode.NONE) {
-            slides.add(SimpleIntroPage(
-                title = { stringResource(id = R.string.intro_welcome_title) },
-                description = { stringResource(id = R.string.intro_welcome_desc) },
-                slideColor = { colorResource(id = R.color.slide_1) },
-                contentColor = { colorResource(id = R.color.slide_1_text) },
-                icon = { painterResource(id = R.drawable.ic_baseline_right_hand_24) },
-            ))
+            slides.add(
+                SimpleIntroPage(
+                    title = { stringResource(id = R.string.intro_welcome_title) },
+                    description = { stringResource(id = R.string.intro_welcome_desc) },
+                    slideColor = { colorResource(id = R.color.slide_1) },
+                    contentColor = { colorResource(id = R.color.slide_1_text) },
+                    icon = { painterResource(id = R.drawable.ic_baseline_right_hand_24) },
+                )
+            )
 
             slides.add(SimpleIntroPage(
                 title = { stringResource(id = R.string.intro_usage_title) },
@@ -148,7 +152,8 @@ fun rememberIntroSlides(
         }
 
         if (startReason == OnboardingActivity.RetroMode.NONE ||
-            startReason == OnboardingActivity.RetroMode.ACCESSIBILITY) {
+            startReason == OnboardingActivity.RetroMode.ACCESSIBILITY
+        ) {
             slides.add(SimpleIntroPage(
                 title = { stringResource(id = R.string.intro_accessibility_title) },
                 description = { stringResource(id = R.string.accessibility_service_desc) },
@@ -196,7 +201,8 @@ fun rememberIntroSlides(
         }
 
         if (startReason == OnboardingActivity.RetroMode.NONE ||
-            startReason == OnboardingActivity.RetroMode.NOTIFICATION) {
+            startReason == OnboardingActivity.RetroMode.NOTIFICATION
+        ) {
             slides.add(SimpleIntroPage(
                 title = { stringResource(id = R.string.intro_notification_listener_title) },
                 description = { stringResource(id = R.string.intro_notification_listener_desc) },
@@ -218,9 +224,10 @@ fun rememberIntroSlides(
         }
 
         if (Build.VERSION.SDK_INT > Build.VERSION_CODES.LOLLIPOP_MR1 && (
-                startReason == OnboardingActivity.RetroMode.NONE ||
-                startReason == OnboardingActivity.RetroMode.STORAGE
-                )) {
+                    startReason == OnboardingActivity.RetroMode.NONE ||
+                            startReason == OnboardingActivity.RetroMode.STORAGE
+                    )
+        ) {
             slides.add(SimpleIntroPage(
                 title = { stringResource(id = R.string.intro_read_storage_title) },
                 description = { stringResource(id = R.string.intro_read_storage_desc) },
@@ -230,21 +237,30 @@ fun rememberIntroSlides(
                 extraContent = {
                     OutlinedButton(
                         onClick = {
-                            storagePermissionLauncher.launch(
-                                if (context.applicationInfo.targetSdkVersion >= Build.VERSION_CODES.TIRAMISU &&
-                                    Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                                    arrayOf(
-                                        android.Manifest.permission.READ_MEDIA_IMAGES,
-                                        android.Manifest.permission.READ_MEDIA_AUDIO,
-                                        android.Manifest.permission.READ_MEDIA_VIDEO
-                                    )
-                                } else {
+                            if (context.applicationInfo.targetSdkVersion >= Build.VERSION_CODES.TIRAMISU &&
+                                Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU
+                            ) {
+                                context.startActivity(
+                                    Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION).apply {
+                                        data = Uri.parse("package:${context.packageName}")
+                                    }
+                                )
+                            } else {
+                                storagePermissionLauncher.launch(
                                     arrayOf(android.Manifest.permission.READ_EXTERNAL_STORAGE)
-                                }
-                            )
+                                )
+                            }
                         }
                     ) {
                         Text(text = stringResource(id = R.string.grant))
+                    }
+
+                    OutlinedButton(
+                        onClick = {
+                            context.launchUrl("https://github.com/zacharee/LockscreenWidgets/blob/master/PRIVACY.md")
+                        }
+                    ) {
+                        Text(text = stringResource(id = R.string.privacy_policy))
                     }
                 },
                 canMoveForward = { hasStoragePermission }
@@ -252,7 +268,8 @@ fun rememberIntroSlides(
         }
 
         if (startReason == OnboardingActivity.RetroMode.NONE ||
-            startReason == OnboardingActivity.RetroMode.BATTERY) {
+            startReason == OnboardingActivity.RetroMode.BATTERY
+        ) {
             slides.add(SimpleIntroPage(
                 title = { stringResource(id = R.string.intro_battery_optimization) },
                 description = { stringResource(id = R.string.intro_battery_optimization_desc) },
