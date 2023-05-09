@@ -11,6 +11,7 @@ import android.content.pm.LauncherApps
 import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Build
+import android.os.Bundle
 import android.os.ServiceManager
 import android.telephony.PhoneNumberUtils
 import androidx.activity.ComponentActivity
@@ -79,8 +80,9 @@ abstract class BaseBindWidgetActivity : ComponentActivity() {
                             .toBitmap(maxWidth = 512, maxHeight = 512)
 
                         val intent = pinItemRequest.shortcutInfo.intent ?: run {
-                            val number = pinItemRequest.shortcutInfo.extras["phoneNumber"]
-                            val action = pinItemRequest.shortcutInfo.extras["shortcutAction"]
+                            val extras = pinItemRequest.shortcutInfo.extras ?: Bundle()
+                            val number = extras["phoneNumber"]
+                            val action = extras["shortcutAction"]
 
                             if (number != null) {
                                 Intent().apply {
@@ -94,9 +96,9 @@ abstract class BaseBindWidgetActivity : ComponentActivity() {
 
                         if (intent == null) {
                             val msg = "Unable to find intent for pin request.\n" +
-                                    "Request Extras: ${pinItemRequest.extras.keySet().map { it to pinItemRequest.extras[it] }}\n" +
-                                    "Shortcut Info Extras: ${pinItemRequest.shortcutInfo.extras.keySet().map { it to pinItemRequest.shortcutInfo.extras[it] }}\n" +
-                                    "Shortcut Info: ${pinItemRequest.shortcutInfo.toInsecureString()}"
+                                    "Request Extras: ${pinItemRequest.extras?.keySet()?.map { it to pinItemRequest.extras[it] }}\n" +
+                                    "Shortcut Info Extras: ${pinItemRequest.shortcutInfo.extras?.keySet()?.map { it to pinItemRequest.shortcutInfo.extras[it] }}\n" +
+                                    "Shortcut Info: ${pinItemRequest.shortcutInfo?.toInsecureString()}"
                             logUtils.normalLog(msg)
                             Bugsnag.notify(Exception(msg))
                         }
@@ -108,6 +110,8 @@ abstract class BaseBindWidgetActivity : ComponentActivity() {
                         )
 
                         addNewShortcut(shortcut)
+
+                        return@registerForActivityResult
                     }
                 }
 
