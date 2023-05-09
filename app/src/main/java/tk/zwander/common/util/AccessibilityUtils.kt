@@ -137,7 +137,6 @@ object AccessibilityUtils {
     private suspend fun Context.getWindows(
         windows: List<AccessibilityWindowInfo>,
         isOnKeyguard: Boolean,
-        startingFrameState: WidgetFrameDelegate.State,
     ): WindowInfo {
         val systemUiWindows = ConcurrentLinkedQueue<WindowRootPair>()
 
@@ -340,7 +339,6 @@ object AccessibilityUtils {
         //so it shouldn't be noticeable to the user. We use this to check the current keyguard
         //state and, if applicable, send the keyguard dismissal broadcast.
 
-        val startingState = frameDelegate.state.copy()
         var newState = frameDelegate.state.copy()
 
         //Check if the screen is on.
@@ -396,7 +394,7 @@ object AccessibilityUtils {
                 hasEdgePanelWindow, sysUiWindowViewIds,
                 sysUiWindowNodes, topAppWindowPackageName,
                 hasHideForPresentApp, nodeState,
-            ) = getWindows(getWindows(), isOnKeyguard, startingState).also {
+            ) = getWindows(getWindows(), isOnKeyguard).also {
                 logUtils.debugLog("Got windows $it", null)
             }
 
