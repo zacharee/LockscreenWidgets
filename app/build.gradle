@@ -90,6 +90,6 @@ dependencies {
     implementation "com.google.accompanist:accompanist-themeadapter-material:${accompanist_version}"
     implementation "com.google.accompanist:accompanist-themeadapter-material3:${accompanist_version}"
 
-    implementation "com.bugsnag:bugsnag-android:5.29.0"
+    implementation "com.bugsnag:bugsnag-android:5.30.0"
     implementation 'com.joaomgcd:taskerpluginlibrary:0.4.7'
 }
