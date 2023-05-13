@@ -75,7 +75,7 @@ dependencies {
     implementation 'com.github.zacharee:colorpicker:c300c66e93'
     implementation 'com.github.zacharee:PatreonSupportersRetrieval:8436bbdbdc'
     implementation 'com.github.zacharee:SpannedGridLayoutManager:0c56d2019a'
-    implementation 'com.github.zacharee:ComposeIntroSlider:cdd18d55b0'
+    implementation 'com.github.zacharee:ComposeIntroSlider:67013b1426'
 //    implementation project(':spannedlm')
 
     implementation 'androidx.activity:activity-compose:1.7.1'
