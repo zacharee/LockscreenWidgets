@@ -72,8 +72,27 @@ abstract class BaseBindWidgetActivity : ComponentActivity() {
     private val configShortcutRequest = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         try {
             result.data?.let { data ->
+                fun addShortcutFromIntent(overrideLabel: String? = null) {
+                    data.getParcelableExtra<Intent>(Intent.EXTRA_SHORTCUT_INTENT)?.let { shortcutIntent ->
+                        val name = overrideLabel ?: data.getStringExtra(Intent.EXTRA_SHORTCUT_NAME)
+                        val iconRes =
+                            data.getParcelableExtra<Intent.ShortcutIconResource?>(Intent.EXTRA_SHORTCUT_ICON_RESOURCE)
+                        val iconBmp = data.getParcelableExtra<Bitmap?>(Intent.EXTRA_SHORTCUT_ICON)
+
+                        val shortcut = WidgetData.shortcut(
+                            shortcutIdManager.allocateShortcutId(),
+                            name, iconBmp.toBase64(), iconRes, shortcutIntent,
+                            WidgetSizeData(1, 1)
+                        )
+
+                        addNewShortcut(shortcut)
+                    }
+                }
+
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    data.getParcelableExtra<LauncherApps.PinItemRequest>(LauncherApps.EXTRA_PIN_ITEM_REQUEST)?.let { pinItemRequest ->
+                    val pinItemRequest = data.getParcelableExtra<LauncherApps.PinItemRequest>(LauncherApps.EXTRA_PIN_ITEM_REQUEST)
+
+                    if (pinItemRequest != null) {
                         val name = pinItemRequest.shortcutInfo.run { longLabel ?: shortLabel }.toString()
                         val icon = pinItemRequest.shortcutInfo.icon
                             .loadDrawable(this)
@@ -101,33 +120,24 @@ abstract class BaseBindWidgetActivity : ComponentActivity() {
                                     "Shortcut Info: ${pinItemRequest.shortcutInfo?.toInsecureString()}"
                             logUtils.normalLog(msg)
                             Bugsnag.notify(Exception(msg))
+                        } else {
+                            val shortcut = WidgetData.shortcut(
+                                shortcutIdManager.allocateShortcutId(),
+                                name, icon.toBase64(), null, intent,
+                                WidgetSizeData(1, 1),
+                            )
+
+                            addNewShortcut(shortcut)
+
+                            return@registerForActivityResult
                         }
-
-                        val shortcut = WidgetData.shortcut(
-                            shortcutIdManager.allocateShortcutId(),
-                            name, icon.toBase64(), null, intent,
-                            WidgetSizeData(1, 1),
-                        )
-
-                        addNewShortcut(shortcut)
-
-                        return@registerForActivityResult
                     }
-                }
 
-                data.getParcelableExtra<Intent>(Intent.EXTRA_SHORTCUT_INTENT)?.let { shortcutIntent ->
-                    val name = data.getStringExtra(Intent.EXTRA_SHORTCUT_NAME)
-                    val iconRes =
-                        data.getParcelableExtra<Intent.ShortcutIconResource?>(Intent.EXTRA_SHORTCUT_ICON_RESOURCE)
-                    val iconBmp = data.getParcelableExtra<Bitmap?>(Intent.EXTRA_SHORTCUT_ICON)
-
-                    val shortcut = WidgetData.shortcut(
-                        shortcutIdManager.allocateShortcutId(),
-                        name, iconBmp.toBase64(), iconRes, shortcutIntent,
-                        WidgetSizeData(1, 1)
+                    addShortcutFromIntent(
+                        pinItemRequest.shortcutInfo?.label?.toString()
                     )
-
-                    addNewShortcut(shortcut)
+                } else {
+                    addShortcutFromIntent()
                 }
             }
         } catch (e: Exception) {
