@@ -2,6 +2,8 @@ package tk.zwander.common.compose.main
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -22,13 +24,11 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.google.accompanist.flowlayout.FlowMainAxisAlignment
-import com.google.accompanist.flowlayout.FlowRow
-import com.google.accompanist.flowlayout.SizeMode
 import tk.zwander.common.activities.OnboardingActivity
 import tk.zwander.lockscreenwidgets.R
 import tk.zwander.lockscreenwidgets.services.openAccessibilitySettings
 
+@OptIn(ExperimentalLayoutApi::class)
 @Preview
 @Composable
 fun AccessibilityCard() {
@@ -64,10 +64,8 @@ fun AccessibilityCard() {
                 modifier = Modifier
                     .align(Alignment.CenterHorizontally)
                     .fillMaxWidth(),
-                crossAxisSpacing = 0.dp,
-                mainAxisSpacing = 4.dp,
-                mainAxisAlignment = FlowMainAxisAlignment.SpaceAround,
-                mainAxisSize = SizeMode.Expand
+                verticalArrangement = Arrangement.spacedBy(0.dp),
+                horizontalArrangement = Arrangement.SpaceAround,
             ) {
                 OutlinedButton(
                     onClick = {
@@ -80,7 +78,8 @@ fun AccessibilityCard() {
                         containerColor = Color.Transparent,
                         contentColor = MaterialTheme.colorScheme.onErrorContainer
                     ),
-                    border = ButtonDefaults.outlinedButtonBorder.copy(brush = SolidColor(MaterialTheme.colorScheme.onErrorContainer))
+                    border = ButtonDefaults.outlinedButtonBorder.copy(brush = SolidColor(MaterialTheme.colorScheme.onErrorContainer)),
+                    modifier = Modifier.padding(end = 4.dp),
                 ) {
                     Text(text = stringResource(id = R.string.battery_whitelist))
                 }
@@ -91,7 +90,8 @@ fun AccessibilityCard() {
                         containerColor = Color.Transparent,
                         contentColor = MaterialTheme.colorScheme.onErrorContainer
                     ),
-                    border = ButtonDefaults.outlinedButtonBorder.copy(brush = SolidColor(MaterialTheme.colorScheme.onErrorContainer))
+                    border = ButtonDefaults.outlinedButtonBorder.copy(brush = SolidColor(MaterialTheme.colorScheme.onErrorContainer)),
+                    modifier = Modifier.padding(start = 4.dp),
                 ) {
                     Text(text = stringResource(id = R.string.accessibility_settings))
                 }

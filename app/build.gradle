@@ -86,7 +86,6 @@ dependencies {
     implementation 'androidx.lifecycle:lifecycle-viewmodel-compose:2.6.1'
 
     implementation "com.google.accompanist:accompanist-drawablepainter:${accompanist_version}"
-    implementation "com.google.accompanist:accompanist-flowlayout:${accompanist_version}"
     implementation "com.google.accompanist:accompanist-themeadapter-material:${accompanist_version}"
     implementation "com.google.accompanist:accompanist-themeadapter-material3:${accompanist_version}"
 

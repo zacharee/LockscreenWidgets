@@ -4,9 +4,12 @@ import android.content.Intent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -20,6 +23,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -35,10 +39,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.isUnspecified
 import androidx.compose.ui.unit.sp
-import com.google.accompanist.flowlayout.FlowCrossAxisAlignment
-import com.google.accompanist.flowlayout.FlowMainAxisAlignment
-import com.google.accompanist.flowlayout.FlowRow
-import com.google.accompanist.flowlayout.SizeMode
 import tk.zwander.common.compose.components.CardSwitch
 import tk.zwander.common.compose.data.FeatureCardInfo
 import tk.zwander.common.compose.util.rememberBooleanPreferenceState
@@ -120,6 +120,7 @@ fun rememberFeatureCards(): List<FeatureCardInfo> {
     }
 }
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun FeatureCard(info: FeatureCardInfo) {
     val context = LocalContext.current
@@ -191,27 +192,29 @@ fun FeatureCard(info: FeatureCardInfo) {
                         val width = this.maxWidth
 
                         var maxItemHeight by remember(info.buttons.toList()) {
-                            mutableStateOf(0)
+                            mutableIntStateOf(0)
                         }
                         var minTextSize by remember(info.buttons.toList()) {
                             mutableStateOf(16.sp)
                         }
 
                         FlowRow(
-                            mainAxisAlignment = FlowMainAxisAlignment.SpaceBetween,
-                            crossAxisAlignment = FlowCrossAxisAlignment.Center,
-                            mainAxisSpacing = 8.dp,
-                            crossAxisSpacing = 8.dp,
-                            mainAxisSize = SizeMode.Expand,
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalArrangement = Arrangement.Center,
+                            modifier = Modifier.fillMaxWidth(),
                         ) {
                             val itemsPerRow = info.buttons.size.coerceAtMost(3)
                             val columnWidth = (width - (12.dp * (itemsPerRow - 1))) / itemsPerRow
 
-                            info.buttons.forEach {
+                            info.buttons.forEachIndexed { index, mainPageButton ->
                                 ExtraButton(
-                                    info = it,
+                                    info = mainPageButton,
                                     modifier = Modifier
                                         .width(columnWidth)
+                                        .padding(
+                                            start = if (index == 0) 0.dp else 4.dp,
+                                            end = if (index == info.buttons.lastIndex) 0.dp else 4.dp,
+                                        )
                                         .onSizeChanged { s ->
                                             if (s.height > maxItemHeight) {
                                                 maxItemHeight = s.height

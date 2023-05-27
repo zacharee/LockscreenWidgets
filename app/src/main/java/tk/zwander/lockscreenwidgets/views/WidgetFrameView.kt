@@ -11,8 +11,10 @@ import android.view.MotionEvent
 import android.view.View
 import android.view.ViewConfiguration
 import android.view.WindowManager
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Modifier
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.isVisible
 import com.joaomgcd.taskerpluginlibrary.extensions.requestQuery
@@ -148,7 +150,8 @@ class WidgetFrameView(context: Context, attrs: AttributeSet) : ConstraintLayout(
             val items by debugIdItems.collectAsState()
 
             IDListLayout(
-                items = items
+                items = items,
+                modifier = Modifier.fillMaxSize(),
             )
         }
 
