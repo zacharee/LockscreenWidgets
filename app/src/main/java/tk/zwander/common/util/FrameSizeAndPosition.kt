@@ -73,6 +73,14 @@ class FrameSizeAndPosition private constructor(context: Context) : ContextWrappe
         }
     }
 
+    fun setDefaultSizeForType(type: FrameType) {
+        setSizeForType(type, getDefaultSizeForType(type))
+    }
+
+    fun setDefaultPositionForType(type: FrameType) {
+        setPositionForType(type, getDefaultPositionForType(type))
+    }
+
     private fun getDefaultPositionForType(type: FrameType): Point {
         return when (type) {
             FrameType.LockNormal.Portrait,

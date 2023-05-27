@@ -38,6 +38,7 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import tk.zwander.common.compose.components.ClearFrameDataCard
 import tk.zwander.common.compose.components.ClickableCard
 import tk.zwander.common.compose.components.PreferenceSwitch
 import tk.zwander.common.util.PrefManager
@@ -111,7 +112,7 @@ fun DebugCard() {
                     modifier = Modifier.wrapContentHeight()
                 ) {
                     Column(
-                        verticalArrangement = Arrangement.spacedBy(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp),
                         modifier = Modifier.fillMaxWidth()
                     ) {
                         val debugEnabled = PreferenceSwitch(
@@ -144,6 +145,8 @@ fun DebugCard() {
                                 context.logUtils.resetDebugLog()
                             }
                         )
+
+                        ClearFrameDataCard()
                     }
                 }
             }
