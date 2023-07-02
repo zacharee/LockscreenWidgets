@@ -61,7 +61,9 @@ class LogUtils private constructor(private val context: Context) {
 
         Log.e(NORMAL_LOG_TAG, fullMessage)
 
-        logFile.appendText("\n\n$fullMessage")
+        if (context.isDebug) {
+            logFile.appendText("\n\n$fullMessage")
+        }
     }
 
     fun resetDebugLog() {
