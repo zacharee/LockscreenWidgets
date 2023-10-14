@@ -1,5 +1,3 @@
-@file:Suppress("DEPRECATION")
-
 package tk.zwander.common.util
 
 import android.annotation.SuppressLint
@@ -11,6 +9,11 @@ import android.content.pm.PackageManager
 import android.content.pm.ResolveInfo
 import android.content.res.Resources
 import android.os.Build
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.ui.platform.LocalContext
+import androidx.lifecycle.Lifecycle
 
 fun PackageManager.getApplicationInfoCompat(packageName: String, flags: Int = 0): ApplicationInfo {
     return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
@@ -54,4 +57,27 @@ fun PackageManager.getReceiverInfoCompat(componentName: ComponentName, flags: In
     } else {
         getReceiverInfo(componentName, flags)
     }
+}
+
+@Composable
+fun rememberPackageInstallationStatus(packageName: String): Boolean {
+    val context = LocalContext.current
+
+    fun checkStatus(): Boolean {
+        return try {
+            context.packageManager.getApplicationInfo(packageName, 0) != null
+        } catch (e: PackageManager.NameNotFoundException) {
+            false
+        }
+    }
+
+    val state = remember {
+        mutableStateOf(checkStatus())
+    }
+
+    LifecycleEffect(Lifecycle.State.RESUMED) {
+        state.value = checkStatus()
+    }
+
+    return state.value
 }

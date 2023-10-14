@@ -23,12 +23,16 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.lifecycle.Lifecycle
 import dev.zwander.composeintroslider.IntroPage
 import dev.zwander.composeintroslider.SimpleIntroPage
 import tk.zwander.common.activities.OnboardingActivity
 import tk.zwander.common.compose.AppTheme
+import tk.zwander.common.util.LifecycleEffect
+import tk.zwander.common.util.hasReadMediaImagesPermission
 import tk.zwander.common.util.hasStoragePermission
 import tk.zwander.common.util.launchUrl
+import tk.zwander.common.util.rememberPackageInstallationStatus
 import tk.zwander.lockscreenwidgets.R
 import tk.zwander.lockscreenwidgets.services.isAccessibilityEnabled
 import tk.zwander.lockscreenwidgets.services.isNotificationListenerActive
@@ -59,12 +63,30 @@ fun rememberIntroSlides(
                     context.hasStoragePermission
         )
     }
+    var hasReadMediaImagesPermission by remember {
+        mutableStateOf(
+            startReason != OnboardingActivity.RetroMode.STORAGE ||
+                    context.hasReadMediaImagesPermission
+        )
+    }
 
     val storagePermissionLauncher =
         rememberLauncherForActivityResult(contract = ActivityResultContracts.RequestMultiplePermissions()) {
             hasStoragePermission = startReason != OnboardingActivity.RetroMode.STORAGE ||
                     context.hasStoragePermission
+            hasReadMediaImagesPermission = startReason != OnboardingActivity.RetroMode.STORAGE ||
+                    context.hasReadMediaImagesPermission
         }
+
+    LifecycleEffect(Lifecycle.State.RESUMED) {
+        hasAccessibility = context.isAccessibilityEnabled
+        hasNotificationAccess = startReason != OnboardingActivity.RetroMode.NOTIFICATION ||
+                context.isNotificationListenerActive
+        hasStoragePermission = startReason != OnboardingActivity.RetroMode.STORAGE ||
+                context.hasStoragePermission
+        hasReadMediaImagesPermission = startReason != OnboardingActivity.RetroMode.STORAGE ||
+                context.hasReadMediaImagesPermission
+    }
 
     DisposableEffect(key1 = startReason) {
         val listenUri = Settings.Secure.getUriFor(Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES)
@@ -196,7 +218,7 @@ fun rememberIntroSlides(
                         }
                     }
                 },
-                canMoveForward = { hasAccessibility }
+                canMoveForward = { hasAccessibility },
             ))
         }
 
@@ -219,7 +241,7 @@ fun rememberIntroSlides(
                         Text(text = stringResource(id = R.string.grant))
                     }
                 },
-                canMoveForward = { hasNotificationAccess }
+                canMoveForward = { hasNotificationAccess },
             ))
         }
 
@@ -230,21 +252,44 @@ fun rememberIntroSlides(
         ) {
             slides.add(SimpleIntroPage(
                 title = { stringResource(id = R.string.intro_read_storage_title) },
-                description = { stringResource(id = R.string.intro_read_storage_desc) },
+                description = {
+                    stringResource(id = R.string.intro_read_storage_desc).run {
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                            "$this ${stringResource(id = R.string.intro_read_external_storage_desc_13_addendum)}"
+                        } else {
+                            this
+                        }
+                    }
+                },
                 slideColor = { colorResource(id = R.color.slide_6) },
                 contentColor = { colorResource(id = R.color.slide_6_text) },
                 icon = { painterResource(id = R.drawable.ic_baseline_sd_storage_24) },
                 extraContent = {
+                    val appOpsInstalled =
+                        rememberPackageInstallationStatus(packageName = "rikka.appops")
+
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                        OutlinedButton(
+                            onClick = {
+                                storagePermissionLauncher.launch(
+                                    arrayOf(android.Manifest.permission.READ_MEDIA_IMAGES)
+                                )
+                            },
+                        ) {
+                            Text(text = stringResource(id = R.string.grant_read_media_images))
+                        }
+                    }
+
                     OutlinedButton(
                         onClick = {
-                            if (context.applicationInfo.targetSdkVersion >= Build.VERSION_CODES.TIRAMISU &&
-                                Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU
-                            ) {
-                                context.startActivity(
-                                    Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION).apply {
-                                        data = Uri.parse("package:${context.packageName}")
-                                    }
-                                )
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                                if (appOpsInstalled) {
+                                    try {
+                                        context.startActivity(context.packageManager.getLaunchIntentForPackage("rikka.appops"))
+                                    } catch (_: Exception) {}
+                                } else {
+                                    context.launchUrl("https://appops.rikka.app/download/")
+                                }
                             } else {
                                 storagePermissionLauncher.launch(
                                     arrayOf(android.Manifest.permission.READ_EXTERNAL_STORAGE)
@@ -252,7 +297,23 @@ fun rememberIntroSlides(
                             }
                         }
                     ) {
-                        Text(text = stringResource(id = R.string.grant))
+                        Text(
+                            text = stringResource(
+                                id = when {
+                                    Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU -> {
+                                        if (appOpsInstalled) {
+                                            R.string.open_app_ops
+                                        } else {
+                                            R.string.install_app_ops
+                                        }
+                                    }
+
+                                    else -> {
+                                        R.string.grant
+                                    }
+                                },
+                            ),
+                        )
                     }
 
                     OutlinedButton(
@@ -263,7 +324,7 @@ fun rememberIntroSlides(
                         Text(text = stringResource(id = R.string.privacy_policy))
                     }
                 },
-                canMoveForward = { hasStoragePermission }
+                canMoveForward = { hasStoragePermission && hasReadMediaImagesPermission }
             ))
         }
 

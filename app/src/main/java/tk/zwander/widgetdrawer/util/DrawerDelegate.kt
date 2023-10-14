@@ -24,6 +24,7 @@ import android.view.animation.AccelerateInterpolator
 import android.view.animation.DecelerateInterpolator
 import android.widget.Toast
 import androidx.core.animation.doOnEnd
+import androidx.core.content.ContextCompat
 import androidx.core.view.updateLayoutParams
 import androidx.core.view.updatePaddingRelative
 import androidx.lifecycle.Lifecycle
@@ -49,7 +50,6 @@ import tk.zwander.common.util.statusBarHeight
 import tk.zwander.lockscreenwidgets.R
 import tk.zwander.lockscreenwidgets.databinding.DrawerLayoutBinding
 import tk.zwander.lockscreenwidgets.services.Accessibility
-import tk.zwander.lockscreenwidgets.util.*
 import tk.zwander.widgetdrawer.adapters.DrawerAdapter
 import tk.zwander.widgetdrawer.views.Handle
 import kotlin.math.absoluteValue
@@ -358,10 +358,15 @@ class DrawerDelegate private constructor(context: Context) : BaseDelegate<Drawer
     override fun onCreate() {
         super.onCreate()
 
-        registerReceiver(globalReceiver, IntentFilter().apply {
-            @Suppress("DEPRECATION")
-            addAction(Intent.ACTION_CLOSE_SYSTEM_DIALOGS)
-        })
+        ContextCompat.registerReceiver(
+            this,
+            globalReceiver,
+            IntentFilter().apply {
+                @Suppress("DEPRECATION")
+                addAction(Intent.ACTION_CLOSE_SYSTEM_DIALOGS)
+            },
+            ContextCompat.RECEIVER_EXPORTED,
+        )
 
         drawer.removeWidgetConfirmation.root.updateLayoutParams<ViewGroup.LayoutParams> {
             height = (screenSize.y / 2f).toInt()

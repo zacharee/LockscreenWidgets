@@ -11,8 +11,8 @@ import tk.zwander.common.fragments.CommonPreferenceFragment
 import tk.zwander.common.util.HandlerRegistry
 import tk.zwander.common.util.PrefManager
 import tk.zwander.common.util.backup.BackupRestoreManager
+import tk.zwander.common.util.canReadWallpaper
 import tk.zwander.common.util.handler
-import tk.zwander.common.util.hasStoragePermission
 import tk.zwander.common.util.isOneUI
 import tk.zwander.common.util.isTouchWiz
 import tk.zwander.common.util.prefManager
@@ -78,7 +78,7 @@ class SettingsFragment : CommonPreferenceFragment() {
         }
 
         findPreference<SwitchPreferenceCompat>(PrefManager.KEY_FRAME_MASKED_MODE)?.setOnPreferenceChangeListener { _, newValue ->
-            (if (newValue.toString().toBoolean() && !requireContext().hasStoragePermission) {
+            (if (newValue.toString().toBoolean() && !requireContext().canReadWallpaper) {
                 OnboardingActivity.start(requireContext(), OnboardingActivity.RetroMode.STORAGE)
                 false
             } else true)
