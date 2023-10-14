@@ -118,14 +118,28 @@ class WallpaperUtils private constructor(context: Context) : ContextWrapper(cont
         @RequiresApi(Build.VERSION_CODES.R)
         fun withFeature(): ParcelFileDescriptor? {
             return try {
-                iWallpaper.getWallpaperWithFeature(
-                    packageName,
-                    attributionTag,
-                    callback,
-                    flag,
-                    bundle,
-                    UserHandle.getCallingUserId()
-                )
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+                    iWallpaper.getWallpaperWithFeature(
+                        packageName,
+                        attributionTag,
+                        callback,
+                        flag,
+                        bundle,
+                        UserHandle.getCallingUserId(),
+                        true,
+                    )
+                } else {
+                    iWallpaper::class.java.getMethod(
+                        "getWallpaperWithFeature",
+                        String::class.java, String::class.java,
+                        IWallpaperManagerCallback::class.java,
+                        Int::class.java, Bundle::class.java, Int::class.java,
+                    ).invoke(
+                        iWallpaper,
+                        packageName, attributionTag, callback,
+                        flag, bundle, UserHandle.getCallingUserId(),
+                    ) as? ParcelFileDescriptor
+                }
             } catch (e: NoSuchMethodError) {
                 logUtils.debugLog("Missing getWallpaperWithFeature, using getWallpaper instead.")
                 old()

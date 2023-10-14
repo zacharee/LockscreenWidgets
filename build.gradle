@@ -1,8 +1,8 @@
 buildscript {
-    ext.kotlin_version = '1.8.21'
-    ext.compose_version = '1.5.0-beta01'
-    ext.accompanist_version = '0.31.2-alpha'
-    ext.coroutines_version = '1.7.2'
+    ext.kotlin_version = '1.9.10'
+    ext.compose_version = '1.6.0-alpha07'
+    ext.accompanist_version = '0.33.2-alpha'
+    ext.coroutines_version = '1.7.3'
 
     repositories {
         google()
@@ -10,7 +10,7 @@ buildscript {
         maven { url 'https://jitpack.io' }
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:8.2.0-alpha10'
+        classpath 'com.android.tools.build:gradle:8.3.0-alpha07'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
         classpath 'com.bugsnag:bugsnag-android-gradle-plugin:8.0.1'
     }
@@ -25,6 +25,5 @@ allprojects {
 }
 
 tasks.register('clean', Delete.class) {
-    delete rootProject.buildDir
-
+    delete rootProject.layout.buildDirectory
 }

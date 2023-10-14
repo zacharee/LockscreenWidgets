@@ -6,13 +6,13 @@ plugins {
 }
 
 android {
-    compileSdk 33
+    compileSdk 34
 
     defaultConfig {
         namespace "tk.zwander.lockscreenwidgets"
         applicationId "tk.zwander.lockscreenwidgets"
         minSdkVersion 22
-        targetSdkVersion 32
+        targetSdkVersion 34
         versionCode 98
         versionName "2.10.1"
     }
@@ -49,7 +49,7 @@ android {
     packagingOptions.exclude('META-INF/library_release.kotlin_module')
 
     composeOptions {
-        kotlinCompilerExtensionVersion '1.4.7'
+        kotlinCompilerExtensionVersion '1.5.3'
     }
 }
 
@@ -59,15 +59,15 @@ dependencies {
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:${coroutines_version}"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:${coroutines_version}"
 
-    implementation 'androidx.core:core-ktx:1.10.1'
-    implementation 'androidx.appcompat:appcompat:1.7.0-alpha02'
-    implementation 'androidx.constraintlayout:constraintlayout:2.2.0-alpha10'
-    implementation 'androidx.recyclerview:recyclerview:1.3.0'
-    implementation 'androidx.preference:preference-ktx:1.2.0'
+    implementation 'androidx.core:core-ktx:1.12.0'
+    implementation 'androidx.appcompat:appcompat:1.7.0-alpha03'
+    implementation 'androidx.constraintlayout:constraintlayout:2.2.0-alpha13'
+    implementation 'androidx.recyclerview:recyclerview:1.3.1'
+    implementation 'androidx.preference:preference-ktx:1.2.1'
 
     implementation 'org.lsposed.hiddenapibypass:hiddenapibypass:4.3'
     implementation 'com.google.code.gson:gson:2.10.1'
-    implementation 'com.google.android.material:material:1.9.0'
+    implementation 'com.google.android.material:material:1.10.0'
     implementation 'com.github.agrawalsuneet:DotLoadersPack-Android:v1.4.2'
     implementation 'net.bytebuddy:byte-buddy-android:1.14.4'
     implementation 'com.github.zacharee:SeekBarPreference:46a6643c79'
@@ -78,17 +78,17 @@ dependencies {
     implementation 'com.github.zacharee:ComposeIntroSlider:67013b1426'
 //    implementation project(':spannedlm')
 
-    implementation 'androidx.activity:activity-compose:1.7.2'
+    implementation 'androidx.activity:activity-compose:1.8.0'
     implementation "androidx.compose.animation:animation:${compose_version}"
     implementation "androidx.compose.foundation:foundation:${compose_version}"
     implementation "androidx.compose.ui:ui-tooling:${compose_version}"
-    implementation 'androidx.compose.material3:material3:1.2.0-alpha03'
-    implementation 'androidx.lifecycle:lifecycle-viewmodel-compose:2.6.1'
+    implementation 'androidx.compose.material3:material3:1.2.0-alpha09'
+    implementation 'androidx.lifecycle:lifecycle-viewmodel-compose:2.6.2'
 
     implementation "com.google.accompanist:accompanist-drawablepainter:${accompanist_version}"
     implementation "com.google.accompanist:accompanist-themeadapter-material:${accompanist_version}"
     implementation "com.google.accompanist:accompanist-themeadapter-material3:${accompanist_version}"
 
-    implementation "com.bugsnag:bugsnag-android:5.30.0"
+    implementation "com.bugsnag:bugsnag-android:5.31.1"
     implementation 'com.joaomgcd:taskerpluginlibrary:0.4.7'
 }
