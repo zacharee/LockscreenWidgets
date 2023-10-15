@@ -31,6 +31,14 @@
             />
 
         <tk.zwander.common.prefs.MaterialSwitchPreference
+            android:title="@string/settings_screen_force_widget_update"
+            android:summary="@string/settings_screen_force_widget_update_desc"
+            android:key="drawer_force_reload_widgets"
+            android:icon="@drawable/baseline_refresh_24"
+            android:defaultValue="true"
+            />
+
+        <tk.zwander.common.prefs.MaterialSwitchPreference
             android:title="@string/settings_screen_blur_background"
             android:summary="@string/settings_screen_blur_drawer_background_desc"
             android:key="blur_drawer_background"

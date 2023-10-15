@@ -230,6 +230,14 @@
             />
 
         <tk.zwander.common.prefs.MaterialSwitchPreference
+            android:title="@string/settings_screen_force_widget_update"
+            android:summary="@string/settings_screen_force_widget_update_desc"
+            android:key="frame_force_reload_widgets"
+            android:icon="@drawable/baseline_refresh_24"
+            android:defaultValue="true"
+            />
+
+        <tk.zwander.common.prefs.MaterialSwitchPreference
             android:title="@string/settings_screen_animate_show_hide"
             android:summary="@string/settings_screen_animate_show_hide_desc"
             android:key="animate_show_hide"

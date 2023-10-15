@@ -359,7 +359,9 @@ class WidgetFrameDelegate private constructor(context: Context) : BaseDelegate<W
                         //it doesn't seem like pending updates always get
                         //dispatched. Rebinding all the widgets forces
                         //them to update.
-                        adapter.updateViews()
+                        if (prefManager.frameForceWidgetReload) {
+                            adapter.updateViews()
+                        }
                         scrollToStoredPosition(false)
                         lifecycleRegistry.currentState = Lifecycle.State.RESUMED
                     } else {

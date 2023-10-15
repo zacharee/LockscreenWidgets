@@ -248,7 +248,9 @@ class DrawerDelegate private constructor(context: Context) : BaseDelegate<Drawer
                 if (event.attached) {
                     if (!handle.scrollingOpen) {
                         Handler(Looper.getMainLooper()).postDelayed({
-                            adapter.updateViews()
+                            if (prefManager.drawerForceWidgetReload) {
+                                adapter.updateViews()
+                            }
                         }, 50)
                         widgetHost.startListening(this)
                     }
