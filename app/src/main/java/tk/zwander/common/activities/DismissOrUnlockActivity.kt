@@ -12,6 +12,7 @@ import tk.zwander.common.util.Event
 import tk.zwander.common.util.EventObserver
 import tk.zwander.common.util.eventManager
 import tk.zwander.common.util.keyguardManager
+import tk.zwander.common.util.logUtils
 import tk.zwander.common.util.mainHandler
 
 /**
@@ -69,32 +70,40 @@ class DismissOrUnlockActivity : AppCompatActivity(), EventObserver {
     }
 
     private fun handle() {
+        logUtils.debugLog("Handling dismiss/unlock? ${kgm.isKeyguardLocked}")
+
         if (kgm.isKeyguardLocked) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 kgm.requestDismissKeyguard(this, object : KeyguardManager.KeyguardDismissCallback() {
                     override fun onDismissCancelled() {
+                        logUtils.debugLog("Dismiss cancelled.", null)
                         finish()
                     }
 
                     override fun onDismissError() {
+                        logUtils.debugLog("Dismiss error.", null)
                         finish()
                     }
 
                     override fun onDismissSucceeded() {
+                        logUtils.debugLog("Dismiss success", null)
                         finish()
                     }
                 })
             } else {
+                logUtils.debugLog("Trying dismiss workaround", null)
+
                 //If we're below 8.0, we have to do some weirdness to dismiss the lock screen.
                 with (eventManager) {
                     registerListener { _: Event.LockscreenDismissed ->
+                        logUtils.debugLog("Dismiss done.")
                         finish()
                     }
                 }
                 @Suppress("DEPRECATION")
                 window.addFlags(
                     WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD or
-                            WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED
+                            WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED,
                 )
             }
         } else {

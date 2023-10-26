@@ -7,6 +7,7 @@ import android.appwidget.AppWidgetHostView
 import android.appwidget.AppWidgetProviderInfo
 import android.content.Context
 import android.widget.RemoteViews
+import tk.zwander.common.util.logUtils
 import tk.zwander.common.util.safeApplicationContext
 import tk.zwander.common.views.ZeroPaddingAppWidgetHostView
 import java.util.concurrent.ConcurrentLinkedQueue
@@ -36,6 +37,7 @@ abstract class WidgetHostCompat(
         } catch (e: ClassNotFoundException) {
             null
         }
+
         @SuppressLint("PrivateApi")
         val INTERACTION_HANDLER_CLASS = try {
             Class.forName("android.widget.RemoteViews\$InteractionHandler")
@@ -55,18 +57,34 @@ abstract class WidgetHostCompat(
 
                 val newInstance = when {
                     interactionHandlerClass != null && interactionHandlerClass.isInterface -> {
-                        WidgetHostInterface(context.safeApplicationContext, HOST_ID, interactionHandlerClass)
+                        WidgetHostInterface(
+                            context.safeApplicationContext,
+                            HOST_ID,
+                            interactionHandlerClass
+                        )
                     }
+
                     onClickHandlerClass != null && onClickHandlerClass.isInterface -> {
-                        WidgetHostInterface(context.safeApplicationContext, HOST_ID, onClickHandlerClass)
+                        WidgetHostInterface(
+                            context.safeApplicationContext,
+                            HOST_ID,
+                            onClickHandlerClass
+                        )
                     }
+
                     onClickHandlerClass != null && !onClickHandlerClass.isInterface -> {
-                        WidgetHostClass(context.safeApplicationContext, HOST_ID, onClickHandlerClass)
+                        WidgetHostClass(
+                            context.safeApplicationContext,
+                            HOST_ID,
+                            onClickHandlerClass
+                        )
                     }
+
                     else -> {
                         throw IllegalStateException("Unable to find correct click/interaction handler!\n" +
                                 "Interaction Handler: ${interactionHandlerClass?.run { "$canonicalName / $isInterface" }}\n" +
-                                "Click Handler: ${onClickHandlerClass?.run { "$canonicalName / $isInterface" }}")
+                                "Click Handler: ${onClickHandlerClass?.run { "$canonicalName / $isInterface" }}"
+                        )
                     }
                 }
 
@@ -125,6 +143,12 @@ abstract class WidgetHostCompat(
     abstract inner class BaseInnerOnClickHandler {
         @SuppressLint("NewApi")
         fun checkPendingIntent(pendingIntent: PendingIntent?, widgetId: Int) {
+            context.logUtils.debugLog(
+                "Intercepting PendingIntent. " +
+                        "isActivity: ${pendingIntent?.isActivity}. " +
+                        "creatorPackage: ${pendingIntent?.creatorPackage}",
+            )
+
             if (pendingIntent != null) {
                 val triggerUnlockOrDismiss = pendingIntent.isActivity
                 // This package check is so the frame/drawer doesn't dismiss itself when the
