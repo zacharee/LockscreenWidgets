@@ -460,7 +460,11 @@ open class WidgetFrameAdapter(
 
         private suspend fun bindWidget(data: WidgetData) {
             val widgetInfo = withContext(Dispatchers.Main) {
-                manager.getAppWidgetInfo(data.id)
+                try {
+                    manager.getAppWidgetInfo(data.id)
+                } catch (_: PackageManager.NameNotFoundException) {
+                    null
+                }
             }
 
             binding.openWidgetConfig.isVisible =
