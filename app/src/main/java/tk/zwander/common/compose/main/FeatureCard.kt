@@ -18,7 +18,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Card
-import androidx.compose.material3.Divider
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -143,7 +143,7 @@ fun FeatureCard(info: FeatureCardInfo) {
             )
 
             Box(modifier = Modifier.fillMaxWidth(0.25f)) {
-                Divider(
+                HorizontalDivider(
                     modifier = Modifier.padding(top = 24.dp, bottom = 24.dp),
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )

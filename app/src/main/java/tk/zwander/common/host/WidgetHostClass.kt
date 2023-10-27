@@ -45,6 +45,7 @@ class WidgetHostClass(context: Context, id: Int, private val clickHandlerClass: 
             .make()
             .load(WidgetHostCompat::class.java.classLoader, AndroidClassLoadingStrategy.Wrapping(context.cacheDir))
             .loaded
+            .getDeclaredConstructor()
             .newInstance()
     }
 
