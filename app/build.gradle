@@ -83,9 +83,9 @@ dependencies {
     implementation "androidx.compose.foundation:foundation:${compose_version}"
     implementation "androidx.compose.ui:ui-tooling:${compose_version}"
     implementation 'androidx.compose.material3:material3:1.2.0-alpha10'
-    implementation 'androidx.lifecycle:lifecycle-viewmodel-compose:2.7.0-alpha03'
-    implementation 'androidx.lifecycle:lifecycle-runtime-compose:2.7.0-alpha03'
-    implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.7.0-alpha03'
+    implementation 'androidx.lifecycle:lifecycle-viewmodel-compose:2.7.0-beta01'
+    implementation 'androidx.lifecycle:lifecycle-runtime-compose:2.7.0-beta01'
+    implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.7.0-beta01'
 
     implementation "com.google.accompanist:accompanist-drawablepainter:${accompanist_version}"
     implementation "com.google.accompanist:accompanist-themeadapter-material:${accompanist_version}"
