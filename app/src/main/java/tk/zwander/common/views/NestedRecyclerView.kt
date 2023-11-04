@@ -10,7 +10,7 @@ import androidx.core.view.NestedScrollingParent3
 import androidx.core.view.NestedScrollingParentHelper
 import androidx.core.view.ViewCompat
 import androidx.recyclerview.widget.RecyclerView
-import kotlin.math.absoluteValue
+import tk.zwander.common.util.verticalScrollOffset
 
 //https://stackoverflow.com/a/68318211/5496177
 open class NestedRecyclerView @JvmOverloads constructor(
@@ -52,6 +52,14 @@ open class NestedRecyclerView @JvmOverloads constructor(
     var selectedItem: Boolean = false
 
     override fun dispatchTouchEvent(ev: MotionEvent): Boolean {
+        if (ev.action == MotionEvent.ACTION_UP) {
+            // This is to prevent an issue where the item touch helper receives
+            // an ACTION_DOWN but then doesn't later get the ACTION_UP event,
+            // causing it to run any long-press events.
+            nestedScrollingListener?.invoke(true)
+            nestedScrollingListener?.invoke(false)
+        }
+
         // Nothing special if no child scrolling target.
         if (nestedScrollTarget == null || selectedItem) return super.dispatchTouchEvent(ev)
 
@@ -65,13 +73,6 @@ open class NestedRecyclerView @JvmOverloads constructor(
         // our onInterceptTouchEvent. Note that RecyclerView automatically cancels active touches of
         // all its descendants once it starts scrolling so we don't have to do that.
         requestDisallowInterceptTouchEvent(false)
-        if (ev.action == MotionEvent.ACTION_UP) {
-            // This is to prevent an issue where the item touch helper receives
-            // an ACTION_DOWN but then doesn't later get the ACTION_UP event,
-            // causing it to run any long-press events.
-            nestedScrollingListener?.invoke(true)
-            nestedScrollingListener?.invoke(false)
-        }
         if (!handled || nestedScrollTargetWasUnableToScroll) {
             handled = super.dispatchTouchEvent(ev)
         }
@@ -189,37 +190,59 @@ open class NestedRecyclerView @JvmOverloads constructor(
         nestedScrollingListener?.invoke(!it)
     }
 
-    @SuppressLint("NewApi")
-    private fun setTarget(target: View?) {
-        if (target == null) {
-            // We're not nested scrolling anymore so the touch helper can
-            // do its thing again.
-            nestedScrollingListener?.invoke(false)
-        }
-        nestedScrollTarget = target
+    @SuppressLint("NewApi", "ClickableViewAccessibility")
+    private fun setTarget(view: View?) {
+        nestedScrollTarget = view
         nestedScrollTargetWasUnableToScroll = false
 
-        val listScrollListener = object : AbsListView.OnScrollListener {
-            override fun onScrollStateChanged(view: AbsListView?, scrollState: Int) {
-                nestedScrollingListener?.invoke(scrollState != AbsListView.OnScrollListener.SCROLL_STATE_IDLE)
+        view?.setOnTouchListener { _, event ->
+            if (event.action == MotionEvent.ACTION_UP) {
+                nestedScrollingListener?.invoke(true)
+                nestedScrollingListener?.invoke(false)
             }
-
-            override fun onScroll(
-                view: AbsListView?,
-                firstVisibleItem: Int,
-                visibleItemCount: Int,
-                totalItemCount: Int
-            ) {}
+            false
         }
 
-        when (target) {
+        when (view) {
             is AbsListView -> {
-                target.setOnScrollListener(listScrollListener)
+                var previousScrollOffset = view.verticalScrollOffset
+
+                view.setOnScrollListener(object : AbsListView.OnScrollListener {
+                    override fun onScrollStateChanged(view: AbsListView?, scrollState: Int) {
+                        nestedScrollingListener?.invoke(scrollState != AbsListView.OnScrollListener.SCROLL_STATE_IDLE)
+                    }
+
+                    override fun onScroll(
+                        view: AbsListView?,
+                        firstVisibleItem: Int,
+                        visibleItemCount: Int,
+                        totalItemCount: Int
+                    ) {}
+                })
+                view.setOnTouchListener { _, event ->
+                    if (event.action == MotionEvent.ACTION_MOVE) {
+                        val offset = view.verticalScrollOffset
+
+                        if (previousScrollOffset != offset) {
+                            nestedScrollingListener?.invoke(true)
+                            previousScrollOffset = offset
+                        }
+                    }
+                    false
+                }
+            }
+            is RecyclerView -> {
+                view.addOnScrollListener(object : OnScrollListener() {
+                    override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
+                        nestedScrollingListener?.invoke(newState != SCROLL_STATE_IDLE)
+                    }
+                })
             }
             else -> {
-                // Only public on Android 6 and later but exists on Android 5.1.
-                target?.setOnScrollChangeListener { _, _, scrollY, _, oldScrollY ->
-                    nestedScrollingListener?.invoke((scrollY - oldScrollY).absoluteValue > 0)
+                view?.setOnScrollChangeListener { _, _, scrollY, _, oldScrollY ->
+                    if (scrollY != oldScrollY) {
+                        nestedScrollingListener?.invoke(true)
+                    }
                 }
             }
         }

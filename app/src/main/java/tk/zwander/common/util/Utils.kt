@@ -6,9 +6,19 @@ import android.content.Context
 import android.content.Intent
 import android.graphics.drawable.Drawable
 import android.net.Uri
-import android.os.*
+import android.os.Build
+import android.os.Handler
+import android.os.Looper
+import android.os.VibrationEffect
+import android.os.Vibrator
+import android.os.VibratorManager
 import android.view.Display
-import kotlinx.coroutines.*
+import android.widget.AbsListView
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Deferred
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
 import java.util.concurrent.ConcurrentSkipListMap
 
 
@@ -118,3 +128,10 @@ fun Context.vibrate(duration: Long = 50L) {
         vibrator.vibrate(duration)
     }
 }
+
+val AbsListView.verticalScrollOffset: Int
+    get() {
+        return AbsListView::class.java.getDeclaredMethod("computeVerticalScrollOffset")
+            .apply { isAccessible = true }
+            .invoke(this) as Int
+    }
