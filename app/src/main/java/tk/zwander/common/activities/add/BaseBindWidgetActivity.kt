@@ -160,7 +160,9 @@ abstract class BaseBindWidgetActivity : ComponentActivity() {
                         }
 
                         addShortcutFromIntent(
-                            pinItemRequest.shortcutInfo?.label?.toString()
+                            pinItemRequest.shortcutInfo?.run {
+                                longLabel.takeIf { !it.isNullOrEmpty() } ?: shortLabel
+                            }?.toString()
                         )
                     } else {
                         addShortcutFromIntent()
