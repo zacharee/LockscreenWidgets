@@ -99,18 +99,18 @@ class EventManager private constructor(private val context: Context) {
 }
 
 sealed class Event {
-    object LockscreenDismissed : Event()
-    object TempHide : Event()
-    object LaunchAddWidget : Event()
-    object FrameMoveFinished : Event()
-    object ScreenOff : Event()
-    object ScreenOn : Event()
-    object NightModeUpdate : Event()
-    object CenterFrameHorizontally : Event()
-    object CenterFrameVertically : Event()
-    object FrameWidgetClick : Event()
-    object RequestNotificationCount : Event()
-    object FrameResizeFinished : Event()
+    data object LockscreenDismissed : Event()
+    data object TempHide : Event()
+    data object LaunchAddWidget : Event()
+    data object FrameMoveFinished : Event()
+    data object ScreenOff : Event()
+    data object ScreenOn : Event()
+    data object NightModeUpdate : Event()
+    data object CenterFrameHorizontally : Event()
+    data object CenterFrameVertically : Event()
+    data object FrameWidgetClick : Event()
+    data object RequestNotificationCount : Event()
+    data object FrameResizeFinished : Event()
 
     /**
      * On Android 8.0+, it's pretty easy to dismiss the lock screen with a simple API call.
@@ -134,13 +134,13 @@ sealed class Event {
     data class EditingIndexUpdated(val index: Int) : Event()
 
     //*** Widget Drawer
-    object CloseDrawer : Event()
-    object ShowDrawer : Event()
-    object ShowHandle : Event()
-    object DrawerShown : Event()
-    object DrawerHidden : Event()
-    object DrawerWidgetClick : Event()
-    object DrawerBackButtonClick : Event()
+    data object CloseDrawer : Event()
+    data object ShowDrawer : Event()
+    data object ShowHandle : Event()
+    data object DrawerShown : Event()
+    data object DrawerHidden : Event()
+    data object DrawerWidgetClick : Event()
+    data object DrawerBackButtonClick : Event()
 
     data class LaunchAddDrawerWidget(val fromDrawer: Boolean) : Event()
     data class DrawerAttachmentState(val attached: Boolean) : Event()
