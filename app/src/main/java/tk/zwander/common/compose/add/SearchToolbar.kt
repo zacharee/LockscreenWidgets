@@ -2,10 +2,13 @@ package tk.zwander.common.compose.add
 
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsFocusedAsState
-import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -24,9 +27,9 @@ fun SearchToolbar(
     onBack: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        modifier = modifier
+    Box(
+        modifier = modifier,
+        contentAlignment = Alignment.Center,
     ) {
         val focusManager = LocalFocusManager.current
 
@@ -38,7 +41,7 @@ fun SearchToolbar(
         OutlinedTextField(
             value = filter ?: "",
             onValueChange = onFilterChanged,
-            modifier = Modifier.weight(1f),
+            modifier = Modifier.fillMaxWidth(),
             maxLines = 1,
             label = { Text(text = stringResource(id = R.string.search)) },
             trailingIcon = if (!filter.isNullOrBlank() || isFocused) {
@@ -67,7 +70,11 @@ fun SearchToolbar(
                     )
                 }
             },
-            interactionSource = state
+            interactionSource = state,
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedContainerColor = MaterialTheme.colorScheme.background,
+                unfocusedContainerColor = MaterialTheme.colorScheme.background,
+            ),
         )
     }
 }

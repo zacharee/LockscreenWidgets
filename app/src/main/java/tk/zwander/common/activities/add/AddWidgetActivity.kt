@@ -1,9 +1,13 @@
 package tk.zwander.common.activities.add
 
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
 import android.view.MenuItem
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
 import androidx.core.view.WindowCompat
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.MainScope
@@ -29,11 +33,23 @@ abstract class AddWidgetActivity : BaseBindWidgetActivity(), CoroutineScope by M
         DismissOrUnlockActivity.launch(this)
 
         WindowCompat.setDecorFitsSystemWindows(window, false)
+        window.statusBarColor = Color.Transparent.toArgb()
+        window.navigationBarColor = Color.Transparent.toArgb()
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            window.isStatusBarContrastEnforced = false
+            window.isNavigationBarContrastEnforced = false
+        }
 
         setContent {
+            WindowCompat.getInsetsController(window, window.decorView).apply {
+                isAppearanceLightStatusBars = !isSystemInDarkTheme()
+                isAppearanceLightNavigationBars = isAppearanceLightStatusBars
+            }
+
             AddWidgetLayout(
                 showShortcuts = showShortcuts,
-                onBack = onBackPressedDispatcher::onBackPressed
+                onBack = onBackPressedDispatcher::onBackPressed,
             ) {
                 if (it is WidgetListInfo) {
                     tryBindWidget(it.itemInfo)

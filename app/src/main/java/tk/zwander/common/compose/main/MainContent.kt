@@ -1,6 +1,5 @@
 package tk.zwander.common.compose.main
 
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
@@ -23,7 +22,6 @@ import tk.zwander.common.compose.util.insetsContentPadding
 import tk.zwander.lockscreenwidgets.util.WidgetFrameDelegate
 import tk.zwander.widgetdrawer.util.DrawerDelegate
 
-@OptIn(ExperimentalFoundationApi::class)
 @Preview
 @Composable
 fun MainContent() {
