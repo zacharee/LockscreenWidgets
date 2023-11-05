@@ -9,6 +9,7 @@ import android.database.ContentObserver
 import android.net.Uri
 import android.os.Build
 import android.provider.Settings
+import androidx.core.content.ContextCompat
 import com.bugsnag.android.Bugsnag
 import org.lsposed.hiddenapibypass.HiddenApiBypass
 import tk.zwander.common.util.Event
@@ -69,9 +70,11 @@ class App : Application() {
 
         LogUtils.createInstance(this)
 
-        registerReceiver(
+        ContextCompat.registerReceiver(
+            this,
             screenStateReceiver,
-            IntentFilter(Intent.ACTION_SCREEN_OFF).apply { addAction(Intent.ACTION_SCREEN_ON) }
+            IntentFilter(Intent.ACTION_SCREEN_OFF).apply { addAction(Intent.ACTION_SCREEN_ON) },
+            ContextCompat.RECEIVER_EXPORTED,
         )
         contentResolver.registerContentObserver(
             Settings.Secure.getUriFor(Settings.Secure.UI_NIGHT_MODE),

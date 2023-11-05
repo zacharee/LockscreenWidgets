@@ -2,6 +2,8 @@ package tk.zwander.common.activities.add
 
 import android.annotation.SuppressLint
 import android.app.Activity
+import android.app.ActivityOptions
+import android.app.ComponentOptions
 import android.appwidget.AppWidgetManager
 import android.appwidget.AppWidgetProviderInfo
 import android.content.ComponentName
@@ -17,6 +19,7 @@ import android.telephony.PhoneNumberUtils
 import androidx.activity.ComponentActivity
 import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.app.ActivityOptionsCompat
 import com.android.internal.appwidget.IAppWidgetService
 import com.bugsnag.android.Bugsnag
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -26,6 +29,7 @@ import tk.zwander.common.host.widgetHostCompat
 import tk.zwander.common.util.appWidgetManager
 import tk.zwander.common.util.componentNameCompat
 import tk.zwander.common.util.getSamsungConfigureComponent
+import tk.zwander.common.util.internalActivityOptions
 import tk.zwander.common.util.loadPreviewOrIcon
 import tk.zwander.common.util.logUtils
 import tk.zwander.common.util.prefManager
@@ -34,7 +38,7 @@ import tk.zwander.common.util.toBase64
 import tk.zwander.common.util.toBitmap
 import tk.zwander.lockscreenwidgets.R
 import tk.zwander.lockscreenwidgets.data.list.ShortcutListInfo
-import tk.zwander.lockscreenwidgets.util.*
+import tk.zwander.lockscreenwidgets.util.WidgetFrameDelegate
 import kotlin.math.floor
 
 abstract class BaseBindWidgetActivity : ComponentActivity() {
@@ -52,98 +56,120 @@ abstract class BaseBindWidgetActivity : ComponentActivity() {
         get() = currentWidgets.map { it.id }
     protected open val deleteOnConfigureError: Boolean = true
 
-    private val permRequest = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-        val id = result.data?.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, -1) ?: return@registerForActivityResult
+    private val permRequest =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            val id = result.data?.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, -1)
+                ?: return@registerForActivityResult
 
-        if (result.resultCode == Activity.RESULT_OK) {
-            //The user has granted permission for Lockscreen Widgets
-            //so retry binding the widget
-            tryBindWidget(
-                appWidgetManager.getAppWidgetInfo(id)
-            )
-        } else {
-            //The user didn't allow Lockscreen Widgets to bind
-            //widgets, so delete the allocated ID
-            widgetHost.deleteAppWidgetId(id)
+            if (result.resultCode == Activity.RESULT_OK) {
+                //The user has granted permission for Lockscreen Widgets
+                //so retry binding the widget
+                tryBindWidget(
+                    appWidgetManager.getAppWidgetInfo(id)
+                )
+            } else {
+                //The user didn't allow Lockscreen Widgets to bind
+                //widgets, so delete the allocated ID
+                widgetHost.deleteAppWidgetId(id)
+            }
         }
-    }
 
     @Suppress("DEPRECATION")
-    private val configShortcutRequest = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-        try {
-            result.data?.let { data ->
-                fun addShortcutFromIntent(overrideLabel: String? = null) {
-                    data.getParcelableExtra<Intent>(Intent.EXTRA_SHORTCUT_INTENT)?.let { shortcutIntent ->
-                        val name = overrideLabel ?: data.getStringExtra(Intent.EXTRA_SHORTCUT_NAME)
-                        val iconRes =
-                            data.getParcelableExtra<Intent.ShortcutIconResource?>(Intent.EXTRA_SHORTCUT_ICON_RESOURCE)
-                        val iconBmp = data.getParcelableExtra<Bitmap?>(Intent.EXTRA_SHORTCUT_ICON)
+    private val configShortcutRequest =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            try {
+                result.data?.let { data ->
+                    fun addShortcutFromIntent(overrideLabel: String? = null) {
+                        data.getParcelableExtra<Intent>(Intent.EXTRA_SHORTCUT_INTENT)
+                            ?.let { shortcutIntent ->
+                                val name =
+                                    overrideLabel ?: data.getStringExtra(Intent.EXTRA_SHORTCUT_NAME)
+                                val iconRes =
+                                    data.getParcelableExtra<Intent.ShortcutIconResource?>(Intent.EXTRA_SHORTCUT_ICON_RESOURCE)
+                                val iconBmp =
+                                    data.getParcelableExtra<Bitmap?>(Intent.EXTRA_SHORTCUT_ICON)
 
-                        val shortcut = WidgetData.shortcut(
-                            shortcutIdManager.allocateShortcutId(),
-                            name, iconBmp.toBase64(), iconRes, shortcutIntent,
-                            WidgetSizeData(1, 1)
-                        )
+                                val shortcut = WidgetData.shortcut(
+                                    shortcutIdManager.allocateShortcutId(),
+                                    name, iconBmp.toBase64(), iconRes, shortcutIntent,
+                                    WidgetSizeData(1, 1)
+                                )
 
-                        addNewShortcut(shortcut)
+                                addNewShortcut(shortcut)
+                            }
                     }
-                }
 
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    val pinItemRequest = data.getParcelableExtra<LauncherApps.PinItemRequest>(LauncherApps.EXTRA_PIN_ITEM_REQUEST)
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                        val pinItemRequest =
+                            data.getParcelableExtra<LauncherApps.PinItemRequest>(LauncherApps.EXTRA_PIN_ITEM_REQUEST)
 
-                    if (pinItemRequest != null) {
-                        val name = pinItemRequest.shortcutInfo.run { longLabel ?: shortLabel }.toString()
-                        val icon = pinItemRequest.shortcutInfo.icon
-                            .loadDrawable(this)
-                            .toBitmap(maxWidth = 512, maxHeight = 512)
+                        if (pinItemRequest != null) {
+                            val name = pinItemRequest.shortcutInfo.run { longLabel ?: shortLabel }
+                                .toString()
+                            val icon = pinItemRequest.shortcutInfo.icon
+                                .loadDrawable(this)
+                                .toBitmap(maxWidth = 512, maxHeight = 512)
 
-                        val intent = pinItemRequest.shortcutInfo.intent ?: run {
-                            val extras = pinItemRequest.shortcutInfo.extras ?: Bundle()
-                            val number = extras["phoneNumber"]
-                            val action = extras["shortcutAction"]
+                            val intent = pinItemRequest.shortcutInfo.intent ?: run {
+                                val extras = pinItemRequest.shortcutInfo.extras ?: Bundle()
+                                val number = extras["phoneNumber"]
+                                val action = extras["shortcutAction"]
 
-                            if (number != null) {
-                                Intent().apply {
-                                    action?.let { this.action = it.toString() }
-                                    setData(Uri.parse("tel://${PhoneNumberUtils.convertAndStrip(number.toString())}"))
+                                if (number != null) {
+                                    Intent().apply {
+                                        action?.let { this.action = it.toString() }
+                                        setData(
+                                            Uri.parse(
+                                                "tel://${
+                                                    PhoneNumberUtils.convertAndStrip(
+                                                        number.toString()
+                                                    )
+                                                }"
+                                            )
+                                        )
+                                    }
+                                } else {
+                                    null
                                 }
+                            }
+
+                            if (intent == null) {
+                                val msg = "Unable to find intent for pin request.\n" +
+                                        "Request Extras: ${
+                                            pinItemRequest.extras?.keySet()
+                                                ?.map { it to pinItemRequest.extras[it] }
+                                        }\n" +
+                                        "Shortcut Info Extras: ${
+                                            pinItemRequest.shortcutInfo.extras?.keySet()
+                                                ?.map { it to pinItemRequest.shortcutInfo.extras[it] }
+                                        }\n" +
+                                        "Shortcut Info: ${pinItemRequest.shortcutInfo?.toInsecureString()}"
+                                logUtils.normalLog(msg)
+                                Bugsnag.notify(Exception(msg))
                             } else {
-                                null
+                                val shortcut = WidgetData.shortcut(
+                                    shortcutIdManager.allocateShortcutId(),
+                                    name, icon.toBase64(), null, intent,
+                                    WidgetSizeData(1, 1),
+                                )
+
+                                addNewShortcut(shortcut)
+
+                                return@registerForActivityResult
                             }
                         }
 
-                        if (intent == null) {
-                            val msg = "Unable to find intent for pin request.\n" +
-                                    "Request Extras: ${pinItemRequest.extras?.keySet()?.map { it to pinItemRequest.extras[it] }}\n" +
-                                    "Shortcut Info Extras: ${pinItemRequest.shortcutInfo.extras?.keySet()?.map { it to pinItemRequest.shortcutInfo.extras[it] }}\n" +
-                                    "Shortcut Info: ${pinItemRequest.shortcutInfo?.toInsecureString()}"
-                            logUtils.normalLog(msg)
-                            Bugsnag.notify(Exception(msg))
-                        } else {
-                            val shortcut = WidgetData.shortcut(
-                                shortcutIdManager.allocateShortcutId(),
-                                name, icon.toBase64(), null, intent,
-                                WidgetSizeData(1, 1),
-                            )
-
-                            addNewShortcut(shortcut)
-
-                            return@registerForActivityResult
-                        }
+                        addShortcutFromIntent(
+                            pinItemRequest.shortcutInfo?.label?.toString()
+                        )
+                    } else {
+                        addShortcutFromIntent()
                     }
-
-                    addShortcutFromIntent(
-                        pinItemRequest.shortcutInfo?.label?.toString()
-                    )
-                } else {
-                    addShortcutFromIntent()
                 }
+            } catch (e: Exception) {
+                logUtils.normalLog("Error configuring shortcut.", e)
             }
-        } catch (e: Exception) {
-            logUtils.normalLog("Error configuring shortcut.", e)
         }
-    }
 
     private val configureLauncher = ConfigureLauncher()
 
@@ -212,10 +238,12 @@ abstract class BaseBindWidgetActivity : ComponentActivity() {
 
             MaterialAlertDialogBuilder(this)
                 .setTitle(R.string.error)
-                .setMessage(resources.getString(
-                    R.string.create_shortcut_error,
-                    e.message
-                ))
+                .setMessage(
+                    resources.getString(
+                        R.string.create_shortcut_error,
+                        e.message
+                    )
+                )
                 .setPositiveButton(android.R.string.ok) { _, _ ->
                     pendingErrors--
                 }
@@ -249,10 +277,12 @@ abstract class BaseBindWidgetActivity : ComponentActivity() {
 
             MaterialAlertDialogBuilder(this)
                 .setTitle(R.string.error)
-                .setMessage(resources.getString(
-                    R.string.configure_widget_error,
-                    provider
-                ))
+                .setMessage(
+                    resources.getString(
+                        R.string.configure_widget_error,
+                        provider
+                    )
+                )
                 .setPositiveButton(android.R.string.ok) { _, _ ->
                     pendingErrors--
                 }
@@ -304,7 +334,11 @@ abstract class BaseBindWidgetActivity : ComponentActivity() {
         return WidgetSizeData(defaultColSpan, defaultRowSpan)
     }
 
-    protected open fun createWidgetData(id: Int, provider: AppWidgetProviderInfo, overrideSize: WidgetSizeData? = null): WidgetData {
+    protected open fun createWidgetData(
+        id: Int,
+        provider: AppWidgetProviderInfo,
+        overrideSize: WidgetSizeData? = null
+    ): WidgetData {
         return WidgetData.widget(
             id,
             provider.provider,
@@ -327,12 +361,14 @@ abstract class BaseBindWidgetActivity : ComponentActivity() {
     }
 
     private inner class ConfigureLauncher {
-        private val configLauncher = registerForActivityResult(ActivityResultContracts.StartIntentSenderForResult()) { result ->
-            onActivityResult(CONFIGURE_REQ, result.resultCode, result.data)
-        }
-        private val samsungConfigLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-            onActivityResult(CONFIGURE_REQ, result.resultCode, result.data)
-        }
+        private val configLauncher =
+            registerForActivityResult(ActivityResultContracts.StartIntentSenderForResult()) { result ->
+                onActivityResult(CONFIGURE_REQ, result.resultCode, result.data)
+            }
+        private val samsungConfigLauncher =
+            registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+                onActivityResult(CONFIGURE_REQ, result.resultCode, result.data)
+            }
 
         private var currentConfigId: Int? = null
 
@@ -359,13 +395,23 @@ abstract class BaseBindWidgetActivity : ComponentActivity() {
 
             //Use the system API instead of ACTION_APPWIDGET_CONFIGURE to try to avoid some permissions issues
             try {
-                val intentSender = IAppWidgetService.Stub.asInterface(ServiceManager.getService(Context.APPWIDGET_SERVICE))
-                    .createAppWidgetConfigIntentSender(opPackageName, id, 0)
+                val intentSender =
+                    IAppWidgetService.Stub.asInterface(ServiceManager.getService(Context.APPWIDGET_SERVICE))
+                        .createAppWidgetConfigIntentSender(opPackageName, id, 0)
 
                 logUtils.debugLog("Intent sender is $intentSender")
 
                 if (intentSender != null) {
-                    configLauncher.launch(IntentSenderRequest.Builder(intentSender).build())
+                    configLauncher.launch(
+                        IntentSenderRequest.Builder(intentSender)
+                            .build(),
+                        ActivityOptionsCompat.makeBasic()
+                            .apply {
+                                internalActivityOptions?.setPendingIntentBackgroundActivityStartMode(
+                                    ComponentOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOWED
+                                )
+                            },
+                    )
                     currentConfigId = id
                     return true
                 }
@@ -374,11 +420,15 @@ abstract class BaseBindWidgetActivity : ComponentActivity() {
             }
 
             try {
+                currentConfigId = id
                 widgetHost.startAppWidgetConfigureActivityForResult(
                     this@BaseBindWidgetActivity,
-                    id, 0, CONFIGURE_REQ, null
+                    id, 0, CONFIGURE_REQ,
+                    ActivityOptions
+                        .makeBasic()
+                        .setPendingIntentBackgroundActivityStartMode(ComponentOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOWED)
+                        .toBundle(),
                 )
-                currentConfigId = id
                 return true
             } catch (e: Throwable) {
                 logUtils.normalLog("Unable to startAppWidgetConfigureActivityForResult", e)
@@ -389,7 +439,9 @@ abstract class BaseBindWidgetActivity : ComponentActivity() {
 
         fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
             if (requestCode == CONFIGURE_REQ) {
-                val id = data?.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, currentConfigId ?: -1) ?: currentConfigId
+                val id =
+                    data?.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, currentConfigId ?: -1)
+                        ?: currentConfigId
 
                 if (resultCode == Activity.RESULT_OK && id != null && id != -1) {
                     logUtils.debugLog("Successfully configured widget.")

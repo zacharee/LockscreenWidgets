@@ -1,5 +1,6 @@
 package tk.zwander.common.util
 
+import android.app.ActivityOptions
 import android.app.Application
 import android.appwidget.AppWidgetProviderInfo
 import android.content.Context
@@ -14,6 +15,7 @@ import android.os.Vibrator
 import android.os.VibratorManager
 import android.view.Display
 import android.widget.AbsListView
+import androidx.core.app.ActivityOptionsCompat
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
@@ -134,4 +136,15 @@ val AbsListView.verticalScrollOffset: Int
         return AbsListView::class.java.getDeclaredMethod("computeVerticalScrollOffset")
             .apply { isAccessible = true }
             .invoke(this) as Int
+    }
+
+val ActivityOptionsCompat.internalActivityOptions: ActivityOptions?
+    get() {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
+            return null
+        }
+
+        return this::class.java.getDeclaredField("mActivityOptions")
+            .apply { isAccessible = true }
+            .get(this) as? ActivityOptions
     }
