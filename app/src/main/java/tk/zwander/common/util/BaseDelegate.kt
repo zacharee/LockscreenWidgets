@@ -180,6 +180,7 @@ abstract class BaseDelegate<State : BaseDelegate.BaseState>(context: Context) : 
         abstract val isHoldingItem: Boolean
         abstract val updatedForMove: Boolean
         abstract val handlingClick: Boolean
+        abstract val wasOnKeyguard: Boolean
     }
 
     abstract class LayoutManager(

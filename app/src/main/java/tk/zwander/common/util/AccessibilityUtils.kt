@@ -350,6 +350,11 @@ object AccessibilityUtils {
 
         //Check if the lock screen is shown.
         val isOnKeyguard = kgm.isKeyguardLocked
+
+        if (isOnKeyguard != drawerDelegate.state.wasOnKeyguard) {
+            drawerDelegate.updateState { it.copy(wasOnKeyguard = isOnKeyguard) }
+        }
+
         if (isOnKeyguard != frameDelegate.state.wasOnKeyguard) {
             newState = newState.copy(wasOnKeyguard = isOnKeyguard)
             //Update the keyguard dismissal Activity that the lock screen

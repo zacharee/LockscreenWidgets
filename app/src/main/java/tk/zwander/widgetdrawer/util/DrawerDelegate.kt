@@ -177,6 +177,13 @@ class DrawerDelegate private constructor(context: Context) :
         handler(PrefManager.KEY_DRAWER_SIDE_PADDING) {
             updateSidePadding()
         }
+        handler(PrefManager.KEY_SHOW_DRAWER_HANDLE_ONLY_WHEN_LOCKED) {
+            if (!prefManager.showDrawerHandleOnlyWhenLocked) {
+                tryShowHandle()
+            } else if (!state.wasOnKeyguard) {
+                handle.hide(wm)
+            }
+        }
     }
 
     override val blurManager = BlurManager(
@@ -362,6 +369,12 @@ class DrawerDelegate private constructor(context: Context) :
                 animator.start()
             }
 
+            Event.LockscreenDismissed -> {
+                if (prefManager.showDrawerHandleOnlyWhenLocked && !state.wasOnKeyguard) {
+                    handle.hide(wm)
+                }
+            }
+
             else -> {}
         }
     }
@@ -457,6 +470,10 @@ class DrawerDelegate private constructor(context: Context) :
 
     private fun tryShowHandle() {
         if (prefManager.drawerEnabled && prefManager.showDrawerHandle && power.isInteractive) {
+            if (prefManager.showDrawerHandleOnlyWhenLocked && !state.wasOnKeyguard) {
+                return
+            }
+
             handle.show(wm)
         }
     }
@@ -547,6 +564,7 @@ class DrawerDelegate private constructor(context: Context) :
     data class State(
         override val isHoldingItem: Boolean = false,
         override val updatedForMove: Boolean = false,
-        override val handlingClick: Boolean = false
+        override val handlingClick: Boolean = false,
+        override val wasOnKeyguard: Boolean = false,
     ) : BaseState()
 }

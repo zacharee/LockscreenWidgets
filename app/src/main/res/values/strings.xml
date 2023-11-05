@@ -291,6 +291,9 @@
     <string name="drawer_side_padding">Drawer Side Padding</string>
     <string name="drawer_side_padding_desc">Set how much space should show between the sides of the screen and the edges of the outer widgets.</string>
 
+    <string name="show_only_when_locked">Show only when Locked</string>
+    <string name="show_only_when_locked_desc">Only show the drawer handle when the device is on the lock screen.</string>
+
     <string name="allow_show_frame">Allow Showing Frame</string>
     <string name="disallow_show_frame">Disallow Showing Frame</string>
     <string name="frame_allowed_to_show">Frame Allowed to Show</string>

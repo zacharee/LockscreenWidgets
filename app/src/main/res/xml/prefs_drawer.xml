@@ -116,6 +116,15 @@
             />
 
         <tk.zwander.common.prefs.MaterialSwitchPreference
+            android:title="@string/show_only_when_locked"
+            android:summary="@string/show_only_when_locked_desc"
+            android:key="show_drawer_handle_only_when_locked"
+            android:defaultValue="false"
+            android:icon="@drawable/ic_baseline_visibility_24"
+            android:dependency="show_drawer_handle"
+            />
+
+        <tk.zwander.common.prefs.MaterialSwitchPreference
             android:title="@string/show_drawer_handle_shadow"
             android:summary="@string/show_drawer_handle_shadow_desc"
             android:key="show_drawer_handle_shadow"

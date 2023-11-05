@@ -134,6 +134,7 @@ class PrefManager private constructor(context: Context) : ContextWrapper(context
         const val KEY_FORCE_SHOW_FRAME = "force_show_frame"
         const val KEY_FRAME_FORCE_RELOAD_WIDGETS = "frame_force_reload_widgets"
         const val KEY_DRAWER_FORCE_RELOAD_WIDGETS = "drawer_force_reload_widgets"
+        const val KEY_SHOW_DRAWER_HANDLE_ONLY_WHEN_LOCKED = "show_drawer_handle_only_when_locked"
 
         const val VALUE_PAGE_INDICATOR_BEHAVIOR_HIDDEN = 0
         const val VALUE_PAGE_INDICATOR_BEHAVIOR_AUTO_HIDE = 1
@@ -435,6 +436,12 @@ class PrefManager private constructor(context: Context) : ContextWrapper(context
         get() = getBoolean(KEY_SEPARATE_POS_FOR_LOCK_NC, false)
         set(value) {
             putBoolean(KEY_SEPARATE_POS_FOR_LOCK_NC, value)
+        }
+
+    var showDrawerHandleOnlyWhenLocked: Boolean
+        get() = getBoolean(KEY_SHOW_DRAWER_HANDLE_ONLY_WHEN_LOCKED, false)
+        set(value) {
+            putBoolean(KEY_SHOW_DRAWER_HANDLE_ONLY_WHEN_LOCKED, value)
         }
 
     //How the page indicator (scrollbar) should behave (always show, fade out on inactivity, never show).
