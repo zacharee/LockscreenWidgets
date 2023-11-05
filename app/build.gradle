@@ -93,4 +93,6 @@ dependencies {
 
     implementation 'com.bugsnag:bugsnag-android:5.31.2'
     implementation 'com.joaomgcd:taskerpluginlibrary:0.4.10'
+
+    implementation 'com.getkeepsafe.relinker:relinker:1.4.5'
 }

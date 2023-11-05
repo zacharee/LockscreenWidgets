@@ -11,6 +11,7 @@ import android.os.Build
 import android.provider.Settings
 import androidx.core.content.ContextCompat
 import com.bugsnag.android.Bugsnag
+import com.getkeepsafe.relinker.ReLinker
 import org.lsposed.hiddenapibypass.HiddenApiBypass
 import tk.zwander.common.util.Event
 import tk.zwander.common.util.GlobalExceptionHandler
@@ -57,6 +58,9 @@ class App : Application() {
 
     override fun onCreate() {
         super.onCreate()
+
+        ReLinker.loadLibrary(this, "bugsnag-ndk")
+        ReLinker.loadLibrary(this, "bugsnag-plugin-android-anr")
 
         Bugsnag.start(this)
 
