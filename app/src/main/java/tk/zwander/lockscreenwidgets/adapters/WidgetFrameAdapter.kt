@@ -120,36 +120,38 @@ open class WidgetFrameAdapter(
      * accordingly.
      */
     fun updateWidgets(newWidgets: List<WidgetData>) {
+        val uniqueNewWidgets = newWidgets.distinctBy { it.id }
+
         if (!didResize) {
             if (widgets.isEmpty()) {
-                widgets.addAll(newWidgets)
+                widgets.addAll(uniqueNewWidgets)
                 notifyItemRangeInserted(0, itemCount)
             } else {
                 val oldWidgets = widgets.toList()
                 this.widgets.clear()
-                this.widgets.addAll(newWidgets)
+                this.widgets.addAll(uniqueNewWidgets)
 
                 val result = DiffUtil.calculateDiff(object : DiffUtil.Callback() {
                     override fun areContentsTheSame(
                         oldItemPosition: Int,
                         newItemPosition: Int
                     ): Boolean {
-                        return oldWidgets[oldItemPosition].id == newWidgets[newItemPosition].id
+                        return oldWidgets[oldItemPosition].id == uniqueNewWidgets[newItemPosition].id
                     }
 
                     override fun areItemsTheSame(
                         oldItemPosition: Int,
                         newItemPosition: Int
                     ): Boolean {
-                        return oldWidgets[oldItemPosition].id == newWidgets[newItemPosition].id
+                        return oldWidgets[oldItemPosition].id == uniqueNewWidgets[newItemPosition].id
                     }
 
                     override fun getNewListSize(): Int {
-                        return newWidgets.size
+                        return uniqueNewWidgets.size
                     }
 
                     override fun getOldListSize(): Int {
-                        return oldWidgets.size
+                        return uniqueNewWidgets.size
                     }
                 }, true)
 
