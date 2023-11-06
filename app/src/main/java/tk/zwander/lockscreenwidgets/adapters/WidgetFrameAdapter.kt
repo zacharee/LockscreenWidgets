@@ -151,7 +151,7 @@ open class WidgetFrameAdapter(
                     }
 
                     override fun getOldListSize(): Int {
-                        return uniqueNewWidgets.size
+                        return oldWidgets.size
                     }
                 }, true)
 
