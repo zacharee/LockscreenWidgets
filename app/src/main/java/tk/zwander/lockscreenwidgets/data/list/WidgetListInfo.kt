@@ -18,10 +18,10 @@ class WidgetListInfo(
     previewImg: Int,
     appInfo: ApplicationInfo,
     itemInfo: AppWidgetProviderInfo,
-) : BaseListInfo<AppWidgetProviderInfo>(
+) : BaseListInfo<AppWidgetProviderInfo, Int>(
     widgetName, previewImg, appInfo, itemInfo,
 ) {
-    override fun compareTo(other: BaseListInfo<AppWidgetProviderInfo>): Int {
+    override fun compareTo(other: BaseListInfo<AppWidgetProviderInfo, Int>): Int {
         val nameResult = super.compareTo(other)
 
         return if (nameResult == 0) {

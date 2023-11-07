@@ -25,7 +25,7 @@ import tk.zwander.lockscreenwidgets.data.list.BaseListInfo
 fun AddWidgetLayout(
     showShortcuts: Boolean,
     onBack: () -> Unit,
-    onSelected: (BaseListInfo<*>) -> Unit,
+    onSelected: (BaseListInfo<*, *>) -> Unit,
 ) {
     var filter by remember {
         mutableStateOf<String?>(null)

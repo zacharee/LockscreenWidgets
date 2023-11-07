@@ -19,7 +19,7 @@ class ShortcutListInfo(
     icon: Int,
     appInfo: ApplicationInfo,
     itemInfo: ResolveInfo
-) : BaseListInfo<ResolveInfo>(
+) : BaseListInfo<ResolveInfo, Int>(
     shortcutName, icon, appInfo, itemInfo
 ) {
     override fun equals(other: Any?): Boolean {

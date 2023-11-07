@@ -43,13 +43,27 @@ data class WidgetData(
             widgetProvider: ComponentName,
             label: String,
             icon: String?,
-            size: WidgetSizeData?
+            size: WidgetSizeData?,
         ): WidgetData {
             return WidgetData(
                 id, WidgetType.WIDGET, label, icon,
                 null, null,
                 widgetProvider.flattenToString(),
                 size,
+            )
+        }
+
+        fun launcherShortcut(
+            id: Int,
+            label: String,
+            icon: String?,
+            intent: Intent?,
+            size: WidgetSizeData,
+        ): WidgetData {
+            return WidgetData(
+                id, WidgetType.LAUNCHER_SHORTCUT,
+                label, icon, null, intent,
+                null, size,
             )
         }
     }
@@ -84,5 +98,6 @@ data class WidgetData(
 enum class WidgetType {
     WIDGET,
     SHORTCUT,
-    HEADER
+    HEADER,
+    LAUNCHER_SHORTCUT,
 }

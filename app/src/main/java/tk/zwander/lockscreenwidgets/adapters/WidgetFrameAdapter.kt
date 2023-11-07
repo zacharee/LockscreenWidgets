@@ -416,7 +416,7 @@ open class WidgetFrameAdapter(
 
                     when (data.safeType) {
                         WidgetType.WIDGET -> bindWidget(data)
-                        WidgetType.SHORTCUT -> bindShortcut(data)
+                        WidgetType.SHORTCUT, WidgetType.LAUNCHER_SHORTCUT -> bindShortcut(data)
                         WidgetType.HEADER -> {}
                     }
 

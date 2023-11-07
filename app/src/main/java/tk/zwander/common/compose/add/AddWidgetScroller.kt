@@ -2,6 +2,8 @@ package tk.zwander.common.compose.add
 
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
+import android.graphics.drawable.Icon
+import android.os.Build
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -49,7 +51,7 @@ import tk.zwander.lockscreenwidgets.data.list.BaseListInfo
 @Composable
 fun AddWidgetScroller(
     filteredItems: List<AppInfo>,
-    onSelected: (BaseListInfo<*>) -> Unit,
+    onSelected: (BaseListInfo<*, *>) -> Unit,
     searchBarHeight: Int,
     modifier: Modifier = Modifier,
 ) {
@@ -102,16 +104,36 @@ fun AddWidgetScroller(
                     ) { shortcut ->
                         val icon = icon(
                             info = shortcut,
-                            key = shortcut.itemInfo.activityInfo.componentNameCompat
+                            key = shortcut.itemInfo.activityInfo.componentNameCompat,
                         )
 
                         WidgetItem(
                             image = icon,
                             label = shortcut.itemInfo.loadLabel(context.packageManager)
                                 .toString(),
-                            subLabel = stringResource(id = R.string.shortcut)
+                            subLabel = stringResource(id = R.string.shortcut),
                         ) {
                             onSelected(shortcut)
+                        }
+                    }
+
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N_MR1) {
+                        items(
+                            items = app.launcherShortcuts.toList(),
+                            key = { it.itemInfo.id },
+                        ) { shortcut ->
+                            val icon = icon(
+                                info = shortcut,
+                                key = shortcut.itemInfo.id,
+                            )
+
+                            WidgetItem(
+                                image = icon,
+                                label = shortcut.name,
+                                subLabel = stringResource(id = R.string.shortcut),
+                            ) {
+                                onSelected(shortcut)
+                            }
                         }
                     }
                 }
@@ -173,7 +195,7 @@ private fun AppHeader(
 
 @Composable
 private fun icon(
-    info: BaseListInfo<*>,
+    info: BaseListInfo<*, *>,
     key: Any?,
 ): Bitmap? {
     val context = LocalContext.current
@@ -185,11 +207,19 @@ private fun icon(
     LaunchedEffect(key) {
         icon = try {
             withContext(Dispatchers.IO) {
-                context.getRemoteDrawable(
-                    info.appInfo.packageName,
-                    info.icon,
-                    context.packageManager.getResourcesForApplication(info.appInfo)
-                ) { context.packageManager.getApplicationIcon(info.appInfo) }
+                when {
+                    info.icon is Int -> {
+                        context.getRemoteDrawable(
+                            info.appInfo.packageName,
+                            info.icon,
+                            context.packageManager.getResourcesForApplication(info.appInfo)
+                        ) { context.packageManager.getApplicationIcon(info.appInfo) }
+                    }
+                    Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && info.icon is Icon -> {
+                        info.icon.loadDrawable(context).toBitmap()
+                    }
+                    else -> null
+                }
             }
         } catch (e: PackageManager.NameNotFoundException) {
             context.logUtils.normalLog("Unable to load icon for ${info.appInfo.packageName}.", e)

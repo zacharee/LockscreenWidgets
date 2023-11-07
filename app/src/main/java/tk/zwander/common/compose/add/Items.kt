@@ -1,5 +1,6 @@
 package tk.zwander.common.compose.add
 
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.content.pm.PackageManager
 import androidx.compose.runtime.Composable
@@ -21,6 +22,7 @@ import tk.zwander.lockscreenwidgets.data.list.ShortcutListInfo
 import tk.zwander.lockscreenwidgets.data.list.WidgetListInfo
 import java.util.TreeSet
 
+@SuppressLint("RestrictedApi")
 @Composable
 internal fun items(
     filter: String?,
@@ -39,8 +41,8 @@ internal fun items(
 
             context.getAllInstalledWidgetProviders().forEach {
                     try {
-                        val appInfo =
-                            packageManager.getApplicationInfoCompat(it.provider.packageName, 0)
+                        val appInfo = packageManager
+                            .getApplicationInfoCompat(it.provider.packageName, 0)
 
                         val appName = packageManager.getApplicationLabel(appInfo)
                         val widgetName = it.loadLabel(packageManager)
@@ -95,6 +97,49 @@ internal fun items(
                         )
                     }
                 }
+
+//                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N_MR1) {
+//                    val iShortcutManager = IShortcutService.Stub.asInterface(ServiceManager.getService(Context.SHORTCUT_SERVICE))
+//
+//                    packageManager.getInstalledApplicationsCompat().forEach { appInfo ->
+//                        val appName = appInfo.loadLabel(packageManager)
+//
+//                        @Suppress("UNCHECKED_CAST")
+//                        val shortcuts = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+//                            iShortcutManager.getShortcuts(
+//                                appInfo.packageName,
+//                                ShortcutManager.FLAG_MATCH_MANIFEST or ShortcutManager.FLAG_MATCH_DYNAMIC,
+//                                context.userId,
+//                            ).list as List<ShortcutInfo>
+//                        } else {
+//                            val manifest = iShortcutManager::class.java
+//                                .getMethod("getManifestShortcuts", String::class.java, Int::class.java)
+//                                .invoke(iShortcutManager, appInfo.packageName, context.userId) as ParceledListSlice<ShortcutInfo>
+//                            val dynamic = iShortcutManager::class.java
+//                                .getMethod("getDynamicShortcuts", String::class.java, Int::class.java)
+//                                .invoke(iShortcutManager, appInfo.packageName, context.userId) as ParceledListSlice<ShortcutInfo>
+//
+//                            manifest.list + dynamic.list
+//                        }
+//
+//                        if (shortcuts.isNotEmpty()) {
+//                            val app = apps[appInfo.packageName] ?: AppInfo(appName.toString(), appInfo).apply {
+//                                apps[appInfo.packageName] = this
+//                            }
+//
+//                            app.launcherShortcuts.addAll(
+//                                shortcuts.map { shortcut ->
+//                                    LauncherShortcutListInfo(
+//                                        shortcutName = (shortcut.longLabel ?: shortcut.shortLabel).toString(),
+//                                        icon = shortcut.icon,
+//                                        appInfo = appInfo,
+//                                        itemInfo = shortcut,
+//                                    )
+//                                }
+//                            )
+//                        }
+//                    }
+//                }
             }
 
             apps
@@ -110,7 +155,8 @@ internal fun items(
                 if (app.matchesFilter(filter)) {
                     app.copy(
                         widgets = TreeSet(app.widgets.filter { it.matchesFilter(filter) }),
-                        shortcuts = TreeSet(app.shortcuts.filter { it.matchesFilter(filter) })
+                        shortcuts = TreeSet(app.shortcuts.filter { it.matchesFilter(filter) }),
+                        launcherShortcuts = TreeSet(app.launcherShortcuts.filter { it.matchesFilter(filter) }),
                     )
                 } else {
                     null

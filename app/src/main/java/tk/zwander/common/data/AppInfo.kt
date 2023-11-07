@@ -1,6 +1,7 @@
 package tk.zwander.common.data
 
 import android.content.pm.ApplicationInfo
+import tk.zwander.lockscreenwidgets.data.list.LauncherShortcutListInfo
 import tk.zwander.lockscreenwidgets.data.list.ShortcutListInfo
 import tk.zwander.lockscreenwidgets.data.list.WidgetListInfo
 import java.util.TreeSet
@@ -17,7 +18,8 @@ data class AppInfo(
     override val appName: String,
     override val appInfo: ApplicationInfo,
     val widgets: TreeSet<WidgetListInfo> = TreeSet(),
-    val shortcuts: TreeSet<ShortcutListInfo> = TreeSet()
+    val shortcuts: TreeSet<ShortcutListInfo> = TreeSet(),
+    val launcherShortcuts: TreeSet<LauncherShortcutListInfo> = TreeSet(),
 ) : BaseAppInfo<AppInfo>()
 
 data class BasicAppInfo(

@@ -14,6 +14,12 @@ import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.cancel
 import tk.zwander.common.activities.DismissOrUnlockActivity
 import tk.zwander.common.compose.add.AddWidgetLayout
+import tk.zwander.common.data.WidgetData
+import tk.zwander.common.data.WidgetSizeData
+import tk.zwander.common.util.shortcutIdManager
+import tk.zwander.common.util.toBase64
+import tk.zwander.common.util.toBitmap
+import tk.zwander.lockscreenwidgets.data.list.LauncherShortcutListInfo
 import tk.zwander.lockscreenwidgets.data.list.ShortcutListInfo
 import tk.zwander.lockscreenwidgets.data.list.WidgetListInfo
 
@@ -51,10 +57,25 @@ abstract class AddWidgetActivity : BaseBindWidgetActivity(), CoroutineScope by M
                 showShortcuts = showShortcuts,
                 onBack = onBackPressedDispatcher::onBackPressed,
             ) {
-                if (it is WidgetListInfo) {
-                    tryBindWidget(it.itemInfo)
-                } else if (it is ShortcutListInfo) {
-                    tryBindShortcut(it)
+                when (it) {
+                    is WidgetListInfo -> {
+                        tryBindWidget(it.itemInfo)
+                    }
+                    is ShortcutListInfo -> {
+                        tryBindShortcut(it)
+                    }
+                    is LauncherShortcutListInfo -> {
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N_MR1) {
+                            val shortcut = WidgetData.shortcut(
+                                shortcutIdManager.allocateShortcutId(),
+                                it.name, it.icon?.loadDrawable(this)?.toBitmap()?.toBase64(),
+                                null, it.itemInfo.intent,
+                                WidgetSizeData(1, 1)
+                            )
+
+                            addNewShortcut(shortcut)
+                        }
+                    }
                 }
             }
         }
