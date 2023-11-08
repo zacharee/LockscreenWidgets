@@ -102,7 +102,7 @@ abstract class BaseBindWidgetActivity : ComponentActivity() {
                         } else {
                             @Suppress("UNCHECKED_CAST")
                             val msg = "No shortcut intent found.\n" +
-                                    "Intent: $data" +
+                                    "Intent: $data\n" +
                                     "Intent Extras: ${
                                         BaseBundle::class.java.getDeclaredMethod("getItemwiseMap")
                                             .apply { isAccessible = true }
