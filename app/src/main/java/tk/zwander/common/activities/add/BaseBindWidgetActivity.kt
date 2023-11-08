@@ -12,10 +12,12 @@ import android.content.Intent
 import android.content.pm.LauncherApps
 import android.graphics.Bitmap
 import android.net.Uri
+import android.os.BaseBundle
 import android.os.Build
 import android.os.Bundle
 import android.os.ServiceManager
 import android.telephony.PhoneNumberUtils
+import android.util.ArrayMap
 import androidx.activity.ComponentActivity
 import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts
@@ -80,23 +82,36 @@ abstract class BaseBindWidgetActivity : ComponentActivity() {
             try {
                 result.data?.let { data ->
                     fun addShortcutFromIntent(overrideLabel: String? = null) {
-                        data.getParcelableExtra<Intent>(Intent.EXTRA_SHORTCUT_INTENT)
-                            ?.let { shortcutIntent ->
-                                val name =
-                                    overrideLabel ?: data.getStringExtra(Intent.EXTRA_SHORTCUT_NAME)
-                                val iconRes =
-                                    data.getParcelableExtra<Intent.ShortcutIconResource?>(Intent.EXTRA_SHORTCUT_ICON_RESOURCE)
-                                val iconBmp =
-                                    data.getParcelableExtra<Bitmap?>(Intent.EXTRA_SHORTCUT_ICON)
+                        val shortcutIntent = data.getParcelableExtra<Intent>(Intent.EXTRA_SHORTCUT_INTENT)
 
-                                val shortcut = WidgetData.shortcut(
-                                    shortcutIdManager.allocateShortcutId(),
-                                    name, iconBmp.toBase64(), iconRes, shortcutIntent,
-                                    WidgetSizeData(1, 1)
-                                )
+                        if (shortcutIntent != null) {
+                            val name =
+                                overrideLabel ?: data.getStringExtra(Intent.EXTRA_SHORTCUT_NAME)
+                            val iconRes =
+                                data.getParcelableExtra<Intent.ShortcutIconResource?>(Intent.EXTRA_SHORTCUT_ICON_RESOURCE)
+                            val iconBmp =
+                                data.getParcelableExtra<Bitmap?>(Intent.EXTRA_SHORTCUT_ICON)
 
-                                addNewShortcut(shortcut)
-                            }
+                            val shortcut = WidgetData.shortcut(
+                                shortcutIdManager.allocateShortcutId(),
+                                name, iconBmp.toBase64(), iconRes, shortcutIntent,
+                                WidgetSizeData(1, 1)
+                            )
+
+                            addNewShortcut(shortcut)
+                        } else {
+                            @Suppress("UNCHECKED_CAST")
+                            val msg = "No shortcut intent found.\n" +
+                                    "Intent: $data" +
+                                    "Intent Extras: ${
+                                        BaseBundle::class.java.getDeclaredMethod("getItemwiseMap")
+                                            .apply { isAccessible = true }
+                                            .invoke(data.extras) as ArrayMap<String, Any>
+                                    }"
+
+                            logUtils.normalLog(msg)
+                            Bugsnag.notify(IllegalStateException(msg))
+                        }
                     }
 
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -144,8 +159,13 @@ abstract class BaseBindWidgetActivity : ComponentActivity() {
                                                 ?.map { it to pinItemRequest.shortcutInfo.extras[it] }
                                         }\n" +
                                         "Shortcut Info: ${pinItemRequest.shortcutInfo?.toInsecureString()}"
-                                logUtils.normalLog(msg)
-                                Bugsnag.notify(Exception(msg))
+
+                                if (!data.hasExtra(Intent.EXTRA_SHORTCUT_INTENT)) {
+                                    logUtils.normalLog(msg)
+                                    Bugsnag.notify(Exception(msg))
+                                } else {
+                                    logUtils.debugLog(msg)
+                                }
                             } else {
                                 val shortcut = WidgetData.shortcut(
                                     shortcutIdManager.allocateShortcutId(),
