@@ -82,7 +82,8 @@ abstract class BaseBindWidgetActivity : ComponentActivity() {
             try {
                 result.data?.let { data ->
                     fun addShortcutFromIntent(overrideLabel: String? = null) {
-                        val shortcutIntent = data.getParcelableExtra<Intent>(Intent.EXTRA_SHORTCUT_INTENT)
+                        val shortcutIntent =
+                            data.getParcelableExtra<Intent>(Intent.EXTRA_SHORTCUT_INTENT)
 
                         if (shortcutIntent != null) {
                             val name =
@@ -427,12 +428,16 @@ abstract class BaseBindWidgetActivity : ComponentActivity() {
                     configLauncher.launch(
                         IntentSenderRequest.Builder(intentSender)
                             .build(),
-                        ActivityOptionsCompat.makeBasic()
-                            .apply {
-                                internalActivityOptions?.setPendingIntentBackgroundActivityStartMode(
-                                    ComponentOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOWED
-                                )
-                            },
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+                            ActivityOptionsCompat.makeBasic()
+                                .apply {
+                                    internalActivityOptions?.setPendingIntentBackgroundActivityStartMode(
+                                        ComponentOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOWED
+                                    )
+                                }
+                        } else {
+                            null
+                        },
                     )
                     currentConfigId = id
                     return true
@@ -446,10 +451,12 @@ abstract class BaseBindWidgetActivity : ComponentActivity() {
                 widgetHost.startAppWidgetConfigureActivityForResult(
                     this@BaseBindWidgetActivity,
                     id, 0, CONFIGURE_REQ,
-                    ActivityOptions
-                        .makeBasic()
-                        .setPendingIntentBackgroundActivityStartMode(ComponentOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOWED)
-                        .toBundle(),
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+                        ActivityOptions
+                            .makeBasic()
+                            .setPendingIntentBackgroundActivityStartMode(ComponentOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOWED)
+                            .toBundle()
+                    } else null,
                 )
                 return true
             } catch (e: Throwable) {
