@@ -78,7 +78,7 @@ dependencies {
     implementation 'com.github.zacharee:ComposeIntroSlider:13d5cfd28f'
 //    implementation project(':spannedlm')
 
-    implementation 'androidx.activity:activity-compose:1.8.0'
+    implementation 'androidx.activity:activity-compose:1.8.1'
     implementation "androidx.compose.animation:animation:${compose_version}"
     implementation "androidx.compose.foundation:foundation:${compose_version}"
     implementation "androidx.compose.ui:ui-tooling:${compose_version}"
