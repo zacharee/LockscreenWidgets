@@ -25,6 +25,7 @@ import androidx.core.app.ActivityOptionsCompat
 import com.android.internal.appwidget.IAppWidgetService
 import com.bugsnag.android.Bugsnag
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.gson.GsonBuilder
 import tk.zwander.common.data.WidgetData
 import tk.zwander.common.data.WidgetSizeData
 import tk.zwander.common.host.widgetHostCompat
@@ -105,9 +106,11 @@ abstract class BaseBindWidgetActivity : ComponentActivity() {
                             val msg = "No shortcut intent found.\n" +
                                     "Intent: $data\n" +
                                     "Intent Extras: ${
-                                        BaseBundle::class.java.getDeclaredMethod("getItemwiseMap")
-                                            .apply { isAccessible = true }
-                                            .invoke(data.extras) as ArrayMap<String, Any>
+                                        GsonBuilder().create().toJson(
+                                            BaseBundle::class.java.getDeclaredMethod("getItemwiseMap")
+                                                .apply { isAccessible = true }
+                                                .invoke(data.extras) as ArrayMap<String, Any>
+                                        )
                                     }"
 
                             logUtils.normalLog(msg)
