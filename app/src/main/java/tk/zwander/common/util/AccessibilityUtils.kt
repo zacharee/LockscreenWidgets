@@ -69,7 +69,8 @@ object AccessibilityUtils {
                     "com.android.systemui:id/quick_settings_panel",
                     "com.android.systemui:id/settings_button",
                     "com.android.systemui:id/tile_label",
-                    "com.android.systemui:id/header_label"
+                    "com.android.systemui:id/header_label",
+                    "com.android.systemui:id/split_shade_status_bar",
                 ) || ((Build.VERSION.SDK_INT > Build.VERSION_CODES.S_V2) &&
                         node.hasVisibleIds(
                             "com.android.systemui:id/quick_qs_panel",
