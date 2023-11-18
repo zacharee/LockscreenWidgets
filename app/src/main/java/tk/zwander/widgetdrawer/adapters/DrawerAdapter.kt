@@ -4,8 +4,6 @@ import android.appwidget.AppWidgetManager
 import android.appwidget.AppWidgetProviderInfo
 import android.view.View
 import android.view.ViewGroup
-import tk.zwander.lockscreenwidgets.R
-import tk.zwander.lockscreenwidgets.adapters.WidgetFrameAdapter
 import tk.zwander.common.data.WidgetData
 import tk.zwander.common.host.WidgetHostCompat
 import tk.zwander.common.listeners.WidgetResizeListener
@@ -13,6 +11,8 @@ import tk.zwander.common.util.Event
 import tk.zwander.common.util.eventManager
 import tk.zwander.common.util.prefManager
 import tk.zwander.common.util.screenSize
+import tk.zwander.lockscreenwidgets.R
+import tk.zwander.lockscreenwidgets.adapters.WidgetFrameAdapter
 import tk.zwander.widgetdrawer.activities.add.ReconfigureDrawerWidgetActivity
 
 class DrawerAdapter(
@@ -25,7 +25,7 @@ class DrawerAdapter(
     override val rowCount: Int
         get() = (host.context.screenSize.y / host.context.resources.getDimensionPixelSize(R.dimen.drawer_row_height)) - 5
     override val minRowSpan: Int
-        get() = 10
+        get() = 5
     override val rowSpanForAddButton: Int
         get() = 20
     override var currentWidgets: MutableCollection<WidgetData>
