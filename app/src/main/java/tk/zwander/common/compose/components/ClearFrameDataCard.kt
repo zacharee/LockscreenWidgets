@@ -112,6 +112,7 @@ fun ClearFrameDataCard(
         modifier = modifier,
         colors = CardDefaults.outlinedCardColors(
             containerColor = Color.Transparent,
+            contentColor = MaterialTheme.colorScheme.onSurface,
         ),
     ) {
         Column(
