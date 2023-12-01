@@ -27,7 +27,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Surface
-import androidx.compose.material3.SwipeToDismiss
+import androidx.compose.material3.SwipeToDismissBox
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberDismissState
 import androidx.compose.runtime.Composable
@@ -86,9 +86,9 @@ fun HideForIDsLayout(
                         }
                     }
 
-                    SwipeToDismiss(
+                    SwipeToDismissBox(
                         state = state,
-                        background = {
+                        backgroundContent = {
                             Row(
                                 modifier = Modifier
                                     .background(MaterialTheme.colorScheme.errorContainer)
@@ -111,20 +111,19 @@ fun HideForIDsLayout(
                                 )
                             }
                         },
-                        dismissContent = {
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .heightIn(min = 64.dp)
-                                    .background(MaterialTheme.colorScheme.surface)
-                                    .padding(8.dp),
-                                contentAlignment = Alignment.CenterStart,
-                            ) {
-                                Text(text = id)
-                            }
-                        },
-                        modifier = Modifier.animateItemPlacement()
-                    )
+                        modifier = Modifier.animateItemPlacement(),
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .heightIn(min = 64.dp)
+                                .background(MaterialTheme.colorScheme.surface)
+                                .padding(8.dp),
+                            contentAlignment = Alignment.CenterStart,
+                        ) {
+                            Text(text = id)
+                        }
+                    }
                 }
             }
 
