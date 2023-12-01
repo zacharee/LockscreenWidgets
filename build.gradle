@@ -1,27 +1,7 @@
-buildscript {
-    ext.kotlin_version = '1.9.20'
-    ext.compose_version = '1.6.0-alpha08'
-    ext.accompanist_version = '0.33.2-alpha'
-    ext.coroutines_version = '1.7.3'
-
-    repositories {
-        google()
-        mavenCentral()
-        maven { url 'https://jitpack.io' }
-    }
-    dependencies {
-        classpath 'com.android.tools.build:gradle:8.3.0-alpha14'
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
-        classpath 'com.bugsnag:bugsnag-android-gradle-plugin:8.1.0'
-    }
-}
-
-allprojects {
-    repositories {
-        google()
-        mavenCentral()
-        maven { url 'https://jitpack.io' }
-    }
+plugins {
+    alias libs.plugins.android.application apply false
+    alias libs.plugins.bugsnag.android apply false
+    alias libs.plugins.kotlin.android apply false
 }
 
 tasks.register('clean', Delete.class) {

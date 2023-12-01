@@ -38,61 +38,61 @@ android {
     }
 
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_17
-        targetCompatibility JavaVersion.VERSION_17
+        sourceCompatibility JavaVersion.toVersion(libs.versions.jdk.get())
+        targetCompatibility JavaVersion.toVersion(libs.versions.jdk.get())
     }
 
     kotlinOptions {
-        jvmTarget = "17"
+        jvmTarget = libs.versions.jdk.get()
     }
 
     packagingOptions.exclude('META-INF/library_release.kotlin_module')
 
     composeOptions {
-        kotlinCompilerExtensionVersion '1.5.4'
+        kotlinCompilerExtensionVersion libs.versions.composeCompiler.get()
     }
 }
 
 dependencies {
     implementation fileTree(dir: "libs", include: ["*.jar"])
-    implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
-    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:${coroutines_version}"
-    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:${coroutines_version}"
+    implementation libs.kotlin.stdlib
+    implementation libs.kotlinx.coroutines.core
+    implementation libs.kotlinx.coroutines.android
 
-    implementation 'androidx.core:core-ktx:1.13.0-alpha01'
-    implementation 'androidx.appcompat:appcompat:1.7.0-alpha03'
-    implementation 'androidx.constraintlayout:constraintlayout:2.2.0-alpha13'
-    implementation 'androidx.recyclerview:recyclerview:1.3.2'
-    implementation 'androidx.preference:preference-ktx:1.2.1'
+    implementation libs.core.ktx
+    implementation libs.appcompat
+    implementation libs.constraintlayout
+    implementation libs.recyclerview
+    implementation libs.preference.ktx
 
-    implementation 'org.lsposed.hiddenapibypass:hiddenapibypass:4.3'
-    implementation 'com.google.code.gson:gson:2.10.1'
-    implementation 'com.google.android.material:material:1.10.0'
-    implementation 'com.github.agrawalsuneet:DotLoadersPack-Android:v1.4.2'
-    implementation 'net.bytebuddy:byte-buddy-android:1.14.9'
-    implementation 'com.github.zacharee:SeekBarPreference:46a6643c79'
-    implementation 'com.github.zacharee:CollapsiblePreferenceCategory:2f53f2d367'
-    implementation 'com.github.zacharee:colorpicker:c300c66e93'
-    implementation 'com.github.zacharee:PatreonSupportersRetrieval:8436bbdbdc'
-    implementation 'com.github.zacharee:SpannedGridLayoutManager:0c56d2019a'
-    implementation 'com.github.zacharee:ComposeIntroSlider:13d5cfd28f'
+    implementation libs.hiddenapibypass
+    implementation libs.gson
+    implementation libs.material
+    implementation libs.dotLoadersPack
+    implementation libs.byte.buddy.android
+    implementation libs.seekBarPreference
+    implementation libs.collapsiblePreferenceCategory
+    implementation libs.colorpicker
+    implementation libs.patreonSupportersRetrieval
+    implementation libs.spannedGridLayoutManager
+    implementation libs.composeIntroSlider
 //    implementation project(':spannedlm')
 
-    implementation 'androidx.activity:activity-compose:1.8.1'
-    implementation "androidx.compose.animation:animation:${compose_version}"
-    implementation "androidx.compose.foundation:foundation:${compose_version}"
-    implementation "androidx.compose.ui:ui-tooling:${compose_version}"
-    implementation 'androidx.compose.material3:material3:1.2.0-alpha10'
-    implementation 'androidx.lifecycle:lifecycle-viewmodel-compose:2.7.0-beta01'
-    implementation 'androidx.lifecycle:lifecycle-runtime-compose:2.7.0-beta01'
-    implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.7.0-beta01'
+    implementation libs.activity.compose
+    implementation libs.compose.animation
+    implementation libs.compose.foundation
+    implementation libs.compose.ui.tooling
+    implementation libs.compose.material3
+    implementation libs.lifecycle.viewmodel.compose
+    implementation libs.lifecycle.runtime.compose
+    implementation libs.lifecycle.runtime.ktx
 
-    implementation "com.google.accompanist:accompanist-drawablepainter:${accompanist_version}"
-    implementation "com.google.accompanist:accompanist-themeadapter-material:${accompanist_version}"
-    implementation "com.google.accompanist:accompanist-themeadapter-material3:${accompanist_version}"
+    implementation libs.accompanist.drawablepainter
+    implementation libs.accompanist.themeadapter.material
+    implementation libs.accompanist.themeadapter.material3
 
-    implementation 'com.bugsnag:bugsnag-android:5.31.3'
-    implementation 'com.joaomgcd:taskerpluginlibrary:0.4.10'
+    implementation libs.bugsnag.android
+    implementation libs.taskerpluginlibrary
 
-    implementation 'com.getkeepsafe.relinker:relinker:1.4.5'
+    implementation libs.relinker
 }

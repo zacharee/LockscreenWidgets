@@ -1,0 +1,71 @@
+[versions]
+accompanist = "0.33.2-alpha"
+activityCompose = "1.8.1"
+androidGradlePlugin = "8.3.0-alpha15"
+bugsnagAndroid = "6.0.0"
+bugsnagAndroidGradlePlugin = "8.1.0"
+compose = "1.6.0-beta02"
+appcompat = "1.7.0-alpha03"
+byteBuddyAndroid = "1.14.10"
+collapsiblepreferencecategory = "2f53f2d367"
+colorpicker = "c300c66e93"
+composeCompiler = "1.5.5"
+composeintroslider = "13d5cfd28f"
+constraintlayout = "2.2.0-alpha13"
+coreKtx = "1.13.0-alpha01"
+dotloaderspackAndroid = "v1.4.2"
+gson = "2.10.1"
+hiddenapibypass = "4.3"
+jdk = "17"
+kotlin = "1.9.20"
+coroutines = "1.7.3"
+lifecycleViewmodelCompose = "2.7.0-rc01"
+material = "1.10.0"
+compose-material3 = "1.2.0-alpha12"
+patreonsupportersretrieval = "8436bbdbdc"
+preferenceKtx = "1.2.1"
+recyclerview = "1.3.2"
+relinker = "1.4.5"
+seekbarpreference = "46a6643c79"
+spannedgridlayoutmanager = "0c56d2019a"
+taskerpluginlibrary = "0.4.10"
+
+[libraries]
+accompanist-drawablepainter = { module = "com.google.accompanist:accompanist-drawablepainter", version.ref = "accompanist" }
+accompanist-themeadapter-material = { module = "com.google.accompanist:accompanist-themeadapter-material", version.ref = "accompanist" }
+accompanist-themeadapter-material3 = { module = "com.google.accompanist:accompanist-themeadapter-material3", version.ref = "accompanist" }
+activity-compose = { module = "androidx.activity:activity-compose", version.ref = "activityCompose" }
+appcompat = { module = "androidx.appcompat:appcompat", version.ref = "appcompat" }
+bugsnag-android = { module = "com.bugsnag:bugsnag-android", version.ref = "bugsnagAndroid" }
+byte-buddy-android = { module = "net.bytebuddy:byte-buddy-android", version.ref = "byteBuddyAndroid" }
+collapsiblePreferenceCategory = { module = "com.github.zacharee:CollapsiblePreferenceCategory", version.ref = "collapsiblepreferencecategory" }
+colorpicker = { module = "com.github.zacharee:colorpicker", version.ref = "colorpicker" }
+compose-animation = { module = "androidx.compose.animation:animation", version.ref = "compose" }
+compose-foundation = { module = "androidx.compose.foundation:foundation", version.ref = "compose" }
+compose-material3 = { module = "androidx.compose.material3:material3", version.ref = "compose-material3" }
+compose-ui-tooling = { module = "androidx.compose.ui:ui-tooling", version.ref = "compose" }
+composeIntroSlider = { module = "com.github.zacharee:ComposeIntroSlider", version.ref = "composeintroslider" }
+constraintlayout = { module = "androidx.constraintlayout:constraintlayout", version.ref = "constraintlayout" }
+core-ktx = { module = "androidx.core:core-ktx", version.ref = "coreKtx" }
+dotLoadersPack = { module = "com.github.agrawalsuneet:DotLoadersPack-Android", version.ref = "dotloaderspackAndroid" }
+gson = { module = "com.google.code.gson:gson", version.ref = "gson" }
+hiddenapibypass = { module = "org.lsposed.hiddenapibypass:hiddenapibypass", version.ref = "hiddenapibypass" }
+kotlin-stdlib = { module = "org.jetbrains.kotlin:kotlin-stdlib", version.ref = "kotlin" }
+kotlinx-coroutines-android = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version.ref = "coroutines" }
+kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "coroutines" }
+lifecycle-runtime-compose = { module = "androidx.lifecycle:lifecycle-runtime-compose", version.ref = "lifecycleViewmodelCompose" }
+lifecycle-runtime-ktx = { module = "androidx.lifecycle:lifecycle-runtime-ktx", version.ref = "lifecycleViewmodelCompose" }
+lifecycle-viewmodel-compose = { module = "androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "lifecycleViewmodelCompose" }
+material = { module = "com.google.android.material:material", version.ref = "material" }
+patreonSupportersRetrieval = { module = "com.github.zacharee:PatreonSupportersRetrieval", version.ref = "patreonsupportersretrieval" }
+preference-ktx = { module = "androidx.preference:preference-ktx", version.ref = "preferenceKtx" }
+recyclerview = { module = "androidx.recyclerview:recyclerview", version.ref = "recyclerview" }
+relinker = { module = "com.getkeepsafe.relinker:relinker", version.ref = "relinker" }
+seekBarPreference = { module = "com.github.zacharee:SeekBarPreference", version.ref = "seekbarpreference" }
+spannedGridLayoutManager = { module = "com.github.zacharee:SpannedGridLayoutManager", version.ref = "spannedgridlayoutmanager" }
+taskerpluginlibrary = { module = "com.joaomgcd:taskerpluginlibrary", version.ref = "taskerpluginlibrary" }
+
+[plugins]
+android-application = { id = "com.android.application", version.ref = "androidGradlePlugin" }
+bugsnag-android = { id = "com.bugsnag.android.gradle", version.ref = "bugsnagAndroidGradlePlugin" }
+kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
