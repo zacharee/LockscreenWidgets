@@ -19,7 +19,6 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.DismissValue
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -28,8 +27,9 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.SwipeToDismissBox
+import androidx.compose.material3.SwipeToDismissValue
 import androidx.compose.material3.Text
-import androidx.compose.material3.rememberDismissState
+import androidx.compose.material3.rememberSwipeToDismissState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -77,11 +77,11 @@ fun HideForIDsLayout(
                     .weight(1f),
             ) {
                 items(items.toList(), { it }) { id ->
-                    val state = rememberDismissState()
+                    val state = rememberSwipeToDismissState()
 
                     LaunchedEffect(key1 = state.currentValue, key2 = state.targetValue) {
-                        if (state.currentValue != DismissValue.Default &&
-                            state.targetValue != DismissValue.Default) {
+                        if (state.currentValue != SwipeToDismissValue.Settled &&
+                            state.targetValue != SwipeToDismissValue.Settled) {
                             onRemove(id)
                         }
                     }
