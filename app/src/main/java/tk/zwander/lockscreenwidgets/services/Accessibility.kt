@@ -11,6 +11,7 @@ import android.provider.Settings
 import android.view.WindowManager
 import android.view.accessibility.AccessibilityEvent
 import android.view.accessibility.AccessibilityNodeInfo
+import android.view.inputmethod.InputMethodManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.MainScope
@@ -99,6 +100,7 @@ class Accessibility : AccessibilityService(), EventObserver, CoroutineScope by M
     private val kgm by lazy { keyguardManager }
     private val wm by lazy { getSystemService(Context.WINDOW_SERVICE) as WindowManager }
     private val power by lazy { getSystemService(Context.POWER_SERVICE) as PowerManager }
+    private val imm by lazy { getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager }
     private val frameDelegate: WidgetFrameDelegate
         get() = WidgetFrameDelegate.getInstance(this)
     private val drawerDelegate: DrawerDelegate
@@ -155,6 +157,7 @@ class Accessibility : AccessibilityService(), EventObserver, CoroutineScope by M
                         power = power,
                         kgm = kgm,
                         wm = wm,
+                        imm = imm,
                         getWindows = { ArrayList(windows) }
                     )
                 }

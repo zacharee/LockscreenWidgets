@@ -170,6 +170,13 @@
             />
 
         <tk.zwander.common.prefs.MaterialSwitchPreference
+            android:title="@string/settings_screen_hide_when_keyboard_shown"
+            android:summary="@string/settings_screen_hide_when_keyboard_shown_desc"
+            android:key="hide_frame_when_keyboard_shown"
+            android:icon="@drawable/baseline_keyboard_24"
+            />
+
+        <tk.zwander.common.prefs.MaterialSwitchPreference
             android:title="@string/settings_screen_hide_on_edge_panels"
             android:summary="@string/settings_screen_hide_on_edge_panels_desc"
             android:key="frame_hide_on_edge_panel"

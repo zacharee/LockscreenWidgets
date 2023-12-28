@@ -577,6 +577,7 @@ class WidgetFrameDelegate private constructor(context: Context) : BaseDelegate<W
                     && prefManager.widgetFrameEnabled
                     && (!prefManager.hideInLandscape || state.screenOrientation == Surface.ROTATION_0 || state.screenOrientation == Surface.ROTATION_180)
                     && prefManager.canShowFrameFromTasker
+                    && (!prefManager.hideFrameWhenKeyboardShown || !state.showingKeyboard)
         }
 
         fun forNotificationCenter(): Boolean {
@@ -876,5 +877,6 @@ class WidgetFrameDelegate private constructor(context: Context) : BaseDelegate<W
         val isTempHide: Boolean = false,
         val hidingForPresentApp: Boolean = false,
         override val handlingClick: Boolean = false,
+        val showingKeyboard: Boolean = false,
     ) : BaseState()
 }

@@ -8,6 +8,7 @@ import android.view.WindowManager
 import android.view.accessibility.AccessibilityEvent
 import android.view.accessibility.AccessibilityNodeInfo
 import android.view.accessibility.AccessibilityWindowInfo
+import android.view.inputmethod.InputMethodManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
@@ -334,6 +335,7 @@ object AccessibilityUtils {
         power: PowerManager,
         kgm: KeyguardManager,
         wm: WindowManager,
+        imm: InputMethodManager,
         getWindows: () -> List<AccessibilityWindowInfo>
     ) = coroutineScope {
         //This block here runs even when unlocked, but it only takes a millisecond at most,
@@ -341,6 +343,9 @@ object AccessibilityUtils {
         //state and, if applicable, send the keyguard dismissal broadcast.
 
         var newState = frameDelegate.state.copy()
+
+        // Check if keyboard is shown.
+        newState = newState.copy(showingKeyboard = imm.inputMethodWindowVisibleHeight > 0)
 
         //Check if the screen is on.
         val isScreenOn = power.isInteractive
