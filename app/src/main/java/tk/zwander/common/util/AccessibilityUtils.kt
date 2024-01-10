@@ -344,8 +344,15 @@ object AccessibilityUtils {
 
         var newState = frameDelegate.state.copy()
 
-        // Check if keyboard is shown.
-        newState = newState.copy(showingKeyboard = imm.inputMethodWindowVisibleHeight > 0)
+        newState = try {
+            // Check if keyboard is shown.
+            newState.copy(showingKeyboard = imm.inputMethodWindowVisibleHeight > 0)
+        } catch (_: NullPointerException) {
+            // It's possible for `inputMethodWindowVisibleHeight` to throw an NPE on certain Android versions.
+            // If that happens, assume the keyboard isn't visible.
+            // "Attempt to read from field 'com.android.server.wm.DisplayFrames com.android.server.wm.DisplayContent.mDisplayFrames' on a null object reference"
+            newState.copy(showingKeyboard = false)
+        }
 
         //Check if the screen is on.
         val isScreenOn = power.isInteractive

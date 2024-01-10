@@ -12,12 +12,10 @@ import android.content.Intent
 import android.content.pm.LauncherApps
 import android.graphics.Bitmap
 import android.net.Uri
-import android.os.BaseBundle
 import android.os.Build
 import android.os.Bundle
 import android.os.ServiceManager
 import android.telephony.PhoneNumberUtils
-import android.util.ArrayMap
 import androidx.activity.ComponentActivity
 import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts
@@ -29,16 +27,7 @@ import com.google.gson.GsonBuilder
 import tk.zwander.common.data.WidgetData
 import tk.zwander.common.data.WidgetSizeData
 import tk.zwander.common.host.widgetHostCompat
-import tk.zwander.common.util.appWidgetManager
-import tk.zwander.common.util.componentNameCompat
-import tk.zwander.common.util.getSamsungConfigureComponent
-import tk.zwander.common.util.internalActivityOptions
-import tk.zwander.common.util.loadPreviewOrIcon
-import tk.zwander.common.util.logUtils
-import tk.zwander.common.util.prefManager
-import tk.zwander.common.util.shortcutIdManager
-import tk.zwander.common.util.toBase64
-import tk.zwander.common.util.toBitmap
+import tk.zwander.common.util.*
 import tk.zwander.lockscreenwidgets.R
 import tk.zwander.lockscreenwidgets.data.list.ShortcutListInfo
 import tk.zwander.lockscreenwidgets.util.WidgetFrameDelegate
@@ -102,16 +91,9 @@ abstract class BaseBindWidgetActivity : ComponentActivity() {
 
                             addNewShortcut(shortcut)
                         } else {
-                            @Suppress("UNCHECKED_CAST")
+                            val gson = GsonBuilder().create()
                             val msg = "No shortcut intent found.\n" +
-                                    "Intent: $data\n" +
-                                    "Intent Extras: ${
-                                        GsonBuilder().create().toJson(
-                                            BaseBundle::class.java.getDeclaredMethod("getItemwiseMap")
-                                                .apply { isAccessible = true }
-                                                .invoke(data.extras) as ArrayMap<String, Any>
-                                        )
-                                    }"
+                                    "Intent: ${gson.toJson(data)}"
 
                             logUtils.normalLog(msg)
                             Bugsnag.notify(IllegalStateException(msg))
