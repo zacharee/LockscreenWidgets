@@ -1,7 +1,6 @@
 package tk.zwander.lockscreenwidgets.services
 
 import android.accessibilityservice.AccessibilityService
-import android.accessibilityservice.AccessibilityServiceInfo
 import android.annotation.SuppressLint
 import android.content.ComponentName
 import android.content.Context
@@ -109,15 +108,10 @@ class Accessibility : AccessibilityService(), EventObserver, CoroutineScope by M
 
     private val sharedPreferencesChangeHandler = HandlerRegistry {
         handler(PrefManager.KEY_ACCESSIBILITY_EVENT_DELAY) {
-            val currentInfo = serviceInfo ?: AccessibilityServiceInfo(
-                packageManager.resolveService(
-                    Intent(this@Accessibility, Accessibility::class.java),
-                    0,
-                ),
-                this@Accessibility,
-            )
-            currentInfo.notificationTimeout = prefManager.accessibilityEventDelay.toLong()
-            serviceInfo = currentInfo
+            serviceInfo?.let {
+                it.notificationTimeout = prefManager.accessibilityEventDelay.toLong()
+                serviceInfo = it
+            }
         }
         handler(PrefManager.KEY_DEBUG_LOG) {
             IDListProvider.sendUpdate(this@Accessibility)
