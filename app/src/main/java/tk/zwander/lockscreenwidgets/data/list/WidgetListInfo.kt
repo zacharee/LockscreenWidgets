@@ -3,15 +3,15 @@ package tk.zwander.lockscreenwidgets.data.list
 import android.appwidget.AppWidgetProviderInfo
 import tk.zwander.common.activities.add.AddWidgetActivity
 import tk.zwander.common.data.BaseAppInfo
-import java.util.*
+import java.util.Objects
 
 /**
  * Hold the info for a widget listed in [AddWidgetActivity]
  *
- * @property widgetName the label of the widget
- * @property previewImg the preview image of the widget
- * @property appInfo the information about the application this widget belongs to
- * @property itemInfo the information about the widget
+ * @param widgetName the label of the widget
+ * @param previewImg the preview image of the widget
+ * @param appInfo the information about the application this widget belongs to
+ * @param itemInfo the information about the widget
  */
 class WidgetListInfo(
     widgetName: String,
