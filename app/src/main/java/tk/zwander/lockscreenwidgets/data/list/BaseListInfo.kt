@@ -1,27 +1,28 @@
 package tk.zwander.lockscreenwidgets.data.list
 
 import android.os.Parcelable
+import androidx.core.graphics.drawable.IconCompat
 import tk.zwander.common.data.BaseAppInfo
 import java.util.Objects
 
-sealed class BaseListInfo<ItemInfo : Parcelable, Icon : Any>(
+sealed class BaseListInfo<ItemInfo : Parcelable>(
     val name: String,
-    val icon: Icon?,
+    val icon: IconCompat?,
     val appInfo: BaseAppInfo<*>,
     val itemInfo: ItemInfo,
-) : Comparable<BaseListInfo<ItemInfo, Icon>> {
-    override fun compareTo(other: BaseListInfo<ItemInfo, Icon>): Int {
+) : Comparable<BaseListInfo<ItemInfo>> {
+    override fun compareTo(other: BaseListInfo<ItemInfo>): Int {
         return name.compareTo(other.name, true)
     }
 
     override fun equals(other: Any?): Boolean {
-        return other is BaseListInfo<*, *>
+        return other is BaseListInfo<*>
                 && name == other.name
-                && icon == other.icon
+                && icon?.toBundle() == other.icon?.toBundle()
                 && appInfo.appInfo.packageName == other.appInfo.appInfo.packageName
     }
 
     override fun hashCode(): Int {
-        return Objects.hash(name, icon, appInfo.appInfo.packageName)
+        return Objects.hash(name, icon?.toBundle(), appInfo.appInfo.packageName)
     }
 }

@@ -1,6 +1,7 @@
 package tk.zwander.lockscreenwidgets.data.list
 
 import android.appwidget.AppWidgetProviderInfo
+import androidx.core.graphics.drawable.IconCompat
 import tk.zwander.common.activities.add.AddWidgetActivity
 import tk.zwander.common.data.BaseAppInfo
 import java.util.Objects
@@ -15,13 +16,13 @@ import java.util.Objects
  */
 class WidgetListInfo(
     widgetName: String,
-    previewImg: Int,
+    previewImg: IconCompat,
     appInfo: BaseAppInfo<*>,
     itemInfo: AppWidgetProviderInfo,
-) : BaseListInfo<AppWidgetProviderInfo, Int>(
+) : BaseListInfo<AppWidgetProviderInfo>(
     widgetName, previewImg, appInfo, itemInfo,
 ) {
-    override fun compareTo(other: BaseListInfo<AppWidgetProviderInfo, Int>): Int {
+    override fun compareTo(other: BaseListInfo<AppWidgetProviderInfo>): Int {
         val nameResult = super.compareTo(other)
 
         return if (nameResult == 0) {

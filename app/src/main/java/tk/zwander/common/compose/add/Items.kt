@@ -10,6 +10,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
+import androidx.core.graphics.drawable.IconCompat
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import tk.zwander.common.compose.util.matchesFilter
@@ -40,31 +41,34 @@ internal fun items(
             val packageManager = context.packageManager
 
             context.getAllInstalledWidgetProviders().forEach {
-                    try {
-                        val appInfo = packageManager
-                            .getApplicationInfoCompat(it.provider.packageName, 0)
+                try {
+                    val appInfo = packageManager
+                        .getApplicationInfoCompat(it.provider.packageName, 0)
+                    val appResources = packageManager.getResourcesForApplication(appInfo)
 
-                        val appName = packageManager.getApplicationLabel(appInfo)
-                        val widgetName = it.loadLabel(packageManager)
+                    val appName = packageManager.getApplicationLabel(appInfo)
+                    val widgetName = it.loadLabel(packageManager)
 
-                        var app = apps[appInfo.packageName]
-                        if (app == null) {
-                            app = AppInfo(appName.toString(), appInfo)
-                            apps[appInfo.packageName] = app
-                        }
-
-                        app.widgets.add(
-                            WidgetListInfo(
-                                widgetName,
-                                it.previewImage.run { if (this != 0) this else appInfo.icon },
-                                app,
-                                it,
-                            )
-                        )
-                    } catch (e: PackageManager.NameNotFoundException) {
-                        context.logUtils.debugLog("Unable to parse application info for widget", e)
+                    var app = apps[appInfo.packageName]
+                    if (app == null) {
+                        app = AppInfo(appName.toString(), appInfo)
+                        apps[appInfo.packageName] = app
                     }
+
+                    app.widgets.add(
+                        WidgetListInfo(
+                            widgetName,
+                            it.previewImage.run { if (this != 0) this else appInfo.icon }.let { iconResource ->
+                                IconCompat.createWithResource(appResources, appInfo.packageName, iconResource)
+                            },
+                            app,
+                            it,
+                        )
+                    )
+                } catch (e: PackageManager.NameNotFoundException) {
+                    context.logUtils.debugLog("Unable to parse application info for widget", e)
                 }
+            }
 
             if (showShortcuts) {
                 packageManager.queryIntentActivitiesCompat(
@@ -74,18 +78,24 @@ internal fun items(
                     try {
                         val appInfo =
                             packageManager.getApplicationInfoCompat(it.activityInfo.packageName)
+                        val appResources = packageManager.getResourcesForApplication(appInfo)
 
                         val appName = appInfo.loadLabel(packageManager)
                         val shortcutName = it.loadLabel(packageManager)
 
-                        val app = apps[appInfo.packageName] ?: AppInfo(appName.toString(), appInfo).apply {
+                        val app = apps[appInfo.packageName] ?: AppInfo(
+                            appName.toString(),
+                            appInfo
+                        ).apply {
                             apps[appInfo.packageName] = this
                         }
 
                         app.shortcuts.add(
                             ShortcutListInfo(
                                 shortcutName.toString(),
-                                it.iconResource,
+                                it.iconResource.run { if (this != 0) this else appInfo.icon }.let { iconResource ->
+                                    IconCompat.createWithResource(appResources, appInfo.packageName, iconResource)
+                                },
                                 app,
                                 it,
                             )
@@ -156,7 +166,11 @@ internal fun items(
                     app.copy(
                         widgets = TreeSet(app.widgets.filter { it.matchesFilter(filter) }),
                         shortcuts = TreeSet(app.shortcuts.filter { it.matchesFilter(filter) }),
-                        launcherShortcuts = TreeSet(app.launcherShortcuts.filter { it.matchesFilter(filter) }),
+                        launcherShortcuts = TreeSet(app.launcherShortcuts.filter {
+                            it.matchesFilter(
+                                filter
+                            )
+                        }),
                     )
                 } else {
                     null

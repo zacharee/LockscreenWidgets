@@ -2,7 +2,6 @@ package tk.zwander.common.compose.add
 
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
-import android.graphics.drawable.Icon
 import android.os.Build
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
@@ -42,7 +41,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import tk.zwander.common.data.AppInfo
 import tk.zwander.common.util.componentNameCompat
-import tk.zwander.common.util.getRemoteDrawable
 import tk.zwander.common.util.logUtils
 import tk.zwander.common.util.toBitmap
 import tk.zwander.lockscreenwidgets.R
@@ -51,7 +49,7 @@ import tk.zwander.lockscreenwidgets.data.list.BaseListInfo
 @Composable
 fun AddWidgetScroller(
     filteredItems: List<AppInfo>,
-    onSelected: (BaseListInfo<*, *>) -> Unit,
+    onSelected: (BaseListInfo<*>) -> Unit,
     searchBarHeight: Int,
     modifier: Modifier = Modifier,
 ) {
@@ -195,7 +193,7 @@ private fun AppHeader(
 
 @Composable
 private fun icon(
-    info: BaseListInfo<*, *>,
+    info: BaseListInfo<*>,
     key: Any?,
 ): Bitmap? {
     val context = LocalContext.current
@@ -207,19 +205,7 @@ private fun icon(
     LaunchedEffect(key) {
         icon = try {
             withContext(Dispatchers.IO) {
-                when {
-                    info.icon is Int -> {
-                        context.getRemoteDrawable(
-                            info.appInfo.appInfo.packageName,
-                            info.icon,
-                            context.packageManager.getResourcesForApplication(info.appInfo.appInfo)
-                        ) { context.packageManager.getApplicationIcon(info.appInfo.appInfo) }
-                    }
-                    Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && info.icon is Icon -> {
-                        info.icon.loadDrawable(context).toBitmap()
-                    }
-                    else -> null
-                }
+                info.icon?.loadDrawable(context)?.toBitmap()
             }
         } catch (e: PackageManager.NameNotFoundException) {
             context.logUtils.normalLog("Unable to load icon for ${info.appInfo.appInfo.packageName}.", e)

@@ -1,6 +1,7 @@
 package tk.zwander.lockscreenwidgets.data.list
 
 import android.content.pm.ResolveInfo
+import androidx.core.graphics.drawable.IconCompat
 import tk.zwander.common.activities.add.AddWidgetActivity
 import tk.zwander.common.data.BaseAppInfo
 import tk.zwander.common.util.componentNameCompat
@@ -16,10 +17,10 @@ import java.util.Objects
  */
 class ShortcutListInfo(
     shortcutName: String,
-    icon: Int,
+    icon: IconCompat,
     appInfo: BaseAppInfo<*>,
     itemInfo: ResolveInfo
-) : BaseListInfo<ResolveInfo, Int>(
+) : BaseListInfo<ResolveInfo>(
     shortcutName, icon, appInfo, itemInfo
 ) {
     override fun equals(other: Any?): Boolean {

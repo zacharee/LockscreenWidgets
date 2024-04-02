@@ -20,7 +20,7 @@ fun BaseAppInfo<*>.matchesBaseFilter(filter: String?): Boolean {
     return false
 }
 
-fun BaseListInfo<*, *>.matchesFilter(filter: String?): Boolean {
+fun BaseListInfo<*>.matchesFilter(filter: String?): Boolean {
     if (filter.isNullOrBlank()) return true
     if (appInfo.matchesBaseFilter(filter)) return true
     if (name.contains(filter, true)) return true
