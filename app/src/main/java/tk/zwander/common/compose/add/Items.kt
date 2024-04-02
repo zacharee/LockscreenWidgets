@@ -57,7 +57,7 @@ internal fun items(
                             WidgetListInfo(
                                 widgetName,
                                 it.previewImage.run { if (this != 0) this else appInfo.icon },
-                                appInfo,
+                                app,
                                 it,
                             )
                         )
@@ -86,7 +86,7 @@ internal fun items(
                             ShortcutListInfo(
                                 shortcutName.toString(),
                                 it.iconResource,
-                                appInfo,
+                                app,
                                 it,
                             )
                         )

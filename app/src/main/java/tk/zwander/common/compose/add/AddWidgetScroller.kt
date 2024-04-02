@@ -210,10 +210,10 @@ private fun icon(
                 when {
                     info.icon is Int -> {
                         context.getRemoteDrawable(
-                            info.appInfo.packageName,
+                            info.appInfo.appInfo.packageName,
                             info.icon,
-                            context.packageManager.getResourcesForApplication(info.appInfo)
-                        ) { context.packageManager.getApplicationIcon(info.appInfo) }
+                            context.packageManager.getResourcesForApplication(info.appInfo.appInfo)
+                        ) { context.packageManager.getApplicationIcon(info.appInfo.appInfo) }
                     }
                     Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && info.icon is Icon -> {
                         info.icon.loadDrawable(context).toBitmap()
@@ -222,7 +222,7 @@ private fun icon(
                 }
             }
         } catch (e: PackageManager.NameNotFoundException) {
-            context.logUtils.normalLog("Unable to load icon for ${info.appInfo.packageName}.", e)
+            context.logUtils.normalLog("Unable to load icon for ${info.appInfo.appInfo.packageName}.", e)
             null
         }
     }

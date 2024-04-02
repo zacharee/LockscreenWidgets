@@ -1,8 +1,8 @@
 package tk.zwander.lockscreenwidgets.data.list
 
 import android.appwidget.AppWidgetProviderInfo
-import android.content.pm.ApplicationInfo
 import tk.zwander.common.activities.add.AddWidgetActivity
+import tk.zwander.common.data.BaseAppInfo
 import java.util.*
 
 /**
@@ -16,7 +16,7 @@ import java.util.*
 class WidgetListInfo(
     widgetName: String,
     previewImg: Int,
-    appInfo: ApplicationInfo,
+    appInfo: BaseAppInfo<*>,
     itemInfo: AppWidgetProviderInfo,
 ) : BaseListInfo<AppWidgetProviderInfo, Int>(
     widgetName, previewImg, appInfo, itemInfo,

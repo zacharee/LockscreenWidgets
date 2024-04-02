@@ -1,8 +1,8 @@
 package tk.zwander.lockscreenwidgets.data.list
 
-import android.content.pm.ApplicationInfo
 import android.content.pm.ResolveInfo
 import tk.zwander.common.activities.add.AddWidgetActivity
+import tk.zwander.common.data.BaseAppInfo
 import tk.zwander.common.util.componentNameCompat
 import java.util.*
 
@@ -17,7 +17,7 @@ import java.util.*
 class ShortcutListInfo(
     shortcutName: String,
     icon: Int,
-    appInfo: ApplicationInfo,
+    appInfo: BaseAppInfo<*>,
     itemInfo: ResolveInfo
 ) : BaseListInfo<ResolveInfo, Int>(
     shortcutName, icon, appInfo, itemInfo
