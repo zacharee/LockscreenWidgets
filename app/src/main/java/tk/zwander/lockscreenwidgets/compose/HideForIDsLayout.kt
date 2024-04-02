@@ -27,9 +27,9 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.SwipeToDismissBox
-import androidx.compose.material3.SwipeToDismissValue
+import androidx.compose.material3.SwipeToDismissBoxValue
 import androidx.compose.material3.Text
-import androidx.compose.material3.rememberSwipeToDismissState
+import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -77,11 +77,11 @@ fun HideForIDsLayout(
                     .weight(1f),
             ) {
                 items(items.toList(), { it }) { id ->
-                    val state = rememberSwipeToDismissState()
+                    val state = rememberSwipeToDismissBoxState()
 
                     LaunchedEffect(key1 = state.currentValue, key2 = state.targetValue) {
-                        if (state.currentValue != SwipeToDismissValue.Settled &&
-                            state.targetValue != SwipeToDismissValue.Settled) {
+                        if (state.currentValue != SwipeToDismissBoxValue.Settled &&
+                            state.targetValue != SwipeToDismissBoxValue.Settled) {
                             onRemove(id)
                         }
                     }
