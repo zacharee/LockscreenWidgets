@@ -43,8 +43,15 @@ fun Context.getAllInstalledWidgetProviders(pkg: String? = null): List<AppWidgetP
     } catch (e: NoSuchMethodError) {
         logUtils.debugLog("Unable to use getInstalledProvidersForProfile", e)
 
-        manager.getInstalledProviders(AppWidgetProviderInfo.WIDGET_CATEGORY_HOME_SCREEN) +
+        (manager.getInstalledProviders(AppWidgetProviderInfo.WIDGET_CATEGORY_HOME_SCREEN) +
                 manager.getInstalledProviders(AppWidgetProviderInfo.WIDGET_CATEGORY_KEYGUARD) +
-                manager.getInstalledProviders(AppWidgetProviderInfo.WIDGET_CATEGORY_SEARCHBOX)
+                manager.getInstalledProviders(AppWidgetProviderInfo.WIDGET_CATEGORY_SEARCHBOX))
+            .run {
+                if (pkg != null) {
+                    filter { it.providerInfo.packageName == pkg }
+                } else {
+                    this
+                }
+            }
     }
 }

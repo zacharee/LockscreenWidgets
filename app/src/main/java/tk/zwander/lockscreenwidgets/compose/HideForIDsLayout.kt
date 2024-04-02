@@ -54,7 +54,7 @@ fun HideForIDsLayout(
     onRemove: (String) -> Unit,
     onBackUpClicked: () -> Unit,
     onRestoreClicked: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     var isAdding by remember(items) {
         mutableStateOf(false)
