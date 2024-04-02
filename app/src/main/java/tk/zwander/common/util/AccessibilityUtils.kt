@@ -346,7 +346,14 @@ object AccessibilityUtils {
 
         newState = try {
             // Check if keyboard is shown.
-            newState.copy(showingKeyboard = imm.inputMethodWindowVisibleHeight > 0)
+            try {
+                newState.copy(showingKeyboard = imm.inputMethodWindowVisibleHeight > 0)
+            } catch (e: NullPointerException) {
+                // Fetching the IME height can cause the system to throw an NPE:
+                // "Attempt to read from field 'com.android.server.wm.DisplayFrames com.android.server.wm.DisplayContent.mDisplayFrames' on a null object reference".
+                // If this happens, assume the keyboard isn't showing.
+                newState.copy(showingKeyboard = false)
+            }
         } catch (_: NullPointerException) {
             // It's possible for `inputMethodWindowVisibleHeight` to throw an NPE on certain Android versions.
             // If that happens, assume the keyboard isn't visible.
