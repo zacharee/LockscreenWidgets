@@ -69,3 +69,4 @@ taskerpluginlibrary = { module = "com.joaomgcd:taskerpluginlibrary", version.ref
 android-application = { id = "com.android.application", version.ref = "androidGradlePlugin" }
 bugsnag-android = { id = "com.bugsnag.android.gradle", version.ref = "bugsnagAndroidGradlePlugin" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
+kotlin-parcelize = { id = "org.jetbrains.kotlin.plugin.parcelize", version.ref = "kotlin" }
