@@ -13,8 +13,7 @@ fun AppWidgetProviderInfo.getSamsungConfigureComponent(context: Context): Compon
     return context.packageManager.getReceiverInfoCompat(
         provider,
         PackageManager.GET_META_DATA
-    )
-        .metaData?.getString("android.appwidget.provider.semConfigureActivity")
+    ).metaData?.getString("android.appwidget.provider.semConfigureActivity")
         ?.let { ComponentName.unflattenFromString("${provider.packageName}/$it") }
 }
 
