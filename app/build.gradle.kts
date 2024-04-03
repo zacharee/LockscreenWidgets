@@ -1,3 +1,5 @@
+import org.jetbrains.kotlin.gradle.plugin.mpp.pm20.util.archivesName
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -15,6 +17,8 @@ android {
         targetSdk = 34
         versionCode = 104
         versionName = "2.13.1"
+
+        archivesName = "LockscreenWidgets_${versionName}"
     }
 
     buildFeatures {
