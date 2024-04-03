@@ -27,7 +27,16 @@ import com.google.gson.GsonBuilder
 import tk.zwander.common.data.WidgetData
 import tk.zwander.common.data.WidgetSizeData
 import tk.zwander.common.host.widgetHostCompat
-import tk.zwander.common.util.*
+import tk.zwander.common.util.appWidgetManager
+import tk.zwander.common.util.componentNameCompat
+import tk.zwander.common.util.getSamsungConfigureComponent
+import tk.zwander.common.util.internalActivityOptions
+import tk.zwander.common.util.loadPreviewOrIcon
+import tk.zwander.common.util.logUtils
+import tk.zwander.common.util.prefManager
+import tk.zwander.common.util.shortcutIdManager
+import tk.zwander.common.util.toBase64
+import tk.zwander.common.util.toBitmap
 import tk.zwander.lockscreenwidgets.R
 import tk.zwander.lockscreenwidgets.data.list.ShortcutListInfo
 import tk.zwander.lockscreenwidgets.util.WidgetFrameDelegate
@@ -43,6 +52,7 @@ abstract class BaseBindWidgetActivity : ComponentActivity() {
         get() = WidgetFrameDelegate.peekInstance(this)
 
     protected abstract var currentWidgets: MutableSet<WidgetData>
+    private var currentConfigId: Int? = null
 
     protected open val currentIds: Collection<Int>
         get() = currentWidgets.map { it.id }
@@ -359,6 +369,18 @@ abstract class BaseBindWidgetActivity : ComponentActivity() {
         )
     }
 
+    override fun onDestroy() {
+        super.onDestroy()
+
+        if (deleteOnConfigureError) {
+            currentConfigId?.let {
+                //Widget configuration was canceled: delete the
+                //allocated ID
+                widgetHost.deleteAppWidgetId(it)
+            }
+        }
+    }
+
     protected open fun addNewShortcut(shortcut: WidgetData) {
         currentWidgets = currentWidgets.apply {
             add(shortcut)
@@ -377,8 +399,6 @@ abstract class BaseBindWidgetActivity : ComponentActivity() {
             registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
                 onActivityResult(CONFIGURE_REQ, result.resultCode, result.data)
             }
-
-        private var currentConfigId: Int? = null
 
         @SuppressLint("NewApi")
         fun launch(id: Int): Boolean {
@@ -453,41 +473,33 @@ abstract class BaseBindWidgetActivity : ComponentActivity() {
 
         fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
             if (requestCode == CONFIGURE_REQ) {
-                val id =
-                    data?.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, currentConfigId ?: -1)
+                val id = data?.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, currentConfigId ?: -1)
                         ?: currentConfigId
 
+                logUtils.debugLog("Configure complete for id $id $currentConfigId", null)
+
                 if (resultCode == Activity.RESULT_OK && id != null && id != -1) {
-                    logUtils.debugLog("Successfully configured widget.")
-                    //Widget configuration was successful: add the
-                    //widget to the frame
-                    addNewWidget(id, appWidgetManager.getAppWidgetInfo(id) ?: run {
-                        logUtils.debugLog("Unable to get widget info for $id, not adding")
-                        if (deleteOnConfigureError) {
-                            currentConfigId?.let {
-                                widgetHost.deleteAppWidgetId(it)
-                            }
-                        }
+                    logUtils.debugLog("Successfully configured widget.", null)
+
+                    val widgetInfo = appWidgetManager.getAppWidgetInfo(id)
+
+                    if (widgetInfo == null) {
+                        logUtils.debugLog("Unable to get widget info for $id, not adding", null)
                         if (pendingErrors == 0) {
                             finish()
                         }
                         return
-                    })
-                } else {
-                    logUtils.debugLog("Failed to configure widget. Result code $resultCode, id $id.")
-                    if (deleteOnConfigureError) {
-                        currentConfigId?.let {
-                            //Widget configuration was canceled: delete the
-                            //allocated ID
-                            widgetHost.deleteAppWidgetId(it)
-                        }
                     }
+
+                    currentConfigId = null
+
+                    addNewWidget(id, widgetInfo)
+                } else {
+                    logUtils.debugLog("Failed to configure widget. Result code $resultCode, id $id.", null)
                     if (pendingErrors == 0) {
                         finish()
                     }
                 }
-
-                currentConfigId = null
             }
         }
     }
