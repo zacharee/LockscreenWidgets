@@ -397,7 +397,7 @@ class PrefManager private constructor(context: Context) : ContextWrapper(context
     //Whether the widget frame should hide on the password/pin/fingerprint/pattern
     //input screen.
     var hideOnSecurityPage: Boolean
-        get() = getBoolean(KEY_HIDE_ON_SECURITY_PAGE, false)
+        get() = getBoolean(KEY_HIDE_ON_SECURITY_PAGE, true)
         set(value) {
             putBoolean(KEY_HIDE_ON_SECURITY_PAGE, value)
         }

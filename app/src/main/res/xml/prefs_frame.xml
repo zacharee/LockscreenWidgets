@@ -153,6 +153,7 @@
             android:summary="@string/settings_screen_hide_on_security_input_desc"
             android:key="hide_on_security_page"
             android:icon="@drawable/is_baseline_password_24"
+            android:defaultValue="true"
             />
 
         <tk.zwander.common.prefs.MaterialSwitchPreference
