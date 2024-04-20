@@ -48,7 +48,7 @@ class DismissOrUnlockActivity : AppCompatActivity(), EventObserver {
         handle()
     }
 
-    override fun onNewIntent(intent: Intent?) {
+    override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
 
         handle()
