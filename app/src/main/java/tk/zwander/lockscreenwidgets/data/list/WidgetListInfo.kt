@@ -16,7 +16,7 @@ import java.util.Objects
  */
 class WidgetListInfo(
     widgetName: String,
-    previewImg: IconCompat,
+    previewImg: IconCompat?,
     appInfo: BaseAppInfo<*>,
     itemInfo: AppWidgetProviderInfo,
 ) : BaseListInfo<AppWidgetProviderInfo>(

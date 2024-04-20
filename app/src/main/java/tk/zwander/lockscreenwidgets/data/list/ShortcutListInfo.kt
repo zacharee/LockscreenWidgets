@@ -17,7 +17,7 @@ import java.util.Objects
  */
 class ShortcutListInfo(
     shortcutName: String,
-    icon: IconCompat,
+    icon: IconCompat?,
     appInfo: BaseAppInfo<*>,
     itemInfo: ResolveInfo
 ) : BaseListInfo<ResolveInfo>(

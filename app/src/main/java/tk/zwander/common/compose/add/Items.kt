@@ -59,7 +59,11 @@ internal fun items(
                         WidgetListInfo(
                             widgetName,
                             it.previewImage.run { if (this != 0) this else appInfo.icon }.let { iconResource ->
-                                IconCompat.createWithResource(appResources, appInfo.packageName, iconResource)
+                                try {
+                                    IconCompat.createWithResource(appResources, appInfo.packageName, iconResource)
+                                } catch (e: IllegalArgumentException) {
+                                    null
+                                }
                             },
                             app,
                             it,
@@ -94,7 +98,11 @@ internal fun items(
                             ShortcutListInfo(
                                 shortcutName.toString(),
                                 it.iconResource.run { if (this != 0) this else appInfo.icon }.let { iconResource ->
-                                    IconCompat.createWithResource(appResources, appInfo.packageName, iconResource)
+                                    try {
+                                        IconCompat.createWithResource(appResources, appInfo.packageName, iconResource)
+                                    } catch (e: IllegalArgumentException) {
+                                        null
+                                    }
                                 },
                                 app,
                                 it,

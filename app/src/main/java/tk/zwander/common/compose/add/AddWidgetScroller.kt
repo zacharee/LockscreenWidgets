@@ -210,6 +210,9 @@ private fun icon(
         } catch (e: PackageManager.NameNotFoundException) {
             context.logUtils.normalLog("Unable to load icon for ${info.appInfo.appInfo.packageName}.", e)
             null
+        } catch (e: NullPointerException) {
+            context.logUtils.normalLog("Unable to load icon for ${info.appInfo.appInfo.packageName}.", e)
+            null
         }
     }
 
