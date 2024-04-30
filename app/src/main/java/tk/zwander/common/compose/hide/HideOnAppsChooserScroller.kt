@@ -1,6 +1,5 @@
 package tk.zwander.common.compose.hide
 
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets
@@ -18,7 +17,6 @@ import tk.zwander.common.compose.components.CardSwitch
 import tk.zwander.common.compose.util.insetsContentPadding
 import tk.zwander.common.data.BasicAppInfo
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun HideOnAppsChooserScroller(
     filteredItems: Collection<BasicAppInfo>,
@@ -58,7 +56,7 @@ fun HideOnAppsChooserScroller(
                 ),
                 titleTextStyle = MaterialTheme.typography.titleMedium,
                 summaryTextStyle = MaterialTheme.typography.bodySmall,
-                modifier = Modifier.animateItemPlacement(),
+                modifier = Modifier.animateItem(),
                 backgroundColor = MaterialTheme.colorScheme.surface,
             )
         }

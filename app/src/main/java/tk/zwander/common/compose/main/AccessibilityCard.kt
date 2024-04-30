@@ -78,7 +78,7 @@ fun AccessibilityCard() {
                         containerColor = Color.Transparent,
                         contentColor = MaterialTheme.colorScheme.onErrorContainer
                     ),
-                    border = ButtonDefaults.outlinedButtonBorder.copy(brush = SolidColor(MaterialTheme.colorScheme.onErrorContainer)),
+                    border = ButtonDefaults.outlinedButtonBorder(true).copy(brush = SolidColor(MaterialTheme.colorScheme.onErrorContainer)),
                     modifier = Modifier.padding(end = 4.dp),
                 ) {
                     Text(text = stringResource(id = R.string.battery_whitelist))
@@ -90,7 +90,7 @@ fun AccessibilityCard() {
                         containerColor = Color.Transparent,
                         contentColor = MaterialTheme.colorScheme.onErrorContainer
                     ),
-                    border = ButtonDefaults.outlinedButtonBorder.copy(brush = SolidColor(MaterialTheme.colorScheme.onErrorContainer)),
+                    border = ButtonDefaults.outlinedButtonBorder(true).copy(brush = SolidColor(MaterialTheme.colorScheme.onErrorContainer)),
                     modifier = Modifier.padding(start = 4.dp),
                 ) {
                     Text(text = stringResource(id = R.string.accessibility_settings))

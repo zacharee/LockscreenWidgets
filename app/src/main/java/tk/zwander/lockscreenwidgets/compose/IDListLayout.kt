@@ -119,7 +119,7 @@ fun IDListLayout(
                             }
                         },
                         modifier = Modifier.padding(vertical = 4.dp)
-                            .animateItemPlacement(),
+                            .animateItem(),
                         lineHeight = 12.sp,
                         fontSize = 12.sp,
                     )

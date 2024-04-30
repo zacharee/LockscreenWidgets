@@ -386,9 +386,6 @@ class WidgetFrameDelegate private constructor(context: Context) : BaseDelegate<W
                 )
             }
             is Event.FrameIntercept -> forceWakelock(wm, event.down)
-            Event.TempHide -> {
-                removeWindow(wm)
-            }
             is Event.NewNotificationCount -> {
                 //Receive updates from our notification listener service on how many
                 //notifications are currently shown to the user. This count excludes
