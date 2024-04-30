@@ -34,6 +34,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -197,6 +198,7 @@ private fun icon(
     key: Any?,
 ): Bitmap? {
     val context = LocalContext.current
+    val maxWidth = with (LocalDensity.current) { 512.dp.toPx() }
 
     var icon by remember(key) {
         mutableStateOf<Bitmap?>(null)
@@ -205,7 +207,7 @@ private fun icon(
     LaunchedEffect(key) {
         icon = try {
             withContext(Dispatchers.IO) {
-                info.icon?.loadDrawable(context)?.toBitmap()
+                info.icon?.loadDrawable(context)?.toBitmap(maxWidth = maxWidth.toInt())
             }
         } catch (e: PackageManager.NameNotFoundException) {
             context.logUtils.normalLog("Unable to load icon for ${info.appInfo.appInfo.packageName}.", e)
