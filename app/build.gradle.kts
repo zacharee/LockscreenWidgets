@@ -1,8 +1,7 @@
-import org.jetbrains.kotlin.gradle.plugin.mpp.pm20.util.archivesName
-
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
+    alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.kotlin.parcelize)
     alias(libs.plugins.bugsnag.android)
 }
@@ -18,7 +17,7 @@ android {
         versionCode = 104
         versionName = "2.13.1"
 
-        archivesName = "LockscreenWidgets_${versionName}"
+        extensions.getByType(BasePluginExtension::class.java).archivesName.set("RootActivityLauncher_${versionCode}")
     }
 
     buildFeatures {
@@ -33,21 +32,19 @@ android {
         }
     }
 
+    val jdkVersion = project.properties["jdk.version"].toString()
+
     compileOptions {
-        sourceCompatibility = JavaVersion.toVersion(libs.versions.jdk.get())
-        targetCompatibility = JavaVersion.toVersion(libs.versions.jdk.get())
+        sourceCompatibility = JavaVersion.toVersion(jdkVersion)
+        targetCompatibility = JavaVersion.toVersion(jdkVersion)
     }
 
     kotlinOptions {
-        jvmTarget = libs.versions.jdk.get()
+        jvmTarget = jdkVersion
     }
 
     packaging {
         resources.excludes.add("META-INF/library_release.kotlin_module")
-    }
-
-    composeOptions {
-        kotlinCompilerExtensionVersion = libs.versions.composeCompiler.get()
     }
 }
 
