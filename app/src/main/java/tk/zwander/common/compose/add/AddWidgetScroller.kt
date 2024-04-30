@@ -34,7 +34,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -43,7 +42,7 @@ import kotlinx.coroutines.withContext
 import tk.zwander.common.data.AppInfo
 import tk.zwander.common.util.componentNameCompat
 import tk.zwander.common.util.logUtils
-import tk.zwander.common.util.toBitmap
+import tk.zwander.common.util.toSafeBitmap
 import tk.zwander.lockscreenwidgets.R
 import tk.zwander.lockscreenwidgets.data.list.BaseListInfo
 
@@ -166,8 +165,10 @@ private fun AppHeader(
 
             LaunchedEffect(key1 = app.appInfo.packageName) {
                 icon = withContext(Dispatchers.IO) {
-                    app.appInfo.loadIcon(context.packageManager)
-                        .mutate().toBitmap()
+                    with (context) {
+                        app.appInfo.loadIcon(context.packageManager)
+                            .mutate().toSafeBitmap()
+                    }
                 }
             }
 
@@ -198,7 +199,6 @@ private fun icon(
     key: Any?,
 ): Bitmap? {
     val context = LocalContext.current
-    val maxWidth = with (LocalDensity.current) { 512.dp.toPx() }
 
     var icon by remember(key) {
         mutableStateOf<Bitmap?>(null)
@@ -207,7 +207,9 @@ private fun icon(
     LaunchedEffect(key) {
         icon = try {
             withContext(Dispatchers.IO) {
-                info.icon?.loadDrawable(context)?.toBitmap(maxWidth = maxWidth.toInt())
+                with (context) {
+                    info.icon?.loadDrawable(context)?.toSafeBitmap()
+                }
             }
         } catch (e: PackageManager.NameNotFoundException) {
             context.logUtils.normalLog("Unable to load icon for ${info.appInfo.appInfo.packageName}.", e)

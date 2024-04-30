@@ -39,11 +39,9 @@ import tk.zwander.common.host.WidgetHostCompat
 import tk.zwander.common.listeners.WidgetResizeListener
 import tk.zwander.common.util.Event
 import tk.zwander.common.util.EventObserver
-import tk.zwander.common.util.base64ToBitmap
 import tk.zwander.common.util.dpAsPx
 import tk.zwander.common.util.eventManager
 import tk.zwander.common.util.getAllInstalledWidgetProviders
-import tk.zwander.common.util.getRemoteDrawable
 import tk.zwander.common.util.hasConfiguration
 import tk.zwander.common.util.logUtils
 import tk.zwander.common.util.mainHandler
@@ -566,7 +564,7 @@ open class WidgetFrameAdapter(
                 }
             } else {
                 binding.widgetReconfigure.isVisible = true
-                binding.widgetPreview.setImageBitmap(data.icon?.base64ToBitmap())
+                with (itemView.context) { binding.widgetPreview.setImageBitmap(data.iconBitmap) }
                 binding.widgetLabel.text = data.label
             }
         }
@@ -580,15 +578,7 @@ open class WidgetFrameAdapter(
             val shortcutView = FrameShortcutViewBinding.inflate(
                 LayoutInflater.from(binding.widgetHolder.context)
             )
-            val icon = data.icon.base64ToBitmap() ?: data.iconRes?.run {
-                try {
-                    itemView.context.getRemoteDrawable(this.packageName, this)
-                } catch (e: PackageManager.NameNotFoundException) {
-                    host.context.logUtils.debugLog("Unable to bind shortcut", e)
-                    onRemoveCallback(data, bindingAdapterPosition)
-                    return@bindShortcut
-                }
-            }
+            val icon = with (itemView.context) { data.iconBitmap }
 
             shortcutView.shortcutRoot.setOnClickListener {
                 data.shortcutIntent?.apply {

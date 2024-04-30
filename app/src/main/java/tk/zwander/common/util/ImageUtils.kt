@@ -10,6 +10,8 @@ import android.graphics.Canvas
 import android.graphics.Paint
 import android.graphics.drawable.Drawable
 import android.util.Base64
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
 import androidx.core.content.res.ResourcesCompat
 import androidx.core.graphics.drawable.toBitmap
 import java.io.ByteArrayOutputStream
@@ -19,7 +21,7 @@ import java.io.IOException
 fun Context.getRemoteDrawable(
     packageName: String,
     resource: Intent.ShortcutIconResource?
-) : Bitmap? {
+): Bitmap? {
     val appInfo = packageManager.getApplicationInfoInAnyState(packageName)
     val remRes = packageManager.getResourcesForApplication(appInfo)
 
@@ -46,7 +48,8 @@ fun Context.getRemoteDrawable(
         0 -> defaultGetter()
         else -> {
             try {
-                ResourcesCompat.getDrawable(remRes, resourceId, remRes.newTheme()) ?: defaultGetter()
+                ResourcesCompat.getDrawable(remRes, resourceId, remRes.newTheme())
+                    ?: defaultGetter()
             } catch (e: Resources.NotFoundException) {
                 defaultGetter()
             }
@@ -122,11 +125,27 @@ fun String?.base64ToBitmap(): Bitmap? {
     return base64ToByteArray()?.toBitmap()
 }
 
-fun Drawable.toBitmap(maxWidth: Int = intrinsicWidth, maxHeight: Int = intrinsicHeight, config: Bitmap.Config? = null): Bitmap {
-    var image = toBitmap(width = Integer.max(1, intrinsicWidth), height = Integer.max(
-        1,
-        intrinsicHeight
-    ), config = config)
+context(Context)
+fun Drawable.toSafeBitmap(config: Bitmap.Config? = null, maxSize: Dp = 512.dp): Bitmap {
+    val density = density
+    val maxSizePixels = with (density) { maxSize.toPx() }.toInt()
+
+    return toBitmap(maxWidth = maxSizePixels, maxHeight = maxSizePixels, config = config)
+}
+
+fun Drawable.toBitmap(
+    maxWidth: Int = intrinsicWidth,
+    maxHeight: Int = intrinsicHeight,
+    config: Bitmap.Config? = null,
+): Bitmap {
+    var image = toBitmap(
+        width = Integer.max(1, intrinsicWidth),
+        height = Integer.max(
+            1,
+            intrinsicHeight,
+        ),
+        config = config,
+    )
 
     val width: Int = intrinsicWidth
     val height: Int = intrinsicHeight

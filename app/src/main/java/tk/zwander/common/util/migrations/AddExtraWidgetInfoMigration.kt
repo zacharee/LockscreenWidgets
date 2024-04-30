@@ -9,7 +9,6 @@ import tk.zwander.common.util.loadPreviewOrIcon
 import tk.zwander.common.util.logUtils
 import tk.zwander.common.util.prefManager
 import tk.zwander.common.util.toBase64
-import tk.zwander.common.util.toBitmap
 
 class AddExtraWidgetInfoMigration : Migration {
     override val runOnOrBelowDatabaseVersion: Int
@@ -45,7 +44,7 @@ class AddExtraWidgetInfoMigration : Migration {
         }
 
         if (widget.icon == null) {
-            widget.icon = widgetInfo.loadPreviewOrIcon(this, 0)?.toBitmap().toBase64()
+            widget.icon = widgetInfo.loadPreviewOrIcon(this, 0)?.toBase64()
         }
     }
 }

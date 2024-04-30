@@ -17,7 +17,6 @@ import android.service.quicksettings.TileService
 import android.widget.RemoteViews
 import androidx.annotation.RequiresApi
 import androidx.core.content.res.ResourcesCompat
-import androidx.core.graphics.drawable.toBitmap
 import com.android.internal.appwidget.IAppWidgetService
 import tk.zwander.common.activities.add.AddTileWidgetActivity
 import tk.zwander.common.util.PrefManager
@@ -27,8 +26,8 @@ import tk.zwander.common.util.getApplicationInfoInAnyState
 import tk.zwander.common.util.logUtils
 import tk.zwander.common.util.prefManager
 import tk.zwander.common.util.textAsBitmap
+import tk.zwander.common.util.toSafeBitmap
 import tk.zwander.lockscreenwidgets.R
-import tk.zwander.lockscreenwidgets.util.*
 import java.util.concurrent.atomic.AtomicReference
 
 /**
@@ -210,7 +209,7 @@ abstract class BaseWidgetTile : TileService(), SharedPreferences.OnSharedPrefere
                         val iconDrawable = ResourcesCompat.getDrawable(this, icon, this.newTheme())
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && iconDrawable is AdaptiveIconDrawable) {
                             val foreground = iconDrawable.foreground
-                            qsTile?.icon = Icon.createWithBitmap(foreground.toBitmap(128, 128).cropBitmapTransparency())
+                            qsTile?.icon = Icon.createWithBitmap(foreground.toSafeBitmap().cropBitmapTransparency())
                         } else if (iconDrawable is BitmapDrawable) {
                             qsTile?.icon = Icon.createWithBitmap(qsTile?.label?.first()?.toString()?.textAsBitmap(128f, Color.WHITE))
                         } else {

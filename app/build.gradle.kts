@@ -41,6 +41,7 @@ android {
 
     kotlinOptions {
         jvmTarget = jdkVersion
+        freeCompilerArgs += "-Xcontext-receivers"
     }
 
     packaging {

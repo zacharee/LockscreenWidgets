@@ -9,6 +9,7 @@ import android.content.Context
 import android.graphics.Point
 import android.util.TypedValue
 import android.view.View
+import androidx.compose.ui.unit.Density
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import tk.zwander.common.data.WidgetType
@@ -158,3 +159,6 @@ val Context.screenSize: Point
 val Context.statusBarHeight: Int
     @SuppressLint("InternalInsetResource", "DiscouragedApi")
     get() = resources.getDimensionPixelSize(resources.getIdentifier("status_bar_height", "dimen", "android"))
+
+val Context.density: Density
+    get() = Density(this)

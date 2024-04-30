@@ -222,7 +222,7 @@ fun FeatureCard(info: FeatureCardInfo) {
                                         }
                                         .then(
                                             if (maxItemHeight > 0) {
-                                                with(LocalDensity.current) {
+                                                with (LocalDensity.current) {
                                                     Modifier.height(maxItemHeight.toDp())
                                                 }
                                             } else {

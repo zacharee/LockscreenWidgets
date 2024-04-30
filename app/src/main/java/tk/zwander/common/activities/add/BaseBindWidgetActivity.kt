@@ -1,7 +1,6 @@
 package tk.zwander.common.activities.add
 
 import android.annotation.SuppressLint
-import android.app.Activity
 import android.app.ActivityOptions
 import android.app.ComponentOptions
 import android.appwidget.AppWidgetManager
@@ -35,8 +34,7 @@ import tk.zwander.common.util.loadPreviewOrIcon
 import tk.zwander.common.util.logUtils
 import tk.zwander.common.util.prefManager
 import tk.zwander.common.util.shortcutIdManager
-import tk.zwander.common.util.toBase64
-import tk.zwander.common.util.toBitmap
+import tk.zwander.common.util.toSafeBitmap
 import tk.zwander.lockscreenwidgets.R
 import tk.zwander.lockscreenwidgets.data.list.ShortcutListInfo
 import tk.zwander.lockscreenwidgets.util.WidgetFrameDelegate
@@ -63,7 +61,7 @@ abstract class BaseBindWidgetActivity : ComponentActivity() {
             val id = result.data?.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, -1)
                 ?: return@registerForActivityResult
 
-            if (result.resultCode == Activity.RESULT_OK) {
+            if (result.resultCode == RESULT_OK) {
                 //The user has granted permission for Lockscreen Widgets
                 //so retry binding the widget
                 tryBindWidget(
@@ -95,7 +93,7 @@ abstract class BaseBindWidgetActivity : ComponentActivity() {
 
                             val shortcut = WidgetData.shortcut(
                                 shortcutIdManager.allocateShortcutId(),
-                                name, iconBmp.toBase64(), iconRes, shortcutIntent,
+                                name, iconBmp, iconRes, shortcutIntent,
                                 WidgetSizeData(1, 1)
                             )
 
@@ -119,7 +117,7 @@ abstract class BaseBindWidgetActivity : ComponentActivity() {
                                 .toString()
                             val icon = pinItemRequest.shortcutInfo.icon
                                 .loadDrawable(this)
-                                .toBitmap(maxWidth = 512, maxHeight = 512)
+                                .toSafeBitmap()
 
                             val intent = pinItemRequest.shortcutInfo.intent ?: run {
                                 val extras = pinItemRequest.shortcutInfo.extras ?: Bundle()
@@ -165,7 +163,7 @@ abstract class BaseBindWidgetActivity : ComponentActivity() {
                             } else {
                                 val shortcut = WidgetData.shortcut(
                                     shortcutIdManager.allocateShortcutId(),
-                                    name, icon.toBase64(), null, intent,
+                                    name, icon, null, intent,
                                     WidgetSizeData(1, 1),
                                 )
 
@@ -361,10 +359,7 @@ abstract class BaseBindWidgetActivity : ComponentActivity() {
             id,
             provider.provider,
             provider.loadLabel(packageManager),
-            provider.loadPreviewOrIcon(this, 0)?.toBitmap(
-                maxWidth = 512,
-                maxHeight = 512,
-            ).toBase64(),
+            provider.loadPreviewOrIcon(this, 0),
             overrideSize ?: calculateInitialWidgetSize(provider)
         )
     }
@@ -478,7 +473,7 @@ abstract class BaseBindWidgetActivity : ComponentActivity() {
 
                 logUtils.debugLog("Configure complete for id $id $currentConfigId", null)
 
-                if (resultCode == Activity.RESULT_OK && id != null && id != -1) {
+                if (resultCode == RESULT_OK && id != null && id != -1) {
                     logUtils.debugLog("Successfully configured widget.", null)
 
                     val widgetInfo = appWidgetManager.getAppWidgetInfo(id)

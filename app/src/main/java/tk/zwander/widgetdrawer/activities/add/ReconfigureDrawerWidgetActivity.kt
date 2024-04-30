@@ -12,8 +12,6 @@ import tk.zwander.common.util.loadPreviewOrIcon
 import tk.zwander.common.util.prefManager
 import tk.zwander.common.util.pxAsDp
 import tk.zwander.common.util.screenSize
-import tk.zwander.common.util.toBase64
-import tk.zwander.common.util.toBitmap
 import tk.zwander.lockscreenwidgets.R
 import kotlin.math.floor
 
@@ -47,8 +45,7 @@ class ReconfigureDrawerWidgetActivity : ReconfigureWidgetActivity() {
             id,
             provider.provider,
             provider.loadLabel(packageManager),
-            provider.loadPreviewOrIcon(this, 0)?.toBitmap(512, 512)
-                .toBase64(),
+            provider.loadPreviewOrIcon(this, 0),
             overrideSize ?: run {
                 val widthRatio = provider.minWidth.toFloat() / width
                 val defaultColSpan = floor((widthRatio * colCount)).toInt()

@@ -1,9 +1,15 @@
 package tk.zwander.common.data
 
 import android.content.ComponentName
+import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
+import android.graphics.Bitmap
 import android.os.Parcelable
 import kotlinx.parcelize.Parcelize
+import tk.zwander.common.util.base64ToBitmap
+import tk.zwander.common.util.getRemoteDrawable
+import tk.zwander.common.util.toBase64
 import java.util.Objects
 
 /**
@@ -26,14 +32,14 @@ data class WidgetData(
         fun shortcut(
             id: Int,
             label: String,
-            icon: String?,
+            icon: Bitmap?,
             iconRes: Intent.ShortcutIconResource?,
             shortcutIntent: Intent?,
             size: WidgetSizeData,
         ): WidgetData {
             return WidgetData(
                 id, WidgetType.SHORTCUT,
-                label, icon, iconRes, shortcutIntent,
+                label, icon?.toBase64(), iconRes, shortcutIntent,
                 null, size,
             )
         }
@@ -42,11 +48,11 @@ data class WidgetData(
             id: Int,
             widgetProvider: ComponentName,
             label: String,
-            icon: String?,
+            icon: Bitmap?,
             size: WidgetSizeData?,
         ): WidgetData {
             return WidgetData(
-                id, WidgetType.WIDGET, label, icon,
+                id, WidgetType.WIDGET, label, icon?.toBase64(),
                 null, null,
                 widgetProvider.flattenToString(),
                 size,
@@ -73,6 +79,16 @@ data class WidgetData(
 
     val widgetProviderComponent: ComponentName?
         get() = widgetProvider?.let { ComponentName.unflattenFromString(it) }
+
+    context(Context)
+    val iconBitmap: Bitmap?
+        get() = icon?.base64ToBitmap() ?: iconRes?.run {
+            try {
+                getRemoteDrawable(this.packageName, this)
+            } catch (e: PackageManager.NameNotFoundException) {
+                return null
+            }
+        }
 
     var safeSize: WidgetSizeData
         get() = size ?: WidgetSizeData(1, 1)

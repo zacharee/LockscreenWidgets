@@ -5,7 +5,7 @@ import android.app.Application
 import android.appwidget.AppWidgetProviderInfo
 import android.content.Context
 import android.content.Intent
-import android.graphics.drawable.Drawable
+import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Build
 import android.os.Handler
@@ -103,8 +103,8 @@ suspend inline fun <T, S> Collection<T>.mapIndexedParallel(crossinline action: s
 val Context.safeApplicationContext: Context
     get() = if (this is Application) this else applicationContext
 
-fun AppWidgetProviderInfo.loadPreviewOrIcon(context: Context, density: Int): Drawable? {
-    return loadPreviewImage(context, density) ?: loadIcon(context, density)
+fun AppWidgetProviderInfo.loadPreviewOrIcon(context: Context, density: Int): Bitmap? {
+    return with (context) { (loadPreviewImage(context, density) ?: loadIcon(context, density))?.toSafeBitmap() }
 }
 
 @Suppress("DEPRECATION")
