@@ -97,7 +97,7 @@ open class WidgetFrameAdapter(
         get() = 1
     protected open val rowSpanForAddButton: Int
         get() = rowCount
-    protected open var currentWidgets: MutableCollection<WidgetData>
+    protected open var currentWidgets: Collection<WidgetData>
         get() = host.context.prefManager.currentWidgets
         set(value) {
             host.context.prefManager.currentWidgets = LinkedHashSet(value)
@@ -236,10 +236,6 @@ open class WidgetFrameAdapter(
         notifyItemRangeChanged(0, itemCount, Any())
     }
 
-    protected fun persistResize() {
-        currentWidgets = LinkedHashSet(widgets)
-    }
-
     protected open fun launchAddActivity() {
         host.context.eventManager.sendEvent(Event.LaunchAddWidget)
     }
@@ -304,8 +300,17 @@ open class WidgetFrameAdapter(
                 }
             }
 
-        private val currentData: WidgetData?
+        private var currentData: WidgetData?
             get() = bindingAdapterPosition.let { if (it != -1) widgets.getOrNull(it) else null }
+            set(value) {
+                if (value != null) {
+                    bindingAdapterPosition.takeIf { it != -1 }?.let { pos ->
+                        currentWidgets = currentWidgets.toMutableList().apply {
+                            this[pos] = value
+                        }
+                    }
+                }
+            }
 
         init {
             binding.removeWidget.setOnClickListener {
@@ -556,7 +561,7 @@ open class WidgetFrameAdapter(
                             resources.getString(R.string.bind_widget_error, widgetInfo.provider),
                             Toast.LENGTH_LONG
                         ).show()
-                        currentWidgets = currentWidgets.apply {
+                        currentWidgets = currentWidgets.toMutableList().apply {
                             remove(data)
                             host.deleteAppWidgetId(data.id)
                         }
@@ -564,7 +569,7 @@ open class WidgetFrameAdapter(
                 }
             } else {
                 binding.widgetReconfigure.isVisible = true
-                with (itemView.context) { binding.widgetPreview.setImageBitmap(data.iconBitmap) }
+                with(itemView.context) { binding.widgetPreview.setImageBitmap(data.iconBitmap) }
                 binding.widgetLabel.text = data.label
             }
         }
@@ -578,7 +583,7 @@ open class WidgetFrameAdapter(
             val shortcutView = FrameShortcutViewBinding.inflate(
                 LayoutInflater.from(binding.widgetHolder.context)
             )
-            val icon = with (itemView.context) { data.iconBitmap }
+            val icon = with(itemView.context) { data.iconBitmap }
 
             shortcutView.shortcutRoot.setOnClickListener {
                 data.shortcutIntent?.apply {
@@ -626,22 +631,31 @@ open class WidgetFrameAdapter(
         ) {
             val sizeInfo = currentData?.safeSize ?: return
 
-            if (overThreshold) {
+            val newSizeInfo = if (overThreshold) {
                 if (vertical) {
-                    sizeInfo.safeWidgetHeightSpan = min(
-                        sizeInfo.safeWidgetHeightSpan + step * direction,
-                        rowCount
+                    sizeInfo.safeCopy(
+                        widgetHeightSpan = min(
+                            sizeInfo.safeWidgetHeightSpan + step * direction,
+                            rowCount
+                        ),
                     )
                 } else {
-                    sizeInfo.safeWidgetWidthSpan = min(
-                        sizeInfo.safeWidgetWidthSpan + step * direction,
-                        colCount
+                    sizeInfo.safeCopy(
+                        widgetWidthSpan = min(
+                            sizeInfo.safeWidgetWidthSpan + step * direction,
+                            colCount
+                        ),
                     )
                 }
+            } else {
+                sizeInfo
             }
 
-            onResize(currentData ?: return, amount, step)
-            persistResize()
+            val newData = currentData?.copy(size = newSizeInfo)
+
+            currentData = newData
+            onResize(newData ?: return, amount, step)
+            didResize = true
         }
 
         //Make sure the item's size is properly updated on a frame resize, or on initial bind
@@ -654,12 +668,6 @@ open class WidgetFrameAdapter(
                 forceLayout()
                 invalidate()
             }
-        }
-
-        private fun persistResize() {
-            didResize = true
-
-            this@WidgetFrameAdapter.persistResize()
         }
     }
 

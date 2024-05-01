@@ -21,12 +21,12 @@ import java.util.Objects
 data class WidgetData(
     val id: Int,
     val type: WidgetType? = WidgetType.WIDGET,
-    var label: String?,
-    var icon: String?,
-    var iconRes: Intent.ShortcutIconResource?,
-    var shortcutIntent: Intent?,
-    var widgetProvider: String?,
-    var size: WidgetSizeData?,
+    val label: String?,
+    val icon: String?,
+    val iconRes: Intent.ShortcutIconResource?,
+    val shortcutIntent: Intent?,
+    val widgetProvider: String?,
+    val size: WidgetSizeData?,
 ) : Parcelable {
     companion object {
         fun shortcut(
@@ -90,11 +90,8 @@ data class WidgetData(
             }
         }
 
-    var safeSize: WidgetSizeData
+    val safeSize: WidgetSizeData
         get() = size ?: WidgetSizeData(1, 1)
-        set(value) {
-            size = value
-        }
 
     override fun equals(other: Any?): Boolean {
         return other is WidgetData && other.id == id

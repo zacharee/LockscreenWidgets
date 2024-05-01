@@ -25,6 +25,7 @@ fun AppTheme(
             content = content
         )
     } else {
+        @Suppress("DEPRECATION")
         Mdc3Theme(
             content = content
         )

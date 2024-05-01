@@ -14,13 +14,13 @@ class WidgetSizeMigration : Migration {
             val sizeInfos = prefManager.widgetSizes
             val widgets = prefManager.currentWidgets
 
-            widgets.forEach { widget ->
-                val sizeInfo = sizeInfos[widget.id] ?: WidgetSizeData(1, 1)
+            prefManager.currentWidgets = LinkedHashSet(
+                widgets.map { widget ->
+                    val sizeInfo = sizeInfos[widget.id] ?: WidgetSizeData(1, 1)
 
-                widget.size = sizeInfo
-            }
-
-            prefManager.currentWidgets = widgets
+                    widget.copy(size = sizeInfo)
+                }
+            )
         }
     }
 }

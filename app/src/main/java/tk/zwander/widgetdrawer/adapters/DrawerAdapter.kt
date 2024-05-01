@@ -28,7 +28,7 @@ class DrawerAdapter(
         get() = 5
     override val rowSpanForAddButton: Int
         get() = 20
-    override var currentWidgets: MutableCollection<WidgetData>
+    override var currentWidgets: Collection<WidgetData>
         get() = host.context.prefManager.drawerWidgets
         set(value) {
             host.context.prefManager.drawerWidgets = LinkedHashSet(value)
@@ -47,7 +47,7 @@ class DrawerAdapter(
     }
 
     override fun View.onWidgetResize(data: WidgetData, params: ViewGroup.LayoutParams, amount: Int, direction: Int) {
-        params.height = params.height + (amount * direction)
+        params.height += (amount * direction)
     }
 
     override fun getThresholdPx(which: WidgetResizeListener.Which): Int {

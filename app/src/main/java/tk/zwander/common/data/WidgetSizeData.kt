@@ -9,24 +9,28 @@ import kotlin.math.max
  */
 @Parcelize
 data class WidgetSizeData(
-    private var widgetWidthSpan: Int,
-    private var widgetHeightSpan: Int
+    private val widgetWidthSpan: Int,
+    private val widgetHeightSpan: Int
 ) : Parcelable {
     /**
      * Don't allow the user to have a zero-width widget.
      */
-    var safeWidgetWidthSpan: Int
+    val safeWidgetWidthSpan: Int
         get() = max(widgetWidthSpan, 1)
-        set(value) {
-            widgetWidthSpan = max(value, 1)
-        }
 
     /**
      * Don't allow the user to have a zero-height widget.
      */
-    var safeWidgetHeightSpan: Int
+    val safeWidgetHeightSpan: Int
         get() = max(widgetHeightSpan, 1)
-        set(value) {
-            widgetHeightSpan = max(value, 1)
-        }
+
+    fun safeCopy(
+        widgetWidthSpan: Int = safeWidgetWidthSpan,
+        widgetHeightSpan: Int = safeWidgetHeightSpan,
+    ): WidgetSizeData {
+        return WidgetSizeData(
+            widgetWidthSpan = max(widgetWidthSpan, 1),
+            widgetHeightSpan = max(widgetHeightSpan, 1),
+        )
+    }
 }
