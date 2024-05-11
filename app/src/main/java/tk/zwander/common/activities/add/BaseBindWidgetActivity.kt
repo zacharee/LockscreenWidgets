@@ -15,6 +15,7 @@ import android.os.Build
 import android.os.Bundle
 import android.os.ServiceManager
 import android.telephony.PhoneNumberUtils
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts
@@ -22,7 +23,6 @@ import androidx.core.app.ActivityOptionsCompat
 import com.android.internal.appwidget.IAppWidgetService
 import com.bugsnag.android.Bugsnag
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import com.google.gson.GsonBuilder
 import tk.zwander.common.data.WidgetData
 import tk.zwander.common.data.WidgetSizeData
 import tk.zwander.common.host.widgetHostCompat
@@ -77,6 +77,7 @@ abstract class BaseBindWidgetActivity : ComponentActivity() {
     @Suppress("DEPRECATION")
     private val configShortcutRequest =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            var didAddShortcut = false
             try {
                 result.data?.let { data ->
                     fun addShortcutFromIntent(overrideLabel: String? = null) {
@@ -98,10 +99,10 @@ abstract class BaseBindWidgetActivity : ComponentActivity() {
                             )
 
                             addNewShortcut(shortcut)
+                            didAddShortcut = true
                         } else {
-                            val gson = GsonBuilder().create()
                             val msg = "No shortcut intent found.\n" +
-                                    "Intent: ${gson.toJson(data)}"
+                                    "Intent: ${prefManager.gson.toJson(data)}"
 
                             logUtils.normalLog(msg)
                             Bugsnag.notify(IllegalStateException(msg))
@@ -168,6 +169,7 @@ abstract class BaseBindWidgetActivity : ComponentActivity() {
                                 )
 
                                 addNewShortcut(shortcut)
+                                didAddShortcut = true
 
                                 return@registerForActivityResult
                             }
@@ -184,6 +186,10 @@ abstract class BaseBindWidgetActivity : ComponentActivity() {
                 }
             } catch (e: Exception) {
                 logUtils.normalLog("Error configuring shortcut.", e)
+            }
+
+            if (!didAddShortcut) {
+                Toast.makeText(this, R.string.failed_to_add_shortcut, Toast.LENGTH_SHORT).show()
             }
         }
 

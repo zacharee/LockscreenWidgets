@@ -316,4 +316,6 @@
     <string name="open_app_ops">Open App Ops</string>
 
     <string name="grant_read_media_images">Grant READ_MEDIA_IMAGES</string>
+
+    <string name="failed_to_add_shortcut">Unable to add shortcut.</string>
 </resources>
