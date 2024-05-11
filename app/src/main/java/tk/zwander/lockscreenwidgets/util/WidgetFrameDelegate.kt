@@ -837,7 +837,7 @@ class WidgetFrameDelegate private constructor(context: Context) : BaseDelegate<W
     }
 
     data class State(
-        val screenOrientation: Int = Surface.ROTATION_0,
+        override val screenOrientation: Int = Surface.ROTATION_0,
         override val wasOnKeyguard: Boolean = false,
         val isOnFaceWidgets: Boolean = false,
         val currentAppLayer: Int = 0,

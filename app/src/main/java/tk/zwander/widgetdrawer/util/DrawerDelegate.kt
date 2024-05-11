@@ -8,7 +8,6 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
-import android.content.pm.ActivityInfo
 import android.graphics.PixelFormat
 import android.hardware.display.DisplayManager
 import android.os.Handler
@@ -16,6 +15,7 @@ import android.os.Looper
 import android.util.TypedValue
 import android.view.Gravity
 import android.view.LayoutInflater
+import android.view.Surface
 import android.view.View
 import android.view.ViewConfiguration
 import android.view.ViewGroup
@@ -77,6 +77,7 @@ class DrawerDelegate private constructor(context: Context) :
         }
 
         @Synchronized
+        @Suppress("unused")
         fun retrieveInstance(context: Context): DrawerDelegate? {
             return peekInstance(context).also {
                 if (it == null) {
@@ -105,6 +106,10 @@ class DrawerDelegate private constructor(context: Context) :
     }
 
     override var state = State()
+        set(value) {
+            field = value
+            updateDrawer()
+        }
 
     override val params = WindowManager.LayoutParams().apply {
         val displaySize = screenSize
@@ -112,10 +117,9 @@ class DrawerDelegate private constructor(context: Context) :
         flags = WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN or
                 WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS
         width = displaySize.x
-        height = WindowManager.LayoutParams.MATCH_PARENT
+        height = displaySize.y
         format = PixelFormat.RGBA_8888
         gravity = Gravity.TOP or Gravity.CENTER
-        screenOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
     }
     override val rootView: View
         get() = drawer.root
@@ -212,7 +216,6 @@ class DrawerDelegate private constructor(context: Context) :
     }
     private val displayListener = object : DisplayManager.DisplayListener {
         override fun onDisplayChanged(displayId: Int) {
-            params.width = screenSize.x
             updateDrawer()
         }
 
@@ -402,9 +405,6 @@ class DrawerDelegate private constructor(context: Context) :
             ContextCompat.RECEIVER_EXPORTED,
         )
 
-        drawer.removeWidgetConfirmation.root.updateLayoutParams<ViewGroup.LayoutParams> {
-            height = (screenSize.y / 2f).toInt()
-        }
         dpAsPx(16).apply {
             drawer.removeWidgetConfirmation.root.setContentPadding(this, this, this, this)
         }
@@ -494,6 +494,12 @@ class DrawerDelegate private constructor(context: Context) :
     }
 
     private fun updateDrawer(wm: WindowManager = this.wm) {
+        params.apply {
+            val displaySize = screenSize
+            width = displaySize.x
+            height = displaySize.y
+        }
+
         try {
             wm.updateViewLayout(drawer.root, params)
         } catch (_: Exception) {
@@ -538,6 +544,9 @@ class DrawerDelegate private constructor(context: Context) :
     }
 
     private fun removeWidget(info: WidgetData) {
+        drawer.removeWidgetConfirmation.root.updateLayoutParams<ViewGroup.LayoutParams> {
+            height = (screenSize.y / 2f).toInt()
+        }
         drawer.removeWidgetConfirmation.root.show(info)
     }
 
@@ -566,5 +575,6 @@ class DrawerDelegate private constructor(context: Context) :
         override val updatedForMove: Boolean = false,
         override val handlingClick: Boolean = false,
         override val wasOnKeyguard: Boolean = false,
+        override val screenOrientation: Int = Surface.ROTATION_0,
     ) : BaseState()
 }

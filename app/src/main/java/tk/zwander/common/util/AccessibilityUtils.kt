@@ -384,7 +384,9 @@ object AccessibilityUtils {
             }
         }
 
-        newState = newState.copy(screenOrientation = defaultDisplayCompat.rotation)
+        val rotation = defaultDisplayCompat.rotation
+        newState = newState.copy(screenOrientation = rotation)
+        drawerDelegate.updateState { it.copy(screenOrientation = rotation) }
 
         if (isDebug && event != null) {
             // Nest this in the debug check so that loop doesn't have to run always.
