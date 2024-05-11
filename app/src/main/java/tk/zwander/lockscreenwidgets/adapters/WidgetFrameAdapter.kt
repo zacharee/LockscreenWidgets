@@ -305,7 +305,7 @@ open class WidgetFrameAdapter(
             set(value) {
                 if (value != null) {
                     bindingAdapterPosition.takeIf { it != -1 }?.let { pos ->
-                        currentWidgets = currentWidgets.toMutableList().apply {
+                        currentWidgets = widgets.apply {
                             this[pos] = value
                         }
                     }
@@ -629,7 +629,8 @@ open class WidgetFrameAdapter(
             direction: Int,
             vertical: Boolean
         ) {
-            val sizeInfo = currentData?.safeSize ?: return
+            val currentData = currentData ?: return
+            val sizeInfo = currentData.safeSize
 
             val newSizeInfo = if (overThreshold) {
                 if (vertical) {
@@ -651,11 +652,11 @@ open class WidgetFrameAdapter(
                 sizeInfo
             }
 
-            val newData = currentData?.copy(size = newSizeInfo)
+            val newData = currentData.copy(size = newSizeInfo)
 
-            currentData = newData
-            onResize(newData ?: return, amount, step)
+            onResize(newData, amount, step)
             didResize = true
+            this.currentData = newData
         }
 
         //Make sure the item's size is properly updated on a frame resize, or on initial bind
