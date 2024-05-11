@@ -17,7 +17,7 @@ android {
         versionCode = 104
         versionName = "2.13.1"
 
-        extensions.getByType(BasePluginExtension::class.java).archivesName.set("RootActivityLauncher_${versionCode}")
+        extensions.getByType(BasePluginExtension::class.java).archivesName.set("LockscreenWidgets_${versionName}")
     }
 
     buildFeatures {
