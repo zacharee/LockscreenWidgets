@@ -1,4 +1,12 @@
-# Building
+# Lockscreen Widgets
+Lockscreen Widgets adds a frame to your lock screen where you can add home screen widgets.
+
+It also has a widget drawer with a handle you can drag to open it from anywhere.
+
+## Downloads
+The precompiled version of Lockscreen Widgets is a paid app, available on the [Google Play Store](https://play.google.com/store/apps/details?id=tk.zwander.lockscreenwidgets).
+
+## Building
 
 Lockscreen Widgets makes use of some hidden APIs. Since reflection gets tedious, I use a modified android.jar that exposes the hidden APIs so they can be used like normal.
 If you want to build Lockscreen Widgets for yourself, make sure you use the android.jar from the following repo: https://github.com/Reginer/aosp-android-jar.
