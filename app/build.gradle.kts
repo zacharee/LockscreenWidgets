@@ -74,6 +74,7 @@ dependencies {
     implementation(libs.composeIntroSlider)
 //    implementation(project(":spannedlm"))
 
+    implementation(platform(libs.compose.bom))
     implementation(libs.activity.compose)
     implementation(libs.compose.animation)
     implementation(libs.compose.foundation)
@@ -84,6 +85,7 @@ dependencies {
     implementation(libs.lifecycle.runtime.ktx)
 
     implementation(libs.accompanist.drawablepainter)
+    implementation(libs.accompanist.pager)
     implementation(libs.accompanist.themeadapter.material)
     implementation(libs.accompanist.themeadapter.material3)
 
