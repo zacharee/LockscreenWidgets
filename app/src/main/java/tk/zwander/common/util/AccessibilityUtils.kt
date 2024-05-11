@@ -336,7 +336,7 @@ object AccessibilityUtils {
         kgm: KeyguardManager,
         wm: WindowManager,
         imm: InputMethodManager,
-        getWindows: () -> List<AccessibilityWindowInfo>
+        getWindows: () -> List<AccessibilityWindowInfo>?,
     ) = coroutineScope {
         //This block here runs even when unlocked, but it only takes a millisecond at most,
         //so it shouldn't be noticeable to the user. We use this to check the current keyguard
@@ -414,64 +414,67 @@ object AccessibilityUtils {
         //The below block can (very rarely) take over half a second to execute, so only run it
         //if we actually need to (i.e. on the lock screen and screen is on).
         if ((isOnKeyguard || prefManager.showInNotificationCenter) && isScreenOn && prefManager.widgetFrameEnabled /* This is only needed when the frame is enabled */) {
-            val (
-                windows, appWindowIndex,
-                nonAppSystemWindowIndex, minSysUiWindowIndex,
-                hasScreenOffMemoWindow, hasFaceWidgetsWindow,
-                hasEdgePanelWindow, sysUiWindowViewIds,
-                sysUiWindowNodes, topAppWindowPackageName,
-                hasHideForPresentApp, nodeState,
-            ) = getWindows(getWindows(), isOnKeyguard).also {
-                logUtils.debugLog("Got windows $it", null)
-            }
-
-            //Update any ID list widgets on the new IDs
-            coroutineScope {
-                launch {
-                    eventManager.sendEvent(Event.DebugIdsUpdated(sysUiWindowViewIds))
-                    IDListProvider.sendUpdate(this@runAccessibilityJob)
+            val windowInfo = getWindows()?.let {
+                getWindows(it, isOnKeyguard).also { windowInfo ->
+                    logUtils.debugLog("Got windows $windowInfo", null)
                 }
             }
 
-            if (isDebug) {
-                logUtils.debugLog(
-                    sysUiWindowNodes.filter { it.isVisibleToUser }.map { it.viewIdResourceName }
-                        .toString()
-                )
-
+            windowInfo?.sysUiWindowViewIds?.let { sysUiWindowViewIds ->
+                //Update any ID list widgets on the new IDs
                 coroutineScope {
-                    launch(Dispatchers.Main) {
-                        frameDelegate.setNewDebugIdItems(sysUiWindowViewIds.toList())
+                    launch {
+                        eventManager.sendEvent(Event.DebugIdsUpdated(sysUiWindowViewIds))
+                        IDListProvider.sendUpdate(this@runAccessibilityJob)
                     }
                 }
             }
 
-            newState = newState.copy(
-                //Samsung's Screen-Off Memo is really just a normal Activity that shows over the lock screen.
-                //However, it's not an Application-type window for some reason, so it won't hide with the
-                //currentAppLayer check. Explicitly check for its existence here.
-                isOnScreenOffMemo = isOnKeyguard && hasScreenOffMemoWindow,
-                isOnEdgePanel = hasEdgePanelWindow,
-                isOnFaceWidgets = hasFaceWidgetsWindow,
-                //Generate "layer" values for the System UI window and for the topmost app window, if
-                //it exists.
-                //currentAppLayer *should* be -1 even if there's an app open in the background,
-                //since getWindows() is only meant to return windows that can actually be
-                //interacted with. The only time it should be anything else (usually 1) is
-                //if an app is displaying above the keyguard, such as the incoming call
-                //screen or the camera.
-                currentAppLayer = if (appWindowIndex != -1) windows.size - appWindowIndex else appWindowIndex,
-                currentSysUiLayer = if (minSysUiWindowIndex != -1) windows.size - minSysUiWindowIndex else minSysUiWindowIndex,
-                currentSystemLayer = if (nonAppSystemWindowIndex != -1) windows.size - nonAppSystemWindowIndex else nonAppSystemWindowIndex,
-                //This is mostly a debug value to see which app LSWidg thinks is on top.
-                currentAppPackage = topAppWindowPackageName,
-                hidingForPresentApp = hasHideForPresentApp,
-                onMainLockscreen = nodeState.onMainLockscreen,
-                showingNotificationsPanel = nodeState.showingNotificationsPanel,
-                notificationsPanelFullyExpanded = nodeState.hasMoreButton && !nodeState.hasClearAllButton,
-                hideForPresentIds = nodeState.hideForPresentIds,
-                hideForNonPresentIds = nodeState.hideForNonPresentIds,
-            )
+            if (isDebug) {
+                windowInfo?.sysUiWindowNodes?.let { sysUiWindowNodes ->
+                    logUtils.debugLog(
+                        sysUiWindowNodes.filter { it.isVisibleToUser }.map { it.viewIdResourceName }
+                            .toString()
+                    )
+                }
+
+                windowInfo?.sysUiWindowViewIds?.let {sysUiWindowViewIds ->
+                    coroutineScope {
+                        launch(Dispatchers.Main) {
+                            frameDelegate.setNewDebugIdItems(sysUiWindowViewIds.toList())
+                        }
+                    }
+                }
+            }
+
+            windowInfo?.let {
+                newState = newState.copy(
+                    //Samsung's Screen-Off Memo is really just a normal Activity that shows over the lock screen.
+                    //However, it's not an Application-type window for some reason, so it won't hide with the
+                    //currentAppLayer check. Explicitly check for its existence here.
+                    isOnScreenOffMemo = isOnKeyguard && windowInfo.hasScreenOffMemoWindow,
+                    isOnEdgePanel = windowInfo.hasEdgePanelWindow,
+                    isOnFaceWidgets = windowInfo.hasFaceWidgetsWindow,
+                    //Generate "layer" values for the System UI window and for the topmost app window, if
+                    //it exists.
+                    //currentAppLayer *should* be -1 even if there's an app open in the background,
+                    //since getWindows() is only meant to return windows that can actually be
+                    //interacted with. The only time it should be anything else (usually 1) is
+                    //if an app is displaying above the keyguard, such as the incoming call
+                    //screen or the camera.
+                    currentAppLayer = if (windowInfo.topAppWindowIndex != -1) windowInfo.windows.size - windowInfo.topAppWindowIndex else windowInfo.topAppWindowIndex,
+                    currentSysUiLayer = if (windowInfo.minSysUiWindowIndex != -1) windowInfo.windows.size - windowInfo.minSysUiWindowIndex else windowInfo.minSysUiWindowIndex,
+                    currentSystemLayer = if (windowInfo.topNonSysUiWindowIndex != -1) windowInfo.windows.size - windowInfo.topNonSysUiWindowIndex else windowInfo.topNonSysUiWindowIndex,
+                    //This is mostly a debug value to see which app LSWidg thinks is on top.
+                    currentAppPackage = windowInfo.topAppWindowPackageName,
+                    hidingForPresentApp = windowInfo.hasHideForPresentApp,
+                    onMainLockscreen = windowInfo.nodeState.onMainLockscreen,
+                    showingNotificationsPanel = windowInfo.nodeState.showingNotificationsPanel,
+                    notificationsPanelFullyExpanded = windowInfo.nodeState.hasMoreButton && !windowInfo.nodeState.hasClearAllButton,
+                    hideForPresentIds = windowInfo.nodeState.hideForPresentIds,
+                    hideForNonPresentIds = windowInfo.nodeState.hideForNonPresentIds,
+                )
+            }
 
             logUtils.debugLog("NewState $newState", null)
 
@@ -479,29 +482,31 @@ object AccessibilityUtils {
                 frameDelegate.updateStateAndWindowState(wm, true) { newState }
             }
 
-            sysUiWindowNodes.forEachParallel { node ->
-                try {
-                    node.isSealed = false
-                } catch (_: Throwable) {
+            windowInfo?.let {
+                windowInfo.sysUiWindowNodes.forEachParallel { node ->
+                    try {
+                        node.isSealed = false
+                    } catch (_: Throwable) {
+                    }
+
+                    try {
+                        @Suppress("DEPRECATION")
+                        node.recycle()
+                    } catch (_: IllegalStateException) {
+                    }
                 }
 
-                try {
-                    @Suppress("DEPRECATION")
-                    node.recycle()
-                } catch (_: IllegalStateException) {
-                }
-            }
+                windowInfo.windows.forEachParallel {
+                    try {
+                        it.root?.isSealed = false
+                    } catch (_: Throwable) {
+                    }
 
-            windows.forEachParallel {
-                try {
-                    it.root?.isSealed = false
-                } catch (_: Throwable) {
-                }
-
-                try {
-                    @Suppress("DEPRECATION")
-                    it.root?.recycle()
-                } catch (_: IllegalStateException) {
+                    try {
+                        @Suppress("DEPRECATION")
+                        it.root?.recycle()
+                    } catch (_: IllegalStateException) {
+                    }
                 }
             }
         } else {

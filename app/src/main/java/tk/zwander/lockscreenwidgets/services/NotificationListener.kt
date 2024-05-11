@@ -9,6 +9,11 @@ import android.os.SystemProperties
 import android.provider.Settings
 import android.service.notification.NotificationListenerService
 import android.service.notification.StatusBarNotification
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.launch
 import tk.zwander.common.util.Event
 import tk.zwander.common.util.EventObserver
 import tk.zwander.common.util.eventManager
@@ -28,7 +33,7 @@ val Context.isNotificationListenerActive: Boolean
  * AND [Notification.priority] > [Notification.PRIORITY_MIN] (importance for > Nougat),
  * and the user has the option enabled, the widget frame will hide.
  */
-class NotificationListener : NotificationListenerService(), EventObserver {
+class NotificationListener : NotificationListenerService(), EventObserver, CoroutineScope by MainScope() {
     private var isListening = false
 
     override fun onListenerConnected() {
@@ -43,6 +48,11 @@ class NotificationListener : NotificationListenerService(), EventObserver {
 
     override fun onCreate() {
         sendUpdate()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        cancel()
     }
 
     override fun onEvent(event: Event) {
@@ -68,18 +78,22 @@ class NotificationListener : NotificationListenerService(), EventObserver {
     }
 
     private fun sendUpdate() {
-        if (isListening) {
-            //Even with the check to make sure the notification listener is connected, some devices still
-            //crash with an "unknown listener" error when trying to retrieve the notification lists.
-            //This shouldn't happen, but it does, so catch the Exception.
-            try {
-                eventManager.sendEvent(
-                    Event.NewNotificationCount(activeNotifications?.count { it.shouldCount } ?: 0)
-                )
-            } catch (e: Exception) {
-                logUtils.debugLog("Error sending notification count update", e)
-            } catch (e: OutOfMemoryError) {
-                logUtils.debugLog("Error sending notification count update", e)
+        launch(Dispatchers.IO) {
+            if (isListening) {
+                //Even with the check to make sure the notification listener is connected, some devices still
+                //crash with an "unknown listener" error when trying to retrieve the notification lists.
+                //This shouldn't happen, but it does, so catch the Exception.
+                try {
+                    // This seems to cause ANRs on a bunch of devices, so run on a background thread.
+                    val activeNotifications = activeNotifications
+                    eventManager.sendEvent(
+                        Event.NewNotificationCount(activeNotifications?.count { it.shouldCount } ?: 0)
+                    )
+                } catch (e: Exception) {
+                    logUtils.debugLog("Error sending notification count update", e)
+                } catch (e: OutOfMemoryError) {
+                    logUtils.debugLog("Error sending notification count update", e)
+                }
             }
         }
     }

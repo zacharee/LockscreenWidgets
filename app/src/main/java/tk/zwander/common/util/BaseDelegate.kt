@@ -27,6 +27,7 @@ import tk.zwander.common.host.WidgetHostCompat
 import tk.zwander.common.host.widgetHostCompat
 import tk.zwander.lockscreenwidgets.adapters.WidgetFrameAdapter
 
+@Suppress("MemberVisibilityCanBePrivate")
 abstract class BaseDelegate<State : BaseDelegate.BaseState>(context: Context) : ContextWrapper(context),
     EventObserver, WidgetHostCompat.OnClickCallback, SavedStateRegistryOwner {
     protected val wm by lazy { getSystemService(WINDOW_SERVICE) as WindowManager }
@@ -185,7 +186,7 @@ abstract class BaseDelegate<State : BaseDelegate.BaseState>(context: Context) : 
     }
 
     abstract class LayoutManager(
-        context: Context,
+        private val context: Context,
         orientation: Int,
         rowCount: Int,
         colCount: Int
@@ -194,5 +195,18 @@ abstract class BaseDelegate<State : BaseDelegate.BaseState>(context: Context) : 
         orientation,
         rowCount,
         colCount
-    )
+    ) {
+        override fun makeAndAddView(
+            position: Int,
+            direction: Direction,
+            recycler: RecyclerView.Recycler
+        ): View {
+            return try {
+                super.makeAndAddView(position, direction, recycler)
+            } catch (e: Throwable) {
+                context.logUtils.normalLog("Error laying out widget view at $position.", e)
+                context.createWidgetErrorView()
+            }
+        }
+    }
 }

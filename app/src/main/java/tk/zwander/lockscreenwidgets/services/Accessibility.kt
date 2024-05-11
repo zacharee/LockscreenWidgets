@@ -159,7 +159,16 @@ class Accessibility : AccessibilityService(), EventObserver, CoroutineScope by M
                         kgm = kgm,
                         wm = wm,
                         imm = imm,
-                        getWindows = { ArrayList(windows) }
+                        getWindows = {
+                            try {
+                                ArrayList(windows)
+                            } catch (e: SecurityException) {
+                                // Sometimes throws a SecurityException talking about mismatching
+                                // user IDs. In that case, return null and don't update any window-based
+                                // state items.
+                                null
+                            }
+                        }
                     )
                 }
             )

@@ -6,6 +6,8 @@ import android.appwidget.AppWidgetHost
 import android.appwidget.AppWidgetHostView
 import android.appwidget.AppWidgetProviderInfo
 import android.content.Context
+import android.os.BadParcelableException
+import android.os.DeadObjectException
 import android.widget.RemoteViews
 import tk.zwander.common.util.logUtils
 import tk.zwander.common.util.safeApplicationContext
@@ -111,7 +113,17 @@ abstract class WidgetHostCompat(
 
     fun startListening(listener: Any) {
         listeners.add(listener)
-        startListening()
+        try {
+            startListening()
+        } catch (_: BadParcelableException) {
+            // It's possible for retrieving pending updates to fail, causing
+            // a crash. There doesn't seem to be a way to fix this, but catching
+            // the error here should at least allow future updates to be received.
+        } catch (_: DeadObjectException) {
+            // It's possible for retrieving pending updates to fail, causing
+            // a crash. There doesn't seem to be a way to fix this, but catching
+            // the error here should at least allow future updates to be received.
+        }
     }
 
     fun stopListening(listener: Any) {

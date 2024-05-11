@@ -11,6 +11,7 @@ import android.graphics.RectF
 import android.graphics.drawable.GradientDrawable
 import android.os.Build
 import android.os.Bundle
+import android.os.DeadObjectException
 import android.util.SizeF
 import android.view.LayoutInflater
 import android.view.LayoutInflater.Factory2
@@ -39,6 +40,7 @@ import tk.zwander.common.host.WidgetHostCompat
 import tk.zwander.common.listeners.WidgetResizeListener
 import tk.zwander.common.util.Event
 import tk.zwander.common.util.EventObserver
+import tk.zwander.common.util.createWidgetErrorView
 import tk.zwander.common.util.dpAsPx
 import tk.zwander.common.util.eventManager
 import tk.zwander.common.util.getAllInstalledWidgetProviders
@@ -552,7 +554,7 @@ open class WidgetFrameAdapter(
                             }
                         })
                     } catch (e: SecurityException) {
-                        context.logUtils.debugLog("Unable to bind widget view", e)
+                        context.logUtils.debugLog("Unable to bind widget view ${widgetInfo.provider}", e)
 
                         //There was an error adding the widget. Some OEMs (OPPO...) like to add permissions requirements to their
                         //widgets, which can make it impossible for third-party non-launcher apps to bind to them.
@@ -565,6 +567,13 @@ open class WidgetFrameAdapter(
                             remove(data)
                             host.deleteAppWidgetId(data.id)
                         }
+                    } catch (e: RuntimeException) {
+                        if (e.cause !is DeadObjectException) {
+                            throw e
+                        }
+
+                        context.logUtils.debugLog("Unable to bind widget view ${widgetInfo.provider}", e)
+                        addView(context.createWidgetErrorView())
                     }
                 }
             } else {

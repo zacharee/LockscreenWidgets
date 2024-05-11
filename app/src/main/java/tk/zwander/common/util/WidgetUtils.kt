@@ -5,6 +5,10 @@ import android.appwidget.AppWidgetProviderInfo
 import android.content.ComponentName
 import android.content.Context
 import android.content.pm.PackageManager
+import android.graphics.Color
+import android.view.View
+import android.widget.TextView
+import com.android.internal.R
 
 val Context.appWidgetManager: AppWidgetManager
     get() = AppWidgetManager.getInstance(safeApplicationContext)
@@ -53,4 +57,12 @@ fun Context.getAllInstalledWidgetProviders(pkg: String? = null): List<AppWidgetP
                 }
             }
     }
+}
+
+fun Context.createWidgetErrorView(): View {
+    val tv = TextView(this)
+    tv.setText(R.string.gadget_host_error_inflating)
+
+    tv.setBackgroundColor(Color.argb(127, 0, 0, 0))
+    return tv
 }
