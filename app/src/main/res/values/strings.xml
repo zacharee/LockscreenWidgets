@@ -29,7 +29,7 @@
     <string name="enabled">Enabled</string>
     <string name="disabled">Disabled</string>
     <string name="accessibility_settings">Accessibility Settings</string>
-    <string name="battery_whitelist">Battery Whitelist</string>
+    <string name="battery_whitelist">Battery Allowlist</string>
     <string name="back">Back</string>
     <string name="clear">Clear</string>
 
@@ -79,7 +79,7 @@
     <string name="main_screen_social_patreon">Patreon</string>
     <string name="main_screen_social_patreon_desc">For $1 every month, you get access to all of my paid apps, along with some exclusive stuff.</string>
 
-    <string name="main_screen_accessibility_not_started">The Accessibility Service isn\'t currently running. This may be because you need to whitelist Lockscreen Widgets from your phone\'s battery optimizations, or you may just need to toggle it off and on again in Settings.</string>
+    <string name="main_screen_accessibility_not_started">The Accessibility Service isn\'t currently running. This may be because you need to allowlist Lockscreen Widgets from your phone\'s battery optimizations, or you may just need to toggle it off and on again in Settings.</string>
 
     <string name="intro_privacy_policy_desc">Lockscreen Widgets doesn\'t collect any data beyond what\'s needed for crash analysis. Learn more below.</string>
     <string name="main_screen_privacy_policy_desc">Lockscreen Widgets doesn\'t collect any data beyond what\'s needed for crash analysis. Tap here to learn more.</string>
@@ -219,7 +219,7 @@
     <string name="intro_read_external_storage_desc_13_addendum">On Android 13 and later, you will need to grant READ_MEDIA_IMAGES and use App Ops paired with Shizuku to grant this READ_EXTERNAL_STORAGE.</string>
 
     <string name="intro_battery_optimization">Battery Optimization</string>
-    <string name="intro_battery_optimization_desc">Many devices, including those running MIUI and EMUI, have incredibly aggressive battery management. This can cause Lockscreen Widgets to be killed when you don\'t want it to be. Click the button below to read how you can whitelist Lockscreen Widgets on your particular device.</string>
+    <string name="intro_battery_optimization_desc">Many devices, including those running MIUI and EMUI, have incredibly aggressive battery management. This can cause Lockscreen Widgets to be killed when you don\'t want it to be. Click the button below to read how you can allowlist Lockscreen Widgets on your particular device.</string>
 
     <string name="intro_done_title">All Done!</string>
     <string name="intro_done_desc">That\'s it! Check your lock screen and you should now see the widget frame!</string>
