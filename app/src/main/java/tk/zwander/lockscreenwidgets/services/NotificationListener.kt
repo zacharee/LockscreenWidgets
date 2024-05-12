@@ -4,7 +4,10 @@ import android.app.Notification
 import android.app.NotificationManager
 import android.content.ComponentName
 import android.content.Context
+import android.content.Intent
 import android.os.Build
+import android.os.IBinder
+import android.os.Parcel
 import android.os.SystemProperties
 import android.provider.Settings
 import android.service.notification.NotificationListenerService
@@ -33,6 +36,7 @@ val Context.isNotificationListenerActive: Boolean
  * AND [Notification.priority] > [Notification.PRIORITY_MIN] (importance for > Nougat),
  * and the user has the option enabled, the widget frame will hide.
  */
+@Suppress("ProtectedInFinal", "unused")
 class NotificationListener : NotificationListenerService(), EventObserver, CoroutineScope by MainScope() {
     private var isListening = false
 
@@ -48,6 +52,14 @@ class NotificationListener : NotificationListenerService(), EventObserver, Corou
 
     override fun onCreate() {
         sendUpdate()
+    }
+
+    override fun onBind(intent: Intent?): IBinder {
+        super.onBind(intent)
+
+        mWrapper = CatchingListenerWrapper()
+
+        return mWrapper
     }
 
     override fun onDestroy() {
@@ -148,4 +160,14 @@ class NotificationListener : NotificationListenerService(), EventObserver, Corou
 
             return true
         }
+
+    protected inner class CatchingListenerWrapper : NotificationListenerService.NotificationListenerWrapper() {
+        override fun onTransact(code: Int, data: Parcel?, reply: Parcel?, flags: Int): Boolean {
+            return try {
+                super.onTransact(code, data, reply, flags)
+            } catch (e: OutOfMemoryError) {
+                false
+            }
+        }
+    }
 }
