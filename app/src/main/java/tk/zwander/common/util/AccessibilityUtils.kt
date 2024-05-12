@@ -9,6 +9,8 @@ import android.view.accessibility.AccessibilityEvent
 import android.view.accessibility.AccessibilityNodeInfo
 import android.view.accessibility.AccessibilityWindowInfo
 import android.view.inputmethod.InputMethodManager
+import kotlinx.atomicfu.AtomicBoolean
+import kotlinx.atomicfu.atomic
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
@@ -16,8 +18,6 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
 import tk.zwander.common.activities.DismissOrUnlockActivity
 import tk.zwander.common.data.window.WindowInfo
 import tk.zwander.common.data.window.WindowRootPair
@@ -29,23 +29,21 @@ import java.util.concurrent.ConcurrentLinkedQueue
 
 object AccessibilityUtils {
     data class NodeState(
-        val onMainLockscreen: Boolean = false,
-        val showingNotificationsPanel: Boolean = false,
-        val hasMoreButton: Boolean = false,
-        val hideForPresentIds: Boolean = false,
-        val hideForNonPresentIds: Boolean = false,
-        val hasClearAllButton: Boolean = false,
+        val onMainLockscreen: AtomicBoolean = atomic(false),
+        val showingNotificationsPanel: AtomicBoolean = atomic(false),
+        val hasMoreButton: AtomicBoolean = atomic(false),
+        val hideForPresentIds: AtomicBoolean = atomic(false),
+        val hideForNonPresentIds: AtomicBoolean = atomic(false),
+        val hasClearAllButton: AtomicBoolean = atomic(false),
     )
 
     private fun Context.processNode(
-        initialState: NodeState,
+        nodeState: NodeState,
         node: AccessibilityNodeInfo?,
         isOnKeyguard: Boolean,
-    ): NodeState {
-        var newState = initialState
-
+    ) {
         if (node == null) {
-            return initialState
+            return
         }
 
         //If the user has enabled the option to hide the frame on security (pin, pattern, password)
@@ -53,19 +51,17 @@ object AccessibilityUtils {
         //checking for the existence of a security input, since there are a lot of different possible
         //IDs, and OEMs change them. "notification_panel" and "left_button" are largely unchanged,
         //although this method isn't perfect.
-        if (isOnKeyguard && prefManager.hideOnSecurityPage && !newState.onMainLockscreen) {
+        if (isOnKeyguard && prefManager.hideOnSecurityPage && !nodeState.onMainLockscreen.value) {
             if (node.hasVisibleIds(
                     "com.android.systemui:id/notification_panel",
                     "com.android.systemui:id/left_button"
                 )
             ) {
-                newState = newState.copy(
-                    onMainLockscreen = true
-                )
+                nodeState.onMainLockscreen.value = true
             }
         }
 
-        if (isOnKeyguard && prefManager.hideOnNotificationShade && !newState.showingNotificationsPanel) {
+        if (isOnKeyguard && prefManager.hideOnNotificationShade && !nodeState.showingNotificationsPanel.value) {
             if (node.hasVisibleIds(
                     "com.android.systemui:id/quick_settings_panel",
                     "com.android.systemui:id/settings_button",
@@ -80,9 +76,7 @@ object AccessibilityUtils {
                 //Used for "Hide When Notification Shade Shown" so we know when it's actually expanded.
                 //Some devices don't even have left shortcuts, so also check for keyguard_indication_area.
                 //Just like the showingSecurityInput check, this is probably unreliable for some devices.
-                newState = newState.copy(
-                    showingNotificationsPanel = true
-                )
+                nodeState.showingNotificationsPanel.value = true
             }
         }
 
@@ -90,45 +84,35 @@ object AccessibilityUtils {
         //check if the frame can actually show. This checks to the "more_button"
         //ID, which is unique to One UI (it's the three-dot button), and is only
         //visible when the NC is fully expanded.
-        if (prefManager.showInNotificationCenter && !newState.hasMoreButton) {
+        if (prefManager.showInNotificationCenter && !nodeState.hasMoreButton.value) {
             if (node.hasVisibleIds("com.android.systemui:id/more_button")) {
-                newState = newState.copy(
-                    hasMoreButton = true
-                )
+                nodeState.hasMoreButton.value = true
             }
         }
 
-        if (prefManager.showInNotificationCenter && !newState.hasClearAllButton) {
+        if (prefManager.showInNotificationCenter && !nodeState.hasClearAllButton.value) {
             if (node.hasVisibleIds("com.android.systemui:id/clear_all")) {
-                newState = newState.copy(
-                    hasClearAllButton = true
-                )
+                nodeState.hasClearAllButton.value = true
             }
         }
 
         //Check to see if any of the user-specified IDs are present.
         //If any are, the frame will be hidden.
         val presentIds = prefManager.presentIds
-        if (!newState.hideForPresentIds && presentIds.isNotEmpty()) {
+        if (!nodeState.hideForPresentIds.value && presentIds.isNotEmpty()) {
             if (node.hasVisibleIds(presentIds)) {
-                newState = newState.copy(
-                    hideForPresentIds = true
-                )
+                nodeState.hideForPresentIds.value = true
             }
         }
 
         //Check to see if any of the user-specified IDs aren't present
         //(or are present but not visible). If any aren't, the frame will be hidden.
         val nonPresentIds = prefManager.nonPresentIds
-        if (!newState.hideForNonPresentIds && nonPresentIds.isNotEmpty()) {
+        if (!nodeState.hideForNonPresentIds.value && nonPresentIds.isNotEmpty()) {
             if (!node.hasVisibleIds(nonPresentIds)) {
-                newState = newState.copy(
-                    hideForNonPresentIds = true
-                )
+                nodeState.hideForNonPresentIds.value = true
             }
         }
-
-        return newState
     }
 
     /**
@@ -142,8 +126,7 @@ object AccessibilityUtils {
     ): WindowInfo {
         val systemUiWindows = ConcurrentLinkedQueue<WindowRootPair>()
 
-        val stateMutex = Mutex()
-        var nodeState = NodeState()
+        val nodeState = NodeState()
 
         val sysUiWindowViewIds = ConcurrentLinkedQueue<String>()
         val sysUiWindowNodes = ConcurrentLinkedQueue<AccessibilityNodeInfo>()
@@ -188,9 +171,7 @@ object AccessibilityUtils {
                         sysUiWindowAwaits
                     ) { node ->
                         launch(Dispatchers.IO) {
-                            stateMutex.withLock {
-                                nodeState = processNode(nodeState, node, isOnKeyguard)
-                            }
+                            processNode(nodeState, node, isOnKeyguard)
                         }
                     }
                 }
@@ -481,11 +462,11 @@ object AccessibilityUtils {
                     //This is mostly a debug value to see which app LSWidg thinks is on top.
                     currentAppPackage = windowInfo.topAppWindowPackageName,
                     hidingForPresentApp = windowInfo.hasHideForPresentApp,
-                    onMainLockscreen = windowInfo.nodeState.onMainLockscreen,
-                    showingNotificationsPanel = windowInfo.nodeState.showingNotificationsPanel,
-                    notificationsPanelFullyExpanded = windowInfo.nodeState.hasMoreButton && !windowInfo.nodeState.hasClearAllButton,
-                    hideForPresentIds = windowInfo.nodeState.hideForPresentIds,
-                    hideForNonPresentIds = windowInfo.nodeState.hideForNonPresentIds,
+                    onMainLockscreen = windowInfo.nodeState.onMainLockscreen.value,
+                    showingNotificationsPanel = windowInfo.nodeState.showingNotificationsPanel.value,
+                    notificationsPanelFullyExpanded = windowInfo.nodeState.hasMoreButton.value && !windowInfo.nodeState.hasClearAllButton.value,
+                    hideForPresentIds = windowInfo.nodeState.hideForPresentIds.value,
+                    hideForNonPresentIds = windowInfo.nodeState.hideForNonPresentIds.value,
                 )
             }
 

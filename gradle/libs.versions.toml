@@ -3,6 +3,7 @@ accompanist = "0.35.0-alpha"
 activityCompose = "1.9.0"
 androidGradlePlugin = "8.3.2"
 appcompat = "1.7.0-beta01"
+atomicfu = "0.24.0"
 bugsnagAndroid = "6.4.0"
 bugsnagAndroidGradlePlugin = "8.1.0"
 byteBuddyAndroid = "1.14.15"
@@ -35,6 +36,7 @@ accompanist-themeadapter-material = { module = "com.google.accompanist:accompani
 accompanist-themeadapter-material3 = { module = "com.google.accompanist:accompanist-themeadapter-material3", version.ref = "accompanist" }
 activity-compose = { module = "androidx.activity:activity-compose", version.ref = "activityCompose" }
 appcompat = { module = "androidx.appcompat:appcompat", version.ref = "appcompat" }
+atomicfu = { module = "org.jetbrains.kotlinx:atomicfu", version.ref = "atomicfu" }
 bugsnag-android = { module = "com.bugsnag:bugsnag-android", version.ref = "bugsnagAndroid" }
 byte-buddy-android = { module = "net.bytebuddy:byte-buddy-android", version.ref = "byteBuddyAndroid" }
 collapsiblePreferenceCategory = { module = "com.github.zacharee:CollapsiblePreferenceCategory", version.ref = "collapsiblepreferencecategory" }
@@ -69,5 +71,6 @@ taskerpluginlibrary = { module = "com.joaomgcd:taskerpluginlibrary", version.ref
 android-application = { id = "com.android.application", version.ref = "androidGradlePlugin" }
 bugsnag-android = { id = "com.bugsnag.android.gradle", version.ref = "bugsnagAndroidGradlePlugin" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
+kotlin-atomicfu = { id = "org.jetbrains.kotlin.plugin.atomicfu", version.ref = "kotlin" }
 kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 kotlin-parcelize = { id = "org.jetbrains.kotlin.plugin.parcelize", version.ref = "kotlin" }
