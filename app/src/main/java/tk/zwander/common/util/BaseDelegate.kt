@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.ContextWrapper
 import android.hardware.display.DisplayManager
 import android.os.PowerManager
+import android.view.Surface
 import android.view.View
 import android.view.WindowManager
 import androidx.annotation.CallSuper
@@ -28,7 +29,7 @@ import tk.zwander.common.host.widgetHostCompat
 import tk.zwander.lockscreenwidgets.adapters.WidgetFrameAdapter
 
 @Suppress("MemberVisibilityCanBePrivate")
-abstract class BaseDelegate<State : BaseDelegate.BaseState>(context: Context) : ContextWrapper(context),
+abstract class BaseDelegate<State : Any>(context: Context) : ContextWrapper(context),
     EventObserver, WidgetHostCompat.OnClickCallback, SavedStateRegistryOwner {
     protected val wm by lazy { getSystemService(WINDOW_SERVICE) as WindowManager }
     protected val power by lazy { getSystemService(POWER_SERVICE) as PowerManager }
@@ -38,6 +39,9 @@ abstract class BaseDelegate<State : BaseDelegate.BaseState>(context: Context) : 
     protected val displayManager by lazy {
         getSystemService(Context.DISPLAY_SERVICE) as DisplayManager
     }
+
+    open var commonState: BaseState = BaseState()
+        protected set
 
     abstract var state: State
         protected set
@@ -97,6 +101,13 @@ abstract class BaseDelegate<State : BaseDelegate.BaseState>(context: Context) : 
         }
         rootView.setViewTreeLifecycleOwner(this)
         rootView.setViewTreeSavedStateRegistryOwner(this)
+
+        updateCommonState {
+            it.copy(
+                wasOnKeyguard = kgm.isKeyguardLocked,
+                isScreenOn = power.isInteractive,
+            )
+        }
     }
 
     @CallSuper
@@ -137,6 +148,12 @@ abstract class BaseDelegate<State : BaseDelegate.BaseState>(context: Context) : 
 
                 widgetRemovalConfirmed(event, position)
             }
+            Event.ScreenOff -> {
+                updateCommonState { it.copy(isScreenOn = false) }
+            }
+            Event.ScreenOn -> {
+                updateCommonState { it.copy(isScreenOn = true) }
+            }
             else -> {}
         }
     }
@@ -151,11 +168,18 @@ abstract class BaseDelegate<State : BaseDelegate.BaseState>(context: Context) : 
         state = newState
     }
 
+    fun updateCommonState(transform: (BaseState) -> BaseState) {
+        val newState = transform(commonState)
+        logUtils.debugLog("Updating common state from\n$commonState\nto\n$newState")
+        commonState = newState
+    }
+
     @CallSuper
     protected open fun onWidgetMoved(moved: Boolean) {
         if (moved) {
             currentWidgets = adapter.widgets
             adapter.currentEditingInterfacePosition = -1
+            updateCommonState { it.copy(updatedForMove = true) }
         }
     }
 
@@ -171,19 +195,22 @@ abstract class BaseDelegate<State : BaseDelegate.BaseState>(context: Context) : 
         }
     }
 
-    protected abstract fun onItemSelected(selected: Boolean)
+    protected open fun onItemSelected(selected: Boolean) {
+        updateCommonState { it.copy(isHoldingItem = selected) }
+    }
     protected abstract fun isLocked(): Boolean
     protected abstract fun retrieveCounts(): Pair<Int?, Int?>
 
     protected open fun widgetRemovalConfirmed(event: Event.RemoveWidgetConfirmed, position: Int) {}
 
-    abstract class BaseState {
-        abstract val isHoldingItem: Boolean
-        abstract val updatedForMove: Boolean
-        abstract val handlingClick: Boolean
-        abstract val wasOnKeyguard: Boolean
-        abstract val screenOrientation: Int
-    }
+    data class BaseState(
+        val isHoldingItem: Boolean = false,
+        val updatedForMove: Boolean = false,
+        val handlingClick: Boolean = false,
+        val wasOnKeyguard: Boolean = false,
+        val isScreenOn: Boolean = false,
+        val screenOrientation: Int = Surface.ROTATION_0,
+    )
 
     abstract class LayoutManager(
         private val context: Context,

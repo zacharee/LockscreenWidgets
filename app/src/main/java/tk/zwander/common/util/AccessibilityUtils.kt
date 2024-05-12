@@ -343,6 +343,7 @@ object AccessibilityUtils {
         //state and, if applicable, send the keyguard dismissal broadcast.
 
         var newState = frameDelegate.state.copy()
+        var newFrameCommonState = frameDelegate.commonState.copy()
 
         newState = try {
             // Check if keyboard is shown.
@@ -363,20 +364,22 @@ object AccessibilityUtils {
 
         //Check if the screen is on.
         val isScreenOn = power.isInteractive
-        if (frameDelegate.state.isScreenOn != isScreenOn) {
+        if (frameDelegate.commonState.isScreenOn != isScreenOn) {
             //Make sure to turn off temp hide if it was on.
-            newState = newState.copy(isTempHide = false, isScreenOn = isScreenOn)
+            newState = newState.copy(isTempHide = false)
+            newFrameCommonState = newFrameCommonState.copy(isScreenOn = isScreenOn)
+            drawerDelegate.updateCommonState { it.copy(isScreenOn = isScreenOn) }
         }
 
         //Check if the lock screen is shown.
         val isOnKeyguard = kgm.isKeyguardLocked
 
-        if (isOnKeyguard != drawerDelegate.state.wasOnKeyguard) {
-            drawerDelegate.updateState { it.copy(wasOnKeyguard = isOnKeyguard) }
+        if (isOnKeyguard != drawerDelegate.commonState.wasOnKeyguard) {
+            drawerDelegate.updateCommonState { it.copy(wasOnKeyguard = isOnKeyguard) }
         }
 
-        if (isOnKeyguard != frameDelegate.state.wasOnKeyguard) {
-            newState = newState.copy(wasOnKeyguard = isOnKeyguard)
+        if (isOnKeyguard != frameDelegate.commonState.wasOnKeyguard) {
+            newFrameCommonState = newFrameCommonState.copy(wasOnKeyguard = isOnKeyguard)
             //Update the keyguard dismissal Activity that the lock screen
             //has been dismissed.
             if (!isOnKeyguard) {
@@ -385,8 +388,8 @@ object AccessibilityUtils {
         }
 
         val rotation = defaultDisplayCompat.rotation
-        newState = newState.copy(screenOrientation = rotation)
-        drawerDelegate.updateState { it.copy(screenOrientation = rotation) }
+        newFrameCommonState = newFrameCommonState.copy(screenOrientation = rotation)
+        drawerDelegate.updateCommonState { it.copy(screenOrientation = rotation) }
 
         if (isDebug && event != null) {
             // Nest this in the debug check so that loop doesn't have to run always.
@@ -479,7 +482,12 @@ object AccessibilityUtils {
             logUtils.debugLog("NewState $newState", null)
 
             launch {
-                frameDelegate.updateStateAndWindowState(wm, true) { newState }
+                frameDelegate.updateStateAndWindowState(
+                    wm = wm,
+                    updateAccessibility = true,
+                    transform = { newState },
+                    commonTransform = { newFrameCommonState },
+                )
             }
 
             windowInfo?.let {
@@ -510,7 +518,12 @@ object AccessibilityUtils {
                 }
             }
         } else {
-            frameDelegate.updateStateAndWindowState(wm, true) { newState }
+            frameDelegate.updateStateAndWindowState(
+                wm = wm,
+                updateAccessibility = true,
+                transform = { newState },
+                commonTransform = { newFrameCommonState },
+            )
         }
 
         // Some logic for making the drawer go away or system dialogs dismiss when widgets launch Activities indirectly.
@@ -527,24 +540,24 @@ object AccessibilityUtils {
                         "matchesWindowsChanges: $matchesWindowsChanged\n" +
                         "matchesWindowStateChanged: $matchesWindowStateChanged\n" +
                         "packageName: ${event.packageName}\n" +
-                        "handlingDrawerClick: ${drawerDelegate.state.handlingClick}\n" +
-                        "handlingFrameClick: ${frameDelegate.state.handlingClick}"
+                        "handlingDrawerClick: ${drawerDelegate.commonState.handlingClick}\n" +
+                        "handlingFrameClick: ${frameDelegate.commonState.handlingClick}"
             )
 
             if ((matchesWindowsChanged || matchesWindowStateChanged)
                 && event.packageName != packageName
-                && (drawerDelegate.state.handlingClick || frameDelegate.state.handlingClick)
+                && (drawerDelegate.commonState.handlingClick || frameDelegate.commonState.handlingClick)
             ) {
                 logUtils.debugLog("Starting dismiss Activity because of window change.")
                 DismissOrUnlockActivity.launch(this@runAccessibilityJob)
 
-                if (drawerDelegate.state.handlingClick) {
+                if (drawerDelegate.commonState.handlingClick) {
                     logUtils.debugLog("Hiding drawer because of window change")
                     eventManager.sendEvent(Event.CloseDrawer)
                 }
 
-                drawerDelegate.updateState { it.copy(handlingClick = false) }
-                frameDelegate.updateState { it.copy(handlingClick = false) }
+                drawerDelegate.updateCommonState { it.copy(handlingClick = false) }
+                frameDelegate.updateCommonState { it.copy(handlingClick = false) }
             }
         }
 
@@ -552,8 +565,8 @@ object AccessibilityUtils {
                     || event.eventType == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED)
             && event.packageName != null
         ) {
-            drawerDelegate.updateState { it.copy(handlingClick = false) }
-            frameDelegate.updateState { it.copy(handlingClick = false) }
+            drawerDelegate.updateCommonState { it.copy(handlingClick = false) }
+            frameDelegate.updateCommonState { it.copy(handlingClick = false) }
         }
 
         try {

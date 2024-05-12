@@ -8,6 +8,7 @@ import android.content.IntentFilter
 import android.database.ContentObserver
 import android.net.Uri
 import android.os.Build
+import android.os.PowerManager
 import android.provider.Settings
 import androidx.core.content.ContextCompat
 import com.bugsnag.android.Bugsnag
@@ -17,6 +18,7 @@ import tk.zwander.common.util.Event
 import tk.zwander.common.util.GlobalExceptionHandler
 import tk.zwander.common.util.LogUtils
 import tk.zwander.common.util.eventManager
+import tk.zwander.common.util.logUtils
 import tk.zwander.common.util.migrationManager
 import tk.zwander.lockscreenwidgets.activities.add.AddFrameWidgetActivity
 import tk.zwander.widgetdrawer.activities.add.AddDrawerWidgetActivity
@@ -38,8 +40,24 @@ class App : Application() {
     private val screenStateReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
             when (intent?.action) {
-                Intent.ACTION_SCREEN_OFF -> eventManager.sendEvent(Event.ScreenOff)
-                Intent.ACTION_SCREEN_ON -> eventManager.sendEvent(Event.ScreenOn)
+                Intent.ACTION_SCREEN_OFF -> {
+                    logUtils.debugLog("Received screen off: ${power.isInteractive}")
+
+                    if (!power.isInteractive) {
+                        eventManager.sendEvent(Event.ScreenOff)
+
+                        logUtils.debugLog("Sending screen off", null)
+                    }
+                }
+                Intent.ACTION_SCREEN_ON -> {
+                    logUtils.debugLog("Received screen on: ${power.isInteractive}")
+
+                    if (power.isInteractive) {
+                        eventManager.sendEvent(Event.ScreenOn)
+
+                        logUtils.debugLog("Sending screen on", null)
+                    }
+                }
             }
         }
     }
@@ -55,6 +73,8 @@ class App : Application() {
             }
         }
     }
+
+    private val power by lazy { getSystemService(Context.POWER_SERVICE) as PowerManager }
 
     override fun onCreate() {
         super.onCreate()

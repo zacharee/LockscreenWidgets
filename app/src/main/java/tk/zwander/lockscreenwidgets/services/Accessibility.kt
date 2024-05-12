@@ -145,9 +145,6 @@ class Accessibility : AccessibilityService(), EventObserver, CoroutineScope by M
         //Make a copy that is recycled later.
         val eventCopy = event.copyCompat()
 
-        if (System.currentTimeMillis() - state.lastScreenOnTime < 10)
-            return
-
         state.accessibilityJob?.cancel()
         updateState {
             it.copy(
@@ -181,26 +178,7 @@ class Accessibility : AccessibilityService(), EventObserver, CoroutineScope by M
     override fun onEvent(event: Event) {
         when (event) {
             Event.ScreenOff -> {
-                //Sometimes ACTION_SCREEN_OFF gets received *after* the display turns on,
-                //so this check is here to make sure the screen is actually off when this
-                //action is received.
-                if (!power.isInteractive) {
-                    logUtils.debugLog("Screen off")
-
-                    state.accessibilityJob?.cancel()
-                }
-            }
-
-            Event.ScreenOn -> {
-                updateState {
-                    it.copy(
-                        lastScreenOnTime = System.currentTimeMillis()
-                    )
-                }
-
-                logUtils.debugLog("Screen on")
-
-//                state.accessibilityJob?.cancel()
+                state.accessibilityJob?.cancel()
             }
 
             else -> {}
@@ -225,7 +203,6 @@ class Accessibility : AccessibilityService(), EventObserver, CoroutineScope by M
     }
 
     private data class State(
-        val lastScreenOnTime: Long = 0L,
         val accessibilityJob: Job? = null,
     )
 }
