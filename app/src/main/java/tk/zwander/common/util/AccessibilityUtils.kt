@@ -124,10 +124,9 @@ object AccessibilityUtils {
         windows: List<AccessibilityWindowInfo>,
         isOnKeyguard: Boolean,
     ): WindowInfo {
-        val systemUiWindows = ConcurrentLinkedQueue<WindowRootPair>()
-
         val nodeState = NodeState()
 
+        val systemUiWindows = ConcurrentLinkedQueue<WindowRootPair>()
         val sysUiWindowViewIds = ConcurrentLinkedQueue<String>()
         val sysUiWindowNodes = ConcurrentLinkedQueue<AccessibilityNodeInfo>()
         val sysUiWindowAwaits = ConcurrentLinkedQueue<Deferred<*>>()
@@ -177,7 +176,7 @@ object AccessibilityUtils {
                 }
             }
 
-            if (topAppWindowIndex == -1 &&
+            if ((topAppWindowIndex == -1 || topAppWindowIndex > index) &&
                 (window.window.type == AccessibilityWindowInfo.TYPE_APPLICATION || (
                         // This is a workaround for the Google Assistant popup on Pixel devices.
                         // It reports a window type of "-1" since the popup's real type is TYPE_VOICE_INTERACTION,
@@ -192,7 +191,7 @@ object AccessibilityUtils {
             }
 
             if (
-                topNonSysUiWindowIndex == -1 &&
+                (topNonSysUiWindowIndex == -1 || topNonSysUiWindowIndex > index) &&
                 window.window.type != AccessibilityWindowInfo.TYPE_APPLICATION &&
                 window.window.type != AccessibilityWindowInfo.TYPE_ACCESSIBILITY_OVERLAY &&
                 !isSysUi
