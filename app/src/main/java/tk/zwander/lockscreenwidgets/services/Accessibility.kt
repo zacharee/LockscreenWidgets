@@ -13,10 +13,11 @@ import android.view.accessibility.AccessibilityEvent
 import android.view.accessibility.AccessibilityNodeInfo
 import android.view.inputmethod.InputMethodManager
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.async
 import kotlinx.coroutines.cancel
-import kotlinx.coroutines.launch
 import tk.zwander.common.util.AccessibilityUtils.runAccessibilityJob
 import tk.zwander.common.util.Event
 import tk.zwander.common.util.EventObserver
@@ -150,7 +151,7 @@ class Accessibility : AccessibilityService(), EventObserver, CoroutineScope by M
         state.accessibilityJob?.cancel()
         updateState {
             it.copy(
-                accessibilityJob = launch {
+                accessibilityJob = async(Dispatchers.Main) {
                     runAccessibilityJob(
                         event = eventCopy,
                         frameDelegate = frameDelegate,
