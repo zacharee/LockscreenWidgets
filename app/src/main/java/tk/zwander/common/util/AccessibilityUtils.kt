@@ -414,6 +414,15 @@ object AccessibilityUtils {
 
         logUtils.debugLog("Accessibility event: $event, isScreenOn: ${isScreenOn}, wasOnKeyguard: $isOnKeyguard, ${drawerDelegate.state}")
 
+        frameDelegate.updateStateAndWindowState(
+            wm = wm,
+            updateAccessibility = true,
+            transform = { newState },
+            commonTransform = { newFrameCommonState },
+        )
+
+        newState = frameDelegate.state.copy()
+
         //The below block can (very rarely) take over half a second to execute, so only run it
         //if we actually need to (i.e. on the lock screen and screen is on).
         if ((isOnKeyguard || prefManager.showInNotificationCenter) && isScreenOn && prefManager.widgetFrameEnabled /* This is only needed when the frame is enabled */) {
@@ -517,13 +526,6 @@ object AccessibilityUtils {
                     }
                 }
             }
-        } else {
-            frameDelegate.updateStateAndWindowState(
-                wm = wm,
-                updateAccessibility = true,
-                transform = { newState },
-                commonTransform = { newFrameCommonState },
-            )
         }
 
         // Some logic for making the drawer go away or system dialogs dismiss when widgets launch Activities indirectly.
