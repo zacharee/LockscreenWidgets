@@ -13,10 +13,8 @@ import android.view.accessibility.AccessibilityEvent
 import android.view.accessibility.AccessibilityNodeInfo
 import android.view.inputmethod.InputMethodManager
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.MainScope
-import kotlinx.coroutines.async
 import kotlinx.coroutines.cancel
 import tk.zwander.common.util.AccessibilityUtils.runAccessibilityJob
 import tk.zwander.common.util.Event
@@ -148,27 +146,26 @@ class Accessibility : AccessibilityService(), EventObserver, CoroutineScope by M
         state.accessibilityJob?.cancel()
         updateState {
             it.copy(
-                accessibilityJob = async(Dispatchers.Main) {
-                    runAccessibilityJob(
-                        event = eventCopy,
-                        frameDelegate = frameDelegate,
-                        drawerDelegate = drawerDelegate,
-                        power = power,
-                        kgm = kgm,
-                        wm = wm,
-                        imm = imm,
-                        getWindows = {
-                            try {
-                                ArrayList(windows)
-                            } catch (e: SecurityException) {
-                                // Sometimes throws a SecurityException talking about mismatching
-                                // user IDs. In that case, return null and don't update any window-based
-                                // state items.
-                                null
-                            }
+                accessibilityJob = runAccessibilityJob(
+                    context = this@Accessibility,
+                    event = eventCopy,
+                    frameDelegate = frameDelegate,
+                    drawerDelegate = drawerDelegate,
+                    power = power,
+                    kgm = kgm,
+                    wm = wm,
+                    imm = imm,
+                    getWindows = {
+                        try {
+                            ArrayList(windows)
+                        } catch (e: SecurityException) {
+                            // Sometimes throws a SecurityException talking about mismatching
+                            // user IDs. In that case, return null and don't update any window-based
+                            // state items.
+                            null
                         }
-                    )
-                }
+                    }
+                )
             )
         }
     }
