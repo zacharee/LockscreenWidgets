@@ -552,23 +552,22 @@ open class WidgetFrameAdapter(
                                 }
                             }
                         })
-                    } catch (e: SecurityException) {
-                        context.logUtils.debugLog("Unable to bind widget view ${widgetInfo.provider}", e)
-
-                        //There was an error adding the widget. Some OEMs (OPPO...) like to add permissions requirements to their
-                        //widgets, which can make it impossible for third-party non-launcher apps to bind to them.
-                        Toast.makeText(
-                            context,
-                            resources.getString(R.string.bind_widget_error, widgetInfo.provider),
-                            Toast.LENGTH_LONG
-                        ).show()
-                        currentWidgets = currentWidgets.toMutableList().apply {
-                            remove(data)
-                            host.deleteAppWidgetId(data.id)
-                        }
                     } catch (e: Throwable) {
                         context.logUtils.normalLog("Unable to bind widget view ${widgetInfo.provider}", e)
-                        addView(context.createWidgetErrorView())
+
+                        if (e is SecurityException) {
+                            Toast.makeText(
+                                context,
+                                resources.getString(R.string.bind_widget_error, widgetInfo.provider),
+                                Toast.LENGTH_LONG,
+                            ).show()
+                            currentWidgets = currentWidgets.toMutableList().apply {
+                                remove(data)
+                                host.deleteAppWidgetId(data.id)
+                            }
+                        } else {
+                            addView(context.createWidgetErrorView())
+                        }
                     }
                 }
             } else {
