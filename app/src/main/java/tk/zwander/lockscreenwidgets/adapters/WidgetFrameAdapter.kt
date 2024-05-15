@@ -11,7 +11,6 @@ import android.graphics.RectF
 import android.graphics.drawable.GradientDrawable
 import android.os.Build
 import android.os.Bundle
-import android.os.DeadObjectException
 import android.util.SizeF
 import android.view.LayoutInflater
 import android.view.LayoutInflater.Factory2
@@ -60,6 +59,7 @@ import kotlin.math.min
 /**
  * The adapter for the widget frame itself.
  */
+@Suppress("LeakingThis")
 open class WidgetFrameAdapter(
     protected val manager: AppWidgetManager,
     protected val host: WidgetHostCompat,
@@ -108,7 +108,6 @@ open class WidgetFrameAdapter(
         get() = host.context.prefManager.frameWidgetCornerRadiusDp
 
     init {
-        @Suppress("LeakingThis")
         setHasStableIds(true)
     }
 
@@ -567,12 +566,8 @@ open class WidgetFrameAdapter(
                             remove(data)
                             host.deleteAppWidgetId(data.id)
                         }
-                    } catch (e: RuntimeException) {
-                        if (e.cause !is DeadObjectException) {
-                            throw e
-                        }
-
-                        context.logUtils.debugLog("Unable to bind widget view ${widgetInfo.provider}", e)
+                    } catch (e: Throwable) {
+                        context.logUtils.normalLog("Unable to bind widget view ${widgetInfo.provider}", e)
                         addView(context.createWidgetErrorView())
                     }
                 }
