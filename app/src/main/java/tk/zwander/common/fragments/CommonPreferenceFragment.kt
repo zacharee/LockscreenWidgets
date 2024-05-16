@@ -21,6 +21,7 @@ import tk.zwander.common.util.backup.BackupRestoreManager
 import tk.zwander.common.util.backup.backupRestoreManager
 import tk.zwander.common.util.isOneUI
 import tk.zwander.common.util.logUtils
+import tk.zwander.common.util.windowManager
 import tk.zwander.lockscreenwidgets.R
 import java.io.FileNotFoundException
 import java.text.SimpleDateFormat
@@ -34,7 +35,7 @@ abstract class CommonPreferenceFragment : PreferenceFragmentCompat() {
     protected abstract val blurOptionKeys: Array<String>
 
     protected val showBlurOptions by lazy {
-        requireContext().isOneUI || Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
+        (requireContext().isOneUI && Build.VERSION.SDK_INT < Build.VERSION_CODES.S) || (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && context?.windowManager?.isCrossWindowBlurEnabled == true)
     }
 
     private val onWidgetBackUp = registerForActivityResult(ActivityResultContracts.CreateDocument("text/*")) { uri: Uri? ->

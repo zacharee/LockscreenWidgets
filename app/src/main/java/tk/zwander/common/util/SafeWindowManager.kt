@@ -1,5 +1,8 @@
+@file:Suppress("unused")
+
 package tk.zwander.common.util
 
+import android.os.Build
 import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
@@ -43,3 +46,10 @@ fun WindowManager.safeUpdateViewLayout(view: View, params: ViewGroup.LayoutParam
         false
     }
 }
+
+val WindowManager.isCrossWindowBlurEnabledCompat: Boolean
+    get() = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+        isCrossWindowBlurEnabled
+    } else {
+        false
+    }
