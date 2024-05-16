@@ -300,6 +300,14 @@
             />
 
         <tk.zwander.common.prefs.MaterialSwitchPreference
+            android:title="@string/settings_screen_ignore_widget_touches"
+            android:summary="@string/settings_screen_ignore_widget_touches_desc"
+            android:key="frame_ignore_widget_touches"
+            android:icon="@drawable/baseline_do_not_touch_24"
+            android:defaultValue="false"
+            />
+
+        <tk.zwander.common.prefs.MaterialSwitchPreference
             android:title="@string/settings_screen_request_unlock"
             android:summary="@string/settings_screen_request_unlock_desc"
             android:key="request_unlock"

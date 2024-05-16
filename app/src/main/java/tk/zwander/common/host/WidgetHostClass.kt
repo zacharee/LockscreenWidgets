@@ -11,7 +11,6 @@ import android.widget.RemoteViews
 import net.bytebuddy.ByteBuddy
 import net.bytebuddy.android.AndroidClassLoadingStrategy
 import net.bytebuddy.implementation.MethodDelegation
-import net.bytebuddy.implementation.SuperMethodCall
 
 /**
  * An implementation of [AppWidgetHost] used on devices where the hidden API object
@@ -25,21 +24,15 @@ class WidgetHostClass(context: Context, id: Int, private val clickHandlerClass: 
     override fun createOnClickHandlerForWidget(widgetId: Int): Any {
         return ByteBuddy()
             .subclass(clickHandlerClass)
-            .name("OnClickHandlerPieIntercept")
+            .name("android.widget.remoteviews.OnClickHandlerPieIntercept")
             .defineMethod("onClickHandler", Boolean::class.java)
             .withParameters(View::class.java, PendingIntent::class.java, Intent::class.java)
-            .intercept(
-                MethodDelegation.to(InnerOnClickHandlerClass(widgetId))
-                    .andThen(SuperMethodCall.INSTANCE)
-            )
+            .intercept(MethodDelegation.to(InnerOnClickHandlerClass(widgetId)))
             .apply {
                 if (Build.VERSION.SDK_INT > Build.VERSION_CODES.M) {
                     defineMethod("onClickHandler", Boolean::class.java)
                         .withParameters(View::class.java, PendingIntent::class.java, Intent::class.java, Int::class.java)
-                        .intercept(
-                            MethodDelegation.to(InnerOnClickHandlerClass(widgetId))
-                                .andThen(SuperMethodCall.INSTANCE)
-                        )
+                        .intercept(MethodDelegation.to(InnerOnClickHandlerClass(widgetId)))
                 }
             }
             .make()
@@ -50,27 +43,35 @@ class WidgetHostClass(context: Context, id: Int, private val clickHandlerClass: 
     }
 
     inner class InnerOnClickHandlerClass(private val widgetId: Int) : BaseInnerOnClickHandler() {
-        @Suppress("UNUSED_PARAMETER", "unused")
+        private val defaultHandler = clickHandlerClass.getConstructor().newInstance()
+
+        @Suppress("unused")
         fun onClickHandler(
             view: View,
             pendingIntent: PendingIntent,
             fillInIntent: Intent
         ): Boolean {
-            checkPendingIntent(pendingIntent, widgetId)
-
-            return true
+            return if (checkPendingIntent(pendingIntent, widgetId)) {
+                clickHandlerClass.getMethod("onClickHandler", View::class.java, PendingIntent::class.java, Intent::class.java)
+                    .invoke(defaultHandler, view, pendingIntent, fillInIntent) as Boolean
+            } else {
+                false
+            }
         }
 
-        @Suppress("UNUSED_PARAMETER", "unused")
+        @Suppress("unused")
         fun onClickHandler(
             view: View,
             pendingIntent: PendingIntent,
             fillInIntent: Intent,
             windowingMode: Int
         ): Boolean {
-            checkPendingIntent(pendingIntent, widgetId)
-
-            return true
+            return if (checkPendingIntent(pendingIntent, widgetId)) {
+                clickHandlerClass.getMethod("onClickHandler", View::class.java, PendingIntent::class.java, Intent::class.java, Int::class.java)
+                    .invoke(defaultHandler, view, pendingIntent, fillInIntent, windowingMode) as Boolean
+            } else {
+                false
+            }
         }
     }
 }

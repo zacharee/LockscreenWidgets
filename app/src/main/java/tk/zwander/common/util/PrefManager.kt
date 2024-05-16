@@ -136,6 +136,7 @@ class PrefManager private constructor(context: Context) : ContextWrapper(context
         const val KEY_DRAWER_FORCE_RELOAD_WIDGETS = "drawer_force_reload_widgets"
         const val KEY_SHOW_DRAWER_HANDLE_ONLY_WHEN_LOCKED = "show_drawer_handle_only_when_locked"
         const val KEY_FRAME_HIDE_WHEN_KEYBOARD_SHOWN = "hide_frame_when_keyboard_shown"
+        const val KEY_FRAME_IGNORE_WIDGET_TOUCHES = "frame_ignore_widget_touches"
 
         const val VALUE_PAGE_INDICATOR_BEHAVIOR_HIDDEN = 0
         const val VALUE_PAGE_INDICATOR_BEHAVIOR_AUTO_HIDE = 1
@@ -620,6 +621,12 @@ class PrefManager private constructor(context: Context) : ContextWrapper(context
         get() = getBoolean(KEY_LOCK_WIDGET_DRAWER, false)
         set(value) {
             putBoolean(KEY_LOCK_WIDGET_DRAWER, value)
+        }
+
+    var frameIgnoreWidgetTouches: Boolean
+        get() = getBoolean(KEY_FRAME_IGNORE_WIDGET_TOUCHES, false)
+        set(value) {
+            putBoolean(KEY_FRAME_IGNORE_WIDGET_TOUCHES, value)
         }
 
     //The duration of the fade-in/out animation.

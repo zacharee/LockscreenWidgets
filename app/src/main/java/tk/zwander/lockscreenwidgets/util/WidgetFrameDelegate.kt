@@ -432,12 +432,18 @@ class WidgetFrameDelegate private constructor(context: Context) : BaseDelegate<W
         }
     }
 
-    override fun onWidgetClick(trigger: Boolean) {
-        if (trigger && prefManager.requestUnlock) {
-            DismissOrUnlockActivity.launch(this)
-        } else {
-            eventManager.sendEvent(Event.FrameWidgetClick)
+    override fun onWidgetClick(trigger: Boolean): Boolean {
+        val ignoreTouches = prefManager.frameIgnoreWidgetTouches
+
+        if (!ignoreTouches) {
+            if (trigger && prefManager.requestUnlock) {
+                DismissOrUnlockActivity.launch(this)
+            } else {
+                eventManager.sendEvent(Event.FrameWidgetClick)
+            }
         }
+
+        return !ignoreTouches
     }
 
     override fun onCreate() {

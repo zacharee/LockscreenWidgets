@@ -377,13 +377,15 @@ class DrawerDelegate private constructor(context: Context) :
         }
     }
 
-    override fun onWidgetClick(trigger: Boolean) {
+    override fun onWidgetClick(trigger: Boolean): Boolean {
         if (trigger && prefManager.requestUnlockDrawer) {
             DismissOrUnlockActivity.launch(this)
             eventManager.sendEvent(Event.CloseDrawer)
         } else {
             eventManager.sendEvent(Event.DrawerWidgetClick)
         }
+
+        return true
     }
 
     @SuppressLint("UnspecifiedRegisterReceiverFlag")

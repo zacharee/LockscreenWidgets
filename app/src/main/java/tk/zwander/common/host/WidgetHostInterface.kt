@@ -43,9 +43,11 @@ open class WidgetHostInterface(context: Context, id: Int, private val clickHandl
             @Suppress("UNCHECKED_CAST")
             val launchOptions = getLaunchOptions.invoke(response, view) as android.util.Pair<Intent, ActivityOptions>
 
-            checkPendingIntent(pi, widgetId)
-
-            return startPendingIntent.invoke(null, view, pi, launchOptions) as Boolean
+            return if (checkPendingIntent(pi, widgetId)) {
+                startPendingIntent.invoke(null, view, pi, launchOptions) as Boolean
+            } else {
+                false
+            }
         }
     }
 }
