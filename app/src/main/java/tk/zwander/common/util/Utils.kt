@@ -109,6 +109,10 @@ fun AppWidgetProviderInfo.loadPreviewOrIcon(context: Context, density: Int = 0, 
     return with (context) { (loadPreviewImage(context, density) ?: loadIcon(context, density))?.toSafeBitmap(maxSize = maxSize) }
 }
 
+fun AppWidgetProviderInfo.createPersistablePreviewBitmap(context: Context): String? {
+    return loadPreviewOrIcon(context, maxSize = 128.dp)?.toBase64()
+}
+
 @Suppress("DEPRECATION")
 val Context.defaultDisplayCompat: Display
     get() = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {

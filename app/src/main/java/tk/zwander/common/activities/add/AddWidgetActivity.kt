@@ -8,6 +8,7 @@ import androidx.activity.compose.setContent
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.unit.dp
 import androidx.core.view.WindowCompat
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.MainScope
@@ -67,7 +68,7 @@ abstract class AddWidgetActivity : BaseBindWidgetActivity(), CoroutineScope by M
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N_MR1) {
                             val shortcut = WidgetData.shortcut(
                                 shortcutIdManager.allocateShortcutId(),
-                                it.name, it.icon?.loadDrawable(this)?.toSafeBitmap(),
+                                it.name, it.icon?.loadDrawable(this)?.toSafeBitmap(maxSize = 128.dp),
                                 null, it.itemInfo.intent,
                                 WidgetSizeData(1, 1)
                             )

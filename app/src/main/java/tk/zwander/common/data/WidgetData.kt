@@ -17,6 +17,7 @@ import java.util.Objects
  *
  * @property id the ID of the widget
  */
+@Suppress("unused")
 @Parcelize
 data class WidgetData(
     val id: Int,
@@ -48,11 +49,11 @@ data class WidgetData(
             id: Int,
             widgetProvider: ComponentName,
             label: String,
-            icon: Bitmap?,
+            icon: String?,
             size: WidgetSizeData?,
         ): WidgetData {
             return WidgetData(
-                id, WidgetType.WIDGET, label, icon?.toBase64(),
+                id, WidgetType.WIDGET, label, icon,
                 null, null,
                 widgetProvider.flattenToString(),
                 size,

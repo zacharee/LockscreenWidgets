@@ -7,8 +7,8 @@ import tk.zwander.common.activities.add.ReconfigureWidgetActivity
 import tk.zwander.common.data.WidgetData
 import tk.zwander.common.data.WidgetSizeData
 import tk.zwander.common.util.Event
+import tk.zwander.common.util.createPersistablePreviewBitmap
 import tk.zwander.common.util.eventManager
-import tk.zwander.common.util.loadPreviewOrIcon
 import tk.zwander.common.util.prefManager
 import tk.zwander.common.util.pxAsDp
 import tk.zwander.common.util.screenSize
@@ -45,7 +45,7 @@ class ReconfigureDrawerWidgetActivity : ReconfigureWidgetActivity() {
             id,
             provider.provider,
             provider.loadLabel(packageManager),
-            provider.loadPreviewOrIcon(this),
+            provider.createPersistablePreviewBitmap(this),
             overrideSize ?: run {
                 val widthRatio = provider.minWidth.toFloat() / width
                 val defaultColSpan = floor((widthRatio * colCount)).toInt()

@@ -16,6 +16,7 @@ import android.service.quicksettings.Tile
 import android.service.quicksettings.TileService
 import android.widget.RemoteViews
 import androidx.annotation.RequiresApi
+import androidx.compose.ui.unit.dp
 import androidx.core.content.res.ResourcesCompat
 import com.android.internal.appwidget.IAppWidgetService
 import tk.zwander.common.activities.add.AddTileWidgetActivity
@@ -209,7 +210,7 @@ abstract class BaseWidgetTile : TileService(), SharedPreferences.OnSharedPrefere
                         val iconDrawable = ResourcesCompat.getDrawable(this, icon, this.newTheme())
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && iconDrawable is AdaptiveIconDrawable) {
                             val foreground = iconDrawable.foreground
-                            qsTile?.icon = Icon.createWithBitmap(foreground.toSafeBitmap().cropBitmapTransparency())
+                            qsTile?.icon = Icon.createWithBitmap(foreground.toSafeBitmap(maxSize = 128.dp).cropBitmapTransparency())
                         } else if (iconDrawable is BitmapDrawable) {
                             qsTile?.icon = Icon.createWithBitmap(qsTile?.label?.first()?.toString()?.textAsBitmap(128f, Color.WHITE))
                         } else {

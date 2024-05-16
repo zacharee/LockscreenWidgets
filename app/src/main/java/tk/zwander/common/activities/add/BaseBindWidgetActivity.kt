@@ -19,6 +19,7 @@ import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.ui.unit.dp
 import androidx.core.app.ActivityOptionsCompat
 import com.android.internal.appwidget.IAppWidgetService
 import com.bugsnag.android.Bugsnag
@@ -28,9 +29,9 @@ import tk.zwander.common.data.WidgetSizeData
 import tk.zwander.common.host.widgetHostCompat
 import tk.zwander.common.util.appWidgetManager
 import tk.zwander.common.util.componentNameCompat
+import tk.zwander.common.util.createPersistablePreviewBitmap
 import tk.zwander.common.util.getSamsungConfigureComponent
 import tk.zwander.common.util.internalActivityOptions
-import tk.zwander.common.util.loadPreviewOrIcon
 import tk.zwander.common.util.logUtils
 import tk.zwander.common.util.prefManager
 import tk.zwander.common.util.shortcutIdManager
@@ -118,7 +119,7 @@ abstract class BaseBindWidgetActivity : ComponentActivity() {
                                 .toString()
                             val icon = pinItemRequest.shortcutInfo.icon
                                 .loadDrawable(this)
-                                .toSafeBitmap()
+                                .toSafeBitmap(maxSize = 128.dp)
 
                             val intent = pinItemRequest.shortcutInfo.intent ?: run {
                                 val extras = pinItemRequest.shortcutInfo.extras ?: Bundle()
@@ -365,7 +366,7 @@ abstract class BaseBindWidgetActivity : ComponentActivity() {
             id,
             provider.provider,
             provider.loadLabel(packageManager),
-            provider.loadPreviewOrIcon(this),
+            provider.createPersistablePreviewBitmap(this),
             overrideSize ?: calculateInitialWidgetSize(provider)
         )
     }

@@ -5,10 +5,9 @@ import android.content.Context
 import tk.zwander.common.data.WidgetData
 import tk.zwander.common.data.WidgetType
 import tk.zwander.common.util.appWidgetManager
-import tk.zwander.common.util.loadPreviewOrIcon
+import tk.zwander.common.util.createPersistablePreviewBitmap
 import tk.zwander.common.util.logUtils
 import tk.zwander.common.util.prefManager
-import tk.zwander.common.util.toBase64
 
 class AddExtraWidgetInfoMigration : Migration {
     override val runOnOrBelowDatabaseVersion: Int
@@ -40,7 +39,7 @@ class AddExtraWidgetInfoMigration : Migration {
         return widget.copy(
             widgetProvider = widget.widgetProvider ?: widgetInfo.provider.flattenToString(),
             label = widget.label ?: widgetInfo.loadLabel(packageManager),
-            icon = widget.icon ?: widgetInfo.loadPreviewOrIcon(this)?.toBase64(),
+            icon = widget.icon ?: widgetInfo.createPersistablePreviewBitmap(this),
         )
     }
 }
