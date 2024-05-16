@@ -40,7 +40,7 @@ class AddExtraWidgetInfoMigration : Migration {
         return widget.copy(
             widgetProvider = widget.widgetProvider ?: widgetInfo.provider.flattenToString(),
             label = widget.label ?: widgetInfo.loadLabel(packageManager),
-            icon = widget.icon ?: widgetInfo.loadPreviewOrIcon(this, 0)?.toBase64(),
+            icon = widget.icon ?: widgetInfo.loadPreviewOrIcon(this)?.toBase64(),
         )
     }
 }

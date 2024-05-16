@@ -45,7 +45,7 @@ class ReconfigureDrawerWidgetActivity : ReconfigureWidgetActivity() {
             id,
             provider.provider,
             provider.loadLabel(packageManager),
-            provider.loadPreviewOrIcon(this, 0),
+            provider.loadPreviewOrIcon(this),
             overrideSize ?: run {
                 val widthRatio = provider.minWidth.toFloat() / width
                 val defaultColSpan = floor((widthRatio * colCount)).toInt()

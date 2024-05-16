@@ -15,6 +15,8 @@ import android.os.Vibrator
 import android.os.VibratorManager
 import android.view.Display
 import android.widget.AbsListView
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
 import androidx.core.app.ActivityOptionsCompat
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
@@ -103,8 +105,8 @@ suspend inline fun <T, S> Collection<T>.mapIndexedParallel(crossinline action: s
 val Context.safeApplicationContext: Context
     get() = if (this is Application) this else applicationContext
 
-fun AppWidgetProviderInfo.loadPreviewOrIcon(context: Context, density: Int): Bitmap? {
-    return with (context) { (loadPreviewImage(context, density) ?: loadIcon(context, density))?.toSafeBitmap() }
+fun AppWidgetProviderInfo.loadPreviewOrIcon(context: Context, density: Int = 0, maxSize: Dp = 128.dp): Bitmap? {
+    return with (context) { (loadPreviewImage(context, density) ?: loadIcon(context, density))?.toSafeBitmap(maxSize = maxSize) }
 }
 
 @Suppress("DEPRECATION")

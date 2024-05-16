@@ -365,7 +365,7 @@ abstract class BaseBindWidgetActivity : ComponentActivity() {
             id,
             provider.provider,
             provider.loadLabel(packageManager),
-            provider.loadPreviewOrIcon(this, 0),
+            provider.loadPreviewOrIcon(this),
             overrideSize ?: calculateInitialWidgetSize(provider)
         )
     }
