@@ -473,7 +473,8 @@ class DrawerDelegate private constructor(context: Context) :
     private fun showDrawer(wm: WindowManager = this.wm, hideHandle: Boolean = true) {
         try {
             wm.addView(drawer.root, params)
-        } catch (_: Exception) {
+        } catch (e: Exception) {
+            logUtils.normalLog("Error showing drawer", e)
         }
 
         if (hideHandle) {
@@ -490,7 +491,8 @@ class DrawerDelegate private constructor(context: Context) :
 
         try {
             wm.updateViewLayout(drawer.root, params)
-        } catch (_: Exception) {
+        } catch (e: Exception) {
+            logUtils.normalLog("Error updating drawer", e)
         }
     }
 
@@ -513,7 +515,8 @@ class DrawerDelegate private constructor(context: Context) :
                     try {
                         wm.removeView(drawer.root)
                         if (callListener) eventManager.sendEvent(Event.DrawerHidden)
-                    } catch (_: Exception) {
+                    } catch (e: Exception) {
+                        logUtils.normalLog("Error hiding drawer", e)
                     }
                 }, 10)
             }
