@@ -559,6 +559,8 @@ object AccessibilityUtils {
             } catch (e: IllegalStateException) {
                 //Sometimes the event is already recycled somehow.
             }
+
+            frameDelegate.updateStateAndWindowState(wm, true)
         }
     }
 }
