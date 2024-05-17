@@ -16,7 +16,6 @@ import android.os.Bundle
 import android.os.ServiceManager
 import android.telephony.PhoneNumberUtils
 import android.widget.Toast
-import androidx.activity.ComponentActivity
 import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.ui.unit.dp
@@ -24,6 +23,7 @@ import androidx.core.app.ActivityOptionsCompat
 import com.android.internal.appwidget.IAppWidgetService
 import com.bugsnag.android.Bugsnag
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import tk.zwander.common.activities.BaseActivity
 import tk.zwander.common.data.WidgetData
 import tk.zwander.common.data.WidgetSizeData
 import tk.zwander.common.host.widgetHostCompat
@@ -41,7 +41,7 @@ import tk.zwander.lockscreenwidgets.data.list.ShortcutListInfo
 import tk.zwander.lockscreenwidgets.util.WidgetFrameDelegate
 import kotlin.math.floor
 
-abstract class BaseBindWidgetActivity : ComponentActivity() {
+abstract class BaseBindWidgetActivity : BaseActivity() {
     companion object {
         private const val CONFIGURE_REQ = 1000
     }
@@ -207,9 +207,8 @@ abstract class BaseBindWidgetActivity : ComponentActivity() {
             }
         }
 
-    @Deprecated("Deprecated in Java")
+    @Suppress("OVERRIDE_DEPRECATION")
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        @Suppress("DEPRECATION")
         super.onActivityResult(requestCode, resultCode, data)
 
         configureLauncher.onActivityResult(requestCode, resultCode, data)

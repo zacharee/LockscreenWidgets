@@ -6,8 +6,13 @@ import android.os.Build
 import android.os.Bundle
 import android.view.View
 import android.view.ViewGroup
+import android.view.ViewGroup.MarginLayoutParams
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.CallSuper
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.updateLayoutParams
+import androidx.core.view.updatePaddingRelative
 import androidx.preference.Preference
 import androidx.preference.PreferenceCategory
 import androidx.preference.PreferenceFragmentCompat
@@ -80,6 +85,25 @@ abstract class CommonPreferenceFragment : PreferenceFragmentCompat() {
         super.onCreate(savedInstanceState)
 
         prefsHandler.register(requireContext())
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        ViewCompat.setOnApplyWindowInsetsListener(requireView().findViewById(R.id.recycler_view)!!) { v, windowInsets ->
+            val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars() or WindowInsetsCompat.Type.ime())
+
+            (v as RecyclerView).apply {
+                updatePaddingRelative(bottom = insets.bottom)
+                clipToPadding = false
+
+                updateLayoutParams<MarginLayoutParams> {
+                    height = ViewGroup.LayoutParams.MATCH_PARENT
+                }
+            }
+
+            WindowInsetsCompat.CONSUMED
+        }
     }
 
     @CallSuper

@@ -3,16 +3,17 @@ package tk.zwander.common.activities
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
 import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.ActivityResultLauncher
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.toArgb
-import androidx.core.view.WindowCompat
+import androidx.compose.ui.graphics.luminance
+import androidx.core.view.WindowInsetsControllerCompat
 import dev.zwander.composeintroslider.IntroSlider
 import tk.zwander.common.compose.AppTheme
 import tk.zwander.common.compose.data.rememberIntroSlides
@@ -82,24 +83,30 @@ class OnboardingActivity : ComponentActivity() {
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        enableEdgeToEdge()
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            window.isNavigationBarContrastEnforced = false
+        }
         super.onCreate(savedInstanceState)
 
-        setContent {
-            WindowCompat.setDecorFitsSystemWindows(window, false)
-            window.statusBarColor = Color.Transparent.toArgb()
-            window.navigationBarColor = Color.Transparent.toArgb()
+        val insetsControllerCompat = WindowInsetsControllerCompat(window, window.decorView)
 
+        setContent {
             AppTheme {
                 IntroSlider(
                     pages = rememberIntroSlides(startReason = retroMode, finish = ::finish),
                     onExit = ::finish,
                     onDone = {
-                        setResult(Activity.RESULT_OK)
+                        setResult(RESULT_OK)
                         finish()
                     },
                     modifier = Modifier.fillMaxSize(),
                     backPressedDispatcher = LocalOnBackPressedDispatcherOwner.current?.onBackPressedDispatcher,
                     normalizeElements = true,
+                    onContentColorChanged = {
+                        insetsControllerCompat.isAppearanceLightNavigationBars = it.luminance() <= 0.5
+                    },
                 )
             }
         }
