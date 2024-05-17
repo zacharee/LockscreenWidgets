@@ -75,7 +75,7 @@ class NotificationListener : NotificationListenerService(), EventObserver, Corou
                         val original = get(this@NotificationListener)
 
                         set(
-                            this,
+                            this@NotificationListener,
                             ByteBuddy()
                                 .subclass(wrapperClass)
                                 .name("android.service.notification.WrappingNotificationListener")
