@@ -81,7 +81,7 @@ class NotificationListener : NotificationListenerService(), EventObserver, Corou
                                 .name("android.service.notification.WrappingNotificationListener")
                                 .defineMethod("onTransact", Boolean::class.java)
                                 .withParameters(Int::class.java, Parcel::class.java, Parcel::class.java, Int::class.java)
-                                .intercept(MethodDelegation.to(MarshmallowListenerWrapper(original as INotificationListener.Stub)))
+                                .intercept(MethodDelegation.to(LollipopListenerWrapper(original as INotificationListener.Stub)))
                                 .make()
                                 .load(NotificationListenerService::class.java.classLoader, AndroidClassLoadingStrategy.Wrapping(context.cacheDir))
                                 .loaded
@@ -91,7 +91,7 @@ class NotificationListener : NotificationListenerService(), EventObserver, Corou
                         )
                     }
             } catch (e: Throwable) {
-                Bugsnag.notify(IllegalStateException("Error creating Marshmallow notification listener", e))
+                Bugsnag.notify(IllegalStateException("Error creating Lollipop notification listener", e))
             }
         }
 
@@ -207,7 +207,7 @@ class NotificationListener : NotificationListenerService(), EventObserver, Corou
         }
     }
 
-    private inner class MarshmallowListenerWrapper(private val wrapper: INotificationListener.Stub) {
+    private inner class LollipopListenerWrapper(private val wrapper: INotificationListener.Stub) {
         fun onTransact(code: Int, data: Parcel?, reply: Parcel?, flags: Int): Boolean {
             return try {
                 wrapper.onTransact(code, data, reply, flags)
