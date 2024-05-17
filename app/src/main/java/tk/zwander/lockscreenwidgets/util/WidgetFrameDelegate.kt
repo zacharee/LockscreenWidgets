@@ -190,8 +190,7 @@ class WidgetFrameDelegate private constructor(context: Context) : BaseDelegate<W
         flags =
             WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or
                     WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN or
-                    WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS or
-                    WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER
+                    WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS
         format = PixelFormat.RGBA_8888
     }
     override val rootView: View
