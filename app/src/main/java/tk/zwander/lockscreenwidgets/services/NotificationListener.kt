@@ -72,7 +72,7 @@ class NotificationListener : NotificationListenerService(), EventObserver, Corou
                 NotificationListenerService::class.java.getDeclaredField("mWrapper")
                     .apply {
                         isAccessible = true
-                        val original = get(this)
+                        val original = get(this@NotificationListener)
 
                         set(
                             this,
