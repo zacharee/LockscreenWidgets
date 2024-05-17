@@ -62,7 +62,7 @@ class NotificationListener : NotificationListenerService(), EventObserver, Corou
 
     @SuppressLint("PrivateApi", "DiscouragedPrivateApi")
     override fun onBind(intent: Intent?): IBinder {
-        super.onBind(intent)
+        val wrapper = super.onBind(intent)
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             mWrapper = NougatListenerWrapper()
@@ -95,7 +95,7 @@ class NotificationListener : NotificationListenerService(), EventObserver, Corou
             }
         }
 
-        return mWrapper
+        return wrapper
     }
 
     override fun onDestroy() {
