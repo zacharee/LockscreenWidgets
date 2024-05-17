@@ -1,5 +1,6 @@
 package tk.zwander.lockscreenwidgets.services
 
+import android.annotation.SuppressLint
 import android.app.Notification
 import android.app.NotificationManager
 import android.content.ComponentName
@@ -10,13 +11,18 @@ import android.os.IBinder
 import android.os.Parcel
 import android.os.SystemProperties
 import android.provider.Settings
+import android.service.notification.INotificationListener
 import android.service.notification.NotificationListenerService
 import android.service.notification.StatusBarNotification
+import com.bugsnag.android.Bugsnag
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
+import net.bytebuddy.ByteBuddy
+import net.bytebuddy.android.AndroidClassLoadingStrategy
+import net.bytebuddy.implementation.MethodDelegation
 import tk.zwander.common.util.Event
 import tk.zwander.common.util.EventObserver
 import tk.zwander.common.util.eventManager
@@ -36,7 +42,7 @@ val Context.isNotificationListenerActive: Boolean
  * AND [Notification.priority] > [Notification.PRIORITY_MIN] (importance for > Nougat),
  * and the user has the option enabled, the widget frame will hide.
  */
-@Suppress("ProtectedInFinal", "unused")
+@Suppress("unused")
 class NotificationListener : NotificationListenerService(), EventObserver, CoroutineScope by MainScope() {
     private var isListening = false
 
@@ -54,10 +60,40 @@ class NotificationListener : NotificationListenerService(), EventObserver, Corou
         sendUpdate()
     }
 
+    @SuppressLint("PrivateApi", "DiscouragedPrivateApi")
     override fun onBind(intent: Intent?): IBinder {
         super.onBind(intent)
 
-        mWrapper = CatchingListenerWrapper()
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            mWrapper = NougatListenerWrapper()
+        } else {
+            try {
+                val wrapperClass = Class.forName("android.service.notification.NotificationListenerService\$INotificationListenerWrapper")
+                NotificationListenerService::class.java.getDeclaredField("mWrapper")
+                    .apply {
+                        isAccessible = true
+                        val original = get(this)
+
+                        set(
+                            this,
+                            ByteBuddy()
+                                .subclass(wrapperClass)
+                                .name("android.service.notification.WrappingNotificationListener")
+                                .defineMethod("onTransact", Boolean::class.java)
+                                .withParameters(Int::class.java, Parcel::class.java, Parcel::class.java, Int::class.java)
+                                .intercept(MethodDelegation.to(MarshmallowListenerWrapper(original as INotificationListener.Stub)))
+                                .make()
+                                .load(NotificationListenerService::class.java.classLoader, AndroidClassLoadingStrategy.Wrapping(context.cacheDir))
+                                .loaded
+                                .getDeclaredConstructor()
+                                .apply { isAccessible = true }
+                                .newInstance()
+                        )
+                    }
+            } catch (e: Throwable) {
+                Bugsnag.notify(IllegalStateException("Error creating Marshmallow notification listener", e))
+            }
+        }
 
         return mWrapper
     }
@@ -161,11 +197,21 @@ class NotificationListener : NotificationListenerService(), EventObserver, Corou
             return true
         }
 
-    protected inner class CatchingListenerWrapper : NotificationListenerService.NotificationListenerWrapper() {
+    private inner class NougatListenerWrapper : NotificationListenerService.NotificationListenerWrapper() {
         override fun onTransact(code: Int, data: Parcel?, reply: Parcel?, flags: Int): Boolean {
             return try {
                 super.onTransact(code, data, reply, flags)
-            } catch (e: OutOfMemoryError) {
+            } catch (e: Throwable) {
+                false
+            }
+        }
+    }
+
+    private inner class MarshmallowListenerWrapper(private val wrapper: INotificationListener.Stub) {
+        fun onTransact(code: Int, data: Parcel?, reply: Parcel?, flags: Int): Boolean {
+            return try {
+                wrapper.onTransact(code, data, reply, flags)
+            } catch (e: Throwable) {
                 false
             }
         }
