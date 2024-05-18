@@ -5,7 +5,7 @@ androidGradlePlugin = "8.3.2"
 appcompat = "1.7.0-rc01"
 atomicfu = "0.24.0"
 bugsnagAndroid = "6.5.0"
-bugsnagAndroidGradlePlugin = "8.1.0"
+bugsnagGradlePlugin = "0.1.0"
 byteBuddyAndroid = "1.14.15"
 collapsiblepreferencecategory = "2f53f2d367"
 colorpicker = "c300c66e93"
@@ -69,7 +69,7 @@ taskerpluginlibrary = { module = "com.joaomgcd:taskerpluginlibrary", version.ref
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "androidGradlePlugin" }
-bugsnag-android = { id = "com.bugsnag.android.gradle", version.ref = "bugsnagAndroidGradlePlugin" }
+bugsnag = { id = "com.bugsnag.gradle", version.ref = "bugsnagGradlePlugin" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlin-atomicfu = { id = "org.jetbrains.kotlin.plugin.atomicfu", version.ref = "kotlin" }
 kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
