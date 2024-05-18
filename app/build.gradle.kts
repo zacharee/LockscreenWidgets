@@ -66,7 +66,6 @@ dependencies {
     implementation(libs.hiddenapibypass)
     implementation(libs.gson)
     implementation(libs.material)
-    implementation(libs.dotLoadersPack)
     implementation(libs.byte.buddy.android)
     implementation(libs.seekBarPreference)
     implementation(libs.collapsiblePreferenceCategory)
@@ -95,4 +94,5 @@ dependencies {
     implementation(libs.taskerpluginlibrary)
 
     implementation(libs.relinker)
+    implementation(libs.compose.spinkit)
 }

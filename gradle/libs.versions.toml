@@ -12,10 +12,10 @@ colorpicker = "c300c66e93"
 composeBom = "2024.05.00"
 compose-material3 = "1.3.0-beta01"
 composeintroslider = "a611e4f624"
+composeSpinkit = "1.0.4"
 constraintlayout = "2.2.0-alpha13"
 coreKtx = "1.13.1"
 coroutines = "1.8.1"
-dotloaderspackAndroid = "v1.4.2"
 gson = "2.10.1"
 hiddenapibypass = "4.3"
 kotlin = "2.0.0-RC3"
@@ -45,11 +45,11 @@ compose-animation = { module = "androidx.compose.animation:animation" }
 compose-bom = { module = "androidx.compose:compose-bom", version.ref = "composeBom" }
 compose-foundation = { module = "androidx.compose.foundation:foundation" }
 compose-material3 = { module = "androidx.compose.material3:material3", version.ref = "compose-material3" }
+compose-spinkit = { module = "com.github.OCNYang:Compose-SpinKit", version.ref = "composeSpinkit" }
 compose-ui-tooling = { module = "androidx.compose.ui:ui-tooling" }
 composeIntroSlider = { module = "com.github.zacharee:ComposeIntroSlider", version.ref = "composeintroslider" }
 constraintlayout = { module = "androidx.constraintlayout:constraintlayout", version.ref = "constraintlayout" }
 core-ktx = { module = "androidx.core:core-ktx", version.ref = "coreKtx" }
-dotLoadersPack = { module = "com.github.agrawalsuneet:DotLoadersPack-Android", version.ref = "dotloaderspackAndroid" }
 gson = { module = "com.google.code.gson:gson", version.ref = "gson" }
 hiddenapibypass = { module = "org.lsposed.hiddenapibypass:hiddenapibypass", version.ref = "hiddenapibypass" }
 kotlin-stdlib = { module = "org.jetbrains.kotlin:kotlin-stdlib", version.ref = "kotlin" }

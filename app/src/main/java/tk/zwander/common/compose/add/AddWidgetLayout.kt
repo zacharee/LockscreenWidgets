@@ -44,7 +44,7 @@ fun AddWidgetLayout(
             Crossfade(
                 modifier = Modifier.fillMaxSize(),
                 targetState = items.isEmpty(),
-                label = "AddWidget"
+                label = "AddWidget",
             ) {
                 if (it) {
                     Loader(modifier = Modifier.fillMaxSize())
