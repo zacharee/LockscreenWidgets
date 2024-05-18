@@ -114,6 +114,7 @@ fun ClearFrameDataCard(
             containerColor = Color.Transparent,
             contentColor = MaterialTheme.colorScheme.onSurface,
         ),
+        border = ButtonDefaults.outlinedButtonBorder(true),
     ) {
         Column(
             modifier = Modifier.padding(
