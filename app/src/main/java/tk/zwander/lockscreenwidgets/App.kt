@@ -83,6 +83,10 @@ class App : Application() {
         ReLinker.loadLibrary(this, "bugsnag-plugin-android-anr")
 
         Bugsnag.start(this)
+        Bugsnag.addOnError {
+            val error = it.originalError ?: return@addOnError true
+            error !is ClassCastException || error.stackTrace.firstOrNull()?.className?.contains("PmsHookApplication") != true
+        }
 
         val previousHandler = Thread.getDefaultUncaughtExceptionHandler()
         Thread.setDefaultUncaughtExceptionHandler(GlobalExceptionHandler(this, previousHandler))
