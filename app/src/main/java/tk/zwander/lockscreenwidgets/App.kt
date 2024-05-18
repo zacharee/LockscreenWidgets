@@ -8,6 +8,7 @@ import android.content.IntentFilter
 import android.database.ContentObserver
 import android.net.Uri
 import android.os.Build
+import android.os.DeadSystemException
 import android.os.PowerManager
 import android.provider.Settings
 import androidx.core.content.ContextCompat
@@ -85,7 +86,18 @@ class App : Application() {
         Bugsnag.start(this)
         Bugsnag.addOnError {
             val error = it.originalError ?: return@addOnError true
-            error !is ClassCastException || error.stackTrace.firstOrNull()?.className?.contains("PmsHookApplication") != true
+
+            if (error is ClassCastException && error.stackTrace.firstOrNull()?.className?.contains("PmsHookApplication") == true) {
+                return@addOnError false
+            }
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                if (error is DeadSystemException || error is RuntimeException && error.cause is DeadSystemException) {
+                    return@addOnError false
+                }
+            }
+
+            true
         }
 
         val previousHandler = Thread.getDefaultUncaughtExceptionHandler()
