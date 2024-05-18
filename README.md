@@ -3,6 +3,8 @@ Lockscreen Widgets adds a frame to your lock screen where you can add home scree
 
 It also has a widget drawer with a handle you can drag to open it from anywhere.
 
+Note that Lockscreen Widgets is _not_ designed to work on the Always-On Display.
+
 ## Downloads
 The precompiled version of Lockscreen Widgets is a paid app, available on the [Google Play Store](https://play.google.com/store/apps/details?id=tk.zwander.lockscreenwidgets).
 
