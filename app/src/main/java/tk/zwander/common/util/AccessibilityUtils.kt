@@ -397,7 +397,6 @@ object AccessibilityUtils {
             )
 
             newState = frameDelegate.state.copy()
-            newFrameCommonState = frameDelegate.commonState.copy()
 
             //The below block can (very rarely) take over half a second to execute, so only run it
             //if we actually need to (i.e. on the lock screen and screen is on).
@@ -471,7 +470,6 @@ object AccessibilityUtils {
                         wm = wm,
                         updateAccessibility = true,
                         transform = { newState },
-                        commonTransform = { newFrameCommonState },
                     )
                 }
 
