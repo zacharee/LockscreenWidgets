@@ -20,8 +20,8 @@ import java.io.IOException
 @SuppressLint("DiscouragedApi", "InlinedApi")
 fun Context.getRemoteDrawable(
     packageName: String,
-    resource: Intent.ShortcutIconResource?
-): Bitmap? {
+    resource: Intent.ShortcutIconResource?,
+): Drawable? {
     val appInfo = packageManager.getApplicationInfoInAnyState(packageName)
     val remRes = packageManager.getResourcesForApplication(appInfo)
 
@@ -43,7 +43,7 @@ fun Context.getRemoteDrawable(
     resourceId: Int,
     remRes: Resources,
     defaultGetter: () -> Drawable = { packageManager.getApplicationIcon(packageName) }
-): Bitmap? {
+): Drawable? {
     val drawable = when (resourceId) {
         0 -> defaultGetter()
         else -> {
@@ -56,31 +56,7 @@ fun Context.getRemoteDrawable(
         }
     }
 
-    return drawable.mutate()?.run {
-        val width = intrinsicWidth
-        val height = intrinsicHeight
-
-        val ratio = width.toDouble() / height.toDouble()
-        val scaledWidth = when {
-            width > 512 -> 512
-            height > 512 -> 512 * ratio
-            else -> width
-        }
-        val scaledHeight = when {
-            width > 512 -> 512 / ratio
-            height > 512 -> 512
-            else -> height
-        }
-
-        if (width <= 0 || height <= 0) {
-            null
-        } else {
-            toBitmap(
-                scaledWidth.toInt(),
-                scaledHeight.toInt()
-            ).run { copy(config, false) }
-        }
-    }
+    return drawable.mutate()
 }
 
 fun Bitmap?.toByteArray(): ByteArray? {

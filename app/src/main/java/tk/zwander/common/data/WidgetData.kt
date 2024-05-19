@@ -6,10 +6,12 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.os.Parcelable
+import androidx.compose.ui.unit.dp
 import kotlinx.parcelize.Parcelize
 import tk.zwander.common.util.base64ToBitmap
 import tk.zwander.common.util.getRemoteDrawable
 import tk.zwander.common.util.toBase64
+import tk.zwander.common.util.toSafeBitmap
 import java.util.Objects
 
 /**
@@ -24,6 +26,7 @@ data class WidgetData(
     val type: WidgetType? = WidgetType.WIDGET,
     val label: String?,
     val icon: String?,
+    @Deprecated("Pass a Bitmap as a Base64 String to [icon] instead.")
     val iconRes: Intent.ShortcutIconResource?,
     val shortcutIntent: Intent?,
     val widgetProvider: String?,
@@ -82,10 +85,12 @@ data class WidgetData(
         get() = widgetProvider?.let { ComponentName.unflattenFromString(it) }
 
     context(Context)
+    @Suppress("DEPRECATION")
     val iconBitmap: Bitmap?
         get() = icon?.base64ToBitmap() ?: iconRes?.run {
             try {
                 getRemoteDrawable(this.packageName, this)
+                    ?.toSafeBitmap(maxSize = 128.dp)
             } catch (e: PackageManager.NameNotFoundException) {
                 return null
             }

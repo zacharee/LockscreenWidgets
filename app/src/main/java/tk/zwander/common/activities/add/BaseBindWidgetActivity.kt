@@ -9,7 +9,7 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.pm.LauncherApps
-import android.graphics.Bitmap
+import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -30,6 +30,7 @@ import tk.zwander.common.host.widgetHostCompat
 import tk.zwander.common.util.appWidgetManager
 import tk.zwander.common.util.componentNameCompat
 import tk.zwander.common.util.createPersistablePreviewBitmap
+import tk.zwander.common.util.getRemoteDrawable
 import tk.zwander.common.util.getSamsungConfigureComponent
 import tk.zwander.common.util.internalActivityOptions
 import tk.zwander.common.util.logUtils
@@ -91,11 +92,15 @@ abstract class BaseBindWidgetActivity : BaseActivity() {
                             val iconRes =
                                 data.getParcelableExtra<Intent.ShortcutIconResource?>(Intent.EXTRA_SHORTCUT_ICON_RESOURCE)
                             val iconBmp =
-                                data.getParcelableExtra<Bitmap?>(Intent.EXTRA_SHORTCUT_ICON)
+                                data.getParcelableExtra(Intent.EXTRA_SHORTCUT_ICON) ?: try {
+                                    getRemoteDrawable(iconRes.packageName, iconRes)?.toSafeBitmap(maxSize = 128.dp)
+                                } catch (e: PackageManager.NameNotFoundException) {
+                                    null
+                                }
 
                             val shortcut = WidgetData.shortcut(
                                 shortcutIdManager.allocateShortcutId(),
-                                name, iconBmp, iconRes, shortcutIntent,
+                                name, iconBmp, null, shortcutIntent,
                                 WidgetSizeData(1, 1)
                             )
 
