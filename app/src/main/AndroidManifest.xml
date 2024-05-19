@@ -25,8 +25,6 @@
     <uses-permission android:name="com.android.calendar.huawei.permission.CALENDAR_RECESS" />
     <uses-permission android:name="com.huawei.calendar.permission.WRITE_CALENDAR_RECESS" />
 
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" tools:node="remove" />
-
     <uses-sdk tools:overrideLibrary="com.example.jetpack_loading" />
 
     <application
@@ -65,6 +63,7 @@
         <activity android:name="tk.zwander.lockscreenwidgets.activities.SettingsActivity"
             android:exported="false"
             android:label="@string/settings"
+            android:theme="@style/AppTheme.NoActionBar"
             />
         <activity android:name="tk.zwander.common.activities.DismissOrUnlockActivity"
             android:exported="false"

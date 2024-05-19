@@ -3,11 +3,10 @@ package tk.zwander.common.activities
 import android.os.Build
 import android.os.Bundle
 import androidx.activity.enableEdgeToEdge
-import androidx.appcompat.app.AppCompatActivity
+import androidx.fragment.app.FragmentActivity
 
-abstract class BaseActivity : AppCompatActivity() {
+abstract class BaseActivity : FragmentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
-        supportActionBar?.hide()
         enableEdgeToEdge()
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {

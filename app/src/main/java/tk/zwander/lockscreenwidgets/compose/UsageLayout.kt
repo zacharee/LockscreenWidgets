@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Surface
@@ -70,7 +69,6 @@ private fun rememberUsageInfos(): List<UsageInfo> {
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun UsageLayout(
     title: String,
@@ -83,10 +81,10 @@ fun UsageLayout(
     val items = rememberUsageInfos()
 
     Surface(
-        modifier = modifier
+        modifier = modifier,
     ) {
         Column(
-            modifier = Modifier.fillMaxSize()
+            modifier = Modifier.fillMaxSize(),
         ) {
             TitleBar(title = title)
 
@@ -96,8 +94,8 @@ fun UsageLayout(
                 contentPadding = insetsContentPadding(
                     WindowInsets.navigationBars,
                     WindowInsets.ime,
-                    extraPadding = PaddingValues(16.dp)
-                )
+                    extraPadding = PaddingValues(16.dp),
+                ),
             ) {
                 items(items, { it.hashCode() }) { item ->
                     OutlinedCard(
@@ -110,15 +108,15 @@ fun UsageLayout(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(8.dp),
-                            verticalArrangement = Arrangement.spacedBy(8.dp)
+                            verticalArrangement = Arrangement.spacedBy(8.dp),
                         ) {
                             Text(
                                 text = stringResource(id = item.title),
-                                style = MaterialTheme.typography.titleMedium
+                                style = MaterialTheme.typography.titleMedium,
                             )
 
                             Text(
-                                text = stringResource(id = item.message)
+                                text = stringResource(id = item.message),
                             )
                         }
                     }
@@ -136,7 +134,7 @@ fun UsageLayout(
                 TextButton(onClick = { selectedInfo = null }) {
                     Text(text = stringResource(id = android.R.string.ok))
                 }
-            }
+            },
         )
     }
 }

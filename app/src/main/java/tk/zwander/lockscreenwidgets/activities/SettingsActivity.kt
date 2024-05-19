@@ -4,13 +4,25 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.view.MenuItem
-import android.view.ViewGroup
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
-import androidx.core.view.updateLayoutParams
+import android.widget.FrameLayout
+import androidx.activity.compose.setContent
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.material3.Surface
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.viewinterop.AndroidView
+import androidx.core.os.bundleOf
 import androidx.preference.PreferenceFragmentCompat
 import tk.zwander.common.activities.BaseActivity
-import tk.zwander.lockscreenwidgets.databinding.ActivitySettingsBinding
+import tk.zwander.common.compose.AppTheme
+import tk.zwander.common.compose.components.TitleBar
+import tk.zwander.lockscreenwidgets.R
 import tk.zwander.lockscreenwidgets.fragments.SettingsFragment
 
 /**
@@ -41,35 +53,40 @@ class SettingsActivity : BaseActivity() {
             return
         }
 
-        val binding = ActivitySettingsBinding.inflate(layoutInflater)
-        setContentView(binding.root)
+        setContent {
+            AppTheme {
+                Surface(
+                    modifier = Modifier.fillMaxSize()
+                        .statusBarsPadding(),
+                ) {
+                    Column(
+                        modifier = Modifier.fillMaxSize(),
+                    ) {
+                        TitleBar(title = title.toString())
 
-        ViewCompat.setOnApplyWindowInsetsListener(binding.root) { v, windowInsets ->
-            val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
+                        val bottomPadding = with(LocalDensity.current) { WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding().toPx() }
 
-            v.updateLayoutParams<ViewGroup.MarginLayoutParams> {
-                leftMargin = insets.left
-                topMargin = insets.top
-                rightMargin = insets.right
+                        AndroidView(
+                            factory = { FrameLayout(it).apply { id = R.id.content } },
+                            modifier = Modifier.fillMaxWidth()
+                                .weight(1f),
+                        ) { view ->
+                            val fragment = supportFragmentManager.fragmentFactory.instantiate(
+                                classLoader,
+                                fragmentClass.canonicalName ?: throw IllegalStateException("Unable to instantiate $fragmentClass. Canonical name null!")
+                            )
+
+                            fragment.arguments = bundleOf("bottomInset" to bottomPadding)
+
+                            supportFragmentManager.beginTransaction()
+                                .setReorderingAllowed(true)
+                                .replace(view.id, fragment, null)
+                                .commitNowAllowingStateLoss()
+                        }
+                    }
+                }
             }
-
-            windowInsets
         }
-
-        val fragment = supportFragmentManager.fragmentFactory.instantiate(
-            classLoader,
-            fragmentClass.canonicalName ?: throw IllegalStateException("Unable to instantiate $fragmentClass. Canonical name null!")
-        )
-
-        supportFragmentManager.beginTransaction()
-            .setReorderingAllowed(true)
-            .replace(binding.fragment.id, fragment, null)
-            .commitNowAllowingStateLoss()
-
-        supportActionBar?.show()
-        supportActionBar?.setDisplayHomeAsUpEnabled(true)
-        supportActionBar?.setDisplayShowHomeEnabled(true)
-        supportActionBar?.elevation = 0f
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {

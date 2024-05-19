@@ -23,7 +23,7 @@ class UsageActivity : BaseActivity() {
                 UsageLayout(
                     title = title.toString(),
                     modifier = Modifier.fillMaxSize()
-                        .statusBarsPadding()
+                        .statusBarsPadding(),
                 )
             }
         }

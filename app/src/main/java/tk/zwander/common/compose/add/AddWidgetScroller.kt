@@ -14,10 +14,9 @@ import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.ime
-import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
@@ -58,8 +57,7 @@ fun AddWidgetScroller(
     LazyColumn(
         modifier = modifier,
         contentPadding = WindowInsets
-            .statusBars
-            .add(WindowInsets.navigationBars)
+            .systemBars
             .add(WindowInsets.ime)
             .add(WindowInsets(top = searchBarHeight))
             .add(WindowInsets(top = 8.dp))
@@ -70,27 +68,27 @@ fun AddWidgetScroller(
                 AppHeader(
                     app = app,
                     modifier = Modifier
-                        .fillMaxWidth()
+                        .fillMaxWidth(),
                 )
 
                 LazyRow(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    contentPadding = PaddingValues(8.dp)
+                    contentPadding = PaddingValues(8.dp),
                 ) {
                     items(
                         items = app.widgets.toList(),
-                        key = { it.itemInfo.hashCode() }
+                        key = { it.itemInfo.hashCode() },
                     ) { widget ->
                         val icon = icon(
                             info = widget,
-                            key = widget.itemInfo.provider
+                            key = widget.itemInfo.provider,
                         )
 
                         WidgetItem(
                             image = icon,
                             label = widget.itemInfo.loadLabel(context.packageManager),
-                            subLabel = "${widget.itemInfo.minWidth}x${widget.itemInfo.minHeight}"
+                            subLabel = "${widget.itemInfo.minWidth}x${widget.itemInfo.minHeight}",
                         ) {
                             onSelected(widget)
                         }
@@ -98,7 +96,7 @@ fun AddWidgetScroller(
 
                     items(
                         items = app.shortcuts.toList(),
-                        key = { it.itemInfo.activityInfo.componentNameCompat }
+                        key = { it.itemInfo.activityInfo.componentNameCompat },
                     ) { shortcut ->
                         val icon = icon(
                             info = shortcut,
@@ -208,7 +206,7 @@ private fun icon(
         icon = try {
             withContext(Dispatchers.IO) {
                 with (context) {
-                    info.icon?.loadDrawable(context)?.toSafeBitmap()
+                    info.icon?.loadDrawable(context)?.toSafeBitmap(maxSize = 128.dp)
                 }
             }
         } catch (e: PackageManager.NameNotFoundException) {
