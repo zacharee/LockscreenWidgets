@@ -167,7 +167,7 @@ object AccessibilityUtils {
                         root,
                         sysUiWindowNodes,
                         sysUiWindowViewIds,
-                        sysUiWindowAwaits
+                        sysUiWindowAwaits,
                     ) { node ->
                         launch(Dispatchers.IO) {
                             processNode(nodeState, node, isOnKeyguard)
@@ -286,7 +286,9 @@ object AccessibilityUtils {
                 } catch (e: IllegalStateException) {
                     try {
                         parentNode.isSealed = true
-                        parentNode.getChild(i)
+                        parentNode.getChild(i).also {
+                            parentNode.isSealed = false
+                        }
                     } catch (e: Exception) {
                         null
                     }
@@ -476,27 +478,23 @@ object AccessibilityUtils {
                     windowInfo.sysUiWindowNodes.forEachParallel { node ->
                         try {
                             node.isSealed = false
-                        } catch (_: Throwable) {
-                        }
+                        } catch (_: Throwable) {}
 
                         try {
                             @Suppress("DEPRECATION")
                             node.recycle()
-                        } catch (_: IllegalStateException) {
-                        }
+                        } catch (_: IllegalStateException) {}
                     }
 
                     windowInfo.windows.forEachParallel {
                         try {
                             it.root?.isSealed = false
-                        } catch (_: Throwable) {
-                        }
+                        } catch (_: Throwable) {}
 
                         try {
                             @Suppress("DEPRECATION")
                             it.root?.recycle()
-                        } catch (_: IllegalStateException) {
-                        }
+                        } catch (_: IllegalStateException) {}
                     }
                 }
             }
