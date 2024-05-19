@@ -1,7 +1,7 @@
 package tk.zwander.common.compose.add
 
 import android.content.pm.PackageManager
-import android.graphics.Bitmap
+import android.graphics.drawable.Drawable
 import android.os.Build
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
@@ -31,17 +31,16 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.RectangleShape
-import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.google.accompanist.drawablepainter.rememberDrawablePainter
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import tk.zwander.common.data.AppInfo
 import tk.zwander.common.util.componentNameCompat
 import tk.zwander.common.util.logUtils
-import tk.zwander.common.util.toSafeBitmap
 import tk.zwander.lockscreenwidgets.R
 import tk.zwander.lockscreenwidgets.data.list.BaseListInfo
 
@@ -158,23 +157,21 @@ private fun AppHeader(
             horizontalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             var icon by remember(app.appInfo.packageName) {
-                mutableStateOf<Bitmap?>(null)
+                mutableStateOf<Drawable?>(null)
             }
 
             LaunchedEffect(key1 = app.appInfo.packageName) {
                 icon = withContext(Dispatchers.IO) {
-                    with (context) {
-                        app.appInfo.loadIcon(context.packageManager)
-                            .mutate().toSafeBitmap()
-                    }
+                    app.appInfo.loadIcon(context.packageManager)
+                        .mutate()
                 }
             }
 
-            val image = icon?.asImageBitmap()
+            val image = icon
 
             if (image != null) {
                 Image(
-                    bitmap = image,
+                    painter = rememberDrawablePainter(image),
                     contentDescription = app.appName,
                     modifier = Modifier.size(36.dp)
                 )
@@ -195,19 +192,17 @@ private fun AppHeader(
 private fun icon(
     info: BaseListInfo<*>,
     key: Any?,
-): Bitmap? {
+): Drawable? {
     val context = LocalContext.current
 
     var icon by remember(key) {
-        mutableStateOf<Bitmap?>(null)
+        mutableStateOf<Drawable?>(null)
     }
 
     LaunchedEffect(key) {
         icon = try {
             withContext(Dispatchers.IO) {
-                with (context) {
-                    info.icon?.loadDrawable(context)?.toSafeBitmap(maxSize = 128.dp)
-                }
+                info.icon?.loadDrawable(context)
             }
         } catch (e: PackageManager.NameNotFoundException) {
             context.logUtils.normalLog("Unable to load icon for ${info.appInfo.appInfo.packageName}.", e)
