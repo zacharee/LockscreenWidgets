@@ -54,7 +54,8 @@ object AccessibilityUtils {
         if (isOnKeyguard && prefManager.hideOnSecurityPage && !nodeState.onMainLockscreen.value) {
             if (node.hasVisibleIds(
                     "com.android.systemui:id/notification_panel",
-                    "com.android.systemui:id/left_button"
+                    "com.android.systemui:id/left_button",
+                    "com.android.systemui:id/camera_button",
                 )
             ) {
                 nodeState.onMainLockscreen.value = true
