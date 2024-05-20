@@ -325,24 +325,23 @@ object AccessibilityUtils {
             //so it shouldn't be noticeable to the user. We use this to check the current keyguard
             //state and, if applicable, send the keyguard dismissal broadcast.
 
-            var newState = frameDelegate.state.copy()
-            var newFrameCommonState = frameDelegate.commonState.copy()
-
-            newState = try {
-                newState.copy(showingKeyboard = imm.inputMethodWindowVisibleHeight > 0)
-            } catch (e: Throwable) {
-                // Fetching the IME height can cause the system to throw an NPE:
-                // "Attempt to read from field 'com.android.server.wm.DisplayFrames com.android.server.wm.DisplayContent.mDisplayFrames' on a null object reference".
-                // If this happens, assume the keyboard isn't showing.
-                newState.copy(showingKeyboard = false)
+            frameDelegate.updateState {
+                try {
+                    it.copy(showingKeyboard = imm.inputMethodWindowVisibleHeight > 0)
+                } catch (e: Throwable) {
+                    // Fetching the IME height can cause the system to throw an NPE:
+                    // "Attempt to read from field 'com.android.server.wm.DisplayFrames com.android.server.wm.DisplayContent.mDisplayFrames' on a null object reference".
+                    // If this happens, assume the keyboard isn't showing.
+                    it.copy(showingKeyboard = false)
+                }
             }
 
             //Check if the screen is on.
             val isScreenOn = power.isInteractive
             if (frameDelegate.commonState.isScreenOn != isScreenOn) {
                 //Make sure to turn off temp hide if it was on.
-                newState = newState.copy(isTempHide = false)
-                newFrameCommonState = newFrameCommonState.copy(isScreenOn = isScreenOn)
+                frameDelegate.updateState { it.copy(isTempHide = false) }
+                frameDelegate.updateCommonState { it.copy(isScreenOn = isScreenOn) }
                 drawerDelegate.updateCommonState { it.copy(isScreenOn = isScreenOn) }
             }
 
@@ -354,7 +353,7 @@ object AccessibilityUtils {
             }
 
             if (isOnKeyguard != frameDelegate.commonState.wasOnKeyguard) {
-                newFrameCommonState = newFrameCommonState.copy(wasOnKeyguard = isOnKeyguard)
+                frameDelegate.updateCommonState { it.copy(wasOnKeyguard = isOnKeyguard) }
                 //Update the keyguard dismissal Activity that the lock screen
                 //has been dismissed.
                 if (!isOnKeyguard) {
@@ -363,7 +362,7 @@ object AccessibilityUtils {
             }
 
             val rotation = defaultDisplayCompat.rotation
-            newFrameCommonState = newFrameCommonState.copy(screenOrientation = rotation)
+            frameDelegate.updateCommonState { it.copy(screenOrientation = rotation) }
             drawerDelegate.updateCommonState { it.copy(screenOrientation = rotation) }
 
             if (isDebug && event != null) {
@@ -392,11 +391,7 @@ object AccessibilityUtils {
             frameDelegate.updateStateAndWindowState(
                 wm = wm,
                 updateAccessibility = true,
-                transform = { newState },
-                commonTransform = { newFrameCommonState },
             )
-
-            newState = frameDelegate.state.copy()
 
             //The below block can (very rarely) take over half a second to execute, so only run it
             //if we actually need to (i.e. on the lock screen and screen is on).
@@ -435,43 +430,42 @@ object AccessibilityUtils {
                 }
 
                 windowInfo?.let {
-                    newState = newState.copy(
-                        //Samsung's Screen-Off Memo is really just a normal Activity that shows over the lock screen.
-                        //However, it's not an Application-type window for some reason, so it won't hide with the
-                        //currentAppLayer check. Explicitly check for its existence here.
-                        isOnScreenOffMemo = isOnKeyguard && windowInfo.hasScreenOffMemoWindow,
-                        isOnEdgePanel = windowInfo.hasEdgePanelWindow,
-                        isOnFaceWidgets = windowInfo.hasFaceWidgetsWindow,
-                        //Generate "layer" values for the System UI window and for the topmost app window, if
-                        //it exists.
-                        //currentAppLayer *should* be -1 even if there's an app open in the background,
-                        //since getWindows() is only meant to return windows that can actually be
-                        //interacted with. The only time it should be anything else (usually 1) is
-                        //if an app is displaying above the keyguard, such as the incoming call
-                        //screen or the camera.
-                        currentAppLayer = if (windowInfo.topAppWindowIndex != -1) windowInfo.windows.size - windowInfo.topAppWindowIndex else windowInfo.topAppWindowIndex,
-                        currentSysUiLayer = if (windowInfo.minSysUiWindowIndex != -1) windowInfo.windows.size - windowInfo.minSysUiWindowIndex else windowInfo.minSysUiWindowIndex,
-                        currentSystemLayer = if (windowInfo.topNonSysUiWindowIndex != -1) windowInfo.windows.size - windowInfo.topNonSysUiWindowIndex else windowInfo.topNonSysUiWindowIndex,
-                        //This is mostly a debug value to see which app LSWidg thinks is on top.
-                        currentAppPackage = windowInfo.topAppWindowPackageName,
-                        hidingForPresentApp = windowInfo.hasHideForPresentApp,
-                        onMainLockscreen = windowInfo.nodeState.onMainLockscreen.value,
-                        showingNotificationsPanel = windowInfo.nodeState.showingNotificationsPanel.value,
-                        notificationsPanelFullyExpanded = windowInfo.nodeState.hasMoreButton.value && !windowInfo.nodeState.hasClearAllButton.value,
-                        hideForPresentIds = windowInfo.nodeState.hideForPresentIds.value,
-                        hideForNonPresentIds = windowInfo.nodeState.hideForNonPresentIds.value,
-                    )
+                    frameDelegate.updateState {
+                        it.copy(
+                            //Samsung's Screen-Off Memo is really just a normal Activity that shows over the lock screen.
+                            //However, it's not an Application-type window for some reason, so it won't hide with the
+                            //currentAppLayer check. Explicitly check for its existence here.
+                            isOnScreenOffMemo = isOnKeyguard && windowInfo.hasScreenOffMemoWindow,
+                            isOnEdgePanel = windowInfo.hasEdgePanelWindow,
+                            isOnFaceWidgets = windowInfo.hasFaceWidgetsWindow,
+                            //Generate "layer" values for the System UI window and for the topmost app window, if
+                            //it exists.
+                            //currentAppLayer *should* be -1 even if there's an app open in the background,
+                            //since getWindows() is only meant to return windows that can actually be
+                            //interacted with. The only time it should be anything else (usually 1) is
+                            //if an app is displaying above the keyguard, such as the incoming call
+                            //screen or the camera.
+                            currentAppLayer = if (windowInfo.topAppWindowIndex != -1) windowInfo.windows.size - windowInfo.topAppWindowIndex else windowInfo.topAppWindowIndex,
+                            currentSysUiLayer = if (windowInfo.minSysUiWindowIndex != -1) windowInfo.windows.size - windowInfo.minSysUiWindowIndex else windowInfo.minSysUiWindowIndex,
+                            currentSystemLayer = if (windowInfo.topNonSysUiWindowIndex != -1) windowInfo.windows.size - windowInfo.topNonSysUiWindowIndex else windowInfo.topNonSysUiWindowIndex,
+                            //This is mostly a debug value to see which app LSWidg thinks is on top.
+                            currentAppPackage = windowInfo.topAppWindowPackageName,
+                            hidingForPresentApp = windowInfo.hasHideForPresentApp,
+                            onMainLockscreen = windowInfo.nodeState.onMainLockscreen.value,
+                            showingNotificationsPanel = windowInfo.nodeState.showingNotificationsPanel.value,
+                            notificationsPanelFullyExpanded = windowInfo.nodeState.hasMoreButton.value && !windowInfo.nodeState.hasClearAllButton.value,
+                            hideForPresentIds = windowInfo.nodeState.hideForPresentIds.value,
+                            hideForNonPresentIds = windowInfo.nodeState.hideForNonPresentIds.value,
+                        )
+                    }
                 }
 
-                logUtils.debugLog("NewState $newState", null)
+                logUtils.debugLog("NewState ${frameDelegate.state}", null)
 
-                launch {
-                    frameDelegate.updateStateAndWindowState(
-                        wm = wm,
-                        updateAccessibility = true,
-                        transform = { newState },
-                    )
-                }
+                frameDelegate.updateStateAndWindowState(
+                    wm = wm,
+                    updateAccessibility = true,
+                )
 
                 windowInfo?.let {
                     windowInfo.sysUiWindowNodes.forEachParallel { node ->
