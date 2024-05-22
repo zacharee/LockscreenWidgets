@@ -27,9 +27,11 @@ import tk.zwander.common.activities.BaseActivity
 import tk.zwander.common.data.WidgetData
 import tk.zwander.common.data.WidgetSizeData
 import tk.zwander.common.host.widgetHostCompat
+import tk.zwander.common.util.FrameSizeAndPosition
 import tk.zwander.common.util.appWidgetManager
 import tk.zwander.common.util.componentNameCompat
 import tk.zwander.common.util.createPersistablePreviewBitmap
+import tk.zwander.common.util.frameSizeAndPosition
 import tk.zwander.common.util.getRemoteDrawable
 import tk.zwander.common.util.getSamsungConfigureComponent
 import tk.zwander.common.util.internalActivityOptions
@@ -338,9 +340,9 @@ abstract class BaseBindWidgetActivity : BaseActivity() {
     protected open val rowCount: Int
         get() = prefManager.frameRowCount
     protected open val height: Float
-        get() = prefManager.frameHeightDp
+        get() = frameSizeAndPosition.getSizeForType(FrameSizeAndPosition.FrameType.LockNormal.Portrait).y
     protected open val width: Float
-        get() = prefManager.frameWidthDp
+        get() = frameSizeAndPosition.getSizeForType(FrameSizeAndPosition.FrameType.LockNormal.Portrait).y
 
     protected open fun calculateInitialWidgetColSpan(provider: AppWidgetProviderInfo): Int {
         val widthRatio = provider.minWidth.toFloat() / width

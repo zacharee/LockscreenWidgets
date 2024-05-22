@@ -207,9 +207,14 @@ class WidgetFrameDelegate private constructor(context: Context) : BaseDelegate<W
     private val binding =
         WidgetFrameBinding.inflate(LayoutInflater.from(ContextThemeWrapper(this, R.style.AppTheme)))
     override val gridLayoutManager = SpannedLayoutManager()
-    override val adapter = WidgetFrameAdapter(appWidgetManager, widgetHost) { item, _ ->
-        binding.removeWidgetConfirmation.root.show(item)
-    }
+    override val adapter = WidgetFrameAdapter(
+        manager = appWidgetManager,
+        host = widgetHost,
+        onRemoveCallback = { item, _ ->
+            binding.removeWidgetConfirmation.root.show(item)
+        },
+        saveTypeGetter = { saveMode },
+    )
 
     override val prefsHandler = HandlerRegistry {
         handler(PrefManager.KEY_CURRENT_WIDGETS) {

@@ -11,6 +11,28 @@ import tk.zwander.lockscreenwidgets.R
 val Context.frameSizeAndPosition: FrameSizeAndPosition
     get() = FrameSizeAndPosition.getInstance(this)
 
+fun Context.calculateNCPosXFromRightDefault(type: FrameSizeAndPosition.FrameType): Int {
+    val fromRight = dpAsPx(resources.getInteger(R.integer.def_notification_pos_x_from_right_dp))
+    val screenWidth = screenSize.x
+    val frameWidthPx = dpAsPx(frameSizeAndPosition.getSizeForType(type).x)
+
+    val frameRight = (frameWidthPx / 2f)
+    val coord = (screenWidth / 2f) - fromRight - frameRight
+
+    return coord.toInt()
+}
+
+fun Context.calculateNCPosYFromTopDefault(type: FrameSizeAndPosition.FrameType): Int {
+    val fromTop = dpAsPx(resources.getInteger(R.integer.def_notification_pos_y_from_top_dp))
+    val screenHeight = screenSize.y
+    val frameHeightPx = dpAsPx(frameSizeAndPosition.getSizeForType(type).y)
+
+    val frameTop = (frameHeightPx / 2f)
+    val coord = -(screenHeight / 2f) + frameTop + fromTop
+
+    return coord.toInt()
+}
+
 class FrameSizeAndPosition private constructor(context: Context) : ContextWrapper(context) {
     companion object {
         @SuppressLint("StaticFieldLeak")
@@ -88,8 +110,8 @@ class FrameSizeAndPosition private constructor(context: Context) : ContextWrappe
 
             FrameType.LockNotification.Portrait,
             FrameType.NotificationNormal.Portrait -> Point(
-                calculateNCPosXFromRightDefault(),
-                calculateNCPosYFromTopDefault()
+                calculateNCPosXFromRightDefault(type),
+                calculateNCPosYFromTopDefault(type),
             )
 
             FrameType.LockNormal.Landscape -> getPositionForType(FrameType.LockNormal.Portrait)
@@ -104,13 +126,13 @@ class FrameSizeAndPosition private constructor(context: Context) : ContextWrappe
             FrameType.LockNormal.Portrait,
             FrameType.Preview.Portrait -> PointF(
                 prefManager.getResourceFloat(R.integer.def_frame_width),
-                prefManager.getResourceFloat(R.integer.def_frame_height)
+                prefManager.getResourceFloat(R.integer.def_frame_height),
             )
 
             FrameType.LockNotification.Portrait,
             FrameType.NotificationNormal.Portrait -> PointF(
                 prefManager.getResourceFloat(R.integer.def_notification_frame_width),
-                prefManager.getResourceFloat(R.integer.def_notification_frame_height)
+                prefManager.getResourceFloat(R.integer.def_notification_frame_height),
             )
 
             FrameType.LockNormal.Landscape -> getSizeForType(FrameType.LockNormal.Portrait)

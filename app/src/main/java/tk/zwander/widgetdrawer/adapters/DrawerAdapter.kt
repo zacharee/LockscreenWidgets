@@ -8,6 +8,7 @@ import tk.zwander.common.data.WidgetData
 import tk.zwander.common.host.WidgetHostCompat
 import tk.zwander.common.listeners.WidgetResizeListener
 import tk.zwander.common.util.Event
+import tk.zwander.common.util.FrameSizeAndPosition
 import tk.zwander.common.util.eventManager
 import tk.zwander.common.util.prefManager
 import tk.zwander.common.util.screenSize
@@ -18,8 +19,14 @@ import tk.zwander.widgetdrawer.activities.add.ReconfigureDrawerWidgetActivity
 class DrawerAdapter(
     manager: AppWidgetManager,
     host: WidgetHostCompat,
-    onRemoveCallback: (WidgetData, Int) -> Unit
-) : WidgetFrameAdapter(manager, host, onRemoveCallback) {
+    onRemoveCallback: (WidgetData, Int) -> Unit,
+) : WidgetFrameAdapter(
+    manager,
+    host,
+    onRemoveCallback,
+    // Frame type isn't used for the drawer.
+    { FrameSizeAndPosition.FrameType.LockNormal.Portrait },
+) {
     override val colCount: Int
         get() = host.context.prefManager.drawerColCount
     override val rowCount: Int

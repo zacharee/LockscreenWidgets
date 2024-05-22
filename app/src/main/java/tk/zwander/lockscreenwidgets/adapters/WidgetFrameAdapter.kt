@@ -39,9 +39,11 @@ import tk.zwander.common.host.WidgetHostCompat
 import tk.zwander.common.listeners.WidgetResizeListener
 import tk.zwander.common.util.Event
 import tk.zwander.common.util.EventObserver
+import tk.zwander.common.util.FrameSizeAndPosition
 import tk.zwander.common.util.createWidgetErrorView
 import tk.zwander.common.util.dpAsPx
 import tk.zwander.common.util.eventManager
+import tk.zwander.common.util.frameSizeAndPosition
 import tk.zwander.common.util.getAllInstalledWidgetProviders
 import tk.zwander.common.util.hasConfiguration
 import tk.zwander.common.util.logUtils
@@ -63,7 +65,8 @@ import kotlin.math.min
 open class WidgetFrameAdapter(
     protected val manager: AppWidgetManager,
     protected val host: WidgetHostCompat,
-    protected val onRemoveCallback: (WidgetData, Int) -> Unit
+    protected val onRemoveCallback: (WidgetData, Int) -> Unit,
+    protected val saveTypeGetter: () -> FrameSizeAndPosition.FrameType,
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>(), CoroutineScope by MainScope() {
     companion object {
         const val VIEW_TYPE_WIDGET = 0
@@ -260,10 +263,11 @@ open class WidgetFrameAdapter(
 
     protected open fun getThresholdPx(which: WidgetResizeListener.Which): Int {
         return host.context.run {
+            val frameSize = frameSizeAndPosition.getSizeForType(saveTypeGetter())
             if (which == WidgetResizeListener.Which.LEFT || which == WidgetResizeListener.Which.RIGHT) {
-                dpAsPx(prefManager.frameWidthDp) / prefManager.frameColCount
+                frameSize.x.toInt() / prefManager.frameColCount
             } else {
-                dpAsPx(prefManager.frameHeightDp) / prefManager.frameRowCount
+                frameSize.y.toInt() / prefManager.frameRowCount
             }
         }
     }

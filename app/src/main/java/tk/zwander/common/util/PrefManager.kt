@@ -30,31 +30,10 @@ import tk.zwander.lockscreenwidgets.data.Mode
 val Context.prefManager: PrefManager
     get() = PrefManager.getInstance(this)
 
-fun Context.calculateNCPosXFromRightDefault(): Int {
-    val fromRight = dpAsPx(resources.getInteger(R.integer.def_notification_pos_x_from_right_dp))
-    val screenWidth = screenSize.x
-    val frameWidthPx = dpAsPx(prefManager.notificationFrameWidthDp)
-
-    val frameRight = (frameWidthPx / 2f)
-    val coord = (screenWidth / 2f) - fromRight - frameRight
-
-    return coord.toInt()
-}
-
-fun Context.calculateNCPosYFromTopDefault(): Int {
-    val fromTop = dpAsPx(resources.getInteger(R.integer.def_notification_pos_y_from_top_dp))
-    val screenHeight = screenSize.y
-    val frameHeightPx = dpAsPx(prefManager.notificationFrameHeightDp)
-
-    val frameTop = (frameHeightPx / 2f)
-    val coord = -(screenHeight / 2f) + frameTop + fromTop
-
-    return coord.toInt()
-}
-
 /**
  * Handle data persistence.
  */
+@Suppress("DeprecatedCallableAddReplaceWith")
 class PrefManager private constructor(context: Context) : ContextWrapper(context) {
     companion object {
         const val KEY_CURRENT_WIDGETS = "current_widgets"
@@ -239,6 +218,7 @@ class PrefManager private constructor(context: Context) : ContextWrapper(context
         }
 
     //The width of the frame in DP
+    @Deprecated("Use [FrameSizeAndPosition] instead.")
     var frameWidthDp: Float
         get() = getFloat(KEY_FRAME_WIDTH, getResourceFloat(R.integer.def_frame_width))
         set(value) {
@@ -246,6 +226,7 @@ class PrefManager private constructor(context: Context) : ContextWrapper(context
         }
 
     //The width of the frame in the NC in DP.
+    @Deprecated("Use [FrameSizeAndPosition] instead.")
     var notificationFrameWidthDp: Float
         get() = getFloat(KEY_NOTIFICATION_FRAME_WIDTH, getResourceFloat(R.integer.def_notification_frame_width))
         set(value) {
@@ -253,6 +234,7 @@ class PrefManager private constructor(context: Context) : ContextWrapper(context
         }
 
     //The width of the frame in preview mode in DP
+    @Deprecated("Use [FrameSizeAndPosition] instead.")
     var previewWidthDp: Float
         get() = getFloat(KEY_PREVIEW_WIDTH, getResourceFloat(R.integer.def_frame_width))
         set(value) {
@@ -260,6 +242,7 @@ class PrefManager private constructor(context: Context) : ContextWrapper(context
         }
 
     //The height of the frame in DP
+    @Deprecated("Use [FrameSizeAndPosition] instead.")
     var frameHeightDp: Float
         get() = getFloat(KEY_FRAME_HEIGHT, getResourceFloat(R.integer.def_frame_height))
         set(value) {
@@ -267,12 +250,14 @@ class PrefManager private constructor(context: Context) : ContextWrapper(context
         }
 
     //The height of the frame in the NC in DP.
+    @Deprecated("Use [FrameSizeAndPosition] instead.")
     var notificationFrameHeightDp: Float
         get() = getFloat(KEY_NOTIFICATION_FRAME_HEIGHT, getResourceFloat(R.integer.def_notification_frame_height))
         set(value) {
             putFloat(KEY_NOTIFICATION_FRAME_HEIGHT, value)
         }
 
+    @Deprecated("Use [FrameSizeAndPosition] instead.")
     var previewHeightDp: Float
         get() = getFloat(KEY_PREVIEW_HEIGHT, getResourceFloat(R.integer.def_frame_height))
         set(value) {
@@ -280,6 +265,7 @@ class PrefManager private constructor(context: Context) : ContextWrapper(context
         }
 
     //The horizontal position of the center of the frame (from the center of the screen) in pixels
+    @Deprecated("Use [FrameSizeAndPosition] instead.")
     var posX: Int
         get() = getInt(KEY_POS_X, 0)
         set(value) {
@@ -287,20 +273,23 @@ class PrefManager private constructor(context: Context) : ContextWrapper(context
         }
 
     //The horizontal position of the center of the frame in the NC (from the center of the screen) in pixels
+    @Deprecated("Use [FrameSizeAndPosition] instead.")
     var notificationPosX: Int
-        get() = getInt(KEY_NOTIFICATION_POS_X, calculateNCPosXFromRightDefault())
+        get() = getInt(KEY_NOTIFICATION_POS_X, calculateNCPosXFromRightDefault(FrameSizeAndPosition.FrameType.NotificationNormal.Portrait))
         set(value) {
             putInt(KEY_NOTIFICATION_POS_X, value)
         }
 
     //The horizontal position of the center of the frame in the locked NC (from the center of the screen) in pixels
+    @Deprecated("Use [FrameSizeAndPosition] instead.")
     var lockNotificationPosX: Int
-        get() = getInt(KEY_LOCK_NOTIFICATION_POS_X, calculateNCPosXFromRightDefault())
+        get() = getInt(KEY_LOCK_NOTIFICATION_POS_X, calculateNCPosXFromRightDefault(FrameSizeAndPosition.FrameType.LockNotification.Portrait))
         set(value) {
             putInt(KEY_LOCK_NOTIFICATION_POS_X, value)
         }
 
     //The horizontal position of the center of the frame in preview mode in pixels
+    @Deprecated("Use [FrameSizeAndPosition] instead.")
     var previewPosX: Int
         get() = getInt(KEY_PREVIEW_POS_X, 0)
         set(value) {
@@ -308,6 +297,7 @@ class PrefManager private constructor(context: Context) : ContextWrapper(context
         }
 
     //The vertical position of the center of the frame (from the center of the screen) in pixels
+    @Deprecated("Use [FrameSizeAndPosition] instead.")
     var posY: Int
         get() = getInt(KEY_POS_Y, 0)
         set(value) {
@@ -315,20 +305,23 @@ class PrefManager private constructor(context: Context) : ContextWrapper(context
         }
 
     //The vertical position of the center of the frame in the NC (from the center of the screen) in pixels
+    @Deprecated("Use [FrameSizeAndPosition] instead.")
     var notificationPosY: Int
-        get() = getInt(KEY_NOTIFICATION_POS_Y, calculateNCPosYFromTopDefault())
+        get() = getInt(KEY_NOTIFICATION_POS_Y, calculateNCPosYFromTopDefault(FrameSizeAndPosition.FrameType.NotificationNormal.Portrait))
         set(value) {
             putInt(KEY_NOTIFICATION_POS_Y, value)
         }
 
     //The vertical position of the center of the frame in the NC (from the center of the screen) in pixels
+    @Deprecated("Use [FrameSizeAndPosition] instead.")
     var lockNotificationPosY: Int
-        get() = getInt(KEY_LOCK_NOTIFICATION_POS_Y, calculateNCPosYFromTopDefault())
+        get() = getInt(KEY_LOCK_NOTIFICATION_POS_Y, calculateNCPosYFromTopDefault(FrameSizeAndPosition.FrameType.LockNotification.Portrait))
         set(value) {
             putInt(KEY_LOCK_NOTIFICATION_POS_Y, value)
         }
 
     //The vertical position of the center of the frame in preview mode in pixels.
+    @Deprecated("Use [FrameSizeAndPosition] instead.")
     var previewPosY: Int
         get() = getInt(KEY_PREVIEW_POS_Y, 0)
         set(value) {
@@ -760,6 +753,8 @@ class PrefManager private constructor(context: Context) : ContextWrapper(context
             putBoolean(KEY_DRAWER_FORCE_RELOAD_WIDGETS, value)
         }
 
+    @Suppress("DEPRECATION")
+    @Deprecated("Use [FrameSizeAndPosition] instead.")
     fun getCorrectFrameWidth(mode: Mode): Float {
         return when (mode) {
             Mode.LOCK_NORMAL -> frameWidthDp
@@ -768,6 +763,8 @@ class PrefManager private constructor(context: Context) : ContextWrapper(context
         }
     }
 
+    @Suppress("DEPRECATION")
+    @Deprecated("Use [FrameSizeAndPosition] instead.")
     fun getCorrectFrameHeight(mode: Mode): Float {
         return when (mode) {
             Mode.LOCK_NORMAL -> frameHeightDp
@@ -776,6 +773,8 @@ class PrefManager private constructor(context: Context) : ContextWrapper(context
         }
     }
 
+    @Suppress("DEPRECATION")
+    @Deprecated("Use [FrameSizeAndPosition] instead.")
     fun getCorrectFrameX(mode: Mode): Int {
         return when (mode) {
             Mode.LOCK_NORMAL -> posX
@@ -785,6 +784,8 @@ class PrefManager private constructor(context: Context) : ContextWrapper(context
         }
     }
 
+    @Suppress("DEPRECATION")
+    @Deprecated("Use [FrameSizeAndPosition] instead.")
     fun getCorrectFrameY(mode: Mode): Int {
         return when (mode) {
             Mode.LOCK_NORMAL -> posY
