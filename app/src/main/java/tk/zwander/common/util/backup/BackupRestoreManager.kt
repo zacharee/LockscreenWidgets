@@ -138,7 +138,11 @@ class BackupRestoreManager private constructor(context: Context) : ContextWrappe
                 object : TypeToken<LinkedHashSet<WidgetData>>() {}.type
             ) != null
         } catch (e: Exception) {
-            logUtils.normalLog("Error parsing input string $string", e)
+            try {
+                logUtils.normalLog("Error parsing input string $string", e)
+            } catch (e: OutOfMemoryError) {
+                logUtils.normalLog("Error parsing input string. Input is too large.", e)
+            }
             false
         }
     }
