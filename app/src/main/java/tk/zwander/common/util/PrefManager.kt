@@ -768,27 +768,11 @@ class PrefManager private constructor(context: Context) : ContextWrapper(context
         }
     }
 
-    fun setCorrectFrameWidth(mode: Mode, width: Float) {
-        when (mode) {
-            Mode.LOCK_NORMAL -> frameWidthDp = width
-            Mode.NOTIFICATION, Mode.LOCK_NOTIFICATION -> notificationFrameWidthDp = width
-            Mode.PREVIEW -> previewWidthDp = width
-        }
-    }
-
     fun getCorrectFrameHeight(mode: Mode): Float {
         return when (mode) {
             Mode.LOCK_NORMAL -> frameHeightDp
             Mode.LOCK_NOTIFICATION, Mode.NOTIFICATION -> notificationFrameHeightDp
             Mode.PREVIEW -> previewHeightDp
-        }
-    }
-
-    fun setCorrectFrameHeight(mode: Mode, height: Float) {
-        when (mode) {
-            Mode.LOCK_NORMAL -> frameHeightDp = height
-            Mode.NOTIFICATION, Mode.LOCK_NOTIFICATION -> notificationFrameHeightDp = height
-            Mode.PREVIEW -> previewHeightDp = height
         }
     }
 
@@ -801,53 +785,12 @@ class PrefManager private constructor(context: Context) : ContextWrapper(context
         }
     }
 
-    fun setCorrectFrameX(mode: Mode, x: Int) {
-        when (mode) {
-            Mode.LOCK_NORMAL -> posX = x
-            Mode.LOCK_NOTIFICATION -> lockNotificationPosX = x
-            Mode.NOTIFICATION -> notificationPosX = x
-            Mode.PREVIEW -> previewPosX = x
-        }
-    }
-
-    fun setCorrectFramePos(mode: Mode, x: Int, y: Int) {
-        prefs.edit {
-            when (mode) {
-                Mode.LOCK_NORMAL -> {
-                    putInt(KEY_POS_X, x)
-                    putInt(KEY_POS_Y, y)
-                }
-                Mode.LOCK_NOTIFICATION -> {
-                    putInt(KEY_LOCK_NOTIFICATION_POS_X, x)
-                    putInt(KEY_LOCK_NOTIFICATION_POS_Y, y)
-                }
-                Mode.NOTIFICATION -> {
-                    putInt(KEY_NOTIFICATION_POS_X, x)
-                    putInt(KEY_NOTIFICATION_POS_Y, y)
-                }
-                Mode.PREVIEW -> {
-                    putInt(KEY_PREVIEW_POS_X, x)
-                    putInt(KEY_PREVIEW_POS_Y, y)
-                }
-            }
-        }
-    }
-
     fun getCorrectFrameY(mode: Mode): Int {
         return when (mode) {
             Mode.LOCK_NORMAL -> posY
             Mode.LOCK_NOTIFICATION -> lockNotificationPosY
             Mode.NOTIFICATION -> notificationPosY
             Mode.PREVIEW -> previewPosY
-        }
-    }
-
-    fun setCorrectFrameY(mode: Mode, y: Int) {
-        when (mode) {
-            Mode.LOCK_NORMAL -> posY = y
-            Mode.LOCK_NOTIFICATION -> lockNotificationPosY = y
-            Mode.NOTIFICATION -> notificationPosY = y
-            Mode.PREVIEW -> previewPosY = y
         }
     }
 
