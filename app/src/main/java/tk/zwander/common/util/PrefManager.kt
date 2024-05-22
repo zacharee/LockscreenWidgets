@@ -851,18 +851,6 @@ class PrefManager private constructor(context: Context) : ContextWrapper(context
         }
     }
 
-    fun isValidWidgetsString(string: String?): Boolean {
-        return try {
-            gson.fromJson<LinkedHashSet<WidgetData>>(
-                string,
-                object : TypeToken<LinkedHashSet<WidgetData>>() {}.type
-            ) != null
-        } catch (e: Exception) {
-            logUtils.normalLog("Error parsing input string $string", e)
-            false
-        }
-    }
-
     fun registerOnSharedPreferenceChangeListener(listener: OnSharedPreferenceChangeListener) {
         prefs.registerOnSharedPreferenceChangeListener(listener)
     }

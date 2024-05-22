@@ -21,6 +21,7 @@ import tk.zwander.common.util.LogUtils
 import tk.zwander.common.util.eventManager
 import tk.zwander.common.util.logUtils
 import tk.zwander.common.util.migrationManager
+import tk.zwander.common.util.prefManager
 import tk.zwander.lockscreenwidgets.activities.add.AddFrameWidgetActivity
 import tk.zwander.widgetdrawer.activities.add.AddDrawerWidgetActivity
 
@@ -95,6 +96,29 @@ class App : Application() {
                 if (error is DeadSystemException || error is RuntimeException && error.cause is DeadSystemException) {
                     return@addOnError false
                 }
+            }
+
+            try {
+                it.addMetadata(
+                    "widget_data",
+                    hashMapOf(
+                        "currentWidgets" to try {
+                            prefManager.currentWidgetsString
+                        } catch (e: OutOfMemoryError) {
+                            "Too large to parse."
+                        },
+                        "drawerWidgets" to try {
+                            prefManager.drawerWidgetsString
+                        } catch (e: OutOfMemoryError) {
+                            "Too large to parse."
+                        },
+                    ),
+                )
+            } catch (e: OutOfMemoryError) {
+                it.addMetadata(
+                    "widget_data",
+                    hashMapOf("OOM" to "OOM thrown when trying to add current widget data."),
+                )
             }
 
             true
