@@ -260,7 +260,7 @@ abstract class BaseBindWidgetActivity : BaseActivity() {
             configureIntent.component = info.itemInfo.activityInfo.componentNameCompat
 
             configShortcutRequest.launch(configureIntent)
-        } catch (e: SecurityException) {
+        } catch (e: Throwable) {
             logUtils.debugLog("Unable to create shortcut", e)
 
             pendingErrors++
