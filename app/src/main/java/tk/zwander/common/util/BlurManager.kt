@@ -2,11 +2,9 @@ package tk.zwander.common.util
 
 import android.content.Context
 import android.content.ContextWrapper
-import android.graphics.drawable.Drawable
 import android.os.Build
 import android.view.View
 import android.view.View.OnAttachStateChangeListener
-import android.view.ViewRootImpl
 import android.view.WindowManager
 import tk.zwander.common.drawable.BackgroundBlurDrawableCompatDelegate
 
@@ -17,6 +15,7 @@ class BlurManager(
     private val listenKeys: Array<String>,
     private val shouldBlur: () -> Boolean,
     private val blurAmount: () -> Int,
+    private val cornerRadius: (() -> Float)? = null,
     private val updateWindow: () -> Unit,
 ) : ContextWrapper(context), OnAttachStateChangeListener {
     private val handlerRegistry = HandlerRegistry {
@@ -48,7 +47,7 @@ class BlurManager(
     private fun updateBlurDrawable() {
         val blurAmount = blurAmount()
         blurDrawable = if (windowManager.isCrossWindowBlurEnabledCompat && shouldBlur() && blurAmount > 0) {
-            targetView.rootView.viewRootImpl?.createBackgroundBlurDrawableCompat()
+            BackgroundBlurDrawableCompatDelegate.createInstance(targetView.rootView.viewRootImpl)
         } else {
             null
         }
@@ -71,6 +70,9 @@ class BlurManager(
                 val hasBlur = targetView.isHardwareAccelerated && shouldBlur()
 
                 blurDrawable?.setBlurRadius(blurAmount())
+                cornerRadius?.invoke()?.let {
+                    blurDrawable?.setCornerRadius(it)
+                }
 
                 targetView.background = if (hasBlur) blurDrawable?.wrapped else null
             } else {
@@ -97,19 +99,5 @@ class BlurManager(
         }
 
         updateWindow()
-    }
-
-    fun setCornerRadius(radius: Float) {
-        blurDrawable?.setCornerRadius(radius)
-    }
-
-    private fun ViewRootImpl.createBackgroundBlurDrawableCompat(): BackgroundBlurDrawableCompatDelegate {
-        return BackgroundBlurDrawableCompatDelegate.createInstance(
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                createBackgroundBlurDrawable() as Drawable
-            } else {
-                null
-            }
-        )
     }
 }

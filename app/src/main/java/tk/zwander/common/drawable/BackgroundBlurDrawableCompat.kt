@@ -3,53 +3,51 @@ package tk.zwander.common.drawable
 import android.annotation.ColorInt
 import android.graphics.drawable.Drawable
 import android.os.Build
+import android.view.ViewRootImpl
+import androidx.annotation.RequiresApi
 import com.android.internal.graphics.drawable.BackgroundBlurDrawable
 
-sealed class BackgroundBlurDrawableCompatDelegate(open val wrapped: Drawable?) {
-    open fun setColor(@ColorInt color: Int) {}
-
-    open fun setBlurRadius(blurRadius: Int) {}
-
-    open fun setCornerRadius(cornerRadius: Float) {}
-
-    open fun setCornerRadius(
+sealed class BackgroundBlurDrawableCompatDelegate(open val wrapped: Drawable) {
+    abstract fun setColor(@ColorInt color: Int)
+    abstract fun setBlurRadius(blurRadius: Int)
+    abstract fun setCornerRadius(cornerRadius: Float)
+    abstract fun setCornerRadius(
         cornerRadiusTL: Float,
         cornerRadiusTR: Float,
         cornerRadiusBL: Float,
-        cornerRadiusBR: Float
-    ) {}
+        cornerRadiusBR: Float,
+    )
 
-    class BackgroundBlurDrawableCompat12(override val wrapped: BackgroundBlurDrawable?) : BackgroundBlurDrawableCompatDelegate(wrapped) {
+    @RequiresApi(Build.VERSION_CODES.S)
+    class BackgroundBlurDrawableCompatApi31(override val wrapped: BackgroundBlurDrawable) : BackgroundBlurDrawableCompatDelegate(wrapped) {
         override fun setColor(color: Int) {
-            wrapped?.setColor(color)
+            wrapped.setColor(color)
         }
 
         override fun setBlurRadius(blurRadius: Int) {
-            wrapped?.setBlurRadius(blurRadius)
+            wrapped.setBlurRadius(blurRadius)
         }
 
         override fun setCornerRadius(cornerRadius: Float) {
-            wrapped?.setCornerRadius(cornerRadius)
+            wrapped.setCornerRadius(cornerRadius)
         }
 
         override fun setCornerRadius(
             cornerRadiusTL: Float,
             cornerRadiusTR: Float,
             cornerRadiusBL: Float,
-            cornerRadiusBR: Float
+            cornerRadiusBR: Float,
         ) {
-            wrapped?.setCornerRadius(cornerRadiusTL, cornerRadiusTR, cornerRadiusBL, cornerRadiusBR)
+            wrapped.setCornerRadius(cornerRadiusTL, cornerRadiusTR, cornerRadiusBL, cornerRadiusBR)
         }
     }
 
-    class BackgroundBlurDrawableCompatPre12(wrapped: Drawable?) : BackgroundBlurDrawableCompatDelegate(wrapped)
-
     companion object {
-        fun createInstance(wrapped: Drawable?): BackgroundBlurDrawableCompatDelegate {
+        fun createInstance(viewRootImpl: ViewRootImpl): BackgroundBlurDrawableCompatDelegate? {
             return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                BackgroundBlurDrawableCompat12(wrapped as? BackgroundBlurDrawable)
+                BackgroundBlurDrawableCompatApi31(viewRootImpl.createBackgroundBlurDrawable())
             } else {
-                BackgroundBlurDrawableCompatPre12(wrapped)
+                null
             }
         }
     }

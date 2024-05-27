@@ -288,6 +288,7 @@ class WidgetFrameDelegate private constructor(context: Context) : BaseDelegate<W
         listenKeys = arrayOf(PrefManager.KEY_BLUR_BACKGROUND, PrefManager.KEY_BLUR_BACKGROUND_AMOUNT),
         shouldBlur = { prefManager.blurBackground && !showWallpaperLayerCondition },
         blurAmount = { prefManager.backgroundBlurAmount },
+        cornerRadius = { dpAsPx(prefManager.cornerRadiusDp).toFloat() },
     ) { binding.frame.updateWindow(wm, params) }
 
     override fun onEvent(event: Event) {
@@ -739,7 +740,6 @@ class WidgetFrameDelegate private constructor(context: Context) : BaseDelegate<W
     private fun updateCornerRadius() {
         val radius = dpAsPx(prefManager.cornerRadiusDp).toFloat()
         binding.frameCard.radius = radius
-        blurManager.setCornerRadius(radius)
 
         binding.editOutline.background = (binding.editOutline.background.mutate() as GradientDrawable).apply {
             this.cornerRadius = radius
