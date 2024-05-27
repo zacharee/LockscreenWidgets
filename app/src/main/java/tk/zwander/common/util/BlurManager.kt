@@ -27,7 +27,7 @@ class BlurManager(
         updateBlurDrawable()
     }
 
-    private var blurDrawable: BackgroundBlurDrawableCompatDelegate? = null
+    private var blurWrapper: BackgroundBlurDrawableCompatDelegate? = null
 
     override fun onViewAttachedToWindow(v: View?) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
@@ -41,13 +41,13 @@ class BlurManager(
             windowManager.removeCrossWindowBlurEnabledListener(crossBlurEnabledListener)
         }
         targetView.background = null
-        blurDrawable = null
+        blurWrapper = null
     }
 
     private fun updateBlurDrawable() {
         val blurAmount = blurAmount()
-        blurDrawable = if (windowManager.isCrossWindowBlurEnabledCompat && shouldBlur() && blurAmount > 0) {
-            BackgroundBlurDrawableCompatDelegate.createInstance(targetView.rootView.viewRootImpl)
+        blurWrapper = if (windowManager.isCrossWindowBlurEnabledCompat && shouldBlur() && blurAmount > 0) {
+            BackgroundBlurDrawableCompatDelegate(targetView.rootView.viewRootImpl)
         } else {
             null
         }
@@ -66,17 +66,17 @@ class BlurManager(
 
     fun updateBlur() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            if (windowManager.isCrossWindowBlurEnabled) {
+            targetView.background = if (windowManager.isCrossWindowBlurEnabled) {
                 val hasBlur = targetView.isHardwareAccelerated && shouldBlur()
 
-                blurDrawable?.setBlurRadius(blurAmount())
+                blurWrapper?.setBlurRadius(blurAmount())
                 cornerRadius?.invoke()?.let {
-                    blurDrawable?.setCornerRadius(it)
+                    blurWrapper?.setCornerRadius(it)
                 }
 
-                targetView.background = if (hasBlur) blurDrawable?.wrapped else null
+                if (hasBlur) blurWrapper?.drawable else null
             } else {
-                targetView.background = null
+                null
             }
         } else {
             val f = try {
