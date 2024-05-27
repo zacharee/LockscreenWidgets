@@ -128,13 +128,13 @@ class Accessibility : AccessibilityService(), EventObserver, CoroutineScope by M
     }
 
     override fun onServiceConnected() {
-        eventManager.sendEvent(Event.RequestNotificationCount)
         serviceInfo = serviceInfo.apply {
             notificationTimeout = prefManager.accessibilityEventDelay.toLong()
         }
 
         frameDelegate.onCreate()
         drawerDelegate.onCreate()
+        eventManager.sendEvent(Event.RequestNotificationCount)
     }
 
     override fun onAccessibilityEvent(event: AccessibilityEvent) {
