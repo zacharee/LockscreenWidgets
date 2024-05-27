@@ -53,7 +53,7 @@
             android:key="blur_drawer_background_amount"
             android:defaultValue="100"
             android:dependency="blur_drawer_background"
-            app:minValue="0"
+            app:minValue="1"
             app:maxValue="1000"
             />
 

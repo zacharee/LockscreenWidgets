@@ -46,7 +46,8 @@ class BlurManager(
     }
 
     private fun updateBlurDrawable() {
-        blurDrawable = if (windowManager.isCrossWindowBlurEnabledCompat && shouldBlur()) {
+        val blurAmount = blurAmount()
+        blurDrawable = if (windowManager.isCrossWindowBlurEnabledCompat && shouldBlur() && blurAmount > 0) {
             targetView.rootView.viewRootImpl?.createBackgroundBlurDrawableCompat()
         } else {
             null
