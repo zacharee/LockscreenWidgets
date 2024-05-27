@@ -41,8 +41,8 @@ class BlurManager(
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             windowManager.removeCrossWindowBlurEnabledListener(crossBlurEnabledListener)
         }
+        targetView.background = null
         blurDrawable = null
-        updateBlur()
     }
 
     private fun updateBlurDrawable() {
