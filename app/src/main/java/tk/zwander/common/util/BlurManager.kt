@@ -46,7 +46,7 @@ class BlurManager(
     }
 
     private fun updateBlurDrawable() {
-        blurDrawable = if (windowManager.isCrossWindowBlurEnabledCompat) {
+        blurDrawable = if (windowManager.isCrossWindowBlurEnabledCompat && shouldBlur()) {
             targetView.rootView.viewRootImpl?.createBackgroundBlurDrawableCompat()
         } else {
             null
