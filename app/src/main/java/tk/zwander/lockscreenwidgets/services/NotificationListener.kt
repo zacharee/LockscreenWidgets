@@ -180,35 +180,32 @@ class NotificationListener : NotificationListenerService(), EventObserver, Corou
                     return false
                 }
 
-                val importance =
-                    if (!rankingResult || ranking.importance == NotificationManager.IMPORTANCE_NONE) {
-                        nm.getNotificationChannel(notification.channelId).importance
-                    } else {
-                        ranking.importance
+                val importance = ranking.importance
+
+                if (importance != NotificationManager.IMPORTANCE_UNSPECIFIED) {
+                    if (importance <= NotificationManager.IMPORTANCE_MIN) {
+                        logUtils.debugLog("Min important ${this.channelIdLogTag}", null)
+                        return false
                     }
 
-                if (importance <= NotificationManager.IMPORTANCE_MIN) {
-                    logUtils.debugLog("Min important ${this.channelIdLogTag}", null)
-                    return false
-                }
+                    if (importance <= NotificationManager.IMPORTANCE_LOW &&
+                        Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q &&
+                        nm.shouldHideSilentStatusBarIcons()
+                    ) {
+                        logUtils.debugLog("Low importance and silent hidden ${this.channelIdLogTag}", null)
+                        return false
+                    }
 
-                if (importance <= NotificationManager.IMPORTANCE_LOW &&
-                    Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q &&
-                    nm.shouldHideSilentStatusBarIcons()
-                ) {
-                    logUtils.debugLog("Low importance and silent hidden ${this.channelIdLogTag}", null)
-                    return false
-                }
-
-                // There's a bug in Pixel UI 13 where silent notifications don't
-                // show on the lock screen even if they're set to do so.
-                if (importance <= NotificationManager.IMPORTANCE_LOW &&
-                    Build.VERSION.SDK_INT == Build.VERSION_CODES.TIRAMISU &&
-                    SystemProperties.get("ro.vendor.camera.extensions.service")
-                        .contains("com.google.android.apps.camera.services.extensions.service.PixelExtensions")
-                ) {
-                    logUtils.debugLog("Pixel workaround ${this.channelIdLogTag}", null)
-                    return false
+                    // There's a bug in Pixel UI 13 where silent notifications don't
+                    // show on the lock screen even if they're set to do so.
+                    if (importance <= NotificationManager.IMPORTANCE_LOW &&
+                        Build.VERSION.SDK_INT == Build.VERSION_CODES.TIRAMISU &&
+                        SystemProperties.get("ro.vendor.camera.extensions.service")
+                            .contains("com.google.android.apps.camera.services.extensions.service.PixelExtensions")
+                    ) {
+                        logUtils.debugLog("Pixel workaround ${this.channelIdLogTag}", null)
+                        return false
+                    }
                 }
             } else {
                 @Suppress("DEPRECATION")
