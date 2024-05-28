@@ -315,6 +315,15 @@
             android:defaultValue="true"
             />
 
+        <tk.zwander.common.prefs.MaterialSwitchPreference
+            android:title="@string/directly_check_for_activity"
+            android:summary="@string/directly_check_for_activity_desc"
+            android:key="frame_directly_check_for_activity"
+            android:dependency="request_unlock"
+            android:icon="@drawable/baseline_compare_24"
+            android:defaultValue="true"
+            />
+
     </tk.zwander.collapsiblepreferencecategory.CollapsiblePreferenceCategoryNew>
 
 </PreferenceScreen>

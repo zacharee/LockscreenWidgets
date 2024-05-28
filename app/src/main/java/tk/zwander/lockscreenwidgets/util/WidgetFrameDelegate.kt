@@ -323,9 +323,6 @@ class WidgetFrameDelegate private constructor(context: Context) : BaseDelegate<W
                 )
                 updateParamsIfNeeded()
             }
-            Event.FrameWidgetClick -> {
-                updateCommonState { it.copy(handlingClick = prefManager.requestUnlock) }
-            }
             is Event.FrameResized -> {
                 when (event.which) {
                     Event.FrameResized.Side.LEFT -> {
@@ -441,10 +438,10 @@ class WidgetFrameDelegate private constructor(context: Context) : BaseDelegate<W
         val ignoreTouches = prefManager.frameIgnoreWidgetTouches
 
         if (!ignoreTouches) {
-            if (trigger && prefManager.requestUnlock) {
+            if (trigger && prefManager.requestUnlock && prefManager.frameDirectlyCheckForActivity) {
                 DismissOrUnlockActivity.launch(this)
             } else {
-                eventManager.sendEvent(Event.FrameWidgetClick)
+                updateCommonState { it.copy(handlingClick = prefManager.requestUnlock) }
             }
         }
 

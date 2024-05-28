@@ -108,7 +108,6 @@ sealed class Event {
     data object NightModeUpdate : Event()
     data object CenterFrameHorizontally : Event()
     data object CenterFrameVertically : Event()
-    data object FrameWidgetClick : Event()
     data object RequestNotificationCount : Event()
     data object FrameResizeFinished : Event()
 
@@ -139,7 +138,6 @@ sealed class Event {
     data object ShowHandle : Event()
     data object DrawerShown : Event()
     data object DrawerHidden : Event()
-    data object DrawerWidgetClick : Event()
     data object DrawerBackButtonClick : Event()
 
     data class LaunchAddDrawerWidget(val fromDrawer: Boolean) : Event()

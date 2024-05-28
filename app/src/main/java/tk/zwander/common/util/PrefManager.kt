@@ -116,6 +116,8 @@ class PrefManager private constructor(context: Context) : ContextWrapper(context
         const val KEY_SHOW_DRAWER_HANDLE_ONLY_WHEN_LOCKED = "show_drawer_handle_only_when_locked"
         const val KEY_FRAME_HIDE_WHEN_KEYBOARD_SHOWN = "hide_frame_when_keyboard_shown"
         const val KEY_FRAME_IGNORE_WIDGET_TOUCHES = "frame_ignore_widget_touches"
+        const val KEY_FRAME_DIRECTLY_CHECK_FOR_ACTIVITY = "frame_directly_check_for_activity"
+        const val KEY_DRAWER_DIRECTLY_CHECK_FOR_ACTIVITY = "drawer_directly_check_for_activity"
 
         const val VALUE_PAGE_INDICATOR_BEHAVIOR_HIDDEN = 0
         const val VALUE_PAGE_INDICATOR_BEHAVIOR_AUTO_HIDE = 1
@@ -355,6 +357,18 @@ class PrefManager private constructor(context: Context) : ContextWrapper(context
                 KEY_CUSTOM_TILES,
                 gson.toJson(value)
             )
+        }
+
+    var frameDirectlyCheckForActivity: Boolean
+        get() = getBoolean(KEY_FRAME_DIRECTLY_CHECK_FOR_ACTIVITY, true)
+        set(value) {
+            putBoolean(KEY_FRAME_DIRECTLY_CHECK_FOR_ACTIVITY, value)
+        }
+
+    var drawerDirectlyCheckForActivity: Boolean
+        get() = getBoolean(KEY_DRAWER_DIRECTLY_CHECK_FOR_ACTIVITY, true)
+        set(value) {
+            putBoolean(KEY_DRAWER_DIRECTLY_CHECK_FOR_ACTIVITY, value)
         }
 
     //If it's the first time the user's seeing the widget frame. Used to decide

@@ -31,6 +31,15 @@
             />
 
         <tk.zwander.common.prefs.MaterialSwitchPreference
+            android:title="@string/directly_check_for_activity"
+            android:summary="@string/directly_check_for_activity_desc"
+            android:key="drawer_directly_check_for_activity"
+            android:dependency="request_unlock_drawer"
+            android:icon="@drawable/baseline_compare_24"
+            android:defaultValue="true"
+            />
+
+        <tk.zwander.common.prefs.MaterialSwitchPreference
             android:title="@string/settings_screen_force_widget_update"
             android:summary="@string/settings_screen_force_widget_update_desc"
             android:key="drawer_force_reload_widgets"

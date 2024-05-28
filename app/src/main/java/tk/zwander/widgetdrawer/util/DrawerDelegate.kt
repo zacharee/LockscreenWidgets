@@ -259,10 +259,6 @@ class DrawerDelegate private constructor(context: Context) :
                 hideAll()
             }
 
-            Event.DrawerWidgetClick -> {
-                updateCommonState { it.copy(handlingClick = prefManager.requestUnlockDrawer) }
-            }
-
             is Event.DrawerAttachmentState -> {
                 if (event.attached) {
                     if (!handle.scrollingOpen) {
@@ -378,11 +374,11 @@ class DrawerDelegate private constructor(context: Context) :
     }
 
     override fun onWidgetClick(trigger: Boolean): Boolean {
-        if (trigger && prefManager.requestUnlockDrawer) {
+        if (trigger && prefManager.requestUnlockDrawer && prefManager.drawerDirectlyCheckForActivity) {
             DismissOrUnlockActivity.launch(this)
             eventManager.sendEvent(Event.CloseDrawer)
         } else {
-            eventManager.sendEvent(Event.DrawerWidgetClick)
+            updateCommonState { it.copy(handlingClick = prefManager.requestUnlockDrawer) }
         }
 
         return true
