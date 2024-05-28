@@ -27,6 +27,7 @@ import tk.zwander.common.util.fadeAndScaleIn
 import tk.zwander.common.util.fadeAndScaleOut
 import tk.zwander.common.util.handler
 import tk.zwander.common.util.logUtils
+import tk.zwander.common.util.mainHandler
 import tk.zwander.common.util.makeEven
 import tk.zwander.common.util.prefManager
 import tk.zwander.common.util.safeAddView
@@ -36,7 +37,6 @@ import tk.zwander.common.util.vibrate
 import tk.zwander.lockscreenwidgets.activities.TaskerIsShowingFrame
 import tk.zwander.lockscreenwidgets.compose.IDListLayout
 import tk.zwander.lockscreenwidgets.databinding.WidgetFrameBinding
-import tk.zwander.lockscreenwidgets.util.*
 import kotlin.math.roundToInt
 
 /**
@@ -293,47 +293,53 @@ class WidgetFrameView(context: Context, attrs: AttributeSet) : ConstraintLayout(
     }
 
     fun addWindow(wm: WindowManager, params: WindowManager.LayoutParams) {
-        context.logUtils.debugLog("Trying to add overlay $animationState")
+        mainHandler.post {
+            context.logUtils.debugLog("Trying to add overlay $animationState")
 
-        if (!isAttachedToWindow && animationState != AnimationState.STATE_ADDING) {
-            context.logUtils.debugLog("Adding overlay")
+            if (!isAttachedToWindow && animationState != AnimationState.STATE_ADDING) {
+                context.logUtils.debugLog("Adding overlay")
 
-            animationState = AnimationState.STATE_ADDING
+                animationState = AnimationState.STATE_ADDING
 
-            if (!wm.safeAddView(this, params)) {
-                animationState = AnimationState.STATE_IDLE
+                if (!wm.safeAddView(this, params)) {
+                    animationState = AnimationState.STATE_IDLE
+                }
             }
         }
     }
 
     fun updateWindow(wm: WindowManager, params: WindowManager.LayoutParams) {
-        if (isAttachedToWindow) {
-            wm.safeUpdateViewLayout(this, params)
+        mainHandler.post {
+            if (isAttachedToWindow) {
+                wm.safeUpdateViewLayout(this, params)
+            }
         }
     }
 
     fun removeWindow(wm: WindowManager) {
-        context.logUtils.debugLog("Trying to remove overlay $animationState")
+        mainHandler.post {
+            context.logUtils.debugLog("Trying to remove overlay $animationState")
 
-        if (isAttachedToWindow && animationState != AnimationState.STATE_REMOVING) {
-            animationState = AnimationState.STATE_REMOVING
+            if (isAttachedToWindow && animationState != AnimationState.STATE_REMOVING) {
+                animationState = AnimationState.STATE_REMOVING
 
-            context.logUtils.debugLog("Pre-animation removal")
+                context.logUtils.debugLog("Pre-animation removal")
 
-            binding.frameCard.fadeAndScaleOut {
-                context.logUtils.debugLog("Post-animation removal")
+                binding.frameCard.fadeAndScaleOut {
+                    context.logUtils.debugLog("Post-animation removal")
 
-                postDelayed({
-                    context.logUtils.debugLog("Posted removal")
+                    postDelayed({
+                        context.logUtils.debugLog("Posted removal")
 
-                    wm.safeRemoveView(this)
-                    animationState = AnimationState.STATE_IDLE
-                }, 50)
+                        wm.safeRemoveView(this)
+                        animationState = AnimationState.STATE_IDLE
+                    }, 50)
+                }
+            } else if (!isAttachedToWindow) {
+                wm.safeRemoveView(this)
+
+                animationState = AnimationState.STATE_IDLE
             }
-        } else if (!isAttachedToWindow) {
-            wm.safeRemoveView(this)
-
-            animationState = AnimationState.STATE_IDLE
         }
     }
 

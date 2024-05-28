@@ -25,11 +25,11 @@ import tk.zwander.common.util.PrefManager
 import tk.zwander.common.util.dpAsPx
 import tk.zwander.common.util.eventManager
 import tk.zwander.common.util.handler
+import tk.zwander.common.util.mainHandler
 import tk.zwander.common.util.prefManager
 import tk.zwander.common.util.screenSize
 import tk.zwander.common.util.vibrate
 import tk.zwander.lockscreenwidgets.R
-import tk.zwander.lockscreenwidgets.util.*
 import tk.zwander.widgetdrawer.util.DrawerDelegate
 import kotlin.math.absoluteValue
 
@@ -196,37 +196,43 @@ class Handle : LinearLayout {
     }
 
     fun show(wm: WindowManager = this.wm) {
-        try {
-            wm.addView(this, params)
-        } catch (_: Exception) {}
+        mainHandler.post {
+            try {
+                wm.addView(this, params)
+            } catch (_: Exception) {}
+        }
     }
 
     fun hide(wm: WindowManager = this.wm) {
-        currentVisibilityAnim?.cancel()
-        val anim = ValueAnimator.ofFloat(1f, 0f)
-        currentVisibilityAnim = anim
+        mainHandler.post {
+            currentVisibilityAnim?.cancel()
+            val anim = ValueAnimator.ofFloat(1f, 0f)
+            currentVisibilityAnim = anim
 
-        anim.interpolator = AccelerateInterpolator()
-        anim.duration = DrawerDelegate.ANIM_DURATION
-        anim.addUpdateListener {
-            this.alpha = it.animatedValue.toString().toFloat()
-        }
-        anim.addListener(object : AnimatorListenerAdapter() {
-            override fun onAnimationEnd(animation: Animator?) {
-                handler?.postDelayed({
-                    try {
-                        wm.removeView(this@Handle)
-                    } catch (_: Exception) {}
-                }, 10)
+            anim.interpolator = AccelerateInterpolator()
+            anim.duration = DrawerDelegate.ANIM_DURATION
+            anim.addUpdateListener {
+                this.alpha = it.animatedValue.toString().toFloat()
             }
-        })
-        anim.start()
+            anim.addListener(object : AnimatorListenerAdapter() {
+                override fun onAnimationEnd(animation: Animator?) {
+                    handler?.postDelayed({
+                        try {
+                            wm.removeView(this@Handle)
+                        } catch (_: Exception) {}
+                    }, 10)
+                }
+            })
+            anim.start()
+        }
     }
 
     private fun updateLayout(params: WindowManager.LayoutParams = this.params) {
-        try {
-            wm.updateViewLayout(this, params)
-        } catch (_: Exception) {}
+        mainHandler.post {
+            try {
+                wm.updateViewLayout(this, params)
+            } catch (_: Exception) {}
+        }
     }
 
     @SuppressLint("RtlHardcoded")

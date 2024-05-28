@@ -473,10 +473,12 @@ class DrawerDelegate private constructor(context: Context) :
     }
 
     private fun showDrawer(wm: WindowManager = this.wm, hideHandle: Boolean = true) {
-        try {
-            wm.addView(drawer.root, params)
-        } catch (e: Exception) {
-            logUtils.debugLog("Error showing drawer", e)
+        mainHandler.post {
+            try {
+                wm.addView(drawer.root, params)
+            } catch (e: Exception) {
+                logUtils.debugLog("Error showing drawer", e)
+            }
         }
 
         if (hideHandle) {
@@ -485,46 +487,50 @@ class DrawerDelegate private constructor(context: Context) :
     }
 
     private fun updateDrawer(wm: WindowManager = this.wm) {
-        params.apply {
-            val displaySize = screenSize
-            width = displaySize.x
-            height = displaySize.y
-        }
+        mainHandler.post {
+            params.apply {
+                val displaySize = screenSize
+                width = displaySize.x
+                height = displaySize.y
+            }
 
-        try {
-            wm.updateViewLayout(drawer.root, params)
-        } catch (e: Exception) {
-            logUtils.debugLog("Error updating drawer", e)
+            try {
+                wm.updateViewLayout(drawer.root, params)
+            } catch (e: Exception) {
+                logUtils.debugLog("Error updating drawer", e)
+            }
         }
     }
 
     private fun hideDrawer(callListener: Boolean = true) {
-        updateCommonState { it.copy(handlingClick = false) }
-        adapter.currentEditingInterfacePosition = -1
+        mainHandler.post {
+            updateCommonState { it.copy(handlingClick = false) }
+            adapter.currentEditingInterfacePosition = -1
 
-        currentVisibilityAnim?.cancel()
-        val anim = ValueAnimator.ofFloat(1f, 0f)
-        currentVisibilityAnim = anim
+            currentVisibilityAnim?.cancel()
+            val anim = ValueAnimator.ofFloat(1f, 0f)
+            currentVisibilityAnim = anim
 
-        anim.interpolator = AccelerateInterpolator()
-        anim.duration = ANIM_DURATION
-        anim.addUpdateListener {
-            drawer.root.alpha = it.animatedValue.toString().toFloat()
-        }
-        anim.addListener(object : AnimatorListenerAdapter() {
-            override fun onAnimationEnd(animation: Animator?) {
-                drawer.root.handler?.postDelayed({
-                    try {
-                        wm.removeView(drawer.root)
-                        if (callListener) eventManager.sendEvent(Event.DrawerHidden)
-                    } catch (e: Exception) {
-                        logUtils.debugLog("Error hiding drawer", e)
-                    }
-                }, 10)
+            anim.interpolator = AccelerateInterpolator()
+            anim.duration = ANIM_DURATION
+            anim.addUpdateListener {
+                drawer.root.alpha = it.animatedValue.toString().toFloat()
             }
-        })
-        anim.start()
-        tryShowHandle()
+            anim.addListener(object : AnimatorListenerAdapter() {
+                override fun onAnimationEnd(animation: Animator?) {
+                    drawer.root.handler?.postDelayed({
+                        try {
+                            wm.removeView(drawer.root)
+                            if (callListener) eventManager.sendEvent(Event.DrawerHidden)
+                        } catch (e: Exception) {
+                            logUtils.debugLog("Error hiding drawer", e)
+                        }
+                    }, 10)
+                }
+            })
+            anim.start()
+            tryShowHandle()
+        }
     }
 
     override fun retrieveCounts(): Pair<Int?, Int?> {

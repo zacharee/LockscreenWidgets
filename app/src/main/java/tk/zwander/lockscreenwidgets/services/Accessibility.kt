@@ -165,7 +165,7 @@ class Accessibility : AccessibilityService(), EventObserver, CoroutineScope by M
                             null
                         }
                     }
-                )
+                ),
             )
         }
     }
