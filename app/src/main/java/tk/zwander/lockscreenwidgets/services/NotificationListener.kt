@@ -49,6 +49,7 @@ class NotificationListener : NotificationListenerService(), EventObserver, Corou
     override fun onListenerConnected() {
         isListening = true
         eventManager.addObserver(this)
+        sendUpdate()
     }
 
     override fun onListenerDisconnected() {
@@ -62,7 +63,7 @@ class NotificationListener : NotificationListenerService(), EventObserver, Corou
 
     @SuppressLint("PrivateApi", "DiscouragedPrivateApi")
     override fun onBind(intent: Intent?): IBinder {
-        val wrapper = super.onBind(intent)
+        super.onBind(intent)
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             mWrapper = NougatListenerWrapper()
@@ -95,7 +96,9 @@ class NotificationListener : NotificationListenerService(), EventObserver, Corou
             }
         }
 
-        return wrapper
+        return NotificationListenerService::class.java.getDeclaredField("mWrapper")
+            .apply { isAccessible = true }
+            .get(this) as IBinder
     }
 
     override fun onDestroy() {
@@ -134,13 +137,15 @@ class NotificationListener : NotificationListenerService(), EventObserver, Corou
                 try {
                     // This seems to cause ANRs on a bunch of devices, so run on a background thread.
                     val activeNotifications = activeNotifications
+                    logUtils.debugLog("Filtering notifications ${activeNotifications.size}", null)
                     eventManager.sendEvent(
                         Event.NewNotificationCount(activeNotifications?.count { it.shouldCount } ?: 0)
                     )
                 } catch (e: Exception) {
-                    logUtils.debugLog("Error sending notification count update", e)
+                    logUtils.normalLog("Error sending notification count update", e)
+                    Bugsnag.notify(e)
                 } catch (e: OutOfMemoryError) {
-                    logUtils.debugLog("Error sending notification count update", e)
+                    logUtils.normalLog("Error sending notification count update", e)
                 }
             }
         }
@@ -153,10 +158,16 @@ class NotificationListener : NotificationListenerService(), EventObserver, Corou
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                 if (notification.flags and Notification.FLAG_BUBBLE != 0 &&
                     notification.bubbleMetadata.isNotificationSuppressed
-                ) return false
+                ) {
+                    logUtils.debugLog("Bubble and suppressed ${this.channelIdLogTag}", null)
+                    return false
+                }
             }
 
-            if (notification.visibility == Notification.VISIBILITY_SECRET) return false
+            if (notification.visibility == Notification.VISIBILITY_SECRET) {
+                logUtils.debugLog("Secret visibility ${this.channelIdLogTag}", null)
+                return false
+            }
 
             if (Build.VERSION.SDK_INT > Build.VERSION_CODES.N_MR1) {
                 val ranking = Ranking()
@@ -164,7 +175,10 @@ class NotificationListener : NotificationListenerService(), EventObserver, Corou
 
                 if (rankingResult && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S &&
                     ranking.lockscreenVisibilityOverride == Notification.VISIBILITY_SECRET
-                ) return false
+                ) {
+                    logUtils.debugLog("Secret ranking ${this.channelIdLogTag}", null)
+                    return false
+                }
 
                 val importance =
                     if (!rankingResult || ranking.importance == NotificationManager.IMPORTANCE_NONE) {
@@ -173,12 +187,18 @@ class NotificationListener : NotificationListenerService(), EventObserver, Corou
                         ranking.importance
                     }
 
-                if (importance <= NotificationManager.IMPORTANCE_MIN) return false
+                if (importance <= NotificationManager.IMPORTANCE_MIN) {
+                    logUtils.debugLog("Min important ${this.channelIdLogTag}", null)
+                    return false
+                }
 
                 if (importance <= NotificationManager.IMPORTANCE_LOW &&
                     Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q &&
                     nm.shouldHideSilentStatusBarIcons()
-                ) return false
+                ) {
+                    logUtils.debugLog("Low importance and silent hidden ${this.channelIdLogTag}", null)
+                    return false
+                }
 
                 // There's a bug in Pixel UI 13 where silent notifications don't
                 // show on the lock screen even if they're set to do so.
@@ -187,11 +207,15 @@ class NotificationListener : NotificationListenerService(), EventObserver, Corou
                     SystemProperties.get("ro.vendor.camera.extensions.service")
                         .contains("com.google.android.apps.camera.services.extensions.service.PixelExtensions")
                 ) {
+                    logUtils.debugLog("Pixel workaround ${this.channelIdLogTag}", null)
                     return false
                 }
             } else {
                 @Suppress("DEPRECATION")
-                if (notification.priority <= Notification.PRIORITY_MIN) return false
+                if (notification.priority <= Notification.PRIORITY_MIN) {
+                    logUtils.debugLog("Priority min ${this.packageName}", null)
+                    return false
+                }
             }
 
             return true
