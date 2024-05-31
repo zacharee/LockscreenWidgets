@@ -159,13 +159,13 @@ class NotificationListener : NotificationListenerService(), EventObserver, Corou
                 if (notification.flags and Notification.FLAG_BUBBLE != 0 &&
                     notification.bubbleMetadata.isNotificationSuppressed
                 ) {
-                    logUtils.debugLog("Bubble and suppressed ${this.channelIdLogTag}", null)
+                    logUtils.debugLog("Bubble and suppressed ${this.notification.channelId}", null)
                     return false
                 }
             }
 
             if (notification.visibility == Notification.VISIBILITY_SECRET) {
-                logUtils.debugLog("Secret visibility ${this.channelIdLogTag}", null)
+                logUtils.debugLog("Secret visibility ${this.packageName}", null)
                 return false
             }
 
@@ -176,7 +176,7 @@ class NotificationListener : NotificationListenerService(), EventObserver, Corou
                 if (rankingResult && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S &&
                     ranking.lockscreenVisibilityOverride == Notification.VISIBILITY_SECRET
                 ) {
-                    logUtils.debugLog("Secret ranking ${this.channelIdLogTag}", null)
+                    logUtils.debugLog("Secret ranking ${this.notification.channelId}", null)
                     return false
                 }
 
@@ -184,7 +184,7 @@ class NotificationListener : NotificationListenerService(), EventObserver, Corou
 
                 if (importance != NotificationManager.IMPORTANCE_UNSPECIFIED) {
                     if (importance <= NotificationManager.IMPORTANCE_MIN) {
-                        logUtils.debugLog("Min important ${this.channelIdLogTag}", null)
+                        logUtils.debugLog("Min important ${this.notification.channelId}", null)
                         return false
                     }
 
@@ -192,7 +192,7 @@ class NotificationListener : NotificationListenerService(), EventObserver, Corou
                         Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q &&
                         nm.shouldHideSilentStatusBarIcons()
                     ) {
-                        logUtils.debugLog("Low importance and silent hidden ${this.channelIdLogTag}", null)
+                        logUtils.debugLog("Low importance and silent hidden ${this.notification.channelId}", null)
                         return false
                     }
 
@@ -203,7 +203,7 @@ class NotificationListener : NotificationListenerService(), EventObserver, Corou
                         SystemProperties.get("ro.vendor.camera.extensions.service")
                             .contains("com.google.android.apps.camera.services.extensions.service.PixelExtensions")
                     ) {
-                        logUtils.debugLog("Pixel workaround ${this.channelIdLogTag}", null)
+                        logUtils.debugLog("Pixel workaround ${this.notification.channelId}", null)
                         return false
                     }
                 }
