@@ -4,7 +4,6 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.os.Build
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
@@ -33,7 +32,6 @@ class PermissionIntentLaunchActivity : ComponentActivity() {
     enum class LaunchType {
         ACTIVITY,
         SERVICE,
-        FOREGROUND_SERVICE,
         RECEIVER
     }
 
@@ -73,9 +71,6 @@ class PermissionIntentLaunchActivity : ComponentActivity() {
             when (launchType) {
                 LaunchType.ACTIVITY -> startActivity(intentToLaunch)
                 LaunchType.SERVICE -> startService(intentToLaunch)
-                LaunchType.FOREGROUND_SERVICE -> if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    startForegroundService(intentToLaunch)
-                }
                 LaunchType.RECEIVER -> sendBroadcast(intentToLaunch)
             }
         } catch (e: Throwable) {
