@@ -18,7 +18,6 @@
         tools:ignore="QueryAllPackagesPermission" />
     <uses-permission android:name="android.permission.CALL_PHONE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
 
     <uses-permission android:name="com.huawei.android.totemweather.permission.ACCESS_WEATHERCLOCK_PROVIDER" />
     <uses-permission android:name="android.permission.ACCESS_WEATHERCLOCK_PROVIDER" />
@@ -343,6 +342,14 @@
         <meta-data
             android:name="com.bugsnag.android.API_KEY"
             android:value="a7b3e6e6f38ef16b7c3e80cb689f78a3"/>
+
+        <!-- Tasker Workaround -->
+        <service
+            android:name="com.joaomgcd.taskerpluginlibrary.action.IntentServiceAction"
+            tools:remove="android:foregroundServiceType" />
+        
+        <service android:name="com.joaomgcd.taskerpluginlibrary.condition.IntentServiceCondition"
+            tools:remove="android:foregroundServiceType" />
     </application>
 
 </manifest>
