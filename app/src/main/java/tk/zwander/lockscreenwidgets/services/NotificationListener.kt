@@ -6,7 +6,9 @@ import android.app.NotificationManager
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
+import android.os.BadParcelableException
 import android.os.Build
+import android.os.DeadObjectException
 import android.os.IBinder
 import android.os.Parcel
 import android.os.SystemProperties
@@ -139,13 +141,19 @@ class NotificationListener : NotificationListenerService(), EventObserver, Corou
                     val activeNotifications = activeNotifications
                     logUtils.debugLog("Filtering notifications ${activeNotifications.size}", null)
                     eventManager.sendEvent(
-                        Event.NewNotificationCount(activeNotifications?.count { it.shouldCount } ?: 0)
+                        Event.NewNotificationCount(activeNotifications?.count { it.shouldCount } ?: 0),
                     )
+                } catch (e: BadParcelableException) {
+                    logUtils.normalLog("Error sending notification count update", e)
+
+                    if (e.cause !is DeadObjectException) {
+                        Bugsnag.notify(e)
+                    }
+                } catch (e: OutOfMemoryError) {
+                    logUtils.normalLog("Error sending notification count update", e)
                 } catch (e: Exception) {
                     logUtils.normalLog("Error sending notification count update", e)
                     Bugsnag.notify(e)
-                } catch (e: OutOfMemoryError) {
-                    logUtils.normalLog("Error sending notification count update", e)
                 }
             }
         }
