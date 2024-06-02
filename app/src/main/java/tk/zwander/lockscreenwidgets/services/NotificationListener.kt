@@ -17,8 +17,10 @@ import android.service.notification.INotificationListener
 import android.service.notification.NotificationListenerService
 import android.service.notification.StatusBarNotification
 import com.bugsnag.android.Bugsnag
+import kotlinx.atomicfu.atomic
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
@@ -46,16 +48,17 @@ val Context.isNotificationListenerActive: Boolean
  */
 @Suppress("unused")
 class NotificationListener : NotificationListenerService(), EventObserver, CoroutineScope by MainScope() {
-    private var isListening = false
+    private val isListening = atomic(false)
+    private val updateJob = atomic<Job?>(null)
 
     override fun onListenerConnected() {
-        isListening = true
+        isListening.value = true
         eventManager.addObserver(this)
         sendUpdate()
     }
 
     override fun onListenerDisconnected() {
-        isListening = false
+        isListening.value = false
         eventManager.removeObserver(this)
     }
 
@@ -90,7 +93,7 @@ class NotificationListener : NotificationListenerService(), EventObserver, Corou
                                 .loaded
                                 .getDeclaredConstructor()
                                 .apply { isAccessible = true }
-                                .newInstance()
+                                .newInstance(),
                         )
                     }
             } catch (e: Throwable) {
@@ -131,8 +134,9 @@ class NotificationListener : NotificationListenerService(), EventObserver, Corou
     }
 
     private fun sendUpdate() {
-        launch(Dispatchers.IO) {
-            if (isListening) {
+        updateJob.value?.cancel()
+        updateJob.value = launch(Dispatchers.IO) {
+            if (isListening.value) {
                 //Even with the check to make sure the notification listener is connected, some devices still
                 //crash with an "unknown listener" error when trying to retrieve the notification lists.
                 //This shouldn't happen, but it does, so catch the Exception.
