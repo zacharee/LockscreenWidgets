@@ -48,6 +48,8 @@ val Context.isNotificationListenerActive: Boolean
  */
 @Suppress("unused")
 class NotificationListener : NotificationListenerService(), EventObserver, CoroutineScope by MainScope() {
+    private val nm by lazy { getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager }
+
     private val isListening = atomic(false)
     private val updateJob = atomic<Job?>(null)
 
@@ -165,8 +167,6 @@ class NotificationListener : NotificationListenerService(), EventObserver, Corou
 
     private val StatusBarNotification.shouldCount: Boolean
         get() {
-            val nm = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                 if (notification.flags and Notification.FLAG_BUBBLE != 0 &&
                     notification.bubbleMetadata.isNotificationSuppressed
