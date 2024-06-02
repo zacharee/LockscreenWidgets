@@ -118,7 +118,7 @@ fun ClearFrameDataCard(
     ) {
         Column(
             modifier = Modifier.padding(
-                ButtonDefaults.ContentPadding
+                ButtonDefaults.ContentPadding,
             ),
         ) {
             Text(
@@ -129,7 +129,8 @@ fun ClearFrameDataCard(
             Spacer(modifier = Modifier.size(8.dp))
 
             Column(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth()
+                    .padding(bottom = 4.dp),
                 verticalArrangement = Arrangement.spacedBy(4.dp),
             ) {
                 items.forEach { item ->
