@@ -8,6 +8,7 @@ import tk.zwander.common.util.frameSizeAndPosition
 import tk.zwander.common.util.prefManager
 import tk.zwander.lockscreenwidgets.data.Mode
 
+@Suppress("DEPRECATION")
 class FrameSizeAndPositionMigration : Migration {
     override val runOnOrBelowDatabaseVersion: Int
         get() = 4
@@ -16,39 +17,39 @@ class FrameSizeAndPositionMigration : Migration {
         val positions = mapOf(
             FrameSizeAndPosition.FrameType.LockNormal.Portrait to Point(
                 context.prefManager.getCorrectFrameX(Mode.LOCK_NORMAL),
-                context.prefManager.getCorrectFrameY(Mode.LOCK_NORMAL)
+                context.prefManager.getCorrectFrameY(Mode.LOCK_NORMAL),
             ),
             FrameSizeAndPosition.FrameType.LockNotification.Portrait to Point(
                 context.prefManager.getCorrectFrameX(Mode.LOCK_NOTIFICATION),
-                context.prefManager.getCorrectFrameY(Mode.LOCK_NOTIFICATION)
+                context.prefManager.getCorrectFrameY(Mode.LOCK_NOTIFICATION),
             ),
             FrameSizeAndPosition.FrameType.NotificationNormal.Portrait to Point(
                 context.prefManager.getCorrectFrameX(Mode.NOTIFICATION),
-                context.prefManager.getCorrectFrameY(Mode.NOTIFICATION)
+                context.prefManager.getCorrectFrameY(Mode.NOTIFICATION),
             ),
             FrameSizeAndPosition.FrameType.Preview.Portrait to Point(
                 context.prefManager.getCorrectFrameX(Mode.PREVIEW),
-                context.prefManager.getCorrectFrameY(Mode.PREVIEW)
-            )
+                context.prefManager.getCorrectFrameY(Mode.PREVIEW),
+            ),
         )
 
         val sizes = mapOf(
             FrameSizeAndPosition.FrameType.LockNormal.Portrait to PointF(
                 context.prefManager.getCorrectFrameWidth(Mode.LOCK_NORMAL),
-                context.prefManager.getCorrectFrameHeight(Mode.LOCK_NORMAL)
+                context.prefManager.getCorrectFrameHeight(Mode.LOCK_NORMAL),
             ),
             FrameSizeAndPosition.FrameType.LockNotification.Portrait to PointF(
                 context.prefManager.getCorrectFrameWidth(Mode.LOCK_NOTIFICATION),
-                context.prefManager.getCorrectFrameHeight(Mode.LOCK_NOTIFICATION)
+                context.prefManager.getCorrectFrameHeight(Mode.LOCK_NOTIFICATION),
             ),
             FrameSizeAndPosition.FrameType.NotificationNormal.Portrait to PointF(
                 context.prefManager.getCorrectFrameWidth(Mode.NOTIFICATION),
-                context.prefManager.getCorrectFrameHeight(Mode.NOTIFICATION)
+                context.prefManager.getCorrectFrameHeight(Mode.NOTIFICATION),
             ),
             FrameSizeAndPosition.FrameType.Preview.Portrait to PointF(
                 context.prefManager.getCorrectFrameWidth(Mode.PREVIEW),
-                context.prefManager.getCorrectFrameHeight(Mode.PREVIEW)
-            )
+                context.prefManager.getCorrectFrameHeight(Mode.PREVIEW),
+            ),
         )
 
         with (context.frameSizeAndPosition) {
