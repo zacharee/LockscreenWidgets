@@ -155,7 +155,7 @@ class NotificationListener : NotificationListenerService(), EventObserver, Corou
                     }
                 } catch (e: OutOfMemoryError) {
                     logUtils.normalLog("Error sending notification count update", e)
-                } catch (e: Exception) {
+                } catch (e: Throwable) {
                     logUtils.normalLog("Error sending notification count update", e)
                     Bugsnag.notify(e)
                 }
