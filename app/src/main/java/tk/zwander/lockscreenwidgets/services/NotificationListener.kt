@@ -144,10 +144,10 @@ class NotificationListener : NotificationListenerService(), EventObserver, Corou
                 //This shouldn't happen, but it does, so catch the Exception.
                 try {
                     // This seems to cause ANRs on a bunch of devices, so run on a background thread.
-                    val activeNotifications = activeNotifications
+                    val activeNotifications = activeNotifications ?: arrayOf()
                     logUtils.debugLog("Filtering notifications ${activeNotifications.size}", null)
                     eventManager.sendEvent(
-                        Event.NewNotificationCount(activeNotifications?.count { it.shouldCount } ?: 0),
+                        Event.NewNotificationCount(activeNotifications.count { it.shouldCount }),
                     )
                 } catch (e: BadParcelableException) {
                     logUtils.normalLog("Error sending notification count update", e)
