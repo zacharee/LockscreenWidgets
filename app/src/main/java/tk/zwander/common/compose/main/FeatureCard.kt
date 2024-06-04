@@ -137,26 +137,26 @@ fun FeatureCard(info: FeatureCardInfo) {
             Text(
                 text = stringResource(id = info.title),
                 textAlign = TextAlign.Center,
-                style = MaterialTheme.typography.headlineLarge
+                style = MaterialTheme.typography.headlineLarge,
             )
 
             Box(modifier = Modifier.fillMaxWidth(0.25f)) {
                 HorizontalDivider(
-                    modifier = Modifier.padding(top = 24.dp, bottom = 24.dp),
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    modifier = Modifier.padding(top = 12.dp, bottom = 16.dp),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
 
             var enabled by context.rememberBooleanPreferenceState(
                 key = info.enabledKey,
                 enabled = info.isEnabled,
-                onEnabledChanged = info.onEnabledChanged
+                onEnabledChanged = info.onEnabledChanged,
             )
 
             CardSwitch(
                 enabled = enabled,
                 onEnabledChanged = { enabled = it },
-                title = stringResource(id = if (enabled) info.enabledLabel else info.disabledLabel)
+                title = stringResource(id = if (enabled) info.enabledLabel else info.disabledLabel),
             )
 
             AnimatedVisibility(visible = enabled) {
@@ -169,18 +169,18 @@ fun FeatureCard(info: FeatureCardInfo) {
                         },
                         modifier = Modifier
                             .fillMaxWidth()
-                            .heightIn(min = 64.dp)
+                            .heightIn(min = 64.dp),
                     ) {
                         Image(
                             painter = painterResource(id = R.drawable.ic_baseline_add_24),
                             contentDescription = stringResource(id = R.string.add_widget),
                             contentScale = ContentScale.FillHeight,
-                            modifier = Modifier.size(32.dp)
+                            modifier = Modifier.size(32.dp),
                         )
                         Spacer(Modifier.size(16.dp))
                         Text(
                             text = stringResource(id = R.string.add_widget),
-                            style = MaterialTheme.typography.headlineSmall
+                            style = MaterialTheme.typography.headlineSmall,
                         )
                     }
 
@@ -232,7 +232,7 @@ fun FeatureCard(info: FeatureCardInfo) {
                                             minTextSize = min
                                         }
                                     },
-                                    maxFontSize = minTextSize
+                                    maxFontSize = minTextSize,
                                 )
                             }
                         }

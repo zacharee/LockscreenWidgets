@@ -33,6 +33,7 @@ import tk.zwander.common.util.hasReadMediaImagesPermission
 import tk.zwander.common.util.hasStoragePermission
 import tk.zwander.common.util.launchUrl
 import tk.zwander.common.util.rememberPackageInstallationStatus
+import tk.zwander.lockscreenwidgets.BuildConfig
 import tk.zwander.lockscreenwidgets.R
 import tk.zwander.lockscreenwidgets.services.isAccessibilityEnabled
 import tk.zwander.lockscreenwidgets.services.isNotificationListenerActive
@@ -110,6 +111,7 @@ fun rememberIntroSlides(
             context.contentResolver.unregisterContentObserver(contentObserver)
         }
     }
+
     DisposableEffect(key1 = startReason) {
         val listenUri = Settings.Secure.getUriFor("enabled_notification_listeners")
         val contentObserver = object : ContentObserver(null) {
@@ -152,7 +154,7 @@ fun rememberIntroSlides(
                 description = { stringResource(id = R.string.intro_usage_desc) },
                 slideColor = { colorResource(id = R.color.slide_2) },
                 contentColor = { colorResource(id = R.color.slide_2_text) },
-                icon = { painterResource(id = R.drawable.ic_baseline_gesture_two_tap) }
+                icon = { painterResource(id = R.drawable.ic_baseline_gesture_two_tap) },
             ))
 
             slides.add(SimpleIntroPage(
@@ -169,7 +171,7 @@ fun rememberIntroSlides(
                     ) {
                         Text(text = stringResource(id = R.string.more_info))
                     }
-                }
+                },
             ))
         }
 
@@ -218,7 +220,7 @@ fun rememberIntroSlides(
                         }
                     }
                 },
-                canMoveForward = { hasAccessibility },
+                canMoveForward = { hasAccessibility || BuildConfig.DEBUG },
             ))
         }
 
@@ -241,15 +243,12 @@ fun rememberIntroSlides(
                         Text(text = stringResource(id = R.string.grant))
                     }
                 },
-                canMoveForward = { hasNotificationAccess },
+                canMoveForward = { hasNotificationAccess || BuildConfig.DEBUG },
             ))
         }
 
-        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.LOLLIPOP_MR1 && (
-                    startReason == OnboardingActivity.RetroMode.NONE ||
-                            startReason == OnboardingActivity.RetroMode.STORAGE
-                    )
-        ) {
+        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.LOLLIPOP_MR1 &&
+            (startReason == OnboardingActivity.RetroMode.NONE || startReason == OnboardingActivity.RetroMode.STORAGE)) {
             slides.add(SimpleIntroPage(
                 title = { stringResource(id = R.string.intro_read_storage_title) },
                 description = {
@@ -324,7 +323,7 @@ fun rememberIntroSlides(
                         Text(text = stringResource(id = R.string.privacy_policy))
                     }
                 },
-                canMoveForward = { hasStoragePermission && hasReadMediaImagesPermission }
+                canMoveForward = { (hasStoragePermission && hasReadMediaImagesPermission) || BuildConfig.DEBUG },
             ))
         }
 
@@ -345,7 +344,7 @@ fun rememberIntroSlides(
                     ) {
                         Text(text = stringResource(id = R.string.more_info))
                     }
-                }
+                },
             ))
         }
 
@@ -355,7 +354,7 @@ fun rememberIntroSlides(
                 description = { stringResource(id = R.string.intro_done_desc) },
                 slideColor = { colorResource(id = R.color.slide_8) },
                 contentColor = { colorResource(id = R.color.slide_8_text) },
-                icon = { painterResource(id = R.drawable.ic_baseline_done_24) }
+                icon = { painterResource(id = R.drawable.ic_baseline_done_24) },
             ))
         }
     }

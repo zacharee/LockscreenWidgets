@@ -106,6 +106,7 @@ class OnboardingActivity : ComponentActivity() {
                     normalizeElements = true,
                     onContentColorChanged = {
                         insetsControllerCompat.isAppearanceLightNavigationBars = it.luminance() <= 0.5
+                        insetsControllerCompat.isAppearanceLightStatusBars = it.luminance() <= 0.5
                     },
                 )
             }
