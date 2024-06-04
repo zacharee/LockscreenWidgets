@@ -1,9 +1,12 @@
 package tk.zwander.common.compose.main
 
-import androidx.compose.foundation.layout.*
-import androidx.compose.material.*
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Card
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -30,62 +33,67 @@ fun rememberLinks(): List<MainPageLink> {
     return remember {
         listOf(
             MainPageLink(
+                R.drawable.baseline_translate_24,
+                R.string.translate,
+                R.string.translate_desc,
+                "https://crowdin.com/project/lockscreen-widgets",
+            ),
+            MainPageLink(
                 R.drawable.info,
                 R.string.privacy_policy,
                 R.string.main_screen_privacy_policy_desc,
-                "https://github.com/zacharee/LockscreenWidgets/blob/master/PRIVACY.md"
+                "https://github.com/zacharee/LockscreenWidgets/blob/master/PRIVACY.md",
             ),
             MainPageLink(
                 R.drawable.ic_baseline_mastodon_24,
                 R.string.main_screen_social_mastodon,
                 R.string.main_screen_social_mastodon_desc,
-                "https://androiddev.social/@wander1236"
+                "https://androiddev.social/@wander1236",
             ),
             MainPageLink(
                 R.drawable.ic_baseline_earth_24,
                 R.string.main_screen_social_website,
                 R.string.main_screen_social_website_desc,
-                "https://zwander.dev"
+                "https://zwander.dev",
             ),
             MainPageLink(
                 R.drawable.ic_baseline_email_24,
                 R.string.main_screen_social_email,
                 R.string.main_screen_social_email_desc,
-                "mailto:zachary@zwander.dev"
+                "mailto:zachary@zwander.dev",
             ),
             MainPageLink(
                 R.drawable.ic_baseline_telegram_24,
                 R.string.main_screen_social_telegram,
                 R.string.main_screen_social_telegram_desc,
-                "https://bit.ly/ZachareeTG"
+                "https://bit.ly/ZachareeTG",
             ),
             MainPageLink(
                 R.drawable.ic_baseline_github_24,
                 R.string.main_screen_social_github,
                 R.string.main_screen_social_github_desc,
-                "https://github.com/zacharee/LockscreenWidgets"
+                "https://github.com/zacharee/LockscreenWidgets",
             ),
             MainPageLink(
                 R.drawable.ic_baseline_patreon_24,
                 R.string.main_screen_social_patreon,
                 R.string.main_screen_social_patreon_desc,
-                "https://patreon.com/zacharywander"
+                "https://patreon.com/zacharywander",
             ),
             MainPageLink(
                 R.drawable.ic_baseline_heart_24,
                 R.string.supporters,
-                R.string.supporters_desc
+                R.string.supporters_desc,
             ) {
                 MaterialAlertDialogBuilder(context)
                     .setTitle(R.string.supporters)
                     .setView(SupporterView(context))
                     .show()
-            }
+            },
         )
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LinkItem(option: MainPageLink) {
     val context = LocalContext.current
@@ -99,7 +107,7 @@ fun LinkItem(option: MainPageLink) {
                 if (option.isEmail) {
                     context.launchEmail(
                         option.link,
-                        context.resources.getString(R.string.app_name)
+                        context.resources.getString(R.string.app_name),
                     )
                 } else {
                     context.launchUrl(option.link)
@@ -111,7 +119,7 @@ fun LinkItem(option: MainPageLink) {
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment = Alignment.CenterVertically,
         ) {
             Icon(
                 painter = painterResource(id = option.icon),
@@ -126,14 +134,14 @@ fun LinkItem(option: MainPageLink) {
                 Text(
                     text = stringResource(id = option.title),
                     color = MaterialTheme.colorScheme.onSurface,
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight.Bold,
                 )
 
                 Spacer(Modifier.size(4.dp))
 
                 Text(
                     text = stringResource(id = option.desc),
-                    style = MaterialTheme.typography.bodyMedium
+                    style = MaterialTheme.typography.bodyMedium,
                 )
             }
         }

@@ -324,4 +324,7 @@
 
     <string name="directly_check_for_activity">Directly Check for Activity</string>
     <string name="directly_check_for_activity_desc">When enabled, Lockscreen Widgets will use Android\'s API to check whether a widget tap is launching an Activity. This can be faster than Lockscreen Widget\'s built-in detection, but may cause false positives.</string>
+
+    <string name="translate">Translate</string>
+    <string name="translate_desc">Help translate Lockscreen Widgets into your language.</string>
 </resources>
