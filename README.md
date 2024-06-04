@@ -9,10 +9,16 @@ Note that Lockscreen Widgets is _not_ designed to work on the Always-On Display.
 The precompiled version of Lockscreen Widgets is a paid app, available on the [Google Play Store](https://play.google.com/store/apps/details?id=tk.zwander.lockscreenwidgets).
 
 ## Building
-
 Lockscreen Widgets makes use of some hidden APIs. Since reflection gets tedious, I use a modified android.jar that exposes the hidden APIs so they can be used like normal.
 If you want to build Lockscreen Widgets for yourself, make sure you use the android.jar from the following repo: https://github.com/Reginer/aosp-android-jar.
 Lockscreen Widgets is currently built against API 34. Download the `android-34` JAR from the above repo and copy it to `YOUR-SDK-LOCATION/platforms/android-34/android.jar`. Make sure to back the original version up in case something goes wrong.
+
+# Translating
+[![Crowdin](https://badges.crowdin.net/lockscreen-widgets/localized.svg)](https://crowdin.com/project/lockscreen-widgets)
+
+Lockscreen Widgets uses Crowdin for translations. You can view the project and contribute using the following link.
+
+https://crowdin.com/project/lockscreen-widgets
 
 # Error Reporting
 Lockscreen Widgets uses Bugsnag for error reporting as of version 2.7.5. Previous versions use Firebase Crashlytics.
