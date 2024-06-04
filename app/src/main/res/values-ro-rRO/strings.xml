@@ -1,7 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Lockscreen Widgets</string>
-    <string name="widget_drawer">Widget Drawer</string>
     <string name="version_template">v%s</string>
     <string name="edit_gesture_hint">Tap the widget frame with two fingers to move and resize it.</string>
     <string name="edit_gesture_hint_2">Great! Tap with two fingers to hide the editing UI.</string>
