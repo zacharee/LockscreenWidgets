@@ -20,21 +20,21 @@ fun ClickableCard(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     summary: String?,
-    ) {
+) {
     Row(modifier = modifier) {
         SubduedOutlinedButton(
             onClick = onClick,
             modifier = Modifier
                 .fillMaxWidth()
                 .heightIn(min = 64.dp)
-                .animateContentSize()
+                .animateContentSize(),
         ) {
             Column(
-                modifier = Modifier.weight(1f)
+                modifier = Modifier.weight(1f),
             ) {
                 Text(
                     text = title,
-                    style = MaterialTheme.typography.headlineSmall
+                    style = MaterialTheme.typography.headlineSmall,
                 )
 
                 if (!summary.isNullOrBlank()) {
@@ -42,7 +42,7 @@ fun ClickableCard(
 
                     Text(
                         text = summary,
-                        style = MaterialTheme.typography.bodyMedium
+                        style = MaterialTheme.typography.bodyMedium,
                     )
                 }
             }

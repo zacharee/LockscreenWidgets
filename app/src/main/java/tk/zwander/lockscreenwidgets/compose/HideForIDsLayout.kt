@@ -1,6 +1,5 @@
 package tk.zwander.lockscreenwidgets.compose
 
-import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.expandHorizontally
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -127,8 +126,7 @@ fun HideForIDsLayout(
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(bottom = 8.dp)
-                    .animateContentSize(),
+                    .padding(bottom = 8.dp),
                 contentAlignment = Alignment.Center
             ) {
                 // Messy workaround to keep the height consistent.

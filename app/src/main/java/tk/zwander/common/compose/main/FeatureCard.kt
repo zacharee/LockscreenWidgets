@@ -2,7 +2,6 @@ package tk.zwander.common.compose.main
 
 import android.content.Intent
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -127,14 +126,13 @@ fun FeatureCard(info: FeatureCardInfo) {
 
     Card(
         modifier = Modifier
-            .fillMaxWidth()
-            .animateContentSize()
+            .fillMaxWidth(),
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+            horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Text(
                 text = stringResource(id = info.title),
