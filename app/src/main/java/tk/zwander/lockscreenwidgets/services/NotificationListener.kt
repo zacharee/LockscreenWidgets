@@ -240,7 +240,8 @@ class NotificationListener : NotificationListenerService(), EventObserver, Corou
         }
     }
 
-    private inner class LollipopListenerWrapper(private val wrapper: INotificationListener.Stub) {
+    // Public to allow ByteBuddy wrapping
+    inner class LollipopListenerWrapper(private val wrapper: INotificationListener.Stub) {
         fun onTransact(code: Int, data: Parcel?, reply: Parcel?, flags: Int): Boolean {
             return try {
                 wrapper.onTransact(code, data, reply, flags)
