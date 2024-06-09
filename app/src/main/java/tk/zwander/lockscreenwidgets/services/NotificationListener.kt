@@ -144,7 +144,11 @@ class NotificationListener : NotificationListenerService(), EventObserver, Corou
                 //This shouldn't happen, but it does, so catch the Exception.
                 try {
                     // This seems to cause ANRs on a bunch of devices, so run on a background thread.
-                    val activeNotifications = activeNotifications ?: arrayOf()
+                    val activeNotifications = try {
+                        getActiveNotifications(null, TRIM_LIGHT)
+                    } catch (_: Throwable) {
+                        activeNotifications
+                    } ?: arrayOf()
                     logUtils.debugLog("Filtering notifications ${activeNotifications.size}", null)
                     eventManager.sendEvent(
                         Event.NewNotificationCount(activeNotifications.count { it.shouldCount }),
