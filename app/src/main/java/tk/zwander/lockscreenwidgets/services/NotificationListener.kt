@@ -9,7 +9,9 @@ import android.content.Intent
 import android.os.BadParcelableException
 import android.os.Build
 import android.os.DeadObjectException
+import android.os.Handler
 import android.os.IBinder
+import android.os.Looper
 import android.os.Parcel
 import android.os.SystemProperties
 import android.provider.Settings
@@ -49,6 +51,7 @@ val Context.isNotificationListenerActive: Boolean
 @Suppress("unused")
 class NotificationListener : NotificationListenerService(), EventObserver, CoroutineScope by MainScope() {
     private val nm by lazy { getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager }
+    private val handler by lazy { Handler(Looper.getMainLooper()) }
 
     private val isListening = atomic(false)
     private val updateJob = atomic<Job?>(null)
@@ -116,7 +119,9 @@ class NotificationListener : NotificationListenerService(), EventObserver, Corou
     override fun onEvent(event: Event) {
         when (event) {
             Event.RequestNotificationCount -> {
-                sendUpdate()
+                handler.post {
+                    sendUpdate()
+                }
             }
 
             else -> {}
