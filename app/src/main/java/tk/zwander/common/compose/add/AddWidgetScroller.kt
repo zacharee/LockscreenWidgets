@@ -140,13 +140,13 @@ fun AddWidgetScroller(
 @Composable
 private fun AppHeader(
     app: AppInfo,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     val context = LocalContext.current
 
     Card(
         modifier = modifier,
-        shape = RectangleShape
+        shape = RectangleShape,
     ) {
         Row(
             modifier = Modifier
@@ -169,19 +169,15 @@ private fun AppHeader(
 
             val image = icon
 
-            if (image != null) {
-                Image(
-                    painter = rememberDrawablePainter(image),
-                    contentDescription = app.appName,
-                    modifier = Modifier.size(36.dp)
-                )
-            } else {
-                Image(
-                    painter = painterResource(id = R.drawable.ic_launcher_foreground),
-                    contentDescription = app.appName,
-                    modifier = Modifier.size(36.dp)
-                )
-            }
+            Image(
+                painter = if (image != null) {
+                    rememberDrawablePainter(image)
+                } else {
+                    painterResource(id = R.drawable.ic_launcher_foreground)
+                },
+                contentDescription = app.appName,
+                modifier = Modifier.size(36.dp),
+            )
 
             Text(text = app.appName)
         }
