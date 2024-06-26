@@ -1,6 +1,7 @@
 package tk.zwander.common.tiles.widget
 
 import android.app.PendingIntent
+import android.appwidget.AppWidgetHost.AppWidgetHostListener
 import android.appwidget.AppWidgetProviderInfo
 import android.content.Context
 import android.content.Intent
@@ -20,6 +21,7 @@ import androidx.compose.ui.unit.dp
 import androidx.core.content.res.ResourcesCompat
 import com.android.internal.appwidget.IAppWidgetService
 import tk.zwander.common.activities.add.AddTileWidgetActivity
+import tk.zwander.common.host.widgetHostCompat
 import tk.zwander.common.util.PrefManager
 import tk.zwander.common.util.appWidgetManager
 import tk.zwander.common.util.cropBitmapTransparency
@@ -40,8 +42,9 @@ import java.util.concurrent.atomic.AtomicReference
  * AppWidget-specific features (e.g., adapters) just won't work. Updates also don't happen
  * dynamically. The detail view has to be exited and re-entered to see changes.
  */
+@Suppress("MemberVisibilityCanBePrivate")
 @RequiresApi(Build.VERSION_CODES.N)
-abstract class BaseWidgetTile : TileService(), SharedPreferences.OnSharedPreferenceChangeListener {
+abstract class BaseWidgetTile : TileService(), SharedPreferences.OnSharedPreferenceChangeListener, AppWidgetHostListener {
     protected val iManager: IAppWidgetService by lazy {
         IAppWidgetService.Stub.asInterface(
             ServiceManager.getService(Context.APPWIDGET_SERVICE)
@@ -79,8 +82,15 @@ abstract class BaseWidgetTile : TileService(), SharedPreferences.OnSharedPrefere
     override fun onStartListening() {
         super.onStartListening()
 
-        views.set(generateViews())
         updateTile()
+        notifySystemUIOfChanges()
+        widgetHostCompat.startListening(this)
+        widgetHostCompat.setListener(widgetId, this)
+    }
+
+    override fun onStopListening() {
+        super.onStopListening()
+        widgetHostCompat.stopListening(this)
     }
 
     override fun onTileRemoved() {
@@ -153,7 +163,30 @@ abstract class BaseWidgetTile : TileService(), SharedPreferences.OnSharedPrefere
     override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
         if (key == PrefManager.KEY_CUSTOM_TILES) {
             updateTile()
-            views.set(generateViews())
+            notifySystemUIOfChanges()
+        }
+    }
+
+    override fun onUpdateProviderInfo(appWidget: AppWidgetProviderInfo?) {
+        updateTile()
+        notifySystemUIOfChanges()
+    }
+
+    override fun onViewDataChanged(viewId: Int) {
+        notifySystemUIOfChanges()
+    }
+
+    override fun updateAppWidget(views: RemoteViews?) {
+        this.views.set(views?.getRemoteViewsToApply(this, null))
+        notifySystemUIOfChanges()
+    }
+
+    private fun notifySystemUIOfChanges() {
+        try {
+            TileService::class.java.getMethod("semUpdateDetailView")
+                .invoke(this)
+        } catch (e: Throwable) {
+            logUtils.normalLog("Error updating widget view", e)
         }
     }
 
@@ -172,7 +205,7 @@ abstract class BaseWidgetTile : TileService(), SharedPreferences.OnSharedPrefere
                 logUtils.debugLog("Custom widget loaded for tile ID $tileId")
 
                 //Success, set it.
-                outerView = widgetView
+                outerView = widgetView.getRemoteViewsToApply(this, null)
             } else {
                 logUtils.debugLog("Custom widget view is null for tile ID $tileId")
                 //Error retrieving widget, or widget not selected.

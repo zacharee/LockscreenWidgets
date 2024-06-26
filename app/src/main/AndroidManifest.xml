@@ -269,6 +269,10 @@
             <intent-filter>
                 <action android:name="android.service.quicksettings.action.QS_TILE" />
             </intent-filter>
+
+            <meta-data android:name="android.service.quicksettings.SEM_SUPPORT_DETAIL_VIEW" android:value="true" />
+            <meta-data android:name="android.service.quicksettings.SEM_ACTIVE_TILE_SUPPORT_SEM_PLATFORM_VER" android:value="28" />
+            <meta-data android:name="android.service.quicksettings.SEM_DEFAULT_TILE_NAME" android:resource="@string/app_name" />
         </service>
         <service
             android:name="tk.zwander.common.tiles.widget.WidgetTileTwo"
@@ -279,6 +283,10 @@
             <intent-filter>
                 <action android:name="android.service.quicksettings.action.QS_TILE" />
             </intent-filter>
+
+            <meta-data android:name="android.service.quicksettings.SEM_SUPPORT_DETAIL_VIEW" android:value="true" />
+            <meta-data android:name="android.service.quicksettings.SEM_ACTIVE_TILE_SUPPORT_SEM_PLATFORM_VER" android:value="28" />
+            <meta-data android:name="android.service.quicksettings.SEM_DEFAULT_TILE_NAME" android:resource="@string/app_name" />
         </service>
         <service
             android:name="tk.zwander.common.tiles.widget.WidgetTileThree"
@@ -289,6 +297,10 @@
             <intent-filter>
                 <action android:name="android.service.quicksettings.action.QS_TILE" />
             </intent-filter>
+
+            <meta-data android:name="android.service.quicksettings.SEM_SUPPORT_DETAIL_VIEW" android:value="true" />
+            <meta-data android:name="android.service.quicksettings.SEM_ACTIVE_TILE_SUPPORT_SEM_PLATFORM_VER" android:value="28" />
+            <meta-data android:name="android.service.quicksettings.SEM_DEFAULT_TILE_NAME" android:resource="@string/app_name" />
         </service>
         <service
             android:name="tk.zwander.common.tiles.widget.WidgetTileFour"
@@ -299,6 +311,10 @@
             <intent-filter>
                 <action android:name="android.service.quicksettings.action.QS_TILE" />
             </intent-filter>
+
+            <meta-data android:name="android.service.quicksettings.SEM_SUPPORT_DETAIL_VIEW" android:value="true" />
+            <meta-data android:name="android.service.quicksettings.SEM_ACTIVE_TILE_SUPPORT_SEM_PLATFORM_VER" android:value="28" />
+            <meta-data android:name="android.service.quicksettings.SEM_DEFAULT_TILE_NAME" android:resource="@string/app_name" />
         </service>
         <service
             android:name="tk.zwander.common.tiles.widget.WidgetTileFive"
@@ -309,6 +325,10 @@
             <intent-filter>
                 <action android:name="android.service.quicksettings.action.QS_TILE" />
             </intent-filter>
+
+            <meta-data android:name="android.service.quicksettings.SEM_SUPPORT_DETAIL_VIEW" android:value="true" />
+            <meta-data android:name="android.service.quicksettings.SEM_ACTIVE_TILE_SUPPORT_SEM_PLATFORM_VER" android:value="28" />
+            <meta-data android:name="android.service.quicksettings.SEM_DEFAULT_TILE_NAME" android:resource="@string/app_name" />
         </service>
 
         <receiver android:name=".appwidget.IDListProvider"
