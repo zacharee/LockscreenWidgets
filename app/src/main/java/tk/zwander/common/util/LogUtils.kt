@@ -3,10 +3,13 @@ package tk.zwander.common.util
 import android.annotation.SuppressLint
 import android.content.Context
 import android.util.Log
+import java.io.BufferedWriter
 import java.io.File
+import java.io.FileOutputStream
 import java.io.OutputStream
 import java.text.SimpleDateFormat
-import java.util.*
+import java.util.Date
+import java.util.Locale
 
 val Context.logUtils: LogUtils
     get() = LogUtils.getInstance(this)
@@ -46,13 +49,37 @@ class LogUtils private constructor(private val context: Context) {
 
     private val logFile = File(context.cacheDir, "log.txt")
 
+    private var _logFileHandle: BufferedWriter? = null
+    private val logFileHandle: BufferedWriter
+        get() {
+            synchronized(logFile) {
+                if (!logFile.exists()) {
+                    logFile.createNewFile()
+
+                    try {
+                        _logFileHandle?.close()
+                    } catch (_: Throwable) {}
+
+                    _logFileHandle = createLogFileWriter()
+                }
+
+                return _logFileHandle ?: createLogFileWriter().also {
+                    _logFileHandle = it
+                }
+            }
+        }
+
+    private fun createLogFileWriter(): BufferedWriter = FileOutputStream(logFile, true).bufferedWriter()
+
     fun debugLog(message: String, throwable: Throwable? = Exception()) {
         if (context.isDebug) {
             val fullMessage = generateFullMessage(message, throwable)
 
             Log.e(DEBUG_LOG_TAG, fullMessage)
 
-            logFile.appendText("\n\n$fullMessage")
+            synchronized(logFile) {
+                logFileHandle.write("\n\n$fullMessage")
+            }
         }
     }
 
@@ -62,22 +89,28 @@ class LogUtils private constructor(private val context: Context) {
         Log.e(NORMAL_LOG_TAG, fullMessage)
 
         if (context.isDebug) {
-            logFile.appendText("\n\n$fullMessage")
+            synchronized(logFile) {
+                logFileHandle.write("\n\n$fullMessage")
+            }
         }
     }
 
     fun resetDebugLog() {
-        logFile.delete()
+        synchronized(logFile) {
+            logFile.delete()
+        }
     }
 
     fun exportLog(out: OutputStream) {
-        out.use { output ->
-            try {
-                logFile.inputStream().use { input ->
-                    input.copyTo(output)
+        synchronized(logFile) {
+            out.use { output ->
+                try {
+                    logFile.inputStream().use { input ->
+                        input.copyTo(output)
+                    }
+                } catch (e: Exception) {
+                    Log.e(NORMAL_LOG_TAG, "Failed to export log.", e)
                 }
-            } catch (e: Exception) {
-                normalLog("Failed to export log.", e)
             }
         }
     }

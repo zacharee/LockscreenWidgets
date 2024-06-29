@@ -14,11 +14,15 @@ val Context.appWidgetManager: AppWidgetManager
     get() = AppWidgetManager.getInstance(safeApplicationContext)
 
 fun AppWidgetProviderInfo.getSamsungConfigureComponent(context: Context): ComponentName? {
-    return context.packageManager.getReceiverInfoCompat(
-        provider,
-        PackageManager.GET_META_DATA
-    ).metaData?.getString("android.appwidget.provider.semConfigureActivity")
-        ?.let { ComponentName.unflattenFromString("${provider.packageName}/$it") }
+    return try {
+        context.packageManager.getReceiverInfoCompat(
+            provider,
+            PackageManager.GET_META_DATA
+        ).metaData?.getString("android.appwidget.provider.semConfigureActivity")
+            ?.let { ComponentName.unflattenFromString("${provider.packageName}/$it") }
+    } catch (e: PackageManager.NameNotFoundException) {
+        null
+    }
 }
 
 fun AppWidgetProviderInfo?.hasConfiguration(context: Context): Boolean {

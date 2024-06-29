@@ -140,7 +140,7 @@ class BackupRestoreManager private constructor(context: Context) : ContextWrappe
         } catch (e: Exception) {
             try {
                 logUtils.normalLog("Error parsing input string $string", e)
-            } catch (e: OutOfMemoryError) {
+            } catch (e2: OutOfMemoryError) {
                 logUtils.normalLog("Error parsing input string. Input is too large.", e)
             }
             false

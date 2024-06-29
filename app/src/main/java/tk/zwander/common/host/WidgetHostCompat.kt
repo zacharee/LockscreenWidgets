@@ -120,9 +120,9 @@ abstract class WidgetHostCompat(
             // a crash. There doesn't seem to be a way to fix this, but catching
             // the error here should at least allow future updates to be received.
         } catch (_: DeadObjectException) {
-            // It's possible for retrieving pending updates to fail, causing
-            // a crash. There doesn't seem to be a way to fix this, but catching
-            // the error here should at least allow future updates to be received.
+            // Same as above.
+        } catch (_: RuntimeException) {
+            // Same as above.
         }
     }
 
@@ -137,6 +137,7 @@ abstract class WidgetHostCompat(
         }
     }
 
+    @SuppressLint("PrivateApi")
     override fun onCreateView(
         context: Context,
         appWidgetId: Int,
