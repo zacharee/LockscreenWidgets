@@ -5,8 +5,6 @@ import android.appwidget.AppWidgetProviderInfo
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.graphics.Rect
-import android.graphics.RectF
 import android.graphics.drawable.GradientDrawable
 import android.os.Build
 import android.os.Bundle
@@ -185,7 +183,7 @@ abstract class BaseAdapter(
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
-        val inflater = LayoutInflater.from(parent.context).cloneInContext(parent.context)
+        val inflater = LayoutInflater.from(context).cloneInContext(parent.context)
         LayoutInflaterCompat.setFactory2(
             inflater,
             Class.forName("androidx.appcompat.app.AppCompatDelegateImpl")
@@ -250,20 +248,16 @@ abstract class BaseAdapter(
                 showVerticalSizers = value && rowCount > 1
             }
         private var showHorizontalSizers: Boolean
-            get() = itemView.run { binding.widgetLeftDragger.isVisible && binding.widgetRightDragger.isVisible }
+            get() = binding.widgetLeftDragger.isVisible && binding.widgetRightDragger.isVisible
             set(value) {
-                itemView.apply {
-                    binding.widgetLeftDragger.isVisible = value
-                    binding.widgetRightDragger.isVisible = value
-                }
+                binding.widgetLeftDragger.isVisible = value
+                binding.widgetRightDragger.isVisible = value
             }
         private var showVerticalSizers: Boolean
-            get() = itemView.run { binding.widgetTopDragger.isVisible && binding.widgetBottomDragger.isVisible }
+            get() = binding.widgetTopDragger.isVisible && binding.widgetBottomDragger.isVisible
             set(value) {
-                itemView.apply {
-                    binding.widgetTopDragger.isVisible = value
-                    binding.widgetBottomDragger.isVisible = value
-                }
+                binding.widgetTopDragger.isVisible = value
+                binding.widgetBottomDragger.isVisible = value
             }
 
         private var currentData: WidgetData?
@@ -285,63 +279,61 @@ abstract class BaseAdapter(
                 }
             }
 
-            itemView.apply {
-                binding.widgetLeftDragger.setOnTouchListener(WidgetResizeListener(
-                    ::getThresholdPx,
-                    WidgetResizeListener.Which.LEFT,
-                    { overThreshold, step, amount ->
-                        handleResize(
-                            overThreshold,
-                            step,
-                            amount,
-                            -1,
-                            false
-                        )
-                    }
-                ) { notifyItemChanged(bindingAdapterPosition) })
+            binding.widgetLeftDragger.setOnTouchListener(WidgetResizeListener(
+                ::getThresholdPx,
+                WidgetResizeListener.Which.LEFT,
+                { overThreshold, step, amount ->
+                    handleResize(
+                        overThreshold,
+                        step,
+                        amount,
+                        -1,
+                        false
+                    )
+                }
+            ) { notifyItemChanged(bindingAdapterPosition) })
 
-                binding.widgetTopDragger.setOnTouchListener(WidgetResizeListener(
-                    ::getThresholdPx,
-                    WidgetResizeListener.Which.TOP,
-                    { overThreshold, step, amount ->
-                        handleResize(
-                            overThreshold,
-                            step,
-                            amount,
-                            -1,
-                            true
-                        )
-                    }
-                ) { notifyItemChanged(bindingAdapterPosition) })
+            binding.widgetTopDragger.setOnTouchListener(WidgetResizeListener(
+                ::getThresholdPx,
+                WidgetResizeListener.Which.TOP,
+                { overThreshold, step, amount ->
+                    handleResize(
+                        overThreshold,
+                        step,
+                        amount,
+                        -1,
+                        true
+                    )
+                }
+            ) { notifyItemChanged(bindingAdapterPosition) })
 
-                binding.widgetRightDragger.setOnTouchListener(WidgetResizeListener(
-                    ::getThresholdPx,
-                    WidgetResizeListener.Which.RIGHT,
-                    { overThreshold, step, amount ->
-                        handleResize(
-                            overThreshold,
-                            step,
-                            amount,
-                            1,
-                            false
-                        )
-                    }
-                ) { notifyItemChanged(bindingAdapterPosition) })
+            binding.widgetRightDragger.setOnTouchListener(WidgetResizeListener(
+                ::getThresholdPx,
+                WidgetResizeListener.Which.RIGHT,
+                { overThreshold, step, amount ->
+                    handleResize(
+                        overThreshold,
+                        step,
+                        amount,
+                        1,
+                        false
+                    )
+                }
+            ) { notifyItemChanged(bindingAdapterPosition) })
 
-                binding.widgetBottomDragger.setOnTouchListener(WidgetResizeListener(
-                    ::getThresholdPx,
-                    WidgetResizeListener.Which.BOTTOM,
-                    { overThreshold, step, amount ->
-                        handleResize(
-                            overThreshold,
-                            step,
-                            amount,
-                            1,
-                            true
-                        )
-                    }
-                ) { notifyItemChanged(bindingAdapterPosition) })
-            }
+            binding.widgetBottomDragger.setOnTouchListener(WidgetResizeListener(
+                ::getThresholdPx,
+                WidgetResizeListener.Which.BOTTOM,
+                { overThreshold, step, amount ->
+                    handleResize(
+                        overThreshold,
+                        step,
+                        amount,
+                        1,
+                        true
+                    )
+                }
+            ) { notifyItemChanged(bindingAdapterPosition) })
 
             binding.widgetReconfigure.setOnClickListener {
                 openWidgetConfig()
@@ -356,17 +348,17 @@ abstract class BaseAdapter(
             val provider = data.widgetProviderComponent
 
             if (provider == null) {
-                //TODO: Notify + debug log
-                itemView.context.logUtils.normalLog("Unable to reconfigure widget: provider is null.")
+                Toast.makeText(context, R.string.error_reconfiguring_widget, Toast.LENGTH_SHORT).show()
+                context.logUtils.normalLog("Unable to reconfigure widget: provider is null.")
             } else {
                 val pkg = provider.packageName
                 val providerInfo = manager.getAppWidgetInfo(data.id)
-                    ?: (itemView.context.getAllInstalledWidgetProviders(pkg)
+                    ?: (context.getAllInstalledWidgetProviders(pkg)
                         .find { info -> info.provider == provider })
 
                 if (providerInfo == null) {
-                    //TODO: Notify + debug log
-                    itemView.context.logUtils.normalLog("Unable to reconfigure widget $provider: provider info is null.")
+                    Toast.makeText(context, R.string.error_reconfiguring_widget, Toast.LENGTH_SHORT).show()
+                    context.logUtils.normalLog("Unable to reconfigure widget $provider: provider info is null.")
                 } else {
                     launchReconfigure(data.id, providerInfo)
                 }
@@ -374,32 +366,30 @@ abstract class BaseAdapter(
         }
 
         fun onBind(data: WidgetData) {
-            itemView.apply {
-                launch {
-                    context.eventManager.addObserver(this@WidgetVH)
+            launch {
+                context.eventManager.addObserver(this@WidgetVH)
 
-                    onResize(data, 0, 1)
-                    updateEditingUI(currentEditingInterfacePosition)
+                onResize(data, 0, 1)
+                updateEditingUI(currentEditingInterfacePosition)
 
-                    binding.widgetHolder.removeAllViews()
+                binding.widgetHolder.removeAllViews()
 
-                    when (data.safeType) {
-                        WidgetType.WIDGET -> bindWidget(data)
-                        WidgetType.SHORTCUT, WidgetType.LAUNCHER_SHORTCUT -> bindShortcut(data)
-                        WidgetType.HEADER -> {}
-                    }
-
-                    binding.card.radius = context.dpAsPx(widgetCornerRadius).toFloat()
-                    binding.widgetEditOutline.background =
-                        (binding.widgetEditOutline.background.mutate() as GradientDrawable).apply {
-                            this.cornerRadius = binding.card.radius
-                        }
+                when (data.safeType) {
+                    WidgetType.WIDGET -> bindWidget(data)
+                    WidgetType.SHORTCUT, WidgetType.LAUNCHER_SHORTCUT -> bindShortcut(data)
+                    WidgetType.HEADER -> {}
                 }
+
+                binding.card.radius = context.dpAsPx(widgetCornerRadius).toFloat()
+                binding.widgetEditOutline.background =
+                    (binding.widgetEditOutline.background.mutate() as GradientDrawable).apply {
+                        this.cornerRadius = binding.card.radius
+                    }
             }
         }
 
         fun onDestroy() {
-            itemView.context.eventManager.removeObserver(this)
+            context.eventManager.removeObserver(this)
         }
 
         override fun onEvent(event: Event) {
@@ -438,8 +428,7 @@ abstract class BaseAdapter(
                 }
             }
 
-            binding.openWidgetConfig.isVisible =
-                widgetInfo.hasConfiguration(itemView.context) == true
+            binding.openWidgetConfig.isVisible = widgetInfo.hasConfiguration(context) == true
 
             if (widgetInfo != null) {
                 binding.widgetReconfigure.isVisible = false
@@ -465,23 +454,9 @@ abstract class BaseAdapter(
                                 val width = context.pxAsDp(itemView.width)
                                 val height = context.pxAsDp(itemView.height)
 
-                                val paddingRect = Rect(
-                                    R.dimen.app_widget_padding,
-                                    R.dimen.app_widget_padding,
-                                    R.dimen.app_widget_padding,
-                                    R.dimen.app_widget_padding
-                                ).run {
-                                    RectF(
-                                        context.pxAsDp(context.resources.getDimensionPixelSize(left)),
-                                        context.pxAsDp(context.resources.getDimensionPixelSize(top)),
-                                        context.pxAsDp(context.resources.getDimensionPixelSize(right)),
-                                        context.pxAsDp(
-                                            context.resources.getDimensionPixelSize(
-                                                bottom
-                                            )
-                                        )
-                                    )
-                                }
+                                val paddingValue = context.pxAsDp(
+                                    context.resources.getDimensionPixelSize(R.dimen.app_widget_padding),
+                                )
 
                                 // Workaround to fix the One UI 5.1 battery grid widget on some devices.
                                 if (widgetInfo.provider.packageName == "com.android.settings.intelligence") {
@@ -496,15 +471,14 @@ abstract class BaseAdapter(
                                         Bundle(),
                                         listOf(
                                             SizeF(
-                                                width + paddingRect.left + paddingRect.right,
-                                                height + paddingRect.top + paddingRect.bottom
-                                            )
-                                        )
+                                                width + 2 * paddingValue,
+                                                height + 2 * paddingValue,
+                                            ),
+                                        ),
                                     )
                                 } else {
-                                    val adjustedWidth = width + paddingRect.left + paddingRect.right
-                                    val adjustedHeight =
-                                        height + paddingRect.top + paddingRect.bottom
+                                    val adjustedWidth = width + 2 * paddingValue
+                                    val adjustedHeight = height + 2 * paddingValue
 
                                     @Suppress("DEPRECATION")
                                     updateAppWidgetSize(
@@ -512,7 +486,7 @@ abstract class BaseAdapter(
                                         adjustedWidth.toInt(),
                                         adjustedHeight.toInt(),
                                         adjustedWidth.toInt(),
-                                        adjustedHeight.toInt()
+                                        adjustedHeight.toInt(),
                                     )
                                 }
                             }
@@ -537,7 +511,7 @@ abstract class BaseAdapter(
                 }
             } else {
                 binding.widgetReconfigure.isVisible = true
-                with(itemView.context) { binding.widgetPreview.setImageBitmap(data.iconBitmap) }
+                with(context) { binding.widgetPreview.setImageBitmap(data.iconBitmap) }
                 binding.widgetLabel.text = data.label
             }
         }
@@ -549,18 +523,18 @@ abstract class BaseAdapter(
             binding.openWidgetConfig.isVisible = false
 
             val shortcutView = FrameShortcutViewBinding.inflate(
-                LayoutInflater.from(binding.widgetHolder.context)
+                LayoutInflater.from(itemView.context)
             )
-            val icon = with(itemView.context) { data.iconBitmap }
+            val icon = with(context) { data.iconBitmap }
 
             shortcutView.shortcutRoot.setOnClickListener {
                 data.shortcutIntent?.apply {
                     addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
 
                     PermissionIntentLaunchActivity.start(
-                        context = itemView.context,
+                        context = context,
                         intent = this,
-                        launchType = PermissionIntentLaunchActivity.LaunchType.ACTIVITY
+                        launchType = PermissionIntentLaunchActivity.LaunchType.ACTIVITY,
                     )
                 }
             }
@@ -654,7 +628,7 @@ abstract class BaseAdapter(
         }
 
         fun onBind() {
-            binding.root.radius = itemView.context.dpAsPx(widgetCornerRadius).toFloat()
+            binding.root.radius = context.dpAsPx(widgetCornerRadius).toFloat()
         }
     }
 
