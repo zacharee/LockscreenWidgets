@@ -1,7 +1,6 @@
 package tk.zwander.lockscreenwidgets.adapters
 
 import android.annotation.SuppressLint
-import android.appwidget.AppWidgetManager
 import android.appwidget.AppWidgetProviderInfo
 import android.content.Context
 import android.content.Intent
@@ -35,11 +34,12 @@ import kotlinx.coroutines.withContext
 import tk.zwander.common.activities.PermissionIntentLaunchActivity
 import tk.zwander.common.data.WidgetData
 import tk.zwander.common.data.WidgetType
-import tk.zwander.common.host.WidgetHostCompat
+import tk.zwander.common.host.widgetHostCompat
 import tk.zwander.common.listeners.WidgetResizeListener
 import tk.zwander.common.util.Event
 import tk.zwander.common.util.EventObserver
 import tk.zwander.common.util.FrameSizeAndPosition
+import tk.zwander.common.util.appWidgetManager
 import tk.zwander.common.util.createWidgetErrorView
 import tk.zwander.common.util.dpAsPx
 import tk.zwander.common.util.eventManager
@@ -63,8 +63,7 @@ import kotlin.math.min
  */
 @Suppress("LeakingThis")
 open class WidgetFrameAdapter(
-    protected val manager: AppWidgetManager,
-    protected val host: WidgetHostCompat,
+    protected val context: Context,
     protected val onRemoveCallback: (WidgetData, Int) -> Unit,
     protected val saveTypeGetter: () -> FrameSizeAndPosition.FrameType,
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>(), CoroutineScope by MainScope() {
@@ -74,7 +73,6 @@ open class WidgetFrameAdapter(
     }
 
     val widgets = ArrayList<WidgetData>()
-
     val spanSizeLookup = WidgetSpanSizeLookup()
 
     var currentEditingInterfacePosition = -1
@@ -85,7 +83,7 @@ open class WidgetFrameAdapter(
 
             if (changed) {
                 mainHandler.post {
-                    host.context.eventManager.sendEvent(Event.EditingIndexUpdated(value))
+                    context.eventManager.sendEvent(Event.EditingIndexUpdated(value))
                 }
             }
         }
@@ -93,9 +91,9 @@ open class WidgetFrameAdapter(
     private var didResize = false
 
     protected open val colCount: Int
-        get() = host.context.prefManager.frameColCount
+        get() = context.prefManager.frameColCount
     protected open val rowCount: Int
-        get() = host.context.prefManager.frameRowCount
+        get() = context.prefManager.frameRowCount
     protected open val minColSpan: Int
         get() = 1
     protected open val minRowSpan: Int
@@ -103,12 +101,15 @@ open class WidgetFrameAdapter(
     protected open val rowSpanForAddButton: Int
         get() = rowCount
     protected open var currentWidgets: Collection<WidgetData>
-        get() = host.context.prefManager.currentWidgets
+        get() = context.prefManager.currentWidgets
         set(value) {
-            host.context.prefManager.currentWidgets = LinkedHashSet(value)
+            context.prefManager.currentWidgets = LinkedHashSet(value)
         }
     protected open val widgetCornerRadius: Float
-        get() = host.context.prefManager.frameWidgetCornerRadiusDp
+        get() = context.prefManager.frameWidgetCornerRadiusDp
+
+    protected val host = context.widgetHostCompat
+    protected val manager = context.appWidgetManager
 
     init {
         setHasStableIds(true)
@@ -241,11 +242,11 @@ open class WidgetFrameAdapter(
     }
 
     protected open fun launchAddActivity() {
-        host.context.eventManager.sendEvent(Event.LaunchAddWidget)
+        context.eventManager.sendEvent(Event.LaunchAddWidget)
     }
 
     protected open fun launchReconfigure(id: Int, providerInfo: AppWidgetProviderInfo) {
-        ReconfigureFrameWidgetActivity.launch(host.context, id, providerInfo)
+        ReconfigureFrameWidgetActivity.launch(context, id, providerInfo)
     }
 
     protected open fun View.onWidgetResize(
@@ -262,7 +263,7 @@ open class WidgetFrameAdapter(
     }
 
     protected open fun getThresholdPx(which: WidgetResizeListener.Which): Int {
-        return host.context.run {
+        return context.run {
             val frameSize = frameSizeAndPosition.getSizeForType(saveTypeGetter())
             if (which == WidgetResizeListener.Which.LEFT || which == WidgetResizeListener.Which.RIGHT) {
                 frameSize.x.toInt() / prefManager.frameColCount

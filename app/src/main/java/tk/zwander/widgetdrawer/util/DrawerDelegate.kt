@@ -37,7 +37,6 @@ import tk.zwander.common.util.BlurManager
 import tk.zwander.common.util.Event
 import tk.zwander.common.util.HandlerRegistry
 import tk.zwander.common.util.PrefManager
-import tk.zwander.common.util.appWidgetManager
 import tk.zwander.common.util.dpAsPx
 import tk.zwander.common.util.eventManager
 import tk.zwander.common.util.handler
@@ -134,9 +133,7 @@ class DrawerDelegate private constructor(context: Context) :
     private val handle by lazy { Handle(this) }
 
     override val adapter by lazy {
-        DrawerAdapter(
-            appWidgetManager, widgetHost,
-        ) { widget, _ ->
+        DrawerAdapter(context) { widget, _ ->
             removeWidget(widget)
         }
     }

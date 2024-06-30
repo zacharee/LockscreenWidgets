@@ -34,7 +34,6 @@ import tk.zwander.common.util.FrameSizeAndPosition
 import tk.zwander.common.util.HandlerRegistry
 import tk.zwander.common.util.ISnappyLayoutManager
 import tk.zwander.common.util.PrefManager
-import tk.zwander.common.util.appWidgetManager
 import tk.zwander.common.util.dpAsPx
 import tk.zwander.common.util.eventManager
 import tk.zwander.common.util.frameSizeAndPosition
@@ -208,8 +207,7 @@ class WidgetFrameDelegate private constructor(context: Context) : BaseDelegate<W
         WidgetFrameBinding.inflate(LayoutInflater.from(ContextThemeWrapper(this, R.style.AppTheme)))
     override val gridLayoutManager = SpannedLayoutManager()
     override val adapter = WidgetFrameAdapter(
-        manager = appWidgetManager,
-        host = widgetHost,
+        context = context,
         onRemoveCallback = { item, _ ->
             binding.removeWidgetConfirmation.root.show(item)
         },

@@ -1,11 +1,10 @@
 package tk.zwander.widgetdrawer.adapters
 
-import android.appwidget.AppWidgetManager
 import android.appwidget.AppWidgetProviderInfo
+import android.content.Context
 import android.view.View
 import android.view.ViewGroup
 import tk.zwander.common.data.WidgetData
-import tk.zwander.common.host.WidgetHostCompat
 import tk.zwander.common.listeners.WidgetResizeListener
 import tk.zwander.common.util.Event
 import tk.zwander.common.util.FrameSizeAndPosition
@@ -17,40 +16,38 @@ import tk.zwander.lockscreenwidgets.adapters.WidgetFrameAdapter
 import tk.zwander.widgetdrawer.activities.add.ReconfigureDrawerWidgetActivity
 
 class DrawerAdapter(
-    manager: AppWidgetManager,
-    host: WidgetHostCompat,
+    context: Context,
     onRemoveCallback: (WidgetData, Int) -> Unit,
 ) : WidgetFrameAdapter(
-    manager,
-    host,
+    context,
     onRemoveCallback,
     // Frame type isn't used for the drawer.
     { FrameSizeAndPosition.FrameType.LockNormal.Portrait },
 ) {
     override val colCount: Int
-        get() = host.context.prefManager.drawerColCount
+        get() = context.prefManager.drawerColCount
     override val rowCount: Int
-        get() = (host.context.screenSize.y / host.context.resources.getDimensionPixelSize(R.dimen.drawer_row_height)) - 5
+        get() = (context.screenSize.y / context.resources.getDimensionPixelSize(R.dimen.drawer_row_height)) - 5
     override val minRowSpan: Int
         get() = 5
     override val rowSpanForAddButton: Int
         get() = 20
     override var currentWidgets: Collection<WidgetData>
-        get() = host.context.prefManager.drawerWidgets
+        get() = context.prefManager.drawerWidgets
         set(value) {
-            host.context.prefManager.drawerWidgets = LinkedHashSet(value)
+            context.prefManager.drawerWidgets = LinkedHashSet(value)
         }
     override val widgetCornerRadius: Float
-        get() = host.context.prefManager.drawerWidgetCornerRadiusDp
+        get() = context.prefManager.drawerWidgetCornerRadiusDp
 
     override fun launchAddActivity() {
-        host.context.eventManager.sendEvent(Event.CloseDrawer)
-        host.context.eventManager.sendEvent(Event.LaunchAddDrawerWidget(true))
+        context.eventManager.sendEvent(Event.CloseDrawer)
+        context.eventManager.sendEvent(Event.LaunchAddDrawerWidget(true))
     }
 
     override fun launchReconfigure(id: Int, providerInfo: AppWidgetProviderInfo) {
-        host.context.eventManager.sendEvent(Event.CloseDrawer)
-        ReconfigureDrawerWidgetActivity.launch(host.context, id, providerInfo)
+        context.eventManager.sendEvent(Event.CloseDrawer)
+        ReconfigureDrawerWidgetActivity.launch(context, id, providerInfo)
     }
 
     override fun View.onWidgetResize(data: WidgetData, params: ViewGroup.LayoutParams, amount: Int, direction: Int) {
@@ -58,7 +55,7 @@ class DrawerAdapter(
     }
 
     override fun getThresholdPx(which: WidgetResizeListener.Which): Int {
-        return host.context.run {
+        return context.run {
             if (which == WidgetResizeListener.Which.LEFT || which == WidgetResizeListener.Which.RIGHT) {
                 screenSize.x / prefManager.drawerColCount
             } else {

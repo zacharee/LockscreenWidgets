@@ -38,7 +38,7 @@ val Context.widgetHostCompat: WidgetHostCompat
  * implementation defined in the subclass
  */
 class WidgetHostCompat(
-    val context: Context,
+    private val context: Context,
     val mode: Mode,
     id: Int,
 ) : AppWidgetHost(context, id) {
