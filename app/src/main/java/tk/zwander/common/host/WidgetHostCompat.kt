@@ -1,3 +1,5 @@
+@file:Suppress("KDocUnresolvedReference")
+
 package tk.zwander.common.host
 
 import android.annotation.SuppressLint
