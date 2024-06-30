@@ -12,16 +12,16 @@ import android.view.View
 import androidx.compose.ui.unit.Density
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
+import tk.zwander.common.adapters.BaseAdapter
 import tk.zwander.common.data.WidgetType
-import tk.zwander.lockscreenwidgets.adapters.WidgetFrameAdapter
 import kotlin.math.roundToInt
 import kotlin.math.sign
 
 fun createTouchHelperCallback(
-    adapter: WidgetFrameAdapter,
+    adapter: BaseAdapter,
     widgetMoved: (moved: Boolean) -> Unit,
     onItemSelected: (selected: Boolean) -> Unit,
-    frameLocked: () -> Boolean
+    frameLocked: () -> Boolean,
 ): ItemTouchHelper.SimpleCallback {
     return object : ItemTouchHelper.SimpleCallback(
         ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT or ItemTouchHelper.UP or ItemTouchHelper.DOWN,
@@ -42,7 +42,7 @@ fun createTouchHelperCallback(
             recyclerView: RecyclerView,
             viewHolder: RecyclerView.ViewHolder
         ): Int {
-            return if (viewHolder is WidgetFrameAdapter.AddWidgetVH || frameLocked()) 0
+            return if (viewHolder is BaseAdapter.AddWidgetVH || frameLocked()) 0
             else super.getDragDirs(recyclerView, viewHolder)
         }
 

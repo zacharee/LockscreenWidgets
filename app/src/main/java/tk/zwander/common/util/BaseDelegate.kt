@@ -22,11 +22,11 @@ import com.arasthel.spannedgridlayoutmanager.SpannedGridLayoutManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.cancel
+import tk.zwander.common.adapters.BaseAdapter
 import tk.zwander.common.data.WidgetData
 import tk.zwander.common.data.WidgetType
 import tk.zwander.common.host.WidgetHostCompat
 import tk.zwander.common.host.widgetHostCompat
-import tk.zwander.lockscreenwidgets.adapters.WidgetFrameAdapter
 
 @Suppress("MemberVisibilityCanBePrivate")
 abstract class BaseDelegate<State : Any>(context: Context) : ContextWrapper(context),
@@ -48,7 +48,7 @@ abstract class BaseDelegate<State : Any>(context: Context) : ContextWrapper(cont
 
     protected abstract val prefsHandler: HandlerRegistry
     protected abstract val blurManager: BlurManager
-    protected abstract val adapter: WidgetFrameAdapter
+    protected abstract val adapter: BaseAdapter
     protected abstract val gridLayoutManager: LayoutManager
     protected abstract val params: WindowManager.LayoutParams
     protected abstract val rootView: View

@@ -4,30 +4,29 @@ import android.appwidget.AppWidgetProviderInfo
 import android.content.Context
 import android.view.View
 import android.view.ViewGroup
+import tk.zwander.common.adapters.BaseAdapter
 import tk.zwander.common.data.WidgetData
 import tk.zwander.common.listeners.WidgetResizeListener
 import tk.zwander.common.util.Event
-import tk.zwander.common.util.FrameSizeAndPosition
 import tk.zwander.common.util.eventManager
 import tk.zwander.common.util.prefManager
 import tk.zwander.common.util.screenSize
 import tk.zwander.lockscreenwidgets.R
-import tk.zwander.lockscreenwidgets.adapters.WidgetFrameAdapter
 import tk.zwander.widgetdrawer.activities.add.ReconfigureDrawerWidgetActivity
 
 class DrawerAdapter(
     context: Context,
     onRemoveCallback: (WidgetData, Int) -> Unit,
-) : WidgetFrameAdapter(
+) : BaseAdapter(
     context,
     onRemoveCallback,
-    // Frame type isn't used for the drawer.
-    { FrameSizeAndPosition.FrameType.LockNormal.Portrait },
 ) {
     override val colCount: Int
         get() = context.prefManager.drawerColCount
     override val rowCount: Int
         get() = (context.screenSize.y / context.resources.getDimensionPixelSize(R.dimen.drawer_row_height)) - 5
+    override val minColSpan: Int
+        get() = 1
     override val minRowSpan: Int
         get() = 5
     override val rowSpanForAddButton: Int
@@ -57,7 +56,7 @@ class DrawerAdapter(
     override fun getThresholdPx(which: WidgetResizeListener.Which): Int {
         return context.run {
             if (which == WidgetResizeListener.Which.LEFT || which == WidgetResizeListener.Which.RIGHT) {
-                screenSize.x / prefManager.drawerColCount
+                screenSize.x / colCount
             } else {
                 resources.getDimensionPixelSize(R.dimen.drawer_row_height)
             }
