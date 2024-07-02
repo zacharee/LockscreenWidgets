@@ -9,6 +9,10 @@ import android.view.Surface
 import android.view.View
 import android.view.WindowManager
 import androidx.annotation.CallSuper
+import androidx.compose.ui.ExperimentalComposeUiApi
+import androidx.compose.ui.InternalComposeUiApi
+import androidx.compose.ui.platform.compositionContext
+import androidx.compose.ui.platform.createLifecycleAwareWindowRecomposer
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleRegistry
 import androidx.lifecycle.setViewTreeLifecycleOwner
@@ -78,6 +82,7 @@ abstract class BaseDelegate<State : Any>(context: Context) : ContextWrapper(cont
     val isAttached: Boolean
         get() = rootView.isAttachedToWindow
 
+    @OptIn(InternalComposeUiApi::class, ExperimentalComposeUiApi::class)
     @CallSuper
     open fun onCreate() {
         scope = MainScope()
@@ -101,6 +106,7 @@ abstract class BaseDelegate<State : Any>(context: Context) : ContextWrapper(cont
         }
         rootView.setViewTreeLifecycleOwner(this)
         rootView.setViewTreeSavedStateRegistryOwner(this)
+        rootView.compositionContext = rootView.createLifecycleAwareWindowRecomposer()
 
         updateCommonState {
             it.copy(

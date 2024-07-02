@@ -10,12 +10,36 @@ import android.os.Build
 import android.os.Bundle
 import android.util.AttributeSet
 import android.util.SizeF
+import android.view.ContextThemeWrapper
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ListView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatViewInflater
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardColors
+import androidx.compose.material3.Icon
+import androidx.compose.material3.LocalTextStyle
+import androidx.compose.material3.Text
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shadow
+import androidx.compose.ui.platform.compositionContext
+import androidx.compose.ui.platform.findViewTreeCompositionContext
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.core.view.LayoutInflaterCompat
 import androidx.core.view.forEach
 import androidx.core.view.isVisible
@@ -29,6 +53,7 @@ import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import tk.zwander.common.activities.PermissionIntentLaunchActivity
+import tk.zwander.common.compose.AppTheme
 import tk.zwander.common.data.WidgetData
 import tk.zwander.common.data.WidgetType
 import tk.zwander.common.host.widgetHostCompat
@@ -45,7 +70,7 @@ import tk.zwander.common.util.logUtils
 import tk.zwander.common.util.mainHandler
 import tk.zwander.common.util.pxAsDp
 import tk.zwander.lockscreenwidgets.R
-import tk.zwander.lockscreenwidgets.databinding.AddWidgetBinding
+import tk.zwander.lockscreenwidgets.databinding.ComposeViewHolderBinding
 import tk.zwander.lockscreenwidgets.databinding.FrameShortcutViewBinding
 import tk.zwander.lockscreenwidgets.databinding.WidgetPageHolderBinding
 import java.util.Collections
@@ -82,7 +107,7 @@ abstract class BaseAdapter(
     protected val host = context.widgetHostCompat
     protected val manager = context.appWidgetManager
 
-    private val baseLayoutInflater = LayoutInflater.from(context).cloneInContext(context).apply {
+    private val baseLayoutInflater = LayoutInflater.from(context).cloneInContext(ContextThemeWrapper(context, R.style.AppTheme)).apply {
         val compatInflater = AppCompatViewInflater()
         LayoutInflaterCompat.setFactory2(
             this,
@@ -95,8 +120,10 @@ abstract class BaseAdapter(
                 ): View? {
                     return compatInflater.createView(
                         parent, name, context, attrs,
-                        false, false, true, false,
-                    )
+                        true, false, true, false,
+                    ).also {
+                        it?.compositionContext = parent?.findViewTreeCompositionContext()
+                    }
                 }
 
                 override fun onCreateView(
@@ -210,16 +237,10 @@ abstract class BaseAdapter(
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
-        val inflater = baseLayoutInflater.cloneInContext(parent.context)
+        val inflater = baseLayoutInflater
 
         return if (viewType == VIEW_TYPE_ADD) {
-            AddWidgetVH(
-                inflater.inflate(
-                    R.layout.add_widget,
-                    parent,
-                    false,
-                ),
-            )
+            AddWidgetVH(inflater.inflate(R.layout.compose_view_holder, parent, false))
         } else {
             WidgetVH(inflater.inflate(R.layout.widget_page_holder, parent, false))
         }
@@ -542,7 +563,7 @@ abstract class BaseAdapter(
             binding.widgetHolder.isVisible = true
             binding.openWidgetConfig.isVisible = false
 
-            val shortcutView = FrameShortcutViewBinding.inflate(baseLayoutInflater.cloneInContext(itemView.context))
+            val shortcutView = FrameShortcutViewBinding.inflate(baseLayoutInflater)
             val icon = with(context) { data.iconBitmap }
 
             shortcutView.shortcutRoot.setOnClickListener {
@@ -637,16 +658,57 @@ abstract class BaseAdapter(
      * added to the frame.
      */
     inner class AddWidgetVH(view: View) : RecyclerView.ViewHolder(view) {
-        private val binding = AddWidgetBinding.bind(view)
-
-        init {
-            binding.clickTarget.setOnClickListener {
-                launchAddActivity()
-            }
-        }
+        private val binding = ComposeViewHolderBinding.bind(view)
 
         fun onBind() {
-            binding.root.radius = context.dpAsPx(widgetCornerRadius).toFloat()
+            binding.root.setContent {
+                AppTheme {
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        onClick = {
+                            launchAddActivity()
+                        },
+                        colors = CardColors(
+                            containerColor = Color.Transparent,
+                            contentColor = Color.White,
+                            disabledContentColor = Color.White,
+                            disabledContainerColor = Color.Transparent,
+                        ),
+                        shape = RoundedCornerShape(widgetCornerRadius.dp),
+                    ) {
+                        Column(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                        ) {
+                            Icon(
+                                painter = painterResource(R.drawable.ic_baseline_add_24),
+                                contentDescription = stringResource(R.string.add_widget),
+                                tint = Color.White,
+                                modifier = Modifier.size(48.dp)
+                                    .background(
+                                        brush = Brush.radialGradient(
+                                            0f to Color.Black.copy(alpha = 0.5f),
+                                            1f to Color.Transparent,
+                                        ),
+                                    ),
+                            )
+
+                            Text(
+                                text = stringResource(R.string.add_widget),
+                                fontWeight = FontWeight.Bold,
+                                style = LocalTextStyle.current.copy(
+                                    shadow = Shadow(
+                                        color = Color.Black,
+                                        offset = Offset(3f, 3f),
+                                        blurRadius = 5f,
+                                    ),
+                                ),
+                                fontSize = 20.sp,
+                            )
+                        }
+                    }
+                }
+            }
         }
     }
 
