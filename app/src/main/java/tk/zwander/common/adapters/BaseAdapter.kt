@@ -8,15 +8,14 @@ import android.content.pm.PackageManager
 import android.graphics.drawable.GradientDrawable
 import android.os.Build
 import android.os.Bundle
+import android.util.AttributeSet
 import android.util.SizeF
 import android.view.LayoutInflater
-import android.view.LayoutInflater.Factory2
 import android.view.View
 import android.view.ViewGroup
-import android.view.Window
 import android.widget.ListView
 import android.widget.Toast
-import androidx.appcompat.app.AppCompatCallback
+import androidx.appcompat.app.AppCompatViewInflater
 import androidx.core.view.LayoutInflaterCompat
 import androidx.core.view.forEach
 import androidx.core.view.isVisible
@@ -82,6 +81,34 @@ abstract class BaseAdapter(
 
     protected val host = context.widgetHostCompat
     protected val manager = context.appWidgetManager
+
+    private val baseLayoutInflater = LayoutInflater.from(context).cloneInContext(context).apply {
+        val compatInflater = AppCompatViewInflater()
+        LayoutInflaterCompat.setFactory2(
+            this,
+            object : LayoutInflater.Factory2 {
+                override fun onCreateView(
+                    parent: View?,
+                    name: String,
+                    context: Context,
+                    attrs: AttributeSet,
+                ): View? {
+                    return compatInflater.createView(
+                        parent, name, context, attrs,
+                        false, false, true, false,
+                    )
+                }
+
+                override fun onCreateView(
+                    name: String,
+                    context: Context,
+                    attrs: AttributeSet,
+                ): View? {
+                    return onCreateView(null, name, context, attrs)
+                }
+            },
+        )
+    }
 
     protected abstract val colCount: Int
     protected abstract val rowCount: Int
@@ -183,26 +210,19 @@ abstract class BaseAdapter(
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
-        val inflater = LayoutInflater.from(context).cloneInContext(parent.context)
-        LayoutInflaterCompat.setFactory2(
-            inflater,
-            Class.forName("androidx.appcompat.app.AppCompatDelegateImpl")
-                .getDeclaredConstructor(
-                    Context::class.java,
-                    Window::class.java,
-                    AppCompatCallback::class.java
-                )
-                .apply { isAccessible = true }
-                .newInstance(parent.context, null, null) as Factory2
-        )
-        return if (viewType == VIEW_TYPE_ADD) AddWidgetVH(
-            inflater.inflate(
-                R.layout.add_widget,
-                parent,
-                false
+        val inflater = baseLayoutInflater.cloneInContext(parent.context)
+
+        return if (viewType == VIEW_TYPE_ADD) {
+            AddWidgetVH(
+                inflater.inflate(
+                    R.layout.add_widget,
+                    parent,
+                    false,
+                ),
             )
-        )
-        else WidgetVH(inflater.inflate(R.layout.widget_page_holder, parent, false))
+        } else {
+            WidgetVH(inflater.inflate(R.layout.widget_page_holder, parent, false))
+        }
     }
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
@@ -522,9 +542,7 @@ abstract class BaseAdapter(
             binding.widgetHolder.isVisible = true
             binding.openWidgetConfig.isVisible = false
 
-            val shortcutView = FrameShortcutViewBinding.inflate(
-                LayoutInflater.from(itemView.context)
-            )
+            val shortcutView = FrameShortcutViewBinding.inflate(baseLayoutInflater.cloneInContext(itemView.context))
             val icon = with(context) { data.iconBitmap }
 
             shortcutView.shortcutRoot.setOnClickListener {
@@ -604,7 +622,7 @@ abstract class BaseAdapter(
         //Make sure the item's size is properly updated on a frame resize, or on initial bind
         private fun onResize(data: WidgetData, amount: Int, direction: Int) {
             itemView.apply {
-                layoutParams = (layoutParams as ViewGroup.LayoutParams).apply {
+                layoutParams = layoutParams.apply {
                     onWidgetResize(data, this, amount, direction)
                 }
 
