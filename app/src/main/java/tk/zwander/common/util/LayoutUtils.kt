@@ -20,7 +20,7 @@ import kotlin.math.sign
 fun createTouchHelperCallback(
     adapter: BaseAdapter,
     widgetMoved: (moved: Boolean) -> Unit,
-    onItemSelected: (selected: Boolean) -> Unit,
+    onItemSelected: (selected: Boolean, highlighted: Boolean) -> Unit,
     frameLocked: () -> Boolean,
 ): ItemTouchHelper.SimpleCallback {
     return object : ItemTouchHelper.SimpleCallback(
@@ -62,7 +62,7 @@ fun createTouchHelperCallback(
                     if (adapter.currentEditingInterfacePosition == adapterPos) -1 else adapterPos
             }
 
-            onItemSelected(actionState == ItemTouchHelper.ACTION_STATE_DRAG)
+            onItemSelected(actionState == ItemTouchHelper.ACTION_STATE_DRAG, adapter.currentEditingInterfacePosition != -1)
 
             super.onSelectedChanged(viewHolder, actionState)
         }
@@ -73,7 +73,7 @@ fun createTouchHelperCallback(
         ) {
             super.clearView(recyclerView, viewHolder)
 
-            onItemSelected(false)
+            onItemSelected(false, false)
 
             viewHolder.itemView.alpha = 1.0f
         }

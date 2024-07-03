@@ -10,7 +10,6 @@ import android.view.View
 import android.view.WindowManager
 import androidx.annotation.CallSuper
 import androidx.compose.ui.ExperimentalComposeUiApi
-import androidx.compose.ui.InternalComposeUiApi
 import androidx.compose.ui.platform.compositionContext
 import androidx.compose.ui.platform.createLifecycleAwareWindowRecomposer
 import androidx.lifecycle.Lifecycle
@@ -69,7 +68,7 @@ abstract class BaseDelegate<State : Any>(context: Context) : ContextWrapper(cont
             adapter = adapter,
             widgetMoved = this::onWidgetMoved,
             onItemSelected = this::onItemSelected,
-            frameLocked = this::isLocked
+            frameLocked = this::isLocked,
         )
     }
     protected val itemTouchHelper by lazy {
@@ -82,7 +81,7 @@ abstract class BaseDelegate<State : Any>(context: Context) : ContextWrapper(cont
     val isAttached: Boolean
         get() = rootView.isAttachedToWindow
 
-    @OptIn(InternalComposeUiApi::class, ExperimentalComposeUiApi::class)
+    @OptIn(ExperimentalComposeUiApi::class)
     @CallSuper
     open fun onCreate() {
         scope = MainScope()
@@ -201,8 +200,8 @@ abstract class BaseDelegate<State : Any>(context: Context) : ContextWrapper(cont
         }
     }
 
-    protected open fun onItemSelected(selected: Boolean) {
-        updateCommonState { it.copy(isHoldingItem = selected) }
+    protected open fun onItemSelected(selected: Boolean, highlighted: Boolean) {
+        updateCommonState { it.copy(isHoldingItem = selected, isItemHighlighted = highlighted) }
     }
     protected abstract fun isLocked(): Boolean
     protected abstract fun retrieveCounts(): Pair<Int?, Int?>
@@ -211,6 +210,7 @@ abstract class BaseDelegate<State : Any>(context: Context) : ContextWrapper(cont
 
     data class BaseState(
         val isHoldingItem: Boolean = false,
+        val isItemHighlighted: Boolean = false,
         val updatedForMove: Boolean = false,
         val handlingClick: Boolean = false,
         val wasOnKeyguard: Boolean = false,

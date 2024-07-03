@@ -433,7 +433,7 @@ class WidgetFrameDelegate private constructor(context: Context) : BaseDelegate<W
     }
 
     override fun onWidgetClick(trigger: Boolean): Boolean {
-        val ignoreTouches = prefManager.frameIgnoreWidgetTouches
+        val ignoreTouches = prefManager.frameIgnoreWidgetTouches || commonState.isItemHighlighted
 
         if (!ignoreTouches) {
             if (trigger && prefManager.requestUnlock && prefManager.frameDirectlyCheckForActivity) {
