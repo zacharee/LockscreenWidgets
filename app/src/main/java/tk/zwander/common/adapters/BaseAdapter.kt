@@ -18,7 +18,11 @@ import android.widget.ListView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatViewInflater
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -27,14 +31,16 @@ import androidx.compose.material3.CardColors
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.Text
+import androidx.compose.material3.ripple
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shadow
-import androidx.compose.ui.platform.compositionContext
-import androidx.compose.ui.platform.findViewTreeCompositionContext
+import androidx.compose.ui.platform.createLifecycleAwareWindowRecomposer
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -76,9 +82,10 @@ import tk.zwander.lockscreenwidgets.databinding.WidgetPageHolderBinding
 import java.util.Collections
 import kotlin.math.min
 
-@Suppress("LeakingThis")
+@Suppress("LeakingThis", "MemberVisibilityCanBePrivate")
 abstract class BaseAdapter(
     protected val context: Context,
+    protected val rootView: View,
     protected val onRemoveCallback: (WidgetData, Int) -> Unit,
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>(), CoroutineScope by MainScope() {
     companion object {
@@ -121,9 +128,7 @@ abstract class BaseAdapter(
                     return compatInflater.createView(
                         parent, name, context, attrs,
                         true, false, true, false,
-                    ).also {
-                        it?.compositionContext = parent?.findViewTreeCompositionContext()
-                    }
+                    )
                 }
 
                 override fun onCreateView(
@@ -660,14 +665,13 @@ abstract class BaseAdapter(
     inner class AddWidgetVH(view: View) : RecyclerView.ViewHolder(view) {
         private val binding = ComposeViewHolderBinding.bind(view)
 
+        @OptIn(ExperimentalComposeUiApi::class)
         fun onBind() {
+            binding.root.setParentCompositionContext(rootView.createLifecycleAwareWindowRecomposer())
             binding.root.setContent {
                 AppTheme {
                     Card(
-                        modifier = Modifier.fillMaxWidth(),
-                        onClick = {
-                            launchAddActivity()
-                        },
+                        modifier = Modifier.fillMaxSize(),
                         colors = CardColors(
                             containerColor = Color.Transparent,
                             contentColor = Color.White,
@@ -676,35 +680,48 @@ abstract class BaseAdapter(
                         ),
                         shape = RoundedCornerShape(widgetCornerRadius.dp),
                     ) {
-                        Column(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                        ) {
-                            Icon(
-                                painter = painterResource(R.drawable.ic_baseline_add_24),
-                                contentDescription = stringResource(R.string.add_widget),
-                                tint = Color.White,
-                                modifier = Modifier.size(48.dp)
-                                    .background(
-                                        brush = Brush.radialGradient(
-                                            0f to Color.Black.copy(alpha = 0.5f),
-                                            1f to Color.Transparent,
-                                        ),
-                                    ),
-                            )
-
-                            Text(
-                                text = stringResource(R.string.add_widget),
-                                fontWeight = FontWeight.Bold,
-                                style = LocalTextStyle.current.copy(
-                                    shadow = Shadow(
+                        Box(
+                            modifier = Modifier.fillMaxSize()
+                                .clickable(
+                                    enabled = true,
+                                    interactionSource = remember { MutableInteractionSource() },
+                                    onClick = { launchAddActivity() },
+                                    indication = ripple(
                                         color = Color.Black,
-                                        offset = Offset(3f, 3f),
-                                        blurRadius = 5f,
                                     ),
                                 ),
-                                fontSize = 20.sp,
-                            )
+                            contentAlignment = Alignment.Center,
+                        ) {
+                            Column(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                            ) {
+                                Icon(
+                                    painter = painterResource(R.drawable.ic_baseline_add_24),
+                                    contentDescription = stringResource(R.string.add_widget),
+                                    tint = Color.White,
+                                    modifier = Modifier.size(48.dp)
+                                        .background(
+                                            brush = Brush.radialGradient(
+                                                0f to Color.Black.copy(alpha = 0.5f),
+                                                1f to Color.Transparent,
+                                            ),
+                                        ),
+                                )
+
+                                Text(
+                                    text = stringResource(R.string.add_widget),
+                                    fontWeight = FontWeight.Bold,
+                                    style = LocalTextStyle.current.copy(
+                                        shadow = Shadow(
+                                            color = Color.Black,
+                                            offset = Offset(3f, 3f),
+                                            blurRadius = 5f,
+                                        ),
+                                    ),
+                                    fontSize = 20.sp,
+                                )
+                            }
                         }
                     }
                 }

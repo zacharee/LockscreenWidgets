@@ -19,9 +19,10 @@ import tk.zwander.lockscreenwidgets.activities.add.ReconfigureFrameWidgetActivit
  */
 open class WidgetFrameAdapter(
     context: Context,
+    rootView: View,
     onRemoveCallback: (WidgetData, Int) -> Unit,
     private val saveTypeGetter: () -> FrameSizeAndPosition.FrameType,
-) : BaseAdapter(context, onRemoveCallback) {
+) : BaseAdapter(context, rootView, onRemoveCallback) {
     override val colCount: Int
         get() = context.prefManager.frameColCount
     override val rowCount: Int

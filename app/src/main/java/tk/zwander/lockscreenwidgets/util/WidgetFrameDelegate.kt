@@ -206,13 +206,16 @@ class WidgetFrameDelegate private constructor(context: Context) : BaseDelegate<W
     private val binding =
         WidgetFrameBinding.inflate(LayoutInflater.from(ContextThemeWrapper(this, R.style.AppTheme)))
     override val gridLayoutManager = SpannedLayoutManager()
-    override val adapter = WidgetFrameAdapter(
-        context = context,
-        onRemoveCallback = { item, _ ->
-            binding.removeWidgetConfirmation.root.show(item)
-        },
-        saveTypeGetter = { saveMode },
-    )
+    override val adapter by lazy {
+        WidgetFrameAdapter(
+            context = context,
+            rootView = rootView,
+            onRemoveCallback = { item, _ ->
+                binding.removeWidgetConfirmation.root.show(item)
+            },
+            saveTypeGetter = { saveMode },
+        )
+    }
 
     override val prefsHandler = HandlerRegistry {
         handler(PrefManager.KEY_CURRENT_WIDGETS) {
@@ -362,6 +365,7 @@ class WidgetFrameDelegate private constructor(context: Context) : BaseDelegate<W
             is Event.FrameAttachmentState -> {
                 try {
                     if (event.attached) {
+                        lifecycleRegistry.currentState = Lifecycle.State.RESUMED
                         widgetHost.startListening(this)
                         updateWallpaperLayerIfNeeded()
                         updateCornerRadius()
@@ -373,7 +377,6 @@ class WidgetFrameDelegate private constructor(context: Context) : BaseDelegate<W
                             adapter.updateViews()
                         }
                         scrollToStoredPosition(false)
-                        lifecycleRegistry.currentState = Lifecycle.State.RESUMED
                     } else {
                         widgetHost.stopListening(this)
                         lifecycleRegistry.currentState = Lifecycle.State.STARTED

@@ -16,9 +16,11 @@ import tk.zwander.widgetdrawer.activities.add.ReconfigureDrawerWidgetActivity
 
 class DrawerAdapter(
     context: Context,
+    rootView: View,
     onRemoveCallback: (WidgetData, Int) -> Unit,
 ) : BaseAdapter(
     context,
+    rootView,
     onRemoveCallback,
 ) {
     override val colCount: Int

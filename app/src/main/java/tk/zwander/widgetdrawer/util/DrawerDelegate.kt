@@ -133,7 +133,7 @@ class DrawerDelegate private constructor(context: Context) :
     private val handle by lazy { Handle(this) }
 
     override val adapter by lazy {
-        DrawerAdapter(context) { widget, _ ->
+        DrawerAdapter(context, rootView) { widget, _ ->
             removeWidget(widget)
         }
     }
