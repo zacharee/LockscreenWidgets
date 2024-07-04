@@ -487,9 +487,9 @@ class WidgetFrameDelegate private constructor(context: Context) : BaseDelegate<W
     override fun widgetRemovalConfirmed(event: Event.RemoveWidgetConfirmed, position: Int) {
         if (event.remove) {
             binding.widgetsPager.post {
-                val pos = when (val pos = (binding.widgetsPager.layoutManager as? SpannedLayoutManager)?.firstVisiblePosition) {
+                val pos = when (val pos = gridLayoutManager.firstVisiblePosition) {
                     RecyclerView.NO_POSITION -> (position - 1).coerceAtLeast(0)
-                    else -> pos ?: 0
+                    else -> pos
                 }
 
                 binding.widgetsPager.scrollToPosition(pos)
