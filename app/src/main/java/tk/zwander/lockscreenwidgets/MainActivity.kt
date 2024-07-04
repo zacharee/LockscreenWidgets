@@ -79,7 +79,7 @@ class MainActivity : BaseActivity(), CoroutineScope by MainScope() {
             MainContent()
         }
 
-        if (prefManager.firstRun || !isAccessibilityEnabled) {
+        if (prefManager.firstRun || (!isAccessibilityEnabled && !BuildConfig.DEBUG)) {
             OnboardingActivity.startForResult(
                 this, introRequest,
                 if (!prefManager.firstRun) OnboardingActivity.RetroMode.ACCESSIBILITY else OnboardingActivity.RetroMode.NONE
