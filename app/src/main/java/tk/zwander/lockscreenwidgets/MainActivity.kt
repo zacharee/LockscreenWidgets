@@ -61,7 +61,7 @@ class MainActivity : BaseActivity(), CoroutineScope by MainScope() {
                     WidgetTileTwo::class.java,
                     WidgetTileThree::class.java,
                     WidgetTileFour::class.java,
-                    WidgetTileFive::class.java
+                    WidgetTileFive::class.java,
                 )
 
                 components.forEach {
@@ -69,7 +69,7 @@ class MainActivity : BaseActivity(), CoroutineScope by MainScope() {
                         ComponentName(this@MainActivity, it),
                         if (isOneUI) PackageManager.COMPONENT_ENABLED_STATE_ENABLED
                         else PackageManager.COMPONENT_ENABLED_STATE_DISABLED,
-                        PackageManager.DONT_KILL_APP or PackageManager.SYNCHRONOUS
+                        PackageManager.DONT_KILL_APP or PackageManager.SYNCHRONOUS,
                     )
                 }
             }
@@ -82,7 +82,7 @@ class MainActivity : BaseActivity(), CoroutineScope by MainScope() {
         if (prefManager.firstRun || (!isAccessibilityEnabled && !BuildConfig.DEBUG)) {
             OnboardingActivity.startForResult(
                 this, introRequest,
-                if (!prefManager.firstRun) OnboardingActivity.RetroMode.ACCESSIBILITY else OnboardingActivity.RetroMode.NONE
+                if (!prefManager.firstRun) OnboardingActivity.RetroMode.ACCESSIBILITY else OnboardingActivity.RetroMode.NONE,
             )
         }
     }

@@ -44,7 +44,7 @@ import java.util.concurrent.atomic.AtomicReference
  */
 @Suppress("MemberVisibilityCanBePrivate")
 @RequiresApi(Build.VERSION_CODES.N)
-abstract class BaseWidgetTile : TileService(), SharedPreferences.OnSharedPreferenceChangeListener, AppWidgetHostListener {
+abstract class BaseWidgetTile : TileService(), SharedPreferences.OnSharedPreferenceChangeListener {
     protected val iManager: IAppWidgetService by lazy {
         IAppWidgetService.Stub.asInterface(
             ServiceManager.getService(Context.APPWIDGET_SERVICE)
@@ -79,13 +79,42 @@ abstract class BaseWidgetTile : TileService(), SharedPreferences.OnSharedPrefere
 
     protected val views by lazy { AtomicReference(generateViews()) }
 
+    protected val appWidgetHostListener by lazy {
+        try {
+            object : AppWidgetHostListener {
+                override fun onUpdateProviderInfo(appWidget: AppWidgetProviderInfo?) {
+                    updateTile()
+                    notifySystemUIOfChanges()
+                }
+
+                override fun onViewDataChanged(viewId: Int) {
+                    notifySystemUIOfChanges()
+                }
+
+                override fun updateAppWidget(views: RemoteViews?) {
+                    this@BaseWidgetTile.views.set(views?.getRemoteViewsToApply(this@BaseWidgetTile, null))
+                    notifySystemUIOfChanges()
+                }
+            }
+        } catch (_: Throwable) {
+            null
+        }
+    }
+
     override fun onStartListening() {
         super.onStartListening()
 
         updateTile()
         notifySystemUIOfChanges()
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            try {
+                appWidgetHostListener?.let {
+                    widgetHostCompat.setListener(widgetId, it)
+                }
+            } catch (_: Throwable) {}
+        }
         widgetHostCompat.startListening(this)
-        widgetHostCompat.setListener(widgetId, this)
     }
 
     override fun onStopListening() {
@@ -165,20 +194,6 @@ abstract class BaseWidgetTile : TileService(), SharedPreferences.OnSharedPrefere
             updateTile()
             notifySystemUIOfChanges()
         }
-    }
-
-    override fun onUpdateProviderInfo(appWidget: AppWidgetProviderInfo?) {
-        updateTile()
-        notifySystemUIOfChanges()
-    }
-
-    override fun onViewDataChanged(viewId: Int) {
-        notifySystemUIOfChanges()
-    }
-
-    override fun updateAppWidget(views: RemoteViews?) {
-        this.views.set(views?.getRemoteViewsToApply(this, null))
-        notifySystemUIOfChanges()
     }
 
     private fun notifySystemUIOfChanges() {
