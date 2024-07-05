@@ -4,7 +4,6 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.view.MenuItem
-import android.widget.FrameLayout
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.WindowInsets
@@ -18,6 +17,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.os.bundleOf
+import androidx.fragment.app.FragmentContainerView
 import androidx.preference.PreferenceFragmentCompat
 import tk.zwander.common.activities.BaseActivity
 import tk.zwander.common.compose.AppTheme
@@ -67,7 +67,11 @@ class SettingsActivity : BaseActivity() {
                         val bottomPadding = with(LocalDensity.current) { WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding().toPx() }
 
                         AndroidView(
-                            factory = { FrameLayout(it).apply { id = R.id.content } },
+                            factory = {
+                                FragmentContainerView(it).apply {
+                                    id = R.id.content
+                                }
+                            },
                             modifier = Modifier.fillMaxWidth()
                                 .weight(1f),
                         ) { view ->

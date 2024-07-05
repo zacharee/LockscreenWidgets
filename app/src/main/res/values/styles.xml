@@ -1,14 +1,18 @@
 <resources>
     <style name="BaseTheme" parent="Theme.Material3.DynamicColors.DayNight">
+        <item name="android:windowDrawsSystemBarBackgrounds">true</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+        <item name="enableEdgeToEdge">true</item>
+    </style>
+
+    <style name="BaseColorTheme" parent="BaseTheme">
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
-        <item name="android:windowDrawsSystemBarBackgrounds">true</item>
-        <item name="android:statusBarColor">@android:color/transparent</item>
-        <item name="android:navigationBarColor">?colorSurface</item>
     </style>
 
-    <style name="AppTheme" parent="BaseTheme">
+    <style name="AppTheme" parent="BaseColorTheme">
         <item name="actionBarStyle">@style/AppTheme.ActionBar</item>
         <item name="android:actionBarStyle">@style/AppTheme.ActionBar</item>
 
