@@ -30,7 +30,7 @@
     <string name="back">Назад</string>
     <string name="clear">Очистить</string>
     <string name="drawer_enabled">Боковая Панель Включена</string>
-    <string name="frame_enabled">Frame Enabled</string>
+    <string name="frame_enabled">Рамка Включена</string>
     <string name="add_id_hint">com.android.systemui:id/some_id_here</string>
     <string name="category_appearance">Внешний вид</string>
     <string name="category_behavior">Поведение</string>
