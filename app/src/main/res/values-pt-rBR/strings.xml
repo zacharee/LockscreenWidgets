@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="version_template">v%s</string>
+    <string name="version_template">%s</string>
     <string name="edit_gesture_hint">Tap the widget frame with two fingers to move and resize it.</string>
     <string name="edit_gesture_hint_2">Great! Tap with two fingers to hide the editing UI.</string>
     <string name="hide_gesture_hint">Tap the widget frame with three fingers to temporarily hide it. It will remain hidden until you turn the display off and on again.</string>
