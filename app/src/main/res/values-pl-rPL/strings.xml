@@ -99,9 +99,9 @@
     <string name="settings_screen_show_in_notification_center_desc">Samsung\'s One UI 1 (Pie) and One UI 2 (10) have some empty space to the right of the clock when the notification center is fully expanded. Enabling this option will cause the widget frame to appear when the shade is fully expanded. This state has its own independent positioning and size.</string>
     <string name="settings_screen_show_on_main_lock_screen">Pokaż na głównym ekranie blokady</string>
     <string name="settings_screen_show_on_main_lock_screen_desc">If you\'re using the option to show in the notification center, you may not want Lockscreen Widgets to show on the main lock screen. Disable this option to have the frame only show when the notification center is fully expanded.</string>
-    <string name="settings_screen_corner_radius">Corner Radius</string>
-    <string name="settings_screen_corner_radius_desc">Change how rounded the corners of the widget frame are.</string>
-    <string name="settings_screen_widget_corner_radius">Widget Corner Radius</string>
+    <string name="settings_screen_corner_radius">Zaokrąglenie rogów</string>
+    <string name="settings_screen_corner_radius_desc">Zmienia zaokrąglenie rogów okna widżetów.</string>
+    <string name="settings_screen_widget_corner_radius">Zaokrąglenie rogów widżetów</string>
     <string name="settings_screen_widget_corner_radius_desc">Change how rounded the corners of widgets are.</string>
     <string name="settings_screen_background_color">Kolor tła</string>
     <string name="settings_screen_background_color_desc">Set the background color of the widget frame, including transparency.</string>
