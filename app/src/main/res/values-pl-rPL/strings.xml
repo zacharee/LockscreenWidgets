@@ -31,7 +31,7 @@
     <string name="clear">Wyczyść</string>
     <string name="drawer_enabled">Drawer włączony</string>
     <string name="frame_enabled">Ramka włączona</string>
-    <string name="add_id_hint">com.android.systemui:id/some_id_here</string>
+    <string name="add_id_hint">com.android.systemui:id/id_aplikacji</string>
     <string name="category_appearance">Wygląd</string>
     <string name="category_behavior">Zachowanie</string>
     <string name="category_visibility">Widoczność</string>
@@ -169,7 +169,7 @@
     <string name="usage_modify_frame_desc">If the frame is in the way, or you want it to be a different size, you can easily move and resize it. Simply tap the frame itself with two fingers to show the editing interface.</string>
     <string name="usage_temp_hide">Tymczasowo ukryj</string>
     <string name="usage_temp_hide_desc">If you need to just hide the widget frame for a while, tap it with three fingers. You can also enter the editing interface with a two-finger tap and press the eye button in the top left. This will hide the frame until the screen is turned off and on again.</string>
-    <string name="usage_reorder_widgets">Reorder Widgets</string>
+    <string name="usage_reorder_widgets">Zmień kolejność widżetów</string>
     <string name="usage_reorder_widgets_desc">To change the order of the widgets, simply long-press the widget you want to move and drag it to where you want it to be.</string>
     <string name="usage_remove_widgets">Remove/Resize Widgets</string>
     <string name="usage_remove_widgets_desc">To remove a widget, long-press it without dragging and tap the red button that appears in the top right. Long-pressing a widget will also show four \"draggers\" around the edges, which you can use to resize the widget.</string>
