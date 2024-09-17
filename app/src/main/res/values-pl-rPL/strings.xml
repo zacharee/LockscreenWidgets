@@ -125,7 +125,7 @@
     <string name="settings_screen_ignore_widget_touches_desc">When enabled, touches on widgets will be ignored. This will prevent accidental app launches, but will also prevent interacting with widgets.</string>
     <string name="settings_screen_lock_widget_drawer">Lock Widget Drawer</string>
     <string name="settings_screen_lock_widget_drawer_desc">When this is enabled, the widget drawer\'s layout will become locked. You won\'t be able to remove, resize, or reorder widgets, but you\'ll still be able to interact with them.</string>
-    <string name="settings_screen_animation_duration">Animation Duration</string>
+    <string name="settings_screen_animation_duration">Długość animacji</string>
     <string name="settings_screen_animation_duration_desc">Set how long it takes for the fade-in/fade-out animation to complete.</string>
     <string name="settings_screen_back_up_widgets">Kopia zapasowa</string>
     <string name="settings_screen_back_up_widgets_desc">Back up current widgets and shortcuts. This does not include widget tiles.</string>
@@ -136,8 +136,8 @@
     <string name="settings_screen_blur_drawer_background_desc">On Samsung devices and Android 12 and later, it\'s possible to blur the background of the drawer. This may not work on all devices or in battery saving mode.</string>
     <string name="settings_screen_blur_background_amount">Blur Amount</string>
     <string name="settings_screen_blur_background_amount_desc">Set how blurred the background should be.</string>
-    <string name="settings_screen_remember_position">Remember Position</string>
-    <string name="settings_screen_remember_position_desc">By default, Lockscreen Widgets remembers which page it was on the last time it was on-screen and scrolls to that position every time it shows. Disable this option to have Lockscreen Widgets always show the first page when it appears.</string>
+    <string name="settings_screen_remember_position">Zapamiętaj pozycje strony</string>
+    <string name="settings_screen_remember_position_desc">Domyślnie Lockscreen Widgets przewija na stronę z widżetami, która była po raz ostatni na ekranie. Wyłącz tę opcję, aby zawsze pojawiała się strona z początkową stroną.</string>
     <string name="settings_screen_hide_on_edge_panels">Hide on Edge Panels</string>
     <string name="settings_screen_hide_on_edge_panels_desc">Hide the widget frame when Samsung\'s Edge Panels are open.</string>
     <string name="settings_screen_hide_on_present_apps">Hide on Present Apps</string>
@@ -154,7 +154,7 @@
     <string name="intro_usage_desc">Tap the \"plus\" page to add a widget, press and hold to reorder/resize/remove widgets in the list, and tap anywhere on the frame with two fingers to move/resize the frame or add a widget. You can also tap with three fingers to hide the widget frame until the screen is turned off and on again.</string>
     <string name="intro_accessibility_title">Ułatwienie dostępu</string>
     <string name="intro_accessibility_desc">To be able to display on the lock screen, you\'ll need to activate Lockscreen Widgets\' Accessibility Service. This app doesn\'t collect any data from your screen.</string>
-    <string name="intro_notification_listener_title">Notification Listener</string>
+    <string name="intro_notification_listener_title">Dostęp do powiadomień</string>
     <string name="intro_notification_listener_desc">Lockscreen Widgets can hide the widget frame while there are notifications displayed. To do so, you\'ll need to enable the Notification Listener. You don\'t have to grant this right now.</string>
     <string name="intro_read_storage_title">Read External Storage</string>
     <string name="intro_read_storage_desc">Lockscreen Widgets has a \"masking\" mode, where it will use your wallpaper as the widget frame background, causing it to seem transparent, while also being able to cover lock screen elements. To do this, Lockscreen Widgets needs permission to be able to read your device\'s storage. You don\'t have to grant this right now. If you\'re running Lollipop, this permission is already granted. More details are available in the privacy policy.</string>
@@ -162,8 +162,8 @@
     <string name="intro_battery_optimization">Optymalizacja pracy baterii</string>
     <string name="intro_battery_optimization_desc">Many devices, including those running MIUI and EMUI, have incredibly aggressive battery management. This can cause Lockscreen Widgets to be killed when you don\'t want it to be. Click the button below to read how you can allowlist Lockscreen Widgets on your particular device.</string>
     <string name="intro_done_title">Gotowe!</string>
-    <string name="intro_done_desc">That\'s it! Check your lock screen and you should now see the widget frame!</string>
-    <string name="usage_add_widget">Dodaj Widżet</string>
+    <string name="intro_done_desc">To wszystko! Sprawdź ekran blokady, powinna pojawić się tam ramka z widżetami.</string>
+    <string name="usage_add_widget">Dodaj widżet</string>
     <string name="usage_add_widget_desc">Adding a widget can be done in one of three ways. If the widget pager doesn\'t have any widgets added, simply press the \"plus\" button that appears inside it. Otherwise, you can tap the frame with two fingers and then tap the \"plus\" button on the top right of the frame. You can also add a widget from the app itself, by tapping the \"plus\" button at the top right of the main screen.</string>
     <string name="usage_modify_frame">Modify Frame</string>
     <string name="usage_modify_frame_desc">If the frame is in the way, or you want it to be a different size, you can easily move and resize it. Simply tap the frame itself with two fingers to show the editing interface.</string>
@@ -191,7 +191,7 @@
     <string name="unable_to_launch">Nie można uruchomić.</string>
     <string name="open_close_toolbar">Open/Close Toolbar</string>
     <string name="open_widget_drawer">Open Widget Drawer</string>
-    <string name="open_drawer">Otwórz menu z widżetami</string>
+    <string name="open_drawer">Otwórz listę z widżetami</string>
     <string name="close_widget_drawer">Close Drawer</string>
     <string name="drawer">Drawer</string>
     <string name="handle">Handle</string>
