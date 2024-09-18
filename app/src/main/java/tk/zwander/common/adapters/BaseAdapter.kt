@@ -53,7 +53,6 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.arasthel.spannedgridlayoutmanager.SpanSize
 import com.arasthel.spannedgridlayoutmanager.SpannedGridLayoutManager
-import com.bugsnag.android.Bugsnag
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.MainScope
@@ -484,7 +483,7 @@ abstract class BaseAdapter(
                     isVisible = true
 
                     if (!BrokenAppsRegistry.isBroken(widgetInfo)) {
-                        Bugsnag.leaveBreadcrumb("Attempting to create view for ${widgetInfo.provider}.")
+                        context.logUtils.debugLog("Attempting to create view for ${widgetInfo.provider}.", null)
                         try {
                             // We're recreating the AppWidgetHostView here each time, which probably isn't the most efficient
                             // way to do things. However, it's not trivial to just set a new source on an AppWidgetHostView,
