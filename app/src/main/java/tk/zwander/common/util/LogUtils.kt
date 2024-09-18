@@ -3,6 +3,7 @@ package tk.zwander.common.util
 import android.annotation.SuppressLint
 import android.content.Context
 import android.util.Log
+import com.bugsnag.android.Bugsnag
 import java.io.BufferedWriter
 import java.io.File
 import java.io.FileOutputStream
@@ -76,6 +77,7 @@ class LogUtils private constructor(private val context: Context) {
             val fullMessage = generateFullMessage(message, throwable)
 
             Log.e(DEBUG_LOG_TAG, fullMessage)
+            Bugsnag.leaveBreadcrumb(message)
 
             synchronized(logFile) {
                 logFileHandle.write("\n\n$fullMessage")
@@ -87,6 +89,7 @@ class LogUtils private constructor(private val context: Context) {
         val fullMessage = generateFullMessage(message, throwable)
 
         Log.e(NORMAL_LOG_TAG, fullMessage)
+        Bugsnag.leaveBreadcrumb(message)
 
         if (context.isDebug) {
             synchronized(logFile) {
