@@ -73,11 +73,12 @@ class LogUtils private constructor(private val context: Context) {
     private fun createLogFileWriter(): BufferedWriter = FileOutputStream(logFile, true).bufferedWriter()
 
     fun debugLog(message: String, throwable: Throwable? = Exception()) {
+        Bugsnag.leaveBreadcrumb(message)
+
         if (context.isDebug) {
             val fullMessage = generateFullMessage(message, throwable)
 
             Log.e(DEBUG_LOG_TAG, fullMessage)
-            Bugsnag.leaveBreadcrumb(message)
 
             synchronized(logFile) {
                 logFileHandle.write("\n\n$fullMessage")
