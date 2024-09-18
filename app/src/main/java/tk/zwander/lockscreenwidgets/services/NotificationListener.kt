@@ -178,7 +178,7 @@ class NotificationListener : NotificationListenerService(), EventObserver, Corou
         get() {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                 if (notification.flags and Notification.FLAG_BUBBLE != 0 &&
-                    notification.bubbleMetadata.isNotificationSuppressed
+                    notification.bubbleMetadata?.isNotificationSuppressed == true
                 ) {
                     logUtils.debugLog("Bubble and suppressed ${this.notification.channelId}", null)
                     return false
