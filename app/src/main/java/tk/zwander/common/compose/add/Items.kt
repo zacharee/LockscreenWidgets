@@ -15,6 +15,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import tk.zwander.common.compose.util.matchesFilter
 import tk.zwander.common.data.AppInfo
+import tk.zwander.common.util.BrokenAppsRegistry
 import tk.zwander.common.util.getAllInstalledWidgetProviders
 import tk.zwander.common.util.getApplicationInfoCompat
 import tk.zwander.common.util.logUtils
@@ -41,6 +42,11 @@ internal fun items(
             val packageManager = context.packageManager
 
             context.getAllInstalledWidgetProviders().forEach {
+                if (BrokenAppsRegistry.isBroken(it)) {
+                    context.logUtils.debugLog("Hiding broken widget ${it.provider}.")
+                    return@forEach
+                }
+
                 try {
                     val appInfo = packageManager
                         .getApplicationInfoCompat(it.provider.packageName, 0)

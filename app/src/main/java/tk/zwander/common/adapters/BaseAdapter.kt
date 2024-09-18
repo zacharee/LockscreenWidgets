@@ -53,6 +53,7 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.arasthel.spannedgridlayoutmanager.SpanSize
 import com.arasthel.spannedgridlayoutmanager.SpannedGridLayoutManager
+import com.bugsnag.android.Bugsnag
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.MainScope
@@ -64,6 +65,7 @@ import tk.zwander.common.data.WidgetData
 import tk.zwander.common.data.WidgetType
 import tk.zwander.common.host.widgetHostCompat
 import tk.zwander.common.listeners.WidgetResizeListener
+import tk.zwander.common.util.BrokenAppsRegistry
 import tk.zwander.common.util.Event
 import tk.zwander.common.util.EventObserver
 import tk.zwander.common.util.appWidgetManager
@@ -481,77 +483,86 @@ abstract class BaseAdapter(
                 binding.widgetHolder.apply {
                     isVisible = true
 
-                    try {
-                        // We're recreating the AppWidgetHostView here each time, which probably isn't the most efficient
-                        // way to do things. However, it's not trivial to just set a new source on an AppWidgetHostView,
-                        // so this makes the most sense right now.
-                        addView(withContext(Dispatchers.Main) {
-                            host.createView(itemView.context, data.id, widgetInfo).apply hostView@{
-                                findScrollableViewsInHierarchy(this).forEach { list ->
-                                    list.isNestedScrollingEnabled = true
-                                }
-
-                                this.viewTreeObserver.addOnGlobalLayoutListener {
+                    if (!BrokenAppsRegistry.isBroken(widgetInfo)) {
+                        Bugsnag.leaveBreadcrumb("Attempting to create view for ${widgetInfo.provider}.")
+                        try {
+                            // We're recreating the AppWidgetHostView here each time, which probably isn't the most efficient
+                            // way to do things. However, it's not trivial to just set a new source on an AppWidgetHostView,
+                            // so this makes the most sense right now.
+                            addView(withContext(Dispatchers.Main) {
+                                host.createView(itemView.context, data.id, widgetInfo).apply hostView@{
                                     findScrollableViewsInHierarchy(this).forEach { list ->
                                         list.isNestedScrollingEnabled = true
                                     }
-                                }
 
-                                val width = context.pxAsDp(itemView.width)
-                                val height = context.pxAsDp(itemView.height)
+                                    this.viewTreeObserver.addOnGlobalLayoutListener {
+                                        findScrollableViewsInHierarchy(this).forEach { list ->
+                                            list.isNestedScrollingEnabled = true
+                                        }
+                                    }
 
-                                val paddingValue = context.pxAsDp(
-                                    context.resources.getDimensionPixelSize(R.dimen.app_widget_padding),
-                                )
+                                    val width = context.pxAsDp(itemView.width)
+                                    val height = context.pxAsDp(itemView.height)
 
-                                // Workaround to fix the One UI 5.1 battery grid widget on some devices.
-                                if (widgetInfo.provider.packageName == "com.android.settings.intelligence") {
-                                    updateAppWidgetOptions(Bundle().apply {
-                                        putBoolean("hsIsHorizontalIcon", false)
-                                        putInt("semAppWidgetRowSpan", 1)
-                                    })
-                                }
+                                    val paddingValue = context.pxAsDp(
+                                        context.resources.getDimensionPixelSize(R.dimen.app_widget_padding),
+                                    )
 
-                                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                                    updateAppWidgetSize(
-                                        Bundle(),
-                                        listOf(
-                                            SizeF(
-                                                width + 2 * paddingValue,
-                                                height + 2 * paddingValue,
+                                    // Workaround to fix the One UI 5.1 battery grid widget on some devices.
+                                    if (widgetInfo.provider.packageName == "com.android.settings.intelligence") {
+                                        updateAppWidgetOptions(Bundle().apply {
+                                            putBoolean("hsIsHorizontalIcon", false)
+                                            putInt("semAppWidgetRowSpan", 1)
+                                        })
+                                    }
+
+                                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                                        updateAppWidgetSize(
+                                            Bundle(),
+                                            listOf(
+                                                SizeF(
+                                                    width + 2 * paddingValue,
+                                                    height + 2 * paddingValue,
+                                                ),
                                             ),
-                                        ),
-                                    )
-                                } else {
-                                    val adjustedWidth = width + 2 * paddingValue
-                                    val adjustedHeight = height + 2 * paddingValue
+                                        )
+                                    } else {
+                                        val adjustedWidth = width + 2 * paddingValue
+                                        val adjustedHeight = height + 2 * paddingValue
 
-                                    @Suppress("DEPRECATION")
-                                    updateAppWidgetSize(
-                                        null,
-                                        adjustedWidth.toInt(),
-                                        adjustedHeight.toInt(),
-                                        adjustedWidth.toInt(),
-                                        adjustedHeight.toInt(),
-                                    )
+                                        @Suppress("DEPRECATION")
+                                        updateAppWidgetSize(
+                                            null,
+                                            adjustedWidth.toInt(),
+                                            adjustedHeight.toInt(),
+                                            adjustedWidth.toInt(),
+                                            adjustedHeight.toInt(),
+                                        )
+                                    }
                                 }
-                            }
-                        })
-                    } catch (e: Throwable) {
-                        context.logUtils.normalLog("Unable to bind widget view ${widgetInfo.provider}", e)
+                            })
+                        } catch (e: Throwable) {
+                            context.logUtils.normalLog("Unable to bind widget view ${widgetInfo.provider}", e)
 
-                        if (e is SecurityException) {
-                            Toast.makeText(
-                                context,
-                                resources.getString(R.string.bind_widget_error, widgetInfo.provider),
-                                Toast.LENGTH_LONG,
-                            ).show()
-                            currentWidgets = currentWidgets.toMutableList().apply {
-                                remove(data)
-                                host.deleteAppWidgetId(data.id)
+                            if (e is SecurityException) {
+                                Toast.makeText(
+                                    context,
+                                    resources.getString(R.string.bind_widget_error, widgetInfo.provider),
+                                    Toast.LENGTH_LONG,
+                                ).show()
+                                currentWidgets = currentWidgets.toMutableList().apply {
+                                    remove(data)
+                                    host.deleteAppWidgetId(data.id)
+                                }
+                            } else {
+                                addView(context.createWidgetErrorView())
                             }
-                        } else {
-                            addView(context.createWidgetErrorView())
+                        }
+                    } else {
+                        context.logUtils.normalLog("Broken app widget detected: ${widgetInfo.provider}. Removing from adapter list.", null)
+                        currentWidgets = currentWidgets.toMutableList().apply {
+                            remove(data)
+                            host.deleteAppWidgetId(data.id)
                         }
                     }
                 }
