@@ -58,8 +58,10 @@ class NotificationListener : NotificationListenerService(), EventObserver, Corou
 
     override fun onListenerConnected() {
         isListening.value = true
+        handler.post {
+            sendUpdate()
+        }
         eventManager.addObserver(this)
-        sendUpdate()
     }
 
     override fun onListenerDisconnected() {
