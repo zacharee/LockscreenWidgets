@@ -194,7 +194,7 @@
     <string name="open_drawer">Otwórz menu z widżetami</string>
     <string name="close_widget_drawer">Zamknij menu z widżetami</string>
     <string name="drawer">Menu z widżetami</string>
-    <string name="handle">Handle</string>
+    <string name="handle">Obsłuż</string>
     <string name="error">Błąd</string>
     <string name="close_on_empty_tap">Dotknij pustej przestrzeni, aby zamknąć menu z widżetami</string>
     <string name="close_on_empty_tap_desc">Włączenie tej opcji spowoduje zamknięcie menu z widżetami, gdy dotkniesz obszar pozbawiony żadnego widżetu.</string>
@@ -224,18 +224,18 @@
     <string name="force_show_frame">Force Show Frame</string>
     <string name="unforce_show_frame">Undo Force Show Frame</string>
     <string name="frame_forced_to_show">Frame Forced to Show</string>
-    <string name="reset_frame_position_size">Reset Frame Position and Size</string>
+    <string name="reset_frame_position_size">Zresetuj pozycję i rozmiar ramki z widżetami</string>
     <string name="on_lock_screen">Na ekranie blokady</string>
     <string name="in_notification_center">In Notification Center</string>
     <string name="in_locked_notification_center">In Locked Notification Center</string>
-    <string name="reset_frame_position_size_confirm_message">Are you sure you want to reset the position and size?</string>
+    <string name="reset_frame_position_size_confirm_message">Jesteś pewny/a, że chcesz zresetować pozycję i rozmiar?</string>
     <string name="install_app_ops">Install App Ops</string>
     <string name="open_app_ops">Open App Ops</string>
-    <string name="grant_read_media_images">Grant READ_MEDIA_IMAGES</string>
-    <string name="failed_to_add_shortcut">Unable to add shortcut.</string>
+    <string name="grant_read_media_images">Przydziel dostęp do zdjęć i filmów</string>
+    <string name="failed_to_add_shortcut">Nie można dodać skrótu.</string>
     <string name="directly_check_for_activity">Directly Check for Activity</string>
     <string name="directly_check_for_activity_desc">When enabled, Lockscreen Widgets will use Android\'s API to check whether a widget tap is launching an Activity. This can be faster than Lockscreen Widget\'s built-in detection, but may cause false positives.</string>
     <string name="translate">Przetłumacz</string>
     <string name="translate_desc">Pomóż przetłumaczyć Lockscreen Widgets na swój język.</string>
-    <string name="error_reconfiguring_widget">Error reconfiguring widget</string>
+    <string name="error_reconfiguring_widget">Błąd podczas zmiany konfiguracji widżetu</string>
 </resources>
