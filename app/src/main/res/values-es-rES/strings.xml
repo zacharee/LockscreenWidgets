@@ -6,7 +6,7 @@
     <string name="hide_gesture_hint">Tap the widget frame with three fingers to temporarily hide it. It will remain hidden until you turn the display off and on again.</string>
     <string name="hide_gesture_hint_2">Turn the display off and on again to bring the widget frame back.</string>
     <string name="accessibility_service_desc">Lockscreen Widgets requires an Accessibility Service to display on the lock screen and in the notification center. No data is collected, and no actions will be performed on the device.</string>
-    <string name="add_widget">Add Widget</string>
+    <string name="add_widget">Añadir Widget</string>
     <string name="grant">Grant</string>
     <string name="settings">Settings</string>
     <string name="yes">Yes</string>
