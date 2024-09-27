@@ -69,10 +69,6 @@ class NotificationListener : NotificationListenerService(), EventObserver, Corou
         eventManager.removeObserver(this)
     }
 
-    override fun onCreate() {
-        sendUpdate()
-    }
-
     @SuppressLint("PrivateApi", "DiscouragedPrivateApi")
     override fun onBind(intent: Intent?): IBinder {
         super.onBind(intent)
@@ -121,8 +117,10 @@ class NotificationListener : NotificationListenerService(), EventObserver, Corou
     override fun onEvent(event: Event) {
         when (event) {
             Event.RequestNotificationCount -> {
-                handler.post {
-                    sendUpdate()
+                if (isListening.value) {
+                    handler.post {
+                        sendUpdate()
+                    }
                 }
             }
 
