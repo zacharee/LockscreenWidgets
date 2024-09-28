@@ -239,7 +239,7 @@ class NotificationListener : NotificationListenerService(), EventObserver, Corou
                         SystemProperties.get("ro.vendor.camera.extensions.service")
                             .contains("com.google.android.apps.camera.services.extensions.service.PixelExtensions")
                     ) {
-                        logUtils.debugLog("Pixel workaround ${this.notification.channelId}", null)
+                        logUtils.debugLog("Pixel workaround on ${this.packageName} ${this.notification.channelId}", null)
                         return false
                     }
                 }
