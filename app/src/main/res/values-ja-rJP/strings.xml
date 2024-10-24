@@ -4,7 +4,7 @@
     <string name="edit_gesture_hint">二本指でタップして移動やリサイズします</string>
     <string name="edit_gesture_hint_2">二本指でタップして編集モードを終了します</string>
     <string name="hide_gesture_hint">三本指でタップして一時的に非表示にできます。画面をOFF→ONすることで再度表示されます</string>
-    <string name="hide_gesture_hint_2">Turn the display off and on again to bring the widget frame back.</string>
+    <string name="hide_gesture_hint_2">画面をOFFにして再度ONにするとウィジェットが復帰します</string>
     <string name="accessibility_service_desc">Lockscreen Widgets requires an Accessibility Service to display on the lock screen and in the notification center. No data is collected, and no actions will be performed on the device.</string>
     <string name="add_widget">ウィジェット追加</string>
     <string name="grant">Grant</string>
@@ -25,7 +25,7 @@
     <string name="shortcut">Shortcut</string>
     <string name="enabled">Enabled</string>
     <string name="disabled">Disabled</string>
-    <string name="accessibility_settings">Accessibility Settings</string>
+    <string name="accessibility_settings">ユーザー補助の設定</string>
     <string name="battery_whitelist">Battery Allowlist</string>
     <string name="back">Back</string>
     <string name="clear">Clear</string>
