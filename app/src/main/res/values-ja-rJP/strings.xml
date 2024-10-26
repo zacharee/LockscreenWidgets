@@ -5,7 +5,7 @@
     <string name="edit_gesture_hint_2">二本指でタップして編集モードを終了します</string>
     <string name="hide_gesture_hint">三本指でタップして一時的に非表示にできます。画面をOFF→ONすることで再度表示されます</string>
     <string name="hide_gesture_hint_2">画面をOFFにして再度ONにするとウィジェットが復帰します</string>
-    <string name="accessibility_service_desc">Lockscreen Widgets requires an Accessibility Service to display on the lock screen and in the notification center. No data is collected, and no actions will be performed on the device.</string>
+    <string name="accessibility_service_desc">このアプリでは、ロック画面の通知の中央にウィジェットを表示するため、アクセシビリティサービスが必要です。これ以外の動作には使用せず、情報の収集も行いません。</string>
     <string name="add_widget">ウィジェット追加</string>
     <string name="grant">許可</string>
     <string name="settings">設定</string>
@@ -16,12 +16,12 @@
     <string name="usage">使用方法</string>
     <string name="back_up">バックアップ</string>
     <string name="restore">バックアップから復元</string>
-    <string name="id_list">ID List</string>
+    <string name="id_list">IDリスト</string>
     <string name="more_info">More Info</string>
     <string name="search">Search</string>
     <string name="preview">Preview</string>
     <string name="close_app">Close App</string>
-    <string name="privacy_policy">Privacy Policy</string>
+    <string name="privacy_policy">個人情報保護方針</string>
     <string name="shortcut">Shortcut</string>
     <string name="enabled">有効</string>
     <string name="disabled">無効</string>
@@ -29,8 +29,8 @@
     <string name="battery_whitelist">Battery Allowlist</string>
     <string name="back">Back</string>
     <string name="clear">Clear</string>
-    <string name="drawer_enabled">Drawer Enabled</string>
-    <string name="frame_enabled">Frame Enabled</string>
+    <string name="drawer_enabled">ドロワー有効</string>
+    <string name="frame_enabled">フレーム有効</string>
     <string name="add_id_hint">com.android.systemui:id/some_id_here</string>
     <string name="category_appearance">Appearance</string>
     <string name="category_behavior">Behavior</string>
@@ -50,8 +50,8 @@
     <string name="hide">Hide</string>
     <string name="shortcut_icon">Shortcut Icon</string>
     <string name="expand">Expand</string>
-    <string name="alert_remove_widget_confirm">Remove Widget?</string>
-    <string name="alert_remove_widget_confirm_desc">Are you sure you want to remove this widget?</string>
+    <string name="alert_remove_widget_confirm">ウィジェットを削除しますか？</string>
+    <string name="alert_remove_widget_confirm_desc">このウィジェットを削除してもよろしいですか？</string>
     <string name="main_screen_social_mastodon">Mastodon</string>
     <string name="main_screen_social_mastodon_desc">Follow me on Mastodon for updates about my apps and random development-related nonsense.</string>
     <string name="main_screen_social_website">Website</string>
@@ -59,7 +59,7 @@
     <string name="main_screen_social_email">Email</string>
     <string name="main_screen_social_email_desc">Send me an email if you have a question or problem. Please include as much detail as possible. Just telling me \"it doesn\'t work\" just wastes everyone\'s time.</string>
     <string name="main_screen_social_telegram">Telegram</string>
-    <string name="main_screen_social_telegram_desc">If email isn\'t your thing, you can ask your question in my Telegram server. Please mention which app you\'re using, as this server is for all of the ones I\'ve developed.</string>
+    <string name="main_screen_social_telegram_desc">電子メールが苦手な方は、私のTelegramサーバーで尋ねることができます。 こちらでは私が開発したすべてのアプリに対応しているので、どのアプリを使用しているかをお知らせください。</string>
     <string name="main_screen_social_github">GitHub</string>
     <string name="main_screen_social_github_desc">Lockscreen Widgets is open source! If you\'re a developer or tinkerer interested in helping to improve the project (or you just want to check out the source), tap here.</string>
     <string name="main_screen_social_patreon">Patreon</string>
