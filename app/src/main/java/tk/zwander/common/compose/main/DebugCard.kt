@@ -56,7 +56,7 @@ fun DebugCard() {
     val onDebugExportResult = rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument("text/*")) { uri: Uri? ->
         if (uri != null) {
             with (context) {
-                logUtils.exportLog(contentResolver.openOutputStream(uri))
+                contentResolver.openOutputStream(uri)?.let { logUtils.exportLog(it) }
             }
         }
     }

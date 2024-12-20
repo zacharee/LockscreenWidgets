@@ -2,7 +2,6 @@ package tk.zwander.common.activities.add
 
 import android.annotation.SuppressLint
 import android.app.ActivityOptions
-import android.app.ComponentOptions
 import android.appwidget.AppWidgetManager
 import android.appwidget.AppWidgetProviderInfo
 import android.content.ComponentName
@@ -90,12 +89,12 @@ abstract class BaseBindWidgetActivity : BaseActivity() {
 
                         if (shortcutIntent != null) {
                             val name =
-                                overrideLabel ?: data.getStringExtra(Intent.EXTRA_SHORTCUT_NAME)
+                                overrideLabel ?: data.getStringExtra(Intent.EXTRA_SHORTCUT_NAME) ?: "Unknown"
                             val iconRes =
                                 data.getParcelableExtra<Intent.ShortcutIconResource?>(Intent.EXTRA_SHORTCUT_ICON_RESOURCE)
                             val iconBmp =
                                 data.getParcelableExtra(Intent.EXTRA_SHORTCUT_ICON) ?: try {
-                                    getRemoteDrawable(iconRes.packageName, iconRes)?.toSafeBitmap(maxSize = 128.dp)
+                                    iconRes?.let { getRemoteDrawable(iconRes.packageName, iconRes) }?.toSafeBitmap(maxSize = 128.dp)
                                 } catch (e: PackageManager.NameNotFoundException) {
                                     null
                                 }
@@ -122,14 +121,14 @@ abstract class BaseBindWidgetActivity : BaseActivity() {
                             data.getParcelableExtra<LauncherApps.PinItemRequest>(LauncherApps.EXTRA_PIN_ITEM_REQUEST)
 
                         if (pinItemRequest != null) {
-                            val name = pinItemRequest.shortcutInfo.run { longLabel ?: shortLabel }
-                                .toString()
-                            val icon = pinItemRequest.shortcutInfo.icon
-                                .loadDrawable(this)
-                                .toSafeBitmap(maxSize = 128.dp)
+                            val name = pinItemRequest.shortcutInfo?.run { longLabel ?: shortLabel }
+                                ?.toString() ?: "Unknown"
+                            val icon = pinItemRequest.shortcutInfo?.icon
+                                ?.loadDrawable(this)
+                                ?.toSafeBitmap(maxSize = 128.dp)
 
-                            val intent = pinItemRequest.shortcutInfo.intent ?: run {
-                                val extras = pinItemRequest.shortcutInfo.extras ?: Bundle()
+                            val intent = pinItemRequest.shortcutInfo?.intent ?: run {
+                                val extras = pinItemRequest.shortcutInfo?.extras ?: Bundle()
                                 val number = extras["phoneNumber"]
                                 val action = extras["shortcutAction"]
 
@@ -155,11 +154,11 @@ abstract class BaseBindWidgetActivity : BaseActivity() {
                                 val msg = "Unable to find intent for pin request.\n" +
                                         "Request Extras: ${
                                             pinItemRequest.extras?.keySet()
-                                                ?.map { it to pinItemRequest.extras[it] }
+                                                ?.map { it to pinItemRequest.extras?.get(it) }
                                         }\n" +
                                         "Shortcut Info Extras: ${
-                                            pinItemRequest.shortcutInfo.extras?.keySet()
-                                                ?.map { it to pinItemRequest.shortcutInfo.extras[it] }
+                                            pinItemRequest.shortcutInfo?.extras?.keySet()
+                                                ?.map { it to pinItemRequest.shortcutInfo?.extras?.get(it) }
                                         }\n" +
                                         "Shortcut Info: ${pinItemRequest.shortcutInfo?.toInsecureString()}"
 
@@ -184,7 +183,7 @@ abstract class BaseBindWidgetActivity : BaseActivity() {
                         }
 
                         addShortcutFromIntent(
-                            pinItemRequest.shortcutInfo?.run {
+                            pinItemRequest?.shortcutInfo?.run {
                                 longLabel.takeIf { !it.isNullOrEmpty() } ?: shortLabel
                             }?.toString()
                         )
@@ -445,7 +444,7 @@ abstract class BaseBindWidgetActivity : BaseActivity() {
                             ActivityOptionsCompat.makeBasic()
                                 .apply {
                                     internalActivityOptions?.setPendingIntentBackgroundActivityStartMode(
-                                        ComponentOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOWED
+                                        ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOWED
                                     )
                                 }
                         } else {
@@ -467,7 +466,7 @@ abstract class BaseBindWidgetActivity : BaseActivity() {
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
                         ActivityOptions
                             .makeBasic()
-                            .setPendingIntentBackgroundActivityStartMode(ComponentOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOWED)
+                            .setPendingIntentBackgroundActivityStartMode(ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOWED)
                             .toBundle()
                     } else null,
                 )

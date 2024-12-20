@@ -12,9 +12,9 @@ import android.widget.LinearLayout
 import androidx.dynamicanimation.animation.DynamicAnimation
 import androidx.dynamicanimation.animation.SpringAnimation
 import androidx.dynamicanimation.animation.SpringForce
-import tk.zwander.lockscreenwidgets.R
 import tk.zwander.common.util.dpAsPx
 import tk.zwander.common.util.vibrate
+import tk.zwander.lockscreenwidgets.R
 import kotlin.math.absoluteValue
 
 class ToolbarAnimHolder : LinearLayout {
@@ -22,7 +22,7 @@ class ToolbarAnimHolder : LinearLayout {
     constructor(context: Context, attributeSet: AttributeSet) : super(context, attributeSet)
 
     private val closedTranslation: Int
-        get() = findViewById<FrameLayout>(R.id.button_wrapper).height
+        get() = findViewById<FrameLayout>(R.id.button_wrapper)?.height ?: 0
     private val openedTranslation = -context.dpAsPx(16)
     private val threshold: Float
         get() = (openedTranslation + closedTranslation) / 2f
@@ -53,8 +53,8 @@ class ToolbarAnimHolder : LinearLayout {
     override fun onFinishInflate() {
         super.onFinishInflate()
 
-        findViewById<View>(R.id.open_close_toolbar).setOnTouchListener(touchListener)
-        findViewById<View>(R.id.button_wrapper).setOnTouchListener(touchListener)
+        findViewById<View>(R.id.open_close_toolbar)?.setOnTouchListener(touchListener)
+        findViewById<View>(R.id.button_wrapper)?.setOnTouchListener(touchListener)
     }
 
     private fun transition(isOpen: Boolean = this.isOpen) {
@@ -67,12 +67,12 @@ class ToolbarAnimHolder : LinearLayout {
                     currentlyTransitioning = false
                 }
             }.start()
-            findViewById<ImageView>(R.id.open_close_toolbar).animate()
-                .apply {
+            findViewById<ImageView>(R.id.open_close_toolbar)?.animate()
+                ?.apply {
                     cancel()
                 }
-                .rotation(if (isOpen) 0f else 180f)
-                .start()
+                ?.rotation(if (isOpen) 0f else 180f)
+                ?.start()
 
             this.isOpen = !isOpen
         }

@@ -15,7 +15,7 @@ class DrawerRecycler : NestedRecyclerView {
     constructor(context: Context, attrs: AttributeSet) : super(context, attrs)
 
     private val gestureDetector = GestureDetector(context, object : GestureDetector.SimpleOnGestureListener() {
-        override fun onSingleTapUp(e: MotionEvent?): Boolean {
+        override fun onSingleTapUp(e: MotionEvent): Boolean {
             return if (context.prefManager.closeOnEmptyTap) {
                 context.eventManager.sendEvent(Event.CloseDrawer)
                 true
@@ -24,7 +24,7 @@ class DrawerRecycler : NestedRecyclerView {
     })
 
     @SuppressLint("ClickableViewAccessibility")
-    override fun onTouchEvent(e: MotionEvent?): Boolean {
+    override fun onTouchEvent(e: MotionEvent): Boolean {
         return super.onTouchEvent(e) or gestureDetector.onTouchEvent(e)
     }
 }

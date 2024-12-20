@@ -14,6 +14,7 @@ composeintroslider = "a611e4f624"
 composeSpinkit = "1.0.4"
 constraintlayout = "2.2.0"
 coreKtx = "1.15.0"
+core-remoteviews = "1.1.0"
 coroutines = "1.10.0"
 gson = "2.11.0"
 hiddenapibypass = "4.3"
@@ -30,9 +31,6 @@ taskerpluginlibrary = "0.4.10"
 
 [libraries]
 accompanist-drawablepainter = { module = "com.google.accompanist:accompanist-drawablepainter", version.ref = "accompanist" }
-accompanist-pager = { module = "com.google.accompanist:accompanist-pager", version.ref = "accompanist" }
-accompanist-themeadapter-material = { module = "com.google.accompanist:accompanist-themeadapter-material", version.ref = "accompanist" }
-accompanist-themeadapter-material3 = { module = "com.google.accompanist:accompanist-themeadapter-material3", version.ref = "accompanist" }
 activity-compose = { module = "androidx.activity:activity-compose", version.ref = "activityCompose" }
 appcompat = { module = "androidx.appcompat:appcompat", version.ref = "appcompat" }
 atomicfu = { module = "org.jetbrains.kotlinx:atomicfu", version.ref = "atomicfu" }
@@ -49,6 +47,7 @@ compose-ui-tooling = { module = "androidx.compose.ui:ui-tooling" }
 composeIntroSlider = { module = "com.github.zacharee:ComposeIntroSlider", version.ref = "composeintroslider" }
 constraintlayout = { module = "androidx.constraintlayout:constraintlayout", version.ref = "constraintlayout" }
 core-ktx = { module = "androidx.core:core-ktx", version.ref = "coreKtx" }
+core-remoteviews = { module = "androidx.core:core-remoteviews", version.ref = "core-remoteviews" }
 gson = { module = "com.google.code.gson:gson", version.ref = "gson" }
 hiddenapibypass = { module = "org.lsposed.hiddenapibypass:hiddenapibypass", version.ref = "hiddenapibypass" }
 kotlin-stdlib = { module = "org.jetbrains.kotlin:kotlin-stdlib", version.ref = "kotlin" }

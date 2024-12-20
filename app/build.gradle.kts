@@ -8,7 +8,7 @@ plugins {
 }
 
 android {
-    compileSdk = 34
+    compileSdk = 35
 
     defaultConfig {
         namespace = "tk.zwander.lockscreenwidgets"
@@ -58,6 +58,7 @@ dependencies {
     implementation(libs.atomicfu)
 
     implementation(libs.core.ktx)
+    implementation(libs.core.remoteviews)
     implementation(libs.appcompat)
     implementation(libs.constraintlayout)
     implementation(libs.recyclerview)
@@ -86,9 +87,6 @@ dependencies {
     implementation(libs.lifecycle.runtime.ktx)
 
     implementation(libs.accompanist.drawablepainter)
-    implementation(libs.accompanist.pager)
-    implementation(libs.accompanist.themeadapter.material)
-    implementation(libs.accompanist.themeadapter.material3)
 
     implementation(libs.bugsnag.android)
     implementation(libs.taskerpluginlibrary)

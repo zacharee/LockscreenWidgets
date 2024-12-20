@@ -821,7 +821,7 @@ class PrefManager private constructor(context: Context) : ContextWrapper(context
     fun getFloat(key: String, def: Float): Float = prefs.getFloat(key, def)
     fun getInt(key: String, def: Int): Int = prefs.getInt(key, def)
     fun getBoolean(key: String, def: Boolean): Boolean = prefs.getBoolean(key, def)
-    fun getStringSet(key: String, def: Set<String>): Set<String> = prefs.getStringSet(key, def).toSet()
+    fun getStringSet(key: String, def: Set<String>): Set<String> = prefs.getStringSet(key, def)?.toSet() ?: def
 
     fun putString(key: String, value: String?) = prefs.edit(true) { putString(key, value) }
     fun putFloat(key: String, value: Float) = prefs.edit(true) { putFloat(key, value) }

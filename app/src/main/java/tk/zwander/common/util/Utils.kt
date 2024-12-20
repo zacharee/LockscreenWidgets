@@ -116,7 +116,7 @@ fun AppWidgetProviderInfo.createPersistablePreviewBitmap(context: Context): Stri
 @Suppress("DEPRECATION")
 val Context.defaultDisplayCompat: Display
     get() = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-        displayNoVerify
+        displayNoVerify ?: windowManager.defaultDisplay
     } else {
         windowManager.defaultDisplay
     }

@@ -30,8 +30,8 @@ class HandlerRegistry(setup: HandlerRegistry.() -> Unit) : SharedPreferences.OnS
         items[key]?.action?.invoke(key)
     }
 
-    override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences, key: String) {
-        handle(key)
+    override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences, key: String?) {
+        key?.let { handle(key) }
     }
 
     fun register(context: Context) {

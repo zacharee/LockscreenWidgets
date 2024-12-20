@@ -348,7 +348,7 @@ class DrawerDelegate private constructor(context: Context) :
                 animator.interpolator =
                     if (metThreshold) DecelerateInterpolator() else AccelerateInterpolator()
                 animator.addListener(object : AnimatorListenerAdapter() {
-                    override fun onAnimationEnd(animation: Animator?) {
+                    override fun onAnimationEnd(animation: Animator) {
                         if (!metThreshold) {
                             hideDrawer()
                         } else {
@@ -514,7 +514,7 @@ class DrawerDelegate private constructor(context: Context) :
                 drawer.root.alpha = it.animatedValue.toString().toFloat()
             }
             anim.addListener(object : AnimatorListenerAdapter() {
-                override fun onAnimationEnd(animation: Animator?) {
+                override fun onAnimationEnd(animation: Animator) {
                     drawer.root.handler?.postDelayed({
                         try {
                             wm.removeView(drawer.root)

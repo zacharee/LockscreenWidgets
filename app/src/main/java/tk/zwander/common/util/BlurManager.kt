@@ -29,14 +29,14 @@ class BlurManager(
 
     private var blurWrapper: BackgroundBlurDrawableCompatDelegate? = null
 
-    override fun onViewAttachedToWindow(v: View?) {
+    override fun onViewAttachedToWindow(v: View) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             windowManager.addCrossWindowBlurEnabledListener(crossBlurEnabledListener)
         }
         updateBlur()
     }
 
-    override fun onViewDetachedFromWindow(v: View?) {
+    override fun onViewDetachedFromWindow(v: View) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             windowManager.removeCrossWindowBlurEnabledListener(crossBlurEnabledListener)
         }
