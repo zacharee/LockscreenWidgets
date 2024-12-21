@@ -3,6 +3,7 @@ package tk.zwander.common.util
 import android.annotation.SuppressLint
 import android.content.Context
 import android.util.Log
+import com.bugsnag.android.BreadcrumbType
 import com.bugsnag.android.Bugsnag
 import java.io.BufferedWriter
 import java.io.File
@@ -81,7 +82,7 @@ class LogUtils private constructor(private val context: Context) {
             Log.e(DEBUG_LOG_TAG, fullMessage)
 
             synchronized(logFile) {
-                logFileHandle.write("\n\n$fullMessage")
+                logFileHandle.writeSafely("\n\n$fullMessage")
             }
         }
     }
@@ -94,7 +95,7 @@ class LogUtils private constructor(private val context: Context) {
 
         if (context.isDebug) {
             synchronized(logFile) {
-                logFileHandle.write("\n\n$fullMessage")
+                logFileHandle.writeSafely("\n\n$fullMessage")
             }
         }
     }
@@ -125,5 +126,13 @@ class LogUtils private constructor(private val context: Context) {
         return "${formatter.format(Date())}\n${message}${throwable?.let { 
             "\n${Log.getStackTraceString(it)}"
         } ?: ""}"
+    }
+
+    private fun BufferedWriter.writeSafely(string: String) {
+        try {
+            write(string)
+        } catch (e: Exception) {
+            Bugsnag.leaveBreadcrumb("Unable to write to log file.", mapOf("error" to e), BreadcrumbType.ERROR)
+        }
     }
 }
