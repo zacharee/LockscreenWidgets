@@ -260,6 +260,7 @@ class NotificationListener : NotificationListenerService(), EventObserver, Corou
             return try {
                 super.onTransact(code, data, reply, flags)
             } catch (e: Throwable) {
+                Bugsnag.leaveBreadcrumb("Unable to receive notification update", mapOf("error" to e), BreadcrumbType.ERROR)
                 false
             }
         }
@@ -271,6 +272,7 @@ class NotificationListener : NotificationListenerService(), EventObserver, Corou
             return try {
                 wrapper.onTransact(code, data, reply, flags)
             } catch (e: Throwable) {
+                Bugsnag.leaveBreadcrumb("Unable to receive notification update", mapOf("error" to e), BreadcrumbType.ERROR)
                 false
             }
         }
