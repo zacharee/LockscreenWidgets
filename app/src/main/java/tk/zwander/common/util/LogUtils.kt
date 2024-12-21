@@ -91,7 +91,7 @@ class LogUtils private constructor(private val context: Context) {
         val fullMessage = generateFullMessage(message, throwable)
 
         Log.e(NORMAL_LOG_TAG, fullMessage)
-        Bugsnag.leaveBreadcrumb(message)
+        Bugsnag.leaveBreadcrumb(message, throwable?.let { mapOf("error" to throwable) }?: mapOf(), BreadcrumbType.ERROR)
 
         if (context.isDebug) {
             synchronized(logFile) {

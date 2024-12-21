@@ -206,6 +206,9 @@ private fun icon(
         } catch (e: NullPointerException) {
             context.logUtils.normalLog("Unable to load icon for ${info.appInfo.appInfo.packageName}.", e)
             null
+        } catch (e: OutOfMemoryError) {
+            context.logUtils.normalLog("Unable to load icon for ${info.appInfo.appInfo.packageName}", e)
+            null
         }
     }
 
