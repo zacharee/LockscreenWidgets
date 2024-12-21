@@ -7,6 +7,7 @@ object BrokenAppsRegistry {
         "com.hihonor.calendar",
         "com.huawei.android.totemweather",
         "com.hihonor.android.totemweather",
+        "com.huawei.android.totemweatherwidget",
     )
     private val brokenProviders = arrayOf(
         "com.android.calendar.mycalendar",
