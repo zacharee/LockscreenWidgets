@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.app.ActivityOptions
 import android.appwidget.AppWidgetManager
 import android.appwidget.AppWidgetProviderInfo
+import android.content.ActivityNotFoundException
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
@@ -286,11 +287,16 @@ abstract class BaseBindWidgetActivity : BaseActivity() {
      * @param provider the current widget's provider
      */
     protected fun getWidgetPermission(id: Int, provider: ComponentName) {
-        val intent = Intent(AppWidgetManager.ACTION_APPWIDGET_BIND)
-        intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, id)
-        intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_PROVIDER, provider)
+        try {
+            val intent = Intent(AppWidgetManager.ACTION_APPWIDGET_BIND)
+            intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, id)
+            intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_PROVIDER, provider)
 
-        permRequest.launch(intent)
+            permRequest.launch(intent)
+        } catch (e: ActivityNotFoundException) {
+            logUtils.normalLog("Unable to launch widget permission request", e)
+            widgetHost.deleteAppWidgetId(id)
+        }
     }
 
     /**
