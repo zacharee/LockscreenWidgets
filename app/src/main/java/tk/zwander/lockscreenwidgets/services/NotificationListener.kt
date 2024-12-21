@@ -18,6 +18,7 @@ import android.provider.Settings
 import android.service.notification.INotificationListener
 import android.service.notification.NotificationListenerService
 import android.service.notification.StatusBarNotification
+import com.bugsnag.android.BreadcrumbType
 import com.bugsnag.android.Bugsnag
 import kotlinx.atomicfu.atomic
 import kotlinx.coroutines.CoroutineScope
@@ -177,7 +178,7 @@ class NotificationListener : NotificationListenerService(), EventObserver, Corou
                     logUtils.normalLog("Error sending notification count update", e)
                 } catch (e: Throwable) {
                     logUtils.normalLog("Error sending notification count update", e)
-                    Bugsnag.notify(e)
+                    Bugsnag.leaveBreadcrumb("Error sending notification count update", mapOf("error" to e), BreadcrumbType.ERROR)
                 }
             }
         }
