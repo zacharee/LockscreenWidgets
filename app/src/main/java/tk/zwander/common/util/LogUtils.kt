@@ -115,6 +115,7 @@ class LogUtils private constructor(private val context: Context) {
                     }
                 } catch (e: Exception) {
                     Log.e(NORMAL_LOG_TAG, "Failed to export log.", e)
+                    Bugsnag.leaveBreadcrumb("Unable to export log.", mapOf("error" to e), BreadcrumbType.ERROR)
                 }
             }
         }
