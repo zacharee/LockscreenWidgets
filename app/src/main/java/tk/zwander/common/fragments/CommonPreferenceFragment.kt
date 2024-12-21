@@ -16,6 +16,8 @@ import androidx.preference.PreferenceGroupAdapter
 import androidx.preference.PreferenceScreen
 import androidx.preference.PreferenceViewHolder
 import androidx.recyclerview.widget.RecyclerView
+import com.bugsnag.android.BreadcrumbType
+import com.bugsnag.android.Bugsnag
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import tk.zwander.common.util.HandlerRegistry
 import tk.zwander.common.util.backup.BackupRestoreManager
@@ -72,6 +74,15 @@ abstract class CommonPreferenceFragment : PreferenceFragmentCompat() {
                         .setPositiveButton(android.R.string.ok, null)
                         .show()
                     logUtils.normalLog("Unable to restore widgets", e)
+                    Bugsnag.leaveBreadcrumb("Unable to restore widgets", mapOf("error" to e), BreadcrumbType.ERROR)
+                } catch (e: OutOfMemoryError) {
+                    MaterialAlertDialogBuilder(requireContext())
+                        .setTitle(R.string.error)
+                        .setMessage(R.string.unable_to_restore_widgets)
+                        .setPositiveButton(android.R.string.ok, null)
+                        .show()
+                    logUtils.normalLog("Unable to restore widgets", e)
+                    Bugsnag.leaveBreadcrumb("Unable to restore widgets", mapOf("error" to e), BreadcrumbType.ERROR)
                 }
             }
         }
