@@ -2,6 +2,7 @@
 accompanist = "0.37.0"
 activityCompose = "1.9.3"
 androidGradlePlugin = "8.7.3"
+shizuku = "13.1.5"
 appcompat = "1.7.0"
 atomicfu = "0.26.1"
 bugsnagAndroid = "6.10.0"
@@ -62,6 +63,8 @@ preference-ktx = { module = "androidx.preference:preference-ktx", version.ref = 
 recyclerview = { module = "androidx.recyclerview:recyclerview", version.ref = "recyclerview" }
 relinker = { module = "com.getkeepsafe.relinker:relinker", version.ref = "relinker" }
 seekBarPreference = { module = "com.github.zacharee:SeekBarPreference", version.ref = "seekbarpreference" }
+shizuku-api = { module = "dev.rikka.shizuku:api", version.ref = "shizuku" }
+shizuku-provider = { module = "dev.rikka.shizuku:provider", version.ref = "shizuku" }
 spannedGridLayoutManager = { module = "com.github.zacharee:SpannedGridLayoutManager", version.ref = "spannedgridlayoutmanager" }
 taskerpluginlibrary = { module = "com.joaomgcd:taskerpluginlibrary", version.ref = "taskerpluginlibrary" }
 

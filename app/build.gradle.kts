@@ -14,7 +14,7 @@ android {
         namespace = "tk.zwander.lockscreenwidgets"
         applicationId = "tk.zwander.lockscreenwidgets"
         minSdk = 22
-        targetSdk = 34
+        targetSdk = 35
         versionCode = 120
         versionName = "2.15.8"
 
@@ -25,6 +25,7 @@ android {
         viewBinding = true
         compose = true
         buildConfig = true
+        aidl = true
     }
 
     buildTypes {
@@ -93,4 +94,7 @@ dependencies {
 
     implementation(libs.relinker)
     implementation(libs.compose.spinkit)
+
+    implementation(libs.shizuku.api)
+    implementation(libs.shizuku.provider)
 }

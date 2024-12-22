@@ -27,7 +27,7 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" tools:node="remove" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" tools:node="remove" />
 
-    <uses-sdk tools:overrideLibrary="com.example.jetpack_loading" />
+    <uses-sdk tools:overrideLibrary="com.example.jetpack_loading,rikka.shizuku.provider,rikka.shizuku.api,rikka.shizuku.shared,rikka.shizuku.aidl" />
 
     <application
         android:allowBackup="true"
@@ -235,7 +235,8 @@
             android:label="@string/frame_enabled"
             android:icon="@drawable/ic_baseline_power_settings_new_24"
             android:permission="android.permission.BIND_QUICK_SETTINGS_TILE"
-            android:exported="true">
+            android:exported="true"
+            tools:targetApi="n">
             <intent-filter>
                 <action android:name="android.service.quicksettings.action.QS_TILE" />
             </intent-filter>
@@ -245,7 +246,8 @@
             android:label="@string/drawer_enabled"
             android:icon="@drawable/ic_baseline_power_settings_new_24"
             android:permission="android.permission.BIND_QUICK_SETTINGS_TILE"
-            android:exported="true">
+            android:exported="true"
+            tools:targetApi="n">
             <intent-filter>
                 <action android:name="android.service.quicksettings.action.QS_TILE" />
             </intent-filter>
@@ -255,7 +257,8 @@
             android:label="@string/tile_show_in_notification_center"
             android:icon="@drawable/ic_baseline_notifications_active_24"
             android:permission="android.permission.BIND_QUICK_SETTINGS_TILE"
-            android:exported="true">
+            android:exported="true"
+            tools:targetApi="n">
             <intent-filter>
                 <action android:name="android.service.quicksettings.action.QS_TILE" />
             </intent-filter>
@@ -265,7 +268,8 @@
             android:label="@string/app_name"
             android:icon="@drawable/ic_baseline_launch_24"
             android:permission="android.permission.BIND_QUICK_SETTINGS_TILE"
-            android:exported="true">
+            android:exported="true"
+            tools:targetApi="n">
             <intent-filter>
                 <action android:name="android.service.quicksettings.action.QS_TILE" />
             </intent-filter>
@@ -279,7 +283,8 @@
             android:label="@string/app_name"
             android:icon="@drawable/ic_baseline_launch_24"
             android:permission="android.permission.BIND_QUICK_SETTINGS_TILE"
-            android:exported="true">
+            android:exported="true"
+            tools:targetApi="n">
             <intent-filter>
                 <action android:name="android.service.quicksettings.action.QS_TILE" />
             </intent-filter>
@@ -293,7 +298,8 @@
             android:label="@string/app_name"
             android:icon="@drawable/ic_baseline_launch_24"
             android:permission="android.permission.BIND_QUICK_SETTINGS_TILE"
-            android:exported="true">
+            android:exported="true"
+            tools:targetApi="n">
             <intent-filter>
                 <action android:name="android.service.quicksettings.action.QS_TILE" />
             </intent-filter>
@@ -307,7 +313,8 @@
             android:label="@string/app_name"
             android:icon="@drawable/ic_baseline_launch_24"
             android:permission="android.permission.BIND_QUICK_SETTINGS_TILE"
-            android:exported="true">
+            android:exported="true"
+            tools:targetApi="n">
             <intent-filter>
                 <action android:name="android.service.quicksettings.action.QS_TILE" />
             </intent-filter>
@@ -321,7 +328,8 @@
             android:label="@string/app_name"
             android:icon="@drawable/ic_baseline_launch_24"
             android:permission="android.permission.BIND_QUICK_SETTINGS_TILE"
-            android:exported="true">
+            android:exported="true"
+            tools:targetApi="n">
             <intent-filter>
                 <action android:name="android.service.quicksettings.action.QS_TILE" />
             </intent-filter>
@@ -359,6 +367,14 @@
                 <action android:name="${applicationId}.action.OPEN_DRAWER" />
             </intent-filter>
         </receiver>
+
+        <provider
+            android:name="rikka.shizuku.ShizukuProvider"
+            android:authorities="${applicationId}.shizuku"
+            android:multiprocess="false"
+            android:enabled="true"
+            android:exported="true"
+            android:permission="android.permission.INTERACT_ACROSS_USERS_FULL" />
 
         <meta-data android:name="google_analytics_adid_collection_enabled" android:value="false" />
         <meta-data

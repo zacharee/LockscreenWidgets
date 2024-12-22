@@ -229,8 +229,8 @@
     <string name="in_notification_center">في مركز الاشعارات</string>
     <string name="in_locked_notification_center">في مركز الإشعارات المقفل</string>
     <string name="reset_frame_position_size_confirm_message">هل أنت متأكد من أنك تريد إعادة تعيين الموقع والحجم؟</string>
-    <string name="install_app_ops">تثبيت تطبيقات</string>
-    <string name="open_app_ops">فتح تطبيقات</string>
+    <string name="install_shizuku">تثبيت تطبيقات</string>
+    <string name="open_shizuku">فتح تطبيقات</string>
     <string name="grant_read_media_images">منح قراءة الوسائط والصور</string>
     <string name="failed_to_add_shortcut">غير قادر على إضافة الاختصار.</string>
     <string name="directly_check_for_activity">التحقق مباشرة من النشاط</string>

@@ -229,8 +229,8 @@
     <string name="in_notification_center">In Notification Center</string>
     <string name="in_locked_notification_center">In Locked Notification Center</string>
     <string name="reset_frame_position_size_confirm_message">Jesteś pewny/a, że chcesz zresetować pozycję i rozmiar?</string>
-    <string name="install_app_ops">Install App Ops</string>
-    <string name="open_app_ops">Open App Ops</string>
+    <string name="install_shizuku">Install App Ops</string>
+    <string name="open_shizuku">Open App Ops</string>
     <string name="grant_read_media_images">Przydziel dostęp do zdjęć i filmów</string>
     <string name="failed_to_add_shortcut">Nie można dodać skrótu.</string>
     <string name="directly_check_for_activity">Directly Check for Activity</string>
