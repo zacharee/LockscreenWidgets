@@ -1,6 +1,7 @@
 package tk.zwander.common.compose.add
 
 import android.content.pm.PackageManager
+import android.content.res.Resources
 import android.graphics.drawable.Drawable
 import android.os.Build
 import androidx.compose.foundation.Image
@@ -196,19 +197,30 @@ private fun icon(
     }
 
     LaunchedEffect(key) {
-        icon = try {
-            withContext(Dispatchers.IO) {
+        icon = withContext(Dispatchers.IO) {
+            try {
                 info.icon?.loadDrawable(context)
+            } catch (e: PackageManager.NameNotFoundException) {
+                context.logUtils.normalLog(
+                    "Unable to load icon for ${info.appInfo.appInfo.packageName}.",
+                    e,
+                )
+                null
+            } catch (e: NullPointerException) {
+                context.logUtils.normalLog(
+                    "Unable to load icon for ${info.appInfo.appInfo.packageName}.",
+                    e,
+                )
+                null
+            } catch (e: OutOfMemoryError) {
+                context.logUtils.normalLog(
+                    "Unable to load icon for ${info.appInfo.appInfo.packageName}",
+                    e,
+                )
+                null
+            } catch (e: Resources.NotFoundException) {
+                info.appInfo.appInfo.loadIcon(context.packageManager)
             }
-        } catch (e: PackageManager.NameNotFoundException) {
-            context.logUtils.normalLog("Unable to load icon for ${info.appInfo.appInfo.packageName}.", e)
-            null
-        } catch (e: NullPointerException) {
-            context.logUtils.normalLog("Unable to load icon for ${info.appInfo.appInfo.packageName}.", e)
-            null
-        } catch (e: OutOfMemoryError) {
-            context.logUtils.normalLog("Unable to load icon for ${info.appInfo.appInfo.packageName}", e)
-            null
         }
     }
 

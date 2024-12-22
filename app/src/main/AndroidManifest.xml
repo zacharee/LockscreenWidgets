@@ -51,12 +51,14 @@
             android:label="@string/add_widget"
             android:excludeFromRecents="true"
             android:launchMode="singleTop"
+            android:theme="@style/AppTheme.NoActionBar"
             />
         <activity android:name="tk.zwander.common.activities.add.AddTileWidgetActivity"
             android:exported="true"
             android:label="@string/add_widget"
             android:excludeFromRecents="true"
             android:launchMode="singleTop"
+            android:theme="@style/AppTheme.NoActionBar"
             />
         <activity android:name="tk.zwander.common.activities.OnboardingActivity"
             android:exported="false"
@@ -97,6 +99,7 @@
             android:label="@string/add_widget"
             android:excludeFromRecents="true"
             android:launchMode="singleTop"
+            android:theme="@style/AppTheme.NoActionBar"
             />
         <activity android:name="tk.zwander.widgetdrawer.activities.TriggerActivity"
             android:label="@string/open_drawer"
