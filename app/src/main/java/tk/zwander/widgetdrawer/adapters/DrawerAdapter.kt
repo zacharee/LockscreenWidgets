@@ -27,8 +27,6 @@ class DrawerAdapter(
         get() = context.prefManager.drawerColCount
     override val rowCount: Int
         get() = (context.screenSize.y / context.resources.getDimensionPixelSize(R.dimen.drawer_row_height)) - 5
-    override val minColSpan: Int
-        get() = 1
     override val minRowSpan: Int
         get() = 5
     override val rowSpanForAddButton: Int

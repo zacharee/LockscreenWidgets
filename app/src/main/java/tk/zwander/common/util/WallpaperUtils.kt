@@ -17,7 +17,6 @@ import android.os.Handler
 import android.os.Looper
 import android.os.ParcelFileDescriptor
 import android.os.ServiceManager
-import android.util.Log
 import androidx.annotation.RequiresApi
 
 val Context.wallpaperUtils: WallpaperUtils

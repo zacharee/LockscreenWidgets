@@ -3,7 +3,7 @@ package tk.zwander.common.util
 import android.appwidget.AppWidgetProviderInfo
 
 object BrokenAppsRegistry {
-    val brokenApps = arrayOf(
+    private val brokenApps = arrayOf(
         "com.hihonor.calendar",
         "com.huawei.android.totemweather",
         "com.hihonor.android.totemweather",

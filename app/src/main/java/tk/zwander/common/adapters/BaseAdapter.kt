@@ -85,7 +85,7 @@ import tk.zwander.lockscreenwidgets.databinding.WidgetPageHolderBinding
 import java.util.Collections
 import kotlin.math.min
 
-@Suppress("LeakingThis", "MemberVisibilityCanBePrivate")
+@Suppress("LeakingThis")
 abstract class BaseAdapter(
     protected val context: Context,
     protected val rootView: View,
@@ -149,7 +149,7 @@ abstract class BaseAdapter(
 
     protected abstract val colCount: Int
     protected abstract val rowCount: Int
-    protected abstract val minColSpan: Int
+    protected open val minColSpan: Int = 1
     protected abstract val minRowSpan: Int
     protected abstract val rowSpanForAddButton: Int
     protected abstract var currentWidgets: Collection<WidgetData>

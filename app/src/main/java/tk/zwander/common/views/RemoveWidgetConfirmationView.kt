@@ -15,7 +15,7 @@ import tk.zwander.common.util.eventManager
  * the widget, and passes the result back to the delegate.
  */
 class RemoveWidgetConfirmationView(context: Context, attrs: AttributeSet) : MaterialCardView(context, attrs) {
-    val binding by lazy { RemoveWidgetConfirmationLayoutBinding.bind(this) }
+    private val binding by lazy { RemoveWidgetConfirmationLayoutBinding.bind(this) }
 
     private var item: WidgetData? = null
 

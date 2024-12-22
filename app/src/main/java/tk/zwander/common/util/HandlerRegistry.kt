@@ -44,7 +44,7 @@ class HandlerRegistry(setup: HandlerRegistry.() -> Unit) : SharedPreferences.OnS
 
     data class ItemHandler(
         val keys: List<String>,
-        val action: (String) -> Unit
+        val action: (String) -> Unit,
     ) {
         constructor(key: String, action: (String) -> Unit) : this(listOf(key), action)
     }

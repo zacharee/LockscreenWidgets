@@ -150,8 +150,8 @@ class FrameSizeAndPosition private constructor(context: Context) : ContextWrappe
                 }
             }
 
-            object Portrait : LockNormal("portrait")
-            object Landscape : LockNormal("landscape")
+            data object Portrait : LockNormal("portrait")
+            data object Landscape : LockNormal("landscape")
         }
 
         sealed class LockNotification(key: String) : FrameType("lock_notification_$key") {
@@ -161,8 +161,8 @@ class FrameSizeAndPosition private constructor(context: Context) : ContextWrappe
                 }
             }
 
-            object Portrait : LockNotification("portrait")
-            object Landscape : LockNotification("landscape")
+            data object Portrait : LockNotification("portrait")
+            data object Landscape : LockNotification("landscape")
         }
 
         sealed class NotificationNormal(key: String) : FrameType("notification_normal_$key") {
@@ -172,8 +172,8 @@ class FrameSizeAndPosition private constructor(context: Context) : ContextWrappe
                 }
             }
 
-            object Portrait : NotificationNormal("portrait")
-            object Landscape : NotificationNormal("landscape")
+            data object Portrait : NotificationNormal("portrait")
+            data object Landscape : NotificationNormal("landscape")
         }
 
         sealed class Preview(key: String) : FrameType("preview_$key") {
@@ -183,8 +183,8 @@ class FrameSizeAndPosition private constructor(context: Context) : ContextWrappe
                 }
             }
 
-            object Portrait : Preview("portrait")
-            object Landscape : Preview("landscape")
+            data object Portrait : Preview("portrait")
+            data object Landscape : Preview("landscape")
         }
     }
 }

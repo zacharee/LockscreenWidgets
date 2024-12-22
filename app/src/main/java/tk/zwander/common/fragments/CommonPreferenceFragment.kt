@@ -37,7 +37,7 @@ abstract class CommonPreferenceFragment : PreferenceFragmentCompat() {
 
     protected abstract val blurOptionKeys: Array<String>
 
-    protected val showBlurOptions by lazy {
+    private val showBlurOptions by lazy {
         (requireContext().isOneUI && Build.VERSION.SDK_INT < Build.VERSION_CODES.S) || (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && context?.windowManager?.isCrossWindowBlurEnabled == true)
     }
 
