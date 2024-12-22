@@ -34,8 +34,6 @@ class IDListProvider : AppWidgetProvider() {
         @Suppress("DEPRECATION")
         view.setRemoteAdapter(R.id.id_list, Intent(context, IDWidgetService::class.java))
 
-        appWidgetIds.forEach {
-            appWidgetManager.updateAppWidget(it, view)
-        }
+        appWidgetManager.updateAppWidget(appWidgetIds, view)
     }
 }
