@@ -220,7 +220,7 @@ private fun icon(
                 null
             } catch (e: Resources.NotFoundException) {
                 info.appInfo.appInfo.loadIcon(context.packageManager)
-            }
+            } ?: info.appInfo.appInfo.loadIcon(context.packageManager)
         }
     }
 
