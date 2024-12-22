@@ -17,7 +17,7 @@ import android.os.Handler
 import android.os.Looper
 import android.os.ParcelFileDescriptor
 import android.os.ServiceManager
-import android.os.UserHandle
+import android.util.Log
 import androidx.annotation.RequiresApi
 
 val Context.wallpaperUtils: WallpaperUtils
@@ -111,7 +111,7 @@ class WallpaperUtils private constructor(context: Context) : ContextWrapper(cont
                 callback,
                 flag,
                 bundle,
-                UserHandle.getCallingUserId()
+                userId,
             )
         }
 
@@ -125,7 +125,7 @@ class WallpaperUtils private constructor(context: Context) : ContextWrapper(cont
                         callback,
                         flag,
                         bundle,
-                        UserHandle.getCallingUserId(),
+                        userId,
                         true,
                     )
                 } else {
@@ -137,7 +137,7 @@ class WallpaperUtils private constructor(context: Context) : ContextWrapper(cont
                     ).invoke(
                         iWallpaper,
                         packageName, attributionTag, callback,
-                        flag, bundle, UserHandle.getCallingUserId(),
+                        flag, bundle, userId,
                     ) as? ParcelFileDescriptor
                 }
             } catch (e: NoSuchMethodError) {
@@ -151,7 +151,7 @@ class WallpaperUtils private constructor(context: Context) : ContextWrapper(cont
         //always work. Thus the try-catch.
         return try {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                withFeature()
+                withFeature() ?: old()
             } else {
                 old()
             }
