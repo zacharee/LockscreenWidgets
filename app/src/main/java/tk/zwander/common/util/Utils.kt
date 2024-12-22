@@ -106,7 +106,7 @@ val Context.safeApplicationContext: Context
     get() = if (this is Application) this else applicationContext
 
 fun AppWidgetProviderInfo.loadPreviewOrIcon(context: Context, density: Int = 0, maxSize: Dp = 128.dp): Bitmap? {
-    return with (context) { (loadPreviewImage(context, density) ?: loadIcon(context, density))?.toSafeBitmap(maxSize = maxSize) }
+    return (loadPreviewImage(context, density) ?: loadIcon(context, density))?.toSafeBitmap(context.density, maxSize = maxSize)
 }
 
 fun AppWidgetProviderInfo.createPersistablePreviewBitmap(context: Context): String? {

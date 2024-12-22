@@ -31,6 +31,7 @@ import tk.zwander.common.util.FrameSizeAndPosition
 import tk.zwander.common.util.appWidgetManager
 import tk.zwander.common.util.componentNameCompat
 import tk.zwander.common.util.createPersistablePreviewBitmap
+import tk.zwander.common.util.density
 import tk.zwander.common.util.frameSizeAndPosition
 import tk.zwander.common.util.getRemoteDrawable
 import tk.zwander.common.util.getSamsungConfigureComponent
@@ -95,7 +96,7 @@ abstract class BaseBindWidgetActivity : BaseActivity() {
                                 data.getParcelableExtra<Intent.ShortcutIconResource?>(Intent.EXTRA_SHORTCUT_ICON_RESOURCE)
                             val iconBmp =
                                 data.getParcelableExtra(Intent.EXTRA_SHORTCUT_ICON) ?: try {
-                                    iconRes?.let { getRemoteDrawable(iconRes.packageName, iconRes) }?.toSafeBitmap(maxSize = 128.dp)
+                                    iconRes?.let { getRemoteDrawable(iconRes.packageName, iconRes) }?.toSafeBitmap(density, maxSize = 128.dp)
                                 } catch (e: PackageManager.NameNotFoundException) {
                                     null
                                 }
@@ -126,7 +127,7 @@ abstract class BaseBindWidgetActivity : BaseActivity() {
                                 ?.toString() ?: "Unknown"
                             val icon = pinItemRequest.shortcutInfo?.icon
                                 ?.loadDrawable(this)
-                                ?.toSafeBitmap(maxSize = 128.dp)
+                                ?.toSafeBitmap(density, maxSize = 128.dp)
 
                             val intent = pinItemRequest.shortcutInfo?.intent ?: run {
                                 val extras = pinItemRequest.shortcutInfo?.extras ?: Bundle()

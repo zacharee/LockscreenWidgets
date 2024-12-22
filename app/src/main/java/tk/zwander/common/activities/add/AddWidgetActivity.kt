@@ -13,6 +13,7 @@ import tk.zwander.common.activities.DismissOrUnlockActivity
 import tk.zwander.common.compose.add.AddWidgetLayout
 import tk.zwander.common.data.WidgetData
 import tk.zwander.common.data.WidgetSizeData
+import tk.zwander.common.util.density
 import tk.zwander.common.util.shortcutIdManager
 import tk.zwander.common.util.toSafeBitmap
 import tk.zwander.lockscreenwidgets.data.list.LauncherShortcutListInfo
@@ -50,7 +51,7 @@ abstract class AddWidgetActivity : BaseBindWidgetActivity(), CoroutineScope by M
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N_MR1) {
                             val shortcut = WidgetData.shortcut(
                                 shortcutIdManager.allocateShortcutId(),
-                                it.name, it.icon?.loadDrawable(this)?.toSafeBitmap(maxSize = 128.dp),
+                                it.name, it.icon?.loadDrawable(this)?.toSafeBitmap(density, maxSize = 128.dp),
                                 null, it.itemInfo.intent,
                                 WidgetSizeData(1, 1)
                             )

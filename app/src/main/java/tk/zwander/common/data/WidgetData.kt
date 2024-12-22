@@ -9,6 +9,7 @@ import android.os.Parcelable
 import androidx.compose.ui.unit.dp
 import kotlinx.parcelize.Parcelize
 import tk.zwander.common.util.base64ToBitmap
+import tk.zwander.common.util.density
 import tk.zwander.common.util.getRemoteDrawable
 import tk.zwander.common.util.toBase64
 import tk.zwander.common.util.toSafeBitmap
@@ -84,18 +85,6 @@ data class WidgetData(
     val widgetProviderComponent: ComponentName?
         get() = widgetProvider?.let { ComponentName.unflattenFromString(it) }
 
-    context(Context)
-    @Suppress("DEPRECATION")
-    val iconBitmap: Bitmap?
-        get() = icon?.base64ToBitmap() ?: iconRes?.run {
-            try {
-                getRemoteDrawable(this.packageName, this)
-                    ?.toSafeBitmap(maxSize = 128.dp)
-            } catch (e: PackageManager.NameNotFoundException) {
-                return null
-            }
-        }
-
     val safeSize: WidgetSizeData
         get() = size ?: WidgetSizeData(1, 1)
 
@@ -110,6 +99,17 @@ data class WidgetData(
             Objects.hash(id, safeType)
         } else {
             Objects.hash(id, safeType, widgetProviderComponent)
+        }
+    }
+
+    @Suppress("DEPRECATION")
+    fun getIconBitmap(context: Context): Bitmap? {
+        return icon?.base64ToBitmap() ?: iconRes?.run {
+            try {
+                context.getRemoteDrawable(this.packageName, this).toSafeBitmap(context.density, maxSize = 128.dp)
+            } catch (e: PackageManager.NameNotFoundException) {
+                null
+            }
         }
     }
 }

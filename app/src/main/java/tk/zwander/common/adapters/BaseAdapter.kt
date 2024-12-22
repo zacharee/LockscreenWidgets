@@ -598,7 +598,7 @@ abstract class BaseAdapter(
                 }
             } else {
                 binding.widgetReconfigure.isVisible = true
-                with(context) { binding.widgetPreview.setImageBitmap(data.iconBitmap) }
+                binding.widgetPreview.setImageBitmap(data.getIconBitmap(context))
                 binding.widgetLabel.text = data.label
             }
         }
@@ -610,7 +610,7 @@ abstract class BaseAdapter(
             binding.openWidgetConfig.isVisible = false
 
             val shortcutView = FrameShortcutViewBinding.inflate(baseLayoutInflater)
-            val icon = with(context) { data.iconBitmap }
+            val icon = data.getIconBitmap(context)
 
             shortcutView.shortcutRoot.setOnClickListener {
                 data.shortcutIntent?.apply {

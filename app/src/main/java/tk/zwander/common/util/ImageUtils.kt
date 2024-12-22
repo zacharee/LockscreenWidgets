@@ -10,6 +10,7 @@ import android.graphics.Canvas
 import android.graphics.Paint
 import android.graphics.drawable.Drawable
 import android.util.Base64
+import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.core.content.res.ResourcesCompat
@@ -21,7 +22,7 @@ import java.io.IOException
 fun Context.getRemoteDrawable(
     packageName: String,
     resource: Intent.ShortcutIconResource?,
-): Drawable? {
+): Drawable {
     val appInfo = packageManager.getApplicationInfoInAnyState(packageName)
     val remRes = packageManager.getResourcesForApplication(appInfo)
 
@@ -43,7 +44,7 @@ fun Context.getRemoteDrawable(
     resourceId: Int,
     remRes: Resources,
     defaultGetter: () -> Drawable = { packageManager.getApplicationIcon(packageName) }
-): Drawable? {
+): Drawable {
     val drawable = when (resourceId) {
         0 -> defaultGetter()
         else -> {
@@ -101,9 +102,7 @@ fun String?.base64ToBitmap(): Bitmap? {
     return base64ToByteArray()?.toBitmap()
 }
 
-context(Context)
-fun Drawable.toSafeBitmap(config: Bitmap.Config? = null, maxSize: Dp = 512.dp): Bitmap {
-    val density = density
+fun Drawable.toSafeBitmap(density: Density, config: Bitmap.Config? = null, maxSize: Dp = 512.dp): Bitmap {
     val maxSizePixels = with (density) { maxSize.toPx() }.toInt()
 
     return toBitmap(maxWidth = maxSizePixels, maxHeight = maxSizePixels, config = config)
@@ -172,7 +171,7 @@ fun Bitmap.cropBitmapTransparency(): Bitmap {
     )
 }
 
-fun String.textAsBitmap(textSize: Float, textColor: Int): Bitmap? {
+fun String.textAsBitmap(textSize: Float, textColor: Int): Bitmap {
     val paint = Paint(Paint.ANTI_ALIAS_FLAG)
     paint.textSize = textSize
     paint.color = textColor
