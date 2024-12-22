@@ -12,7 +12,7 @@ import tk.zwander.lockscreenwidgets.services.IDWidgetService
 
 /**
  * A widget-form alternative to the debug ID overlay. This is a keyguard-only widget that can be added
- * to Lockscreen Widgets to view the ID list without distrupting the widget frame.
+ * to Lockscreen Widgets to view the ID list without disrupting the widget frame.
  */
 class IDListProvider : AppWidgetProvider() {
     companion object {
