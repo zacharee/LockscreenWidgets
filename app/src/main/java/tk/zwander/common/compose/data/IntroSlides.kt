@@ -267,7 +267,7 @@ fun rememberIntroSlides(
                     OutlinedButton(
                         onClick = {
                             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                                if (shizukuInstalled && shizukuRunning) {
+                                if (shizukuRunning) {
                                     scope.launch {
                                         with(ShizukuUtils) {
                                             context.runShizukuCommand {

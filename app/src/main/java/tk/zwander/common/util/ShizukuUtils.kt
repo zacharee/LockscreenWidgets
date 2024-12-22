@@ -99,10 +99,8 @@ object ShizukuUtils {
         coroutineContext: CoroutineContext = EmptyCoroutineContext,
         block: IShizukuService.() -> Unit,
     ): ShizukuCommandResult = coroutineScope {
-        val shizukuPermission = Shizuku.pingBinder() && Shizuku.checkSelfPermission() == PackageManager.PERMISSION_GRANTED
-
         if (isShizukuRunning) {
-            if (shizukuPermission) {
+            if (Shizuku.checkSelfPermission() == PackageManager.PERMISSION_GRANTED) {
                 app.postShizukuCommand(coroutineContext, block)
                 ShizukuCommandResult.POSTED
             } else {
@@ -130,9 +128,7 @@ object ShizukuUtils {
                 }
             }
         } else {
-            val installed = isShizukuInstalled
-
-            if (installed) {
+            if (isShizukuInstalled) {
                 ShizukuCommandResult.INSTALLED_NOT_RUNNING
             } else {
                 ShizukuCommandResult.NOT_INSTALLED
