@@ -26,27 +26,6 @@ import kotlin.coroutines.suspendCoroutine
 
 object ShizukuUtils {
     @Composable
-    fun rememberHasPermissionAsState(): State<Boolean> {
-        val hasPermission = remember {
-            mutableStateOf(Shizuku.pingBinder() && Shizuku.checkSelfPermission() == PackageManager.PERMISSION_GRANTED)
-        }
-
-        DisposableEffect(null) {
-            val listener = Shizuku.OnRequestPermissionResultListener { _, grantResult ->
-                hasPermission.value = grantResult == PackageManager.PERMISSION_GRANTED
-            }
-
-            Shizuku.addRequestPermissionResultListener(listener)
-
-            onDispose {
-                Shizuku.removeRequestPermissionResultListener(listener)
-            }
-        }
-
-        return hasPermission
-    }
-
-    @Composable
     fun rememberShizukuInstallStateAsState(): State<Boolean> {
         val context = LocalContext.current
 
