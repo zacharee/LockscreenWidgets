@@ -59,13 +59,16 @@ class BlurManager(
         val shouldBlur = shouldBlur()
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            if (blurWrapper == null
-                && blurAmount > 0
+            if (blurAmount > 0
                 && shouldBlur
                 && targetView.isAttachedToWindow
                 && windowManager.isCrossWindowBlurEnabled
             ) {
-                blurWrapper = BackgroundBlurDrawableCompatDelegate(targetView.rootView.viewRootImpl)
+                if (blurWrapper == null) {
+                    blurWrapper = BackgroundBlurDrawableCompatDelegate(targetView.rootView.viewRootImpl)
+                }
+            } else {
+                blurWrapper = null
             }
 
             blurWrapper?.setBlurRadius(blurAmount)
