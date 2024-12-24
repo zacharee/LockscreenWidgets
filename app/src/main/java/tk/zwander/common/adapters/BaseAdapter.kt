@@ -656,6 +656,8 @@ abstract class BaseAdapter(
             direction: Int,
             vertical: Boolean
         ) {
+            context.logUtils.debugLog("handleResize($overThreshold, $step, $amount, $direction, $vertical)", null)
+
             val currentData = currentData ?: return
             val sizeInfo = currentData.safeSize
 
@@ -678,6 +680,8 @@ abstract class BaseAdapter(
             } else {
                 sizeInfo
             }
+
+            context.logUtils.debugLog("New size $newSizeInfo, old size $sizeInfo")
 
             val newData = currentData.copy(size = newSizeInfo)
 
