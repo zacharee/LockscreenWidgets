@@ -8,6 +8,7 @@
     <string name="accessibility_service_desc">Lockscreen Widgets wymaga włączenia ułatwienia dostępu, aby móc wyświetlać widgety na ekranie blokady i w centrum powiadomień. Żadne dane nie są zbierane, ani żadne akcje nie będą wykonywane na tym urządzeniu.</string>
     <string name="add_widget">Dodaj widżet</string>
     <string name="grant">Przydziel dostęp</string>
+    <string name="granted">Granted</string>
     <string name="settings">Ustawienia</string>
     <string name="yes">Tak</string>
     <string name="no">Nie</string>
