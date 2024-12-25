@@ -71,7 +71,6 @@
     <string name="settings_screen_hide_when_notifications_shown_desc">Ukryj ramkę z widżetami, gdy będą widoczne powiadomienia. Wymaga to dostępu do wszystkich powiadomień z urządzenia. Nie musisz dawać dostępu do tego teraz.</string>
     <string name="settings_screen_page_indicator_behavior">Zachowanie wskaźnika ramki z widżetami</string>
     <string name="settings_screen_page_indicator_behavior_hidden">Zawsze ukrywaj</string>
-    <string name="settings_screen_page_indicator_behavior_auto_hide">Automatycznie ukrywaj</string>
     <string name="settings_screen_page_indicator_behavior_shown">Zawsze wyświetlaj</string>
     <string name="settings_screen_hide_on_notification_shade">Ukryj, gdy wyświetlone zostanie centrum powiadomień</string>
     <string name="settings_screen_hide_on_notification_shade_desc">Ukrywa ramkę z widżetami, gdy centrum powiadomienia zostanie wyświetlone. Ta opcja może nie działać na niektórych urządzeniach.</string>
@@ -112,7 +111,6 @@
     <string name="settings_screen_touch_protection">Ochrona przed dotykiem</string>
     <string name="settings_screen_touch_protection_desc">Ignore touches on the widget frame when the proximity sensor is covered.</string>
     <string name="settings_screen_request_unlock">Prompt for Unlock/Dismiss Notification Center</string>
-    <string name="settings_screen_request_unlock_desc">If Lockscreen Widgets detects that a widget is launching an app, it will prompt to unlock the device and dismiss the notification center. Disable this option to prevent that behavior.</string>
     <string name="settings_screen_hide_on_facewidgets">Hide on FaceWidgets Screen</string>
     <string name="settings_screen_hide_on_facewidgets_desc">Hide the frame when the FaceWidgets screen is shown.</string>
     <string name="settings_screen_hide_in_landscape">Ukryj w trybie poziomym</string>
