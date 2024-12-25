@@ -6,10 +6,13 @@ import android.content.Context
 import android.content.ContextWrapper
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.content.res.Resources
 import android.content.res.XmlResourceParser
+import android.util.Xml
 import androidx.core.content.res.ResourcesCompat
 import org.xmlpull.v1.XmlPullParser
 import org.xmlpull.v1.XmlPullParserException
+import org.xmlpull.v1.XmlPullParserFactory
 import tk.zwander.common.util.safeApplicationContext
 import tk.zwander.lockscreenwidgets.R
 import java.io.IOException
@@ -73,7 +76,7 @@ class IconPackManager private constructor(private val context: Context) : Contex
     }
 
     fun loadIconPackMap(packageName: String): IconPack? {
-        val parseXml = getXml("appfilter") ?: return null
+        val parseXml = getXml("appfilter", packageName) ?: return null
         val compStart = "ComponentInfo{"
         val compStartLength = compStart.length
         val compEnd = "}"
@@ -146,4 +149,27 @@ class IconPackManager private constructor(private val context: Context) : Contex
             clockMetadata = clockMetadata,
         )
     }
+
+    private fun getXml(name: String, packageName: String): XmlPullParser? {
+        val res: Resources
+        try {
+            res = context.packageManager.getResourcesForApplication(packageName)
+            @SuppressLint("DiscouragedApi")
+            val resourceId = res.getIdentifier(name, "xml", packageName)
+            return if (0 != resourceId) {
+                context.packageManager.getXml(packageName, resourceId, null)
+            } else {
+                val factory = XmlPullParserFactory.newInstance()
+                val parser = factory.newPullParser()
+                parser.setInput(res.assets.open("$name.xml"), Xml.Encoding.UTF_8.toString())
+                parser
+            }
+        } catch (_: PackageManager.NameNotFoundException) {
+        } catch (_: IOException) {
+        } catch (_: XmlPullParserException) {
+        }
+        return null
+    }
 }
+
+private operator fun XmlPullParser.get(key: String): String? = this.getAttributeValue(null, key)
