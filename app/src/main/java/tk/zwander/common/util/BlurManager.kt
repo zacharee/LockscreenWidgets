@@ -63,6 +63,7 @@ class BlurManager(
                 && shouldBlur
                 && targetView.isAttachedToWindow
                 && windowManager.isCrossWindowBlurEnabled
+                && targetView.rootView.viewRootImpl.isHardwareEnabled
             ) {
                 if (blurWrapper == null) {
                     blurWrapper = BackgroundBlurDrawableCompatDelegate(targetView.rootView.viewRootImpl)
