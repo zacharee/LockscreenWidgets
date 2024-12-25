@@ -12,7 +12,7 @@ import tk.zwander.lockscreenwidgets.services.IDWidgetService
 
 /**
  * A widget-form alternative to the debug ID overlay. This is a keyguard-only widget that can be added
- * to Lockscreen Widgets to view the ID list without distrupting the widget frame.
+ * to Lockscreen Widgets to view the ID list without disrupting the widget frame.
  */
 class IDListProvider : AppWidgetProvider() {
     companion object {
@@ -20,6 +20,7 @@ class IDListProvider : AppWidgetProvider() {
             //There's a new list of IDs; make sure the factory is notified
             val manager = context.appWidgetManager
             val component = ComponentName(context, IDListProvider::class.java)
+            @Suppress("DEPRECATION")
             manager.notifyAppWidgetViewDataChanged(manager.getAppWidgetIds(component), R.id.id_list)
         }
     }
@@ -30,10 +31,9 @@ class IDListProvider : AppWidgetProvider() {
         appWidgetIds: IntArray
     ) {
         val view = RemoteViews(context.packageName, R.layout.id_list_widget_layout)
+        @Suppress("DEPRECATION")
         view.setRemoteAdapter(R.id.id_list, Intent(context, IDWidgetService::class.java))
 
-        appWidgetIds.forEach {
-            appWidgetManager.updateAppWidget(it, view)
-        }
+        appWidgetManager.updateAppWidget(appWidgetIds, view)
     }
 }

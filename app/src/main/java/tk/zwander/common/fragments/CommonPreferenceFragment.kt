@@ -16,10 +16,13 @@ import androidx.preference.PreferenceGroupAdapter
 import androidx.preference.PreferenceScreen
 import androidx.preference.PreferenceViewHolder
 import androidx.recyclerview.widget.RecyclerView
+import com.bugsnag.android.BreadcrumbType
+import com.bugsnag.android.Bugsnag
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import tk.zwander.common.util.HandlerRegistry
 import tk.zwander.common.util.backup.BackupRestoreManager
 import tk.zwander.common.util.backup.backupRestoreManager
+import tk.zwander.common.util.contracts.registerCreateDocumentLauncherWithDownloadFallback
 import tk.zwander.common.util.isOneUI
 import tk.zwander.common.util.logUtils
 import tk.zwander.common.util.windowManager
@@ -35,11 +38,13 @@ abstract class CommonPreferenceFragment : PreferenceFragmentCompat() {
 
     protected abstract val blurOptionKeys: Array<String>
 
-    protected val showBlurOptions by lazy {
+    private val showBlurOptions by lazy {
         (requireContext().isOneUI && Build.VERSION.SDK_INT < Build.VERSION_CODES.S) || (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && context?.windowManager?.isCrossWindowBlurEnabled == true)
     }
 
-    private val onWidgetBackUp = registerForActivityResult(ActivityResultContracts.CreateDocument("text/*")) { uri: Uri? ->
+    private val onWidgetBackUp = registerCreateDocumentLauncherWithDownloadFallback(
+        mimeType = "*/*",
+    ) { uri: Uri? ->
         if (uri != null) {
             requireContext().apply {
                 contentResolver.openOutputStream(uri)?.bufferedWriter()?.use { output ->
@@ -72,6 +77,15 @@ abstract class CommonPreferenceFragment : PreferenceFragmentCompat() {
                         .setPositiveButton(android.R.string.ok, null)
                         .show()
                     logUtils.normalLog("Unable to restore widgets", e)
+                    Bugsnag.leaveBreadcrumb("Unable to restore widgets", mapOf("error" to e), BreadcrumbType.ERROR)
+                } catch (e: OutOfMemoryError) {
+                    MaterialAlertDialogBuilder(requireContext())
+                        .setTitle(R.string.error)
+                        .setMessage(R.string.unable_to_restore_widgets)
+                        .setPositiveButton(android.R.string.ok, null)
+                        .show()
+                    logUtils.normalLog("Unable to restore widgets", e)
+                    Bugsnag.leaveBreadcrumb("Unable to restore widgets", mapOf("error" to e), BreadcrumbType.ERROR)
                 }
             }
         }

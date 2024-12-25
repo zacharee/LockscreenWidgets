@@ -1,13 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <declare-styleable name="LinkPreference">
-        <attr name="link" format="string|reference" />
-        <attr name="link_type" format="enum">
-            <enum name="link" value="0" />
-            <enum name="email" value="1" />
-        </attr>
-    </declare-styleable>
-
     <declare-styleable name="SpannedGridLayoutManager">
         <attr name="android:orientation" />
         <attr name="spanCount" />

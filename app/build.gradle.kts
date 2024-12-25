@@ -8,15 +8,15 @@ plugins {
 }
 
 android {
-    compileSdk = 34
+    compileSdk = 35
 
     defaultConfig {
         namespace = "tk.zwander.lockscreenwidgets"
         applicationId = "tk.zwander.lockscreenwidgets"
         minSdk = 22
-        targetSdk = 34
-        versionCode = 120
-        versionName = "2.15.8"
+        targetSdk = 35
+        versionCode = 121
+        versionName = "2.15.9"
 
         extensions.getByType(BasePluginExtension::class.java).archivesName.set("LockscreenWidgets_${versionName}")
     }
@@ -25,6 +25,7 @@ android {
         viewBinding = true
         compose = true
         buildConfig = true
+        aidl = true
     }
 
     buildTypes {
@@ -58,6 +59,7 @@ dependencies {
     implementation(libs.atomicfu)
 
     implementation(libs.core.ktx)
+    implementation(libs.core.remoteviews)
     implementation(libs.appcompat)
     implementation(libs.constraintlayout)
     implementation(libs.recyclerview)
@@ -86,13 +88,15 @@ dependencies {
     implementation(libs.lifecycle.runtime.ktx)
 
     implementation(libs.accompanist.drawablepainter)
-    implementation(libs.accompanist.pager)
-    implementation(libs.accompanist.themeadapter.material)
-    implementation(libs.accompanist.themeadapter.material3)
 
     implementation(libs.bugsnag.android)
     implementation(libs.taskerpluginlibrary)
 
     implementation(libs.relinker)
     implementation(libs.compose.spinkit)
+
+    implementation(libs.shizuku.api)
+    implementation(libs.shizuku.provider)
+
+    implementation(libs.storage)
 }

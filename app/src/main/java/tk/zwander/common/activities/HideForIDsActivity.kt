@@ -15,6 +15,7 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.gson.reflect.TypeToken
 import kotlinx.coroutines.flow.MutableStateFlow
 import tk.zwander.common.compose.AppTheme
+import tk.zwander.common.util.contracts.rememberCreateDocumentLauncherWithDownloadFallback
 import tk.zwander.common.util.logUtils
 import tk.zwander.common.util.prefManager
 import tk.zwander.lockscreenwidgets.R
@@ -67,17 +68,6 @@ class HideForIDsActivity : BaseActivity() {
     private val gson by lazy { prefManager.gson }
     private val format = SimpleDateFormat("yyyy-MM-dd_HH:mm:ss", Locale.getDefault())
 
-    private val saveRequest = registerForActivityResult(ActivityResultContracts.CreateDocument("text/*")) { uri ->
-        //Write the current list of IDs to the specified file
-        contentResolver.openOutputStream(uri ?: return@registerForActivityResult)?.use { out ->
-            val stringified = gson.toJson(items.value)
-
-            out.bufferedWriter().use { writer ->
-                writer.append(stringified)
-            }
-        }
-    }
-
     private val openRequest = registerForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
         //Copy the IDs stored in the specified file to the list here
         contentResolver.openInputStream(uri ?: return@registerForActivityResult)?.use { input ->
@@ -123,6 +113,17 @@ class HideForIDsActivity : BaseActivity() {
 
         setContent {
             val items by this.items.collectAsState()
+
+            val saveRequest = rememberCreateDocumentLauncherWithDownloadFallback(mimeType = "text/plain") { uri ->
+                //Write the current list of IDs to the specified file
+                contentResolver.openOutputStream(uri ?: return@rememberCreateDocumentLauncherWithDownloadFallback)?.use { out ->
+                    val stringified = gson.toJson(this.items.value)
+
+                    out.bufferedWriter().use { writer ->
+                        writer.append(stringified)
+                    }
+                }
+            }
 
             AppTheme {
                 HideForIDsLayout(

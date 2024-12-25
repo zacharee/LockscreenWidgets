@@ -29,14 +29,14 @@ class BlurManager(
 
     private var blurWrapper: BackgroundBlurDrawableCompatDelegate? = null
 
-    override fun onViewAttachedToWindow(v: View?) {
+    override fun onViewAttachedToWindow(v: View) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             windowManager.addCrossWindowBlurEnabledListener(crossBlurEnabledListener)
         }
         updateBlur()
     }
 
-    override fun onViewDetachedFromWindow(v: View?) {
+    override fun onViewDetachedFromWindow(v: View) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             windowManager.removeCrossWindowBlurEnabledListener(crossBlurEnabledListener)
         }
@@ -59,13 +59,17 @@ class BlurManager(
         val shouldBlur = shouldBlur()
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            if (blurWrapper == null
-                && blurAmount > 0
+            if (blurAmount > 0
                 && shouldBlur
                 && targetView.isAttachedToWindow
                 && windowManager.isCrossWindowBlurEnabled
+                && targetView.rootView.viewRootImpl.isHardwareEnabled
             ) {
-                blurWrapper = BackgroundBlurDrawableCompatDelegate(targetView.rootView.viewRootImpl)
+                if (blurWrapper == null) {
+                    blurWrapper = BackgroundBlurDrawableCompatDelegate(targetView.rootView.viewRootImpl)
+                }
+            } else {
+                blurWrapper = null
             }
 
             blurWrapper?.setBlurRadius(blurAmount)

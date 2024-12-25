@@ -2,7 +2,9 @@ package tk.zwander.common.adapters
 
 import android.annotation.SuppressLint
 import android.appwidget.AppWidgetProviderInfo
+import android.content.BroadcastReceiver
 import android.content.Context
+import android.content.ContextWrapper
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.drawable.GradientDrawable
@@ -83,7 +85,7 @@ import tk.zwander.lockscreenwidgets.databinding.WidgetPageHolderBinding
 import java.util.Collections
 import kotlin.math.min
 
-@Suppress("LeakingThis", "MemberVisibilityCanBePrivate")
+@Suppress("LeakingThis")
 abstract class BaseAdapter(
     protected val context: Context,
     protected val rootView: View,
@@ -115,37 +117,39 @@ abstract class BaseAdapter(
     protected val host = context.widgetHostCompat
     protected val manager = context.appWidgetManager
 
-    private val baseLayoutInflater = LayoutInflater.from(context).cloneInContext(ContextThemeWrapper(context, R.style.AppTheme)).apply {
-        val compatInflater = AppCompatViewInflater()
-        LayoutInflaterCompat.setFactory2(
-            this,
-            object : LayoutInflater.Factory2 {
-                override fun onCreateView(
-                    parent: View?,
-                    name: String,
-                    context: Context,
-                    attrs: AttributeSet,
-                ): View? {
-                    return compatInflater.createView(
-                        parent, name, context, attrs,
-                        true, false, true, false,
-                    )
-                }
+    private val baseLayoutInflater =
+        LayoutInflater.from(context).cloneInContext(ContextThemeWrapper(context, R.style.AppTheme))
+            .apply {
+                val compatInflater = AppCompatViewInflater()
+                LayoutInflaterCompat.setFactory2(
+                    this,
+                    object : LayoutInflater.Factory2 {
+                        override fun onCreateView(
+                            parent: View?,
+                            name: String,
+                            context: Context,
+                            attrs: AttributeSet,
+                        ): View? {
+                            return compatInflater.createView(
+                                parent, name, context, attrs,
+                                true, false, true, false,
+                            )
+                        }
 
-                override fun onCreateView(
-                    name: String,
-                    context: Context,
-                    attrs: AttributeSet,
-                ): View? {
-                    return onCreateView(null, name, context, attrs)
-                }
-            },
-        )
-    }
+                        override fun onCreateView(
+                            name: String,
+                            context: Context,
+                            attrs: AttributeSet,
+                        ): View? {
+                            return onCreateView(null, name, context, attrs)
+                        }
+                    },
+                )
+            }
 
     protected abstract val colCount: Int
     protected abstract val rowCount: Int
-    protected abstract val minColSpan: Int
+    protected open val minColSpan: Int = 1
     protected abstract val minRowSpan: Int
     protected abstract val rowSpanForAddButton: Int
     protected abstract var currentWidgets: Collection<WidgetData>
@@ -276,6 +280,7 @@ abstract class BaseAdapter(
         amount: Int,
         direction: Int,
     )
+
     abstract fun getThresholdPx(which: WidgetResizeListener.Which): Int
 
     /**
@@ -395,7 +400,8 @@ abstract class BaseAdapter(
             val provider = data.widgetProviderComponent
 
             if (provider == null) {
-                Toast.makeText(context, R.string.error_reconfiguring_widget, Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, R.string.error_reconfiguring_widget, Toast.LENGTH_SHORT)
+                    .show()
                 context.logUtils.normalLog("Unable to reconfigure widget: provider is null.")
             } else {
                 val pkg = provider.packageName
@@ -404,7 +410,8 @@ abstract class BaseAdapter(
                         .find { info -> info.provider == provider })
 
                 if (providerInfo == null) {
-                    Toast.makeText(context, R.string.error_reconfiguring_widget, Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context, R.string.error_reconfiguring_widget, Toast.LENGTH_SHORT)
+                        .show()
                     context.logUtils.normalLog("Unable to reconfigure widget $provider: provider info is null.")
                 } else {
                     launchReconfigure(data.id, providerInfo)
@@ -483,13 +490,28 @@ abstract class BaseAdapter(
                     isVisible = true
 
                     if (!BrokenAppsRegistry.isBroken(widgetInfo)) {
-                        context.logUtils.debugLog("Attempting to create view for ${widgetInfo.provider}.", null)
+                        context.logUtils.debugLog(
+                            "Attempting to create view for ${widgetInfo.provider}.",
+                            null
+                        )
                         try {
                             // We're recreating the AppWidgetHostView here each time, which probably isn't the most efficient
                             // way to do things. However, it's not trivial to just set a new source on an AppWidgetHostView,
                             // so this makes the most sense right now.
                             addView(withContext(Dispatchers.Main) {
-                                host.createView(itemView.context, data.id, widgetInfo).apply hostView@{
+                                host.createView(
+                                    object : ContextWrapper(itemView.context) {
+                                        override fun unregisterReceiver(receiver: BroadcastReceiver?) {
+                                            try {
+                                                super.unregisterReceiver(receiver)
+                                            } catch (e: Exception) {
+                                                logUtils.debugLog("Unable to unregister receiver.", e)
+                                            }
+                                        }
+                                    },
+                                    data.id,
+                                    widgetInfo
+                                ).apply hostView@{
                                     findScrollableViewsInHierarchy(this).forEach { list ->
                                         list.isNestedScrollingEnabled = true
                                     }
@@ -541,12 +563,18 @@ abstract class BaseAdapter(
                                 }
                             })
                         } catch (e: Throwable) {
-                            context.logUtils.normalLog("Unable to bind widget view ${widgetInfo.provider}", e)
+                            context.logUtils.normalLog(
+                                "Unable to bind widget view ${widgetInfo.provider}",
+                                e
+                            )
 
                             if (e is SecurityException) {
                                 Toast.makeText(
                                     context,
-                                    resources.getString(R.string.bind_widget_error, widgetInfo.provider),
+                                    resources.getString(
+                                        R.string.bind_widget_error,
+                                        widgetInfo.provider
+                                    ),
                                     Toast.LENGTH_LONG,
                                 ).show()
                                 currentWidgets = currentWidgets.toMutableList().apply {
@@ -558,7 +586,10 @@ abstract class BaseAdapter(
                             }
                         }
                     } else {
-                        context.logUtils.normalLog("Broken app widget detected: ${widgetInfo.provider}. Removing from adapter list.", null)
+                        context.logUtils.normalLog(
+                            "Broken app widget detected: ${widgetInfo.provider}. Removing from adapter list.",
+                            null
+                        )
                         currentWidgets = currentWidgets.toMutableList().apply {
                             remove(data)
                             host.deleteAppWidgetId(data.id)
@@ -567,7 +598,7 @@ abstract class BaseAdapter(
                 }
             } else {
                 binding.widgetReconfigure.isVisible = true
-                with(context) { binding.widgetPreview.setImageBitmap(data.iconBitmap) }
+                binding.widgetPreview.setImageBitmap(data.getIconBitmap(context))
                 binding.widgetLabel.text = data.label
             }
         }
@@ -579,7 +610,7 @@ abstract class BaseAdapter(
             binding.openWidgetConfig.isVisible = false
 
             val shortcutView = FrameShortcutViewBinding.inflate(baseLayoutInflater)
-            val icon = with(context) { data.iconBitmap }
+            val icon = data.getIconBitmap(context)
 
             shortcutView.shortcutRoot.setOnClickListener {
                 data.shortcutIntent?.apply {
@@ -625,6 +656,8 @@ abstract class BaseAdapter(
             direction: Int,
             vertical: Boolean
         ) {
+            context.logUtils.debugLog("handleResize($overThreshold, $step, $amount, $direction, $vertical)", null)
+
             val currentData = currentData ?: return
             val sizeInfo = currentData.safeSize
 
@@ -647,6 +680,8 @@ abstract class BaseAdapter(
             } else {
                 sizeInfo
             }
+
+            context.logUtils.debugLog("New size $newSizeInfo, old size $sizeInfo")
 
             val newData = currentData.copy(size = newSizeInfo)
 
@@ -691,7 +726,8 @@ abstract class BaseAdapter(
                         shape = RoundedCornerShape(widgetCornerRadius.dp),
                     ) {
                         Box(
-                            modifier = Modifier.fillMaxSize()
+                            modifier = Modifier
+                                .fillMaxSize()
                                 .clickable(
                                     enabled = true,
                                     interactionSource = remember { MutableInteractionSource() },
@@ -710,7 +746,8 @@ abstract class BaseAdapter(
                                     painter = painterResource(R.drawable.ic_baseline_add_24),
                                     contentDescription = stringResource(R.string.add_widget),
                                     tint = Color.White,
-                                    modifier = Modifier.size(48.dp)
+                                    modifier = Modifier
+                                        .size(48.dp)
                                         .background(
                                             brush = Brush.radialGradient(
                                                 0f to Color.Black.copy(alpha = 0.5f),

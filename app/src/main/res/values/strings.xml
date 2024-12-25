@@ -11,6 +11,7 @@
 
     <string name="add_widget">Add Widget</string>
     <string name="grant">Grant</string>
+    <string name="granted">Granted</string>
     <string name="settings">Settings</string>
     <string name="yes">Yes</string>
     <string name="no">No</string>
@@ -219,7 +220,7 @@
 
     <string name="intro_read_storage_title">Read External Storage</string>
     <string name="intro_read_storage_desc">Lockscreen Widgets has a \"masking\" mode, where it will use your wallpaper as the widget frame background, causing it to seem transparent, while also being able to cover lock screen elements. To do this, Lockscreen Widgets needs permission to be able to read your device\'s storage. You don\'t have to grant this right now. If you\'re running Lollipop, this permission is already granted. More details are available in the privacy policy.</string>
-    <string name="intro_read_external_storage_desc_13_addendum">On Android 13 and later, you will need to grant READ_MEDIA_IMAGES and use App Ops paired with Shizuku to grant this READ_EXTERNAL_STORAGE.</string>
+    <string name="intro_read_external_storage_desc_13_addendum">On Android 13 and later, you will need to use Shizuku to grant the required permissions.</string>
 
     <string name="intro_battery_optimization">Battery Optimization</string>
     <string name="intro_battery_optimization_desc">Many devices, including those running MIUI and EMUI, have incredibly aggressive battery management. This can cause Lockscreen Widgets to be killed when you don\'t want it to be. Click the button below to read how you can allowlist Lockscreen Widgets on your particular device.</string>
@@ -315,8 +316,8 @@
     <string name="in_locked_notification_center">In Locked Notification Center</string>
     <string name="reset_frame_position_size_confirm_message">Are you sure you want to reset the position and size?</string>
 
-    <string name="install_app_ops">Install App Ops</string>
-    <string name="open_app_ops">Open App Ops</string>
+    <string name="install_shizuku">Install Shizuku</string>
+    <string name="open_shizuku">Open Shizuku</string>
 
     <string name="grant_read_media_images">Grant READ_MEDIA_IMAGES</string>
 
@@ -329,4 +330,6 @@
     <string name="translate_desc">Help translate Lockscreen Widgets into your language.</string>
 
     <string name="error_reconfiguring_widget">Error reconfiguring widget</string>
+
+    <string name="system_icons">System Icons</string>
 </resources>

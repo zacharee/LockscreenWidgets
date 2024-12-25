@@ -3,6 +3,7 @@ package tk.zwander.common.util
 import android.annotation.SuppressLint
 import android.content.Context
 import android.util.Log
+import com.bugsnag.android.BreadcrumbType
 import com.bugsnag.android.Bugsnag
 import java.io.BufferedWriter
 import java.io.File
@@ -81,7 +82,7 @@ class LogUtils private constructor(private val context: Context) {
             Log.e(DEBUG_LOG_TAG, fullMessage)
 
             synchronized(logFile) {
-                logFileHandle.write("\n\n$fullMessage")
+                logFileHandle.writeSafely("\n\n$fullMessage")
             }
         }
     }
@@ -90,11 +91,11 @@ class LogUtils private constructor(private val context: Context) {
         val fullMessage = generateFullMessage(message, throwable)
 
         Log.e(NORMAL_LOG_TAG, fullMessage)
-        Bugsnag.leaveBreadcrumb(message)
+        Bugsnag.leaveBreadcrumb(message, throwable?.let { mapOf("error" to throwable) }?: mapOf(), BreadcrumbType.ERROR)
 
         if (context.isDebug) {
             synchronized(logFile) {
-                logFileHandle.write("\n\n$fullMessage")
+                logFileHandle.writeSafely("\n\n$fullMessage")
             }
         }
     }
@@ -114,6 +115,7 @@ class LogUtils private constructor(private val context: Context) {
                     }
                 } catch (e: Exception) {
                     Log.e(NORMAL_LOG_TAG, "Failed to export log.", e)
+                    Bugsnag.leaveBreadcrumb("Unable to export log.", mapOf("error" to e), BreadcrumbType.ERROR)
                 }
             }
         }
@@ -125,5 +127,13 @@ class LogUtils private constructor(private val context: Context) {
         return "${formatter.format(Date())}\n${message}${throwable?.let { 
             "\n${Log.getStackTraceString(it)}"
         } ?: ""}"
+    }
+
+    private fun BufferedWriter.writeSafely(string: String) {
+        try {
+            write(string)
+        } catch (e: Exception) {
+            Bugsnag.leaveBreadcrumb("Unable to write to log file.", mapOf("error" to e), BreadcrumbType.ERROR)
+        }
     }
 }

@@ -18,6 +18,7 @@ import android.provider.Settings
 import android.service.notification.INotificationListener
 import android.service.notification.NotificationListenerService
 import android.service.notification.StatusBarNotification
+import com.bugsnag.android.BreadcrumbType
 import com.bugsnag.android.Bugsnag
 import kotlinx.atomicfu.atomic
 import kotlinx.coroutines.CoroutineScope
@@ -177,7 +178,7 @@ class NotificationListener : NotificationListenerService(), EventObserver, Corou
                     logUtils.normalLog("Error sending notification count update", e)
                 } catch (e: Throwable) {
                     logUtils.normalLog("Error sending notification count update", e)
-                    Bugsnag.notify(e)
+                    Bugsnag.leaveBreadcrumb("Error sending notification count update", mapOf("error" to e), BreadcrumbType.ERROR)
                 }
             }
         }
@@ -255,10 +256,11 @@ class NotificationListener : NotificationListenerService(), EventObserver, Corou
         }
 
     private inner class NougatListenerWrapper : NotificationListenerService.NotificationListenerWrapper() {
-        override fun onTransact(code: Int, data: Parcel?, reply: Parcel?, flags: Int): Boolean {
+        override fun onTransact(code: Int, data: Parcel, reply: Parcel?, flags: Int): Boolean {
             return try {
                 super.onTransact(code, data, reply, flags)
             } catch (e: Throwable) {
+                Bugsnag.leaveBreadcrumb("Unable to receive notification update", mapOf("error" to e), BreadcrumbType.ERROR)
                 false
             }
         }
@@ -266,10 +268,11 @@ class NotificationListener : NotificationListenerService(), EventObserver, Corou
 
     // Public to allow ByteBuddy wrapping
     inner class LollipopListenerWrapper(private val wrapper: INotificationListener.Stub) {
-        fun onTransact(code: Int, data: Parcel?, reply: Parcel?, flags: Int): Boolean {
+        fun onTransact(code: Int, data: Parcel, reply: Parcel?, flags: Int): Boolean {
             return try {
                 wrapper.onTransact(code, data, reply, flags)
             } catch (e: Throwable) {
+                Bugsnag.leaveBreadcrumb("Unable to receive notification update", mapOf("error" to e), BreadcrumbType.ERROR)
                 false
             }
         }

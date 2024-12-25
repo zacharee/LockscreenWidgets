@@ -25,6 +25,7 @@ import tk.zwander.common.host.widgetHostCompat
 import tk.zwander.common.util.PrefManager
 import tk.zwander.common.util.appWidgetManager
 import tk.zwander.common.util.cropBitmapTransparency
+import tk.zwander.common.util.density
 import tk.zwander.common.util.getApplicationInfoInAnyState
 import tk.zwander.common.util.logUtils
 import tk.zwander.common.util.prefManager
@@ -258,7 +259,7 @@ abstract class BaseWidgetTile : TileService(), SharedPreferences.OnSharedPrefere
                         val iconDrawable = ResourcesCompat.getDrawable(this, icon, this.newTheme())
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && iconDrawable is AdaptiveIconDrawable) {
                             val foreground = iconDrawable.foreground
-                            qsTile?.icon = Icon.createWithBitmap(foreground.toSafeBitmap(maxSize = 128.dp).cropBitmapTransparency())
+                            qsTile?.icon = Icon.createWithBitmap(foreground.toSafeBitmap(density, maxSize = 128.dp).cropBitmapTransparency())
                         } else if (iconDrawable is BitmapDrawable) {
                             qsTile?.icon = Icon.createWithBitmap(qsTile?.label?.first()?.toString()?.textAsBitmap(128f, Color.WHITE))
                         } else {

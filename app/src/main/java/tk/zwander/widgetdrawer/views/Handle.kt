@@ -63,8 +63,8 @@ class Handle : LinearLayout {
 
     private val longClickHandler = @SuppressLint("HandlerLeak")
     object : Handler(Looper.getMainLooper()) {
-        override fun handleMessage(msg: Message?) {
-            when (msg?.what) {
+        override fun handleMessage(msg: Message) {
+            when (msg.what) {
                 MSG_LONG_PRESS -> gestureManager.onLongPress()
             }
         }
@@ -215,7 +215,7 @@ class Handle : LinearLayout {
                 this.alpha = it.animatedValue.toString().toFloat()
             }
             anim.addListener(object : AnimatorListenerAdapter() {
-                override fun onAnimationEnd(animation: Animator?) {
+                override fun onAnimationEnd(animation: Animator) {
                     handler?.postDelayed({
                         try {
                             wm.removeView(this@Handle)
@@ -259,8 +259,8 @@ class Handle : LinearLayout {
     inner class GestureManager : GestureDetector.SimpleOnGestureListener() {
         private val gestureDetector = GestureDetector(context, this, handler)
 
-        fun onTouchEvent(event: MotionEvent?): Boolean {
-            when (event?.action) {
+        fun onTouchEvent(event: MotionEvent): Boolean {
+            when (event.action) {
                 MotionEvent.ACTION_UP -> {
                     if (scrollingOpen) {
                         scrollingOpen = false
@@ -278,7 +278,7 @@ class Handle : LinearLayout {
 
         override fun onScroll(
             e1: MotionEvent?,
-            e2: MotionEvent?,
+            e2: MotionEvent,
             distanceX: Float,
             distanceY: Float
         ): Boolean {
@@ -300,7 +300,7 @@ class Handle : LinearLayout {
             } else false
         }
 
-        override fun onLongPress(e: MotionEvent?) {
+        override fun onLongPress(e: MotionEvent) {
             if (isAttachedToWindow) {
                 onLongPress()
             }
@@ -313,7 +313,7 @@ class Handle : LinearLayout {
             }
         }
 
-        override fun onDoubleTap(e: MotionEvent?): Boolean {
+        override fun onDoubleTap(e: MotionEvent): Boolean {
             return if (!calledOpen) {
                 calledOpen = true
                 context.vibrate(25L)

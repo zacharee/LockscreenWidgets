@@ -118,7 +118,7 @@ fun View.fadeAndScaleOut(endListener: () -> Unit) {
         )
         duration = if (context.prefManager.animateShowHide) context.prefManager.animationDuration.toLong() else 0L
         addListener(object : AnimatorListenerAdapter() {
-            override fun onAnimationEnd(animation: Animator?) {
+            override fun onAnimationEnd(animation: Animator) {
                 clearAnimation()
                 endListener()
             }
@@ -139,7 +139,7 @@ fun View.fadeAndScaleIn(endListener: () -> Unit) {
         )
         duration = if (context.prefManager.animateShowHide) context.prefManager.animationDuration.toLong() else 0L
         addListener(object : AnimatorListenerAdapter() {
-            override fun onAnimationEnd(animation: Animator?) {
+            override fun onAnimationEnd(animation: Animator) {
                 clearAnimation()
                 endListener()
             }

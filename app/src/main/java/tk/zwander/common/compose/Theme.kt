@@ -3,11 +3,14 @@ package tk.zwander.common.compose
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
+import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
-import com.google.accompanist.themeadapter.material3.Mdc3Theme
+import androidx.compose.ui.res.colorResource
+import tk.zwander.lockscreenwidgets.R
 
 @Composable
 fun AppTheme(
@@ -25,9 +28,21 @@ fun AppTheme(
             content = content
         )
     } else {
-        @Suppress("DEPRECATION")
-        Mdc3Theme(
-            content = content
+        MaterialTheme(
+            colorScheme = if (isSystemInDarkTheme()) {
+                darkColorScheme(
+                    primary = colorResource(R.color.colorPrimary),
+                    primaryContainer = colorResource(R.color.colorPrimaryDark),
+                    secondary = colorResource(R.color.colorAccent),
+                )
+            } else {
+                lightColorScheme(
+                    primary = colorResource(R.color.colorPrimary),
+                    primaryContainer = colorResource(R.color.colorPrimaryDark),
+                    secondary = colorResource(R.color.colorAccent),
+                )
+            },
+            content = content,
         )
     }
 }

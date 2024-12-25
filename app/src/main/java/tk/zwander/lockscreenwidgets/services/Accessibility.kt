@@ -12,6 +12,7 @@ import android.view.WindowManager
 import android.view.accessibility.AccessibilityEvent
 import android.view.accessibility.AccessibilityNodeInfo
 import android.view.inputmethod.InputMethodManager
+import com.bugsnag.android.Bugsnag
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.MainScope
@@ -125,6 +126,7 @@ class Accessibility : AccessibilityService(), EventObserver, CoroutineScope by M
 
         sharedPreferencesChangeHandler.register(this)
         eventManager.addObserver(this)
+        Bugsnag.leaveBreadcrumb("Accessibility service created.")
     }
 
     override fun onServiceConnected() {
@@ -135,6 +137,7 @@ class Accessibility : AccessibilityService(), EventObserver, CoroutineScope by M
         frameDelegate.onCreate()
         drawerDelegate.onCreate()
         eventManager.sendEvent(Event.RequestNotificationCount)
+        Bugsnag.leaveBreadcrumb("Accessibility service connected.")
     }
 
     override fun onAccessibilityEvent(event: AccessibilityEvent) {
@@ -170,7 +173,9 @@ class Accessibility : AccessibilityService(), EventObserver, CoroutineScope by M
         }
     }
 
-    override fun onInterrupt() {}
+    override fun onInterrupt() {
+        Bugsnag.leaveBreadcrumb("Accessibility service interrupted.")
+    }
 
     override fun onEvent(event: Event) {
         when (event) {
@@ -191,6 +196,8 @@ class Accessibility : AccessibilityService(), EventObserver, CoroutineScope by M
         drawerDelegate.onDestroy()
 
         eventManager.removeObserver(this)
+
+        Bugsnag.leaveBreadcrumb("Accessibility service destroyed.")
     }
 
     private fun updateState(transform: (State) -> State) {

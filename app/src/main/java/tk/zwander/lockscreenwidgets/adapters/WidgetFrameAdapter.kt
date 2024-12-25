@@ -27,8 +27,6 @@ open class WidgetFrameAdapter(
         get() = context.prefManager.frameColCount
     override val rowCount: Int
         get() = context.prefManager.frameRowCount
-    override val minColSpan: Int
-        get() = 1
     override val minRowSpan: Int
         get() = 1
     override val rowSpanForAddButton: Int
