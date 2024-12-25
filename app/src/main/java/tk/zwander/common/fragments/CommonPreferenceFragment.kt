@@ -22,6 +22,7 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import tk.zwander.common.util.HandlerRegistry
 import tk.zwander.common.util.backup.BackupRestoreManager
 import tk.zwander.common.util.backup.backupRestoreManager
+import tk.zwander.common.util.contracts.registerCreateDocumentLauncherWithDownloadFallback
 import tk.zwander.common.util.isOneUI
 import tk.zwander.common.util.logUtils
 import tk.zwander.common.util.windowManager
@@ -41,7 +42,9 @@ abstract class CommonPreferenceFragment : PreferenceFragmentCompat() {
         (requireContext().isOneUI && Build.VERSION.SDK_INT < Build.VERSION_CODES.S) || (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && context?.windowManager?.isCrossWindowBlurEnabled == true)
     }
 
-    private val onWidgetBackUp = registerForActivityResult(ActivityResultContracts.CreateDocument("text/*")) { uri: Uri? ->
+    private val onWidgetBackUp = registerCreateDocumentLauncherWithDownloadFallback(
+        mimeType = "*/*",
+    ) { uri: Uri? ->
         if (uri != null) {
             requireContext().apply {
                 contentResolver.openOutputStream(uri)?.bufferedWriter()?.use { output ->

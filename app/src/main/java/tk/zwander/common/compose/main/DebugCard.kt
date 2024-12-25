@@ -1,9 +1,8 @@
 package tk.zwander.common.compose.main
 
+import android.content.Context
 import android.net.Uri
 import android.view.animation.AnticipateOvershootInterpolator
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
@@ -41,6 +40,7 @@ import tk.zwander.common.compose.components.ClearFrameDataCard
 import tk.zwander.common.compose.components.ClickableCard
 import tk.zwander.common.compose.components.PreferenceSwitch
 import tk.zwander.common.util.PrefManager
+import tk.zwander.common.util.contracts.rememberCreateDocumentLauncherWithDownloadFallback
 import tk.zwander.common.util.logUtils
 import tk.zwander.lockscreenwidgets.BuildConfig
 import tk.zwander.lockscreenwidgets.R
@@ -48,17 +48,21 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
+private fun Context.writeLog(uri: Uri?) {
+    if (uri != null) {
+        contentResolver.openOutputStream(uri)?.let { logUtils.exportLog(it) }
+    }
+}
+
 @Preview
 @Composable
 fun DebugCard() {
     val context = LocalContext.current
 
-    val onDebugExportResult = rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument("text/*")) { uri: Uri? ->
-        if (uri != null) {
-            with (context) {
-                contentResolver.openOutputStream(uri)?.let { logUtils.exportLog(it) }
-            }
-        }
+    val debugExportLauncher = rememberCreateDocumentLauncherWithDownloadFallback(
+        mimeType = "text/plain",
+    ) { uri: Uri? ->
+        context.writeLog(uri)
     }
 
     Card(
@@ -131,7 +135,9 @@ fun DebugCard() {
                             summary = stringResource(id = R.string.settings_screen_export_debug_log_desc),
                             onClick = {
                                 val formatter = SimpleDateFormat("yyyy-MM-dd_HH:mm:ss", Locale.getDefault())
-                                onDebugExportResult.launch("lockscreen_widgets_debug_${formatter.format(Date())}.txt")
+                                val fileName = "lockscreen_widgets_debug_${formatter.format(Date())}.txt"
+
+                                debugExportLauncher.launch(fileName)
                             },
                         )
 
