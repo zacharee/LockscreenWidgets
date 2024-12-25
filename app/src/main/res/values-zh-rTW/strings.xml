@@ -8,6 +8,7 @@
     <string name="accessibility_service_desc">鎖定螢幕小工具需要輔助服務才能顯示在鎖定畫面和通知中心。 不會收集任何數據，也不會在設備上執行任何操作。</string>
     <string name="add_widget">新增小工具</string>
     <string name="grant">授權</string>
+    <string name="granted">Granted</string>
     <string name="settings">設定</string>
     <string name="yes">確認</string>
     <string name="no">取消</string>
@@ -236,4 +237,5 @@
     <string name="translate">Translate</string>
     <string name="translate_desc">Help translate Lockscreen Widgets into your language.</string>
     <string name="error_reconfiguring_widget">Error reconfiguring widget</string>
+    <string name="system_icons">System Icons</string>
 </resources>

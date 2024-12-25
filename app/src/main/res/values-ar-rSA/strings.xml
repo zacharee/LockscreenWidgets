@@ -8,6 +8,7 @@
     <string name="accessibility_service_desc">التطبيقات المصغرة لشاشة القفل تحتاح الى خدمة إمكانية الوصول للعرض على شاشة القفل ومركز الاشعارات. لن يتم جمع بيانات. ولا إجراء سيتم في الجهاز.</string>
     <string name="add_widget">اضافة تطبيق مصغر</string>
     <string name="grant">سماح</string>
+    <string name="granted">Granted</string>
     <string name="settings">الاعدادات</string>
     <string name="yes">نعم</string>
     <string name="no">لا</string>
@@ -50,13 +51,13 @@
     <string name="hide">إخفاء</string>
     <string name="shortcut_icon">إختصار الايقونة</string>
     <string name="expand">تمديد</string>
-    <string name="alert_remove_widget_confirm">Remove Widget?</string>
-    <string name="alert_remove_widget_confirm_desc">Are you sure you want to remove this widget?</string>
+    <string name="alert_remove_widget_confirm">حذف التطبيق المصغر؟</string>
+    <string name="alert_remove_widget_confirm_desc">هل أنت متأكد بأنك تريد حذف هذا التطبيق المصغر؟</string>
     <string name="main_screen_social_mastodon">Mastodon</string>
     <string name="main_screen_social_mastodon_desc">Follow me on Mastodon for updates about my apps and random development-related nonsense.</string>
-    <string name="main_screen_social_website">Website</string>
-    <string name="main_screen_social_website_desc">Check out my website if you\'re that bored.</string>
-    <string name="main_screen_social_email">Email</string>
+    <string name="main_screen_social_website">الموقع الالكتروني</string>
+    <string name="main_screen_social_website_desc">تحقق من موقع الويب الخاص بي إذا كنت تشعر بالملل.</string>
+    <string name="main_screen_social_email">البريد الإلكتروني</string>
     <string name="main_screen_social_email_desc">Send me an email if you have a question or problem. Please include as much detail as possible. Just telling me \"it doesn\'t work\" just wastes everyone\'s time.</string>
     <string name="main_screen_social_telegram">Telegram</string>
     <string name="main_screen_social_telegram_desc">If email isn\'t your thing, you can ask your question in my Telegram server. Please mention which app you\'re using, as this server is for all of the ones I\'ve developed.</string>
@@ -236,4 +237,5 @@
     <string name="translate">ترجمة</string>
     <string name="translate_desc">ساعد بترجمة تطبيقات مصغرة الى لغتك.</string>
     <string name="error_reconfiguring_widget">Error reconfiguring widget</string>
+    <string name="system_icons">System Icons</string>
 </resources>

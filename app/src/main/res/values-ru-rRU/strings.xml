@@ -8,6 +8,7 @@
     <string name="accessibility_service_desc">Приложению требуется доступ к Специальным Возможностям, чтобы отображать виджеты на экране блокировки. Никакие данные не собираем и действия не совершаем.</string>
     <string name="add_widget">Добавить Виджет</string>
     <string name="grant">Предоставить</string>
+    <string name="granted">Granted</string>
     <string name="settings">Настройки</string>
     <string name="yes">Да</string>
     <string name="no">Нет</string>
@@ -31,7 +32,7 @@
     <string name="clear">Очистить</string>
     <string name="drawer_enabled">Боковая Панель Включена</string>
     <string name="frame_enabled">Рамка Включена</string>
-    <string name="add_id_hint">com.android.systemui:id/some_id_here</string>
+    <string name="add_id_hint">com.android.systemui:id/some_id_здесь</string>
     <string name="category_appearance">Внешний вид</string>
     <string name="category_behavior">Поведение</string>
     <string name="category_visibility">Видимость</string>
@@ -90,7 +91,7 @@
     <string name="settings_screen_show_debug_id_view_desc">Показывает поверх рамки виджетов список \"ID Видов\", которые оно находит на экране в данный момент. Функция полезна для отладки и нахождения идентификаторов, которые могут использоваться для обнаружения состояний экрана блокировки.</string>
     <string name="settings_screen_accessibility_event_delay">Задержка События Спец. Возможностей</string>
     <string name="settings_screen_accessibility_event_delay_desc">Устанавливает задержку между Событиями Спец. Возможностей, на которые отвечает приложение. Чем короче задержка, тем быстрее реагирует виджет на изменения, но снижается скорость работы устройства и быстрее тратится батарея.</string>
-    <string name="settings_screen_non_present_ids">Hide on Non-Present IDs</string>
+    <string name="settings_screen_non_present_ids">Скрывать на нетекущие ID</string>
     <string name="settings_screen_non_present_ids_desc">Lockscreen Widgets will hide itself when these IDs are not on-screen. You can find which IDs should go here by enabling both Debug switches and looking at the IDs that are highlighted in red when you want the frame to be hidden.</string>
     <string name="settings_screen_present_ids">Hide on Present IDs</string>
     <string name="settings_screen_present_ids_desc">Lockscreen Widgets will hide itself when these IDs are on-screen. You can find which IDs should go here by enabling both Debug switches and looking at the IDs that are highlighted in green when you want the frame to be hidden.</string>
@@ -236,4 +237,5 @@
     <string name="translate">Translate</string>
     <string name="translate_desc">Help translate Lockscreen Widgets into your language.</string>
     <string name="error_reconfiguring_widget">Error reconfiguring widget</string>
+    <string name="system_icons">System Icons</string>
 </resources>
