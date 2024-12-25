@@ -239,4 +239,5 @@
     <string name="translate">Przetłumacz</string>
     <string name="translate_desc">Pomóż przetłumaczyć Lockscreen Widgets na swój język.</string>
     <string name="error_reconfiguring_widget">Błąd podczas zmiany konfiguracji widżetu</string>
+    <string name="system_icons">System Icons</string>
 </resources>
