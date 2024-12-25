@@ -6,6 +6,7 @@ import android.content.ContextWrapper
 import android.graphics.Point
 import android.graphics.PointF
 import com.google.gson.reflect.TypeToken
+import tk.zwander.common.data.SafePointF
 import tk.zwander.lockscreenwidgets.R
 
 val Context.frameSizeAndPosition: FrameSizeAndPosition
@@ -91,7 +92,7 @@ class FrameSizeAndPosition private constructor(context: Context) : ContextWrappe
 
     fun setSizeForType(type: FrameType, size: PointF) {
         sizesMap = sizesMap.toMutableMap().apply {
-            this[type.key] = size
+            this[type.key] = SafePointF(size)
         }
     }
 
