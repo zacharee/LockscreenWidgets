@@ -115,6 +115,8 @@ class FrameSizeAndPosition private constructor(context: Context) : ContextWrappe
                 calculateNCPosYFromTopDefault(type),
             )
 
+            // These are getting the *current* position for portrait, which is to keep things somewhat
+            // consistent on squarer displays.
             FrameType.LockNormal.Landscape -> getPositionForType(FrameType.LockNormal.Portrait)
             FrameType.LockNotification.Landscape -> getPositionForType(FrameType.LockNotification.Portrait)
             FrameType.NotificationNormal.Landscape -> getPositionForType(FrameType.NotificationNormal.Portrait)
@@ -136,6 +138,8 @@ class FrameSizeAndPosition private constructor(context: Context) : ContextWrappe
                 prefManager.getResourceFloat(R.integer.def_notification_frame_height),
             )
 
+            // These are getting the *current* size for portrait, which is to keep things somewhat
+            // consistent on squarer displays.
             FrameType.LockNormal.Landscape -> getSizeForType(FrameType.LockNormal.Portrait)
             FrameType.LockNotification.Landscape -> getSizeForType(FrameType.LockNotification.Portrait)
             FrameType.NotificationNormal.Landscape -> getSizeForType(FrameType.NotificationNormal.Portrait)
