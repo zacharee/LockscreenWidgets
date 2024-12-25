@@ -17,6 +17,7 @@ import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.google.gson.reflect.TypeToken
 import com.joaomgcd.taskerpluginlibrary.extensions.requestQuery
+import tk.zwander.common.data.SafePointF
 import tk.zwander.common.data.WidgetData
 import tk.zwander.common.data.WidgetSizeData
 import tk.zwander.common.data.WidgetTileInfo
@@ -139,6 +140,7 @@ class PrefManager private constructor(context: Context) : ContextWrapper(context
         .setExclusionStrategies(CrashFixExclusionStrategy())
         .registerTypeAdapter(Uri::class.java, GsonUriHandler())
         .registerTypeAdapter(Intent::class.java, GsonIntentHandler())
+        .registerTypeAdapter(SafePointF::class.java, GsonSafePointFHandler())
         .create()
 
     //The widgets currently added to the widget frame
