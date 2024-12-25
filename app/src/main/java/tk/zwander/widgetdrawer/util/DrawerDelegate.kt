@@ -220,6 +220,11 @@ class DrawerDelegate private constructor(context: Context) :
     }
 
     private var currentVisibilityAnim: Animator? = null
+        set(value) {
+            isHiding = false
+            field = value
+        }
+    private var isHiding: Boolean = false
     private var latestScrollInVelocity: Float = 0f
 
     @SuppressLint("RtlHardcoded")
@@ -501,32 +506,38 @@ class DrawerDelegate private constructor(context: Context) :
 
     private fun hideDrawer(callListener: Boolean = true) {
         mainHandler.post {
-            updateCommonState { it.copy(handlingClick = false) }
-            adapter.currentEditingInterfacePosition = -1
+            if (!isHiding) {
+                isHiding = true
 
-            currentVisibilityAnim?.cancel()
-            val anim = ValueAnimator.ofFloat(1f, 0f)
-            currentVisibilityAnim = anim
+                updateCommonState { it.copy(handlingClick = false) }
+                adapter.currentEditingInterfacePosition = -1
 
-            anim.interpolator = AccelerateInterpolator()
-            anim.duration = ANIM_DURATION
-            anim.addUpdateListener {
-                drawer.root.alpha = it.animatedValue.toString().toFloat()
-            }
-            anim.addListener(object : AnimatorListenerAdapter() {
-                override fun onAnimationEnd(animation: Animator) {
-                    drawer.root.handler?.postDelayed({
-                        try {
-                            wm.removeView(drawer.root)
-                            if (callListener) eventManager.sendEvent(Event.DrawerHidden)
-                        } catch (e: Exception) {
-                            logUtils.debugLog("Error hiding drawer", e)
-                        }
-                    }, 10)
+                currentVisibilityAnim?.cancel()
+                val anim = ValueAnimator.ofFloat(1f, 0f)
+                currentVisibilityAnim = anim
+
+                anim.interpolator = AccelerateInterpolator()
+                anim.duration = ANIM_DURATION
+                anim.addUpdateListener {
+                    drawer.root.alpha = it.animatedValue.toString().toFloat()
                 }
-            })
-            anim.start()
-            tryShowHandle()
+                anim.addListener(object : AnimatorListenerAdapter() {
+                    override fun onAnimationEnd(animation: Animator) {
+                        drawer.root.handler?.postDelayed({
+                            try {
+                                wm.removeView(drawer.root)
+                                if (callListener) eventManager.sendEvent(Event.DrawerHidden)
+                            } catch (e: Exception) {
+                                logUtils.debugLog("Error hiding drawer", e)
+                            } finally {
+                            }
+                        }, 10)
+                        isHiding = false
+                    }
+                })
+                anim.start()
+                tryShowHandle()
+            }
         }
     }
 
