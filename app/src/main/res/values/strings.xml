@@ -330,4 +330,6 @@
     <string name="translate_desc">Help translate Lockscreen Widgets into your language.</string>
 
     <string name="error_reconfiguring_widget">Error reconfiguring widget</string>
+
+    <string name="system_icons">System Icons</string>
 </resources>
