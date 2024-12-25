@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="version_template">v%s</string>
+    <string name="version_template">2.15.7</string>
     <string name="edit_gesture_hint">Tap the widget frame with two fingers to move and resize it.</string>
     <string name="edit_gesture_hint_2">Great! Tap with two fingers to hide the editing UI.</string>
     <string name="hide_gesture_hint">Tap the widget frame with three fingers to temporarily hide it. It will remain hidden until you turn the display off and on again.</string>
@@ -72,6 +72,8 @@
     <string name="settings_screen_hide_when_notifications_shown_desc">Hide the widget frame while there are notifications being shown. This requires the use of a Notification Listener Service. You don\'t have to grant this permission right now.</string>
     <string name="settings_screen_page_indicator_behavior">Page Indicator Behavior</string>
     <string name="settings_screen_page_indicator_behavior_hidden">Always Hidden</string>
+    <string name="settings_screen_page_indicator_behavior_auto_hide">Auto-Hide</string>
+    <string name="settings_screen_page_indicator_behavior_shown">Always Shown</string>
     <string name="settings_screen_hide_on_notification_shade">Hide when Notification Shade Shown</string>
     <string name="settings_screen_hide_on_notification_shade_desc">Try to hide the widget frame when the notification shade is pulled down. This may not work on all devices.</string>
     <string name="settings_screen_hide_on_security_input">Hide on Security Input</string>
@@ -111,6 +113,8 @@
     <string name="settings_screen_touch_protection">Touch Protection</string>
     <string name="settings_screen_touch_protection_desc">Ignore touches on the widget frame when the proximity sensor is covered.</string>
     <string name="settings_screen_request_unlock">Prompt for Unlock/Dismiss Notification Center</string>
+    <string name="settings_screen_request_unlock_desc">If Lockscreen Widgets detects that a widget is launching an app, it will prompt to unlock the device and dismiss the notification center. Disable this option to prevent that behavior.</string>
+    <string name="settings_screen_hide_on_facewidgets">Hide on FaceWidgets Screen</string>
     <string name="settings_screen_hide_on_facewidgets_desc">Hide the frame when the FaceWidgets screen is shown.</string>
     <string name="settings_screen_hide_in_landscape">Hide in Landscape</string>
     <string name="settings_screen_hide_in_landscape_desc">Hide the widget frame when the device is in landscape.</string>
