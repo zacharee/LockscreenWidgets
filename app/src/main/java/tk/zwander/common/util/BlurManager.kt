@@ -6,7 +6,7 @@ import android.os.Build
 import android.view.View
 import android.view.View.OnAttachStateChangeListener
 import android.view.WindowManager
-import tk.zwander.common.drawable.BackgroundBlurDrawableCompatDelegate
+import tk.zwander.common.drawable.BackgroundBlurDrawableCompat
 
 class BlurManager(
     context: Context,
@@ -15,8 +15,8 @@ class BlurManager(
     private val listenKeys: Array<String>,
     private val shouldBlur: () -> Boolean,
     private val blurAmount: () -> Int,
-    private val cornerRadius: (() -> Float)? = null,
     private val updateWindow: () -> Unit,
+    private val cornerRadius: () -> Float = { 0f },
 ) : ContextWrapper(context), OnAttachStateChangeListener {
     private val handlerRegistry = HandlerRegistry {
         handler(*listenKeys) {
@@ -27,7 +27,7 @@ class BlurManager(
         updateBlur()
     }
 
-    private var blurWrapper: BackgroundBlurDrawableCompatDelegate? = null
+    private var blurDrawable: BackgroundBlurDrawableCompat? = null
 
     override fun onViewAttachedToWindow(v: View) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
@@ -41,7 +41,7 @@ class BlurManager(
             windowManager.removeCrossWindowBlurEnabledListener(crossBlurEnabledListener)
         }
         targetView.background = null
-        blurWrapper = null
+        blurDrawable = null
     }
 
     fun onCreate() {
@@ -65,19 +65,17 @@ class BlurManager(
                 && windowManager.isCrossWindowBlurEnabled
                 && targetView.rootView.viewRootImpl.isHardwareEnabled
             ) {
-                if (blurWrapper == null) {
-                    blurWrapper = BackgroundBlurDrawableCompatDelegate(targetView.rootView.viewRootImpl)
+                if (blurDrawable == null) {
+                    blurDrawable = BackgroundBlurDrawableCompat(targetView.rootView.viewRootImpl)
                 }
             } else {
-                blurWrapper = null
+                blurDrawable = null
             }
 
-            blurWrapper?.setBlurRadius(blurAmount)
-            cornerRadius?.invoke()?.let { cr ->
-                blurWrapper?.setCornerRadius(cr)
-            }
+            blurDrawable?.setBlurRadius(blurAmount)
+            blurDrawable?.setCornerRadius(cornerRadius())
 
-            targetView.background = blurWrapper?.drawable
+            targetView.background = blurDrawable
         } else {
             val f = try {
                 params::class.java.getDeclaredField("samsungFlags")

@@ -290,7 +290,8 @@ class WidgetFrameDelegate private constructor(context: Context) : BaseDelegate<W
         shouldBlur = { prefManager.blurBackground && !showWallpaperLayerCondition },
         blurAmount = { prefManager.backgroundBlurAmount },
         cornerRadius = { dpAsPx(prefManager.cornerRadiusDp).toFloat() },
-    ) { binding.frame.updateWindow(wm, params) }
+        updateWindow = { binding.frame.updateWindow(wm, params) },
+    )
 
     override fun onEvent(event: Event) {
         super.onEvent(event)

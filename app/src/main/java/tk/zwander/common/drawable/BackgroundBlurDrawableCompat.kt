@@ -1,12 +1,15 @@
 package tk.zwander.common.drawable
 
 import android.annotation.ColorInt
+import android.graphics.Canvas
 import android.graphics.drawable.Drawable
 import android.os.Build
 import android.view.ViewRootImpl
 import androidx.annotation.RequiresApi
+import androidx.appcompat.graphics.drawable.DrawableWrapperCompat
+import com.android.internal.graphics.drawable.BackgroundBlurDrawable
 
-sealed class BackgroundBlurDrawableCompatDelegate(open val drawable: Drawable) {
+sealed class BackgroundBlurDrawableCompat(protected open val wrapped: Drawable) : DrawableWrapperCompat(wrapped) {
     abstract fun setColor(@ColorInt color: Int)
     abstract fun setBlurRadius(blurRadius: Int)
     abstract fun setCornerRadius(cornerRadius: Float)
@@ -17,18 +20,24 @@ sealed class BackgroundBlurDrawableCompatDelegate(open val drawable: Drawable) {
         cornerRadiusBR: Float,
     )
 
+    override fun draw(canvas: Canvas) {
+        if (canvas.isHardwareAccelerated) {
+            wrapped.draw(canvas)
+        }
+    }
+
     @RequiresApi(Build.VERSION_CODES.S)
-    class BackgroundBlurDrawableCompatApi31(override val drawable: SafeBackgroundBlurDrawable) : BackgroundBlurDrawableCompatDelegate(drawable) {
+    class BackgroundBlurDrawableCompatApi31(override val wrapped: BackgroundBlurDrawable) : BackgroundBlurDrawableCompat(wrapped) {
         override fun setColor(color: Int) {
-            drawable.setColor(color)
+            wrapped.setColor(color)
         }
 
         override fun setBlurRadius(blurRadius: Int) {
-            drawable.setBlurRadius(blurRadius)
+            wrapped.setBlurRadius(blurRadius)
         }
 
         override fun setCornerRadius(cornerRadius: Float) {
-            drawable.setCornerRadius(cornerRadius)
+            wrapped.setCornerRadius(cornerRadius)
         }
 
         override fun setCornerRadius(
@@ -37,7 +46,7 @@ sealed class BackgroundBlurDrawableCompatDelegate(open val drawable: Drawable) {
             cornerRadiusBL: Float,
             cornerRadiusBR: Float,
         ) {
-            drawable.setCornerRadius(
+            wrapped.setCornerRadius(
                 cornerRadiusTL,
                 cornerRadiusTR,
                 cornerRadiusBL,
@@ -47,9 +56,9 @@ sealed class BackgroundBlurDrawableCompatDelegate(open val drawable: Drawable) {
     }
 
     companion object {
-        operator fun invoke(viewRootImpl: ViewRootImpl): BackgroundBlurDrawableCompatDelegate? {
+        operator fun invoke(viewRootImpl: ViewRootImpl): BackgroundBlurDrawableCompat? {
             return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                BackgroundBlurDrawableCompatApi31(SafeBackgroundBlurDrawable(viewRootImpl.createBackgroundBlurDrawable()))
+                BackgroundBlurDrawableCompatApi31(viewRootImpl.createBackgroundBlurDrawable())
             } else {
                 null
             }
