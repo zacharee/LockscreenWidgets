@@ -1,13 +1,13 @@
 package tk.zwander.common.drawable
 
 import android.graphics.Canvas
-import android.graphics.drawable.DrawableWrapper
 import android.os.Build
 import androidx.annotation.RequiresApi
+import androidx.appcompat.graphics.drawable.DrawableWrapperCompat
 import com.android.internal.graphics.drawable.BackgroundBlurDrawable
 
 @RequiresApi(Build.VERSION_CODES.S)
-class SafeBackgroundBlurDrawable(private val wrapped: BackgroundBlurDrawable) : DrawableWrapper(wrapped) {
+class SafeBackgroundBlurDrawable(private val wrapped: BackgroundBlurDrawable) : DrawableWrapperCompat(wrapped) {
     override fun draw(canvas: Canvas) {
         if (canvas.isHardwareAccelerated) {
             wrapped.draw(canvas)
