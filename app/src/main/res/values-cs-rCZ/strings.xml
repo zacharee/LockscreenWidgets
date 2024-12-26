@@ -66,7 +66,7 @@
     <string name="main_screen_social_patreon">Patreon</string>
     <string name="main_screen_social_patreon_desc">Za $1 každý měsíc získáte přístup ke všem mým placeným aplikacím a k některým exkluzivním věcem.</string>
     <string name="main_screen_accessibility_not_started">Služba Dostupnost není spuštěna. Může to být proto, že musíte povolit seznam widgetů na zamykací obrazovce podle optimalizace baterie na vašem telefonu, nebo je budete muset vypnout a znovu zapnout v Nastavení.</string>
-    <string name="intro_privacy_policy_desc">Lockscreen Widgets doesn\'t collect any data beyond what\'s needed for crash analysis. Learn more below.</string>
+    <string name="intro_privacy_policy_desc">Widgety na zamykací obrazovce nezískávají žádná data nad rámec toho, co je potřeba pro analýzu chyb. Další informace níže.</string>
     <string name="main_screen_privacy_policy_desc">Lockscreen Widgets doesn\'t collect any data beyond what\'s needed for crash analysis. Tap here to learn more.</string>
     <string name="settings_screen_hide_when_notifications_shown">Hide when Showing Notifications</string>
     <string name="settings_screen_hide_when_notifications_shown_desc">Hide the widget frame while there are notifications being shown. This requires the use of a Notification Listener Service. You don\'t have to grant this permission right now.</string>
