@@ -5,7 +5,6 @@ import android.graphics.drawable.Drawable
 import android.os.Build
 import android.view.ViewRootImpl
 import androidx.annotation.RequiresApi
-import com.android.internal.graphics.drawable.BackgroundBlurDrawable
 
 sealed class BackgroundBlurDrawableCompatDelegate(open val drawable: Drawable) {
     abstract fun setColor(@ColorInt color: Int)
@@ -19,7 +18,7 @@ sealed class BackgroundBlurDrawableCompatDelegate(open val drawable: Drawable) {
     )
 
     @RequiresApi(Build.VERSION_CODES.S)
-    class BackgroundBlurDrawableCompatApi31(override val drawable: BackgroundBlurDrawable) : BackgroundBlurDrawableCompatDelegate(drawable) {
+    class BackgroundBlurDrawableCompatApi31(override val drawable: SafeBackgroundBlurDrawable) : BackgroundBlurDrawableCompatDelegate(drawable) {
         override fun setColor(color: Int) {
             drawable.setColor(color)
         }
@@ -50,7 +49,7 @@ sealed class BackgroundBlurDrawableCompatDelegate(open val drawable: Drawable) {
     companion object {
         operator fun invoke(viewRootImpl: ViewRootImpl): BackgroundBlurDrawableCompatDelegate? {
             return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                BackgroundBlurDrawableCompatApi31(viewRootImpl.createBackgroundBlurDrawable())
+                BackgroundBlurDrawableCompatApi31(SafeBackgroundBlurDrawable(viewRootImpl.createBackgroundBlurDrawable()))
             } else {
                 null
             }
