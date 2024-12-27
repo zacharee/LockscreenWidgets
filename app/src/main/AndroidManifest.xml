@@ -105,8 +105,11 @@
             android:label="@string/open_drawer"
             android:theme="@style/AppTheme.Null"
             android:exported="true"
-            android:launchMode="singleInstancePerTask"
-            />
+            android:launchMode="singleInstancePerTask">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+            </intent-filter>
+        </activity>
         <activity-alias
             android:name=".activities.LaunchDrawer"
             android:targetActivity="tk.zwander.widgetdrawer.activities.TriggerActivity"
@@ -114,9 +117,19 @@
             android:exported="true"
             android:label="@string/open_widget_drawer">
             <intent-filter>
-                <action android:name="android.intent.action.CREATE_SHORTCUT" />
+                <action android:name="android.intent.action.MAIN" />
             </intent-filter>
         </activity-alias>
+        <activity
+            android:name="tk.zwander.widgetdrawer.activities.ShortcutConfigActivity"
+            android:exported="true"
+            android:excludeFromRecents="true"
+            android:theme="@style/AppTheme.Null"
+            android:label="@string/open_widget_drawer">
+            <intent-filter>
+                <action android:name="android.intent.action.CREATE_SHORTCUT" />
+            </intent-filter>
+        </activity>
         <activity android:name="tk.zwander.common.activities.HideOnAppsChooserActivity"
             android:label="@string/settings_screen_hide_on_present_apps"
             android:exported="false"
