@@ -11,13 +11,17 @@ import android.provider.Settings
 import android.view.WindowManager
 import android.view.accessibility.AccessibilityEvent
 import android.view.accessibility.AccessibilityNodeInfo
+import android.view.accessibility.AccessibilityWindowInfo
 import android.view.inputmethod.InputMethodManager
 import com.bugsnag.android.Bugsnag
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.launch
 import tk.zwander.common.util.AccessibilityUtils.runAccessibilityJob
+import tk.zwander.common.util.AccessibilityUtils.runWindowOperation
 import tk.zwander.common.util.Event
 import tk.zwander.common.util.EventObserver
 import tk.zwander.common.util.HandlerRegistry
@@ -138,6 +142,19 @@ class Accessibility : AccessibilityService(), EventObserver, CoroutineScope by M
         drawerDelegate.onCreate()
         eventManager.sendEvent(Event.RequestNotificationCount)
         Bugsnag.leaveBreadcrumb("Accessibility service connected.")
+
+        launch(Dispatchers.Main) {
+            runWindowOperation(
+                context = this@Accessibility,
+                wm = wm,
+                frameDelegate = frameDelegate,
+                drawerDelegate = drawerDelegate,
+                isScreenOn = power.isInteractive,
+                isOnKeyguard = kgm.isKeyguardLocked,
+                getWindows = ::getWindowsSafely,
+                initialRun = true,
+            )
+        }
     }
 
     override fun onAccessibilityEvent(event: AccessibilityEvent) {
@@ -158,16 +175,7 @@ class Accessibility : AccessibilityService(), EventObserver, CoroutineScope by M
                     kgm = kgm,
                     wm = wm,
                     imm = imm,
-                    getWindows = {
-                        try {
-                            ArrayList(windows)
-                        } catch (e: SecurityException) {
-                            // Sometimes throws a SecurityException talking about mismatching
-                            // user IDs. In that case, return null and don't update any window-based
-                            // state items.
-                            null
-                        }
-                    }
+                    getWindows = ::getWindowsSafely,
                 ),
             )
         }
@@ -204,6 +212,17 @@ class Accessibility : AccessibilityService(), EventObserver, CoroutineScope by M
         val newState = transform(state)
         logUtils.debugLog("Updating accessibility state from $state to $newState")
         state = newState
+    }
+
+    private fun getWindowsSafely(): List<AccessibilityWindowInfo>? {
+        return try {
+            ArrayList(windows)
+        } catch (e: SecurityException) {
+            // Sometimes throws a SecurityException talking about mismatching
+            // user IDs. In that case, return null and don't update any window-based
+            // state items.
+            null
+        }
     }
 
     private data class State(

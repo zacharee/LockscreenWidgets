@@ -62,7 +62,7 @@ object AccessibilityUtils {
             }
         }
 
-        if (isOnKeyguard && prefManager.hideOnNotificationShade && !nodeState.showingNotificationsPanel.value) {
+        if (((isOnKeyguard && prefManager.hideOnNotificationShade) || prefManager.drawerHideWhenNotificationPanelOpen) && !nodeState.showingNotificationsPanel.value) {
             if (node.hasVisibleIds(
                     "com.android.systemui:id/quick_settings_panel",
                     "com.android.systemui:id/settings_button",
@@ -309,9 +309,134 @@ object AccessibilityUtils {
         }
     }
 
+    suspend fun runWindowOperation(
+        context: Context,
+        wm: WindowManager,
+        frameDelegate: WidgetFrameDelegate,
+        drawerDelegate: DrawerDelegate,
+        isScreenOn: Boolean,
+        isOnKeyguard: Boolean,
+        getWindows: () -> List<AccessibilityWindowInfo>?,
+        initialRun: Boolean = false,
+    ) {
+        with(context) {
+            //The below block can (very rarely) take over half a second to execute, so only run it
+            //if we actually need to (i.e. on the lock screen and screen is on).
+            if (isScreenOn &&
+                (((isOnKeyguard || prefManager.showInNotificationCenter) && prefManager.widgetFrameEnabled /* This is only needed when the frame is enabled */) ||
+                        (prefManager.drawerEnabled && (initialRun || drawerDelegate.isAttached) && prefManager.drawerHideWhenNotificationPanelOpen))) {
+                val windowInfo = getWindows()?.let {
+                    getWindows(it, isOnKeyguard).also { windowInfo ->
+                        logUtils.debugLog("Got windows $windowInfo", null)
+                    }
+                }
+
+                windowInfo?.sysUiWindowViewIds?.let { sysUiWindowViewIds ->
+                    //Update any ID list widgets on the new IDs
+                    coroutineScope {
+                        launch {
+                            eventManager.sendEvent(Event.DebugIdsUpdated(sysUiWindowViewIds))
+                            IDListProvider.sendUpdate(context)
+                        }
+                    }
+                }
+
+                if (isDebug) {
+                    windowInfo?.sysUiWindowNodes?.let { sysUiWindowNodes ->
+                        logUtils.debugLog(
+                            sysUiWindowNodes.filter { it.isVisibleToUser }.map { it.viewIdResourceName }
+                                .toString()
+                        )
+                    }
+
+                    windowInfo?.sysUiWindowViewIds?.let { sysUiWindowViewIds ->
+                        coroutineScope {
+                            launch(Dispatchers.Main) {
+                                frameDelegate.setNewDebugIdItems(sysUiWindowViewIds.toList())
+                            }
+                        }
+                    }
+                }
+
+                windowInfo?.let {
+                    val notificationsWereOpen = frameDelegate.state.showingNotificationsPanel
+                    val notificationsAreOpen = windowInfo.nodeState.showingNotificationsPanel.value
+
+                    frameDelegate.updateState {
+                        it.copy(
+                            //Samsung's Screen-Off Memo is really just a normal Activity that shows over the lock screen.
+                            //However, it's not an Application-type window for some reason, so it won't hide with the
+                            //currentAppLayer check. Explicitly check for its existence here.
+                            isOnScreenOffMemo = isOnKeyguard && windowInfo.hasScreenOffMemoWindow,
+                            isOnEdgePanel = windowInfo.hasEdgePanelWindow,
+                            isOnFaceWidgets = windowInfo.hasFaceWidgetsWindow,
+                            //Generate "layer" values for the System UI window and for the topmost app window, if
+                            //it exists.
+                            //currentAppLayer *should* be -1 even if there's an app open in the background,
+                            //since getWindows() is only meant to return windows that can actually be
+                            //interacted with. The only time it should be anything else (usually 1) is
+                            //if an app is displaying above the keyguard, such as the incoming call
+                            //screen or the camera.
+                            currentAppLayer = if (windowInfo.topAppWindowIndex != -1) windowInfo.windows.size - windowInfo.topAppWindowIndex else windowInfo.topAppWindowIndex,
+                            currentSysUiLayer = if (windowInfo.minSysUiWindowIndex != -1) windowInfo.windows.size - windowInfo.minSysUiWindowIndex else windowInfo.minSysUiWindowIndex,
+                            currentSystemLayer = if (windowInfo.topNonSysUiWindowIndex != -1) windowInfo.windows.size - windowInfo.topNonSysUiWindowIndex else windowInfo.topNonSysUiWindowIndex,
+                            //This is mostly a debug value to see which app LSWidg thinks is on top.
+                            currentAppPackage = windowInfo.topAppWindowPackageName,
+                            hidingForPresentApp = windowInfo.hasHideForPresentApp,
+                            onMainLockscreen = windowInfo.nodeState.onMainLockscreen.value,
+                            showingNotificationsPanel = notificationsAreOpen,
+                            notificationsPanelFullyExpanded = windowInfo.nodeState.hasMoreButton.value && !windowInfo.nodeState.hasClearAllButton.value,
+                            hideForPresentIds = windowInfo.nodeState.hideForPresentIds.value,
+                            hideForNonPresentIds = windowInfo.nodeState.hideForNonPresentIds.value,
+                        )
+                    }
+
+                    if (!drawerDelegate.scrollingOpen &&
+                        notificationsWereOpen != notificationsAreOpen &&
+                        notificationsAreOpen &&
+                        drawerDelegate.isAttached &&
+                        prefManager.drawerHideWhenNotificationPanelOpen) {
+                        eventManager.sendEvent(Event.CloseDrawer)
+                    }
+                }
+
+                logUtils.debugLog("NewState ${frameDelegate.state}", null)
+
+                frameDelegate.updateStateAndWindowState(
+                    wm = wm,
+                    updateAccessibility = true,
+                )
+
+                windowInfo?.let {
+                    windowInfo.sysUiWindowNodes.forEachParallel { node ->
+                        try {
+                            node.isSealed = false
+                        } catch (_: Throwable) {}
+
+                        try {
+                            @Suppress("DEPRECATION")
+                            node.recycle()
+                        } catch (_: IllegalStateException) {}
+                    }
+
+                    windowInfo.windows.forEachParallel {
+                        try {
+                            it.root?.isSealed = false
+                        } catch (_: Throwable) {}
+
+                        try {
+                            @Suppress("DEPRECATION")
+                            it.root?.recycle()
+                        } catch (_: IllegalStateException) {}
+                    }
+                }
+            }
+        }
+    }
+
     fun CoroutineScope.runAccessibilityJob(
         context: Context,
-        event: AccessibilityEvent?,
+        event: AccessibilityEvent,
         frameDelegate: WidgetFrameDelegate,
         drawerDelegate: DrawerDelegate,
         power: PowerManager,
@@ -365,7 +490,7 @@ object AccessibilityUtils {
             frameDelegate.updateCommonState { it.copy(screenOrientation = rotation) }
             drawerDelegate.updateCommonState { it.copy(screenOrientation = rotation) }
 
-            if (isDebug && event != null) {
+            if (isDebug) {
                 // Nest this in the debug check so that loop doesn't have to run always.
                 try {
                     logUtils.debugLog("Source Node ID: ${event.sourceNodeId}, Window ID: ${event.windowId}, Source ID Name: ${event.source?.viewIdResourceName}")
@@ -393,107 +518,18 @@ object AccessibilityUtils {
                 updateAccessibility = true,
             )
 
-            //The below block can (very rarely) take over half a second to execute, so only run it
-            //if we actually need to (i.e. on the lock screen and screen is on).
-            if ((isOnKeyguard || prefManager.showInNotificationCenter) && isScreenOn && prefManager.widgetFrameEnabled /* This is only needed when the frame is enabled */) {
-                val windowInfo = getWindows()?.let {
-                    getWindows(it, isOnKeyguard).also { windowInfo ->
-                        logUtils.debugLog("Got windows $windowInfo", null)
-                    }
-                }
-
-                windowInfo?.sysUiWindowViewIds?.let { sysUiWindowViewIds ->
-                    //Update any ID list widgets on the new IDs
-                    coroutineScope {
-                        launch {
-                            eventManager.sendEvent(Event.DebugIdsUpdated(sysUiWindowViewIds))
-                            IDListProvider.sendUpdate(context)
-                        }
-                    }
-                }
-
-                if (isDebug) {
-                    windowInfo?.sysUiWindowNodes?.let { sysUiWindowNodes ->
-                        logUtils.debugLog(
-                            sysUiWindowNodes.filter { it.isVisibleToUser }.map { it.viewIdResourceName }
-                                .toString()
-                        )
-                    }
-
-                    windowInfo?.sysUiWindowViewIds?.let { sysUiWindowViewIds ->
-                        coroutineScope {
-                            launch(Dispatchers.Main) {
-                                frameDelegate.setNewDebugIdItems(sysUiWindowViewIds.toList())
-                            }
-                        }
-                    }
-                }
-
-                windowInfo?.let {
-                    frameDelegate.updateState {
-                        it.copy(
-                            //Samsung's Screen-Off Memo is really just a normal Activity that shows over the lock screen.
-                            //However, it's not an Application-type window for some reason, so it won't hide with the
-                            //currentAppLayer check. Explicitly check for its existence here.
-                            isOnScreenOffMemo = isOnKeyguard && windowInfo.hasScreenOffMemoWindow,
-                            isOnEdgePanel = windowInfo.hasEdgePanelWindow,
-                            isOnFaceWidgets = windowInfo.hasFaceWidgetsWindow,
-                            //Generate "layer" values for the System UI window and for the topmost app window, if
-                            //it exists.
-                            //currentAppLayer *should* be -1 even if there's an app open in the background,
-                            //since getWindows() is only meant to return windows that can actually be
-                            //interacted with. The only time it should be anything else (usually 1) is
-                            //if an app is displaying above the keyguard, such as the incoming call
-                            //screen or the camera.
-                            currentAppLayer = if (windowInfo.topAppWindowIndex != -1) windowInfo.windows.size - windowInfo.topAppWindowIndex else windowInfo.topAppWindowIndex,
-                            currentSysUiLayer = if (windowInfo.minSysUiWindowIndex != -1) windowInfo.windows.size - windowInfo.minSysUiWindowIndex else windowInfo.minSysUiWindowIndex,
-                            currentSystemLayer = if (windowInfo.topNonSysUiWindowIndex != -1) windowInfo.windows.size - windowInfo.topNonSysUiWindowIndex else windowInfo.topNonSysUiWindowIndex,
-                            //This is mostly a debug value to see which app LSWidg thinks is on top.
-                            currentAppPackage = windowInfo.topAppWindowPackageName,
-                            hidingForPresentApp = windowInfo.hasHideForPresentApp,
-                            onMainLockscreen = windowInfo.nodeState.onMainLockscreen.value,
-                            showingNotificationsPanel = windowInfo.nodeState.showingNotificationsPanel.value,
-                            notificationsPanelFullyExpanded = windowInfo.nodeState.hasMoreButton.value && !windowInfo.nodeState.hasClearAllButton.value,
-                            hideForPresentIds = windowInfo.nodeState.hideForPresentIds.value,
-                            hideForNonPresentIds = windowInfo.nodeState.hideForNonPresentIds.value,
-                        )
-                    }
-                }
-
-                logUtils.debugLog("NewState ${frameDelegate.state}", null)
-
-                frameDelegate.updateStateAndWindowState(
-                    wm = wm,
-                    updateAccessibility = true,
-                )
-
-                windowInfo?.let {
-                    windowInfo.sysUiWindowNodes.forEachParallel { node ->
-                        try {
-                            node.isSealed = false
-                        } catch (_: Throwable) {}
-
-                        try {
-                            @Suppress("DEPRECATION")
-                            node.recycle()
-                        } catch (_: IllegalStateException) {}
-                    }
-
-                    windowInfo.windows.forEachParallel {
-                        try {
-                            it.root?.isSealed = false
-                        } catch (_: Throwable) {}
-
-                        try {
-                            @Suppress("DEPRECATION")
-                            it.root?.recycle()
-                        } catch (_: IllegalStateException) {}
-                    }
-                }
-            }
+            runWindowOperation(
+                context = context,
+                wm = wm,
+                frameDelegate = frameDelegate,
+                drawerDelegate = drawerDelegate,
+                isOnKeyguard = isOnKeyguard,
+                isScreenOn = isScreenOn,
+                getWindows = getWindows,
+            )
 
             // Some logic for making the drawer go away or system dialogs dismiss when widgets launch Activities indirectly.
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P && event != null) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
                 val matchesWindowsChanged =
                     event.eventType == AccessibilityEvent.TYPE_WINDOWS_CHANGED
                             && ((event.windowChanges and AccessibilityEvent.WINDOWS_CHANGE_ADDED != 0)
@@ -527,9 +563,8 @@ object AccessibilityUtils {
                 }
             }
 
-            if (event != null && (event.eventType == AccessibilityEvent.TYPE_WINDOWS_CHANGED
-                        || event.eventType == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED)
-                && event.packageName != null
+            if ((event.eventType == AccessibilityEvent.TYPE_WINDOWS_CHANGED
+                        || event.eventType == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED) && event.packageName != null
             ) {
                 drawerDelegate.updateCommonState { it.copy(handlingClick = false) }
                 frameDelegate.updateCommonState { it.copy(handlingClick = false) }
@@ -538,7 +573,7 @@ object AccessibilityUtils {
             try {
                 //Make sure to recycle the copy of the event.
                 @Suppress("DEPRECATION")
-                event?.recycle()
+                event.recycle()
             } catch (e: IllegalStateException) {
                 //Sometimes the event is already recycled somehow.
             }

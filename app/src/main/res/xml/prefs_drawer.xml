@@ -48,6 +48,14 @@
             />
 
         <tk.zwander.common.prefs.MaterialSwitchPreference
+            android:title="@string/drawer_hide_when_notification_panel_expanded"
+            android:summary="@string/drawer_hide_when_notification_panel_expanded_desc"
+            android:key="drawer_hide_when_notification_panel_open"
+            android:icon="@drawable/ic_baseline_visibility_off_24"
+            android:defaultValue="false"
+            />
+
+        <tk.zwander.common.prefs.MaterialSwitchPreference
             android:title="@string/settings_screen_blur_background"
             android:summary="@string/settings_screen_blur_drawer_background_desc"
             android:key="blur_drawer_background"

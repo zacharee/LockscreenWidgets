@@ -129,6 +129,9 @@ class DrawerDelegate private constructor(context: Context) :
             prefManager.drawerWidgets = LinkedHashSet(value)
         }
 
+    val scrollingOpen: Boolean
+        get() = handle.scrollingOpen
+
     private val drawer by lazy { DrawerLayoutBinding.inflate(LayoutInflater.from(this)) }
     private val handle by lazy { Handle(this) }
 
