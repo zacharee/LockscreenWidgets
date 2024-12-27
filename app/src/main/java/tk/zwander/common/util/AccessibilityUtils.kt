@@ -322,9 +322,9 @@ object AccessibilityUtils {
         with(context) {
             //The below block can (very rarely) take over half a second to execute, so only run it
             //if we actually need to (i.e. on the lock screen and screen is on).
-            if (isScreenOn &&
+            if (initialRun || (isScreenOn &&
                 (((isOnKeyguard || prefManager.showInNotificationCenter) && prefManager.widgetFrameEnabled /* This is only needed when the frame is enabled */) ||
-                        (prefManager.drawerEnabled && (initialRun || drawerDelegate.isAttached) && prefManager.drawerHideWhenNotificationPanelOpen))) {
+                        (prefManager.drawerEnabled && drawerDelegate.isAttached && prefManager.drawerHideWhenNotificationPanelOpen)))) {
                 val windowInfo = getWindows()?.let {
                     getWindows(it, isOnKeyguard).also { windowInfo ->
                         logUtils.debugLog("Got windows $windowInfo", null)
