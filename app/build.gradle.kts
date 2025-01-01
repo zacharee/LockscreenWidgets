@@ -19,6 +19,13 @@ android {
         versionName = "2.16.0"
 
         extensions.getByType(BasePluginExtension::class.java).archivesName.set("LockscreenWidgets_${versionName}")
+
+        @Suppress("UnstableApiUsage")
+        externalNativeBuild {
+            cmake {
+                cppFlags += ""
+            }
+        }
     }
 
     buildFeatures {
@@ -26,6 +33,7 @@ android {
         compose = true
         buildConfig = true
         aidl = true
+        prefab = true
     }
 
     buildTypes {
@@ -48,6 +56,13 @@ android {
 
     packaging {
         resources.excludes.add("META-INF/library_release.kotlin_module")
+        jniLibs.pickFirsts += "**/libbugsnag-ndk.so"
+    }
+    externalNativeBuild {
+        cmake {
+            path = file("CMakeLists.txt")
+            version = "3.22.1"
+        }
     }
 }
 

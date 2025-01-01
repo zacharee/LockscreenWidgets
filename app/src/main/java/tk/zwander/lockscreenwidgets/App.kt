@@ -126,11 +126,16 @@ class App : Application(), CoroutineScope by MainScope() {
             .tag("${packageName}_granter")
     }
 
+    private external fun setUpAborter()
+
     override fun onCreate() {
         super.onCreate()
 
         ReLinker.loadLibrary(this, "bugsnag-ndk")
         ReLinker.loadLibrary(this, "bugsnag-plugin-android-anr")
+        ReLinker.loadLibrary(this, "lockscreenwidgets")
+
+        setUpAborter()
 
         Bugsnag.start(this)
         Bugsnag.addOnError {
