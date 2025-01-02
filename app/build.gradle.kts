@@ -24,6 +24,7 @@ android {
         externalNativeBuild {
             cmake {
                 cppFlags += ""
+                arguments.add("-DANDROID_WEAK_API_DEFS=ON")
             }
         }
     }

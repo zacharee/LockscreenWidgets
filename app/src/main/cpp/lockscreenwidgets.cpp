@@ -21,9 +21,9 @@ extern "C"
 #pragma ide diagnostic ignored "UnusedParameter"
 JNIEXPORT void JNICALL
 Java_tk_zwander_lockscreenwidgets_App_setUpAborter(JNIEnv *env, jobject thiz) {
-#if __ANDROID_API__ >= 30
-    __android_log_set_aborter(aborter);
-#endif
+    if (__builtin_available(android 30, *)) {
+        __android_log_set_aborter(aborter);
+    }
 }
 #pragma clang diagnostic pop
 
