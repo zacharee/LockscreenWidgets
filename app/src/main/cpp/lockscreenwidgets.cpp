@@ -26,4 +26,3 @@ Java_tk_zwander_lockscreenwidgets_App_setUpAborter(JNIEnv *env, jobject thiz) {
     }
 }
 #pragma clang diagnostic pop
-
