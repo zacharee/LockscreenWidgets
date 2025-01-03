@@ -150,6 +150,15 @@
             android:icon="@drawable/shadow"
             />
 
+        <tk.zwander.common.prefs.MaterialSwitchPreference
+            android:title="@string/drawer_handle_tap_to_open"
+            android:summary="@string/drawer_handle_tap_to_open_desc"
+            android:key="drawer_handle_tap_to_open"
+            android:defaultValue="false"
+            android:dependency="show_drawer_handle"
+            android:icon="@drawable/tap"
+            />
+
         <tk.zwander.seekbarpreference.SeekBarPreference
             android:title="@string/drawer_handle_height"
             android:summary="@string/drawer_handle_height_desc"

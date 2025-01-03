@@ -59,10 +59,11 @@ class Handle : LinearLayout {
     private val wm = context.getSystemService(Context.WINDOW_SERVICE) as WindowManager
 
     private val handleLeft = AppCompatResources.getDrawable(context, R.drawable.drawer_handle_left)
-    private val handleRight = AppCompatResources.getDrawable(context, R.drawable.drawer_handle_right)
+    private val handleRight =
+        AppCompatResources.getDrawable(context, R.drawable.drawer_handle_right)
 
-    private val longClickHandler = @SuppressLint("HandlerLeak")
-    object : Handler(Looper.getMainLooper()) {
+    @SuppressLint("HandlerLeak")
+    private val longClickHandler = object : Handler(Looper.getMainLooper()) {
         override fun handleMessage(msg: Message) {
             when (msg.what) {
                 MSG_LONG_PRESS -> gestureManager.onLongPress()
@@ -96,7 +97,8 @@ class Handle : LinearLayout {
         }
 
         handler(PrefManager.KEY_SHOW_DRAWER_HANDLE_SHADOW) {
-            elevation = if (context.prefManager.drawerHandleShadow) context.dpAsPx(8).toFloat() else 0f
+            elevation =
+                if (context.prefManager.drawerHandleShadow) context.dpAsPx(8).toFloat() else 0f
         }
     }
 
@@ -121,20 +123,24 @@ class Handle : LinearLayout {
                 initialScrollRawX = event.rawX
                 moveRawY = event.rawY
             }
+
             MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
                 longClickHandler.removeMessages(MSG_LONG_PRESS)
                 setMoveMode(false)
                 context.prefManager.drawerHandleYPosition = params.y
             }
+
             MotionEvent.ACTION_MOVE -> {
                 if (inMoveMode) {
                     val gravity = when {
                         event.rawX <= 1 / 3f * screenWidth -> {
                             Gravity.LEFT
                         }
+
                         event.rawX >= 2 / 3f * screenWidth -> {
                             Gravity.RIGHT
                         }
+
                         else -> -1
                     }
                     params.y += (event.rawY - moveRawY).toInt()
@@ -150,12 +156,14 @@ class Handle : LinearLayout {
                     scrollTotalX += velocity
                     initialScrollRawX = event.rawX
 
-                    context.eventManager.sendEvent(Event.ScrollInDrawer(
-                        context.prefManager.drawerHandleSide,
-                        scrollTotalX.absoluteValue,
-                        false,
-                        velocity
-                    ))
+                    context.eventManager.sendEvent(
+                        Event.ScrollInDrawer(
+                            context.prefManager.drawerHandleSide,
+                            scrollTotalX.absoluteValue,
+                            false,
+                            velocity
+                        )
+                    )
                 }
             }
         }
@@ -199,7 +207,8 @@ class Handle : LinearLayout {
         mainHandler.post {
             try {
                 wm.addView(this, params)
-            } catch (_: Exception) {}
+            } catch (_: Exception) {
+            }
         }
     }
 
@@ -219,7 +228,8 @@ class Handle : LinearLayout {
                     handler?.postDelayed({
                         try {
                             wm.removeView(this@Handle)
-                        } catch (_: Exception) {}
+                        } catch (_: Exception) {
+                        }
                     }, 10)
                 }
             })
@@ -231,7 +241,8 @@ class Handle : LinearLayout {
         mainHandler.post {
             try {
                 wm.updateViewLayout(this, params)
-            } catch (_: Exception) {}
+            } catch (_: Exception) {
+            }
         }
     }
 
@@ -264,9 +275,11 @@ class Handle : LinearLayout {
                 MotionEvent.ACTION_UP -> {
                     if (scrollingOpen) {
                         scrollingOpen = false
-                        context.eventManager.sendEvent(Event.ScrollOpenFinish(
-                            context.prefManager.drawerHandleSide
-                        ))
+                        context.eventManager.sendEvent(
+                            Event.ScrollOpenFinish(
+                                context.prefManager.drawerHandleSide
+                            )
+                        )
                     }
 
                     calledOpen = false
@@ -289,12 +302,14 @@ class Handle : LinearLayout {
                     context.vibrate(25L)
                     scrollingOpen = true
 
-                    context.eventManager.sendEvent(Event.ScrollInDrawer(
-                        context.prefManager.drawerHandleSide,
-                        scrollTotalX.absoluteValue,
-                        true,
-                        distanceX,
-                    ))
+                    context.eventManager.sendEvent(
+                        Event.ScrollInDrawer(
+                            context.prefManager.drawerHandleSide,
+                            scrollTotalX.absoluteValue,
+                            true,
+                            distanceX,
+                        )
+                    )
                 }
                 true
             } else false
@@ -313,8 +328,17 @@ class Handle : LinearLayout {
             }
         }
 
+        override fun onSingleTapUp(e: MotionEvent): Boolean {
+            return if (!calledOpen && context.prefManager.drawerHandleTapToOpen) {
+                calledOpen = true
+                context.vibrate(25L)
+                context.eventManager.sendEvent(Event.ShowDrawer)
+                true
+            } else false
+        }
+
         override fun onDoubleTap(e: MotionEvent): Boolean {
-            return if (!calledOpen) {
+            return if (!calledOpen && !context.prefManager.drawerHandleTapToOpen) {
                 calledOpen = true
                 context.vibrate(25L)
                 context.eventManager.sendEvent(Event.ShowDrawer)
