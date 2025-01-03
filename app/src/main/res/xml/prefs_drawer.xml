@@ -178,7 +178,7 @@
             android:defaultValue="6"
             android:icon="@drawable/expand_horiz"
             app:minValue="1"
-            app:maxValue="24"
+            app:maxValue="64"
             app:units="dp"
             android:dependency="show_drawer_handle"
             />
