@@ -217,6 +217,8 @@
     <string name="drawer_side_padding_desc">Ustawia ile odstępu będzie po bokach ekranu od widżetów.</string>
     <string name="drawer_hide_when_notification_panel_expanded">Hide When Notification Panel Opened</string>
     <string name="drawer_hide_when_notification_panel_expanded_desc">Dismiss the widget drawer when the notification panel is expanded behind it.</string>
+    <string name="drawer_handle_tap_to_open">Single-Tap Handle to Open Drawer</string>
+    <string name="drawer_handle_tap_to_open_desc">Single-tapping the handle will open the drawer immediately instead of requiring a drag or a double tap.</string>
     <string name="show_only_when_locked">Pokaż tylko wtedy, gdy zablokowany</string>
     <string name="show_only_when_locked_desc">Pokazuj pasek otwierający menu z widżetami, tylko gdy jesteś na ekranie blokady.</string>
     <string name="allow_show_frame">Allow Showing Frame</string>
