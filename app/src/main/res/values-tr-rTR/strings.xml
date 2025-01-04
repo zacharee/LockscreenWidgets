@@ -217,6 +217,8 @@
     <string name="drawer_side_padding_desc">Ekranın kenarları ile dış widget\'ların kenarları arasında ne kadar boşluk olacağını ayarlayın.</string>
     <string name="drawer_hide_when_notification_panel_expanded">Bildirim Paneli Açıldığında Gizle</string>
     <string name="drawer_hide_when_notification_panel_expanded_desc">Bildirim paneli arkaplanda genişletildiğinde widget çekmecesini kapatın.</string>
+    <string name="drawer_handle_tap_to_open">Single-Tap Handle to Open Drawer</string>
+    <string name="drawer_handle_tap_to_open_desc">Single-tapping the handle will open the drawer immediately instead of requiring a drag or a double tap.</string>
     <string name="show_only_when_locked">Yalnızca Kilitli olduğunda göster</string>
     <string name="show_only_when_locked_desc">Çekmece tutamaçını yalnızca cihaz kilit ekranındayken göster.</string>
     <string name="allow_show_frame">Çerçeveyi Göstermeye İzin Ver</string>
