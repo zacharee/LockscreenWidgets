@@ -16,22 +16,26 @@ fun WindowManager.safeAddView(view: View, params: ViewGroup.LayoutParams): Boole
     }
 }
 
-fun WindowManager.safeRemoveView(view: View): Boolean {
+fun WindowManager.safeRemoveView(view: View, logError: Boolean = true): Boolean {
     return try {
         removeView(view)
         true
     } catch (e: Exception) {
-        view.context.logUtils.debugLog("Error removing view", e)
+        if (logError) {
+            view.context.logUtils.debugLog("Error removing view", e)
+        }
         false
     }
 }
 
-fun WindowManager.safeRemoveViewImmediate(view: View): Boolean {
+fun WindowManager.safeRemoveViewImmediate(view: View, logError: Boolean = true): Boolean {
     return try {
         removeViewImmediate(view)
         true
     } catch (e: Exception) {
-        view.context.logUtils.debugLog("Error removing view immediate", e)
+        if (logError) {
+            view.context.logUtils.debugLog("Error removing view immediate", e)
+        }
         false
     }
 }

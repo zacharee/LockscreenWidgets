@@ -331,12 +331,14 @@ class WidgetFrameView(context: Context, attrs: AttributeSet) : ConstraintLayout(
                     postDelayed({
                         context.logUtils.debugLog("Posted removal")
 
-                        wm.safeRemoveView(this)
+                        if (isAttachedToWindow) {
+                            wm.safeRemoveView(this)
+                        }
                         animationState = AnimationState.STATE_IDLE
                     }, 50)
                 }
             } else if (!isAttachedToWindow) {
-                wm.safeRemoveView(this)
+                wm.safeRemoveView(this, false)
 
                 animationState = AnimationState.STATE_IDLE
             }
