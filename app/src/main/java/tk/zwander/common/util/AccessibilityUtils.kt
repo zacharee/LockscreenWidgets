@@ -86,7 +86,7 @@ object AccessibilityUtils {
         //ID, which is unique to One UI (it's the three-dot button), and is only
         //visible when the NC is fully expanded.
         if (prefManager.showInNotificationCenter && !nodeState.hasMoreButton.value) {
-            if (node.hasVisibleIds("com.android.systemui:id/more_button")) {
+            if (node.hasVisibleIds("com.android.systemui:id/more_button") || node.hasVisibleIds("com.android.systemui:id/edit_button")) {
                 nodeState.hasMoreButton.value = true
             }
         }
