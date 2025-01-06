@@ -146,5 +146,5 @@ class LogUtils private constructor(private val context: Context) {
         }
     }
 
-    private class DefaultException : Exception()
+    class DefaultException : Exception()
 }

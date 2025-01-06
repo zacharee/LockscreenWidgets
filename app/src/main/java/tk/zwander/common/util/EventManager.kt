@@ -85,7 +85,7 @@ class EventManager private constructor(private val context: Context) {
     }
 
     fun sendEvent(event: Event) {
-        context.logUtils.debugLog("Sending event $event")
+        context.logUtils.debugLog("Sending event $event", null)
 
         observers.forEach {
             it.onEvent(event)

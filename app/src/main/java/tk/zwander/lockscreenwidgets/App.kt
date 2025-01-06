@@ -57,7 +57,7 @@ class App : Application(), CoroutineScope by MainScope() {
         override fun onReceive(context: Context?, intent: Intent?) {
             when (intent?.action) {
                 Intent.ACTION_SCREEN_OFF -> {
-                    logUtils.debugLog("Received screen off: ${power.isInteractive}")
+                    logUtils.debugLog("Received screen off: ${power.isInteractive}", null)
 
                     if (!power.isInteractive) {
                         eventManager.sendEvent(Event.ScreenOff)
@@ -66,7 +66,7 @@ class App : Application(), CoroutineScope by MainScope() {
                     }
                 }
                 Intent.ACTION_SCREEN_ON -> {
-                    logUtils.debugLog("Received screen on: ${power.isInteractive}")
+                    logUtils.debugLog("Received screen on: ${power.isInteractive}", null)
 
                     if (power.isInteractive) {
                         eventManager.sendEvent(Event.ScreenOn)

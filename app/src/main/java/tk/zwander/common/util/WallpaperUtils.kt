@@ -46,7 +46,7 @@ class WallpaperUtils private constructor(context: Context) : ContextWrapper(cont
         override fun onWallpaperColorsChanged(colors: WallpaperColors?, which: Int, userId: Int) {}
 
         override fun onWallpaperChanged() {
-            logUtils.debugLog("Wallpaper changed, clearing cache.")
+            logUtils.debugLog("Wallpaper changed, clearing cache.", null)
             cachedWallpaper = null
         }
     }
@@ -87,7 +87,7 @@ class WallpaperUtils private constructor(context: Context) : ContextWrapper(cont
                 desc?.let { pfd ->
                     pfd.fileDescriptor?.let { fd ->
                         BitmapFactory.decodeFileDescriptor(fd)?.also { bmp ->
-                            logUtils.debugLog("Caching new wallpaper $bmp.")
+                            logUtils.debugLog("Caching new wallpaper $bmp.", null)
                             cachedWallpaper = bmp
                         }
                     }
@@ -140,7 +140,7 @@ class WallpaperUtils private constructor(context: Context) : ContextWrapper(cont
                     ) as? ParcelFileDescriptor
                 }
             } catch (e: NoSuchMethodError) {
-                logUtils.debugLog("Missing getWallpaperWithFeature, using getWallpaper instead.")
+                logUtils.debugLog("Missing getWallpaperWithFeature, using getWallpaper instead.", null)
                 old()
             }
         }

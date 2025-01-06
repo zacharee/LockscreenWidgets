@@ -96,7 +96,7 @@ class DismissOrUnlockActivity : AppCompatActivity(), EventObserver {
                 //If we're below 8.0, we have to do some weirdness to dismiss the lock screen.
                 with (eventManager) {
                     registerListener { _: Event.LockscreenDismissed ->
-                        logUtils.debugLog("Dismiss done.")
+                        logUtils.debugLog("Dismiss done.", null)
                         finish()
                     }
                 }

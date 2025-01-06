@@ -625,7 +625,7 @@ class WidgetFrameDelegate private constructor(context: Context) : BaseDelegate<W
                         "hideOnEdgePanel: ${prefManager.hideOnEdgePanel}\n" +
                         "hidingForPresentApp: ${state.hidingForPresentApp}\n" +
                         "canShowFrameFromTasker: ${prefManager.canShowFrameFromTasker}\n" +
-                        "forceShowFrame: ${prefManager.forceShowFrame}\n"
+                        "forceShowFrame: ${prefManager.forceShowFrame}\n",
             )
         }
     }
@@ -650,15 +650,15 @@ class WidgetFrameDelegate private constructor(context: Context) : BaseDelegate<W
         logUtils.debugLog("updateWallpaperLayerIfNeeded() called $showWallpaperLayer")
 
         if (showWallpaperLayer) {
-            logUtils.debugLog("Trying to retrieve wallpaper")
+            logUtils.debugLog("Trying to retrieve wallpaper", null)
 
             try {
                 val drawable = wallpaperUtils.wallpaperDrawable
 
-                logUtils.debugLog("Retrieved wallpaper: $drawable")
+                logUtils.debugLog("Retrieved wallpaper: $drawable", null)
 
                 drawable?.mutate()?.apply {
-                    logUtils.debugLog("Setting wallpaper drawable.")
+                    logUtils.debugLog("Setting wallpaper drawable.", null)
 
                     binding.wallpaperBackground.setImageDrawable(this)
                     binding.wallpaperBackground.colorFilter = PorterDuffColorFilter(
@@ -690,7 +690,7 @@ class WidgetFrameDelegate private constructor(context: Context) : BaseDelegate<W
                 binding.wallpaperBackground.setImageDrawable(null)
             }
         } else {
-            logUtils.debugLog("Removing wallpaper")
+            logUtils.debugLog("Removing wallpaper", null)
 
             binding.wallpaperBackground.setImageDrawable(null)
         }
@@ -760,35 +760,35 @@ class WidgetFrameDelegate private constructor(context: Context) : BaseDelegate<W
         var changed = false
 
         if (params.x != newX) {
-            logUtils.debugLog("x changed")
+            logUtils.debugLog("x changed", null)
 
             changed = true
             params.x = newX
         }
 
         if (params.y != newY) {
-            logUtils.debugLog("y changed")
+            logUtils.debugLog("y changed", null)
 
             changed = true
             params.y = newY
         }
 
         if (params.width != newW) {
-            logUtils.debugLog("w changed")
+            logUtils.debugLog("w changed", null)
 
             changed = true
             params.width = newW
         }
 
         if (params.height != newH) {
-            logUtils.debugLog("h changed")
+            logUtils.debugLog("h changed", null)
 
             changed = true
             params.height = newH
         }
 
         if (changed) {
-            logUtils.debugLog("Updating params")
+            logUtils.debugLog("Updating params", null)
 
             binding.frame.updateWindow(wm, params)
             mainHandler.post {

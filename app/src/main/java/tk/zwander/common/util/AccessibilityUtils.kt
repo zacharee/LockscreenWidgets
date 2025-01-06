@@ -325,6 +325,9 @@ object AccessibilityUtils {
             if (initialRun || (isScreenOn &&
                 (((isOnKeyguard || prefManager.showInNotificationCenter) && prefManager.widgetFrameEnabled /* This is only needed when the frame is enabled */) ||
                         (prefManager.drawerEnabled && drawerDelegate.isAttached && prefManager.drawerHideWhenNotificationPanelOpen)))) {
+
+                logUtils.debugLog("Running window operation.", if (initialRun) LogUtils.DefaultException() else null)
+
                 val windowInfo = getWindows()?.let {
                     getWindows(it, isOnKeyguard).also { windowInfo ->
                         logUtils.debugLog("Got windows $windowInfo", null)
@@ -345,11 +348,13 @@ object AccessibilityUtils {
                     windowInfo?.sysUiWindowNodes?.let { sysUiWindowNodes ->
                         logUtils.debugLog(
                             sysUiWindowNodes.filter { it.isVisibleToUser }.map { it.viewIdResourceName }
-                                .toString()
+                                .toString(),
+                            null,
                         )
                     }
 
                     windowInfo?.sysUiWindowViewIds?.let { sysUiWindowViewIds ->
+                        logUtils.debugLog("Found IDs\n${sysUiWindowViewIds.joinToString("\n")}", null)
                         coroutineScope {
                             launch(Dispatchers.Main) {
                                 frameDelegate.setNewDebugIdItems(sysUiWindowViewIds.toList())
@@ -446,6 +451,8 @@ object AccessibilityUtils {
         getWindows: () -> List<AccessibilityWindowInfo>?,
     ) = async(Dispatchers.Main) {
         with(context) {
+            logUtils.debugLog("Running accessibility job")
+
             //This block here runs even when unlocked, but it only takes a millisecond at most,
             //so it shouldn't be noticeable to the user. We use this to check the current keyguard
             //state and, if applicable, send the keyguard dismissal broadcast.
@@ -493,25 +500,29 @@ object AccessibilityUtils {
             if (isDebug) {
                 // Nest this in the debug check so that loop doesn't have to run always.
                 try {
-                    logUtils.debugLog("Source Node ID: ${event.sourceNodeId}, Window ID: ${event.windowId}, Source ID Name: ${event.source?.viewIdResourceName}")
-                    logUtils.debugLog(
-                        "Records: ${
-                            run {
-                                val records = ArrayList<String>()
-                                for (i in 0 until event.recordCount) {
-                                    val record = event.getRecord(i)
-                                    records.add("$record ${record.sourceNodeId} ${record.windowId} ${record.source?.viewIdResourceName}")
+                    logUtils.debugLog("Source Node ID: ${event.sourceNodeId}, Window ID: ${event.windowId}, Source ID Name: ${event.source?.viewIdResourceName}", null)
+
+                    if (event.recordCount > 0) {
+                        logUtils.debugLog(
+                            "Records: ${
+                                run {
+                                    val records = ArrayList<String>()
+                                    for (i in 0 until event.recordCount) {
+                                        val record = event.getRecord(i)
+                                        records.add("$record ${record.sourceNodeId} ${record.windowId} ${record.source?.viewIdResourceName}")
+                                    }
+                                    records.joinToString(",,,,,,,,")
                                 }
-                                records.joinToString(",,,,,,,,")
-                            }
-                        }"
-                    )
+                            }",
+                            null,
+                        )
+                    }
                 } catch (e: Exception) {
                     logUtils.debugLog("Error printing debug info", e)
                 }
             }
 
-            logUtils.debugLog("Accessibility event: $event, isScreenOn: ${isScreenOn}, wasOnKeyguard: $isOnKeyguard, ${drawerDelegate.state}")
+            logUtils.debugLog("Accessibility event: $event, isScreenOn: ${isScreenOn}, wasOnKeyguard: $isOnKeyguard, ${drawerDelegate.state}", null)
 
             frameDelegate.updateStateAndWindowState(
                 wm = wm,
@@ -543,18 +554,19 @@ object AccessibilityUtils {
                             "matchesWindowStateChanged: $matchesWindowStateChanged\n" +
                             "packageName: ${event.packageName}\n" +
                             "handlingDrawerClick: ${drawerDelegate.commonState.handlingClick}\n" +
-                            "handlingFrameClick: ${frameDelegate.commonState.handlingClick}"
+                            "handlingFrameClick: ${frameDelegate.commonState.handlingClick}",
+                    null,
                 )
 
                 if ((matchesWindowsChanged || matchesWindowStateChanged)
                     && event.packageName != packageName
                     && (drawerDelegate.commonState.handlingClick || frameDelegate.commonState.handlingClick)
                 ) {
-                    logUtils.debugLog("Starting dismiss Activity because of window change.")
+                    logUtils.debugLog("Starting dismiss Activity because of window change.", null)
                     DismissOrUnlockActivity.launch(context)
 
                     if (drawerDelegate.commonState.handlingClick) {
-                        logUtils.debugLog("Hiding drawer because of window change")
+                        logUtils.debugLog("Hiding drawer because of window change", null)
                         eventManager.sendEvent(Event.CloseDrawer)
                     }
 
