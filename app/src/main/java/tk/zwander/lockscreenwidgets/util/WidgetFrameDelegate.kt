@@ -508,7 +508,9 @@ class WidgetFrameDelegate private constructor(context: Context) : BaseDelegate<W
     }
 
     private fun removeWindow(wm: WindowManager) {
-        logUtils.debugLog("Removing overlay")
+        if (isAttached) {
+            logUtils.debugLog("Removing overlay")
+        }
 
         adapter.currentEditingInterfacePosition = -1
 

@@ -8,3 +8,6 @@ val Context.isTouchWiz: Boolean
 
 val Context.isOneUI: Boolean
     get() = isTouchWiz && Build.VERSION.SDK_INT >= Build.VERSION_CODES.P
+
+val Context.isPixelUI: Boolean
+    get() = packageManager.hasSystemFeature("com.google.android.feature.PIXEL_EXPERIENCE")

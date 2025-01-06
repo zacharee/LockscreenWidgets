@@ -86,7 +86,9 @@ object AccessibilityUtils {
         //ID, which is unique to One UI (it's the three-dot button), and is only
         //visible when the NC is fully expanded.
         if (prefManager.showInNotificationCenter && !nodeState.hasMoreButton.value) {
-            if (node.hasVisibleIds("com.android.systemui:id/more_button") || node.hasVisibleIds("com.android.systemui:id/edit_button")) {
+            if (node.hasVisibleIds("com.android.systemui:id/more_button") ||
+                node.hasVisibleIds("com.android.systemui:id/edit_button") ||
+                node.hasVisibleIds("com.android.systemui:id/settings_button_container")) {
                 nodeState.hasMoreButton.value = true
             }
         }
@@ -319,6 +321,18 @@ object AccessibilityUtils {
         getWindows: () -> List<AccessibilityWindowInfo>?,
         initialRun: Boolean = false,
     ) {
+        context.logUtils.debugLog("Trying to run window operation " +
+                "${initialRun}, " +
+                "${isScreenOn}, " +
+                "${isOnKeyguard}, " +
+                "${context.prefManager.showInNotificationCenter}, " +
+                "${context.prefManager.widgetFrameEnabled}, " +
+                "${context.prefManager.drawerEnabled}, " +
+                "${drawerDelegate.isAttached}, " +
+                "${context.prefManager.drawerHideWhenNotificationPanelOpen}",
+            null,
+        )
+
         with(context) {
             //The below block can (very rarely) take over half a second to execute, so only run it
             //if we actually need to (i.e. on the lock screen and screen is on).
@@ -335,6 +349,7 @@ object AccessibilityUtils {
                 }
 
                 windowInfo?.sysUiWindowViewIds?.let { sysUiWindowViewIds ->
+                    logUtils.debugLog("Found IDs\n${sysUiWindowViewIds.joinToString("\n")}", null)
                     //Update any ID list widgets on the new IDs
                     coroutineScope {
                         launch {
@@ -354,7 +369,6 @@ object AccessibilityUtils {
                     }
 
                     windowInfo?.sysUiWindowViewIds?.let { sysUiWindowViewIds ->
-                        logUtils.debugLog("Found IDs\n${sysUiWindowViewIds.joinToString("\n")}", null)
                         coroutineScope {
                             launch(Dispatchers.Main) {
                                 frameDelegate.setNewDebugIdItems(sysUiWindowViewIds.toList())

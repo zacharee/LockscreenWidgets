@@ -14,6 +14,7 @@ import tk.zwander.common.util.backup.BackupRestoreManager
 import tk.zwander.common.util.canReadWallpaper
 import tk.zwander.common.util.handler
 import tk.zwander.common.util.isOneUI
+import tk.zwander.common.util.isPixelUI
 import tk.zwander.common.util.isTouchWiz
 import tk.zwander.common.util.prefManager
 import tk.zwander.lockscreenwidgets.R
@@ -51,7 +52,7 @@ class SettingsFragment : CommonPreferenceFragment() {
 
         //Currently, the option to show the frame when the notification center is fully expanded is only
         //for Samsung One UI 1.0 and above, so we need to hide the relevant toggles.
-        val ncCondition = requireContext().isOneUI
+        val ncCondition = requireContext().isOneUI || (requireContext().isPixelUI && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S)
 
         findPreference<SwitchPreferenceCompat>(PrefManager.KEY_SHOW_IN_NOTIFICATION_CENTER)?.apply {
             if (!ncCondition) {

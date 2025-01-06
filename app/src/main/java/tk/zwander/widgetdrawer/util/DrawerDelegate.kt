@@ -501,7 +501,9 @@ class DrawerDelegate private constructor(context: Context) :
             }
 
             try {
-                wm.updateViewLayout(drawer.root, params)
+                if (isAttached) {
+                    wm.updateViewLayout(drawer.root, params)
+                }
             } catch (e: Exception) {
                 logUtils.debugLog("Error updating drawer", e)
             }
