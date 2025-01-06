@@ -56,30 +56,21 @@ fun rememberIntroSlides(
         mutableStateOf(context.isAccessibilityEnabled)
     }
     var hasNotificationAccess by remember {
-        mutableStateOf(
-            startReason != OnboardingActivity.RetroMode.NOTIFICATION ||
-                    context.isNotificationListenerActive
-        )
+        mutableStateOf(context.isNotificationListenerActive)
     }
     var canReadWallpaper by remember {
-        mutableStateOf(
-            startReason != OnboardingActivity.RetroMode.STORAGE ||
-                    context.canReadWallpaper
-        )
+        mutableStateOf(context.canReadWallpaper)
     }
 
     val storagePermissionLauncher =
         rememberLauncherForActivityResult(contract = ActivityResultContracts.RequestMultiplePermissions()) {
-            canReadWallpaper = startReason != OnboardingActivity.RetroMode.STORAGE ||
-                    context.canReadWallpaper
+            canReadWallpaper = context.canReadWallpaper
         }
 
     LifecycleEffect(Lifecycle.State.RESUMED) {
         hasAccessibility = context.isAccessibilityEnabled
-        hasNotificationAccess = startReason != OnboardingActivity.RetroMode.NOTIFICATION ||
-                context.isNotificationListenerActive
-        canReadWallpaper = startReason != OnboardingActivity.RetroMode.STORAGE ||
-                context.canReadWallpaper
+        hasNotificationAccess = context.isNotificationListenerActive
+        canReadWallpaper = context.canReadWallpaper
     }
 
     DisposableEffect(key1 = startReason) {
@@ -112,9 +103,7 @@ fun rememberIntroSlides(
                 super.onChange(selfChange, uri)
 
                 if (listenUri == uri) {
-                    hasNotificationAccess =
-                        startReason != OnboardingActivity.RetroMode.NOTIFICATION ||
-                                context.isNotificationListenerActive
+                    hasNotificationAccess = context.isNotificationListenerActive
                 }
             }
         }
@@ -240,7 +229,7 @@ fun rememberIntroSlides(
                         Text(text = stringResource(id = if (hasNotificationAccess) R.string.granted else R.string.grant))
                     }
                 },
-                canMoveForward = { hasNotificationAccess || BuildConfig.DEBUG },
+                canMoveForward = { startReason != OnboardingActivity.RetroMode.NOTIFICATION || hasNotificationAccess || BuildConfig.DEBUG },
             ))
         }
 
@@ -324,7 +313,7 @@ fun rememberIntroSlides(
                         Text(text = stringResource(id = R.string.privacy_policy))
                     }
                 },
-                canMoveForward = { canReadWallpaper || BuildConfig.DEBUG },
+                canMoveForward = { startReason != OnboardingActivity.RetroMode.STORAGE || canReadWallpaper || BuildConfig.DEBUG },
             ))
         }
 
