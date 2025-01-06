@@ -73,7 +73,7 @@ class LogUtils private constructor(private val context: Context) {
 
     private fun createLogFileWriter(): BufferedWriter = FileOutputStream(logFile, true).bufferedWriter()
 
-    fun debugLog(message: String, throwable: Throwable? = DefaultException) {
+    fun debugLog(message: String, throwable: Throwable? = DefaultException()) {
         Bugsnag.leaveBreadcrumb(
             message,
             throwable?.takeIf { it !is DefaultException }?.let { mapOf("error" to throwable) } ?: mapOf(),
@@ -91,7 +91,7 @@ class LogUtils private constructor(private val context: Context) {
         }
     }
 
-    fun normalLog(message: String, throwable: Throwable? = DefaultException) {
+    fun normalLog(message: String, throwable: Throwable? = DefaultException()) {
         val fullMessage = generateFullMessage(message, throwable)
 
         Log.e(NORMAL_LOG_TAG, fullMessage)
@@ -146,7 +146,5 @@ class LogUtils private constructor(private val context: Context) {
         }
     }
 
-    private object DefaultException : Exception() {
-        private fun readResolve(): Any = DefaultException
-    }
+    private class DefaultException : Exception()
 }
