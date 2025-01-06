@@ -150,6 +150,7 @@ class IconPackManager private constructor(private val context: Context) : Contex
         )
     }
 
+    @Suppress("SameParameterValue")
     private fun getXml(name: String, packageName: String): XmlPullParser? {
         val res: Resources
         try {

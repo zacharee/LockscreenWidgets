@@ -1,330 +1,262 @@
-package tk.zwander.common.iconpacks;
+package tk.zwander.common.iconpacks
 
-import android.annotation.TargetApi;
-import android.graphics.Bitmap;
-import android.graphics.Canvas;
-import android.graphics.ColorFilter;
-import android.graphics.Paint;
-import android.graphics.Rect;
-import android.graphics.drawable.AdaptiveIconDrawable;
-import android.graphics.drawable.Drawable;
-import android.graphics.drawable.LayerDrawable;
-import android.os.Build;
-import android.os.SystemClock;
-
-import androidx.annotation.NonNull;
-import androidx.core.util.Supplier;
-
-import java.util.Calendar;
-import java.util.concurrent.TimeUnit;
+import android.annotation.TargetApi
+import android.graphics.Bitmap
+import android.graphics.Canvas
+import android.graphics.ColorFilter
+import android.graphics.Paint
+import android.graphics.Rect
+import android.graphics.drawable.AdaptiveIconDrawable
+import android.graphics.drawable.Drawable
+import android.graphics.drawable.LayerDrawable
+import android.os.Build
+import android.os.SystemClock
+import androidx.core.util.Supplier
+import java.util.Calendar
+import java.util.concurrent.TimeUnit
 
 /**
- * Wrapper over {@link AdaptiveIconDrawable} to intercept icon flattening logic for dynamic
+ * Wrapper over [AdaptiveIconDrawable] to intercept icon flattening logic for dynamic
  * clock icons
  */
 @TargetApi(Build.VERSION_CODES.O)
-public class ClockDrawableWrapper extends AdaptiveIconDrawable {
+class ClockDrawableWrapper private constructor(base: AdaptiveIconDrawable) :
+    AdaptiveIconDrawable(base.background, base.foreground) {
+    private val mAnimationInfo = AnimationInfo()
 
-    public static boolean sRunningInTest = false;
+    private class AnimationInfo {
+        var baseDrawableState: ConstantState? = null
 
-    private static final String TAG = "ClockDrawableWrapper";
+        var hourLayerIndex: Int = 0
+        var minuteLayerIndex: Int = 0
+        var secondLayerIndex: Int = 0
+        var defaultHour: Int = 0
+        var defaultMinute: Int = 0
+        var defaultSecond: Int = 0
 
-    private static final boolean DISABLE_SECONDS = true;
-    private static final int NO_COLOR = -1;
-
-    // Time after which the clock icon should check for an update. The actual invalidate
-    // will only happen in case of any change.
-    public static final long TICK_MS = DISABLE_SECONDS ? TimeUnit.MINUTES.toMillis(1) : 200L;
-
-    private static final String LAUNCHER_PACKAGE = "com.android.launcher3";
-    private static final String ROUND_ICON_METADATA_KEY = LAUNCHER_PACKAGE
-            + ".LEVEL_PER_TICK_ICON_ROUND";
-    private static final String HOUR_INDEX_METADATA_KEY = LAUNCHER_PACKAGE + ".HOUR_LAYER_INDEX";
-    private static final String MINUTE_INDEX_METADATA_KEY = LAUNCHER_PACKAGE
-            + ".MINUTE_LAYER_INDEX";
-    private static final String SECOND_INDEX_METADATA_KEY = LAUNCHER_PACKAGE
-            + ".SECOND_LAYER_INDEX";
-    private static final String DEFAULT_HOUR_METADATA_KEY = LAUNCHER_PACKAGE
-            + ".DEFAULT_HOUR";
-    private static final String DEFAULT_MINUTE_METADATA_KEY = LAUNCHER_PACKAGE
-            + ".DEFAULT_MINUTE";
-    private static final String DEFAULT_SECOND_METADATA_KEY = LAUNCHER_PACKAGE
-            + ".DEFAULT_SECOND";
-
-    /* Number of levels to jump per second for the second hand */
-    private static final int LEVELS_PER_SECOND = 10;
-
-    public static final int INVALID_VALUE = -1;
-
-    private int mTargetSdkVersion;
-
-    private final AnimationInfo mAnimationInfo = new AnimationInfo();
-    private AnimationInfo mThemeInfo = null;
-
-    private ClockDrawableWrapper(AdaptiveIconDrawable base) {
-        super(base.getBackground(), base.getForeground());
-    }
-
-    @Override
-    public Drawable getMonochrome() {
-        if (mThemeInfo == null) {
-            return null;
-        }
-        Drawable d = mThemeInfo.baseDrawableState.newDrawable().mutate();
-        if (d instanceof AdaptiveIconDrawable) {
-            Drawable mono = ((AdaptiveIconDrawable) d).getForeground();
-            mThemeInfo.applyTime(Calendar.getInstance(), (LayerDrawable) mono);
-            return mono;
-        }
-        return null;
-    }
-
-    public static ClockDrawableWrapper forMeta(int targetSdkVersion,
-                                               @NonNull ClockMetadata metadata, Supplier<Drawable> drawableProvider) {
-        Drawable drawable = drawableProvider.get().mutate();
-        if (!(drawable instanceof AdaptiveIconDrawable)) {
-            return null;
+        fun copyForIcon(icon: Drawable): AnimationInfo {
+            val result = AnimationInfo()
+            result.baseDrawableState = icon.constantState
+            result.defaultHour = defaultHour
+            result.defaultMinute = defaultMinute
+            result.defaultSecond = defaultSecond
+            result.hourLayerIndex = hourLayerIndex
+            result.minuteLayerIndex = minuteLayerIndex
+            result.secondLayerIndex = secondLayerIndex
+            return result
         }
 
-        ClockDrawableWrapper wrapper =
-                new ClockDrawableWrapper((AdaptiveIconDrawable) drawable);
-        wrapper.mTargetSdkVersion = targetSdkVersion;
-        AnimationInfo info = wrapper.mAnimationInfo;
-
-        info.baseDrawableState = drawable.getConstantState();
-
-        info.hourLayerIndex = metadata.getHourLayerIndex();
-        info.minuteLayerIndex = metadata.getMinuteLayerIndex();
-        info.secondLayerIndex = metadata.getSecondLayerIndex();
-
-        info.defaultHour = metadata.getDefaultHour();
-        info.defaultMinute = metadata.getDefaultMinute();
-        info.defaultSecond = metadata.getDefaultSecond();
-
-        LayerDrawable foreground = (LayerDrawable) wrapper.getForeground();
-        int layerCount = foreground.getNumberOfLayers();
-        if (info.hourLayerIndex < 0 || info.hourLayerIndex >= layerCount) {
-            info.hourLayerIndex = INVALID_VALUE;
-        }
-        if (info.minuteLayerIndex < 0 || info.minuteLayerIndex >= layerCount) {
-            info.minuteLayerIndex = INVALID_VALUE;
-        }
-        if (info.secondLayerIndex < 0 || info.secondLayerIndex >= layerCount) {
-            info.secondLayerIndex = INVALID_VALUE;
-        } else if (DISABLE_SECONDS) {
-            foreground.setDrawable(info.secondLayerIndex, null);
-            info.secondLayerIndex = INVALID_VALUE;
-        }
-        info.applyTime(Calendar.getInstance(), foreground);
-        return wrapper;
-    }
-
-    private static class AnimationInfo {
-
-        public ConstantState baseDrawableState;
-
-        public int hourLayerIndex;
-        public int minuteLayerIndex;
-        public int secondLayerIndex;
-        public int defaultHour;
-        public int defaultMinute;
-        public int defaultSecond;
-
-        public AnimationInfo copyForIcon(Drawable icon) {
-            AnimationInfo result = new AnimationInfo();
-            result.baseDrawableState = icon.getConstantState();
-            result.defaultHour = defaultHour;
-            result.defaultMinute = defaultMinute;
-            result.defaultSecond = defaultSecond;
-            result.hourLayerIndex = hourLayerIndex;
-            result.minuteLayerIndex = minuteLayerIndex;
-            result.secondLayerIndex = secondLayerIndex;
-            return result;
-        }
-
-        boolean applyTime(Calendar time, LayerDrawable foregroundDrawable) {
-            time.setTimeInMillis(System.currentTimeMillis());
+        fun applyTime(time: Calendar, foregroundDrawable: LayerDrawable): Boolean {
+            time.timeInMillis = System.currentTimeMillis()
 
             // We need to rotate by the difference from the default time if one is specified.
-            int convertedHour = (time.get(Calendar.HOUR) + (12 - defaultHour)) % 12;
-            int convertedMinute = (time.get(Calendar.MINUTE) + (60 - defaultMinute)) % 60;
-            int convertedSecond = (time.get(Calendar.SECOND) + (60 - defaultSecond)) % 60;
+            val convertedHour = (time[Calendar.HOUR] + (12 - defaultHour)) % 12
+            val convertedMinute = (time[Calendar.MINUTE] + (60 - defaultMinute)) % 60
+            val convertedSecond = (time[Calendar.SECOND] + (60 - defaultSecond)) % 60
 
-            boolean invalidate = false;
+            var invalidate = false
             if (hourLayerIndex != INVALID_VALUE) {
-                final Drawable hour = foregroundDrawable.getDrawable(hourLayerIndex);
-                if (hour.setLevel(convertedHour * 60 + time.get(Calendar.MINUTE))) {
-                    invalidate = true;
+                val hour = foregroundDrawable.getDrawable(hourLayerIndex)
+                if (hour.setLevel(convertedHour * 60 + time[Calendar.MINUTE])) {
+                    invalidate = true
                 }
             }
 
             if (minuteLayerIndex != INVALID_VALUE) {
-                final Drawable minute = foregroundDrawable.getDrawable(minuteLayerIndex);
-                if (minute.setLevel(time.get(Calendar.HOUR) * 60 + convertedMinute)) {
-                    invalidate = true;
+                val minute = foregroundDrawable.getDrawable(minuteLayerIndex)
+                if (minute.setLevel(time[Calendar.HOUR] * 60 + convertedMinute)) {
+                    invalidate = true
                 }
             }
 
             if (secondLayerIndex != INVALID_VALUE) {
-                final Drawable second = foregroundDrawable.getDrawable(secondLayerIndex);
+                val second = foregroundDrawable.getDrawable(secondLayerIndex)
                 if (second.setLevel(convertedSecond * LEVELS_PER_SECOND)) {
-                    invalidate = true;
+                    invalidate = true
                 }
             }
 
-            return invalidate;
+            return invalidate
         }
     }
 
-    private static class ClockIconDrawable extends FastBitmapDrawable implements Runnable {
+    private class ClockIconDrawable(cs: ClockConstantState) :
+        FastBitmapDrawable(cs.mBitmap, cs.mIconColor), Runnable {
+        private val mTime: Calendar = Calendar.getInstance()
 
-        private final Calendar mTime = Calendar.getInstance();
+        private val mBoundsOffset = cs.mBoundsOffset
+        private val mAnimInfo =
+            cs.mAnimInfo
 
-        private final float mBoundsOffset;
-        private final AnimationInfo mAnimInfo;
+        private val mBG = cs.mBG
+        private val mBgPaint = Paint(Paint.FILTER_BITMAP_FLAG or Paint.ANTI_ALIAS_FLAG)
+        private val mBgFilter = cs.mBgFilter
+        private val mThemedFgColor: Int
 
-        private final Bitmap mBG;
-        private final Paint mBgPaint = new Paint(Paint.FILTER_BITMAP_FLAG | Paint.ANTI_ALIAS_FLAG);
-        private final ColorFilter mBgFilter;
-        private final int mThemedFgColor;
+        private val mFullDrawable: AdaptiveIconDrawable
+        private val mFG: LayerDrawable
+        private val mCanvasScale: Float
 
-        private final AdaptiveIconDrawable mFullDrawable;
-        private final LayerDrawable mFG;
-        private final float mCanvasScale;
-
-        ClockIconDrawable(ClockConstantState cs) {
-            super(cs.mBitmap, cs.mIconColor);
-            mBoundsOffset = cs.mBoundsOffset;
-            mAnimInfo = cs.mAnimInfo;
-
-            mBG = cs.mBG;
-            mBgFilter = cs.mBgFilter;
-            mBgPaint.setColorFilter(cs.mBgFilter);
-            mThemedFgColor = cs.mThemedFgColor;
+        init {
+            mBgPaint.setColorFilter(cs.mBgFilter)
+            mThemedFgColor = cs.mThemedFgColor
 
             mFullDrawable =
-                    (AdaptiveIconDrawable) mAnimInfo.baseDrawableState.newDrawable().mutate();
-            mFG = (LayerDrawable) mFullDrawable.getForeground();
+                mAnimInfo!!.baseDrawableState!!.newDrawable().mutate() as AdaptiveIconDrawable
+            mFG = mFullDrawable.foreground as LayerDrawable
 
             // Time needs to be applied here since drawInternal is NOT guaranteed to be called
             // before this foreground drawable is shown on the screen.
-            mAnimInfo.applyTime(mTime, mFG);
-            mCanvasScale = 1 - 2 * mBoundsOffset;
+            mAnimInfo.applyTime(mTime, mFG)
+            mCanvasScale = 1 - 2 * mBoundsOffset
         }
 
-        @Override
-        public void setAlpha(int alpha) {
-            super.setAlpha(alpha);
-            mBgPaint.setAlpha(alpha);
-            mFG.setAlpha(alpha);
+        override fun setAlpha(alpha: Int) {
+            super.setAlpha(alpha)
+            mBgPaint.alpha = alpha
+            mFG.alpha = alpha
         }
 
-        @Override
-        protected void onBoundsChange(Rect bounds) {
-            super.onBoundsChange(bounds);
+        override fun onBoundsChange(bounds: Rect) {
+            super.onBoundsChange(bounds)
 
             // b/211896569 AdaptiveIcon does not work properly when bounds
             // are not aligned to top/left corner
-            mFullDrawable.setBounds(0, 0, bounds.width(), bounds.height());
+            mFullDrawable.setBounds(0, 0, bounds.width(), bounds.height())
         }
 
-        @Override
-        public void drawInternal(Canvas canvas, Rect bounds) {
+        public override fun drawInternal(canvas: Canvas, bounds: Rect) {
             if (mAnimInfo == null) {
-                super.drawInternal(canvas, bounds);
-                return;
+                super.drawInternal(canvas, bounds)
+                return
             }
-            canvas.drawBitmap(mBG, null, bounds, mBgPaint);
+            canvas.drawBitmap(mBG, null, bounds, mBgPaint)
 
             // prepare and draw the foreground
-            mAnimInfo.applyTime(mTime, mFG);
-            int saveCount = canvas.save();
-            canvas.translate(bounds.left, bounds.top);
-            canvas.scale(mCanvasScale, mCanvasScale, bounds.width() / 2, bounds.height() / 2);
-            canvas.clipPath(mFullDrawable.getIconMask());
-            mFG.draw(canvas);
-            canvas.restoreToCount(saveCount);
+            mAnimInfo.applyTime(mTime, mFG)
+            val saveCount = canvas.save()
+            canvas.translate(bounds.left.toFloat(), bounds.top.toFloat())
+            canvas.scale(mCanvasScale, mCanvasScale, bounds.width() / 2f, bounds.height() / 2f)
+            canvas.clipPath(mFullDrawable.iconMask)
+            mFG.draw(canvas)
+            canvas.restoreToCount(saveCount)
 
-            reschedule();
+            reschedule()
         }
 
-        @Override
-        public boolean isThemed() {
-            return mBgPaint.getColorFilter() != null;
+        override val isThemed: Boolean
+            get() = mBgPaint.colorFilter != null
+
+        override fun updateFilter() {
+            super.updateFilter()
+            val alpha = if (mIsDisabled) (mDisabledAlpha * FULLY_OPAQUE).toInt() else FULLY_OPAQUE
+            setAlpha(alpha)
+            mBgPaint.setColorFilter(if (mIsDisabled) disabledColorFilter else mBgFilter)
+            mFG.colorFilter =
+                if (mIsDisabled) disabledColorFilter else null
         }
 
-        @Override
-        protected void updateFilter() {
-            super.updateFilter();
-            int alpha = mIsDisabled ? (int) (mDisabledAlpha * FULLY_OPAQUE) : FULLY_OPAQUE;
-            setAlpha(alpha);
-            mBgPaint.setColorFilter(mIsDisabled ? getDisabledColorFilter() : mBgFilter);
-            mFG.setColorFilter(mIsDisabled ? getDisabledColorFilter() : null);
-        }
+        override val iconColor: Int
+            get() = if (isThemed) mThemedFgColor else super.iconColor
 
-        @Override
-        public int getIconColor() {
-            return isThemed() ? mThemedFgColor : super.getIconColor();
-        }
-
-        @Override
-        public void run() {
-            if (mAnimInfo.applyTime(mTime, mFG)) {
-                invalidateSelf();
+        override fun run() {
+            if (mAnimInfo!!.applyTime(mTime, mFG)) {
+                invalidateSelf()
             } else {
-                reschedule();
+                reschedule()
             }
         }
 
-        @Override
-        public boolean setVisible(boolean visible, boolean restart) {
-            boolean result = super.setVisible(visible, restart);
+        override fun setVisible(visible: Boolean, restart: Boolean): Boolean {
+            val result = super.setVisible(visible, restart)
             if (visible) {
-                reschedule();
+                reschedule()
             } else {
-                unscheduleSelf(this);
+                unscheduleSelf(this)
             }
-            return result;
+            return result
         }
 
-        private void reschedule() {
-            if (!isVisible()) {
-                return;
+        fun reschedule() {
+            if (!isVisible) {
+                return
             }
-            unscheduleSelf(this);
-            final long upTime = SystemClock.uptimeMillis();
-            final long step = TICK_MS; /* tick every 200 ms */
-            scheduleSelf(this, upTime - ((upTime % step)) + step);
+            unscheduleSelf(this)
+            val upTime = SystemClock.uptimeMillis()
+            val step = TICK_MS /* tick every 200 ms */
+            scheduleSelf(this, upTime - ((upTime % step)) + step)
         }
 
-        @Override
-        public FastBitmapConstantState newConstantState() {
-            return new ClockConstantState(mBitmap, mIconColor, mThemedFgColor, mBoundsOffset,
-                    mAnimInfo, mBG, mBgPaint.getColorFilter());
+        public override fun newConstantState(): FastBitmapConstantState {
+            return ClockConstantState(
+                mBitmap, mIconColor, mThemedFgColor, mBoundsOffset,
+                mAnimInfo, mBG, mBgPaint.colorFilter
+            )
         }
 
-        private static class ClockConstantState extends FastBitmapConstantState {
-
-            private final float mBoundsOffset;
-            private final AnimationInfo mAnimInfo;
-            private final Bitmap mBG;
-            private final ColorFilter mBgFilter;
-            private final int mThemedFgColor;
-
-            ClockConstantState(Bitmap bitmap, int color, int themedFgColor,
-                    float boundsOffset, AnimationInfo animInfo, Bitmap bg, ColorFilter bgFilter) {
-                super(bitmap, color);
-                mBoundsOffset = boundsOffset;
-                mAnimInfo = animInfo;
-                mBG = bg;
-                mBgFilter = bgFilter;
-                mThemedFgColor = themedFgColor;
+        private class ClockConstantState(
+            bitmap: Bitmap,
+            color: Int,
+            val mThemedFgColor: Int,
+            val mBoundsOffset: Float,
+            val mAnimInfo: AnimationInfo?,
+            val mBG: Bitmap,
+            val mBgFilter: ColorFilter
+        ) : FastBitmapConstantState(bitmap, color) {
+            public override fun createDrawable(): FastBitmapDrawable {
+                return ClockIconDrawable(this)
             }
+        }
+    }
 
-            @Override
-            public FastBitmapDrawable createDrawable() {
-                return new ClockIconDrawable(this);
+    companion object {
+        private const val DISABLE_SECONDS = true
+
+        // Time after which the clock icon should check for an update. The actual invalidate
+        // will only happen in case of any change.
+        val TICK_MS: Long = if (DISABLE_SECONDS) TimeUnit.MINUTES.toMillis(1) else 200L
+
+        /* Number of levels to jump per second for the second hand */
+        private const val LEVELS_PER_SECOND = 10
+
+        const val INVALID_VALUE: Int = -1
+
+        fun forMeta(
+            metadata: ClockMetadata,
+            drawableProvider: Supplier<Drawable?>
+        ): ClockDrawableWrapper? {
+            val drawable = drawableProvider.get()?.mutate() as? AdaptiveIconDrawable ?: return null
+
+            val wrapper =
+                ClockDrawableWrapper(drawable)
+            val info = wrapper.mAnimationInfo
+
+            info.baseDrawableState = drawable.constantState
+
+            info.hourLayerIndex = metadata.hourLayerIndex
+            info.minuteLayerIndex = metadata.minuteLayerIndex
+            info.secondLayerIndex = metadata.secondLayerIndex
+
+            info.defaultHour = metadata.defaultHour
+            info.defaultMinute = metadata.defaultMinute
+            info.defaultSecond = metadata.defaultSecond
+
+            val foreground = wrapper.foreground as LayerDrawable
+            val layerCount = foreground.numberOfLayers
+            if (info.hourLayerIndex < 0 || info.hourLayerIndex >= layerCount) {
+                info.hourLayerIndex = INVALID_VALUE
             }
+            if (info.minuteLayerIndex < 0 || info.minuteLayerIndex >= layerCount) {
+                info.minuteLayerIndex = INVALID_VALUE
+            }
+            if (info.secondLayerIndex < 0 || info.secondLayerIndex >= layerCount) {
+                info.secondLayerIndex = INVALID_VALUE
+            } else if (DISABLE_SECONDS) {
+                foreground.setDrawable(info.secondLayerIndex, null)
+                info.secondLayerIndex = INVALID_VALUE
+            }
+            info.applyTime(Calendar.getInstance(), foreground)
+            return wrapper
         }
     }
 }

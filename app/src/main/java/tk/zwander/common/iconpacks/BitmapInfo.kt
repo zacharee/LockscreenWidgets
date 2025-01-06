@@ -1,15 +1,14 @@
-package tk.zwander.common.iconpacks;
+package tk.zwander.common.iconpacks
 
-import androidx.annotation.IntDef;
+import androidx.annotation.IntDef
 
-public class BitmapInfo {
-    public static final int FLAG_THEMED = 1 << 0;
-    public static final int FLAG_NO_BADGE = 1 << 1;
-    public static final int FLAG_SKIP_USER_BADGE = 1 << 2;
-    @IntDef(flag = true, value = {
-            FLAG_THEMED,
-            FLAG_NO_BADGE,
-            FLAG_SKIP_USER_BADGE,
-    })
-    public @interface DrawableCreationFlags {}
+object BitmapInfo {
+    const val FLAG_THEMED: Int = 1
+    const val FLAG_NO_BADGE: Int = 1 shl 1
+    const val FLAG_SKIP_USER_BADGE: Int = 1 shl 2
+
+    @IntDef(
+        flag = true, value = [FLAG_THEMED, FLAG_NO_BADGE, FLAG_SKIP_USER_BADGE]
+    )
+    annotation class DrawableCreationFlags
 }
