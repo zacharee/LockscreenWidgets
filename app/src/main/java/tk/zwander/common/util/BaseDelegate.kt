@@ -164,13 +164,13 @@ abstract class BaseDelegate<State : Any>(context: Context) : ContextWrapper(cont
 
     open fun updateState(transform: (State) -> State) {
         val newState = transform(state)
-        logUtils.debugLog("Updating state from\n$state\nto\n$newState")
+        logUtils.debugLog("Updating state from\n$state\nto\n$newState", null)
         state = newState
     }
 
     fun updateCommonState(transform: (BaseState) -> BaseState) {
         val newState = transform(commonState)
-        logUtils.debugLog("Updating common state from\n$commonState\nto\n$newState")
+        logUtils.debugLog("Updating common state from\n$commonState\nto\n$newState", null)
         commonState = newState
     }
 
