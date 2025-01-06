@@ -97,7 +97,7 @@
     <string name="settings_screen_present_ids">Mevcut Olmayan Kimliklerde Gizle</string>
     <string name="settings_screen_present_ids_desc">Kilit Ekranı Widget\'ları, bu kimlikler ekranda olduğunda kendini gizleyecektir. Her iki Hata Ayıklama anahtarını etkinleştirerek ve çerçevenin gizlenmesini istediğinizde yeşil renkle vurgulanan kimliklere bakarak hangi kimliklerin buraya gitmesi gerektiğini bulabilirsiniz.</string>
     <string name="settings_screen_show_in_notification_center">Bildirim Gölgesi Tamamen Genişlediğinde Göster</string>
-    <string name="settings_screen_show_in_notification_center_desc">Samsung\'un One UI 1 (Pie) ve One UI 2 (10) bildirim merkezi tamamen genişletildiğinde saatin sağında biraz boş alan bulunur. Bu seçeneği etkinleştirmek, gölge tamamen genişletildiğinde widget çerçevesinin görünmesine neden olur. Bu durumun kendi bağımsız konumu ve boyutu vardır.</string>
+    <string name="settings_screen_show_in_notification_center_desc">Enabling this option will cause the widget frame to appear when the shade is fully expanded. This state has its own independent positioning and size.</string>
     <string name="settings_screen_show_on_main_lock_screen">Ana Kilit Ekranında Göster</string>
     <string name="settings_screen_show_on_main_lock_screen_desc">Bildirim merkezinde gösterme seçeneğini kullanıyorsanız, Kilit Ekranı Widget\'larının ana kilit ekranında gösterilmesini istemeyebilirsiniz. Çerçevenin yalnızca bildirim merkezi tamamen genişletildiğinde gösterilmesi için bu seçeneği devre dışı bırakın.</string>
     <string name="settings_screen_corner_radius">Köşe Yuvarlaklığı</string>
