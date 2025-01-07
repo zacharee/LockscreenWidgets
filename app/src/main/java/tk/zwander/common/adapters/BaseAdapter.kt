@@ -432,6 +432,7 @@ abstract class BaseAdapter(
                 when (data.safeType) {
                     WidgetType.WIDGET -> bindWidget(data)
                     WidgetType.SHORTCUT, WidgetType.LAUNCHER_SHORTCUT -> bindShortcut(data)
+                    WidgetType.LAUNCHER_ITEM -> bindLauncherItem(data)
                     WidgetType.HEADER -> {}
                 }
 
@@ -604,6 +605,34 @@ abstract class BaseAdapter(
                 binding.widgetPreview.setImageBitmap(data.getIconBitmap(context))
                 binding.widgetLabel.text = data.label
             }
+        }
+
+        private fun bindLauncherItem(data: WidgetData) {
+            binding.widgetReconfigure.isVisible = false
+            binding.widgetHolder.isVisible = true
+            binding.openWidgetConfig.isVisible = false
+            binding.overrideIcon.isVisible = true
+
+            binding.overrideIcon.setOnClickListener {
+                launchShortcutIconOverride(data.id)
+            }
+
+            val shortcutView = FrameShortcutViewBinding.inflate(baseLayoutInflater)
+            val icon = data.getIconBitmap(context)
+
+            shortcutView.shortcutName.isVisible = false
+            shortcutView.shortcutRoot.setOnClickListener {
+                val launchIntent = Intent(Intent.ACTION_MAIN)
+                launchIntent.addCategory(Intent.CATEGORY_LAUNCHER)
+                launchIntent.`package` = data.widgetProviderComponent?.packageName
+                launchIntent.component = data.widgetProviderComponent
+                launchIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+
+                context.startActivity(launchIntent)
+            }
+            shortcutView.shortcutIcon.setImageBitmap(icon)
+
+            binding.widgetHolder.addView(shortcutView.root)
         }
 
         @SuppressLint("DiscouragedApi")

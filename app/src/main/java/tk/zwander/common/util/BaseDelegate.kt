@@ -137,7 +137,10 @@ abstract class BaseDelegate<State : Any>(context: Context) : ContextWrapper(cont
                         remove(event.item)
                         when (event.item?.safeType) {
                             WidgetType.WIDGET -> widgetHost.deleteAppWidgetId(event.item.id)
-                            WidgetType.SHORTCUT -> shortcutIdManager.removeShortcutId(event.item.id)
+                            WidgetType.SHORTCUT,
+                            WidgetType.LAUNCHER_SHORTCUT,
+                            WidgetType.LAUNCHER_ITEM -> shortcutIdManager.removeShortcutId(event.item.id)
+
                             else -> {}
                         }
                     }
@@ -148,12 +151,15 @@ abstract class BaseDelegate<State : Any>(context: Context) : ContextWrapper(cont
 
                 widgetRemovalConfirmed(event, position)
             }
+
             Event.ScreenOff -> {
                 updateCommonState { it.copy(isScreenOn = false) }
             }
+
             Event.ScreenOn -> {
                 updateCommonState { it.copy(isScreenOn = true) }
             }
+
             else -> {}
         }
     }
@@ -206,6 +212,7 @@ abstract class BaseDelegate<State : Any>(context: Context) : ContextWrapper(cont
     protected open fun onItemSelected(selected: Boolean, highlighted: Boolean) {
         updateCommonState { it.copy(isHoldingItem = selected, isItemHighlighted = highlighted) }
     }
+
     protected abstract fun isLocked(): Boolean
     protected abstract fun retrieveCounts(): Pair<Int?, Int?>
 

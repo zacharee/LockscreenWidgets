@@ -7,6 +7,7 @@ import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.os.Parcelable
 import androidx.compose.ui.unit.dp
+import kotlinx.parcelize.IgnoredOnParcel
 import kotlinx.parcelize.Parcelize
 import tk.zwander.common.iconpacks.iconPackManager
 import tk.zwander.common.util.base64ToBitmap
@@ -34,6 +35,7 @@ data class WidgetData(
     val shortcutIntent: Intent?,
     val widgetProvider: String?,
     val size: WidgetSizeData?,
+    val packageName: String?,
 ) : Parcelable {
     companion object {
         fun shortcut(
@@ -47,7 +49,7 @@ data class WidgetData(
             return WidgetData(
                 id, WidgetType.SHORTCUT,
                 label, icon?.toBase64(), iconRes, shortcutIntent,
-                null, size,
+                null, size, null,
             )
         }
 
@@ -62,7 +64,20 @@ data class WidgetData(
                 id, WidgetType.WIDGET, label, icon,
                 null, null,
                 widgetProvider.flattenToString(),
-                size,
+                size, widgetProvider.packageName,
+            )
+        }
+
+        fun launcherItem(
+            id: Int,
+            packageName: String,
+            componentName: ComponentName,
+            size: WidgetSizeData,
+        ): WidgetData {
+            return WidgetData(
+                id, WidgetType.LAUNCHER_ITEM,
+                null, null, null, null,
+                componentName.flattenToString(), size, packageName,
             )
         }
 
@@ -76,7 +91,7 @@ data class WidgetData(
             return WidgetData(
                 id, WidgetType.LAUNCHER_SHORTCUT,
                 label, icon, null, intent,
-                null, size,
+                null, size, null,
             )
         }
     }
@@ -84,8 +99,9 @@ data class WidgetData(
     val safeType: WidgetType
         get() = type ?: WidgetType.WIDGET
 
-    val widgetProviderComponent: ComponentName?
-        get() = widgetProvider?.let { ComponentName.unflattenFromString(it) }
+    @IgnoredOnParcel
+    val widgetProviderComponent: ComponentName? =
+        widgetProvider?.let { ComponentName.unflattenFromString(it) }
 
     val safeSize: WidgetSizeData
         get() = size ?: WidgetSizeData(1, 1)
@@ -106,6 +122,21 @@ data class WidgetData(
 
     @Suppress("DEPRECATION")
     fun getIconBitmap(context: Context): Bitmap? {
+        if (type == WidgetType.LAUNCHER_ITEM && packageName != null && widgetProviderComponent != null) {
+            return (context.iconPackManager.currentIconPack.value?.resolveIcon(
+                context,
+                widgetProviderComponent
+            ) ?: (try {
+                context.packageManager.getActivityIcon(widgetProviderComponent)
+            } catch (e: Exception) {
+                null
+            }) ?: (try {
+                context.packageManager.getApplicationIcon(widgetProviderComponent.packageName)
+            } catch (e: Exception) {
+                null
+            }))?.toSafeBitmap(context.density, maxSize = 128.dp)
+        }
+
         if (type == WidgetType.SHORTCUT || type == WidgetType.LAUNCHER_SHORTCUT) {
             context.prefManager.shortcutOverrideIcons[id]?.let { overrideIcon ->
                 return overrideIcon.base64ToBitmap()
@@ -142,7 +173,8 @@ data class WidgetData(
 
         return icon?.base64ToBitmap() ?: iconRes?.run {
             try {
-                context.getRemoteDrawable(this.packageName, this).toSafeBitmap(context.density, maxSize = 128.dp)
+                context.getRemoteDrawable(this.packageName, this)
+                    .toSafeBitmap(context.density, maxSize = 128.dp)
             } catch (e: PackageManager.NameNotFoundException) {
                 null
             }
@@ -155,4 +187,5 @@ enum class WidgetType {
     SHORTCUT,
     HEADER,
     LAUNCHER_SHORTCUT,
+    LAUNCHER_ITEM,
 }

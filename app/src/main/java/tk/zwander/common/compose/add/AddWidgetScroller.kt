@@ -113,6 +113,24 @@ fun AddWidgetScroller(
                         }
                     }
 
+                    items(
+                        items = app.launcherItems.toList(),
+                        key = { it.itemInfo.activityInfo.componentNameCompat.flattenToString() + "launcher_item" },
+                    ) { launcherItem ->
+                        val icon = icon(
+                            info = launcherItem,
+                            key = launcherItem.itemInfo.activityInfo.componentNameCompat,
+                        )
+
+                        WidgetItem(
+                            image = icon,
+                            label = app.appName,
+                            subLabel = stringResource(R.string.launcher),
+                        ) {
+                            onSelected(launcherItem)
+                        }
+                    }
+
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N_MR1) {
                         items(
                             items = app.launcherShortcuts.toList(),

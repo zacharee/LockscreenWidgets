@@ -1,7 +1,7 @@
 package tk.zwander.common.util
 
 import android.content.ComponentName
-import android.content.pm.ActivityInfo
+import android.content.pm.ComponentInfo
 
-val ActivityInfo.componentNameCompat: ComponentName
+val ComponentInfo.componentNameCompat: ComponentName
     get() = ComponentName(packageName, name)

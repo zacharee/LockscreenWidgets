@@ -13,9 +13,13 @@ import android.content.res.XmlResourceParser
 import android.util.Xml
 import androidx.core.content.ContextCompat
 import androidx.core.content.res.ResourcesCompat
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
 import org.xmlpull.v1.XmlPullParser
 import org.xmlpull.v1.XmlPullParserException
 import org.xmlpull.v1.XmlPullParserFactory
@@ -34,7 +38,7 @@ val Context.iconPackManager: IconPackManager
 /**
  * Parts based on https://github.com/LawnchairLauncher/lawnchair/blob/689d250d4bedc8a8c917b8d872d830ec89bc5e14/lawnchair/src/app/lawnchair/ui/preferences/PreferenceViewModel.kt
  */
-class IconPackManager private constructor(private val context: Context) : ContextWrapper(context) {
+class IconPackManager private constructor(private val context: Context) : ContextWrapper(context), CoroutineScope by MainScope() {
     companion object {
         private val iconPackIntents = listOf(
             Intent("com.novalauncher.THEME"),
@@ -63,7 +67,7 @@ class IconPackManager private constructor(private val context: Context) : Contex
                 val replacedPackage = intent.data?.host
 
                 if (replacedPackage == _currentIconPack.value?.packPackage) {
-                    _currentIconPack.value = prefManager.selectedIconPackPackage?.let { loadIconPackMap(it) }
+                    updatePack()
                 }
             }
         }
@@ -71,7 +75,7 @@ class IconPackManager private constructor(private val context: Context) : Contex
 
     private val prefsHandler = HandlerRegistry {
         handler(PrefManager.KEY_SELECTED_ICON_PACK_PACKAGE) {
-            _currentIconPack.value = prefManager.selectedIconPackPackage?.let { loadIconPackMap(it) }
+            updatePack()
         }
     }
 
@@ -83,6 +87,7 @@ class IconPackManager private constructor(private val context: Context) : Contex
             ContextCompat.RECEIVER_NOT_EXPORTED,
         )
         prefsHandler.register(this)
+        updatePack()
     }
 
     fun getIconPackPackages(): List<LoadedIconPack> {
@@ -105,20 +110,6 @@ class IconPackManager private constructor(private val context: Context) : Contex
         )
 
         return (packs + defaultIconsPack).sortedBy { (it.label ?: it.packageName)?.lowercase() }
-    }
-
-    fun loadIconPack(packageName: String): LoadedIconPack {
-        val info = try {
-            packageManager.getApplicationInfo(packageName, 0)
-        } catch (e: PackageManager.NameNotFoundException) {
-            null
-        }
-
-        return LoadedIconPack(
-            label = info?.loadLabel(packageManager)?.toString(),
-            packageName = packageName,
-            packIcon = info?.loadIcon(packageManager) ?: ResourcesCompat.getDrawable(resources, R.drawable.android, theme)!!,
-        )
     }
 
     fun getIconPackIcons(packageName: String): TreeSet<IconPackIcon> {
@@ -235,6 +226,12 @@ class IconPackManager private constructor(private val context: Context) : Contex
         } catch (_: XmlPullParserException) {
         }
         return null
+    }
+
+    private fun updatePack() {
+        launch(Dispatchers.IO) {
+            _currentIconPack.value = prefManager.selectedIconPackPackage?.let { loadIconPackMap(it) }
+        }
     }
 }
 

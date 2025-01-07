@@ -9,6 +9,7 @@ fun AppInfo.matchesFilter(filter: String?): Boolean {
     if (widgets.any { it.matchesFilter(filter) }) return true
     if (shortcuts.any { it.matchesFilter(filter) }) return true
     if (launcherShortcuts.any { it.matchesFilter(filter) }) return true
+    if (launcherItems.any { it.matchesFilter(filter) }) return true
 
     return false
 }

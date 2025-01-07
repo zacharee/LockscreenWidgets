@@ -33,6 +33,7 @@
     <string name="battery_whitelist">Battery Allowlist</string>
     <string name="back">Back</string>
     <string name="clear">Clear</string>
+    <string name="launcher">Launcher</string>
 
     <string name="drawer_enabled">Drawer Enabled</string>
     <string name="frame_enabled">Frame Enabled</string>

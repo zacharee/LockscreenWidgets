@@ -10,16 +10,22 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.unit.dp
 import androidx.core.graphics.drawable.IconCompat
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import tk.zwander.common.compose.util.matchesFilter
 import tk.zwander.common.data.AppInfo
+import tk.zwander.common.iconpacks.iconPackManager
 import tk.zwander.common.util.BrokenAppsRegistry
+import tk.zwander.common.util.componentNameCompat
+import tk.zwander.common.util.density
 import tk.zwander.common.util.getAllInstalledWidgetProviders
 import tk.zwander.common.util.getApplicationInfoCompat
 import tk.zwander.common.util.logUtils
 import tk.zwander.common.util.queryIntentActivitiesCompat
+import tk.zwander.common.util.toSafeBitmap
+import tk.zwander.lockscreenwidgets.data.list.LauncherItemListInfo
 import tk.zwander.lockscreenwidgets.data.list.ShortcutListInfo
 import tk.zwander.lockscreenwidgets.data.list.WidgetListInfo
 import java.util.TreeSet
@@ -64,13 +70,18 @@ internal fun items(
                     app.widgets.add(
                         WidgetListInfo(
                             widgetName,
-                            it.previewImage.run { if (this != 0) this else appInfo.icon }.let { iconResource ->
-                                try {
-                                    IconCompat.createWithResource(appResources, appInfo.packageName, iconResource)
-                                } catch (e: IllegalArgumentException) {
-                                    null
-                                }
-                            },
+                            it.previewImage.run { if (this != 0) this else appInfo.icon }
+                                .let { iconResource ->
+                                    try {
+                                        IconCompat.createWithResource(
+                                            appResources,
+                                            appInfo.packageName,
+                                            iconResource
+                                        )
+                                    } catch (e: IllegalArgumentException) {
+                                        null
+                                    }
+                                },
                             app,
                             it,
                         )
@@ -103,13 +114,18 @@ internal fun items(
                         app.shortcuts.add(
                             ShortcutListInfo(
                                 shortcutName.toString(),
-                                it.iconResource.run { if (this != 0) this else appInfo.icon }.let { iconResource ->
-                                    try {
-                                        IconCompat.createWithResource(appResources, appInfo.packageName, iconResource)
-                                    } catch (e: IllegalArgumentException) {
-                                        null
-                                    }
-                                },
+                                it.iconResource.run { if (this != 0) this else appInfo.icon }
+                                    .let { iconResource ->
+                                        try {
+                                            IconCompat.createWithResource(
+                                                appResources,
+                                                appInfo.packageName,
+                                                iconResource
+                                            )
+                                        } catch (e: IllegalArgumentException) {
+                                            null
+                                        }
+                                    },
                                 app,
                                 it,
                             )
@@ -120,6 +136,50 @@ internal fun items(
                             e
                         )
                     }
+                }
+
+                packageManager.queryIntentActivitiesCompat(
+                    Intent(Intent.ACTION_MAIN).apply {
+                        addCategory(Intent.CATEGORY_LAUNCHER)
+                    },
+                    0,
+                ).forEach { launcherItem ->
+                    val appInfo =
+                        packageManager.getApplicationInfoCompat(launcherItem.activityInfo.packageName)
+                    val appResources = packageManager.getResourcesForApplication(appInfo)
+                    val appName = appInfo.loadLabel(packageManager)
+
+                    val appEntry = apps.getOrPut(appInfo.packageName) {
+                        AppInfo(appName.toString(), appInfo)
+                    }
+
+                    appEntry.launcherItems.add(
+                        LauncherItemListInfo(
+                            appName = appName.toString(),
+                            icon = context.iconPackManager.currentIconPack.value
+                                ?.resolveIcon(
+                                    context,
+                                    launcherItem.componentInfo.componentNameCompat,
+                                )
+                                ?.toSafeBitmap(context.density, maxSize = 128.dp)
+                                ?.let { IconCompat.createWithBitmap(it) } ?: (
+                                    launcherItem.iconResource.run { if (this != 0) this else appInfo.icon }
+                                        .let { iconResource ->
+                                            try {
+                                                IconCompat.createWithResource(
+                                                    appResources,
+                                                    appInfo.packageName,
+                                                    iconResource
+                                                )
+                                            } catch (e: IllegalArgumentException) {
+                                                null
+                                            }
+                                        }
+                                    ),
+                            appInfo = appEntry,
+                            itemInfo = launcherItem,
+                        ),
+                    )
                 }
 
 //                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N_MR1) {
@@ -185,6 +245,7 @@ internal fun items(
                                 filter
                             )
                         }),
+                        launcherItems = TreeSet(app.launcherItems.filter { it.matchesFilter(filter) }),
                     )
                 } else {
                     null
