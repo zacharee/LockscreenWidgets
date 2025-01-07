@@ -200,7 +200,8 @@ class SelectIconPackActivity : BaseActivity() {
                                                 }
                                             }
 
-                                            if (shortcutId == null && pack.packageName == prefManager.selectedIconPackPackage) {
+                                            if ((shortcutId == null && pack.packageName == prefManager.selectedIconPackPackage) ||
+                                                (shortcutId != null && prefManager.shortcutOverrideIcons[shortcutId!!]?.packPackageName == pack.packageName)) {
                                                 Icon(
                                                     painter = painterResource(R.drawable.baseline_check_24),
                                                     contentDescription = stringResource(R.string.selected_pack),

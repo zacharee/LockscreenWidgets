@@ -25,6 +25,7 @@ import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.LaunchedEffect
@@ -38,6 +39,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.google.accompanist.drawablepainter.rememberDrawablePainter
@@ -49,6 +52,7 @@ import tk.zwander.common.compose.components.Loader
 import tk.zwander.common.iconpacks.IconPackIcon
 import tk.zwander.common.iconpacks.iconPackManager
 import tk.zwander.common.util.prefManager
+import tk.zwander.lockscreenwidgets.R
 
 class SelectIconFromPackActivity : BaseActivity() {
     companion object {
@@ -169,6 +173,14 @@ class SelectIconFromPackActivity : BaseActivity() {
                                                         text = it.flattenToString(),
                                                     )
                                                 }
+                                            }
+
+                                            if (icon.name == prefManager.shortcutOverrideIcons[shortcutId!!]?.name &&
+                                                icon.entry.packPackageName == prefManager.selectedIconPackPackage) {
+                                                Icon(
+                                                    painter = painterResource(R.drawable.baseline_check_24),
+                                                    contentDescription = stringResource(R.string.selected_pack),
+                                                )
                                             }
                                         }
                                     }
