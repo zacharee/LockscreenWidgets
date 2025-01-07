@@ -27,21 +27,22 @@ data class IconPack(
     fun resolveIcon(context: Context, componentName: ComponentName): Drawable? {
         val iconEntry = calendarMap[componentName] ?: componentMap[componentName] ?: return null
 
-        var resolvedEntry = iconEntry
-
-        when {
-            iconEntry.type == IconType.Calendar -> {
-                val dayOfMonth = Calendar.getInstance().get(Calendar.DAY_OF_MONTH)
-                resolvedEntry = iconEntry.resolveDynamicCalendar(dayOfMonth)
-            }
-        }
-
-        return resolveEntry(context, resolvedEntry)
+        return resolveEntry(context, iconEntry)
     }
 
     fun resolveEntry(context: Context, entry: IconEntry): Drawable? {
-        val drawable = getIconDrawable(context, entry)
         val clockMetadata = clockMetadata[entry]
+
+        var resolvedEntry = entry
+
+        when {
+            entry.type == IconType.Calendar -> {
+                val dayOfMonth = Calendar.getInstance().get(Calendar.DAY_OF_MONTH)
+                resolvedEntry = entry.resolveDynamicCalendar(dayOfMonth)
+            }
+        }
+
+        val drawable = getIconDrawable(context, resolvedEntry)
 
         if (clockMetadata != null && Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val wrapper = ClockDrawableWrapper.forMeta(clockMetadata) {

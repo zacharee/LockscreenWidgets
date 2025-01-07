@@ -7,6 +7,7 @@ data class IconPackIcon(
     val name: String,
     val component: ComponentName?,
     val loadDrawable: () -> Drawable?,
+    val entry: IconEntry,
 ) : Comparable<IconPackIcon> {
     override fun compareTo(other: IconPackIcon): Int {
         return name.compareTo(other.name, true)

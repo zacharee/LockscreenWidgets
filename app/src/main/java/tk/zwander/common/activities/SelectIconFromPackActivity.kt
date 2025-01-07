@@ -48,10 +48,7 @@ import tk.zwander.common.compose.add.SearchToolbar
 import tk.zwander.common.compose.components.Loader
 import tk.zwander.common.iconpacks.IconPackIcon
 import tk.zwander.common.iconpacks.iconPackManager
-import tk.zwander.common.util.density
 import tk.zwander.common.util.prefManager
-import tk.zwander.common.util.toBase64
-import tk.zwander.common.util.toSafeBitmap
 
 class SelectIconFromPackActivity : BaseActivity() {
     companion object {
@@ -144,9 +141,7 @@ class SelectIconFromPackActivity : BaseActivity() {
                                                 .heightIn(min = 48.dp)
                                                 .clickable {
                                                     prefManager.shortcutOverrideIcons = prefManager.shortcutOverrideIcons.apply {
-                                                        loadedDrawable?.toSafeBitmap(density, maxSize = 128.dp)?.toBase64()?.let {
-                                                            this[shortcutId!!] = it
-                                                        }
+                                                        this[shortcutId!!] = icon.entry
                                                     }
                                                     setResult(Activity.RESULT_OK)
                                                     finish()

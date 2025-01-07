@@ -21,6 +21,7 @@ import tk.zwander.common.data.SafePointF
 import tk.zwander.common.data.WidgetData
 import tk.zwander.common.data.WidgetSizeData
 import tk.zwander.common.data.WidgetTileInfo
+import tk.zwander.common.iconpacks.IconEntry
 import tk.zwander.lockscreenwidgets.BuildConfig
 import tk.zwander.lockscreenwidgets.R
 import tk.zwander.lockscreenwidgets.activities.TaskerIsAllowedToShowFrame
@@ -122,7 +123,7 @@ class PrefManager private constructor(context: Context) : ContextWrapper(context
         const val KEY_DRAWER_HIDE_WHEN_NOTIFICATION_PANEL_OPEN = "drawer_hide_when_notification_panel_open"
         const val KEY_DRAWER_HANDLE_TAP_TO_OPEN = "drawer_handle_tap_to_open"
         const val KEY_SELECTED_ICON_PACK_PACKAGE = "selected_icon_pack_package"
-        const val KEY_SHORTCUT_OVERRIDE_ICONS = "shortcut_override_icons"
+        const val KEY_SHORTCUT_OVERRIDE_ICONS = "shortcut_override_icon_entries"
 
         const val VALUE_PAGE_INDICATOR_BEHAVIOR_HIDDEN = 0
         const val VALUE_PAGE_INDICATOR_BEHAVIOR_AUTO_HIDE = 1
@@ -791,10 +792,10 @@ class PrefManager private constructor(context: Context) : ContextWrapper(context
             putString(KEY_SELECTED_ICON_PACK_PACKAGE, value)
         }
 
-    var shortcutOverrideIcons: HashMap<Int, String>
+    var shortcutOverrideIcons: HashMap<Int, IconEntry>
         get() = gson.fromJson(
             getString(KEY_SHORTCUT_OVERRIDE_ICONS, ""),
-            object : TypeToken<HashMap<Int, String>>() {},
+            object : TypeToken<HashMap<Int, IconEntry>>() {},
         ) ?: HashMap()
         set(value) {
             putString(KEY_SHORTCUT_OVERRIDE_ICONS, gson.toJson(value))

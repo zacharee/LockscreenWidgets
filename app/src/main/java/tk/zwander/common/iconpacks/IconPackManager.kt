@@ -124,6 +124,7 @@ class IconPackManager private constructor(private val context: Context) : Contex
                     loadDrawable = {
                         packMap.resolveIcon(this, component)
                     },
+                    entry = entry,
                 )
             }
         )

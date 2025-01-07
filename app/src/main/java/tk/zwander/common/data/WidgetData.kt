@@ -120,9 +120,26 @@ data class WidgetData(
         }
     }
 
+    private fun getOverrideIcon(context: Context): Bitmap? {
+        context.prefManager.shortcutOverrideIcons[id]?.let { entry ->
+            context.iconPackManager.currentIconPack.value?.resolveEntry(
+                context,
+                entry,
+            )?.let { override ->
+                return override.toSafeBitmap(context.density, maxSize = 128.dp)
+            }
+        }
+
+        return null
+    }
+
     @Suppress("DEPRECATION")
     fun getIconBitmap(context: Context): Bitmap? {
         if (type == WidgetType.LAUNCHER_ITEM && packageName != null && widgetProviderComponent != null) {
+            getOverrideIcon(context)?.let {
+                return it
+            }
+
             return (context.iconPackManager.currentIconPack.value?.resolveIcon(
                 context,
                 widgetProviderComponent
@@ -138,10 +155,9 @@ data class WidgetData(
         }
 
         if (type == WidgetType.SHORTCUT || type == WidgetType.LAUNCHER_SHORTCUT) {
-            context.prefManager.shortcutOverrideIcons[id]?.let { overrideIcon ->
-                return overrideIcon.base64ToBitmap()
+            getOverrideIcon(context)?.let {
+                return it
             }
-
 
             val iconPackIcon = shortcutIntent?.component?.let {
                 context.iconPackManager.currentIconPack.value?.resolveIcon(
