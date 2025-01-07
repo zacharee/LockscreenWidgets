@@ -114,8 +114,7 @@ class IconPackManager private constructor(private val context: Context) : Contex
 
     fun getIconPackIcons(packageName: String): TreeSet<IconPackIcon> {
         val packMap = loadIconPackMap(packageName) ?: return TreeSet()
-
-        val allEntries = packMap.getAllEntries().filter { (_, entry) -> entry.type != IconType.Calendar }
+        val allEntries = packMap.getAllEntries()
 
         return TreeSet(
             allEntries.map { (component, entry) ->
@@ -123,7 +122,7 @@ class IconPackManager private constructor(private val context: Context) : Contex
                     name = entry.name,
                     component = component,
                     loadDrawable = {
-                        packMap.resolveEntry(this, entry)
+                        packMap.resolveIcon(this, component)
                     },
                 )
             }

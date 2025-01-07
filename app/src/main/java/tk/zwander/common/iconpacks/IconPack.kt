@@ -25,7 +25,7 @@ data class IconPack(
     }
 
     fun resolveIcon(context: Context, componentName: ComponentName): Drawable? {
-        val iconEntry = componentMap[componentName] ?: return null
+        val iconEntry = calendarMap[componentName] ?: componentMap[componentName] ?: return null
 
         var resolvedEntry = iconEntry
 
