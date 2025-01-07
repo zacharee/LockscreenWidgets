@@ -30,6 +30,7 @@
     <string name="battery_whitelist">Ustawienia baterii</string>
     <string name="back">Wróć</string>
     <string name="clear">Wyczyść</string>
+    <string name="launcher">Launcher</string>
     <string name="drawer_enabled">Menu z widżetami włączone</string>
     <string name="frame_enabled">Ramka włączona</string>
     <string name="add_id_hint">com.android.systemui:id/id_aplikacji</string>
