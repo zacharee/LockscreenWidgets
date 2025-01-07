@@ -8,9 +8,12 @@ import android.graphics.Bitmap
 import android.os.Parcelable
 import androidx.compose.ui.unit.dp
 import kotlinx.parcelize.Parcelize
+import tk.zwander.common.iconpacks.iconPackManager
 import tk.zwander.common.util.base64ToBitmap
 import tk.zwander.common.util.density
 import tk.zwander.common.util.getRemoteDrawable
+import tk.zwander.common.util.prefManager
+import tk.zwander.common.util.queryIntentActivitiesCompat
 import tk.zwander.common.util.toBase64
 import tk.zwander.common.util.toSafeBitmap
 import java.util.Objects
@@ -104,6 +107,33 @@ data class WidgetData(
 
     @Suppress("DEPRECATION")
     fun getIconBitmap(context: Context): Bitmap? {
+        if (type == WidgetType.SHORTCUT || type == WidgetType.LAUNCHER_SHORTCUT) {
+            context.prefManager.shortcutOverrideIcons[id]?.let { overrideIcon ->
+                return overrideIcon.base64ToBitmap()
+            }
+
+
+            val iconPackIcon = shortcutIntent?.component?.let {
+                context.iconPackManager.currentIconPack.value?.resolveIcon(
+                    context,
+                    it,
+                )
+            } ?: (shortcutIntent?.`package` ?: shortcutIntent?.component?.packageName)?.let {
+                context.packageManager.queryIntentActivitiesCompat(
+                    Intent(Intent.ACTION_MAIN).apply {
+                        addCategory(Intent.CATEGORY_LAUNCHER)
+                        `package` = it
+                    }
+                ).firstNotNullOfOrNull { resolveInfo ->
+                    context.iconPackManager.currentIconPack.value?.resolveIcon(context, resolveInfo.componentInfo.componentName)
+                }
+            }
+
+            iconPackIcon?.let {
+                return iconPackIcon.toSafeBitmap(context.density, maxSize = 128.dp)
+            }
+        }
+
         return icon?.base64ToBitmap() ?: iconRes?.run {
             try {
                 context.getRemoteDrawable(this.packageName, this).toSafeBitmap(context.density, maxSize = 128.dp)

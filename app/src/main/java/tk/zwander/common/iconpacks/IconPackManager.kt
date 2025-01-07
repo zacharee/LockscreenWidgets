@@ -1,21 +1,35 @@
 package tk.zwander.common.iconpacks
 
 import android.annotation.SuppressLint
+import android.content.BroadcastReceiver
 import android.content.ComponentName
 import android.content.Context
 import android.content.ContextWrapper
 import android.content.Intent
+import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.content.res.Resources
 import android.content.res.XmlResourceParser
 import android.util.Xml
+import androidx.core.content.ContextCompat
 import androidx.core.content.res.ResourcesCompat
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import org.xmlpull.v1.XmlPullParser
 import org.xmlpull.v1.XmlPullParserException
 import org.xmlpull.v1.XmlPullParserFactory
+import tk.zwander.common.util.HandlerRegistry
+import tk.zwander.common.util.PrefManager
+import tk.zwander.common.util.handler
+import tk.zwander.common.util.prefManager
 import tk.zwander.common.util.safeApplicationContext
 import tk.zwander.lockscreenwidgets.R
 import java.io.IOException
+import java.util.TreeSet
+
+val Context.iconPackManager: IconPackManager
+    get() = IconPackManager.getInstance(this)
 
 /**
  * Parts based on https://github.com/LawnchairLauncher/lawnchair/blob/689d250d4bedc8a8c917b8d872d830ec89bc5e14/lawnchair/src/app/lawnchair/ui/preferences/PreferenceViewModel.kt
@@ -37,6 +51,38 @@ class IconPackManager private constructor(private val context: Context) : Contex
                 instance = this
             }
         }
+    }
+
+    private val _currentIconPack = MutableStateFlow<IconPack?>(null)
+    val currentIconPack: StateFlow<IconPack?>
+        get() = _currentIconPack.asStateFlow()
+
+    private val packageChangeReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context, intent: Intent) {
+            if (intent.action == Intent.ACTION_PACKAGE_REPLACED) {
+                val replacedPackage = intent.data?.host
+
+                if (replacedPackage == _currentIconPack.value?.packPackage) {
+                    _currentIconPack.value = prefManager.selectedIconPackPackage?.let { loadIconPackMap(it) }
+                }
+            }
+        }
+    }
+
+    private val prefsHandler = HandlerRegistry {
+        handler(PrefManager.KEY_SELECTED_ICON_PACK_PACKAGE) {
+            _currentIconPack.value = prefManager.selectedIconPackPackage?.let { loadIconPackMap(it) }
+        }
+    }
+
+    init {
+        ContextCompat.registerReceiver(
+            this,
+            packageChangeReceiver,
+            IntentFilter(Intent.ACTION_PACKAGE_REPLACED),
+            ContextCompat.RECEIVER_NOT_EXPORTED,
+        )
+        prefsHandler.register(this)
     }
 
     fun getIconPackPackages(): List<LoadedIconPack> {
@@ -72,6 +118,24 @@ class IconPackManager private constructor(private val context: Context) : Contex
             label = info?.loadLabel(packageManager)?.toString(),
             packageName = packageName,
             packIcon = info?.loadIcon(packageManager) ?: ResourcesCompat.getDrawable(resources, R.drawable.android, theme)!!,
+        )
+    }
+
+    fun getIconPackIcons(packageName: String): TreeSet<IconPackIcon> {
+        val packMap = loadIconPackMap(packageName) ?: return TreeSet()
+
+        val allEntries = packMap.getAllEntries().filter { (_, entry) -> entry.type != IconType.Calendar }
+
+        return TreeSet(
+            allEntries.map { (component, entry) ->
+                IconPackIcon(
+                    name = entry.name,
+                    component = component,
+                    loadDrawable = {
+                        packMap.resolveEntry(this, entry)
+                    },
+                )
+            }
         )
     }
 
@@ -143,6 +207,7 @@ class IconPackManager private constructor(private val context: Context) : Contex
         }
 
         return IconPack(
+            packPackage = packageName,
             componentMap = componentMap,
             clockMap = clockMap,
             calendarMap = calendarMap,

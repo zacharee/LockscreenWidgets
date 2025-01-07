@@ -1,6 +1,7 @@
 package tk.zwander.common.fragments
 
 import android.annotation.SuppressLint
+import android.content.Intent
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -19,6 +20,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bugsnag.android.BreadcrumbType
 import com.bugsnag.android.Bugsnag
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import tk.zwander.common.activities.SelectIconPackActivity
 import tk.zwander.common.util.HandlerRegistry
 import tk.zwander.common.util.backup.BackupRestoreManager
 import tk.zwander.common.util.backup.backupRestoreManager
@@ -137,6 +139,11 @@ abstract class CommonPreferenceFragment : PreferenceFragmentCompat() {
                     .setPositiveButton(android.R.string.ok, null)
                     .show()
             }
+            true
+        }
+
+        findPreference<Preference>("select_icon_pack")?.setOnPreferenceClickListener {
+            startActivity(Intent(requireContext(), SelectIconPackActivity::class.java))
             true
         }
     }

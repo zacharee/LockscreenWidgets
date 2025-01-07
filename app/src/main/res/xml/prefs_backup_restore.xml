@@ -15,4 +15,11 @@
         android:icon="@drawable/ic_baseline_open_in_new_24"
         />
 
+    <Preference
+        android:title="@string/icon_pack"
+        android:summary="@string/icon_pack_desc"
+        android:key="select_icon_pack"
+        android:icon="@drawable/image"
+        />
+
 </PreferenceScreen>

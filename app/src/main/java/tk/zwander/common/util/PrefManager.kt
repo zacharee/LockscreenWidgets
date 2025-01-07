@@ -121,6 +121,8 @@ class PrefManager private constructor(context: Context) : ContextWrapper(context
         const val KEY_DRAWER_DIRECTLY_CHECK_FOR_ACTIVITY = "drawer_directly_check_for_activity"
         const val KEY_DRAWER_HIDE_WHEN_NOTIFICATION_PANEL_OPEN = "drawer_hide_when_notification_panel_open"
         const val KEY_DRAWER_HANDLE_TAP_TO_OPEN = "drawer_handle_tap_to_open"
+        const val KEY_SELECTED_ICON_PACK_PACKAGE = "selected_icon_pack_package"
+        const val KEY_SHORTCUT_OVERRIDE_ICONS = "shortcut_override_icons"
 
         const val VALUE_PAGE_INDICATOR_BEHAVIOR_HIDDEN = 0
         const val VALUE_PAGE_INDICATOR_BEHAVIOR_AUTO_HIDE = 1
@@ -781,6 +783,21 @@ class PrefManager private constructor(context: Context) : ContextWrapper(context
         get() = getBoolean(KEY_DRAWER_HANDLE_TAP_TO_OPEN, false)
         set(value) {
             putBoolean(KEY_DRAWER_HANDLE_TAP_TO_OPEN, value)
+        }
+
+    var selectedIconPackPackage: String?
+        get() = getString(KEY_SELECTED_ICON_PACK_PACKAGE, null)
+        set(value) {
+            putString(KEY_SELECTED_ICON_PACK_PACKAGE, value)
+        }
+
+    var shortcutOverrideIcons: HashMap<Int, String>
+        get() = gson.fromJson(
+            getString(KEY_SHORTCUT_OVERRIDE_ICONS, ""),
+            object : TypeToken<HashMap<Int, String>>() {},
+        ) ?: HashMap()
+        set(value) {
+            putString(KEY_SHORTCUT_OVERRIDE_ICONS, gson.toJson(value))
         }
 
     @Suppress("DEPRECATION")

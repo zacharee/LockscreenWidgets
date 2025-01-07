@@ -221,6 +221,16 @@
                 <action android:name="com.twofortyfouram.locale.intent.action.EDIT_CONDITION" />
             </intent-filter>
         </activity>
+        <activity android:name="tk.zwander.common.activities.SelectIconPackActivity"
+            android:exported="false"
+            android:label="@string/choose_icon_pack"
+            android:theme="@style/AppTheme.NoActionBar"
+            />
+        <activity android:name="tk.zwander.common.activities.SelectIconFromPackActivity"
+            android:exported="false"
+            android:label="@string/choose_icon_override"
+            android:theme="@style/AppTheme.NoActionBar"
+            />
 
         <service
             android:name="tk.zwander.lockscreenwidgets.services.Accessibility"

@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.content.ComponentName
 import android.content.Context
 import android.content.pm.PackageManager
+import android.content.res.Resources
 import android.graphics.drawable.AdaptiveIconDrawable
 import android.graphics.drawable.Drawable
 import android.os.Build
@@ -11,6 +12,7 @@ import androidx.core.content.res.ResourcesCompat
 import java.util.Calendar
 
 data class IconPack(
+    val packPackage: String,
     private val componentMap: Map<ComponentName, IconEntry>,
     private val calendarMap: Map<ComponentName, IconEntry>,
     private val clockMap: Map<ComponentName, IconEntry>,
@@ -18,9 +20,12 @@ data class IconPack(
 ) {
     private val idCache = mutableMapOf<String, Int>()
 
+    fun getAllEntries(): Map<ComponentName, IconEntry> {
+        return componentMap + calendarMap + clockMap
+    }
+
     fun resolveIcon(context: Context, componentName: ComponentName): Drawable? {
         val iconEntry = componentMap[componentName] ?: return null
-        val clockMetadata = clockMetadata[iconEntry]
 
         var resolvedEntry = iconEntry
 
@@ -31,7 +36,12 @@ data class IconPack(
             }
         }
 
-        val drawable = getIconDrawable(context, resolvedEntry)
+        return resolveEntry(context, resolvedEntry)
+    }
+
+    fun resolveEntry(context: Context, entry: IconEntry): Drawable? {
+        val drawable = getIconDrawable(context, entry)
+        val clockMetadata = clockMetadata[entry]
 
         if (clockMetadata != null && Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val wrapper = ClockDrawableWrapper.forMeta(clockMetadata) {
@@ -56,6 +66,10 @@ data class IconPack(
             packResources.getIdentifier(entry.name, "drawable", entry.packPackageName)
         }
 
-        return ResourcesCompat.getDrawable(packResources, drawableId, context.theme)
+        return try {
+            ResourcesCompat.getDrawable(packResources, drawableId, context.theme)
+        } catch (e: Resources.NotFoundException) {
+            null
+        }
     }
 }

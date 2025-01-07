@@ -39,6 +39,7 @@ class ShortcutIdManager private constructor(private val context: Context) {
 
     fun removeShortcutId(id: Int) {
         context.prefManager.shortcutIds = context.prefManager.shortcutIds.apply { remove(id.toString()) }
+        context.prefManager.shortcutOverrideIcons = context.prefManager.shortcutOverrideIcons.apply { remove(id) }
         host.deleteAppWidgetId(id)
     }
 }

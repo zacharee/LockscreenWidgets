@@ -171,6 +171,22 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 app:tint="@android:color/holo_red_dark" />
 
+            <ImageView
+                android:id="@+id/override_icon"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:src="@drawable/image"
+                android:clickable="true"
+                android:focusable="true"
+                android:layout_marginTop="8dp"
+                android:layout_marginEnd="8dp"
+                android:layout_gravity="top|end"
+                android:contentDescription="@string/choose_icon_override"
+                android:visibility="gone"
+                app:layout_constraintTop_toBottomOf="@+id/remove_widget"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:tint="@android:color/white" />
+
         </androidx.constraintlayout.widget.ConstraintLayout>
 
     </com.google.android.material.card.MaterialCardView>

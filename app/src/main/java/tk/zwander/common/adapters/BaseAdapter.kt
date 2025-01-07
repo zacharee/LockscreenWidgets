@@ -61,6 +61,7 @@ import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import tk.zwander.common.activities.PermissionIntentLaunchActivity
+import tk.zwander.common.activities.SelectIconPackActivity
 import tk.zwander.common.compose.AppTheme
 import tk.zwander.common.data.WidgetData
 import tk.zwander.common.data.WidgetType
@@ -474,6 +475,8 @@ abstract class BaseAdapter(
         }
 
         private suspend fun bindWidget(data: WidgetData) {
+            binding.overrideIcon.isVisible = false
+
             val widgetInfo = withContext(Dispatchers.Main) {
                 try {
                     manager.getAppWidgetInfo(data.id)
@@ -608,6 +611,11 @@ abstract class BaseAdapter(
             binding.widgetReconfigure.isVisible = false
             binding.widgetHolder.isVisible = true
             binding.openWidgetConfig.isVisible = false
+            binding.overrideIcon.isVisible = true
+
+            binding.overrideIcon.setOnClickListener {
+                SelectIconPackActivity.launchForOverride(context, data.id)
+            }
 
             val shortcutView = FrameShortcutViewBinding.inflate(baseLayoutInflater)
             val icon = data.getIconBitmap(context)
