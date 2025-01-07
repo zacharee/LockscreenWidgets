@@ -30,6 +30,7 @@
     <string name="battery_whitelist">Battery Allowlist</string>
     <string name="back">Înapoi</string>
     <string name="clear">Curăță</string>
+    <string name="launcher">Launcher</string>
     <string name="drawer_enabled">Drawer Enabled</string>
     <string name="frame_enabled">Frame Enabled</string>
     <string name="add_id_hint">com.android.systemui:id/some_id_here</string>
