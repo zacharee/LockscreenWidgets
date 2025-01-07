@@ -4,6 +4,7 @@ import android.appwidget.AppWidgetProviderInfo
 import android.content.Context
 import android.view.View
 import android.view.ViewGroup
+import tk.zwander.common.activities.SelectIconPackActivity
 import tk.zwander.common.adapters.BaseAdapter
 import tk.zwander.common.data.WidgetData
 import tk.zwander.common.listeners.WidgetResizeListener
@@ -51,6 +52,11 @@ class DrawerAdapter(
 
     override fun View.onWidgetResize(data: WidgetData, params: ViewGroup.LayoutParams, amount: Int, direction: Int) {
         params.height += (amount * direction)
+    }
+
+    override fun launchShortcutIconOverride(id: Int) {
+        context.eventManager.sendEvent(Event.CloseDrawer)
+        SelectIconPackActivity.launchForOverride(context, id)
     }
 
     override fun getThresholdPx(which: WidgetResizeListener.Which): Int {

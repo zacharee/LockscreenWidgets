@@ -4,6 +4,7 @@ import android.appwidget.AppWidgetProviderInfo
 import android.content.Context
 import android.view.View
 import android.view.ViewGroup
+import tk.zwander.common.activities.SelectIconPackActivity
 import tk.zwander.common.adapters.BaseAdapter
 import tk.zwander.common.data.WidgetData
 import tk.zwander.common.listeners.WidgetResizeListener
@@ -57,6 +58,10 @@ open class WidgetFrameAdapter(
             params.width / context.prefManager.frameColCount * (data.size?.safeWidgetWidthSpan ?: 1)
         params.height =
             params.height / context.prefManager.frameRowCount * (data.size?.safeWidgetHeightSpan ?: 1)
+    }
+
+    override fun launchShortcutIconOverride(id: Int) {
+        SelectIconPackActivity.launchForOverride(context, id)
     }
 
     override fun getThresholdPx(which: WidgetResizeListener.Which): Int {

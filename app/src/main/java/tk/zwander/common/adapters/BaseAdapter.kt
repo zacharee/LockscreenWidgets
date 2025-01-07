@@ -61,7 +61,6 @@ import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import tk.zwander.common.activities.PermissionIntentLaunchActivity
-import tk.zwander.common.activities.SelectIconPackActivity
 import tk.zwander.common.compose.AppTheme
 import tk.zwander.common.data.WidgetData
 import tk.zwander.common.data.WidgetType
@@ -281,6 +280,7 @@ abstract class BaseAdapter(
         amount: Int,
         direction: Int,
     )
+    abstract fun launchShortcutIconOverride(id: Int)
 
     abstract fun getThresholdPx(which: WidgetResizeListener.Which): Int
 
@@ -614,7 +614,7 @@ abstract class BaseAdapter(
             binding.overrideIcon.isVisible = true
 
             binding.overrideIcon.setOnClickListener {
-                SelectIconPackActivity.launchForOverride(context, data.id)
+                launchShortcutIconOverride(data.id)
             }
 
             val shortcutView = FrameShortcutViewBinding.inflate(baseLayoutInflater)
