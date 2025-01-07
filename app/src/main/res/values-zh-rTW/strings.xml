@@ -30,6 +30,7 @@
     <string name="battery_whitelist">電池白名單</string>
     <string name="back">返回</string>
     <string name="clear">清除</string>
+    <string name="launcher">Launcher</string>
     <string name="drawer_enabled">啟用抽屜</string>
     <string name="frame_enabled">Frame Enabled</string>
     <string name="add_id_hint">com.android.systemui:id/some_id_here</string>
