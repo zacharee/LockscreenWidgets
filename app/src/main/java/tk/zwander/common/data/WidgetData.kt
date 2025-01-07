@@ -13,7 +13,6 @@ import tk.zwander.common.util.base64ToBitmap
 import tk.zwander.common.util.density
 import tk.zwander.common.util.getRemoteDrawable
 import tk.zwander.common.util.prefManager
-import tk.zwander.common.util.queryIntentActivitiesCompat
 import tk.zwander.common.util.toBase64
 import tk.zwander.common.util.toSafeBitmap
 import java.util.Objects
@@ -118,7 +117,13 @@ data class WidgetData(
                     context,
                     it,
                 )
-            } ?: (shortcutIntent?.`package` ?: shortcutIntent?.component?.packageName)?.let {
+            }
+
+            /*
+            // TODO: Maybe make this a toggleable setting?
+            // This overrides all shortcut icons with the matching launcher component icon, which
+            // might not be desirable.
+            ?: (shortcutIntent?.`package` ?: shortcutIntent?.component?.packageName)?.let {
                 context.packageManager.queryIntentActivitiesCompat(
                     Intent(Intent.ACTION_MAIN).apply {
                         addCategory(Intent.CATEGORY_LAUNCHER)
@@ -128,6 +133,7 @@ data class WidgetData(
                     context.iconPackManager.currentIconPack.value?.resolveIcon(context, resolveInfo.componentInfo.componentName)
                 }
             }
+             */
 
             iconPackIcon?.let {
                 return iconPackIcon.toSafeBitmap(context.density, maxSize = 128.dp)
