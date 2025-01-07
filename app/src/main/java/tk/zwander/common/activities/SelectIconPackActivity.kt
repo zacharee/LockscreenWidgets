@@ -52,16 +52,20 @@ import tk.zwander.common.compose.add.SearchToolbar
 import tk.zwander.common.compose.components.Loader
 import tk.zwander.common.iconpacks.LoadedIconPack
 import tk.zwander.common.iconpacks.iconPackManager
+import tk.zwander.common.util.Event
+import tk.zwander.common.util.eventManager
 import tk.zwander.common.util.prefManager
 import tk.zwander.lockscreenwidgets.R
 
 class SelectIconPackActivity : BaseActivity() {
     companion object {
         private const val EXTRA_SHORTCUT_ID = "shortcut_id"
+        private const val EXTRA_FROM_DRAWER = "from_drawer"
 
-        fun launchForOverride(context: Context, shortcutId: Int) {
+        fun launchForOverride(context: Context, shortcutId: Int, fromDrawer: Boolean = false) {
             val intent = Intent(context, SelectIconPackActivity::class.java)
             intent.putExtra(EXTRA_SHORTCUT_ID, shortcutId)
+            intent.putExtra(EXTRA_FROM_DRAWER, fromDrawer)
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
 
             context.startActivity(intent)
@@ -69,10 +73,14 @@ class SelectIconPackActivity : BaseActivity() {
     }
 
     private val shortcutId by lazy { intent.getIntExtra(EXTRA_SHORTCUT_ID, -1).takeIf { it != -1 } }
+    private val fromDrawer by lazy { intent.getBooleanExtra(EXTRA_FROM_DRAWER, false) }
 
     private val shortcutOverrideLauncher =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
             if (result.resultCode == Activity.RESULT_OK) {
+                if (fromDrawer) {
+                    eventManager.sendEvent(Event.ShowDrawer)
+                }
                 finish()
             }
         }

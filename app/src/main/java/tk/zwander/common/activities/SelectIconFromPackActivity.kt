@@ -58,10 +58,6 @@ class SelectIconFromPackActivity : BaseActivity() {
         private const val EXTRA_SHORTCUT_ID = "shortcut_id"
         private const val EXTRA_ICON_PACK_PACKAGE_NAME = "icon_pack_package_name"
 
-        fun start(context: Context, shortcutId: Int, iconPackPackageName: String) {
-            context.startActivity(createIntent(context, shortcutId, iconPackPackageName))
-        }
-
         fun createIntent(context: Context, shortcutId: Int, iconPackPackageName: String): Intent {
             val intent = Intent(context, SelectIconFromPackActivity::class.java)
             intent.putExtra(EXTRA_SHORTCUT_ID, shortcutId)

@@ -56,7 +56,7 @@ class DrawerAdapter(
 
     override fun launchShortcutIconOverride(id: Int) {
         context.eventManager.sendEvent(Event.CloseDrawer)
-        SelectIconPackActivity.launchForOverride(context, id)
+        SelectIconPackActivity.launchForOverride(context, id, true)
     }
 
     override fun getThresholdPx(which: WidgetResizeListener.Which): Int {
