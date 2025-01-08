@@ -30,6 +30,7 @@
     <string name="battery_whitelist">Battery Allowlist</string>
     <string name="back">Back</string>
     <string name="clear">Clear</string>
+    <string name="launcher">Launcher</string>
     <string name="drawer_enabled">Drawer Enabled</string>
     <string name="frame_enabled">Frame Enabled</string>
     <string name="add_id_hint">com.android.systemui:id/some_id_here</string>
@@ -221,6 +222,8 @@
     <string name="drawer_handle_tap_to_open_desc">Single-tapping the handle will open the drawer immediately instead of requiring a drag or a double tap.</string>
     <string name="show_only_when_locked">Show only when Locked</string>
     <string name="show_only_when_locked_desc">Only show the drawer handle when the device is on the lock screen.</string>
+    <string name="icon_pack">Icon Pack</string>
+    <string name="icon_pack_desc">Choose an icon pack for shortcut icons. This applies to both the frame and the drawer.</string>
     <string name="allow_show_frame">Allow Showing Frame</string>
     <string name="disallow_show_frame">Disallow Showing Frame</string>
     <string name="frame_allowed_to_show">Frame Allowed to Show</string>
@@ -244,4 +247,7 @@
     <string name="translate_desc">Help translate Lockscreen Widgets into your language.</string>
     <string name="error_reconfiguring_widget">Error reconfiguring widget</string>
     <string name="system_icons">System Icons</string>
+    <string name="choose_icon_pack">Choose Icon Pack</string>
+    <string name="choose_icon_override">Choose Icon Override</string>
+    <string name="selected_pack">Currently selected icon pack</string>
 </resources>

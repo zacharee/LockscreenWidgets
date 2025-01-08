@@ -30,6 +30,7 @@
     <string name="battery_whitelist">Pil İzin Listesi</string>
     <string name="back">Geri</string>
     <string name="clear">Temizle</string>
+    <string name="launcher">Başlatıcı</string>
     <string name="drawer_enabled">Çekmece Etkinleştirildi</string>
     <string name="frame_enabled">Çerçeve Etkinleştirildi</string>
     <string name="add_id_hint">com.android.systemui:id/some_id_here</string>
@@ -97,7 +98,7 @@
     <string name="settings_screen_present_ids">Mevcut Olmayan Kimliklerde Gizle</string>
     <string name="settings_screen_present_ids_desc">Kilit Ekranı Widget\'ları, bu kimlikler ekranda olduğunda kendini gizleyecektir. Her iki Hata Ayıklama anahtarını etkinleştirerek ve çerçevenin gizlenmesini istediğinizde yeşil renkle vurgulanan kimliklere bakarak hangi kimliklerin buraya gitmesi gerektiğini bulabilirsiniz.</string>
     <string name="settings_screen_show_in_notification_center">Bildirim Gölgesi Tamamen Genişlediğinde Göster</string>
-    <string name="settings_screen_show_in_notification_center_desc">Enabling this option will cause the widget frame to appear when the shade is fully expanded. This state has its own independent positioning and size.</string>
+    <string name="settings_screen_show_in_notification_center_desc">Bu seçeneği etkinleştirmek, gölge tamamen genişletildiğinde widget çerçevesinin görünmesine neden olur. Bu durumun kendi bağımsız konumu ve boyutu vardır.</string>
     <string name="settings_screen_show_on_main_lock_screen">Ana Kilit Ekranında Göster</string>
     <string name="settings_screen_show_on_main_lock_screen_desc">Bildirim merkezinde gösterme seçeneğini kullanıyorsanız, Kilit Ekranı Widget\'larının ana kilit ekranında gösterilmesini istemeyebilirsiniz. Çerçevenin yalnızca bildirim merkezi tamamen genişletildiğinde gösterilmesi için bu seçeneği devre dışı bırakın.</string>
     <string name="settings_screen_corner_radius">Köşe Yuvarlaklığı</string>
@@ -217,10 +218,12 @@
     <string name="drawer_side_padding_desc">Ekranın kenarları ile dış widget\'ların kenarları arasında ne kadar boşluk olacağını ayarlayın.</string>
     <string name="drawer_hide_when_notification_panel_expanded">Bildirim Paneli Açıldığında Gizle</string>
     <string name="drawer_hide_when_notification_panel_expanded_desc">Bildirim paneli arkaplanda genişletildiğinde widget çekmecesini kapatın.</string>
-    <string name="drawer_handle_tap_to_open">Single-Tap Handle to Open Drawer</string>
-    <string name="drawer_handle_tap_to_open_desc">Single-tapping the handle will open the drawer immediately instead of requiring a drag or a double tap.</string>
+    <string name="drawer_handle_tap_to_open">Çekmeceyi Açmak İçin Tek Dokunuşlu Tutamaç</string>
+    <string name="drawer_handle_tap_to_open_desc">Tutamacı tek kez tıkladığınızda çekmece hemen açılıyor; sürüklemek veya çift tıklamak gerekmiyor.</string>
     <string name="show_only_when_locked">Yalnızca Kilitli olduğunda göster</string>
     <string name="show_only_when_locked_desc">Çekmece tutamaçını yalnızca cihaz kilit ekranındayken göster.</string>
+    <string name="icon_pack">Simge Paketi</string>
+    <string name="icon_pack_desc">Kısayol simgeleri için bir simge paketi seçin. Bu hem çerçeve hem de çekmece için geçerlidir.</string>
     <string name="allow_show_frame">Çerçeveyi Göstermeye İzin Ver</string>
     <string name="disallow_show_frame">Çerçevenin Gösterilmesine İzin Verme</string>
     <string name="frame_allowed_to_show">Çerçevenin Gösterilmesine İzin Verildi</string>
@@ -244,4 +247,7 @@
     <string name="translate_desc">Kilit Ekranı Widget\'larının dilinize çevrilmesine yardımcı olun.</string>
     <string name="error_reconfiguring_widget">Widget yeniden yapılandırılırken hata oluştu</string>
     <string name="system_icons">Sistem simgeleri</string>
+    <string name="choose_icon_pack">Simge Paketini Seçin</string>
+    <string name="choose_icon_override">Simge Geçersiz Kılmayı Seçin</string>
+    <string name="selected_pack">Şu anda seçili simge paketi</string>
 </resources>
