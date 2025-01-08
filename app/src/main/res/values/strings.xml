@@ -345,4 +345,6 @@
     <string name="choose_icon_pack">Choose Icon Pack</string>
     <string name="choose_icon_override">Choose Icon Override</string>
     <string name="selected_pack">Currently selected icon pack</string>
+
+    <string name="blank_widget">Blank Widget</string>
 </resources>

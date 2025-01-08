@@ -374,6 +374,15 @@
             <meta-data android:name="android.appwidget.provider"
                 android:resource="@xml/id_list_provider_info" />
         </receiver>
+        <receiver android:name=".appwidget.BlankWidgetProvider"
+            android:label="@string/blank_widget"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data android:name="android.appwidget.provider"
+                android:resource="@xml/blank_widget_provider_info" />
+        </receiver>
 
         <receiver android:name="tk.zwander.common.appwidget.OpenDrawerProvider"
             android:label="@string/open_drawer"
