@@ -2,15 +2,12 @@ package tk.zwander.common.adapters
 
 import android.annotation.SuppressLint
 import android.appwidget.AppWidgetProviderInfo
-import android.content.BroadcastReceiver
 import android.content.Context
-import android.content.ContextWrapper
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.drawable.GradientDrawable
 import android.os.Build
 import android.os.Bundle
-import android.util.AttributeSet
 import android.util.SizeF
 import android.view.ContextThemeWrapper
 import android.view.LayoutInflater
@@ -18,7 +15,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ListView
 import android.widget.Toast
-import androidx.appcompat.app.AppCompatViewInflater
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -70,6 +66,7 @@ import tk.zwander.common.util.BrokenAppsRegistry
 import tk.zwander.common.util.Event
 import tk.zwander.common.util.EventObserver
 import tk.zwander.common.util.appWidgetManager
+import tk.zwander.common.util.compat.LayoutInflaterFactory2Compat
 import tk.zwander.common.util.createWidgetErrorView
 import tk.zwander.common.util.dpAsPx
 import tk.zwander.common.util.eventManager
@@ -77,6 +74,7 @@ import tk.zwander.common.util.getAllInstalledWidgetProviders
 import tk.zwander.common.util.hasConfiguration
 import tk.zwander.common.util.logUtils
 import tk.zwander.common.util.mainHandler
+import tk.zwander.common.util.mitigations.SafeContextWrapper
 import tk.zwander.common.util.pxAsDp
 import tk.zwander.lockscreenwidgets.R
 import tk.zwander.lockscreenwidgets.databinding.ComposeViewHolderBinding
@@ -120,30 +118,9 @@ abstract class BaseAdapter(
     private val baseLayoutInflater =
         LayoutInflater.from(context).cloneInContext(ContextThemeWrapper(context, R.style.AppTheme))
             .apply {
-                val compatInflater = AppCompatViewInflater()
                 LayoutInflaterCompat.setFactory2(
                     this,
-                    object : LayoutInflater.Factory2 {
-                        override fun onCreateView(
-                            parent: View?,
-                            name: String,
-                            context: Context,
-                            attrs: AttributeSet,
-                        ): View? {
-                            return compatInflater.createView(
-                                parent, name, context, attrs,
-                                true, false, true, false,
-                            )
-                        }
-
-                        override fun onCreateView(
-                            name: String,
-                            context: Context,
-                            attrs: AttributeSet,
-                        ): View? {
-                            return onCreateView(null, name, context, attrs)
-                        }
-                    },
+                    LayoutInflaterFactory2Compat(),
                 )
             }
 
@@ -181,14 +158,14 @@ abstract class BaseAdapter(
                 val result = DiffUtil.calculateDiff(object : DiffUtil.Callback() {
                     override fun areContentsTheSame(
                         oldItemPosition: Int,
-                        newItemPosition: Int
+                        newItemPosition: Int,
                     ): Boolean {
                         return oldWidgets[oldItemPosition].id == uniqueNewWidgets[newItemPosition].id
                     }
 
                     override fun areItemsTheSame(
                         oldItemPosition: Int,
-                        newItemPosition: Int
+                        newItemPosition: Int,
                     ): Boolean {
                         return oldWidgets[oldItemPosition].id == uniqueNewWidgets[newItemPosition].id
                     }
@@ -504,15 +481,7 @@ abstract class BaseAdapter(
                             // so this makes the most sense right now.
                             addView(withContext(Dispatchers.Main) {
                                 host.createView(
-                                    object : ContextWrapper(itemView.context) {
-                                        override fun unregisterReceiver(receiver: BroadcastReceiver?) {
-                                            try {
-                                                super.unregisterReceiver(receiver)
-                                            } catch (e: Exception) {
-                                                logUtils.debugLog("Unable to unregister receiver.", e)
-                                            }
-                                        }
-                                    },
+                                    SafeContextWrapper(itemView.context),
                                     data.id,
                                     widgetInfo
                                 ).apply hostView@{

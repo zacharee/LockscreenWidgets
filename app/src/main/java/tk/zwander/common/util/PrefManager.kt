@@ -152,7 +152,7 @@ class PrefManager private constructor(context: Context) : ContextWrapper(context
     var currentWidgets: LinkedHashSet<WidgetData>
         get() = gson.fromJson(
             currentWidgetsString,
-            object : TypeToken<LinkedHashSet<WidgetData>>() {}.type
+            object : TypeToken<LinkedHashSet<WidgetData>>() {}.type,
         ) ?: LinkedHashSet()
         set(value) {
             currentWidgetsString = gson.toJson(value)
@@ -168,7 +168,7 @@ class PrefManager private constructor(context: Context) : ContextWrapper(context
     var drawerWidgets: LinkedHashSet<WidgetData>
         get() = gson.fromJson(
             drawerWidgetsString,
-            object : TypeToken<LinkedHashSet<WidgetData>>() {}.type
+            object : TypeToken<LinkedHashSet<WidgetData>>() {}.type,
         ) ?: LinkedHashSet()
         set(value) {
             drawerWidgetsString = gson.toJson(value)
@@ -184,7 +184,7 @@ class PrefManager private constructor(context: Context) : ContextWrapper(context
     var shortcutIds: LinkedHashSet<String>
         get() = gson.fromJson(
             getString(KEY_SHORTCUT_IDS),
-            object : TypeToken<LinkedHashSet<String>>() {}.type
+            object : TypeToken<LinkedHashSet<String>>() {}.type,
         ) ?: LinkedHashSet()
         set(value) {
             putString(
@@ -217,7 +217,7 @@ class PrefManager private constructor(context: Context) : ContextWrapper(context
     var widgetSizes: HashMap<Int, WidgetSizeData>
         get() = gson.fromJson(
             getString(KEY_WIDGET_SIZES),
-            object : TypeToken<HashMap<Int, WidgetSizeData>>() {}.type
+            object : TypeToken<HashMap<Int, WidgetSizeData>>() {}.type,
         ) ?: HashMap()
         set(value) {
             putString(
@@ -357,7 +357,7 @@ class PrefManager private constructor(context: Context) : ContextWrapper(context
     var customTiles: HashMap<Int, WidgetTileInfo>
         get() = gson.fromJson(
             getString(KEY_CUSTOM_TILES, null),
-            object : TypeToken<HashMap<Int, WidgetTileInfo>>(){}.type
+            object : TypeToken<HashMap<Int, WidgetTileInfo>>(){}.type,
         ) ?: HashMap()
         set(value) {
             putString(

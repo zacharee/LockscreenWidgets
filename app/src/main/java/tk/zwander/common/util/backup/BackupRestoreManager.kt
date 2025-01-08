@@ -63,7 +63,7 @@ class BackupRestoreManager private constructor(context: Context) : ContextWrappe
         return try {
             val dataMap = prefManager.gson.fromJson<HashMap<String, String?>>(
                 string,
-                object : TypeToken<HashMap<String, String?>>(){}.type
+                object : TypeToken<HashMap<String, String?>>(){}.type,
             )
 
             handleDataMap(dataMap, which)
@@ -135,7 +135,7 @@ class BackupRestoreManager private constructor(context: Context) : ContextWrappe
         return try {
             prefManager.gson.fromJson<LinkedHashSet<WidgetData>>(
                 string,
-                object : TypeToken<LinkedHashSet<WidgetData>>() {}.type
+                object : TypeToken<LinkedHashSet<WidgetData>>() {}.type,
             ) != null
         } catch (e: Exception) {
             try {

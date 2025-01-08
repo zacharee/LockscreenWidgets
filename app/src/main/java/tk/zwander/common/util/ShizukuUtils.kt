@@ -109,7 +109,7 @@ object ShizukuUtils {
                         val listener = object : Shizuku.OnRequestPermissionResultListener {
                             override fun onRequestPermissionResult(
                                 requestCode: Int,
-                                grantResult: Int
+                                grantResult: Int,
                             ) {
                                 Shizuku.removeRequestPermissionResultListener(this)
                                 cont.resume(grantResult == PackageManager.PERMISSION_GRANTED)

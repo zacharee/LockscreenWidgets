@@ -82,7 +82,7 @@ class HideForIDsActivity : BaseActivity() {
             val list = try {
                 gson.fromJson<HashSet<String>>(
                     builder.toString(),
-                    object : TypeToken<HashSet<String>>() {}.type
+                    object : TypeToken<HashSet<String>>() {}.type,
                 )
             } catch (e: Exception) {
                 logUtils.debugLog("Unable to parse ID list", e)
