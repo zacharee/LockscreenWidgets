@@ -17,7 +17,7 @@ class LayoutInflaterFactory2Compat : LayoutInflater.Factory2 {
         parent: View?,
         name: String,
         context: Context,
-        attrs: AttributeSet
+        attrs: AttributeSet,
     ): View? {
         return compatInflater.createView(
             parent, name, context, attrs,
