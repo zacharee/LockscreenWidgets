@@ -250,4 +250,5 @@
     <string name="choose_icon_pack">Simge Paketini Seçin</string>
     <string name="choose_icon_override">Simge Geçersiz Kılmayı Seçin</string>
     <string name="selected_pack">Şu anda seçili simge paketi</string>
+    <string name="blank_widget">Blank Widget</string>
 </resources>
