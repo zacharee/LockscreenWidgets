@@ -12,7 +12,7 @@ class BlurManager(
     private val context: Context,
     private val params: WindowManager.LayoutParams,
     private val targetView: View,
-    private val listenKeys: Array<String>,
+    private val listenKeys: List<String>,
     private val shouldBlur: () -> Boolean,
     private val blurAmount: () -> Int,
     private val updateWindow: () -> Unit,

@@ -286,7 +286,7 @@ class WidgetFrameDelegate private constructor(context: Context) : BaseDelegate<W
         context = this,
         params = params,
         targetView = binding.blurBackground,
-        listenKeys = arrayOf(PrefManager.KEY_BLUR_BACKGROUND, PrefManager.KEY_BLUR_BACKGROUND_AMOUNT),
+        listenKeys = listOf(PrefManager.KEY_BLUR_BACKGROUND, PrefManager.KEY_BLUR_BACKGROUND_AMOUNT),
         shouldBlur = { prefManager.blurBackground && !showWallpaperLayerCondition },
         blurAmount = { prefManager.backgroundBlurAmount },
         cornerRadius = { dpAsPx(prefManager.cornerRadiusDp).toFloat() },

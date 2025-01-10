@@ -54,10 +54,6 @@ fun HandlerRegistry.handler(vararg keys: String, action: (String) -> Unit) {
     putHandler(HandlerRegistry.ItemHandler(keys.toList(), action))
 }
 
-fun HandlerRegistry.handler(keys: Iterable<String>, action: (String) -> Unit) {
-    putHandler(HandlerRegistry.ItemHandler(keys.toList(), action))
-}
-
-fun HandlerRegistry.handler(keys: Array<String>, action: (String) -> Unit) {
-    putHandler(HandlerRegistry.ItemHandler(keys.toList(), action))
+fun HandlerRegistry.handler(keys: List<String>, action: (String) -> Unit) {
+    putHandler(HandlerRegistry.ItemHandler(keys, action))
 }

@@ -193,9 +193,9 @@ class DrawerDelegate private constructor(context: Context) :
         context = context,
         params = params,
         targetView = drawer.blurBackground,
-        listenKeys = arrayOf(
+        listenKeys = listOf(
             PrefManager.KEY_BLUR_DRAWER_BACKGROUND,
-            PrefManager.KEY_BLUR_DRAWER_BACKGROUND_AMOUNT
+            PrefManager.KEY_BLUR_DRAWER_BACKGROUND_AMOUNT,
         ),
         shouldBlur = { prefManager.blurDrawerBackground },
         blurAmount = { prefManager.drawerBackgroundBlurAmount },
