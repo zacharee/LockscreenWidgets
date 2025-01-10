@@ -53,3 +53,11 @@ class HandlerRegistry(setup: HandlerRegistry.() -> Unit) : SharedPreferences.OnS
 fun HandlerRegistry.handler(vararg keys: String, action: (String) -> Unit) {
     putHandler(HandlerRegistry.ItemHandler(keys.toList(), action))
 }
+
+fun HandlerRegistry.handler(keys: Iterable<String>, action: (String) -> Unit) {
+    putHandler(HandlerRegistry.ItemHandler(keys.toList(), action))
+}
+
+fun HandlerRegistry.handler(keys: Array<String>, action: (String) -> Unit) {
+    putHandler(HandlerRegistry.ItemHandler(keys.toList(), action))
+}

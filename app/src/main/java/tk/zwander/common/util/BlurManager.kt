@@ -19,7 +19,7 @@ class BlurManager(
     private val cornerRadius: () -> Float = { 0f },
 ) : OnAttachStateChangeListener {
     private val handlerRegistry = HandlerRegistry {
-        handler(*listenKeys) {
+        handler(listenKeys) {
             updateBlur()
         }
     }
