@@ -1,7 +1,6 @@
 package tk.zwander.common.util
 
 import android.content.Context
-import android.content.ContextWrapper
 import android.os.Build
 import android.view.View
 import android.view.View.OnAttachStateChangeListener
@@ -9,7 +8,8 @@ import android.view.WindowManager
 import tk.zwander.common.drawable.BackgroundBlurDrawableCompat
 
 class BlurManager(
-    context: Context,
+    private val windowManager: WindowManager,
+    private val context: Context,
     private val params: WindowManager.LayoutParams,
     private val targetView: View,
     private val listenKeys: Array<String>,
@@ -17,7 +17,7 @@ class BlurManager(
     private val blurAmount: () -> Int,
     private val updateWindow: () -> Unit,
     private val cornerRadius: () -> Float = { 0f },
-) : ContextWrapper(context), OnAttachStateChangeListener {
+) : OnAttachStateChangeListener {
     private val handlerRegistry = HandlerRegistry {
         handler(*listenKeys) {
             updateBlur()
@@ -46,12 +46,12 @@ class BlurManager(
 
     fun onCreate() {
         targetView.addOnAttachStateChangeListener(this)
-        handlerRegistry.register(this)
+        handlerRegistry.register(context)
     }
 
     fun onDestroy() {
         targetView.removeOnAttachStateChangeListener(this)
-        handlerRegistry.unregister(this)
+        handlerRegistry.unregister(context)
     }
 
     fun updateBlur() {

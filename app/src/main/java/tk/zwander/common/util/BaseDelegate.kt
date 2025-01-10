@@ -2,7 +2,6 @@ package tk.zwander.common.util
 
 import android.app.WallpaperManager
 import android.content.Context
-import android.content.ContextWrapper
 import android.hardware.display.DisplayManager
 import android.os.PowerManager
 import android.view.Surface
@@ -27,11 +26,12 @@ import tk.zwander.common.data.WidgetData
 import tk.zwander.common.data.WidgetType
 import tk.zwander.common.host.WidgetHostCompat
 import tk.zwander.common.host.widgetHostCompat
+import tk.zwander.common.util.mitigations.SafeContextWrapper
 
 @Suppress("MemberVisibilityCanBePrivate")
-abstract class BaseDelegate<State : Any>(context: Context) : ContextWrapper(context),
+abstract class BaseDelegate<State : Any>(context: Context) : SafeContextWrapper(context),
     EventObserver, WidgetHostCompat.OnClickCallback, SavedStateRegistryOwner {
-    protected val wm by lazy { getSystemService(WINDOW_SERVICE) as WindowManager }
+    protected val wm by lazy { windowManager }
     protected val power by lazy { getSystemService(POWER_SERVICE) as PowerManager }
     protected val kgm by lazy { keyguardManager }
     protected val wallpaper by lazy { getSystemService(Context.WALLPAPER_SERVICE) as WallpaperManager }

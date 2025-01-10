@@ -200,6 +200,7 @@ class DrawerDelegate private constructor(context: Context) :
         shouldBlur = { prefManager.blurDrawerBackground },
         blurAmount = { prefManager.drawerBackgroundBlurAmount },
         updateWindow = ::updateDrawer,
+        windowManager = wm,
     )
 
     override val gridLayoutManager = SpannedLayoutManager()

@@ -2,7 +2,6 @@ package tk.zwander.common.util
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.content.ContextWrapper
 import tk.zwander.common.util.migrations.AddExtraWidgetInfoMigration
 import tk.zwander.common.util.migrations.FrameDimAmountMigration
 import tk.zwander.common.util.migrations.FrameSizeAndPositionMigration
@@ -12,7 +11,7 @@ import tk.zwander.lockscreenwidgets.BuildConfig
 val Context.migrationManager: MigrationManager
     get() = MigrationManager.getInstance(this)
 
-class MigrationManager private constructor(context: Context) : ContextWrapper(context) {
+class MigrationManager private constructor(private val context: Context) {
     companion object {
         @SuppressLint("StaticFieldLeak")
         private var instance: MigrationManager? = null
@@ -34,12 +33,12 @@ class MigrationManager private constructor(context: Context) : ContextWrapper(co
 
     fun runMigrations() {
         val currentVersion = BuildConfig.DATABASE_VERSION
-        val storedVersion = prefManager.databaseVersion
+        val storedVersion = context.prefManager.databaseVersion
 
         if (currentVersion > storedVersion) {
             migrations.forEach { migration ->
                 if (migration.runOnOrBelowDatabaseVersion >= storedVersion) {
-                    migration.run(this)
+                    migration.run(context)
                 }
             }
 
@@ -48,6 +47,6 @@ class MigrationManager private constructor(context: Context) : ContextWrapper(co
     }
 
     private fun updateDatabaseVersion(newVersion: Int) {
-        prefManager.databaseVersion = newVersion
+        context.prefManager.databaseVersion = newVersion
     }
 }

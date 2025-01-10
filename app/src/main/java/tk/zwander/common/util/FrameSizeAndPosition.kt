@@ -2,7 +2,6 @@ package tk.zwander.common.util
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.content.ContextWrapper
 import android.graphics.Point
 import android.graphics.PointF
 import com.google.gson.reflect.TypeToken
@@ -34,7 +33,7 @@ fun Context.calculateNCPosYFromTopDefault(type: FrameSizeAndPosition.FrameType):
     return coord.toInt()
 }
 
-class FrameSizeAndPosition private constructor(context: Context) : ContextWrapper(context) {
+class FrameSizeAndPosition private constructor(private val context: Context) {
     companion object {
         @SuppressLint("StaticFieldLeak")
         private var instance: FrameSizeAndPosition? = null
@@ -50,7 +49,7 @@ class FrameSizeAndPosition private constructor(context: Context) : ContextWrappe
         const val KEY_SIZES_MAP = "frame_sizes_map"
     }
 
-    private val prefManager = baseContext.prefManager
+    private val prefManager = context.prefManager
 
     private var positionsMap: Map<String, Point>
         get() = prefManager.gson.fromJson(
@@ -111,8 +110,8 @@ class FrameSizeAndPosition private constructor(context: Context) : ContextWrappe
 
             FrameType.LockNotification.Portrait,
             FrameType.NotificationNormal.Portrait -> Point(
-                calculateNCPosXFromRightDefault(type),
-                calculateNCPosYFromTopDefault(type),
+                context.calculateNCPosXFromRightDefault(type),
+                context.calculateNCPosYFromTopDefault(type),
             )
 
             // These are getting the *current* position for portrait, which is to keep things somewhat

@@ -3,7 +3,6 @@ package tk.zwander.common.util
 import android.annotation.IntegerRes
 import android.annotation.SuppressLint
 import android.content.Context
-import android.content.ContextWrapper
 import android.content.Intent
 import android.content.SharedPreferences
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener
@@ -36,7 +35,7 @@ val Context.prefManager: PrefManager
  * Handle data persistence.
  */
 @Suppress("DeprecatedCallableAddReplaceWith")
-class PrefManager private constructor(context: Context) : ContextWrapper(context) {
+class PrefManager private constructor(private val context: Context) {
     companion object {
         const val KEY_CURRENT_WIDGETS = "current_widgets"
         const val KEY_FRAME_WIDTH = "frame_width"
@@ -140,7 +139,7 @@ class PrefManager private constructor(context: Context) : ContextWrapper(context
     }
 
     //The actual SharedPreferences implementation
-    private val prefs: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(this)
+    private val prefs: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(context)
     val gson: Gson = GsonBuilder()
         .setExclusionStrategies(CrashFixExclusionStrategy())
         .registerTypeAdapter(Uri::class.java, GsonUriHandler())
@@ -284,7 +283,7 @@ class PrefManager private constructor(context: Context) : ContextWrapper(context
     //The horizontal position of the center of the frame in the NC (from the center of the screen) in pixels
     @Deprecated("Use [FrameSizeAndPosition] instead.")
     var notificationPosX: Int
-        get() = getInt(KEY_NOTIFICATION_POS_X, calculateNCPosXFromRightDefault(FrameSizeAndPosition.FrameType.NotificationNormal.Portrait))
+        get() = getInt(KEY_NOTIFICATION_POS_X, context.calculateNCPosXFromRightDefault(FrameSizeAndPosition.FrameType.NotificationNormal.Portrait))
         set(value) {
             putInt(KEY_NOTIFICATION_POS_X, value)
         }
@@ -292,7 +291,7 @@ class PrefManager private constructor(context: Context) : ContextWrapper(context
     //The horizontal position of the center of the frame in the locked NC (from the center of the screen) in pixels
     @Deprecated("Use [FrameSizeAndPosition] instead.")
     var lockNotificationPosX: Int
-        get() = getInt(KEY_LOCK_NOTIFICATION_POS_X, calculateNCPosXFromRightDefault(FrameSizeAndPosition.FrameType.LockNotification.Portrait))
+        get() = getInt(KEY_LOCK_NOTIFICATION_POS_X, context.calculateNCPosXFromRightDefault(FrameSizeAndPosition.FrameType.LockNotification.Portrait))
         set(value) {
             putInt(KEY_LOCK_NOTIFICATION_POS_X, value)
         }
@@ -316,7 +315,7 @@ class PrefManager private constructor(context: Context) : ContextWrapper(context
     //The vertical position of the center of the frame in the NC (from the center of the screen) in pixels
     @Deprecated("Use [FrameSizeAndPosition] instead.")
     var notificationPosY: Int
-        get() = getInt(KEY_NOTIFICATION_POS_Y, calculateNCPosYFromTopDefault(FrameSizeAndPosition.FrameType.NotificationNormal.Portrait))
+        get() = getInt(KEY_NOTIFICATION_POS_Y, context.calculateNCPosYFromTopDefault(FrameSizeAndPosition.FrameType.NotificationNormal.Portrait))
         set(value) {
             putInt(KEY_NOTIFICATION_POS_Y, value)
         }
@@ -324,7 +323,7 @@ class PrefManager private constructor(context: Context) : ContextWrapper(context
     //The vertical position of the center of the frame in the NC (from the center of the screen) in pixels
     @Deprecated("Use [FrameSizeAndPosition] instead.")
     var lockNotificationPosY: Int
-        get() = getInt(KEY_LOCK_NOTIFICATION_POS_Y, calculateNCPosYFromTopDefault(FrameSizeAndPosition.FrameType.LockNotification.Portrait))
+        get() = getInt(KEY_LOCK_NOTIFICATION_POS_Y, context.calculateNCPosYFromTopDefault(FrameSizeAndPosition.FrameType.LockNotification.Portrait))
         set(value) {
             putInt(KEY_LOCK_NOTIFICATION_POS_Y, value)
         }
@@ -568,19 +567,19 @@ class PrefManager private constructor(context: Context) : ContextWrapper(context
     //The corner radius for the widget frame
     //(how rounded the corners are, in dp)
     var cornerRadiusDp: Float
-        get() = getInt(KEY_FRAME_CORNER_RADIUS, resources.getInteger(R.integer.def_corner_radius_dp_scaled_10x)) / 10f
+        get() = getInt(KEY_FRAME_CORNER_RADIUS, context.resources.getInteger(R.integer.def_corner_radius_dp_scaled_10x)) / 10f
         set(value) {
             putInt(KEY_FRAME_CORNER_RADIUS, (value * 10f).toInt())
         }
 
     var frameWidgetCornerRadiusDp: Float
-        get() = getInt(KEY_FRAME_WIDGET_CORNER_RADIUS, resources.getInteger(R.integer.def_corner_radius_dp_scaled_10x)) / 10f
+        get() = getInt(KEY_FRAME_WIDGET_CORNER_RADIUS, context.resources.getInteger(R.integer.def_corner_radius_dp_scaled_10x)) / 10f
         set(value) {
             putInt(KEY_FRAME_WIDGET_CORNER_RADIUS, (value * 10f).toInt())
         }
 
     var drawerWidgetCornerRadiusDp: Float
-        get() = getInt(KEY_DRAWER_WIDGET_CORNER_RADIUS, resources.getInteger(R.integer.def_corner_radius_dp_scaled_10x)) / 10f
+        get() = getInt(KEY_DRAWER_WIDGET_CORNER_RADIUS, context.resources.getInteger(R.integer.def_corner_radius_dp_scaled_10x)) / 10f
         set(value) {
             putInt(KEY_DRAWER_WIDGET_CORNER_RADIUS, (value * 10f).toInt())
         }
@@ -719,7 +718,7 @@ class PrefManager private constructor(context: Context) : ContextWrapper(context
         }
 
     var drawerBackgroundColor: Int
-        get() = getInt(KEY_DRAWER_BACKGROUND_COLOR, ResourcesCompat.getColor(resources, R.color.drawerBackgroundDefault, theme))
+        get() = getInt(KEY_DRAWER_BACKGROUND_COLOR, ResourcesCompat.getColor(context.resources, R.color.drawerBackgroundDefault, context.theme))
         set(value) {
             putInt(KEY_DRAWER_BACKGROUND_COLOR, value)
         }
@@ -752,14 +751,14 @@ class PrefManager private constructor(context: Context) : ContextWrapper(context
         get() = getBoolean(KEY_CAN_SHOW_FRAME_FROM_TASKER, true)
         set(value) {
             putBoolean(KEY_CAN_SHOW_FRAME_FROM_TASKER, value)
-            TaskerIsAllowedToShowFrame::class.java.requestQuery(this)
+            TaskerIsAllowedToShowFrame::class.java.requestQuery(context)
         }
 
     var forceShowFrame: Boolean
         get() = getBoolean(KEY_FORCE_SHOW_FRAME, false)
         set(value) {
             putBoolean(KEY_FORCE_SHOW_FRAME, value)
-            TaskerIsForceShowingFrame::class.java.requestQuery(this)
+            TaskerIsForceShowingFrame::class.java.requestQuery(context)
         }
 
     var frameForceWidgetReload: Boolean
@@ -864,6 +863,6 @@ class PrefManager private constructor(context: Context) : ContextWrapper(context
     fun putStringSet(key: String, value: Set<String>) = prefs.edit(true) { putStringSet(key, value) }
 
     fun getResourceFloat(@IntegerRes resource: Int): Float {
-        return resources.getInteger(resource).toFloat()
+        return context.resources.getInteger(resource).toFloat()
     }
 }

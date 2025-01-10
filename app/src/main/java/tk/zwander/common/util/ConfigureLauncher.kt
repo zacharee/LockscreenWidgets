@@ -5,7 +5,6 @@ import android.app.ActivityOptions
 import android.appwidget.AppWidgetManager
 import android.appwidget.AppWidgetProviderInfo
 import android.content.Context
-import android.content.ContextWrapper
 import android.content.Intent
 import android.os.Build
 import android.os.ServiceManager
@@ -21,7 +20,7 @@ class ConfigureLauncher(
     private val activity: ComponentActivity,
     private val addNewWidget: (id: Int, provider: AppWidgetProviderInfo) -> Unit,
     private val finishIfNoErrors: () -> Unit,
-) : ContextWrapper(activity) {
+) {
     companion object {
         private const val CONFIGURE_REQ = 1000
     }
@@ -37,15 +36,15 @@ class ConfigureLauncher(
             onActivityResult(CONFIGURE_REQ, result.resultCode, result.data)
         }
 
-    private val widgetHost by lazy { widgetHostCompat }
+    private val widgetHost by lazy { activity.widgetHostCompat }
 
     @SuppressLint("NewApi")
     fun launch(id: Int): Boolean {
         try {
-            val samsungConfigComponent = appWidgetManager.getAppWidgetInfo(id)
-                .getSamsungConfigureComponent(this)
+            val samsungConfigComponent = activity.appWidgetManager.getAppWidgetInfo(id)
+                .getSamsungConfigureComponent(activity)
 
-            logUtils.debugLog("Found Samsung config component $samsungConfigComponent.")
+            activity.logUtils.debugLog("Found Samsung config component $samsungConfigComponent.")
 
             if (samsungConfigComponent != null) {
                 val launchIntent = Intent(AppWidgetManager.ACTION_APPWIDGET_CONFIGURE)
@@ -57,16 +56,16 @@ class ConfigureLauncher(
                 return true
             }
         } catch (e: Throwable) {
-            logUtils.normalLog("Error configuring Samsung widget", e)
+            activity.logUtils.normalLog("Error configuring Samsung widget", e)
         }
 
         //Use the system API instead of ACTION_APPWIDGET_CONFIGURE to try to avoid some permissions issues
         try {
             val intentSender =
                 IAppWidgetService.Stub.asInterface(ServiceManager.getService(Context.APPWIDGET_SERVICE))
-                    .createAppWidgetConfigIntentSender(opPackageName, id, 0)
+                    .createAppWidgetConfigIntentSender(activity.opPackageName, id, 0)
 
-            logUtils.debugLog("Intent sender is $intentSender")
+            activity.logUtils.debugLog("Intent sender is $intentSender")
 
             if (intentSender != null) {
                 configLauncher.launch(
@@ -87,7 +86,7 @@ class ConfigureLauncher(
                 return true
             }
         } catch (e: Throwable) {
-            logUtils.normalLog("Unable to launch widget config IntentSender", e)
+            activity.logUtils.normalLog("Unable to launch widget config IntentSender", e)
         }
 
         try {
@@ -104,7 +103,7 @@ class ConfigureLauncher(
             )
             return true
         } catch (e: Throwable) {
-            logUtils.normalLog("Unable to startAppWidgetConfigureActivityForResult", e)
+            activity.logUtils.normalLog("Unable to startAppWidgetConfigureActivityForResult", e)
         }
 
         return false
@@ -115,15 +114,15 @@ class ConfigureLauncher(
             val id = data?.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, currentConfigId ?: -1)
                 ?: currentConfigId
 
-            logUtils.debugLog("Configure complete for id $id $currentConfigId", null)
+            activity.logUtils.debugLog("Configure complete for id $id $currentConfigId", null)
 
             if (resultCode == RESULT_OK && id != null && id != -1) {
-                logUtils.debugLog("Successfully configured widget.", null)
+                activity.logUtils.debugLog("Successfully configured widget.", null)
 
-                val widgetInfo = appWidgetManager.getAppWidgetInfo(id)
+                val widgetInfo = activity.appWidgetManager.getAppWidgetInfo(id)
 
                 if (widgetInfo == null) {
-                    logUtils.debugLog("Unable to get widget info for $id, not adding", null)
+                    activity.logUtils.debugLog("Unable to get widget info for $id, not adding", null)
                     finishIfNoErrors()
                     return
                 }
@@ -132,7 +131,7 @@ class ConfigureLauncher(
 
                 addNewWidget(id, widgetInfo)
             } else {
-                logUtils.debugLog("Failed to configure widget. Result code $resultCode, id $id.", null)
+                activity.logUtils.debugLog("Failed to configure widget. Result code $resultCode, id $id.", null)
                 finishIfNoErrors()
             }
         }

@@ -4,7 +4,6 @@ import android.annotation.SuppressLint
 import android.content.BroadcastReceiver
 import android.content.ComponentName
 import android.content.Context
-import android.content.ContextWrapper
 import android.content.Intent
 import android.content.IntentFilter
 import android.content.pm.PackageManager
@@ -38,7 +37,7 @@ val Context.iconPackManager: IconPackManager
 /**
  * Parts based on https://github.com/LawnchairLauncher/lawnchair/blob/689d250d4bedc8a8c917b8d872d830ec89bc5e14/lawnchair/src/app/lawnchair/ui/preferences/PreferenceViewModel.kt
  */
-class IconPackManager private constructor(private val context: Context) : ContextWrapper(context), CoroutineScope by MainScope() {
+class IconPackManager private constructor(private val context: Context) : CoroutineScope by MainScope() {
     companion object {
         private val iconPackIntents = listOf(
             Intent("com.novalauncher.THEME"),
@@ -81,32 +80,32 @@ class IconPackManager private constructor(private val context: Context) : Contex
 
     init {
         ContextCompat.registerReceiver(
-            this,
+            context,
             packageChangeReceiver,
             IntentFilter(Intent.ACTION_PACKAGE_REPLACED),
             ContextCompat.RECEIVER_NOT_EXPORTED,
         )
-        prefsHandler.register(this)
+        prefsHandler.register(context)
         updatePack()
     }
 
     fun getIconPackPackages(): List<LoadedIconPack> {
         val packs = iconPackIntents.flatMap {
-            packageManager.queryIntentActivities(it, 0)
+            context.packageManager.queryIntentActivities(it, 0)
         }.associateBy {
             it.activityInfo.packageName
         }.mapTo(mutableSetOf()) { (_, info) ->
             LoadedIconPack(
-                label = info.activityInfo.applicationInfo.loadLabel(packageManager).toString(),
+                label = info.activityInfo.applicationInfo.loadLabel(context.packageManager).toString(),
                 packageName = info.activityInfo.packageName,
-                packIcon = info.activityInfo.applicationInfo.loadIcon(packageManager),
+                packIcon = info.activityInfo.applicationInfo.loadIcon(context.packageManager),
             )
         }
 
         val defaultIconsPack = LoadedIconPack(
-            label = resources.getString(R.string.system_icons),
+            label = context.resources.getString(R.string.system_icons),
             packageName = null,
-            packIcon = ResourcesCompat.getDrawable(resources, R.drawable.android, theme)!!,
+            packIcon = ResourcesCompat.getDrawable(context.resources, R.drawable.android, context.theme)!!,
         )
 
         return (packs + defaultIconsPack).sortedBy { (it.label ?: it.packageName)?.lowercase() }
@@ -122,7 +121,7 @@ class IconPackManager private constructor(private val context: Context) : Contex
                     name = entry.name,
                     component = component,
                     loadDrawable = {
-                        packMap.resolveIcon(this, component)
+                        packMap.resolveIcon(context, component)
                     },
                     entry = entry,
                 )
@@ -230,7 +229,7 @@ class IconPackManager private constructor(private val context: Context) : Contex
 
     private fun updatePack() {
         launch(Dispatchers.IO) {
-            _currentIconPack.value = prefManager.selectedIconPackPackage?.let { loadIconPackMap(it) }
+            _currentIconPack.value = context.prefManager.selectedIconPackPackage?.let { loadIconPackMap(it) }
         }
     }
 }

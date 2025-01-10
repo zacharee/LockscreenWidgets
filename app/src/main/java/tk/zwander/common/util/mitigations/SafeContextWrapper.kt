@@ -5,7 +5,7 @@ import android.content.Context
 import android.content.ContextWrapper
 import tk.zwander.common.util.logUtils
 
-class SafeContextWrapper(context: Context) : ContextWrapper(context) {
+open class SafeContextWrapper(context: Context) : ContextWrapper(context) {
     override fun unregisterReceiver(receiver: BroadcastReceiver?) {
         try {
             super.unregisterReceiver(receiver)
