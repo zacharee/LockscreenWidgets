@@ -8,6 +8,7 @@ import android.view.ViewRootImpl
 import androidx.annotation.RequiresApi
 import androidx.appcompat.graphics.drawable.DrawableWrapperCompat
 import com.android.internal.graphics.drawable.BackgroundBlurDrawable
+import tk.zwander.common.util.peekLogUtils
 
 sealed class BackgroundBlurDrawableCompat(protected open val wrapped: Drawable) : DrawableWrapperCompat(wrapped) {
     abstract fun setColor(@ColorInt color: Int)
@@ -22,6 +23,7 @@ sealed class BackgroundBlurDrawableCompat(protected open val wrapped: Drawable) 
 
     override fun draw(canvas: Canvas) {
         if (canvas.isHardwareAccelerated) {
+            peekLogUtils?.debugLog("Drawing BackgroundBlurDrawable.", null)
             wrapped.draw(canvas)
         }
     }

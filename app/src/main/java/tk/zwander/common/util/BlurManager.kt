@@ -57,6 +57,9 @@ class BlurManager(
     fun updateBlur() {
         val blurAmount = blurAmount()
         val shouldBlur = shouldBlur()
+        val cornerRadius = cornerRadius()
+
+        context.logUtils.debugLog("Updating blur for $targetView. Should blur $shouldBlur, amount $blurAmount, radius $cornerRadius.")
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             if (blurAmount > 0
@@ -64,8 +67,10 @@ class BlurManager(
                 && targetView.isAttachedToWindow
                 && windowManager.isCrossWindowBlurEnabled
                 && targetView.rootView.viewRootImpl.isHardwareEnabled
+                && targetView.alpha > 0
             ) {
                 if (blurDrawable == null) {
+                    context.logUtils.debugLog("Creating BackgroundBlurDrawableCompat.", null)
                     blurDrawable = BackgroundBlurDrawableCompat(targetView.rootView.viewRootImpl)
                 }
             } else {
@@ -73,8 +78,9 @@ class BlurManager(
             }
 
             blurDrawable?.setBlurRadius(blurAmount)
-            blurDrawable?.setCornerRadius(cornerRadius())
+            blurDrawable?.setCornerRadius(cornerRadius)
 
+            context.logUtils.debugLog("Setting blur drawable $blurDrawable on target view.", null)
             targetView.background = blurDrawable
         } else {
             val f = try {
