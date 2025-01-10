@@ -796,7 +796,7 @@ class WidgetFrameDelegate private constructor(context: Context) : BaseDelegate<W
             binding.frame.updateWindow(wm, params)
             mainHandler.post {
                 updateWallpaperLayerIfNeeded()
-                blurManager.updateBlur()
+                blurManager.updateBlur(fromParamsUpdate = true)
                 adapter.updateViews()
                 scrollToStoredPosition(true)
             }

@@ -54,7 +54,7 @@ class BlurManager(
         handlerRegistry.unregister(context)
     }
 
-    fun updateBlur() {
+    fun updateBlur(fromParamsUpdate: Boolean = false) {
         val blurAmount = blurAmount()
         val shouldBlur = shouldBlur()
         val cornerRadius = cornerRadius()
@@ -62,26 +62,28 @@ class BlurManager(
         context.logUtils.debugLog("Updating blur for $targetView. Should blur $shouldBlur, amount $blurAmount, radius $cornerRadius.")
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            if (blurAmount > 0
-                && shouldBlur
-                && targetView.isAttachedToWindow
-                && windowManager.isCrossWindowBlurEnabled
-                && targetView.rootView.viewRootImpl.isHardwareEnabled
-                && targetView.alpha > 0
-            ) {
-                if (blurDrawable == null) {
-                    context.logUtils.debugLog("Creating BackgroundBlurDrawableCompat.", null)
-                    blurDrawable = BackgroundBlurDrawableCompat(targetView.rootView.viewRootImpl)
+            if (!fromParamsUpdate) {
+                if (blurAmount > 0 &&
+                    shouldBlur &&
+                    targetView.isAttachedToWindow &&
+                    windowManager.isCrossWindowBlurEnabled &&
+                    targetView.rootView.viewRootImpl.isHardwareEnabled &&
+                    targetView.alpha > 0
+                ) {
+                    if (blurDrawable == null) {
+                        context.logUtils.debugLog("Creating BackgroundBlurDrawableCompat.", null)
+                        blurDrawable = BackgroundBlurDrawableCompat(targetView.rootView.viewRootImpl)
+                    }
+                } else {
+                    blurDrawable = null
                 }
-            } else {
-                blurDrawable = null
+
+                blurDrawable?.setBlurRadius(blurAmount)
+                blurDrawable?.setCornerRadius(cornerRadius)
+
+                context.logUtils.debugLog("Setting blur drawable $blurDrawable on target view.", null)
+                targetView.background = blurDrawable
             }
-
-            blurDrawable?.setBlurRadius(blurAmount)
-            blurDrawable?.setCornerRadius(cornerRadius)
-
-            context.logUtils.debugLog("Setting blur drawable $blurDrawable on target view.", null)
-            targetView.background = blurDrawable
         } else {
             val f = try {
                 params::class.java.getDeclaredField("samsungFlags")
@@ -100,8 +102,8 @@ class BlurManager(
                 f?.set(params, f.get(params) as Int and 64.inv())
                 params.dimAmount = 0.0f
             }
-        }
 
-        updateWindow()
+            updateWindow()
+        }
     }
 }
