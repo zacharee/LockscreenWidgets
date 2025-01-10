@@ -1,9 +1,12 @@
 package tk.zwander.common.util
 
 import android.app.KeyguardManager
+import android.content.ComponentName
 import android.content.Context
+import android.content.Intent
 import android.os.Build
 import android.os.PowerManager
+import android.provider.Settings
 import android.view.WindowManager
 import android.view.accessibility.AccessibilityEvent
 import android.view.accessibility.AccessibilityNodeInfo
@@ -22,7 +25,7 @@ import tk.zwander.common.activities.DismissOrUnlockActivity
 import tk.zwander.common.data.window.WindowInfo
 import tk.zwander.common.data.window.WindowRootPair
 import tk.zwander.lockscreenwidgets.appwidget.IDListProvider
-import tk.zwander.lockscreenwidgets.services.hasVisibleIds
+import tk.zwander.lockscreenwidgets.services.Accessibility
 import tk.zwander.lockscreenwidgets.util.WidgetFrameDelegate
 import tk.zwander.widgetdrawer.util.DrawerDelegate
 import java.util.concurrent.ConcurrentLinkedQueue
@@ -607,4 +610,58 @@ object AccessibilityUtils {
             frameDelegate.updateStateAndWindowState(wm, true)
         }
     }
+}
+
+//Check if the Accessibility service is enabled
+val Context.isAccessibilityEnabled: Boolean
+    get() = Settings.Secure.getString(
+        contentResolver,
+        Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES
+    )?.contains(ComponentName(this, Accessibility::class.java).flattenToString()) ?: false
+
+fun Context.openAccessibilitySettings() {
+    //Samsung devices have a separate Activity for listing
+    //installed Accessibility Services, for some reason.
+    //It's exported and permission-free, at least on Android 10,
+    //so attempt to launch it. A "dumb" try-catch is simpler
+    //than a check for the existence and state of this Activity.
+    //If the Installed Services Activity can't be launched,
+    //just launch the normal Accessibility Activity.
+    try {
+        val accIntent = Intent(Intent.ACTION_MAIN)
+        accIntent.`package` = "com.android.settings"
+        accIntent.component = ComponentName(
+            "com.android.settings",
+            "com.android.settings.Settings\$AccessibilityInstalledServiceActivity"
+        )
+        startActivity(accIntent)
+    } catch (e: Exception) {
+        logUtils.debugLog("Error opening Installed Services:", e)
+        val accIntent = Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)
+        startActivity(accIntent)
+    }
+}
+
+fun <T> AccessibilityNodeInfo?.use(block: (AccessibilityNodeInfo?) -> T): T {
+    val result = block(this)
+    @Suppress("DEPRECATION")
+    this?.recycle()
+    return result
+}
+
+fun AccessibilityEvent.copyCompat(): AccessibilityEvent {
+    return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+        AccessibilityEvent(this)
+    } else {
+        @Suppress("DEPRECATION")
+        AccessibilityEvent.obtain(this)
+    }
+}
+
+fun AccessibilityNodeInfo.hasVisibleIds(vararg ids: String): Boolean {
+    return ids.contains(viewIdResourceName) && isVisibleToUser
+}
+
+fun AccessibilityNodeInfo.hasVisibleIds(ids: Iterable<String>): Boolean {
+    return ids.contains(viewIdResourceName) && isVisibleToUser
 }

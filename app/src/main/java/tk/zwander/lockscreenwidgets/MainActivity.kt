@@ -22,9 +22,9 @@ import tk.zwander.common.tiles.widget.WidgetTileFour
 import tk.zwander.common.tiles.widget.WidgetTileOne
 import tk.zwander.common.tiles.widget.WidgetTileThree
 import tk.zwander.common.tiles.widget.WidgetTileTwo
+import tk.zwander.common.util.isAccessibilityEnabled
 import tk.zwander.common.util.isOneUI
 import tk.zwander.common.util.prefManager
-import tk.zwander.lockscreenwidgets.services.isAccessibilityEnabled
 import tk.zwander.lockscreenwidgets.util.WidgetFrameDelegate
 
 /**

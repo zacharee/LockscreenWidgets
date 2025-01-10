@@ -34,12 +34,12 @@ import tk.zwander.common.compose.AppTheme
 import tk.zwander.common.util.LifecycleEffect
 import tk.zwander.common.util.ShizukuUtils
 import tk.zwander.common.util.canReadWallpaper
+import tk.zwander.common.util.isAccessibilityEnabled
 import tk.zwander.common.util.launchUrl
+import tk.zwander.common.util.openAccessibilitySettings
 import tk.zwander.lockscreenwidgets.BuildConfig
 import tk.zwander.lockscreenwidgets.R
-import tk.zwander.lockscreenwidgets.services.isAccessibilityEnabled
 import tk.zwander.lockscreenwidgets.services.isNotificationListenerActive
-import tk.zwander.lockscreenwidgets.services.openAccessibilitySettings
 
 @Composable
 fun rememberIntroSlides(
