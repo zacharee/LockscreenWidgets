@@ -38,6 +38,7 @@ object AccessibilityUtils {
         val hideForPresentIds: AtomicBoolean = atomic(false),
         val hideForNonPresentIds: AtomicBoolean = atomic(false),
         val hasClearAllButton: AtomicBoolean = atomic(false),
+        val hasSettingsContainerButton: AtomicBoolean = atomic(false),
     )
 
     private fun Context.processNode(
@@ -90,9 +91,14 @@ object AccessibilityUtils {
         //visible when the NC is fully expanded.
         if (prefManager.showInNotificationCenter && !nodeState.hasMoreButton.value) {
             if (node.hasVisibleIds("com.android.systemui:id/more_button") ||
-                node.hasVisibleIds("com.android.systemui:id/edit_button") ||
-                node.hasVisibleIds("com.android.systemui:id/settings_button_container")) {
+                node.hasVisibleIds("com.android.systemui:id/edit_button")) {
                 nodeState.hasMoreButton.value = true
+            }
+        }
+
+        if (prefManager.showInNotificationCenter && !nodeState.hasSettingsContainerButton.value) {
+            if (node.hasVisibleIds("com.android.systemui:id/settings_button_container")) {
+                nodeState.hasSettingsContainerButton.value = isPixelUI
             }
         }
 
@@ -407,7 +413,8 @@ object AccessibilityUtils {
                             hidingForPresentApp = windowInfo.hasHideForPresentApp,
                             onMainLockscreen = windowInfo.nodeState.onMainLockscreen.value,
                             showingNotificationsPanel = notificationsAreOpen,
-                            notificationsPanelFullyExpanded = windowInfo.nodeState.hasMoreButton.value && !windowInfo.nodeState.hasClearAllButton.value,
+                            notificationsPanelFullyExpanded = (windowInfo.nodeState.hasMoreButton.value) || (windowInfo.nodeState.hasSettingsContainerButton.value &&
+                                    !windowInfo.nodeState.hasClearAllButton.value),
                             hideForPresentIds = windowInfo.nodeState.hideForPresentIds.value,
                             hideForNonPresentIds = windowInfo.nodeState.hideForNonPresentIds.value,
                         )
