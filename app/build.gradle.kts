@@ -15,8 +15,8 @@ android {
         applicationId = "tk.zwander.lockscreenwidgets"
         minSdk = 22
         targetSdk = 35
-        versionCode = 127
-        versionName = "2.18.0"
+        versionCode = 128
+        versionName = "2.19.0"
 
         extensions.getByType(BasePluginExtension::class.java).archivesName.set("LockscreenWidgets_${versionName}")
 
