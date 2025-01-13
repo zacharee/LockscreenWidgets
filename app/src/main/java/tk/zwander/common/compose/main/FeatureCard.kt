@@ -43,6 +43,8 @@ import tk.zwander.common.compose.data.FeatureCardInfo
 import tk.zwander.common.compose.util.rememberBooleanPreferenceState
 import tk.zwander.common.data.MainPageButton
 import tk.zwander.common.util.Event
+import tk.zwander.common.util.EventObserver
+import tk.zwander.common.util.EventObserverEffect
 import tk.zwander.common.util.PrefManager
 import tk.zwander.common.util.eventManager
 import tk.zwander.common.util.prefManager
@@ -51,7 +53,6 @@ import tk.zwander.lockscreenwidgets.R
 import tk.zwander.lockscreenwidgets.activities.SettingsActivity
 import tk.zwander.lockscreenwidgets.activities.UsageActivity
 import tk.zwander.lockscreenwidgets.fragments.SettingsFragment
-import tk.zwander.lockscreenwidgets.util.MainWidgetFrameDelegate
 import tk.zwander.widgetdrawer.fragments.DrawerSettings
 
 @Composable
@@ -61,18 +62,17 @@ fun rememberFeatureCards(): List<FeatureCardInfo> {
     return remember {
         listOf(
             FeatureCardInfo(
-                R.string.app_name,
-                BuildConfig.VERSION_NAME,
-                R.string.enabled,
-                R.string.disabled,
-                PrefManager.KEY_WIDGET_FRAME_ENABLED,
-                listOf(
+                title = R.string.app_name,
+                version = BuildConfig.VERSION_NAME,
+                enabledLabel = R.string.enabled,
+                disabledLabel = R.string.disabled,
+                enabledKey = PrefManager.KEY_WIDGET_FRAME_ENABLED,
+                buttons = listOf(
                     MainPageButton(
                         R.drawable.ic_baseline_preview_24,
                         R.string.preview
                     ) {
-                        MainWidgetFrameDelegate.retrieveInstance(context)
-                            ?.updateState { it.copy(isPreview = !it.isPreview) }
+                        context.eventManager.sendEvent(Event.PreviewFrames(Event.PreviewFrames.ShowMode.TOGGLE))
                     },
                     MainPageButton(
                         R.drawable.ic_baseline_help_outline_24,
@@ -87,9 +87,11 @@ fun rememberFeatureCards(): List<FeatureCardInfo> {
                         SettingsActivity.launch(context, SettingsFragment::class.java)
                     },
                 ),
-                { context.eventManager.sendEvent(Event.LaunchAddWidget(-1)) },
-                { context.prefManager.widgetFrameEnabled },
-                { context.prefManager.widgetFrameEnabled = it },
+                onAddWidget = {
+                    context.eventManager.sendEvent(Event.PreviewFrames(Event.PreviewFrames.ShowMode.SHOW_FOR_SELECTION))
+                },
+                isEnabled = { context.prefManager.widgetFrameEnabled },
+                onEnabledChanged = { context.prefManager.widgetFrameEnabled = it },
                 onAddFrame = {
                     val maxFrameId = context.prefManager.currentSecondaryFrames.maxOrNull() ?: 1
                     val newFrameId = maxFrameId + 1
@@ -98,6 +100,15 @@ fun rememberFeatureCards(): List<FeatureCardInfo> {
                         add(newFrameId)
                     }
                 },
+                eventObserver = object : EventObserver {
+                    override fun onEvent(event: Event) {
+                        if (event is Event.FrameSelected) {
+                            if (event.frameId != null) {
+                                context.eventManager.sendEvent(Event.LaunchAddWidget(event.frameId))
+                            }
+                        }
+                    }
+                }
             ),
             FeatureCardInfo(
                 R.string.widget_drawer,
@@ -131,6 +142,8 @@ fun rememberFeatureCards(): List<FeatureCardInfo> {
 @Composable
 fun FeatureCard(info: FeatureCardInfo) {
     val context = LocalContext.current
+
+    EventObserverEffect(info.eventObserver)
 
     Card(
         modifier = Modifier

@@ -250,6 +250,13 @@
             android:visibility="gone"
             layout="@layout/touch_protection_layer"
             />
+        
+        <androidx.compose.ui.platform.ComposeView
+            android:id="@+id/select_frame_layout"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:visibility="gone"
+            />
 
     </com.google.android.material.card.MaterialCardView>
 

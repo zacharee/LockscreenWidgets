@@ -25,6 +25,7 @@ import org.lsposed.hiddenapibypass.HiddenApiBypass
 import rikka.shizuku.Shizuku
 import tk.zwander.common.activities.add.BaseBindWidgetActivity
 import tk.zwander.common.util.Event
+import tk.zwander.common.util.EventObserver
 import tk.zwander.common.util.GlobalExceptionHandler
 import tk.zwander.common.util.LogUtils
 import tk.zwander.common.util.ShizukuService
@@ -34,6 +35,7 @@ import tk.zwander.common.util.migrationManager
 import tk.zwander.common.util.prefManager
 import tk.zwander.common.util.safeApplicationContext
 import tk.zwander.lockscreenwidgets.activities.add.AddFrameWidgetActivity
+import tk.zwander.lockscreenwidgets.util.FramePrefs
 import tk.zwander.widgetdrawer.activities.add.AddDrawerWidgetActivity
 import kotlin.coroutines.CoroutineContext
 
@@ -50,7 +52,7 @@ val Context.app: App
  * QS tile depending on whether the user is
  * running One UI or not.
  */
-class App : Application(), CoroutineScope by MainScope() {
+class App : Application(), CoroutineScope by MainScope(), EventObserver {
     //Listen for the screen turning on and off.
     //This shouldn't really be necessary, but there are some quirks in how
     //Android works that makes it helpful.
@@ -202,17 +204,7 @@ class App : Application(), CoroutineScope by MainScope() {
 
         migrationManager.runMigrations()
 
-        eventManager.addListener<Event.LaunchAddWidget> {
-            val intent = Intent(this, AddFrameWidgetActivity::class.java)
-            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-            intent.putExtra(BaseBindWidgetActivity.EXTRA_HOLDER_ID, it.frameId)
-
-            startActivity(intent)
-        }
-
-        eventManager.addListener<Event.LaunchAddDrawerWidget> {
-            AddDrawerWidgetActivity.launch(this, it.fromDrawer)
-        }
+        eventManager.addObserver(this)
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             Shizuku.addBinderReceivedListenerSticky {
@@ -229,6 +221,27 @@ class App : Application(), CoroutineScope by MainScope() {
                     })
                 }
             }
+        }
+    }
+
+    override fun onEvent(event: Event) {
+        when (event) {
+            is Event.RemoveFrameConfirmed -> {
+                if (event.confirmed && event.frameId != null) {
+                    FramePrefs.removeFrame(this, event.frameId)
+                }
+            }
+            is Event.LaunchAddDrawerWidget -> {
+                AddDrawerWidgetActivity.launch(this, event.fromDrawer)
+            }
+            is Event.LaunchAddWidget -> {
+                val intent = Intent(this, AddFrameWidgetActivity::class.java)
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                intent.putExtra(BaseBindWidgetActivity.EXTRA_HOLDER_ID, event.frameId)
+
+                startActivity(intent)
+            }
+            else -> {}
         }
     }
 

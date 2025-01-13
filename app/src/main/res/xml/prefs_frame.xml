@@ -82,8 +82,13 @@
     </tk.zwander.collapsiblepreferencecategory.CollapsiblePreferenceCategoryNew>
 
     <tk.zwander.collapsiblepreferencecategory.CollapsiblePreferenceCategoryNew
-        android:title="@string/category_layout"
-        android:key="settings_layout_category">
+        android:title="@string/settings_screen_category_grid"
+        android:key="frame_grid_settings">
+
+        <Preference
+            android:title="@string/select_frame"
+            android:key="select_frame_pref"
+            />
 
         <tk.zwander.seekbarpreference.SeekBarPreference
             android:title="@string/settings_screen_frame_col_count"
@@ -102,6 +107,12 @@
             app:minValue="1"
             app:maxValue="20"
             />
+
+    </tk.zwander.collapsiblepreferencecategory.CollapsiblePreferenceCategoryNew>
+
+    <tk.zwander.collapsiblepreferencecategory.CollapsiblePreferenceCategoryNew
+        android:title="@string/category_layout"
+        android:key="settings_layout_category">
 
         <tk.zwander.common.prefs.MaterialSwitchPreference
             android:title="@string/settings_screen_lock_widget_frame"

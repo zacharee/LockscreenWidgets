@@ -18,14 +18,30 @@ import android.view.View
 import android.view.WindowManager
 import android.widget.ImageView
 import android.widget.Toast
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import androidx.core.graphics.component1
 import androidx.core.graphics.component2
+import androidx.core.view.isVisible
 import androidx.lifecycle.Lifecycle
 import androidx.recyclerview.widget.RecyclerView
 import com.android.internal.R.attr.screenOrientation
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import tk.zwander.common.activities.DismissOrUnlockActivity
+import tk.zwander.common.compose.AppTheme
 import tk.zwander.common.data.WidgetData
 import tk.zwander.common.util.BaseDelegate
 import tk.zwander.common.util.BlurManager
@@ -149,6 +165,20 @@ open class MainWidgetFrameDelegate protected constructor(context: Context, prote
                     }
                 }
             }
+
+            if (actualNewState.isSelectionPreview != oldState.isSelectionPreview) {
+                if (actualNewState.isSelectionPreview) {
+                    if (canShow()) {
+                        addWindow(wm)
+                        binding.selectFrameLayout.isVisible = true
+                    }
+                } else {
+                    if (!canShow()) {
+                        removeWindow(wm)
+                        binding.selectFrameLayout.isVisible = false
+                    }
+                }
+            }
         }
 
     private val saveMode: FrameSizeAndPosition.FrameType
@@ -159,7 +189,6 @@ open class MainWidgetFrameDelegate protected constructor(context: Context, prote
 
             return when {
                 id != -1 -> FrameSizeAndPosition.FrameType.SecondaryLockscreen.select(!isLandscape, id)
-                state.isPreview -> FrameSizeAndPosition.FrameType.Preview.select(!isLandscape)
                 state.notificationsPanelFullyExpanded && prefManager.showInNotificationCenter -> {
                     if (kgm.isKeyguardLocked && prefManager.separatePosForLockNC) {
                         FrameSizeAndPosition.FrameType.LockNotification.select(!isLandscape)
@@ -281,7 +310,10 @@ open class MainWidgetFrameDelegate protected constructor(context: Context, prote
     }
 
     private val showWallpaperLayerCondition: Boolean
-        get() = !state.isPreview && prefManager.maskedMode && (!state.notificationsPanelFullyExpanded || !prefManager.showInNotificationCenter)
+        get() = !state.isPreview &&
+                !state.isSelectionPreview &&
+                prefManager.maskedMode &&
+                (!state.notificationsPanelFullyExpanded || !prefManager.showInNotificationCenter)
 
     override val blurManager by lazy {
         BlurManager(
@@ -457,9 +489,22 @@ open class MainWidgetFrameDelegate protected constructor(context: Context, prote
             Event.ScreenOn -> {
                 updateStateAndWindowState(wm) { it.copy(isScreenOn = true) }
             }
-            is Event.RemoveFrameConfirmed -> {
-                if (event.confirmed && event.frameId == id) {
-                    FramePrefs.removeFrame(this, id)
+            is Event.PreviewFrames -> {
+                if (prefManager.currentSecondaryFrames.isEmpty()) {
+                    eventManager.sendEvent(Event.LaunchAddWidget(id))
+                } else {
+                    updateState {
+                        it.copy(
+                            isPreview = event.show == Event.PreviewFrames.ShowMode.SHOW ||
+                                    (event.show == Event.PreviewFrames.ShowMode.TOGGLE && !it.isPreview),
+                            isSelectionPreview = event.show == Event.PreviewFrames.ShowMode.SHOW_FOR_SELECTION,
+                        )
+                    }
+                }
+            }
+            is Event.FrameSelected -> {
+                if (event.frameId == null) {
+                    updateState { it.copy(isSelectionPreview = false) }
                 }
             }
             else -> {}
@@ -480,10 +525,50 @@ open class MainWidgetFrameDelegate protected constructor(context: Context, prote
         return !ignoreTouches
     }
 
+    @OptIn(ExperimentalLayoutApi::class)
     override fun onCreate() {
         super.onCreate()
 
         binding.frame.frameId = id
+        binding.selectFrameLayout.setContent {
+            AppTheme {
+                Surface(
+                    modifier = Modifier.fillMaxSize(),
+                ) {
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        Column(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.spacedBy(8.dp),
+                        ) {
+                            Text(text = "$id")
+
+                            FlowRow(
+                                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                verticalArrangement = Arrangement.spacedBy(8.dp),
+                            ) {
+                                OutlinedButton(
+                                    onClick = {
+                                        eventManager.sendEvent(Event.FrameSelected(null))
+                                    },
+                                ) {
+                                    Text(text = stringResource(R.string.cancel))
+                                }
+
+                                OutlinedButton(
+                                    onClick = { eventManager.sendEvent(Event.FrameSelected(id)) },
+                                ) {
+                                    Text(text = stringResource(R.string.select))
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
 
         //Scroll to the stored page, making sure to catch a potential
         //out-of-bounds error.
@@ -610,7 +695,7 @@ open class MainWidgetFrameDelegate protected constructor(context: Context, prote
      */
     private fun canShow(): Boolean {
         fun forPreview(): Boolean {
-            return state.isPreview
+            return state.isPreview || state.isSelectionPreview
         }
 
         fun forCommon(): Boolean {
@@ -896,6 +981,7 @@ open class MainWidgetFrameDelegate protected constructor(context: Context, prote
         val currentAppPackage: String? = null,
         val isOnEdgePanel: Boolean = false,
         val isPreview: Boolean = false,
+        val isSelectionPreview: Boolean = false,
         //This is used to track when the notification shade has
         //been expanded/collapsed or when the "show in NC" setting
         //has been changed. Since the params are different for the

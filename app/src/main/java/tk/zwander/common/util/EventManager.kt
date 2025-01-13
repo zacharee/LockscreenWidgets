@@ -2,6 +2,9 @@ package tk.zwander.common.util
 
 import android.annotation.SuppressLint
 import android.content.Context
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import tk.zwander.common.data.WidgetData
@@ -132,6 +135,15 @@ sealed class Event {
     data class LaunchAddWidget(val frameId: Int) : Event()
     data class TempHide(val frameId: Int) : Event()
     data class RemoveFrameConfirmed(val confirmed: Boolean, val frameId: Int?) : Event()
+    data class PreviewFrames(val show: ShowMode) : Event() {
+        enum class ShowMode {
+            SHOW,
+            HIDE,
+            TOGGLE,
+            SHOW_FOR_SELECTION,
+        }
+    }
+    data class FrameSelected(val frameId: Int?) : Event()
 
     //*** Widget Drawer
     data object CloseDrawer : Event()
@@ -160,3 +172,16 @@ data class ListenerInfo<T : Event>(
     val listenerClass: Class<T>,
     val listener: (T) -> Unit
 )
+
+@Composable
+fun EventObserverEffect(observer: EventObserver?) {
+    val context = LocalContext.current
+
+    DisposableEffect(observer) {
+        observer?.let { context.eventManager.addObserver(observer) }
+
+        onDispose {
+            observer?.let { context.eventManager.removeObserver(observer) }
+        }
+    }
+}

@@ -1,6 +1,7 @@
 package tk.zwander.common.compose.data
 
 import tk.zwander.common.data.MainPageButton
+import tk.zwander.common.util.EventObserver
 
 data class FeatureCardInfo(
     val title: Int,
@@ -13,4 +14,5 @@ data class FeatureCardInfo(
     val isEnabled: () -> Boolean,
     val onEnabledChanged: (Boolean) -> Unit,
     val onAddFrame: (() -> Unit)? = null,
+    val eventObserver: EventObserver? = null,
 )
