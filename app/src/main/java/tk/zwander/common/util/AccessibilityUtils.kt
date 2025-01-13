@@ -504,7 +504,7 @@ object AccessibilityUtils {
 
             //Check if the screen is on.
             val isScreenOn = power.isInteractive
-            if (drawerDelegate.commonState.isScreenOn != isScreenOn) {
+            if (frameDelegates.values.first().commonState.isScreenOn != isScreenOn) {
                 frameDelegates.forEach { (_, frameDelegate) ->
                     //Make sure to turn off temp hide if it was on.
                     frameDelegate.updateState { it.copy(isTempHide = false) }
@@ -517,11 +517,8 @@ object AccessibilityUtils {
             //Check if the lock screen is shown.
             val isOnKeyguard = kgm.isKeyguardLocked
 
-            if (isOnKeyguard != drawerDelegate.commonState.wasOnKeyguard) {
+            if (isOnKeyguard != frameDelegates.values.first().commonState.wasOnKeyguard) {
                 drawerDelegate.updateCommonState { it.copy(wasOnKeyguard = isOnKeyguard) }
-            }
-
-            if (isOnKeyguard != drawerDelegate.commonState.wasOnKeyguard) {
                 frameDelegates.forEach { (_, frameDelegate) ->
                     frameDelegate.updateCommonState { it.copy(wasOnKeyguard = isOnKeyguard) }
                 }

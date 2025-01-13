@@ -12,4 +12,5 @@ data class FeatureCardInfo(
     val onAddWidget: () -> Unit,
     val isEnabled: () -> Boolean,
     val onEnabledChanged: (Boolean) -> Unit,
+    val onAddFrame: (() -> Unit)? = null,
 )

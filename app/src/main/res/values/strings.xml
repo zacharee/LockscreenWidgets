@@ -347,4 +347,5 @@
     <string name="selected_pack">Currently selected icon pack</string>
 
     <string name="blank_widget">Blank Widget</string>
+    <string name="add_frame">Add Widget Frame</string>
 </resources>

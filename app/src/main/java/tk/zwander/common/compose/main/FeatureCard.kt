@@ -89,7 +89,15 @@ fun rememberFeatureCards(): List<FeatureCardInfo> {
                 ),
                 { context.eventManager.sendEvent(Event.LaunchAddWidget(-1)) },
                 { context.prefManager.widgetFrameEnabled },
-                { context.prefManager.widgetFrameEnabled = it }
+                { context.prefManager.widgetFrameEnabled = it },
+                onAddFrame = {
+                    val maxFrameId = context.prefManager.currentSecondaryFrames.maxOrNull() ?: 1
+                    val newFrameId = maxFrameId + 1
+
+                    context.prefManager.currentSecondaryFrames = context.prefManager.currentSecondaryFrames.toMutableList().apply {
+                        add(newFrameId)
+                    }
+                },
             ),
             FeatureCardInfo(
                 R.string.widget_drawer,
@@ -182,6 +190,29 @@ fun FeatureCard(info: FeatureCardInfo) {
                             text = stringResource(id = R.string.add_widget),
                             style = MaterialTheme.typography.headlineSmall,
                         )
+                    }
+
+                    info.onAddFrame?.let { onAddFrame ->
+                        SubduedOutlinedButton(
+                            onClick = {
+                                onAddFrame()
+                            },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .heightIn(min = 64.dp),
+                        ) {
+                            Image(
+                                painter = painterResource(id = R.drawable.ic_baseline_add_24),
+                                contentDescription = stringResource(id = R.string.add_frame),
+                                contentScale = ContentScale.FillHeight,
+                                modifier = Modifier.size(32.dp),
+                            )
+                            Spacer(Modifier.size(16.dp))
+                            Text(
+                                text = stringResource(id = R.string.add_frame),
+                                style = MaterialTheme.typography.headlineSmall,
+                            )
+                        }
                     }
 
                     Spacer(Modifier.size(16.dp))

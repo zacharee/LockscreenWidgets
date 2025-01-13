@@ -111,10 +111,10 @@ sealed class Event {
      * lock screen has successfully been dismissed.
      */
     data class NewNotificationCount(val count: Int) : Event()
-    data class FrameIntercept(val down: Boolean) : Event()
-    data class FrameAttachmentState(val attached: Boolean) : Event()
-    data class FrameMoved(val velX: Float, val velY: Float) : Event()
-    data class FrameResized(val which: Side, val velocity: Int, val isUp: Boolean) : Event() {
+    data class FrameIntercept(val frameId: Int, val down: Boolean) : Event()
+    data class FrameAttachmentState(val frameId: Int, val attached: Boolean) : Event()
+    data class FrameMoved(val frameId: Int, val velX: Float, val velY: Float) : Event()
+    data class FrameResized(val frameId: Int, val which: Side, val velocity: Int, val isUp: Boolean) : Event() {
         enum class Side {
             LEFT,
             TOP,

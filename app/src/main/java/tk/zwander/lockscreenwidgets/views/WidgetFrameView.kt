@@ -37,6 +37,7 @@ import tk.zwander.common.util.vibrate
 import tk.zwander.lockscreenwidgets.activities.TaskerIsShowingFrame
 import tk.zwander.lockscreenwidgets.compose.IDListLayout
 import tk.zwander.lockscreenwidgets.databinding.WidgetFrameBinding
+import tk.zwander.lockscreenwidgets.util.FramePrefs
 import kotlin.math.roundToInt
 
 /**
@@ -63,6 +64,7 @@ class WidgetFrameView(context: Context, attrs: AttributeSet) : ConstraintLayout(
         set(value) {
             field = value
             binding.editWrapper.isVisible = value
+            binding.removeFrame.isVisible = value && id != -1
         }
 
     private val sensorManager by lazy { context.getSystemService(Context.SENSOR_SERVICE) as SensorManager }
@@ -121,19 +123,19 @@ class WidgetFrameView(context: Context, attrs: AttributeSet) : ConstraintLayout(
         }
 
         binding.leftDragger.setOnTouchListener(ExpandTouchListener { velX, _, isUp ->
-            context.eventManager.sendEvent(Event.FrameResized(Event.FrameResized.Side.LEFT, velX, isUp))
+            context.eventManager.sendEvent(Event.FrameResized(frameId, Event.FrameResized.Side.LEFT, velX, isUp))
             true
         })
         binding.rightDragger.setOnTouchListener(ExpandTouchListener { velX, _, isUp ->
-            context.eventManager.sendEvent(Event.FrameResized(Event.FrameResized.Side.RIGHT, velX, isUp))
+            context.eventManager.sendEvent(Event.FrameResized(frameId, Event.FrameResized.Side.RIGHT, velX, isUp))
             true
         })
         binding.topDragger.setOnTouchListener(ExpandTouchListener { _, velY, isUp ->
-            context.eventManager.sendEvent(Event.FrameResized(Event.FrameResized.Side.TOP, velY, isUp))
+            context.eventManager.sendEvent(Event.FrameResized(frameId, Event.FrameResized.Side.TOP, velY, isUp))
             true
         })
         binding.bottomDragger.setOnTouchListener(ExpandTouchListener { _, velY, isUp ->
-            context.eventManager.sendEvent(Event.FrameResized(Event.FrameResized.Side.BOTTOM, velY, isUp))
+            context.eventManager.sendEvent(Event.FrameResized(frameId, Event.FrameResized.Side.BOTTOM, velY, isUp))
             true
         })
         binding.addWidget.setOnClickListener {
@@ -141,6 +143,13 @@ class WidgetFrameView(context: Context, attrs: AttributeSet) : ConstraintLayout(
         }
         binding.tempHideFrame.setOnClickListener {
             context.eventManager.sendEvent(Event.TempHide(frameId))
+        }
+
+        if (frameId != -1) {
+            binding.removeFrame.setOnClickListener {
+                // TODO: Confirmation
+                FramePrefs.removeFrame(context, frameId)
+            }
         }
 
         if (context.prefManager.firstViewing && frameId == -1) {
@@ -172,7 +181,7 @@ class WidgetFrameView(context: Context, attrs: AttributeSet) : ConstraintLayout(
         }
 
         binding.frameCard.fadeAndScaleIn {
-            context.eventManager.sendEvent(Event.FrameAttachmentState(true))
+            context.eventManager.sendEvent(Event.FrameAttachmentState(frameId, true))
             animationState = AnimationState.STATE_IDLE
         }
     }
@@ -186,7 +195,7 @@ class WidgetFrameView(context: Context, attrs: AttributeSet) : ConstraintLayout(
         unregisterProxListener()
 
         isInEditingMode = false
-        context.eventManager.sendEvent(Event.FrameAttachmentState(false))
+        context.eventManager.sendEvent(Event.FrameAttachmentState(frameId, false))
         animationState = AnimationState.STATE_IDLE
     }
 
@@ -366,12 +375,12 @@ class WidgetFrameView(context: Context, attrs: AttributeSet) : ConstraintLayout(
     private fun onTouch(event: MotionEvent): Boolean {
         return when (event.action) {
             MotionEvent.ACTION_DOWN -> {
-                context.eventManager.sendEvent(Event.FrameIntercept(true))
+                context.eventManager.sendEvent(Event.FrameIntercept(frameId, true))
                 false
             }
             MotionEvent.ACTION_CANCEL,
             MotionEvent.ACTION_UP -> {
-                context.eventManager.sendEvent(Event.FrameIntercept(false))
+                context.eventManager.sendEvent(Event.FrameIntercept(frameId, false))
                 alreadyIndicatedMoving = false
                 false
             }
@@ -458,7 +467,7 @@ class WidgetFrameView(context: Context, attrs: AttributeSet) : ConstraintLayout(
                     prevX = newX
                     prevY = newY
 
-                    context.eventManager.sendEvent(Event.FrameMoved(velX, velY))
+                    context.eventManager.sendEvent(Event.FrameMoved(frameId, velX, velY))
                     true
                 }
                 MotionEvent.ACTION_UP -> {

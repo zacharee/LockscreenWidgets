@@ -28,6 +28,7 @@ import tk.zwander.common.util.keyguardManager
 import tk.zwander.common.util.logUtils
 import tk.zwander.common.util.prefManager
 import tk.zwander.lockscreenwidgets.appwidget.IDListProvider
+import tk.zwander.lockscreenwidgets.util.FramePrefs
 import tk.zwander.lockscreenwidgets.util.MainWidgetFrameDelegate
 import tk.zwander.lockscreenwidgets.util.SecondaryWidgetFrameDelegate
 import tk.zwander.widgetdrawer.util.DrawerDelegate
@@ -63,6 +64,29 @@ class Accessibility : AccessibilityService(), EventObserver, CoroutineScope by M
         }
         handler(PrefManager.KEY_DEBUG_LOG) {
             IDListProvider.sendUpdate(this@Accessibility)
+        }
+        handler(PrefManager.KEY_CURRENT_FRAMES) {
+            val newFrameIds = prefManager.currentSecondaryFrames
+            val currentFrames = secondaryFrameDelegates
+
+            val removedFrames = currentFrames.filter { (id, _) -> !newFrameIds.contains(id) }
+            val addedFrameIds = newFrameIds.filter { !currentFrames.containsKey(it) }
+
+            removedFrames.forEach { (id, frame) ->
+                frame.onDestroy()
+                FramePrefs.removeFrame(this@Accessibility, id)
+                currentFrames.remove(id)
+            }
+
+            addedFrameIds.forEach { id ->
+                val newFrame = SecondaryWidgetFrameDelegate(this@Accessibility, id)
+                newFrame.onCreate()
+                currentFrames.values.firstOrNull()?.let { referenceFrame ->
+                    newFrame.updateState { referenceFrame.state }
+                    newFrame.updateCommonState { referenceFrame.commonState }
+                }
+                currentFrames[id] = newFrame
+            }
         }
     }
 

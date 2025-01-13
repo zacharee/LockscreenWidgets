@@ -3,6 +3,7 @@ package tk.zwander.lockscreenwidgets.util
 import android.content.Context
 import com.google.gson.reflect.TypeToken
 import tk.zwander.common.data.WidgetData
+import tk.zwander.common.util.PrefManager
 import tk.zwander.common.util.prefManager
 
 object FramePrefs {
@@ -31,6 +32,7 @@ object FramePrefs {
 
         if (frameId == -1) {
             context.prefManager.currentWidgets = set
+            return
         }
 
         context.prefManager.putString(
@@ -39,7 +41,7 @@ object FramePrefs {
         )
     }
 
-    fun getSizeForFrame(context: Context, frameId: Int): Pair<Int, Int> {
+    fun getGridSizeForFrame(context: Context, frameId: Int): Pair<Int, Int> {
         return getRowCountForFrame(context, frameId) to getColCountForFrame(context, frameId)
     }
 
@@ -59,7 +61,7 @@ object FramePrefs {
         }
     }
 
-    fun setSizeForFrame(context: Context, frameId: Int, size: Pair<Int, Int>) {
+    fun setGridSizeForFrame(context: Context, frameId: Int, size: Pair<Int, Int>) {
         if (frameId == -1) {
             context.prefManager.frameRowCount = size.first
             context.prefManager.frameColCount = size.second
@@ -81,6 +83,14 @@ object FramePrefs {
         context.prefManager.remove(generatePrefKey(KEY_FRAME_WIDGETS, frameId))
         context.prefManager.remove(generatePrefKey(KEY_FRAME_ROW_COUNT, frameId))
         context.prefManager.remove(generatePrefKey(KEY_FRAME_COL_COUNT, frameId))
+    }
+
+    fun generateCurrentWidgetsKey(id: Int): String {
+        if (id == -1) {
+            return PrefManager.KEY_CURRENT_WIDGETS
+        }
+
+        return "${KEY_FRAME_WIDGETS}_${id}"
     }
 
     private fun generatePrefKey(baseKey: String, id: Int): String {
