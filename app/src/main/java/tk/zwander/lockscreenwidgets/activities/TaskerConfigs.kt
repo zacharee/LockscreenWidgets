@@ -15,7 +15,7 @@ import com.joaomgcd.taskerpluginlibrary.runner.TaskerPluginResultConditionSatisf
 import com.joaomgcd.taskerpluginlibrary.runner.TaskerPluginResultConditionUnsatisfied
 import com.joaomgcd.taskerpluginlibrary.runner.TaskerPluginResultSucess
 import tk.zwander.common.util.prefManager
-import tk.zwander.lockscreenwidgets.util.WidgetFrameDelegate
+import tk.zwander.lockscreenwidgets.util.MainWidgetFrameDelegate
 
 class TaskerCanShowActivity : ComponentActivity(), TaskerPluginConfigNoInput {
     private val helper by lazy { CanShowHelper(this) }
@@ -162,7 +162,7 @@ class TaskerIsShowingFrame : ComponentActivity(), TaskerPluginConfigNoInput {
             input: TaskerInput<Unit>,
             update: Unit?
         ): TaskerPluginResultCondition<Unit> {
-            return if (WidgetFrameDelegate.peekInstance(context)?.isAttached == true) {
+            return if (MainWidgetFrameDelegate.peekInstance(context)?.isAttached == true) {
                 TaskerPluginResultConditionSatisfied(context)
             } else {
                 TaskerPluginResultConditionUnsatisfied()

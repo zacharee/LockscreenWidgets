@@ -22,7 +22,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import tk.zwander.common.compose.AppTheme
 import tk.zwander.common.compose.util.insetsContentPadding
-import tk.zwander.lockscreenwidgets.util.WidgetFrameDelegate
+import tk.zwander.lockscreenwidgets.util.MainWidgetFrameDelegate
 import tk.zwander.widgetdrawer.util.DrawerDelegate
 
 @Preview
@@ -31,7 +31,7 @@ fun MainContent() {
     val features = rememberFeatureCards()
     val links = rememberLinks()
 
-    val hasFrameDelegateInstance = WidgetFrameDelegate.readOnlyInstance.collectAsState().value != null
+    val hasFrameDelegateInstance = MainWidgetFrameDelegate.readOnlyInstance.collectAsState().value != null
     val hasDrawerDelegateInstance = DrawerDelegate.readOnlyInstance.collectAsState().value != null
 
     AppTheme {

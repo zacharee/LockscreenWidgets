@@ -20,6 +20,7 @@ class DrawerAdapter(
     rootView: View,
     onRemoveCallback: (WidgetData, Int) -> Unit,
 ) : BaseAdapter(
+    -2,
     context,
     rootView,
     onRemoveCallback,

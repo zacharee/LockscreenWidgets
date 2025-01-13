@@ -48,6 +48,7 @@ import kotlin.math.roundToInt
  */
 class WidgetFrameView(context: Context, attrs: AttributeSet) : ConstraintLayout(context, attrs) {
     var animationState = AnimationState.STATE_IDLE
+    var frameId: Int = Int.MIN_VALUE
 
     private var maxPointerCount = 0
     private var alreadyIndicatedMoving = false
@@ -113,10 +114,10 @@ class WidgetFrameView(context: Context, attrs: AttributeSet) : ConstraintLayout(
 
         binding.move.setOnTouchListener(MoveTouchListener())
         binding.centerHorizontally.setOnClickListener {
-            context.eventManager.sendEvent(Event.CenterFrameHorizontally)
+            context.eventManager.sendEvent(Event.CenterFrameHorizontally(frameId))
         }
         binding.centerVertically.setOnClickListener {
-            context.eventManager.sendEvent(Event.CenterFrameVertically)
+            context.eventManager.sendEvent(Event.CenterFrameVertically(frameId))
         }
 
         binding.leftDragger.setOnTouchListener(ExpandTouchListener { velX, _, isUp ->
@@ -136,13 +137,13 @@ class WidgetFrameView(context: Context, attrs: AttributeSet) : ConstraintLayout(
             true
         })
         binding.addWidget.setOnClickListener {
-            context.eventManager.sendEvent(Event.LaunchAddWidget)
+            context.eventManager.sendEvent(Event.LaunchAddWidget(frameId))
         }
         binding.tempHideFrame.setOnClickListener {
-            context.eventManager.sendEvent(Event.TempHide)
+            context.eventManager.sendEvent(Event.TempHide(frameId))
         }
 
-        if (context.prefManager.firstViewing) {
+        if (context.prefManager.firstViewing && frameId == -1) {
             binding.gestureHintView.root.isVisible = true
         }
 
@@ -233,7 +234,7 @@ class WidgetFrameView(context: Context, attrs: AttributeSet) : ConstraintLayout(
                             if (binding.hideHintView.root.isVisible) {
                                 binding.hideHintView.root.close()
                             }
-                            context.eventManager.sendEvent(Event.TempHide)
+                            context.eventManager.sendEvent(Event.TempHide(frameId))
                             return true
                         }
                     }
@@ -245,7 +246,7 @@ class WidgetFrameView(context: Context, attrs: AttributeSet) : ConstraintLayout(
                     }
 
                     if (ev.buttonState == MotionEvent.BUTTON_TERTIARY) {
-                        context.eventManager.sendEvent(Event.TempHide)
+                        context.eventManager.sendEvent(Event.TempHide(frameId))
                         return true
                     }
                 }
@@ -289,7 +290,7 @@ class WidgetFrameView(context: Context, attrs: AttributeSet) : ConstraintLayout(
     }
 
     fun updateDebugIdViewVisibility() {
-        binding.idList.isVisible = context.prefManager.showDebugIdView
+        binding.idList.isVisible = context.prefManager.showDebugIdView && frameId == -1
     }
 
     fun addWindow(wm: WindowManager, params: WindowManager.LayoutParams) {
@@ -461,7 +462,7 @@ class WidgetFrameView(context: Context, attrs: AttributeSet) : ConstraintLayout(
                     true
                 }
                 MotionEvent.ACTION_UP -> {
-                    context.eventManager.sendEvent(Event.FrameMoveFinished)
+                    context.eventManager.sendEvent(Event.FrameMoveFinished(frameId))
                     true
                 }
                 else -> false

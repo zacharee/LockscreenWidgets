@@ -85,6 +85,7 @@ import kotlin.math.min
 
 @Suppress("LeakingThis")
 abstract class BaseAdapter(
+    protected val holderId: Int,
     protected val context: Context,
     protected val rootView: View,
     protected val onRemoveCallback: (WidgetData, Int) -> Unit,
@@ -105,7 +106,7 @@ abstract class BaseAdapter(
 
             if (changed) {
                 mainHandler.post {
-                    context.eventManager.sendEvent(Event.EditingIndexUpdated(value))
+                    context.eventManager.sendEvent(Event.EditingIndexUpdated(value, holderId))
                 }
             }
         }
@@ -427,16 +428,20 @@ abstract class BaseAdapter(
 
         override fun onEvent(event: Event) {
             when (event) {
-                Event.FrameMoveFinished -> {
-                    val pos = bindingAdapterPosition
+                is Event.FrameMoveFinished -> {
+                    if (event.frameId == holderId) {
+                        val pos = bindingAdapterPosition
 
-                    if (pos != -1 && pos < widgets.size) {
-                        onResize(widgets[pos], 0, 1)
+                        if (pos != -1 && pos < widgets.size) {
+                            onResize(widgets[pos], 0, 1)
+                        }
                     }
                 }
 
                 is Event.EditingIndexUpdated -> {
-                    updateEditingUI(event.index)
+                    if (event.frameId == holderId) {
+                        updateEditingUI(event.index)
+                    }
                 }
 
                 else -> {}

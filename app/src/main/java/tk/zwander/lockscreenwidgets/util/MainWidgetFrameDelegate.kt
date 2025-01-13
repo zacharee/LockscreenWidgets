@@ -53,16 +53,15 @@ import tk.zwander.lockscreenwidgets.views.WidgetFrameView
 
 /**
  * Handle most of the logic involving the widget frame.
- * TODO: make this work with multiple frame "clients" (i.e. a preview in MainActivity).
  */
-class WidgetFrameDelegate private constructor(context: Context) : BaseDelegate<WidgetFrameDelegate.State>(context) {
+open class MainWidgetFrameDelegate protected constructor(context: Context, protected val id: Int = -1) : BaseDelegate<MainWidgetFrameDelegate.State>(context) {
     companion object {
-        private val instance = MutableStateFlow<WidgetFrameDelegate?>(null)
+        private val instance = MutableStateFlow<MainWidgetFrameDelegate?>(null)
 
         val readOnlyInstance = instance.asStateFlow()
 
         @Synchronized
-        fun peekInstance(context: Context): WidgetFrameDelegate? {
+        fun peekInstance(context: Context): MainWidgetFrameDelegate? {
             if (instance.value == null) {
                 context.logUtils.debugLog("Accessibility isn't running yet")
 
@@ -73,7 +72,7 @@ class WidgetFrameDelegate private constructor(context: Context) : BaseDelegate<W
         }
 
         @Synchronized
-        fun retrieveInstance(context: Context): WidgetFrameDelegate? {
+        fun retrieveInstance(context: Context): MainWidgetFrameDelegate? {
             return peekInstance(context).also {
                 if (it == null) {
                     Toast.makeText(context, R.string.accessibility_not_started, Toast.LENGTH_SHORT)
@@ -83,12 +82,12 @@ class WidgetFrameDelegate private constructor(context: Context) : BaseDelegate<W
         }
 
         @Synchronized
-        fun getInstance(context: Context): WidgetFrameDelegate {
+        fun getInstance(context: Context): MainWidgetFrameDelegate {
             return instance.value ?: run {
                 if (context !is Accessibility) {
                     throw IllegalStateException("Delegate can only be initialized by Accessibility Service!")
                 } else {
-                    WidgetFrameDelegate(context).also {
+                    MainWidgetFrameDelegate(context).also {
                         instance.value = it
                     }
                 }
@@ -159,6 +158,7 @@ class WidgetFrameDelegate private constructor(context: Context) : BaseDelegate<W
                         commonState.screenOrientation == Surface.ROTATION_270)
 
             return when {
+                id != -1 -> FrameSizeAndPosition.FrameType.SecondaryLockscreen.select(!isLandscape, id)
                 state.isPreview -> FrameSizeAndPosition.FrameType.Preview.select(!isLandscape)
                 state.notificationsPanelFullyExpanded && prefManager.showInNotificationCenter -> {
                     if (kgm.isKeyguardLocked && prefManager.separatePosForLockNC) {
@@ -172,7 +172,7 @@ class WidgetFrameDelegate private constructor(context: Context) : BaseDelegate<W
         }
 
     //The size, position, and such of the widget frame on the lock screen.
-    override val params = WindowManager.LayoutParams().apply {
+    final override val params = WindowManager.LayoutParams().apply {
         type = WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY
 
         frameSizeAndPosition.getSizeForType(saveMode).let { size ->
@@ -208,6 +208,7 @@ class WidgetFrameDelegate private constructor(context: Context) : BaseDelegate<W
     override val gridLayoutManager = SpannedLayoutManager()
     override val adapter by lazy {
         WidgetFrameAdapter(
+            frameId = id,
             context = context,
             rootView = rootView,
             onRemoveCallback = { item, _ ->
@@ -236,7 +237,7 @@ class WidgetFrameDelegate private constructor(context: Context) : BaseDelegate<W
         }
         handler(
             PrefManager.KEY_FRAME_ROW_COUNT,
-            PrefManager.KEY_FRAME_COL_COUNT
+            PrefManager.KEY_FRAME_COL_COUNT,
         ) {
             updateCounts()
             adapter.updateViews()
@@ -249,7 +250,7 @@ class WidgetFrameDelegate private constructor(context: Context) : BaseDelegate<W
         }
         handler(
             PrefManager.KEY_SHOW_DEBUG_ID_VIEW,
-            PrefManager.KEY_DEBUG_LOG
+            PrefManager.KEY_DEBUG_LOG,
         ) {
             binding.frame.updateDebugIdViewVisibility()
         }
@@ -260,12 +261,12 @@ class WidgetFrameDelegate private constructor(context: Context) : BaseDelegate<W
             updateCornerRadius()
         }
         handler(
-            PrefManager.KEY_LOCK_WIDGET_FRAME
+            PrefManager.KEY_LOCK_WIDGET_FRAME,
         ) {
             adapter.currentEditingInterfacePosition = -1
         }
         handler(
-            PrefManager.KEY_FRAME_WIDGET_CORNER_RADIUS
+            PrefManager.KEY_FRAME_WIDGET_CORNER_RADIUS,
         ) {
             if (binding.frame.isAttachedToWindow) {
                 adapter.updateViews()
@@ -282,49 +283,61 @@ class WidgetFrameDelegate private constructor(context: Context) : BaseDelegate<W
     private val showWallpaperLayerCondition: Boolean
         get() = !state.isPreview && prefManager.maskedMode && (!state.notificationsPanelFullyExpanded || !prefManager.showInNotificationCenter)
 
-    override val blurManager = BlurManager(
-        context = this,
-        params = params,
-        targetView = binding.blurBackground,
-        listenKeys = listOf(PrefManager.KEY_BLUR_BACKGROUND, PrefManager.KEY_BLUR_BACKGROUND_AMOUNT),
-        shouldBlur = { prefManager.blurBackground && !showWallpaperLayerCondition },
-        blurAmount = { prefManager.backgroundBlurAmount },
-        cornerRadius = { dpAsPx(prefManager.cornerRadiusDp).toFloat() },
-        updateWindow = { binding.frame.updateWindow(wm, params) },
-        windowManager = wm,
-    )
+    override val blurManager by lazy {
+        BlurManager(
+            context = this,
+            params = params,
+            targetView = binding.blurBackground,
+            listenKeys = listOf(PrefManager.KEY_BLUR_BACKGROUND, PrefManager.KEY_BLUR_BACKGROUND_AMOUNT),
+            shouldBlur = { prefManager.blurBackground && !showWallpaperLayerCondition },
+            blurAmount = { prefManager.backgroundBlurAmount },
+            cornerRadius = { dpAsPx(prefManager.cornerRadiusDp).toFloat() },
+            updateWindow = { binding.frame.updateWindow(wm, params) },
+            windowManager = wm,
+        )
+    }
 
     override fun onEvent(event: Event) {
         super.onEvent(event)
 
         when (event) {
-            Event.FrameMoveFinished -> updateWallpaperLayerIfNeeded()
-            Event.TempHide -> {
-                updateState { it.copy(isTempHide = true) }
-                updateWindowState(wm)
+            is Event.FrameMoveFinished -> {
+                if (event.frameId == id) {
+                    updateWallpaperLayerIfNeeded()
+                }
+            }
+            is Event.TempHide -> {
+                if (event.frameId == id) {
+                    updateState { it.copy(isTempHide = true) }
+                    updateWindowState(wm)
+                }
             }
             Event.NightModeUpdate -> {
                 adapter.updateViews()
             }
-            Event.CenterFrameHorizontally -> {
-                frameSizeAndPosition.setPositionForType(
-                    saveMode,
-                    Point(
-                        0,
-                        frameSizeAndPosition.getPositionForType(saveMode).y
+            is Event.CenterFrameHorizontally -> {
+                if (event.frameId == id) {
+                    frameSizeAndPosition.setPositionForType(
+                        saveMode,
+                        Point(
+                            0,
+                            frameSizeAndPosition.getPositionForType(saveMode).y
+                        )
                     )
-                )
-                updateParamsIfNeeded()
+                    updateParamsIfNeeded()
+                }
             }
-            Event.CenterFrameVertically -> {
-                frameSizeAndPosition.setPositionForType(
-                    saveMode,
-                    Point(
-                        frameSizeAndPosition.getPositionForType(saveMode).x,
-                        0
+            is Event.CenterFrameVertically -> {
+                if (event.frameId == id) {
+                    frameSizeAndPosition.setPositionForType(
+                        saveMode,
+                        Point(
+                            frameSizeAndPosition.getPositionForType(saveMode).x,
+                            0
+                        )
                     )
-                )
-                updateParamsIfNeeded()
+                    updateParamsIfNeeded()
+                }
             }
             is Event.FrameResized -> {
                 when (event.which) {
@@ -358,7 +371,7 @@ class WidgetFrameDelegate private constructor(context: Context) : BaseDelegate<W
                 )
 
                 if (event.isUp) {
-                    eventManager.sendEvent(Event.FrameResizeFinished)
+                    eventManager.sendEvent(Event.FrameResizeFinished(id))
                     updateWallpaperLayerIfNeeded()
                 }
             }
@@ -454,6 +467,8 @@ class WidgetFrameDelegate private constructor(context: Context) : BaseDelegate<W
     override fun onCreate() {
         super.onCreate()
 
+        binding.frame.frameId = id
+
         //Scroll to the stored page, making sure to catch a potential
         //out-of-bounds error.
         try {
@@ -482,8 +497,8 @@ class WidgetFrameDelegate private constructor(context: Context) : BaseDelegate<W
         updateWindowState(wm, updateAccessibility)
     }
 
-    override fun retrieveCounts(): Pair<Int?, Int?> {
-        return prefManager.frameRowCount to prefManager.frameColCount
+    override fun retrieveCounts(): Pair<Int, Int> {
+        return FramePrefs.getSizeForFrame(this, id)
     }
 
     override fun widgetRemovalConfirmed(event: Event.RemoveWidgetConfirmed, position: Int) {
@@ -590,7 +605,7 @@ class WidgetFrameDelegate private constructor(context: Context) : BaseDelegate<W
         }
 
         fun forNotificationCenter(): Boolean {
-            return (state.notificationsPanelFullyExpanded && prefManager.showInNotificationCenter)
+            return (id == -1 && state.notificationsPanelFullyExpanded && prefManager.showInNotificationCenter)
                     && forCommon()
         }
 
@@ -809,10 +824,10 @@ class WidgetFrameDelegate private constructor(context: Context) : BaseDelegate<W
 
     //Parts based on https://stackoverflow.com/a/26445064/5496177
     inner class SpannedLayoutManager : LayoutManager(
-        this@WidgetFrameDelegate,
+        this@MainWidgetFrameDelegate,
         RecyclerView.HORIZONTAL,
-        prefManager.frameRowCount,
-        prefManager.frameColCount
+        FramePrefs.getRowCountForFrame(this@MainWidgetFrameDelegate, id),
+        FramePrefs.getColCountForFrame(this@MainWidgetFrameDelegate, id),
     ), ISnappyLayoutManager {
         override fun canScrollHorizontally(): Boolean {
             return (adapter.currentEditingInterfacePosition == -1 || commonState.isHoldingItem) && super.canScrollHorizontally()

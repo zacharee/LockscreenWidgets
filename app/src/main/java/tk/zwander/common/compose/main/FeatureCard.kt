@@ -51,7 +51,7 @@ import tk.zwander.lockscreenwidgets.R
 import tk.zwander.lockscreenwidgets.activities.SettingsActivity
 import tk.zwander.lockscreenwidgets.activities.UsageActivity
 import tk.zwander.lockscreenwidgets.fragments.SettingsFragment
-import tk.zwander.lockscreenwidgets.util.WidgetFrameDelegate
+import tk.zwander.lockscreenwidgets.util.MainWidgetFrameDelegate
 import tk.zwander.widgetdrawer.fragments.DrawerSettings
 
 @Composable
@@ -71,7 +71,7 @@ fun rememberFeatureCards(): List<FeatureCardInfo> {
                         R.drawable.ic_baseline_preview_24,
                         R.string.preview
                     ) {
-                        WidgetFrameDelegate.retrieveInstance(context)
+                        MainWidgetFrameDelegate.retrieveInstance(context)
                             ?.updateState { it.copy(isPreview = !it.isPreview) }
                     },
                     MainPageButton(
@@ -87,7 +87,7 @@ fun rememberFeatureCards(): List<FeatureCardInfo> {
                         SettingsActivity.launch(context, SettingsFragment::class.java)
                     },
                 ),
-                { context.eventManager.sendEvent(Event.LaunchAddWidget) },
+                { context.eventManager.sendEvent(Event.LaunchAddWidget(-1)) },
                 { context.prefManager.widgetFrameEnabled },
                 { context.prefManager.widgetFrameEnabled = it }
             ),

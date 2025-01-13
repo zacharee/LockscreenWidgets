@@ -35,15 +35,18 @@ import tk.zwander.common.util.shortcutIdManager
 import tk.zwander.common.util.toSafeBitmap
 import tk.zwander.lockscreenwidgets.R
 import tk.zwander.lockscreenwidgets.data.list.ShortcutListInfo
-import tk.zwander.lockscreenwidgets.util.WidgetFrameDelegate
+import tk.zwander.lockscreenwidgets.util.FramePrefs
 import kotlin.math.floor
 
 abstract class BaseBindWidgetActivity : BaseActivity() {
+    companion object {
+        const val EXTRA_HOLDER_ID = "holder_id"
+    }
+
     protected val widgetHost by lazy { widgetHostCompat }
-    protected val widgetDelegate: WidgetFrameDelegate?
-        get() = WidgetFrameDelegate.peekInstance(this)
 
     protected abstract var currentWidgets: MutableSet<WidgetData>
+    protected open val holderId by lazy { intent.getIntExtra(EXTRA_HOLDER_ID, Int.MIN_VALUE) }
 
     protected open val currentIds: Collection<Int>
         get() = currentWidgets.map { it.id }
@@ -333,9 +336,9 @@ abstract class BaseBindWidgetActivity : BaseActivity() {
     }
 
     protected open val colCount: Int
-        get() = prefManager.frameColCount
+        get() = FramePrefs.getColCountForFrame(this, holderId)
     protected open val rowCount: Int
-        get() = prefManager.frameRowCount
+        get() = FramePrefs.getRowCountForFrame(this, holderId)
     protected open val height: Float
         get() = frameSizeAndPosition.getSizeForType(FrameSizeAndPosition.FrameType.LockNormal.Portrait).y
     protected open val width: Float

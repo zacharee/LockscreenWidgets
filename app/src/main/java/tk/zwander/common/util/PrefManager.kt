@@ -123,6 +123,7 @@ class PrefManager private constructor(private val context: Context) {
         const val KEY_DRAWER_HANDLE_TAP_TO_OPEN = "drawer_handle_tap_to_open"
         const val KEY_SELECTED_ICON_PACK_PACKAGE = "selected_icon_pack_package"
         const val KEY_SHORTCUT_OVERRIDE_ICONS = "shortcut_override_icon_entries"
+        const val KEY_CURRENT_FRAMES = "current_secondary_widget_frames"
 
         const val VALUE_PAGE_INDICATOR_BEHAVIOR_HIDDEN = 0
         const val VALUE_PAGE_INDICATOR_BEHAVIOR_AUTO_HIDE = 1
@@ -800,6 +801,12 @@ class PrefManager private constructor(private val context: Context) {
             putString(KEY_SHORTCUT_OVERRIDE_ICONS, gson.toJson(value))
         }
 
+    var currentSecondaryFrames: List<Int>
+        get() = getStringSet(KEY_CURRENT_FRAMES, setOf()).map { it.toInt() }
+        set(value) {
+            putStringSet(KEY_CURRENT_FRAMES, value.map { it.toString() }.toSet())
+        }
+
     @Suppress("DEPRECATION")
     @Deprecated("Use [FrameSizeAndPosition] instead.")
     fun getCorrectFrameWidth(mode: Mode): Float {
@@ -861,6 +868,8 @@ class PrefManager private constructor(private val context: Context) {
     fun putInt(key: String, value: Int) = prefs.edit(true) { putInt(key, value) }
     fun putBoolean(key: String, value: Boolean) = prefs.edit(true) { putBoolean(key, value) }
     fun putStringSet(key: String, value: Set<String>) = prefs.edit(true) { putStringSet(key, value) }
+
+    fun remove(key: String) = prefs.edit(true) { remove(key) }
 
     fun getResourceFloat(@IntegerRes resource: Int): Float {
         return context.resources.getInteger(resource).toFloat()

@@ -25,7 +25,7 @@ import tk.zwander.common.tiles.widget.WidgetTileTwo
 import tk.zwander.common.util.isAccessibilityEnabled
 import tk.zwander.common.util.isOneUI
 import tk.zwander.common.util.prefManager
-import tk.zwander.lockscreenwidgets.util.WidgetFrameDelegate
+import tk.zwander.lockscreenwidgets.util.MainWidgetFrameDelegate
 
 /**
  * Host the main page of the app (the social links). It also hosts the buttons to add a widget, view usage
@@ -90,7 +90,7 @@ class MainActivity : BaseActivity(), CoroutineScope by MainScope() {
     override fun onStop() {
         super.onStop()
 
-        WidgetFrameDelegate.peekInstance(this)?.updateState { it.copy(isPreview = false) }
+        MainWidgetFrameDelegate.peekInstance(this)?.updateState { it.copy(isPreview = false) }
     }
 
     override fun onDestroy() {

@@ -28,7 +28,8 @@ import tk.zwander.common.util.keyguardManager
 import tk.zwander.common.util.logUtils
 import tk.zwander.common.util.prefManager
 import tk.zwander.lockscreenwidgets.appwidget.IDListProvider
-import tk.zwander.lockscreenwidgets.util.WidgetFrameDelegate
+import tk.zwander.lockscreenwidgets.util.MainWidgetFrameDelegate
+import tk.zwander.lockscreenwidgets.util.SecondaryWidgetFrameDelegate
 import tk.zwander.widgetdrawer.util.DrawerDelegate
 
 /**
@@ -47,10 +48,11 @@ class Accessibility : AccessibilityService(), EventObserver, CoroutineScope by M
     private val wm by lazy { getSystemService(Context.WINDOW_SERVICE) as WindowManager }
     private val power by lazy { getSystemService(Context.POWER_SERVICE) as PowerManager }
     private val imm by lazy { getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager }
-    private val frameDelegate: WidgetFrameDelegate
-        get() = WidgetFrameDelegate.getInstance(this)
+    private val frameDelegate: MainWidgetFrameDelegate
+        get() = MainWidgetFrameDelegate.getInstance(this)
     private val drawerDelegate: DrawerDelegate
         get() = DrawerDelegate.getInstance(this)
+    private val secondaryFrameDelegates = hashMapOf<Int, SecondaryWidgetFrameDelegate>()
 
     private val sharedPreferencesChangeHandler = HandlerRegistry {
         handler(PrefManager.KEY_ACCESSIBILITY_EVENT_DELAY) {
@@ -82,6 +84,13 @@ class Accessibility : AccessibilityService(), EventObserver, CoroutineScope by M
 
         frameDelegate.onCreate()
         drawerDelegate.onCreate()
+
+        prefManager.currentSecondaryFrames.forEach { secondaryId ->
+            secondaryFrameDelegates[secondaryId] = SecondaryWidgetFrameDelegate(this, secondaryId).also {
+                it.onCreate()
+            }
+        }
+
         eventManager.sendEvent(Event.RequestNotificationCount)
         Bugsnag.leaveBreadcrumb("Accessibility service connected.")
 
@@ -89,7 +98,7 @@ class Accessibility : AccessibilityService(), EventObserver, CoroutineScope by M
             runWindowOperation(
                 context = this@Accessibility,
                 wm = wm,
-                frameDelegate = frameDelegate,
+                frameDelegates = secondaryFrameDelegates + (-1 to frameDelegate),
                 drawerDelegate = drawerDelegate,
                 isScreenOn = power.isInteractive,
                 isOnKeyguard = kgm.isKeyguardLocked,
@@ -111,7 +120,7 @@ class Accessibility : AccessibilityService(), EventObserver, CoroutineScope by M
                 accessibilityJob = runAccessibilityJob(
                     context = this@Accessibility,
                     event = eventCopy,
-                    frameDelegate = frameDelegate,
+                    frameDelegates = secondaryFrameDelegates + (-1 to frameDelegate),
                     drawerDelegate = drawerDelegate,
                     power = power,
                     kgm = kgm,
@@ -144,6 +153,9 @@ class Accessibility : AccessibilityService(), EventObserver, CoroutineScope by M
         sharedPreferencesChangeHandler.unregister(this)
         frameDelegate.onDestroy()
         drawerDelegate.onDestroy()
+        secondaryFrameDelegates.forEach { (_, delegate) ->
+            delegate.onDestroy()
+        }
 
         eventManager.removeObserver(this)
 

@@ -100,16 +100,10 @@ class EventManager private constructor(private val context: Context) {
 
 sealed class Event {
     data object LockscreenDismissed : Event()
-    data object TempHide : Event()
-    data object LaunchAddWidget : Event()
-    data object FrameMoveFinished : Event()
     data object ScreenOff : Event()
     data object ScreenOn : Event()
     data object NightModeUpdate : Event()
-    data object CenterFrameHorizontally : Event()
-    data object CenterFrameVertically : Event()
     data object RequestNotificationCount : Event()
-    data object FrameResizeFinished : Event()
 
     /**
      * On Android 8.0+, it's pretty easy to dismiss the lock screen with a simple API call.
@@ -130,7 +124,13 @@ sealed class Event {
     }
     data class RemoveWidgetConfirmed(val remove: Boolean, val item: WidgetData?) : Event()
     data class DebugIdsUpdated(val ids: Collection<String>) : Event()
-    data class EditingIndexUpdated(val index: Int) : Event()
+    data class EditingIndexUpdated(val index: Int, val frameId: Int) : Event()
+    data class FrameMoveFinished(val frameId: Int) : Event()
+    data class CenterFrameHorizontally(val frameId: Int) : Event()
+    data class CenterFrameVertically(val frameId: Int) : Event()
+    data class FrameResizeFinished(val frameId: Int) : Event()
+    data class LaunchAddWidget(val frameId: Int) : Event()
+    data class TempHide(val frameId: Int) : Event()
 
     //*** Widget Drawer
     data object CloseDrawer : Event()

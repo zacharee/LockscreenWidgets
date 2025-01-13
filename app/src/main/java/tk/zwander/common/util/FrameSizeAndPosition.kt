@@ -106,7 +106,9 @@ class FrameSizeAndPosition private constructor(private val context: Context) {
     private fun getDefaultPositionForType(type: FrameType): Point {
         return when (type) {
             FrameType.LockNormal.Portrait,
-            FrameType.Preview.Portrait -> Point(0, 0)
+            FrameType.Preview.Portrait,
+            is FrameType.SecondaryLockscreen.Portrait
+                 -> Point(0, 0)
 
             FrameType.LockNotification.Portrait,
             FrameType.NotificationNormal.Portrait -> Point(
@@ -120,13 +122,15 @@ class FrameSizeAndPosition private constructor(private val context: Context) {
             FrameType.LockNotification.Landscape -> getPositionForType(FrameType.LockNotification.Portrait)
             FrameType.NotificationNormal.Landscape -> getPositionForType(FrameType.NotificationNormal.Portrait)
             FrameType.Preview.Landscape -> getPositionForType(FrameType.Preview.Portrait)
+            is FrameType.SecondaryLockscreen.Landscape -> getPositionForType(FrameType.SecondaryLockscreen.Portrait(type.id))
         }
     }
 
     private fun getDefaultSizeForType(type: FrameType): PointF {
         return when (type) {
             FrameType.LockNormal.Portrait,
-            FrameType.Preview.Portrait -> PointF(
+            FrameType.Preview.Portrait,
+            is FrameType.SecondaryLockscreen.Portrait -> PointF(
                 prefManager.getResourceFloat(R.integer.def_frame_width),
                 prefManager.getResourceFloat(R.integer.def_frame_height),
             )
@@ -143,6 +147,7 @@ class FrameSizeAndPosition private constructor(private val context: Context) {
             FrameType.LockNotification.Landscape -> getSizeForType(FrameType.LockNotification.Portrait)
             FrameType.NotificationNormal.Landscape -> getSizeForType(FrameType.NotificationNormal.Portrait)
             FrameType.Preview.Landscape -> getSizeForType(FrameType.Preview.Portrait)
+            is FrameType.SecondaryLockscreen.Landscape -> getSizeForType(FrameType.SecondaryLockscreen.Portrait(type.id))
         }
     }
 
@@ -189,6 +194,17 @@ class FrameSizeAndPosition private constructor(private val context: Context) {
 
             data object Portrait : Preview("portrait")
             data object Landscape : Preview("landscape")
+        }
+
+        sealed class SecondaryLockscreen(key: String): FrameType("secondary_lockscreen_$key") {
+            companion object {
+                fun select(portrait: Boolean, id: Int): FrameType {
+                    return if (portrait) Portrait(id) else Landscape(id)
+                }
+            }
+
+            data class Portrait(val id: Int) : SecondaryLockscreen("Portrait_$id")
+            data class Landscape(val id: Int) : SecondaryLockscreen("Landscape_$id")
         }
     }
 }

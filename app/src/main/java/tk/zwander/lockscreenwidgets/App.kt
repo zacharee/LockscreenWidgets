@@ -23,6 +23,7 @@ import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
 import org.lsposed.hiddenapibypass.HiddenApiBypass
 import rikka.shizuku.Shizuku
+import tk.zwander.common.activities.add.BaseBindWidgetActivity
 import tk.zwander.common.util.Event
 import tk.zwander.common.util.GlobalExceptionHandler
 import tk.zwander.common.util.LogUtils
@@ -204,6 +205,7 @@ class App : Application(), CoroutineScope by MainScope() {
         eventManager.addListener<Event.LaunchAddWidget> {
             val intent = Intent(this, AddFrameWidgetActivity::class.java)
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            intent.putExtra(BaseBindWidgetActivity.EXTRA_HOLDER_ID, it.frameId)
 
             startActivity(intent)
         }
