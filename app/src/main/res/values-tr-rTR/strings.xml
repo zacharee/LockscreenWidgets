@@ -53,7 +53,7 @@
     <string name="shortcut_icon">Kısayol Simgesi</string>
     <string name="expand">Genişlet</string>
     <string name="alert_remove_widget_confirm">Widget\'ı kaldır?</string>
-    <string name="alert_remove_widget_confirm_desc">Bu widget\'ı kaldırmak istediğinizden emin misiniz?</string>
+    <string name="alert_remove_widget_confirm_desc">Are you sure you want to remove this item?</string>
     <string name="main_screen_social_mastodon">Mastodon</string>
     <string name="main_screen_social_mastodon_desc">Uygulamalarım ve rastgele geliştirmeyle ilgili saçmalıklar hakkında güncellemeler için beni Mastodon\'da takip edin.</string>
     <string name="main_screen_social_website">Web Sitesi</string>
@@ -251,4 +251,6 @@
     <string name="choose_icon_override">Simge Geçersiz Kılmayı Seçin</string>
     <string name="selected_pack">Şu anda seçili simge paketi</string>
     <string name="blank_widget">Blank Widget</string>
+    <string name="add_frame">Add Widget Frame</string>
+    <string name="remove_frame_confirmation_message">Are you sure you want to remove this frame?</string>
 </resources>
