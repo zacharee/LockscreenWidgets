@@ -131,6 +131,7 @@ sealed class Event {
     data class FrameResizeFinished(val frameId: Int) : Event()
     data class LaunchAddWidget(val frameId: Int) : Event()
     data class TempHide(val frameId: Int) : Event()
+    data class RemoveFrameConfirmed(val confirmed: Boolean, val frameId: Int?) : Event()
 
     //*** Widget Drawer
     data object CloseDrawer : Event()

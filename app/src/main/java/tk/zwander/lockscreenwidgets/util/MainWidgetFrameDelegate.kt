@@ -457,6 +457,11 @@ open class MainWidgetFrameDelegate protected constructor(context: Context, prote
             Event.ScreenOn -> {
                 updateStateAndWindowState(wm) { it.copy(isScreenOn = true) }
             }
+            is Event.RemoveFrameConfirmed -> {
+                if (event.confirmed && event.frameId == id) {
+                    FramePrefs.removeFrame(this, id)
+                }
+            }
             else -> {}
         }
     }
@@ -490,7 +495,11 @@ open class MainWidgetFrameDelegate protected constructor(context: Context, prote
     override fun onDestroy() {
         super.onDestroy()
 
-        invalidateInstance()
+        binding.frame.removeWindow(wm)
+
+        if (id == -1) {
+            invalidateInstance()
+        }
     }
 
     override fun isLocked(): Boolean {

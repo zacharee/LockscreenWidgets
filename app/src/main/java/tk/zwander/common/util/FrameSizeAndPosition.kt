@@ -85,6 +85,12 @@ class FrameSizeAndPosition private constructor(private val context: Context) {
         }
     }
 
+    fun removePositionForType(type: FrameType) {
+        positionsMap = positionsMap.toMutableMap().apply {
+            remove(type.key)
+        }
+    }
+
     fun getSizeForType(type: FrameType): PointF {
         return sizesMap[type.key] ?: getDefaultSizeForType(type)
     }
@@ -92,6 +98,12 @@ class FrameSizeAndPosition private constructor(private val context: Context) {
     fun setSizeForType(type: FrameType, size: PointF) {
         sizesMap = sizesMap.toMutableMap().apply {
             this[type.key] = SafePointF(size)
+        }
+    }
+
+    fun removeSizeForType(type: FrameType) {
+        sizesMap = sizesMap.toMutableMap().apply {
+            remove(type.key)
         }
     }
 

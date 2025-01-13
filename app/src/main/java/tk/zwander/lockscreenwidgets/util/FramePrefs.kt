@@ -3,7 +3,9 @@ package tk.zwander.lockscreenwidgets.util
 import android.content.Context
 import com.google.gson.reflect.TypeToken
 import tk.zwander.common.data.WidgetData
+import tk.zwander.common.util.FrameSizeAndPosition
 import tk.zwander.common.util.PrefManager
+import tk.zwander.common.util.frameSizeAndPosition
 import tk.zwander.common.util.prefManager
 
 object FramePrefs {
@@ -83,6 +85,14 @@ object FramePrefs {
         context.prefManager.remove(generatePrefKey(KEY_FRAME_WIDGETS, frameId))
         context.prefManager.remove(generatePrefKey(KEY_FRAME_ROW_COUNT, frameId))
         context.prefManager.remove(generatePrefKey(KEY_FRAME_COL_COUNT, frameId))
+
+        listOf(
+            FrameSizeAndPosition.FrameType.SecondaryLockscreen.Portrait(frameId),
+            FrameSizeAndPosition.FrameType.SecondaryLockscreen.Landscape(frameId),
+        ).forEach { type ->
+            context.frameSizeAndPosition.removeSizeForType(type)
+            context.frameSizeAndPosition.removePositionForType(type)
+        }
     }
 
     fun generateCurrentWidgetsKey(id: Int): String {

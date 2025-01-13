@@ -61,7 +61,7 @@
     <string name="expand">Expand</string>
 
     <string name="alert_remove_widget_confirm">Remove Widget?</string>
-    <string name="alert_remove_widget_confirm_desc">Are you sure you want to remove this widget?</string>
+    <string name="alert_remove_widget_confirm_desc">Are you sure you want to remove this item?</string>
 
     <string name="main_screen_social_mastodon">Mastodon</string>
     <string name="main_screen_social_mastodon_desc">Follow me on Mastodon for updates about my apps and random development-related nonsense.</string>
@@ -348,4 +348,6 @@
 
     <string name="blank_widget">Blank Widget</string>
     <string name="add_frame">Add Widget Frame</string>
+
+    <string name="remove_frame_confirmation_message">Are you sure you want to remove this frame?</string>
 </resources>

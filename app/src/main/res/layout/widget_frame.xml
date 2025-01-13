@@ -240,6 +240,12 @@
             />
 
         <include
+            android:id="@+id/remove_frame_confirmation"
+            android:visibility="gone"
+            layout="@layout/remove_frame_confirmation_layout"
+            />
+
+        <include
             android:id="@+id/touch_protection_view"
             android:visibility="gone"
             layout="@layout/touch_protection_layer"

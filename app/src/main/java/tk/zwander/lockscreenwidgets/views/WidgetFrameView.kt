@@ -37,7 +37,6 @@ import tk.zwander.common.util.vibrate
 import tk.zwander.lockscreenwidgets.activities.TaskerIsShowingFrame
 import tk.zwander.lockscreenwidgets.compose.IDListLayout
 import tk.zwander.lockscreenwidgets.databinding.WidgetFrameBinding
-import tk.zwander.lockscreenwidgets.util.FramePrefs
 import kotlin.math.roundToInt
 
 /**
@@ -147,8 +146,7 @@ class WidgetFrameView(context: Context, attrs: AttributeSet) : ConstraintLayout(
 
         if (frameId != -1) {
             binding.removeFrame.setOnClickListener {
-                // TODO: Confirmation
-                FramePrefs.removeFrame(context, frameId)
+                binding.removeFrameConfirmation.root.show(frameId)
             }
         }
 
