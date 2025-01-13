@@ -193,6 +193,8 @@ fun FeatureCard(info: FeatureCardInfo) {
                     }
 
                     info.onAddFrame?.let { onAddFrame ->
+                        Spacer(modifier = Modifier.size(8.dp))
+
                         SubduedOutlinedButton(
                             onClick = {
                                 onAddFrame()
