@@ -53,7 +53,7 @@
     <string name="shortcut_icon">إختصار الايقونة</string>
     <string name="expand">تمديد</string>
     <string name="alert_remove_widget_confirm">حذف التطبيق المصغر؟</string>
-    <string name="alert_remove_widget_confirm_desc">هل أنت متأكد بأنك تريد حذف هذا التطبيق المصغر؟</string>
+    <string name="alert_remove_widget_confirm_desc">Are you sure you want to remove this item?</string>
     <string name="main_screen_social_mastodon">Mastodon</string>
     <string name="main_screen_social_mastodon_desc">Follow me on Mastodon for updates about my apps and random development-related nonsense.</string>
     <string name="main_screen_social_website">الموقع الالكتروني</string>
@@ -251,4 +251,6 @@
     <string name="choose_icon_override">Choose Icon Override</string>
     <string name="selected_pack">Currently selected icon pack</string>
     <string name="blank_widget">Blank Widget</string>
+    <string name="add_frame">Add Widget Frame</string>
+    <string name="remove_frame_confirmation_message">Are you sure you want to remove this frame?</string>
 </resources>
