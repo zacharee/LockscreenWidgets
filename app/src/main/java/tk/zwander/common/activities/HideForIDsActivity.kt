@@ -71,22 +71,24 @@ class HideForIDsActivity : BaseActivity() {
     private val openRequest = registerForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
         //Copy the IDs stored in the specified file to the list here
         contentResolver.openInputStream(uri ?: return@registerForActivityResult)?.use { input ->
-            val builder = StringBuilder()
-
-            input.bufferedReader().useLines { seq ->
-                seq.forEach {
-                    builder.append(it)
-                }
-            }
-
             val list = try {
+                val builder = StringBuilder()
+
+                input.bufferedReader().useLines { seq ->
+                    seq.forEach {
+                        builder.append(it)
+                    }
+                }
+
                 gson.fromJson<HashSet<String>>(
                     builder.toString(),
                     object : TypeToken<HashSet<String>>() {}.type,
                 )
+            } catch (e: OutOfMemoryError) {
+                logUtils.debugLog("OOM thrown when trying to restore ID list", e)
+                null
             } catch (e: Exception) {
                 logUtils.debugLog("Unable to parse ID list", e)
-
                 null
             }
 
