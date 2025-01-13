@@ -53,7 +53,7 @@
     <string name="shortcut_icon">Ikona skrótu</string>
     <string name="expand">Rozwiń</string>
     <string name="alert_remove_widget_confirm">Usunąć widżet?</string>
-    <string name="alert_remove_widget_confirm_desc">Czy na pewno chcesz usunąć ten widżet?</string>
+    <string name="alert_remove_widget_confirm_desc">Are you sure you want to remove this item?</string>
     <string name="main_screen_social_mastodon">Mastodon</string>
     <string name="main_screen_social_mastodon_desc">Obserwuj mnie na Mastodonie, by uzyskać informacje o moich innych aplikacjach, wraz z ciekawostkami związanych z ich tworzeniem.</string>
     <string name="main_screen_social_website">Strona internetowa</string>
@@ -251,4 +251,6 @@
     <string name="choose_icon_override">Choose Icon Override</string>
     <string name="selected_pack">Currently selected icon pack</string>
     <string name="blank_widget">Blank Widget</string>
+    <string name="add_frame">Add Widget Frame</string>
+    <string name="remove_frame_confirmation_message">Are you sure you want to remove this frame?</string>
 </resources>
