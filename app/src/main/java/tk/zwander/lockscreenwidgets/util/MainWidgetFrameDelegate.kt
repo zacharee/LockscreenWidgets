@@ -17,7 +17,6 @@ import android.view.Surface
 import android.view.View
 import android.view.WindowManager
 import android.widget.ImageView
-import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -25,6 +24,7 @@ import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -85,16 +85,6 @@ open class MainWidgetFrameDelegate protected constructor(context: Context, prote
             }
 
             return getInstance(context)
-        }
-
-        @Synchronized
-        fun retrieveInstance(context: Context): MainWidgetFrameDelegate? {
-            return peekInstance(context).also {
-                if (it == null) {
-                    Toast.makeText(context, R.string.accessibility_not_started, Toast.LENGTH_SHORT)
-                        .show()
-                }
-            }
         }
 
         @Synchronized
@@ -538,6 +528,7 @@ open class MainWidgetFrameDelegate protected constructor(context: Context, prote
             AppTheme {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
+                    color = MaterialTheme.colorScheme.surface.copy(alpha = 0.75f),
                 ) {
                     Box(
                         modifier = Modifier.fillMaxSize(),
