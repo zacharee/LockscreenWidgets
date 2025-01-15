@@ -252,10 +252,18 @@
     <string name="selected_pack">Currently selected icon pack</string>
     <string name="blank_widget">Blank Widget</string>
     <string name="add_frame">Add Widget Frame</string>
+    <string name="remove_frame">Remove Widget Frame</string>
     <string name="remove_frame_confirmation_message">Are you sure you want to remove this frame?</string>
     <string name="select">Select</string>
     <string name="cancel">Cancel</string>
     <string name="select_frame">Select Frame</string>
     <string name="selected_frame">Selected frame: %s</string>
     <string name="settings_screen_category_grid">Grid</string>
+    <plurals name="frame_count_info">
+        <item quantity="one">%s frame added</item>
+        <item quantity="few">%s frames added</item>
+        <item quantity="many">%s frames added</item>
+        <item quantity="other">%s frames added</item>
+    </plurals>
+    <string name="frame_management">Frame Management</string>
 </resources>
