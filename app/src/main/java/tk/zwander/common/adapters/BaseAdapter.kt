@@ -602,7 +602,11 @@ abstract class BaseAdapter(
                 launchIntent.component = data.widgetProviderComponent
                 launchIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
 
-                context.startActivity(launchIntent)
+                try {
+                    context.startActivity(launchIntent)
+                } catch (e: Throwable) {
+                    context.logUtils.debugLog("Unable to launch launcher Activity", e)
+                }
             }
             shortcutView.shortcutIcon.setImageBitmap(icon)
 
