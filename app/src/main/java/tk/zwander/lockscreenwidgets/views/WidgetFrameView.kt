@@ -223,15 +223,17 @@ class WidgetFrameView(context: Context, attrs: AttributeSet) : ConstraintLayout(
                     when (max) {
                         2 -> {
                             if (!context.prefManager.lockWidgetFrame) {
-                                isInEditingMode = !isInEditingMode
-                                if (binding.gestureHintView.root.isVisible) {
-                                    val ghv = binding.gestureHintView.root
-                                    if (!ghv.stage2) {
-                                        ghv.stage2 = true
-                                    } else if (ghv.stage2) {
-                                        ghv.stage2 = false
-                                        ghv.close()
-                                        binding.hideHintView.root.isVisible = true
+                                if (!binding.selectFrameLayout.isVisible) {
+                                    isInEditingMode = !isInEditingMode
+                                    if (binding.gestureHintView.root.isVisible) {
+                                        val ghv = binding.gestureHintView.root
+                                        if (!ghv.stage2) {
+                                            ghv.stage2 = true
+                                        } else if (ghv.stage2) {
+                                            ghv.stage2 = false
+                                            ghv.close()
+                                            binding.hideHintView.root.isVisible = true
+                                        }
                                     }
                                 }
                                 return true
@@ -248,7 +250,9 @@ class WidgetFrameView(context: Context, attrs: AttributeSet) : ConstraintLayout(
 
                     if (ev.buttonState == MotionEvent.BUTTON_SECONDARY
                         || ev.buttonState == MotionEvent.BUTTON_STYLUS_SECONDARY) {
-                        isInEditingMode = !isInEditingMode
+                        if (!binding.selectFrameLayout.isVisible) {
+                            isInEditingMode = !isInEditingMode
+                        }
                         return true
                     }
 
