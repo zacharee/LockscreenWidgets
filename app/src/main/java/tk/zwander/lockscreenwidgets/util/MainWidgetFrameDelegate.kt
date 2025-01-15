@@ -255,8 +255,8 @@ open class MainWidgetFrameDelegate protected constructor(context: Context, prote
             binding.frame.updatePageIndicatorBehavior()
         }
         handler(
-            PrefManager.KEY_FRAME_ROW_COUNT,
-            PrefManager.KEY_FRAME_COL_COUNT,
+            FramePrefs.generatePrefKey(FramePrefs.KEY_FRAME_ROW_COUNT, id),
+            FramePrefs.generatePrefKey(FramePrefs.KEY_FRAME_COL_COUNT, id),
         ) {
             updateCounts()
             adapter.updateViews()

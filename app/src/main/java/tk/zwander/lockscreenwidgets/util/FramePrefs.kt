@@ -10,8 +10,8 @@ import tk.zwander.common.util.prefManager
 
 object FramePrefs {
     private const val KEY_FRAME_WIDGETS = "FRAME_WIDGETS_FOR_FRAME_"
-    private const val KEY_FRAME_ROW_COUNT = "FRAME_ROW_COUNT_FOR_FRAME_"
-    private const val KEY_FRAME_COL_COUNT = "FRAME_COL_COUNT_FOR_FRAME_"
+    const val KEY_FRAME_ROW_COUNT = "FRAME_ROW_COUNT_FOR_FRAME_"
+    const val KEY_FRAME_COL_COUNT = "FRAME_COL_COUNT_FOR_FRAME_"
 
     fun getWidgetsForFrame(context: Context, frameId: Int): Set<WidgetData> {
         if (frameId == -1) {
@@ -63,14 +63,22 @@ object FramePrefs {
         }
     }
 
-    fun setGridSizeForFrame(context: Context, frameId: Int, size: Pair<Int, Int>) {
+    fun setRowCountForFrame(context: Context, frameId: Int, rowCount: Int) {
         if (frameId == -1) {
-            context.prefManager.frameRowCount = size.first
-            context.prefManager.frameColCount = size.second
+            context.prefManager.frameRowCount = rowCount
+            return
         }
 
-        context.prefManager.putInt(generatePrefKey(KEY_FRAME_ROW_COUNT, frameId), size.first)
-        context.prefManager.putInt(generatePrefKey(KEY_FRAME_COL_COUNT, frameId), size.second)
+        context.prefManager.putInt(generatePrefKey(KEY_FRAME_ROW_COUNT, frameId), rowCount)
+    }
+
+    fun setColCountForFrame(context: Context, frameId: Int, colCount: Int) {
+        if (frameId == -1) {
+            context.prefManager.frameColCount = colCount
+            return
+        }
+
+        context.prefManager.putInt(generatePrefKey(KEY_FRAME_COL_COUNT, frameId), colCount)
     }
 
     fun removeFrame(context: Context, frameId: Int) {
@@ -103,7 +111,7 @@ object FramePrefs {
         return "${KEY_FRAME_WIDGETS}_${id}"
     }
 
-    private fun generatePrefKey(baseKey: String, id: Int): String {
+    fun generatePrefKey(baseKey: String, id: Int): String {
         return "${baseKey}_${id}"
     }
 }

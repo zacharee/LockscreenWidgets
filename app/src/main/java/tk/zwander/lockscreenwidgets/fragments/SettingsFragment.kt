@@ -21,6 +21,8 @@ import tk.zwander.common.util.isTouchWiz
 import tk.zwander.common.util.prefManager
 import tk.zwander.lockscreenwidgets.R
 import tk.zwander.lockscreenwidgets.services.isNotificationListenerActive
+import tk.zwander.lockscreenwidgets.util.FramePrefs
+import tk.zwander.seekbarpreference.SeekBarPreference
 
 /**
  * The settings page.
@@ -36,13 +38,29 @@ class SettingsFragment : CommonPreferenceFragment() {
         handler(PrefManager.KEY_CURRENT_FRAMES) {
             findPreference<Preference>("add_secondary_frame")?.updateFrameCountSummary()
             findPreference<Preference>("remove_secondary_frame")?.updateRemoveFrameVisibility()
+
+            updateSelectedFrameForGrid()
         }
     }
     override val which = BackupRestoreManager.Which.FRAME
     override val blurOptionKeys: Array<String> = arrayOf(
         PrefManager.KEY_BLUR_BACKGROUND,
-        PrefManager.KEY_BLUR_BACKGROUND_AMOUNT
+        PrefManager.KEY_BLUR_BACKGROUND_AMOUNT,
     )
+
+    private var selectedFrameForGrid: Int = -1
+        set(value) {
+            field = value
+
+            updateGridSize()
+        }
+
+    private val columnsPerPagePref: SeekBarPreference?
+        get() = findPreference("frame_col_count_fragment")
+    private val rowsPerPagePref: SeekBarPreference?
+        get() = findPreference("frame_row_count_fragment")
+    private val selectedFrameForGridPref: Preference?
+        get() = findPreference("select_frame_pref")
 
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         super.onCreatePreferences(savedInstanceState, rootKey)
@@ -132,6 +150,22 @@ class SettingsFragment : CommonPreferenceFragment() {
                 true
             }
         }
+
+        columnsPerPagePref?.setOnPreferenceChangeListener { _, newValue ->
+            FramePrefs.setColCountForFrame(requireContext(), selectedFrameForGrid, newValue.toString().toFloat().toInt())
+            true
+        }
+        rowsPerPagePref?.setOnPreferenceChangeListener { _, newValue ->
+            FramePrefs.setRowCountForFrame(requireContext(), selectedFrameForGrid, newValue.toString().toFloat().toInt())
+            true
+        }
+        selectedFrameForGridPref?.setOnPreferenceClickListener {
+            requireContext().eventManager.sendEvent(Event.PreviewFrames(Event.PreviewFrames.ShowMode.SHOW_FOR_SELECTION, 102, true))
+            true
+        }
+
+        updateSelectedFrameForGrid()
+        updateGridSize()
     }
 
     override fun onEvent(event: Event) {
@@ -144,6 +178,10 @@ class SettingsFragment : CommonPreferenceFragment() {
                 }
                 requireContext().eventManager.sendEvent(Event.PreviewFrames(Event.PreviewFrames.ShowMode.HIDE))
             }
+            if (event.frameId != null && event.requestCode == 102) {
+                selectedFrameForGrid = event.frameId
+                requireContext().eventManager.sendEvent(Event.PreviewFrames(Event.PreviewFrames.ShowMode.HIDE))
+            }
         }
     }
 
@@ -154,5 +192,20 @@ class SettingsFragment : CommonPreferenceFragment() {
 
     private fun Preference.updateRemoveFrameVisibility() {
         isVisible = requireContext().prefManager.currentSecondaryFrames.isNotEmpty()
+    }
+
+    private fun updateGridSize() {
+        columnsPerPagePref?.progress = FramePrefs.getColCountForFrame(requireContext(), selectedFrameForGrid)
+        rowsPerPagePref?.progress = FramePrefs.getRowCountForFrame(requireContext(), selectedFrameForGrid)
+        selectedFrameForGridPref?.summary = resources.getString(R.string.selected_frame, "$selectedFrameForGrid")
+    }
+
+    private fun updateSelectedFrameForGrid() {
+        val secondaryFrames = requireContext().prefManager.currentSecondaryFrames
+        val hasSecondaryFrames = secondaryFrames.isNotEmpty()
+        selectedFrameForGridPref?.isVisible = hasSecondaryFrames
+        if (!hasSecondaryFrames || (selectedFrameForGrid != -1 && !secondaryFrames.contains(selectedFrameForGrid))) {
+            selectedFrameForGrid = -1
+        }
     }
 }

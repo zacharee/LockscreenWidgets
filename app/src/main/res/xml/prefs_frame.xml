@@ -110,18 +110,20 @@
 
         <tk.zwander.seekbarpreference.SeekBarPreference
             android:title="@string/settings_screen_frame_col_count"
-            android:key="frame_col_count"
+            android:key="frame_col_count_fragment"
             android:icon="@drawable/ic_baseline_view_column_24"
             android:defaultValue="1"
+            android:persistent="false"
             app:minValue="1"
             app:maxValue="20"
             />
 
         <tk.zwander.seekbarpreference.SeekBarPreference
             android:title="@string/settings_screen_frame_row_count"
-            android:key="frame_row_count"
+            android:key="frame_row_count_fragment"
             android:icon="@drawable/ic_baseline_view_row_24"
             android:defaultValue="1"
+            android:persistent="false"
             app:minValue="1"
             app:maxValue="20"
             />
