@@ -135,7 +135,7 @@ sealed class Event {
     data class LaunchAddWidget(val frameId: Int) : Event()
     data class TempHide(val frameId: Int) : Event()
     data class RemoveFrameConfirmed(val confirmed: Boolean, val frameId: Int?) : Event()
-    data class PreviewFrames(val show: ShowMode) : Event() {
+    data class PreviewFrames(val show: ShowMode, val requestCode: Int = -1, val includeMainFrame: Boolean = true) : Event() {
         enum class ShowMode {
             SHOW,
             HIDE,
@@ -143,7 +143,7 @@ sealed class Event {
             SHOW_FOR_SELECTION,
         }
     }
-    data class FrameSelected(val frameId: Int?) : Event()
+    data class FrameSelected(val frameId: Int?, val requestCode: Int?) : Event()
 
     //*** Widget Drawer
     data object CloseDrawer : Event()

@@ -2,6 +2,24 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
+    <PreferenceCategory
+        android:title="@string/frame_management"
+        android:key="frame_management_category">
+
+        <Preference
+            android:key="add_secondary_frame"
+            android:title="@string/add_frame"
+            android:icon="@drawable/ic_baseline_add_24"
+            />
+
+        <Preference
+            android:key="remove_secondary_frame"
+            android:title="@string/remove_frame"
+            android:icon="@drawable/ic_baseline_remove_circle_24"
+            />
+
+    </PreferenceCategory>
+
     <tk.zwander.collapsiblepreferencecategory.CollapsiblePreferenceCategoryNew
         android:title="@string/category_appearance"
         android:key="settings_appearance_category">

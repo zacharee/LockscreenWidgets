@@ -166,8 +166,8 @@ open class MainWidgetFrameDelegate protected constructor(context: Context, prote
                 }
             }
 
-            if (actualNewState.isSelectionPreview != oldState.isSelectionPreview) {
-                if (actualNewState.isSelectionPreview) {
+            if (actualNewState.selectionPreviewRequestCode != oldState.selectionPreviewRequestCode) {
+                if (actualNewState.selectionPreviewRequestCode != null) {
                     if (canShow()) {
                         addWindow(wm)
                         binding.selectFrameLayout.isVisible = true
@@ -311,7 +311,7 @@ open class MainWidgetFrameDelegate protected constructor(context: Context, prote
 
     private val showWallpaperLayerCondition: Boolean
         get() = !state.isPreview &&
-                !state.isSelectionPreview &&
+                state.selectionPreviewRequestCode == null &&
                 prefManager.maskedMode &&
                 (!state.notificationsPanelFullyExpanded || !prefManager.showInNotificationCenter)
 
@@ -490,21 +490,25 @@ open class MainWidgetFrameDelegate protected constructor(context: Context, prote
                 updateStateAndWindowState(wm) { it.copy(isScreenOn = true) }
             }
             is Event.PreviewFrames -> {
-                if (prefManager.currentSecondaryFrames.isEmpty()) {
+                if (prefManager.currentSecondaryFrames.isEmpty() && event.show == Event.PreviewFrames.ShowMode.SHOW_FOR_SELECTION) {
                     eventManager.sendEvent(Event.LaunchAddWidget(id))
                 } else {
-                    updateState {
-                        it.copy(
-                            isPreview = event.show == Event.PreviewFrames.ShowMode.SHOW ||
-                                    (event.show == Event.PreviewFrames.ShowMode.TOGGLE && !it.isPreview),
-                            isSelectionPreview = event.show == Event.PreviewFrames.ShowMode.SHOW_FOR_SELECTION,
-                        )
+                    if (event.includeMainFrame || id != -1) {
+                        updateState {
+                            it.copy(
+                                isPreview = event.show == Event.PreviewFrames.ShowMode.SHOW ||
+                                        (event.show == Event.PreviewFrames.ShowMode.TOGGLE && !it.isPreview),
+                                selectionPreviewRequestCode = event.requestCode.takeIf {
+                                    event.show == Event.PreviewFrames.ShowMode.SHOW_FOR_SELECTION
+                                },
+                            )
+                        }
                     }
                 }
             }
             is Event.FrameSelected -> {
                 if (event.frameId == null) {
-                    updateState { it.copy(isSelectionPreview = false) }
+                    updateState { it.copy(selectionPreviewRequestCode = null) }
                 }
             }
             else -> {}
@@ -552,14 +556,14 @@ open class MainWidgetFrameDelegate protected constructor(context: Context, prote
                             ) {
                                 OutlinedButton(
                                     onClick = {
-                                        eventManager.sendEvent(Event.FrameSelected(null))
+                                        eventManager.sendEvent(Event.FrameSelected(null, state.selectionPreviewRequestCode))
                                     },
                                 ) {
                                     Text(text = stringResource(R.string.cancel))
                                 }
 
                                 OutlinedButton(
-                                    onClick = { eventManager.sendEvent(Event.FrameSelected(id)) },
+                                    onClick = { eventManager.sendEvent(Event.FrameSelected(id, state.selectionPreviewRequestCode)) },
                                 ) {
                                     Text(text = stringResource(R.string.select))
                                 }
@@ -695,7 +699,7 @@ open class MainWidgetFrameDelegate protected constructor(context: Context, prote
      */
     private fun canShow(): Boolean {
         fun forPreview(): Boolean {
-            return state.isPreview || state.isSelectionPreview
+            return state.isPreview || state.selectionPreviewRequestCode != null
         }
 
         fun forCommon(): Boolean {
@@ -981,7 +985,7 @@ open class MainWidgetFrameDelegate protected constructor(context: Context, prote
         val currentAppPackage: String? = null,
         val isOnEdgePanel: Boolean = false,
         val isPreview: Boolean = false,
-        val isSelectionPreview: Boolean = false,
+        val selectionPreviewRequestCode: Int? = null,
         //This is used to track when the notification shade has
         //been expanded/collapsed or when the "show in NC" setting
         //has been changed. Since the params are different for the

@@ -8,10 +8,12 @@ import tk.zwander.common.activities.HideForIDsActivity
 import tk.zwander.common.activities.HideOnAppsChooserActivity
 import tk.zwander.common.activities.OnboardingActivity
 import tk.zwander.common.fragments.CommonPreferenceFragment
+import tk.zwander.common.util.Event
 import tk.zwander.common.util.HandlerRegistry
 import tk.zwander.common.util.PrefManager
 import tk.zwander.common.util.backup.BackupRestoreManager
 import tk.zwander.common.util.canReadWallpaper
+import tk.zwander.common.util.eventManager
 import tk.zwander.common.util.handler
 import tk.zwander.common.util.isOneUI
 import tk.zwander.common.util.isPixelUI
@@ -30,6 +32,10 @@ class SettingsFragment : CommonPreferenceFragment() {
         handler(PrefManager.KEY_WIDGET_FRAME_ENABLED) {
             findPreference<SwitchPreferenceCompat>(PrefManager.KEY_WIDGET_FRAME_ENABLED)?.isChecked =
                 requireContext().prefManager.widgetFrameEnabled
+        }
+        handler(PrefManager.KEY_CURRENT_FRAMES) {
+            findPreference<Preference>("add_secondary_frame")?.updateFrameCountSummary()
+            findPreference<Preference>("remove_secondary_frame")?.updateRemoveFrameVisibility()
         }
     }
     override val which = BackupRestoreManager.Which.FRAME
@@ -105,5 +111,48 @@ class SettingsFragment : CommonPreferenceFragment() {
                 preferenceScreen.removePreferenceRecursively(key)
             }
         }
+
+        findPreference<Preference>("add_secondary_frame")?.apply {
+            updateFrameCountSummary()
+            setOnPreferenceClickListener {
+                val maxFrameId = context.prefManager.currentSecondaryFrames.maxOrNull() ?: 1
+                val newFrameId = maxFrameId + 1
+
+                context.prefManager.currentSecondaryFrames = context.prefManager.currentSecondaryFrames.toMutableList().apply {
+                    add(newFrameId)
+                }
+                true
+            }
+        }
+
+        findPreference<Preference>("remove_secondary_frame")?.apply {
+            updateRemoveFrameVisibility()
+            setOnPreferenceClickListener {
+                requireContext().eventManager.sendEvent(Event.PreviewFrames(Event.PreviewFrames.ShowMode.SHOW_FOR_SELECTION, 101, false))
+                true
+            }
+        }
+    }
+
+    override fun onEvent(event: Event) {
+        super.onEvent(event)
+
+        if (event is Event.FrameSelected) {
+            if (event.frameId != null && event.requestCode == 101) {
+                requireContext().prefManager.currentSecondaryFrames = requireContext().prefManager.currentSecondaryFrames.toMutableList().apply {
+                    removeAll { it == event.frameId }
+                }
+                requireContext().eventManager.sendEvent(Event.PreviewFrames(Event.PreviewFrames.ShowMode.HIDE))
+            }
+        }
+    }
+
+    private fun Preference.updateFrameCountSummary() {
+        val quantity = requireContext().prefManager.currentSecondaryFrames.size + 1
+        summary = resources.getQuantityString(R.plurals.frame_count_info, quantity, "$quantity")
+    }
+
+    private fun Preference.updateRemoveFrameVisibility() {
+        isVisible = requireContext().prefManager.currentSecondaryFrames.isNotEmpty()
     }
 }

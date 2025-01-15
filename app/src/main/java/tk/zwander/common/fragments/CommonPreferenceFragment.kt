@@ -21,10 +21,13 @@ import com.bugsnag.android.BreadcrumbType
 import com.bugsnag.android.Bugsnag
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import tk.zwander.common.activities.SelectIconPackActivity
+import tk.zwander.common.util.Event
+import tk.zwander.common.util.EventObserver
 import tk.zwander.common.util.HandlerRegistry
 import tk.zwander.common.util.backup.BackupRestoreManager
 import tk.zwander.common.util.backup.backupRestoreManager
 import tk.zwander.common.util.contracts.registerCreateDocumentLauncherWithDownloadFallback
+import tk.zwander.common.util.eventManager
 import tk.zwander.common.util.isOneUI
 import tk.zwander.common.util.logUtils
 import tk.zwander.common.util.windowManager
@@ -34,7 +37,7 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
-abstract class CommonPreferenceFragment : PreferenceFragmentCompat() {
+abstract class CommonPreferenceFragment : PreferenceFragmentCompat(), EventObserver {
     protected abstract val prefsHandler: HandlerRegistry
     protected abstract val which: BackupRestoreManager.Which
 
@@ -146,6 +149,8 @@ abstract class CommonPreferenceFragment : PreferenceFragmentCompat() {
             startActivity(Intent(requireContext(), SelectIconPackActivity::class.java))
             true
         }
+
+        requireContext().eventManager.addObserver(this)
     }
 
     override fun addPreferencesFromResource(preferencesResId: Int) {
@@ -181,7 +186,11 @@ abstract class CommonPreferenceFragment : PreferenceFragmentCompat() {
         super.onDestroy()
 
         prefsHandler.unregister(requireContext())
+        requireContext().eventManager.removeObserver(this)
     }
+
+    @CallSuper
+    override fun onEvent(event: Event) {}
 
     private fun setZeroPaddingToLayoutChildren(view: View) {
         if (view !is ViewGroup)

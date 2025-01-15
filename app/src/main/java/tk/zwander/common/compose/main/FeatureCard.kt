@@ -88,27 +88,19 @@ fun rememberFeatureCards(): List<FeatureCardInfo> {
                     },
                 ),
                 onAddWidget = {
-                    context.eventManager.sendEvent(Event.PreviewFrames(Event.PreviewFrames.ShowMode.SHOW_FOR_SELECTION))
+                    context.eventManager.sendEvent(Event.PreviewFrames(Event.PreviewFrames.ShowMode.SHOW_FOR_SELECTION, 100))
                 },
                 isEnabled = { context.prefManager.widgetFrameEnabled },
                 onEnabledChanged = { context.prefManager.widgetFrameEnabled = it },
-                onAddFrame = {
-                    val maxFrameId = context.prefManager.currentSecondaryFrames.maxOrNull() ?: 1
-                    val newFrameId = maxFrameId + 1
-
-                    context.prefManager.currentSecondaryFrames = context.prefManager.currentSecondaryFrames.toMutableList().apply {
-                        add(newFrameId)
-                    }
-                },
                 eventObserver = object : EventObserver {
                     override fun onEvent(event: Event) {
                         if (event is Event.FrameSelected) {
-                            if (event.frameId != null) {
+                            if (event.frameId != null && event.requestCode == 100) {
                                 context.eventManager.sendEvent(Event.LaunchAddWidget(event.frameId))
                             }
                         }
                     }
-                }
+                },
             ),
             FeatureCardInfo(
                 R.string.widget_drawer,
@@ -181,7 +173,9 @@ fun FeatureCard(info: FeatureCardInfo) {
             )
 
             AnimatedVisibility(visible = enabled) {
-                Column {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                ) {
                     Spacer(Modifier.size(16.dp))
 
                     SubduedOutlinedButton(
@@ -203,31 +197,6 @@ fun FeatureCard(info: FeatureCardInfo) {
                             text = stringResource(id = R.string.add_widget),
                             style = MaterialTheme.typography.headlineSmall,
                         )
-                    }
-
-                    info.onAddFrame?.let { onAddFrame ->
-                        Spacer(modifier = Modifier.size(8.dp))
-
-                        SubduedOutlinedButton(
-                            onClick = {
-                                onAddFrame()
-                            },
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .heightIn(min = 64.dp),
-                        ) {
-                            Image(
-                                painter = painterResource(id = R.drawable.ic_baseline_add_24),
-                                contentDescription = stringResource(id = R.string.add_frame),
-                                contentScale = ContentScale.FillHeight,
-                                modifier = Modifier.size(32.dp),
-                            )
-                            Spacer(Modifier.size(16.dp))
-                            Text(
-                                text = stringResource(id = R.string.add_frame),
-                                style = MaterialTheme.typography.headlineSmall,
-                            )
-                        }
                     }
 
                     Spacer(Modifier.size(16.dp))
@@ -266,7 +235,7 @@ fun FeatureCard(info: FeatureCardInfo) {
                                         }
                                         .then(
                                             if (maxItemHeight > 0) {
-                                                with (LocalDensity.current) {
+                                                with(LocalDensity.current) {
                                                     Modifier.height(maxItemHeight.toDp())
                                                 }
                                             } else {
