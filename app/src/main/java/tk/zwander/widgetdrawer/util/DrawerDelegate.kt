@@ -577,7 +577,7 @@ class DrawerDelegate private constructor(context: Context) :
         this@DrawerDelegate,
         RecyclerView.VERTICAL,
         1,
-        prefManager.drawerColCount
+        prefManager.drawerColCount,
     ) {
         override fun canScrollVertically(): Boolean {
             return (adapter.currentEditingInterfacePosition == -1 || commonState.isHoldingItem) && super.canScrollVertically()
