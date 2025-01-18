@@ -442,10 +442,7 @@ class DrawerDelegate private constructor(context: Context) :
         hideDrawer(false)
         handle.hide(wm)
 
-        try {
-            unregisterReceiver(globalReceiver)
-        } catch (ignored: IllegalArgumentException) {
-        }
+        unregisterReceiver(globalReceiver)
         invalidateInstance()
 
         displayManager.unregisterDisplayListener(displayListener)
