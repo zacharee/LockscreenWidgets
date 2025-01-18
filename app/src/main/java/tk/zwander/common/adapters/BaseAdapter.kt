@@ -56,6 +56,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import tk.zwander.common.activities.DismissOrUnlockActivity
 import tk.zwander.common.activities.PermissionIntentLaunchActivity
 import tk.zwander.common.compose.AppTheme
 import tk.zwander.common.data.WidgetData
@@ -602,11 +603,10 @@ abstract class BaseAdapter(
                 launchIntent.component = data.widgetProviderComponent
                 launchIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
 
-                try {
-                    context.startActivity(launchIntent)
-                } catch (e: Throwable) {
-                    context.logUtils.debugLog("Unable to launch launcher Activity", e)
-                }
+                DismissOrUnlockActivity.launch(
+                    context = context,
+                    activityIntent = launchIntent,
+                )
             }
             shortcutView.shortcutIcon.setImageBitmap(icon)
 
