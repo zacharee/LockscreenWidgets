@@ -223,8 +223,9 @@ open class MainWidgetFrameDelegate protected constructor(context: Context, prote
         }
 
     //The actual frame View
-    private val binding =
+    private val binding by lazy {
         WidgetFrameBinding.inflate(LayoutInflater.from(ContextThemeWrapper(this, R.style.AppTheme)))
+    }
     override val gridLayoutManager = SpannedLayoutManager()
     override val adapter by lazy {
         WidgetFrameAdapter(
