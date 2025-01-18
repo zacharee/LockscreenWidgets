@@ -73,12 +73,14 @@ class LogUtils private constructor(private val context: Context) {
 
     private fun createLogFileWriter(): BufferedWriter = FileOutputStream(logFile, true).bufferedWriter()
 
-    fun debugLog(message: String, throwable: Throwable? = DefaultException()) {
-        Bugsnag.leaveBreadcrumb(
-            message,
-            throwable?.takeIf { it !is DefaultException }?.let { mapOf("error" to throwable) } ?: mapOf(),
-            BreadcrumbType.LOG,
-        )
+    fun debugLog(message: String, throwable: Throwable? = DefaultException(), leaveBreadcrumb: Boolean = true) {
+        if (leaveBreadcrumb) {
+            Bugsnag.leaveBreadcrumb(
+                message,
+                throwable?.takeIf { it !is DefaultException }?.let { mapOf("error" to throwable.stringify()) } ?: mapOf(),
+                BreadcrumbType.LOG,
+            )
+        }
 
         if (context.isDebug) {
             val fullMessage = generateFullMessage(message, throwable)
@@ -91,16 +93,18 @@ class LogUtils private constructor(private val context: Context) {
         }
     }
 
-    fun normalLog(message: String, throwable: Throwable? = DefaultException()) {
+    fun normalLog(message: String, throwable: Throwable? = DefaultException(), leaveBreadcrumb: Boolean = true) {
         val fullMessage = generateFullMessage(message, throwable)
 
         Log.e(NORMAL_LOG_TAG, fullMessage)
 
-        Bugsnag.leaveBreadcrumb(
-            message,
-            throwable?.takeIf { it !is DefaultException }?.let { mapOf("error" to throwable) } ?: mapOf(),
-            BreadcrumbType.ERROR,
-        )
+        if (leaveBreadcrumb) {
+            Bugsnag.leaveBreadcrumb(
+                message,
+                throwable?.takeIf { it !is DefaultException }?.let { mapOf("error" to throwable.stringify()) } ?: mapOf(),
+                BreadcrumbType.ERROR,
+            )
+        }
 
         if (context.isDebug) {
             synchronized(logFile) {
@@ -124,7 +128,7 @@ class LogUtils private constructor(private val context: Context) {
                     }
                 } catch (e: Exception) {
                     Log.e(NORMAL_LOG_TAG, "Failed to export log.", e)
-                    Bugsnag.leaveBreadcrumb("Unable to export log.", mapOf("error" to e), BreadcrumbType.ERROR)
+                    Bugsnag.leaveBreadcrumb("Unable to export log.", mapOf("error" to e.stringify()), BreadcrumbType.ERROR)
                 }
             }
         }
@@ -142,7 +146,7 @@ class LogUtils private constructor(private val context: Context) {
         try {
             write(string)
         } catch (e: Exception) {
-            Bugsnag.leaveBreadcrumb("Unable to write to log file.", mapOf("error" to e), BreadcrumbType.ERROR)
+            Bugsnag.leaveBreadcrumb("Unable to write to log file.", mapOf("error" to e.stringify()), BreadcrumbType.ERROR)
         }
     }
 

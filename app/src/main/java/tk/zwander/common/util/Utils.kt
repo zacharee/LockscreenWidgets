@@ -18,6 +18,7 @@ import android.widget.AbsListView
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.core.app.ActivityOptionsCompat
+import com.google.gson.GsonBuilder
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
@@ -154,3 +155,7 @@ val ActivityOptionsCompat.internalActivityOptions: ActivityOptions?
             .apply { isAccessible = true }
             .get(this) as? ActivityOptions
     }
+
+fun Throwable.stringify(): String {
+    return GsonBuilder().create().toJson(this)
+}

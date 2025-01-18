@@ -34,6 +34,7 @@ import tk.zwander.common.util.Event
 import tk.zwander.common.util.EventObserver
 import tk.zwander.common.util.eventManager
 import tk.zwander.common.util.logUtils
+import tk.zwander.common.util.stringify
 
 //Check if the notification listener service is enabled
 val Context.isNotificationListenerActive: Boolean
@@ -178,7 +179,7 @@ class NotificationListener : NotificationListenerService(), EventObserver, Corou
                     logUtils.normalLog("Error sending notification count update", e)
                 } catch (e: Throwable) {
                     logUtils.normalLog("Error sending notification count update", e)
-                    Bugsnag.leaveBreadcrumb("Error sending notification count update", mapOf("error" to e), BreadcrumbType.ERROR)
+                    Bugsnag.leaveBreadcrumb("Error sending notification count update", mapOf("error" to e.stringify()), BreadcrumbType.ERROR)
                 }
             }
         }
@@ -260,7 +261,7 @@ class NotificationListener : NotificationListenerService(), EventObserver, Corou
             return try {
                 super.onTransact(code, data, reply, flags)
             } catch (e: Throwable) {
-                Bugsnag.leaveBreadcrumb("Unable to receive notification update", mapOf("error" to e), BreadcrumbType.ERROR)
+                Bugsnag.leaveBreadcrumb("Unable to receive notification update", mapOf("error" to e.stringify()), BreadcrumbType.ERROR)
                 false
             }
         }
@@ -272,7 +273,7 @@ class NotificationListener : NotificationListenerService(), EventObserver, Corou
             return try {
                 wrapper.onTransact(code, data, reply, flags)
             } catch (e: Throwable) {
-                Bugsnag.leaveBreadcrumb("Unable to receive notification update", mapOf("error" to e), BreadcrumbType.ERROR)
+                Bugsnag.leaveBreadcrumb("Unable to receive notification update", mapOf("error" to e.stringify()), BreadcrumbType.ERROR)
                 false
             }
         }

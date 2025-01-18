@@ -30,6 +30,7 @@ import tk.zwander.common.util.contracts.registerCreateDocumentLauncherWithDownlo
 import tk.zwander.common.util.eventManager
 import tk.zwander.common.util.isOneUI
 import tk.zwander.common.util.logUtils
+import tk.zwander.common.util.stringify
 import tk.zwander.common.util.windowManager
 import tk.zwander.lockscreenwidgets.R
 import java.io.FileNotFoundException
@@ -82,7 +83,7 @@ abstract class CommonPreferenceFragment : PreferenceFragmentCompat(), EventObser
                         .setPositiveButton(android.R.string.ok, null)
                         .show()
                     logUtils.normalLog("Unable to restore widgets", e)
-                    Bugsnag.leaveBreadcrumb("Unable to restore widgets", mapOf("error" to e), BreadcrumbType.ERROR)
+                    Bugsnag.leaveBreadcrumb("Unable to restore widgets", mapOf("error" to e.stringify()), BreadcrumbType.ERROR)
                 } catch (e: OutOfMemoryError) {
                     MaterialAlertDialogBuilder(requireContext())
                         .setTitle(R.string.error)
@@ -90,7 +91,7 @@ abstract class CommonPreferenceFragment : PreferenceFragmentCompat(), EventObser
                         .setPositiveButton(android.R.string.ok, null)
                         .show()
                     logUtils.normalLog("Unable to restore widgets", e)
-                    Bugsnag.leaveBreadcrumb("Unable to restore widgets", mapOf("error" to e), BreadcrumbType.ERROR)
+                    Bugsnag.leaveBreadcrumb("Unable to restore widgets", mapOf("error" to e.stringify()), BreadcrumbType.ERROR)
                 }
             }
         }
