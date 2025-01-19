@@ -44,7 +44,8 @@ class DismissOrUnlockActivity : AppCompatActivity(), EventObserver {
     }
 
     private val kgm by lazy { keyguardManager }
-    private val activityIntent by lazy { IntentCompat.getParcelableExtra(intent, EXTRA_ACTIVITY_INTENT, Intent::class.java) }
+    private val activityIntent: Intent?
+        get() = IntentCompat.getParcelableExtra(intent, EXTRA_ACTIVITY_INTENT, Intent::class.java)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -56,6 +57,7 @@ class DismissOrUnlockActivity : AppCompatActivity(), EventObserver {
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
 
+        setIntent(intent)
         handle()
     }
 
@@ -82,17 +84,19 @@ class DismissOrUnlockActivity : AppCompatActivity(), EventObserver {
                 kgm.requestDismissKeyguard(this, object : KeyguardManager.KeyguardDismissCallback() {
                     override fun onDismissCancelled() {
                         logUtils.debugLog("Dismiss cancelled.", null)
+                        startActivityIntent()
                         finish()
                     }
 
                     override fun onDismissError() {
                         logUtils.debugLog("Dismiss error.", null)
+                        startActivityIntent()
                         finish()
                     }
 
                     override fun onDismissSucceeded() {
                         logUtils.debugLog("Dismiss success", null)
-                        dismissDone()
+                        startActivityIntent()
                         finish()
                     }
                 })
@@ -103,7 +107,7 @@ class DismissOrUnlockActivity : AppCompatActivity(), EventObserver {
                 with (eventManager) {
                     registerListener { _: Event.LockscreenDismissed ->
                         logUtils.debugLog("Dismiss done.", null)
-                        dismissDone()
+                        startActivityIntent()
                         finish()
                     }
                 }
@@ -121,12 +125,12 @@ class DismissOrUnlockActivity : AppCompatActivity(), EventObserver {
                 sendBroadcast(i)
             }
 
-            dismissDone()
+            startActivityIntent()
             finish()
         }
     }
 
-    private fun dismissDone() {
+    private fun startActivityIntent() {
         activityIntent?.let {
             try {
                 startActivity(it)
