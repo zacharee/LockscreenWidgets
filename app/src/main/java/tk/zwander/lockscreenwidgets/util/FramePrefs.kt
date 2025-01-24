@@ -3,6 +3,7 @@ package tk.zwander.lockscreenwidgets.util
 import android.content.Context
 import com.google.gson.reflect.TypeToken
 import tk.zwander.common.data.WidgetData
+import tk.zwander.common.host.widgetHostCompat
 import tk.zwander.common.util.FrameSizeAndPosition
 import tk.zwander.common.util.PrefManager
 import tk.zwander.common.util.frameSizeAndPosition
@@ -90,6 +91,9 @@ object FramePrefs {
             remove(frameId)
         }
 
+        getWidgetsForFrame(context, frameId).forEach { data ->
+            context.widgetHostCompat.deleteAppWidgetId(data.id)
+        }
         context.prefManager.remove(generatePrefKey(KEY_FRAME_WIDGETS, frameId))
         context.prefManager.remove(generatePrefKey(KEY_FRAME_ROW_COUNT, frameId))
         context.prefManager.remove(generatePrefKey(KEY_FRAME_COL_COUNT, frameId))

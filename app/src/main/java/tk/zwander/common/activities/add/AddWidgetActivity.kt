@@ -62,6 +62,7 @@ abstract class AddWidgetActivity : BaseBindWidgetActivity(), CoroutineScope by M
                     is LauncherShortcutListInfo -> {
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N_MR1) {
                             val shortcut = WidgetData.shortcut(
+                                this,
                                 shortcutIdManager.allocateShortcutId(),
                                 it.name, it.icon?.loadDrawable(this)?.toSafeBitmap(density, maxSize = 128.dp),
                                 null, it.itemInfo.intent,

@@ -70,6 +70,7 @@ abstract class ReconfigureWidgetActivity : BaseBindWidgetActivity() {
 
         val oldWidgetIndex = newSet.indexOf(
             WidgetData.widget(
+                this,
                 prevId,
                 provider.provider,
                 "", null,

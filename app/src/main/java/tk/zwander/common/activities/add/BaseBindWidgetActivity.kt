@@ -93,9 +93,13 @@ abstract class BaseBindWidgetActivity : BaseActivity() {
                                 }
 
                             val shortcut = WidgetData.shortcut(
-                                shortcutIdManager.allocateShortcutId(),
-                                name, iconBmp, null, shortcutIntent,
-                                WidgetSizeData(1, 1)
+                                context = this,
+                                id = shortcutIdManager.allocateShortcutId(),
+                                label = name,
+                                icon = iconBmp,
+                                iconRes = null,
+                                shortcutIntent = shortcutIntent,
+                                size = WidgetSizeData(1, 1)
                             )
 
                             addNewShortcut(shortcut)
@@ -163,6 +167,7 @@ abstract class BaseBindWidgetActivity : BaseActivity() {
                                 }
                             } else {
                                 val shortcut = WidgetData.shortcut(
+                                    this,
                                     shortcutIdManager.allocateShortcutId(),
                                     name, icon, null, intent,
                                     WidgetSizeData(1, 1),
@@ -369,6 +374,7 @@ abstract class BaseBindWidgetActivity : BaseActivity() {
         overrideSize: WidgetSizeData? = null,
     ): WidgetData {
         return WidgetData.widget(
+            this,
             id,
             provider.provider,
             provider.loadLabel(packageManager),

@@ -42,6 +42,7 @@ class ReconfigureDrawerWidgetActivity : ReconfigureWidgetActivity() {
 
     override fun createWidgetData(id: Int, provider: AppWidgetProviderInfo, overrideSize: WidgetSizeData?): WidgetData {
         return WidgetData.widget(
+            this,
             id,
             provider.provider,
             provider.loadLabel(packageManager),

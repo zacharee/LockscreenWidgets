@@ -5,6 +5,7 @@ import android.content.Context
 import tk.zwander.common.util.migrations.AddExtraWidgetInfoMigration
 import tk.zwander.common.util.migrations.FrameDimAmountMigration
 import tk.zwander.common.util.migrations.FrameSizeAndPositionMigration
+import tk.zwander.common.util.migrations.WidgetIconMigration
 import tk.zwander.common.util.migrations.WidgetSizeMigration
 import tk.zwander.lockscreenwidgets.BuildConfig
 
@@ -29,6 +30,7 @@ class MigrationManager private constructor(private val context: Context) {
         WidgetSizeMigration(),
         FrameDimAmountMigration(),
         FrameSizeAndPositionMigration(),
+        WidgetIconMigration(),
     )
 
     fun runMigrations() {

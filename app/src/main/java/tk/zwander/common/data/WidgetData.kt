@@ -14,8 +14,8 @@ import tk.zwander.common.util.base64ToBitmap
 import tk.zwander.common.util.density
 import tk.zwander.common.util.getRemoteDrawable
 import tk.zwander.common.util.prefManager
-import tk.zwander.common.util.toBase64
 import tk.zwander.common.util.toSafeBitmap
+import tk.zwander.lockscreenwidgets.util.IconPrefs
 import java.util.Objects
 
 /**
@@ -29,6 +29,7 @@ data class WidgetData(
     val id: Int,
     val type: WidgetType? = WidgetType.WIDGET,
     val label: String?,
+    @Deprecated("Use [PrefManager.iconForWidget()] instead.")
     val icon: String?,
     @Deprecated("Pass a Bitmap as a Base64 String to [icon] instead.")
     val iconRes: Intent.ShortcutIconResource?,
@@ -39,6 +40,7 @@ data class WidgetData(
 ) : Parcelable {
     companion object {
         fun shortcut(
+            context: Context,
             id: Int,
             label: String,
             icon: Bitmap?,
@@ -46,22 +48,27 @@ data class WidgetData(
             shortcutIntent: Intent?,
             size: WidgetSizeData,
         ): WidgetData {
+            IconPrefs.setIconForWidget(context, id, icon)
+
             return WidgetData(
                 id, WidgetType.SHORTCUT,
-                label, icon?.toBase64(), iconRes, shortcutIntent,
+                label, null, iconRes, shortcutIntent,
                 null, size, null,
             )
         }
 
         fun widget(
+            context: Context,
             id: Int,
             widgetProvider: ComponentName,
             label: String,
             icon: String?,
             size: WidgetSizeData?,
         ): WidgetData {
+            IconPrefs.setIconForWidget(context, id, icon)
+
             return WidgetData(
-                id, WidgetType.WIDGET, label, icon,
+                id, WidgetType.WIDGET, label, null,
                 null, null,
                 widgetProvider.flattenToString(),
                 size, widgetProvider.packageName,
@@ -82,15 +89,18 @@ data class WidgetData(
         }
 
         fun launcherShortcut(
+            context: Context,
             id: Int,
             label: String,
             icon: String?,
             intent: Intent?,
             size: WidgetSizeData,
         ): WidgetData {
+            IconPrefs.setIconForWidget(context, id, icon)
+
             return WidgetData(
                 id, WidgetType.LAUNCHER_SHORTCUT,
-                label, icon, null, intent,
+                label, null, null, intent,
                 null, size, null,
             )
         }
@@ -133,7 +143,6 @@ data class WidgetData(
         return null
     }
 
-    @Suppress("DEPRECATION")
     fun getIconBitmap(context: Context): Bitmap? {
         if (type == WidgetType.LAUNCHER_ITEM && packageName != null && widgetProviderComponent != null) {
             getOverrideIcon(context)?.let {
@@ -187,6 +196,11 @@ data class WidgetData(
             }
         }
 
+        return IconPrefs.getIconForWidget(context, id) ?: getNonOverriddenIcon(context)
+    }
+
+    @Suppress("DEPRECATION")
+    fun getNonOverriddenIcon(context: Context): Bitmap? {
         return icon?.base64ToBitmap() ?: iconRes?.run {
             try {
                 context.getRemoteDrawable(this.packageName, this)
