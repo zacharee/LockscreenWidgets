@@ -29,9 +29,9 @@ data class WidgetData(
     val id: Int,
     val type: WidgetType? = WidgetType.WIDGET,
     val label: String?,
-    @Deprecated("Use [PrefManager.iconForWidget()] instead.")
+    @Deprecated("Use [IconPrefs] instead.")
     val icon: String?,
-    @Deprecated("Pass a Bitmap as a Base64 String to [icon] instead.")
+    @Deprecated("Use [IconPrefs] instead.")
     val iconRes: Intent.ShortcutIconResource?,
     val shortcutIntent: Intent?,
     val widgetProvider: String?,
