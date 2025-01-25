@@ -40,6 +40,7 @@ class SafeBlurView(context: Context, attrs: AttributeSet) : FrameLayout(context,
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             viewRootImpl.addSurfaceChangedCallback(surfaceChangedCallback)
+            canDrawOnSurface.value = true
         }
     }
 
@@ -50,6 +51,7 @@ class SafeBlurView(context: Context, attrs: AttributeSet) : FrameLayout(context,
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             viewRootImpl.removeSurfaceChangedCallback(surfaceChangedCallback)
+            canDrawOnSurface.value = false
         }
     }
 
