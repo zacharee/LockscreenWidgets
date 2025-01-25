@@ -8,6 +8,8 @@ import tk.zwander.common.util.appWidgetManager
 import tk.zwander.common.util.createPersistablePreviewBitmap
 import tk.zwander.common.util.logUtils
 import tk.zwander.common.util.prefManager
+import tk.zwander.common.util.toBase64
+import tk.zwander.lockscreenwidgets.util.IconPrefs
 
 class AddExtraWidgetInfoMigration : Migration {
     override val runOnOrBelowDatabaseVersion: Int
@@ -36,10 +38,17 @@ class AddExtraWidgetInfoMigration : Migration {
             return null
         }
 
+        IconPrefs.setIconForWidget(
+            context = this,
+            id = widget.id,
+            icon = IconPrefs.getIconForWidget(context = this, id = widget.id)?.toBase64()
+                ?: widgetInfo.createPersistablePreviewBitmap(this),
+        )
+
         return widget.copy(
             widgetProvider = widget.widgetProvider ?: widgetInfo.provider.flattenToString(),
             label = widget.label ?: widgetInfo.loadLabel(packageManager),
-            icon = widget.icon ?: widgetInfo.createPersistablePreviewBitmap(this),
+            icon = null,
         )
     }
 }
