@@ -81,7 +81,7 @@ class BlurManager(
                 blurDrawable?.setBlurRadius(blurAmount)
                 blurDrawable?.setCornerRadius(cornerRadius)
 
-                context.logUtils.debugLog("Setting blur drawable $blurDrawable on target view.", null)
+                context.logUtils.debugLog("Setting blur drawable $blurDrawable on target view with current background ${targetView.background}.", null)
                 targetView.background = blurDrawable
             }
         } else {
