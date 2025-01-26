@@ -11,7 +11,6 @@ import android.content.pm.PackageManager
 import android.database.ContentObserver
 import android.net.Uri
 import android.os.Build
-import android.os.DeadSystemException
 import android.os.IBinder
 import android.os.PowerManager
 import android.provider.Settings
@@ -30,6 +29,7 @@ import tk.zwander.common.util.GlobalExceptionHandler
 import tk.zwander.common.util.LogUtils
 import tk.zwander.common.util.ShizukuService
 import tk.zwander.common.util.eventManager
+import tk.zwander.common.util.isOrHasDeadObject
 import tk.zwander.common.util.logUtils
 import tk.zwander.common.util.migrationManager
 import tk.zwander.common.util.prefManager
@@ -142,16 +142,14 @@ class App : Application(), CoroutineScope by MainScope(), EventObserver {
 
         Bugsnag.start(this)
         Bugsnag.addOnError {
-            val error = it.originalError ?: return@addOnError true
+            val error = it.originalError
 
             if (error is ClassCastException && error.stackTrace.firstOrNull()?.className?.contains("PmsHookApplication") == true) {
                 return@addOnError false
             }
 
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                if (error is DeadSystemException || error is RuntimeException && error.cause is DeadSystemException) {
-                    return@addOnError false
-                }
+            if (error?.isOrHasDeadObject == true) {
+                return@addOnError false
             }
 
             try {
@@ -168,7 +166,18 @@ class App : Application(), CoroutineScope by MainScope(), EventObserver {
                         } catch (e: OutOfMemoryError) {
                             "Too large to parse."
                         },
-                    ),
+                    ).apply {
+                        prefManager.currentSecondaryFrames.forEach { frameId ->
+                            put(
+                                "secondaryFrame${frameId}Widgets",
+                                try {
+                                    prefManager.gson.toJson(FramePrefs.getWidgetsForFrame(this@App, frameId))
+                                } catch (e: OutOfMemoryError) {
+                                    "Too large to parse."
+                                },
+                            )
+                        }
+                    },
                 )
             } catch (e: OutOfMemoryError) {
                 it.addMetadata(
@@ -176,6 +185,14 @@ class App : Application(), CoroutineScope by MainScope(), EventObserver {
                     hashMapOf("OOM" to "OOM thrown when trying to add current widget data."),
                 )
             }
+
+            it.addMetadata(
+                "settings",
+                mapOf(
+                    "drawer_blur_enabled" to prefManager.blurDrawerBackground,
+                    "frame_blur_enabled" to prefManager.blurBackground,
+                ),
+            )
 
             true
         }
