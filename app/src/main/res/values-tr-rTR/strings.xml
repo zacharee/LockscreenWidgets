@@ -242,7 +242,7 @@
     <string name="grant_read_media_images">READ_MEDIA_IMAGES\'i onayla</string>
     <string name="failed_to_add_shortcut">Kısayol oluşturulamadı.</string>
     <string name="directly_check_for_activity">Doğrudan Aktiviteyi Kontrol Et</string>
-    <string name="directly_check_for_activity_desc">Etkinleştirildiğinde, Kilit Ekranı Widget\'ları bir widget dokunuşunun bir Aktivite başlatıp başlatmadığını kontrol etmek için Android\'in API\'sini kullanır. Bu, Kilit Ekranı Widget\'ının yerleşik algılamasından daha hızlı olabilir, ancak yanlış uyarılara neden olabilir.</string>
+    <string name="directly_check_for_activity_desc">When enabled, Lockscreen Widgets will use Android\'s API to check whether a widget tap is launching an Activity. This can be faster than Lockscreen Widgets\' built-in detection, but may cause false positives.</string>
     <string name="translate">Çeviri</string>
     <string name="translate_desc">Kilit Ekranı Widget\'larının dilinize çevrilmesine yardımcı olun.</string>
     <string name="error_reconfiguring_widget">Widget yeniden yapılandırılırken hata oluştu</string>
