@@ -242,7 +242,7 @@
     <string name="grant_read_media_images">Przydziel dostęp do zdjęć i filmów</string>
     <string name="failed_to_add_shortcut">Nie można dodać skrótu.</string>
     <string name="directly_check_for_activity">Directly Check for Activity</string>
-    <string name="directly_check_for_activity_desc">When enabled, Lockscreen Widgets will use Android\'s API to check whether a widget tap is launching an Activity. This can be faster than Lockscreen Widget\'s built-in detection, but may cause false positives.</string>
+    <string name="directly_check_for_activity_desc">When enabled, Lockscreen Widgets will use Android\'s API to check whether a widget tap is launching an Activity. This can be faster than Lockscreen Widgets\' built-in detection, but may cause false positives.</string>
     <string name="translate">Przetłumacz</string>
     <string name="translate_desc">Pomóż przetłumaczyć Lockscreen Widgets na swój język.</string>
     <string name="error_reconfiguring_widget">Błąd podczas zmiany konfiguracji widżetu</string>
