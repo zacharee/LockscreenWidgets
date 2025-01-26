@@ -48,7 +48,7 @@ import kotlin.math.roundToInt
  */
 class WidgetFrameView(context: Context, attrs: AttributeSet) : ConstraintLayout(context, attrs) {
     var animationState = AnimationState.STATE_IDLE
-    var frameId: Int = Int.MIN_VALUE
+    private var frameId: Int = Int.MIN_VALUE
 
     private var maxPointerCount = 0
     private var alreadyIndicatedMoving = false
@@ -105,6 +105,20 @@ class WidgetFrameView(context: Context, attrs: AttributeSet) : ConstraintLayout(
         STATE_IDLE
     }
 
+    fun onCreate(frameId: Int) {
+        this.frameId = frameId
+
+        if (frameId != -1) {
+            binding.removeFrame.setOnClickListener {
+                binding.removeFrameConfirmation.root.show(frameId)
+            }
+        }
+
+        if (context.prefManager.firstViewing && frameId == -1) {
+            binding.gestureHintView.root.isVisible = true
+        }
+    }
+
     @SuppressLint("ClickableViewAccessibility")
     override fun onFinishInflate() {
         super.onFinishInflate()
@@ -142,16 +156,6 @@ class WidgetFrameView(context: Context, attrs: AttributeSet) : ConstraintLayout(
         }
         binding.tempHideFrame.setOnClickListener {
             context.eventManager.sendEvent(Event.TempHide(frameId))
-        }
-
-        if (frameId != -1) {
-            binding.removeFrame.setOnClickListener {
-                binding.removeFrameConfirmation.root.show(frameId)
-            }
-        }
-
-        if (context.prefManager.firstViewing && frameId == -1) {
-            binding.gestureHintView.root.isVisible = true
         }
 
         binding.idList.setContent {

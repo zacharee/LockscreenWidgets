@@ -525,7 +525,7 @@ open class MainWidgetFrameDelegate protected constructor(context: Context, prote
     override fun onCreate() {
         super.onCreate()
 
-        binding.frame.frameId = id
+        binding.frame.onCreate(id)
         binding.selectFrameLayout.setContent {
             AppTheme {
                 Surface(
