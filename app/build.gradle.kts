@@ -106,6 +106,7 @@ dependencies {
     implementation(libs.accompanist.drawablepainter)
 
     implementation(libs.bugsnag.android)
+    implementation(libs.bugsnag.exitinfo)
     implementation(libs.taskerpluginlibrary)
 
     implementation(libs.relinker)

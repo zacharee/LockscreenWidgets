@@ -16,6 +16,9 @@ import android.os.PowerManager
 import android.provider.Settings
 import androidx.core.content.ContextCompat
 import com.bugsnag.android.Bugsnag
+import com.bugsnag.android.BugsnagExitInfoPlugin
+import com.bugsnag.android.Configuration
+import com.bugsnag.android.ExitInfoPluginConfiguration
 import com.getkeepsafe.relinker.ReLinker
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.MainScope
@@ -140,7 +143,15 @@ class App : Application(), CoroutineScope by MainScope(), EventObserver {
 
         setUpAborter()
 
-        Bugsnag.start(this)
+        Bugsnag.start(this, Configuration.load(this).apply {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                addPlugin(BugsnagExitInfoPlugin(ExitInfoPluginConfiguration().apply {
+                    includeLogcat = true
+                }))
+            }
+            maxBreadcrumbs = 500
+            projectPackages = setOf("tk.zwander.lockscreenwidgets", "tk.zwander.widgetdrawer", "tk.zwander.common")
+        })
         Bugsnag.addOnError {
             val error = it.originalError
 
