@@ -9,6 +9,7 @@ import tk.zwander.common.util.PrefManager
 import tk.zwander.common.util.logUtils
 import tk.zwander.common.util.prefManager
 import tk.zwander.common.util.safeApplicationContext
+import tk.zwander.lockscreenwidgets.util.FramePrefs
 
 val Context.backupRestoreManager: BackupRestoreManager
     get() = BackupRestoreManager.getInstance(this)
@@ -45,10 +46,23 @@ class BackupRestoreManager private constructor(private val context: Context) {
             Which.DRAWER -> context.prefManager.drawerColCount
         }
 
+        val secondaryFrames = if (which == Which.FRAME) context.prefManager.currentSecondaryFrames else null
+        val frameWidgetsMap =
+            secondaryFrames?.associate { it to FramePrefs.getWidgetsForFrame(context, it) }
+        val frameGridsMap = secondaryFrames?.associate {
+            it to FramePrefs.getGridSizeForFrame(context, it)
+        }
+
         val data = HashMap<String, String?>()
         data[PrefManager.KEY_CURRENT_WIDGETS] = currentWidgets
         data[PrefManager.KEY_FRAME_ROW_COUNT] = rows.toString()
         data[PrefManager.KEY_FRAME_COL_COUNT] = cols.toString()
+
+        if (secondaryFrames != null) {
+            data["secondaryFrames"] = context.prefManager.gson.toJson(secondaryFrames)
+            data["frameWidgetsMap"] = context.prefManager.gson.toJson(frameWidgetsMap)
+            data["frameGridsMap"] = context.prefManager.gson.toJson(frameGridsMap)
+        }
 
         return context.prefManager.gson.toJson(data)
     }
@@ -82,6 +96,27 @@ class BackupRestoreManager private constructor(private val context: Context) {
         val newWidgets = dataMap[PrefManager.KEY_CURRENT_WIDGETS]
         val rows = dataMap[PrefManager.KEY_FRAME_ROW_COUNT]
         val cols = dataMap[PrefManager.KEY_FRAME_COL_COUNT]
+
+        if (which == Which.FRAME) {
+            val secondaryFrames = dataMap["secondaryFrames"]?.let {
+                context.prefManager.gson.fromJson(it, object : TypeToken<ArrayList<Int>>() {})
+            }
+            val frameWidgetsMap = dataMap["frameWidgetsMap"]?.let {
+                context.prefManager.gson.fromJson(it, object : TypeToken<HashMap<Int, LinkedHashSet<WidgetData>>>() {})
+            }
+            val frameGridsMap = dataMap["frameGridsMap"]?.let {
+                context.prefManager.gson.fromJson(it, object : TypeToken<HashMap<Int, Pair<Int, Int>>>() {})
+            }
+
+            secondaryFrames?.let { context.prefManager.currentSecondaryFrames = it }
+            frameWidgetsMap?.forEach { (id, widgets) ->
+                FramePrefs.setWidgetsForFrame(context, id, widgets)
+            }
+            frameGridsMap?.forEach { (id, grid) ->
+                FramePrefs.setRowCountForFrame(context, id, grid.first)
+                FramePrefs.setColCountForFrame(context, id, grid.second)
+            }
+        }
 
         return handleWidgetString(newWidgets, which).also {
             if (it) {
