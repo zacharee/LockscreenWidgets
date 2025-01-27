@@ -242,7 +242,7 @@
     <string name="grant_read_media_images">منح قراءة الوسائط والصور</string>
     <string name="failed_to_add_shortcut">غير قادر على إضافة الاختصار.</string>
     <string name="directly_check_for_activity">التحقق مباشرة من النشاط</string>
-    <string name="directly_check_for_activity_desc">عند التمكين، ستستخدم تطبيقات مصغرة قفل الشاشة API لنظام أندرويد للتحقق مما إذا كان يتم تشغيل نشاط النقر على عنصر واجهة المستخدم. يمكن أن يكون هذا أسرع من الكشف المدمج لشاشة القفل، ولكن قد يسبب إيجابيات زائفة.</string>
+    <string name="directly_check_for_activity_desc">When enabled, Lockscreen Widgets will use Android\'s API to check whether a widget tap is launching an Activity. This can be faster than Lockscreen Widgets\' built-in detection, but may cause false positives.</string>
     <string name="translate">ترجمة</string>
     <string name="translate_desc">ساعد بترجمة تطبيقات مصغرة الى لغتك.</string>
     <string name="error_reconfiguring_widget">Error reconfiguring widget</string>
