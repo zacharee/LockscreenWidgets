@@ -16,20 +16,26 @@ import tk.zwander.common.util.logUtils
 class SafeBlurView(context: Context, attrs: AttributeSet) : FrameLayout(context, attrs) {
     private val canDrawOnSurface = atomic(false)
 
-    private val surfaceChangedCallback = object : SurfaceChangedCallback {
-        override fun surfaceCreated(t: SurfaceControl.Transaction?) {
-            context.logUtils.debugLog("Surface created", null)
-            canDrawOnSurface.value = true
-        }
+    private val surfaceChangedCallback by lazy {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            object : SurfaceChangedCallback {
+                override fun surfaceCreated(t: SurfaceControl.Transaction?) {
+                    context.logUtils.debugLog("Surface created", null)
+                    canDrawOnSurface.value = true
+                }
 
-        override fun surfaceReplaced(t: SurfaceControl.Transaction?) {
-            context.logUtils.debugLog("Surface replaced", null)
-            canDrawOnSurface.value = true
-        }
+                override fun surfaceReplaced(t: SurfaceControl.Transaction?) {
+                    context.logUtils.debugLog("Surface replaced", null)
+                    canDrawOnSurface.value = true
+                }
 
-        override fun surfaceDestroyed() {
-            context.logUtils.debugLog("Surface destroyed", null)
-            canDrawOnSurface.value = false
+                override fun surfaceDestroyed() {
+                    context.logUtils.debugLog("Surface destroyed", null)
+                    canDrawOnSurface.value = false
+                }
+            }
+        } else {
+            null
         }
     }
 
