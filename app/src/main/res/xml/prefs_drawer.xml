@@ -159,6 +159,15 @@
             android:icon="@drawable/tap"
             />
 
+        <tk.zwander.common.prefs.MaterialSwitchPreference
+            android:title="@string/drawer_handle_lock_position"
+            android:summary="@string/drawer_handle_lock_position_desc"
+            android:key="drawer_handle_lock_position"
+            android:defaultValue="false"
+            android:dependency="show_drawer_handle"
+            android:icon="@drawable/ic_baseline_lock_24"
+            />
+
         <tk.zwander.seekbarpreference.SeekBarPreference
             android:title="@string/drawer_handle_height"
             android:summary="@string/drawer_handle_height_desc"

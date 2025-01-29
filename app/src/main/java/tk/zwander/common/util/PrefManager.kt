@@ -124,6 +124,7 @@ class PrefManager private constructor(private val context: Context) {
         const val KEY_SELECTED_ICON_PACK_PACKAGE = "selected_icon_pack_package"
         const val KEY_SHORTCUT_OVERRIDE_ICONS = "shortcut_override_icon_entries"
         const val KEY_CURRENT_FRAMES = "current_secondary_widget_frames"
+        const val KEY_DRAWER_HANDLE_LOCK_POSITION = "drawer_handle_lock_position"
 
         const val VALUE_PAGE_INDICATOR_BEHAVIOR_HIDDEN = 0
         const val VALUE_PAGE_INDICATOR_BEHAVIOR_AUTO_HIDE = 1
@@ -805,6 +806,12 @@ class PrefManager private constructor(private val context: Context) {
         get() = getStringSet(KEY_CURRENT_FRAMES, setOf()).map { it.toInt() }
         set(value) {
             putStringSet(KEY_CURRENT_FRAMES, value.map { it.toString() }.toSet())
+        }
+
+    var drawerHandleLockPosition: Boolean
+        get() = getBoolean(KEY_DRAWER_HANDLE_LOCK_POSITION, false)
+        set(value) {
+            putBoolean(KEY_DRAWER_HANDLE_LOCK_POSITION, value)
         }
 
     @Suppress("DEPRECATION")

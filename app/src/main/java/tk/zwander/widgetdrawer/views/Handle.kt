@@ -322,7 +322,7 @@ class Handle : LinearLayout {
         }
 
         fun onLongPress() {
-            if (!scrollingOpen && !calledOpen && !inMoveMode) {
+            if (!scrollingOpen && !calledOpen && !inMoveMode && !context.prefManager.drawerHandleLockPosition) {
                 context.vibrate()
                 setMoveMode(true)
             }
