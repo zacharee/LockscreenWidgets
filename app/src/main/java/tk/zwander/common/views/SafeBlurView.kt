@@ -100,7 +100,7 @@ class SafeBlurView(context: Context, attrs: AttributeSet) : FrameLayout(context,
     }
 
     private fun shouldSkipDrawing(): Boolean {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             context.logUtils.debugLog(
                 "Checking if can draw blur\n" +
                         "viewRootImpl = ${viewRootImpl}\n" +
@@ -109,16 +109,12 @@ class SafeBlurView(context: Context, attrs: AttributeSet) : FrameLayout(context,
                         "canDrawOnSurface = ${canDrawOnSurface.value}"
             )
 
-            if (
-                viewRootImpl == null ||
-                display?.state == Display.STATE_OFF ||
-                viewRootImpl?.mSurface?.isValid == false ||
-                !canDrawOnSurface.value
-            ) {
-                return true
-            }
+            viewRootImpl == null ||
+            display?.state == Display.STATE_OFF ||
+            viewRootImpl?.mSurface?.isValid == false ||
+            !canDrawOnSurface.value
+        } else {
+            true
         }
-
-        return false
     }
 }
