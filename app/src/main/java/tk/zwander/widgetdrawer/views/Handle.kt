@@ -5,6 +5,7 @@ import android.animation.AnimatorListenerAdapter
 import android.animation.ValueAnimator
 import android.annotation.SuppressLint
 import android.content.Context
+import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.PixelFormat
 import android.os.Handler
@@ -14,6 +15,7 @@ import android.util.AttributeSet
 import android.view.GestureDetector
 import android.view.Gravity
 import android.view.MotionEvent
+import android.view.View
 import android.view.WindowManager
 import android.view.animation.AccelerateInterpolator
 import android.view.animation.DecelerateInterpolator
@@ -25,6 +27,7 @@ import tk.zwander.common.util.PrefManager
 import tk.zwander.common.util.dpAsPx
 import tk.zwander.common.util.eventManager
 import tk.zwander.common.util.handler
+import tk.zwander.common.util.logUtils
 import tk.zwander.common.util.mainHandler
 import tk.zwander.common.util.prefManager
 import tk.zwander.common.util.screenSize
@@ -197,6 +200,21 @@ class Handle : LinearLayout {
         setMoveMode(false)
         calledOpen = false
         scrollingOpen = false
+    }
+
+    override fun onDraw(canvas: Canvas) {
+        context.logUtils.debugLog("onDraw() Handle", null)
+        super.onDraw(canvas)
+    }
+
+    override fun draw(canvas: Canvas) {
+        context.logUtils.debugLog("draw() Handle", null)
+        super.draw(canvas)
+    }
+
+    override fun drawChild(canvas: Canvas, child: View?, drawingTime: Long): Boolean {
+        context.logUtils.debugLog("drawChild() Handle", null)
+        return super.drawChild(canvas, child, drawingTime)
     }
 
     fun onDestroy() {

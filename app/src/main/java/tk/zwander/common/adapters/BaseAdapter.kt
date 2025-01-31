@@ -401,6 +401,7 @@ abstract class BaseAdapter(
 
         fun onBind(data: WidgetData) {
             launch {
+                context.logUtils.debugLog("Binding ${data.copy(icon = null, iconRes = null)}", null)
                 context.eventManager.addObserver(this@WidgetVH)
 
                 onResize(data, 0, 1)
@@ -567,7 +568,7 @@ abstract class BaseAdapter(
                     } else {
                         context.logUtils.normalLog(
                             "Broken app widget detected: ${widgetInfo.provider}. Removing from adapter list.",
-                            null
+                            null,
                         )
                         currentWidgets = currentWidgets.toMutableList().apply {
                             remove(data)

@@ -202,6 +202,9 @@ class App : Application(), CoroutineScope by MainScope(), EventObserver {
                 mapOf(
                     "drawer_blur_enabled" to prefManager.blurDrawerBackground,
                     "frame_blur_enabled" to prefManager.blurBackground,
+                    "drawer_enabled" to prefManager.drawerEnabled,
+                    "frame_enabled" to prefManager.widgetFrameEnabled,
+                    "animate_show_hide" to prefManager.animateShowHide,
                 ),
             )
 

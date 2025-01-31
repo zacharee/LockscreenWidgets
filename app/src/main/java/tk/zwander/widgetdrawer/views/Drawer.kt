@@ -1,12 +1,15 @@
 package tk.zwander.widgetdrawer.views
 
 import android.content.Context
+import android.graphics.Canvas
 import android.util.AttributeSet
 import android.view.KeyEvent
+import android.view.View
 import android.widget.FrameLayout
 import com.joaomgcd.taskerpluginlibrary.extensions.requestQuery
 import tk.zwander.common.util.Event
 import tk.zwander.common.util.eventManager
+import tk.zwander.common.util.logUtils
 import tk.zwander.widgetdrawer.activities.TaskerIsShowingDrawer
 
 class Drawer : FrameLayout {
@@ -34,5 +37,20 @@ class Drawer : FrameLayout {
         }
 
         return super.dispatchKeyEvent(event)
+    }
+
+    override fun onDraw(canvas: Canvas) {
+        context.logUtils.debugLog("onDraw() Drawer", null)
+        super.onDraw(canvas)
+    }
+
+    override fun draw(canvas: Canvas) {
+        context.logUtils.debugLog("draw() Drawer", null)
+        super.draw(canvas)
+    }
+
+    override fun drawChild(canvas: Canvas, child: View?, drawingTime: Long): Boolean {
+        context.logUtils.debugLog("drawChild() Drawer", null)
+        return super.drawChild(canvas, child, drawingTime)
     }
 }

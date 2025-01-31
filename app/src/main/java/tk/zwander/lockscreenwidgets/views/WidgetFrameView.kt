@@ -2,6 +2,7 @@ package tk.zwander.lockscreenwidgets.views
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.graphics.Canvas
 import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener2
@@ -273,6 +274,21 @@ class WidgetFrameView(context: Context, attrs: AttributeSet) : ConstraintLayout(
 
     override fun onInterceptTouchEvent(ev: MotionEvent): Boolean {
         return (maxPointerCount > 1 || isProxTooClose)
+    }
+
+    override fun dispatchDraw(canvas: Canvas) {
+        context.logUtils.debugLog("dispatchDraw() WidgetFrameView $frameId", null)
+        super.dispatchDraw(canvas)
+    }
+
+    override fun draw(canvas: Canvas) {
+        context.logUtils.debugLog("draw() WidgetFrameView $frameId", null)
+        super.draw(canvas)
+    }
+
+    override fun drawChild(canvas: Canvas, child: View?, drawingTime: Long): Boolean {
+        context.logUtils.debugLog("drawChild() WidgetFrameView $frameId", null)
+        return super.drawChild(canvas, child, drawingTime)
     }
 
     fun updateFrameBackground() {
