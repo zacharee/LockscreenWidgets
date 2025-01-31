@@ -1,5 +1,6 @@
 package tk.zwander.common.views
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Canvas
 import android.graphics.drawable.Drawable
@@ -12,6 +13,7 @@ import android.view.ViewRootImpl.SurfaceChangedCallback
 import android.widget.FrameLayout
 import kotlinx.atomicfu.atomic
 import tk.zwander.common.util.logUtils
+import tk.zwander.common.util.windowManager
 
 class SafeBlurView(context: Context, attrs: AttributeSet) : FrameLayout(context, attrs) {
     private val canDrawOnSurface = atomic(false)
@@ -99,6 +101,7 @@ class SafeBlurView(context: Context, attrs: AttributeSet) : FrameLayout(context,
         }
     }
 
+    @SuppressLint("DiscouragedPrivateApi")
     private fun shouldSkipDrawing(): Boolean {
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             context.logUtils.debugLog(
@@ -106,13 +109,17 @@ class SafeBlurView(context: Context, attrs: AttributeSet) : FrameLayout(context,
                         "viewRootImpl = ${viewRootImpl}\n" +
                         "displayState = ${display?.state}\n" +
                         "surfaceValid = ${viewRootImpl?.mSurface?.isValid}\n" +
-                        "canDrawOnSurface = ${canDrawOnSurface.value}"
+                        "canDrawOnSurface = ${canDrawOnSurface.value}\n" +
+                        "surfaceControlValid = ${viewRootImpl?.surfaceControl?.isValid}\n" +
+                        "crossWindowBlurEnabled = ${context.windowManager.isCrossWindowBlurEnabled}"
             )
 
             viewRootImpl == null ||
             display?.state == Display.STATE_OFF ||
             viewRootImpl?.mSurface?.isValid == false ||
-            !canDrawOnSurface.value
+            !canDrawOnSurface.value ||
+            viewRootImpl?.surfaceControl?.isValid == false ||
+            !context.windowManager.isCrossWindowBlurEnabled
         } else {
             true
         }
