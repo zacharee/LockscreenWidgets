@@ -178,12 +178,16 @@ class App : Application(), CoroutineScope by MainScope(), EventObserver {
                     "widget_data",
                     hashMapOf(
                         "currentWidgets" to try {
-                            prefManager.currentWidgetsString
+                            prefManager.currentWidgets.map { widget ->
+                                widget.copy(icon = null, iconRes = null)
+                            }
                         } catch (e: OutOfMemoryError) {
                             "Too large to parse."
                         },
                         "drawerWidgets" to try {
-                            prefManager.drawerWidgetsString
+                            prefManager.drawerWidgets.map { widget ->
+                                widget.copy(icon = null, iconRes = null)
+                            }
                         } catch (e: OutOfMemoryError) {
                             "Too large to parse."
                         },
