@@ -1,10 +1,13 @@
 package tk.zwander.common.views
 
 import android.content.Context
+import android.graphics.Canvas
 import android.text.method.ScrollingMovementMethod
 import android.util.AttributeSet
+import android.view.View
 import androidx.core.view.isVisible
 import com.google.android.material.card.MaterialCardView
+import tk.zwander.common.util.logUtils
 import tk.zwander.common.util.prefManager
 import tk.zwander.lockscreenwidgets.R
 import tk.zwander.lockscreenwidgets.databinding.WidgetFrameGestureHintBinding
@@ -17,6 +20,21 @@ import tk.zwander.lockscreenwidgets.databinding.WidgetFrameHideHintBinding
 open class WidgetFrameHintView(context: Context, attrs: AttributeSet) : MaterialCardView(context, attrs) {
     open fun close() {
         isVisible = false
+    }
+
+    override fun draw(canvas: Canvas) {
+        context.logUtils.debugLog("draw() ${this::class.java.name}", null)
+        super.draw(canvas)
+    }
+
+    override fun drawChild(canvas: Canvas, child: View?, drawingTime: Long): Boolean {
+        context.logUtils.debugLog("drawChild() ${this::class.java.name}", null)
+        return super.drawChild(canvas, child, drawingTime)
+    }
+
+    override fun dispatchDraw(canvas: Canvas) {
+        context.logUtils.debugLog("dispatchDraw() ${this::class.java.name}", null)
+        super.dispatchDraw(canvas)
     }
 }
 

@@ -1,11 +1,14 @@
 package tk.zwander.lockscreenwidgets.views
 
 import android.content.Context
+import android.graphics.Canvas
 import android.util.AttributeSet
+import android.view.View
 import androidx.core.view.isVisible
 import com.google.android.material.card.MaterialCardView
 import tk.zwander.common.util.Event
 import tk.zwander.common.util.eventManager
+import tk.zwander.common.util.logUtils
 import tk.zwander.lockscreenwidgets.databinding.RemoveFrameConfirmationLayoutBinding
 
 class RemoveFrameConfirmationView(context: Context, attrs: AttributeSet) : MaterialCardView(context, attrs) {
@@ -35,5 +38,20 @@ class RemoveFrameConfirmationView(context: Context, attrs: AttributeSet) : Mater
     fun hide() {
         isVisible = false
         this.id = null
+    }
+
+    override fun draw(canvas: Canvas) {
+        context.logUtils.debugLog("draw() ${this::class.java.name}", null)
+        super.draw(canvas)
+    }
+
+    override fun drawChild(canvas: Canvas, child: View?, drawingTime: Long): Boolean {
+        context.logUtils.debugLog("drawChild() ${this::class.java.name}", null)
+        return super.drawChild(canvas, child, drawingTime)
+    }
+
+    override fun dispatchDraw(canvas: Canvas) {
+        context.logUtils.debugLog("dispatchDraw() ${this::class.java.name}", null)
+        super.dispatchDraw(canvas)
     }
 }
