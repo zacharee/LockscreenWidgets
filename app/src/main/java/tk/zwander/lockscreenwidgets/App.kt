@@ -196,7 +196,11 @@ class App : Application(), CoroutineScope by MainScope(), EventObserver {
                             put(
                                 "secondaryFrame${frameId}Widgets",
                                 try {
-                                    prefManager.gson.toJson(FramePrefs.getWidgetsForFrame(this@App, frameId))
+                                    prefManager.gson.toJson(
+                                        FramePrefs.getWidgetsForFrame(this@App, frameId).map { widget ->
+                                            widget.copy(icon = null, iconRes = null)
+                                        },
+                                    )
                                 } catch (e: OutOfMemoryError) {
                                     "Too large to parse."
                                 },
