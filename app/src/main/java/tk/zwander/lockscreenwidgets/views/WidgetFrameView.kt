@@ -294,6 +294,11 @@ class WidgetFrameView(context: Context, attrs: AttributeSet) : ConstraintLayout(
         return super.drawChild(canvas, child, drawingTime)
     }
 
+    override fun canHaveDisplayList(): Boolean {
+        context.logUtils.debugLog("canHaveDisplayList() ${this::class.java.name}")
+        return super.canHaveDisplayList()
+    }
+
     fun updateFrameBackground() {
         binding.frameCard.setCardBackgroundColor(context.prefManager.backgroundColor)
     }

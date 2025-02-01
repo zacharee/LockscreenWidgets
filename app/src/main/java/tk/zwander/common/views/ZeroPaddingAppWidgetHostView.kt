@@ -32,4 +32,9 @@ class ZeroPaddingAppWidgetHostView(context: Context) : AppWidgetHostView(context
         context.logUtils.debugLog("drawChild() AppWidgetHostView for ${appWidgetInfo?.provider}", null)
         return super.drawChild(canvas, child, drawingTime)
     }
+
+    override fun canHaveDisplayList(): Boolean {
+        context.logUtils.debugLog("canHaveDisplayList() ${this::class.java.name}")
+        return super.canHaveDisplayList()
+    }
 }

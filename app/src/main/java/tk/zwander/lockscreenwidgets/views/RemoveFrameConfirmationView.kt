@@ -54,4 +54,9 @@ class RemoveFrameConfirmationView(context: Context, attrs: AttributeSet) : Mater
         context.logUtils.debugLog("dispatchDraw() ${this::class.java.name}", null)
         super.dispatchDraw(canvas)
     }
+
+    override fun canHaveDisplayList(): Boolean {
+        context.logUtils.debugLog("canHaveDisplayList() ${this::class.java.name}")
+        return super.canHaveDisplayList()
+    }
 }

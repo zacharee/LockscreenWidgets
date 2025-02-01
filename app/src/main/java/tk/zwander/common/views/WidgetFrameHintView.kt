@@ -36,6 +36,11 @@ open class WidgetFrameHintView(context: Context, attrs: AttributeSet) : Material
         context.logUtils.debugLog("dispatchDraw() ${this::class.java.name}", null)
         super.dispatchDraw(canvas)
     }
+
+    override fun canHaveDisplayList(): Boolean {
+        context.logUtils.debugLog("canHaveDisplayList() ${this::class.java.name}")
+        return super.canHaveDisplayList()
+    }
 }
 
 class WidgetFrameGestureHintView(context: Context, attrs: AttributeSet) : WidgetFrameHintView(context, attrs) {

@@ -53,4 +53,9 @@ class Drawer : FrameLayout {
         context.logUtils.debugLog("drawChild() Drawer", null)
         return super.drawChild(canvas, child, drawingTime)
     }
+
+    override fun canHaveDisplayList(): Boolean {
+        context.logUtils.debugLog("canHaveDisplayList() ${this::class.java.name}")
+        return super.canHaveDisplayList()
+    }
 }

@@ -60,4 +60,9 @@ class RemoveWidgetConfirmationView(context: Context, attrs: AttributeSet) : Mate
         context.logUtils.debugLog("dispatchDraw() ${this::class.java.name}", null)
         super.dispatchDraw(canvas)
     }
+
+    override fun canHaveDisplayList(): Boolean {
+        context.logUtils.debugLog("canHaveDisplayList() ${this::class.java.name}")
+        return super.canHaveDisplayList()
+    }
 }

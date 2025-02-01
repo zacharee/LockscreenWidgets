@@ -101,6 +101,11 @@ class SafeBlurView(context: Context, attrs: AttributeSet) : FrameLayout(context,
         }
     }
 
+    override fun canHaveDisplayList(): Boolean {
+        context.logUtils.debugLog("canHaveDisplayList() ${this::class.java.name}")
+        return super.canHaveDisplayList()
+    }
+
     @SuppressLint("DiscouragedPrivateApi")
     private fun shouldSkipDrawing(): Boolean {
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {

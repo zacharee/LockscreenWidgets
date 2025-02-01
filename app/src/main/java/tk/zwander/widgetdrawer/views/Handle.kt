@@ -217,6 +217,11 @@ class Handle : LinearLayout {
         return super.drawChild(canvas, child, drawingTime)
     }
 
+    override fun canHaveDisplayList(): Boolean {
+        context.logUtils.debugLog("canHaveDisplayList() ${this::class.java.name}")
+        return super.canHaveDisplayList()
+    }
+
     fun onDestroy() {
         prefsHandler.unregister(context)
     }
