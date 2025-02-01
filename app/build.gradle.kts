@@ -107,6 +107,10 @@ dependencies {
 
     implementation(libs.bugsnag.android)
     implementation(libs.bugsnag.exitinfo)
+    implementation(libs.bugsnag.android.performance)
+    implementation(libs.bugsnag.android.performance.appcompat)
+    implementation(libs.bugsnag.android.performance.compose)
+
     implementation(libs.taskerpluginlibrary)
 
     implementation(libs.relinker)

@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.luminance
 import androidx.core.view.WindowInsetsControllerCompat
+import com.bugsnag.android.performance.compose.MeasuredComposable
 import dev.zwander.composeintroslider.IntroSlider
 import tk.zwander.common.compose.AppTheme
 import tk.zwander.common.compose.data.rememberIntroSlides
@@ -93,22 +94,24 @@ class OnboardingActivity : ComponentActivity() {
         val insetsControllerCompat = WindowInsetsControllerCompat(window, window.decorView)
 
         setContent {
-            AppTheme {
-                IntroSlider(
-                    pages = rememberIntroSlides(startReason = retroMode, finish = ::finish),
-                    onExit = ::finish,
-                    onDone = {
-                        setResult(RESULT_OK)
-                        finish()
-                    },
-                    modifier = Modifier.fillMaxSize(),
-                    backPressedDispatcher = LocalOnBackPressedDispatcherOwner.current?.onBackPressedDispatcher,
-                    normalizeElements = true,
-                    onContentColorChanged = {
-                        insetsControllerCompat.isAppearanceLightNavigationBars = it.luminance() <= 0.5
-                        insetsControllerCompat.isAppearanceLightStatusBars = it.luminance() <= 0.5
-                    },
-                )
+            MeasuredComposable(name = "OnboardingActivity") {
+                AppTheme {
+                    IntroSlider(
+                        pages = rememberIntroSlides(startReason = retroMode, finish = ::finish),
+                        onExit = ::finish,
+                        onDone = {
+                            setResult(RESULT_OK)
+                            finish()
+                        },
+                        modifier = Modifier.fillMaxSize(),
+                        backPressedDispatcher = LocalOnBackPressedDispatcherOwner.current?.onBackPressedDispatcher,
+                        normalizeElements = true,
+                        onContentColorChanged = {
+                            insetsControllerCompat.isAppearanceLightNavigationBars = it.luminance() <= 0.5
+                            insetsControllerCompat.isAppearanceLightStatusBars = it.luminance() <= 0.5
+                        },
+                    )
+                }
             }
         }
     }

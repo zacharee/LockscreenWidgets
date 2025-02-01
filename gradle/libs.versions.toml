@@ -2,6 +2,7 @@
 accompanist = "0.37.0"
 activityCompose = "1.10.0"
 androidGradlePlugin = "8.8.0"
+bugsnagAndroidPerformance = "1.11.0"
 shizuku = "13.1.5"
 appcompat = "1.7.0"
 atomicfu = "0.27.0"
@@ -37,6 +38,9 @@ activity-compose = { module = "androidx.activity:activity-compose", version.ref 
 appcompat = { module = "androidx.appcompat:appcompat", version.ref = "appcompat" }
 atomicfu = { module = "org.jetbrains.kotlinx:atomicfu", version.ref = "atomicfu" }
 bugsnag-android = { module = "com.bugsnag:bugsnag-android", version.ref = "bugsnagAndroid" }
+bugsnag-android-performance = { module = "com.bugsnag:bugsnag-android-performance", version.ref = "bugsnagAndroidPerformance" }
+bugsnag-android-performance-appcompat = { module = "com.bugsnag:bugsnag-android-performance-appcompat", version.ref = "bugsnagAndroidPerformance" }
+bugsnag-android-performance-compose = { module = "com.bugsnag:bugsnag-android-performance-compose", version.ref = "bugsnagAndroidPerformance" }
 bugsnag-exitinfo = { module = "com.bugsnag:bugsnag-plugin-android-exitinfo", version.ref = "bugsnagAndroid" }
 byte-buddy-android = { module = "net.bytebuddy:byte-buddy-android", version.ref = "byteBuddyAndroid" }
 collapsiblePreferenceCategory = { module = "com.github.zacharee:CollapsiblePreferenceCategory", version.ref = "collapsiblepreferencecategory" }

@@ -18,6 +18,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.isVisible
+import com.bugsnag.android.performance.compose.MeasuredComposable
 import com.joaomgcd.taskerpluginlibrary.extensions.requestQuery
 import kotlinx.coroutines.flow.MutableStateFlow
 import tk.zwander.common.util.Event
@@ -160,12 +161,14 @@ class WidgetFrameView(context: Context, attrs: AttributeSet) : ConstraintLayout(
         }
 
         binding.idList.setContent {
-            val items by debugIdItems.collectAsState()
+            MeasuredComposable(name = "IDList") {
+                val items by debugIdItems.collectAsState()
 
-            IDListLayout(
-                items = items,
-                modifier = Modifier.fillMaxSize(),
-            )
+                IDListLayout(
+                    items = items,
+                    modifier = Modifier.fillMaxSize(),
+                )
+            }
         }
 
         updateDebugIdViewVisibility()

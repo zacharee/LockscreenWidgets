@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import androidx.activity.compose.setContent
+import com.bugsnag.android.performance.compose.MeasuredComposable
 import tk.zwander.common.compose.hide.HideOnAppsChooserLayout
 
 class HideOnAppsChooserActivity : BaseActivity() {
@@ -20,7 +21,9 @@ class HideOnAppsChooserActivity : BaseActivity() {
         super.onCreate(savedInstanceState)
 
         setContent {
-            HideOnAppsChooserLayout(onBackPressedDispatcher::onBackPressed)
+            MeasuredComposable(name = "HideOnAppsChooser") {
+                HideOnAppsChooserLayout(onBackPressedDispatcher::onBackPressed)
+            }
         }
     }
 }

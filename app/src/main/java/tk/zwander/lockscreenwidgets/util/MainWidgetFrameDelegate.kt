@@ -39,6 +39,7 @@ import androidx.core.view.isVisible
 import androidx.lifecycle.Lifecycle
 import androidx.recyclerview.widget.RecyclerView
 import com.android.internal.R.attr.screenOrientation
+import com.bugsnag.android.performance.compose.MeasuredComposable
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import tk.zwander.common.activities.DismissOrUnlockActivity
@@ -527,39 +528,41 @@ open class MainWidgetFrameDelegate protected constructor(context: Context, prote
 
         binding.frame.onCreate(id)
         binding.selectFrameLayout.setContent {
-            AppTheme {
-                Surface(
-                    modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.surface.copy(alpha = 0.75f),
-                    contentColor = MaterialTheme.colorScheme.contentColorFor(MaterialTheme.colorScheme.surface),
-                ) {
-                    Box(
+            MeasuredComposable(name = "SelectFrameLayoutContent") {
+                AppTheme {
+                    Surface(
                         modifier = Modifier.fillMaxSize(),
-                        contentAlignment = Alignment.Center,
+                        color = MaterialTheme.colorScheme.surface.copy(alpha = 0.75f),
+                        contentColor = MaterialTheme.colorScheme.contentColorFor(MaterialTheme.colorScheme.surface),
                     ) {
-                        Column(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                            verticalArrangement = Arrangement.spacedBy(8.dp),
+                        Box(
+                            modifier = Modifier.fillMaxSize(),
+                            contentAlignment = Alignment.Center,
                         ) {
-                            Text(text = "$id")
-
-                            FlowRow(
-                                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            Column(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalAlignment = Alignment.CenterHorizontally,
                                 verticalArrangement = Arrangement.spacedBy(8.dp),
                             ) {
-                                OutlinedButton(
-                                    onClick = {
-                                        eventManager.sendEvent(Event.FrameSelected(null, state.selectionPreviewRequestCode))
-                                    },
-                                ) {
-                                    Text(text = stringResource(R.string.cancel))
-                                }
+                                Text(text = "$id")
 
-                                OutlinedButton(
-                                    onClick = { eventManager.sendEvent(Event.FrameSelected(id, state.selectionPreviewRequestCode)) },
+                                FlowRow(
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                    verticalArrangement = Arrangement.spacedBy(8.dp),
                                 ) {
-                                    Text(text = stringResource(R.string.select))
+                                    OutlinedButton(
+                                        onClick = {
+                                            eventManager.sendEvent(Event.FrameSelected(null, state.selectionPreviewRequestCode))
+                                        },
+                                    ) {
+                                        Text(text = stringResource(R.string.cancel))
+                                    }
+
+                                    OutlinedButton(
+                                        onClick = { eventManager.sendEvent(Event.FrameSelected(id, state.selectionPreviewRequestCode)) },
+                                    ) {
+                                        Text(text = stringResource(R.string.select))
+                                    }
                                 }
                             }
                         }

@@ -8,6 +8,7 @@ import android.os.Build
 import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
+import com.bugsnag.android.performance.compose.MeasuredComposable
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.MainScope
@@ -77,7 +78,9 @@ class MainActivity : BaseActivity(), CoroutineScope by MainScope() {
         }
 
         setContent {
-            MainContent()
+            MeasuredComposable(name = "MainContentLayout") {
+                MainContent()
+            }
         }
 
         if (prefManager.firstRun || (!isAccessibilityEnabled && !BuildConfig.DEBUG)) {

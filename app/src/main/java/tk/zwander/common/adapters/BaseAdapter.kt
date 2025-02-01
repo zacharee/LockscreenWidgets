@@ -51,6 +51,7 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.arasthel.spannedgridlayoutmanager.SpanSize
 import com.arasthel.spannedgridlayoutmanager.SpannedGridLayoutManager
+import com.bugsnag.android.performance.compose.MeasuredComposable
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.MainScope
@@ -730,60 +731,62 @@ abstract class BaseAdapter(
         fun onBind() {
             binding.root.setParentCompositionContext(rootView.createLifecycleAwareWindowRecomposer())
             binding.root.setContent {
-                AppTheme {
-                    Card(
-                        modifier = Modifier.fillMaxSize(),
-                        colors = CardColors(
-                            containerColor = Color.Transparent,
-                            contentColor = Color.White,
-                            disabledContentColor = Color.White,
-                            disabledContainerColor = Color.Transparent,
-                        ),
-                        shape = RoundedCornerShape(widgetCornerRadius.dp),
-                    ) {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .clickable(
-                                    enabled = true,
-                                    interactionSource = remember { MutableInteractionSource() },
-                                    onClick = { launchAddActivity() },
-                                    indication = ripple(
-                                        color = Color.Black,
-                                    ),
-                                ),
-                            contentAlignment = Alignment.Center,
+                MeasuredComposable(name = "AddWidgetLayout") {
+                    AppTheme {
+                        Card(
+                            modifier = Modifier.fillMaxSize(),
+                            colors = CardColors(
+                                containerColor = Color.Transparent,
+                                contentColor = Color.White,
+                                disabledContentColor = Color.White,
+                                disabledContainerColor = Color.Transparent,
+                            ),
+                            shape = RoundedCornerShape(widgetCornerRadius.dp),
                         ) {
-                            Column(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalAlignment = Alignment.CenterHorizontally,
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .clickable(
+                                        enabled = true,
+                                        interactionSource = remember { MutableInteractionSource() },
+                                        onClick = { launchAddActivity() },
+                                        indication = ripple(
+                                            color = Color.Black,
+                                        ),
+                                    ),
+                                contentAlignment = Alignment.Center,
                             ) {
-                                Icon(
-                                    painter = painterResource(R.drawable.ic_baseline_add_24),
-                                    contentDescription = stringResource(R.string.add_widget),
-                                    tint = Color.White,
-                                    modifier = Modifier
-                                        .size(48.dp)
-                                        .background(
-                                            brush = Brush.radialGradient(
-                                                0f to Color.Black.copy(alpha = 0.5f),
-                                                1f to Color.Transparent,
+                                Column(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalAlignment = Alignment.CenterHorizontally,
+                                ) {
+                                    Icon(
+                                        painter = painterResource(R.drawable.ic_baseline_add_24),
+                                        contentDescription = stringResource(R.string.add_widget),
+                                        tint = Color.White,
+                                        modifier = Modifier
+                                            .size(48.dp)
+                                            .background(
+                                                brush = Brush.radialGradient(
+                                                    0f to Color.Black.copy(alpha = 0.5f),
+                                                    1f to Color.Transparent,
+                                                ),
+                                            ),
+                                    )
+
+                                    Text(
+                                        text = stringResource(R.string.add_widget),
+                                        fontWeight = FontWeight.Bold,
+                                        style = LocalTextStyle.current.copy(
+                                            shadow = Shadow(
+                                                color = Color.Black,
+                                                offset = Offset(3f, 3f),
+                                                blurRadius = 5f,
                                             ),
                                         ),
-                                )
-
-                                Text(
-                                    text = stringResource(R.string.add_widget),
-                                    fontWeight = FontWeight.Bold,
-                                    style = LocalTextStyle.current.copy(
-                                        shadow = Shadow(
-                                            color = Color.Black,
-                                            offset = Offset(3f, 3f),
-                                            blurRadius = 5f,
-                                        ),
-                                    ),
-                                    fontSize = 20.sp,
-                                )
+                                        fontSize = 20.sp,
+                                    )
+                                }
                             }
                         }
                     }

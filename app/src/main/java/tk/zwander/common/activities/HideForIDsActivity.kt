@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import com.bugsnag.android.performance.compose.MeasuredComposable
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.gson.reflect.TypeToken
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -127,30 +128,32 @@ class HideForIDsActivity : BaseActivity() {
                 }
             }
 
-            AppTheme {
-                HideForIDsLayout(
-                    items = items,
-                    title = title.toString(),
-                    onAdd = {
-                        if (it.contains(":id/")) {
-                            this.items.value = TreeSet(items + it)
-                        } else {
-                            this.items.value = TreeSet(items + "com.android.systemui:id/$it")
-                        }
-                    },
-                    onRemove = {
-                        this.items.value = TreeSet(items - it)
-                    },
-                    onBackUpClicked = {
-                        saveRequest.launch("LockscreenWidgets_ID_Backup_${format.format(Date())}.lsw")
-                    },
-                    onRestoreClicked = {
-                        openRequest.launch(arrayOf("*/*"))
-                    },
-                    modifier = Modifier.fillMaxSize()
-                        .systemBarsPadding()
-                        .imePadding()
-                )
+            MeasuredComposable(name = "HideForIDsLayout-${type}") {
+                AppTheme {
+                    HideForIDsLayout(
+                        items = items,
+                        title = title.toString(),
+                        onAdd = {
+                            if (it.contains(":id/")) {
+                                this@HideForIDsActivity.items.value = TreeSet(items + it)
+                            } else {
+                                this@HideForIDsActivity.items.value = TreeSet(items + "com.android.systemui:id/$it")
+                            }
+                        },
+                        onRemove = {
+                            this@HideForIDsActivity.items.value = TreeSet(items - it)
+                        },
+                        onBackUpClicked = {
+                            saveRequest.launch("LockscreenWidgets_ID_Backup_${format.format(Date())}.lsw")
+                        },
+                        onRestoreClicked = {
+                            openRequest.launch(arrayOf("*/*"))
+                        },
+                        modifier = Modifier.fillMaxSize()
+                            .systemBarsPadding()
+                            .imePadding()
+                    )
+                }
             }
         }
     }

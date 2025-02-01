@@ -19,6 +19,8 @@ import com.bugsnag.android.Bugsnag
 import com.bugsnag.android.BugsnagExitInfoPlugin
 import com.bugsnag.android.Configuration
 import com.bugsnag.android.ExitInfoPluginConfiguration
+import com.bugsnag.android.performance.BugsnagPerformance
+import com.bugsnag.android.performance.PerformanceConfiguration
 import com.getkeepsafe.relinker.ReLinker
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.MainScope
@@ -132,6 +134,10 @@ class App : Application(), CoroutineScope by MainScope(), EventObserver {
             .tag("${packageName}_granter")
     }
 
+    init {
+        BugsnagPerformance.reportApplicationClassLoaded()
+    }
+
     private external fun setUpAborter()
 
     override fun onCreate() {
@@ -152,6 +158,10 @@ class App : Application(), CoroutineScope by MainScope(), EventObserver {
             maxBreadcrumbs = 500
             projectPackages = setOf("tk.zwander.lockscreenwidgets", "tk.zwander.widgetdrawer", "tk.zwander.common")
         })
+        BugsnagPerformance.start(PerformanceConfiguration.load(this).apply {
+            autoInstrumentRendering = true
+        })
+
         Bugsnag.addOnError {
             val error = it.originalError
 

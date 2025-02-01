@@ -43,6 +43,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.bugsnag.android.performance.compose.MeasuredComposable
 import com.google.accompanist.drawablepainter.rememberDrawablePainter
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -107,101 +108,103 @@ class SelectIconFromPackActivity : BaseActivity() {
                 }
             }
 
-            AppTheme {
-                Surface(
-                    modifier = Modifier.fillMaxSize(),
-                ) {
-                    Crossfade(
+            MeasuredComposable(name = "SetIconFromPack") {
+                AppTheme {
+                    Surface(
                         modifier = Modifier.fillMaxSize(),
-                        targetState = items.isEmpty(),
-                        label = "SelectIconPack",
-                    ) { loading ->
-                        if (loading) {
-                            Loader(modifier = Modifier.fillMaxSize())
-                        } else {
-                            var searchBarHeight by remember {
-                                mutableIntStateOf(0)
-                            }
-
-                            Box(
-                                modifier = Modifier.fillMaxSize(),
-                                contentAlignment = Alignment.TopCenter,
-                            ) {
-                                LazyColumn(
-                                    modifier = Modifier.fillMaxSize(),
-                                    contentPadding = WindowInsets
-                                        .systemBars
-                                        .add(WindowInsets.ime)
-                                        .add(WindowInsets(top = searchBarHeight))
-                                        .add(WindowInsets(top = 8.dp))
-                                        .asPaddingValues(),
-                                ) {
-                                    items(items = filteredItems, key = { item -> item.name }) { icon ->
-                                        val loadedDrawable = remember(icon.loadDrawable)
-
-                                        Row(
-                                            modifier = Modifier
-                                                .fillMaxWidth()
-                                                .heightIn(min = 48.dp)
-                                                .clickable {
-                                                    prefManager.shortcutOverrideIcons = prefManager.shortcutOverrideIcons.apply {
-                                                        this[shortcutId!!] = icon.entry
-                                                    }
-                                                    setResult(Activity.RESULT_OK)
-                                                    finish()
-                                                }
-                                                .padding(16.dp),
-                                            verticalAlignment = Alignment.CenterVertically,
-                                            horizontalArrangement = Arrangement.spacedBy(16.dp),
-                                        ) {
-                                            Image(
-                                                painter = rememberDrawablePainter(loadedDrawable),
-                                                contentDescription = icon.name,
-                                                modifier = Modifier.size(48.dp),
-                                            )
-
-                                            Column(
-                                                modifier = Modifier.weight(1f),
-                                            ) {
-                                                Text(
-                                                    text = icon.name,
-                                                    fontWeight = FontWeight.Bold,
-                                                )
-
-                                                icon.component?.let {
-                                                    Text(
-                                                        text = it.flattenToString(),
-                                                    )
-                                                }
-                                            }
-
-                                            if (icon.name == prefManager.shortcutOverrideIcons[shortcutId!!]?.name &&
-                                                icon.entry.packPackageName == prefManager.selectedIconPackPackage) {
-                                                Icon(
-                                                    painter = painterResource(R.drawable.baseline_check_24),
-                                                    contentDescription = stringResource(R.string.selected_pack),
-                                                )
-                                            }
-                                        }
-                                    }
+                    ) {
+                        Crossfade(
+                            modifier = Modifier.fillMaxSize(),
+                            targetState = items.isEmpty(),
+                            label = "SelectIconPack",
+                        ) { loading ->
+                            if (loading) {
+                                Loader(modifier = Modifier.fillMaxSize())
+                            } else {
+                                var searchBarHeight by remember {
+                                    mutableIntStateOf(0)
                                 }
 
                                 Box(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .statusBarsPadding()
-                                        .padding(horizontal = 8.dp),
+                                    modifier = Modifier.fillMaxSize(),
+                                    contentAlignment = Alignment.TopCenter,
                                 ) {
-                                    SearchToolbar(
-                                        filter = filter,
-                                        onFilterChanged = { f -> filter = f },
-                                        onBack = ::finish,
+                                    LazyColumn(
+                                        modifier = Modifier.fillMaxSize(),
+                                        contentPadding = WindowInsets
+                                            .systemBars
+                                            .add(WindowInsets.ime)
+                                            .add(WindowInsets(top = searchBarHeight))
+                                            .add(WindowInsets(top = 8.dp))
+                                            .asPaddingValues(),
+                                    ) {
+                                        items(items = filteredItems, key = { item -> item.name }) { icon ->
+                                            val loadedDrawable = remember(icon.loadDrawable)
+
+                                            Row(
+                                                modifier = Modifier
+                                                    .fillMaxWidth()
+                                                    .heightIn(min = 48.dp)
+                                                    .clickable {
+                                                        prefManager.shortcutOverrideIcons = prefManager.shortcutOverrideIcons.apply {
+                                                            this[shortcutId!!] = icon.entry
+                                                        }
+                                                        setResult(Activity.RESULT_OK)
+                                                        finish()
+                                                    }
+                                                    .padding(16.dp),
+                                                verticalAlignment = Alignment.CenterVertically,
+                                                horizontalArrangement = Arrangement.spacedBy(16.dp),
+                                            ) {
+                                                Image(
+                                                    painter = rememberDrawablePainter(loadedDrawable),
+                                                    contentDescription = icon.name,
+                                                    modifier = Modifier.size(48.dp),
+                                                )
+
+                                                Column(
+                                                    modifier = Modifier.weight(1f),
+                                                ) {
+                                                    Text(
+                                                        text = icon.name,
+                                                        fontWeight = FontWeight.Bold,
+                                                    )
+
+                                                    icon.component?.let {
+                                                        Text(
+                                                            text = it.flattenToString(),
+                                                        )
+                                                    }
+                                                }
+
+                                                if (icon.name == prefManager.shortcutOverrideIcons[shortcutId!!]?.name &&
+                                                    icon.entry.packPackageName == prefManager.selectedIconPackPackage) {
+                                                    Icon(
+                                                        painter = painterResource(R.drawable.baseline_check_24),
+                                                        contentDescription = stringResource(R.string.selected_pack),
+                                                    )
+                                                }
+                                            }
+                                        }
+                                    }
+
+                                    Box(
                                         modifier = Modifier
                                             .fillMaxWidth()
-                                            .onSizeChanged { size ->
-                                                searchBarHeight = size.height
-                                            },
-                                    )
+                                            .statusBarsPadding()
+                                            .padding(horizontal = 8.dp),
+                                    ) {
+                                        SearchToolbar(
+                                            filter = filter,
+                                            onFilterChanged = { f -> filter = f },
+                                            onBack = ::finish,
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .onSizeChanged { size ->
+                                                    searchBarHeight = size.height
+                                                },
+                                        )
+                                    }
                                 }
                             }
                         }

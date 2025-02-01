@@ -19,6 +19,7 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.os.bundleOf
 import androidx.fragment.app.FragmentContainerView
 import androidx.preference.PreferenceFragmentCompat
+import com.bugsnag.android.performance.compose.MeasuredComposable
 import tk.zwander.common.activities.BaseActivity
 import tk.zwander.common.compose.AppTheme
 import tk.zwander.common.compose.components.TitleBar
@@ -54,38 +55,40 @@ class SettingsActivity : BaseActivity() {
         }
 
         setContent {
-            AppTheme {
-                Surface(
-                    modifier = Modifier.fillMaxSize()
-                        .statusBarsPadding(),
-                ) {
-                    Column(
-                        modifier = Modifier.fillMaxSize(),
+            MeasuredComposable(name = "SettingsLayout") {
+                AppTheme {
+                    Surface(
+                        modifier = Modifier.fillMaxSize()
+                            .statusBarsPadding(),
                     ) {
-                        TitleBar(title = title.toString())
+                        Column(
+                            modifier = Modifier.fillMaxSize(),
+                        ) {
+                            TitleBar(title = title.toString())
 
-                        val bottomPadding = with(LocalDensity.current) { WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding().toPx() }
+                            val bottomPadding = with(LocalDensity.current) { WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding().toPx() }
 
-                        AndroidView(
-                            factory = {
-                                FragmentContainerView(it).apply {
-                                    id = R.id.content
-                                }
-                            },
-                            modifier = Modifier.fillMaxWidth()
-                                .weight(1f),
-                        ) { view ->
-                            val fragment = supportFragmentManager.fragmentFactory.instantiate(
-                                classLoader,
-                                fragmentClass.canonicalName ?: throw IllegalStateException("Unable to instantiate $fragmentClass. Canonical name null!")
-                            )
+                            AndroidView(
+                                factory = {
+                                    FragmentContainerView(it).apply {
+                                        id = R.id.content
+                                    }
+                                },
+                                modifier = Modifier.fillMaxWidth()
+                                    .weight(1f),
+                            ) { view ->
+                                val fragment = supportFragmentManager.fragmentFactory.instantiate(
+                                    classLoader,
+                                    fragmentClass.canonicalName ?: throw IllegalStateException("Unable to instantiate $fragmentClass. Canonical name null!")
+                                )
 
-                            fragment.arguments = bundleOf("bottomInset" to bottomPadding)
+                                fragment.arguments = bundleOf("bottomInset" to bottomPadding)
 
-                            supportFragmentManager.beginTransaction()
-                                .setReorderingAllowed(true)
-                                .replace(view.id, fragment, null)
-                                .commitNowAllowingStateLoss()
+                                supportFragmentManager.beginTransaction()
+                                    .setReorderingAllowed(true)
+                                    .replace(view.id, fragment, null)
+                                    .commitNowAllowingStateLoss()
+                            }
                         }
                     }
                 }
