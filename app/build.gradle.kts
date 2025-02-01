@@ -16,7 +16,7 @@ android {
         minSdk = 22
         targetSdk = 35
         versionCode = 136
-        versionName = "2.20.6"
+        versionName = "2.21.0"
 
         extensions.getByType(BasePluginExtension::class.java).archivesName.set("LockscreenWidgets_${versionName}")
 
