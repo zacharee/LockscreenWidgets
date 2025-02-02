@@ -17,10 +17,10 @@ import tk.zwander.common.compose.util.rememberBooleanPreferenceState
 
 @Composable
 fun PreferenceScreen(
-    preferences: List<PreferenceCategory>,
+    categories: List<PreferenceCategory>,
     modifier: Modifier = Modifier,
 ) {
-    val expandedStates = preferences.associate { category ->
+    val expandedStates = categories.associate { category ->
         category.key to if (category.collapsible) {
             rememberBooleanPreferenceState(
                 key = "${category.key}_category_expanded",
@@ -32,11 +32,25 @@ fun PreferenceScreen(
         }
     }
 
+    val filteredCategories = categories.mapNotNull { category ->
+        val unfilteredCategoryIsEmpty = category.items.isEmpty()
+
+        val filteredCategory = category.copy(
+            items = category.items.filter { it.visible() },
+        )
+
+        if (filteredCategory.items.isEmpty() && !unfilteredCategoryIsEmpty) {
+            null
+        } else {
+            filteredCategory
+        }
+    }
+
     LazyColumn(
         modifier = modifier,
         contentPadding = (WindowInsets.systemBars.add(WindowInsets.ime)).asPaddingValues(),
     ) {
-        preferences.forEachIndexed { index, category ->
+        filteredCategories.forEachIndexed { index, category ->
             if (category.title != null) {
                 item(key = category.key) {
                     PreferenceCategory(
@@ -44,11 +58,12 @@ fun PreferenceScreen(
                         expanded = expandedStates[category.key]?.value ?: true,
                         onExpandChange = { expandedStates[category.key]?.value = it },
                         modifier = Modifier.fillMaxWidth().animateItem(),
+                        enabled = category.enabled(),
                     )
                 }
             }
 
-            if (expandedStates[category.key]!!.value) {
+            if (expandedStates[category.key]?.value == true) {
                 items(items = category.items, key = { it.key }) { item ->
                     item.Render(
                         modifier = Modifier.fillMaxWidth().animateItem(),
@@ -56,7 +71,7 @@ fun PreferenceScreen(
                 }
             }
 
-            if (index < preferences.lastIndex) {
+            if (index < categories.lastIndex) {
                 item(key = "divider_for_category-${category.key}") {
                     HorizontalDivider(modifier = Modifier.animateItem())
                 }

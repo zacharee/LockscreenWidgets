@@ -1,6 +1,5 @@
 package tk.zwander.common.compose.settings
 
-import android.graphics.drawable.Drawable
 import androidx.annotation.ColorInt
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -35,17 +34,17 @@ import com.github.skydoves.colorpicker.compose.AlphaTile
 import com.github.skydoves.colorpicker.compose.BrightnessSlider
 import com.github.skydoves.colorpicker.compose.HsvColorPicker
 import com.github.skydoves.colorpicker.compose.rememberColorPickerController
-import com.google.accompanist.drawablepainter.rememberDrawablePainter
 import tk.zwander.common.compose.util.rememberPreferenceState
 import tk.zwander.common.util.prefManager
 
 class ColorPickerPreference(
-    title: String,
-    summary: String?,
-    key: String,
-    @ColorInt defaultValue: Int,
-    icon: Drawable? = null,
+    title: @Composable () -> String,
+    summary: @Composable () -> String?,
+    key: @Composable () -> String,
+    defaultValue: @Composable () -> Int,
+    icon: @Composable () -> Painter? = { null },
     enabled: @Composable () -> Boolean = { true },
+    visible: @Composable () -> Boolean = { true },
 ) : BasePreference<Int>(
     title = title,
     summary = summary,
@@ -53,17 +52,18 @@ class ColorPickerPreference(
     defaultValue = defaultValue,
     icon = icon,
     enabled = enabled,
+    visible = visible,
 ) {
     @Composable
     override fun Render(modifier: Modifier) {
         ColorPickerPreference(
-            title = title,
-            summary = summary,
-            key = key,
-            defaultValue = Color(defaultValue),
+            title = title(),
+            summary = summary(),
+            key = key(),
+            defaultValue = Color(defaultValue()),
             modifier = modifier,
-            icon = icon?.let { rememberDrawablePainter(icon) },
-            enabled = enabled,
+            icon = icon(),
+            enabled = enabled(),
         )
     }
 }
@@ -76,7 +76,7 @@ fun ColorPickerPreference(
     @ColorInt defaultValue: Color,
     modifier: Modifier = Modifier,
     icon: Painter? = null,
-    enabled: @Composable () -> Boolean = { true },
+    enabled: Boolean = true,
 ) {
     val context = LocalContext.current
     var value by rememberPreferenceState(
@@ -105,7 +105,7 @@ fun ColorPickerPreference(
     onColorChanged: (color: Color) -> Unit,
     modifier: Modifier = Modifier,
     icon: Painter? = null,
-    enabled: @Composable () -> Boolean = { true },
+    enabled: Boolean = true,
 ) {
     var showingPickerDialog by remember {
         mutableStateOf(false)
@@ -121,7 +121,8 @@ fun ColorPickerPreference(
         onClick = { showingPickerDialog = true },
         widget = {
             Box(
-                modifier = Modifier.size(48.dp)
+                modifier = Modifier
+                    .size(48.dp)
                     .background(
                         color = color,
                         shape = CircleShape,
@@ -146,13 +147,15 @@ fun ColorPickerPreference(
             sheetState = state,
         ) {
             Column(
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier
+                    .fillMaxWidth()
                     .padding(8.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 HsvColorPicker(
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier
+                        .fillMaxWidth()
                         .height(450.dp),
                     controller = controller,
                     onColorChanged = {
@@ -163,18 +166,21 @@ fun ColorPickerPreference(
 
                 AlphaSlider(
                     controller = controller,
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier
+                        .fillMaxWidth()
                         .height(36.dp),
                 )
 
                 BrightnessSlider(
                     controller = controller,
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier
+                        .fillMaxWidth()
                         .height(36.dp),
                 )
 
                 AlphaTile(
-                    modifier = Modifier.size(84.dp)
+                    modifier = Modifier
+                        .size(84.dp)
                         .clip(RoundedCornerShape(8.dp)),
                     controller = controller,
                 )

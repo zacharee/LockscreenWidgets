@@ -4,6 +4,7 @@ import android.content.Context
 import android.graphics.drawable.Drawable
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.platform.LocalContext
 
 @Composable
@@ -52,13 +53,43 @@ class PreferenceCategoryScope(private val context: Context) {
         prefs.add(pref)
     }
 
-    fun switchPreference(
-        title: String,
-        summary: String?,
-        key: String,
-        defaultValue: Boolean = false,
-        icon: Drawable? = null,
+    fun <T> preference(
+        title: @Composable () -> String,
+        summary: @Composable () -> String?,
+        key: @Composable () -> String,
+        icon: @Composable () -> Painter?,
+        defaultValue: @Composable () -> T,
+        onClick: (() -> Unit)? = null,
+        widget: (@Composable () -> Unit)? = null,
+        widgetPosition: @Composable () -> WidgetPosition = { WidgetPosition.END },
         enabled: @Composable () -> Boolean = { true },
+        visible: @Composable () -> Boolean = { true },
+    ) {
+        preference(
+            BasePreference<T>(
+            title = title,
+            summary = summary,
+            key = key,
+            icon = icon,
+            defaultValue = defaultValue,
+            onClick = onClick,
+            widget = widget,
+            widgetPosition = widgetPosition,
+            enabled = enabled,
+            visible = visible,
+        )
+        )
+    }
+
+    fun switchPreference(
+        title: @Composable () -> String,
+        summary: @Composable () -> String?,
+        key: @Composable () -> String,
+        defaultValue: @Composable () -> Boolean = { false },
+        icon: @Composable () -> Painter? = { null },
+        enabled: @Composable () -> Boolean = { true },
+        visible: @Composable () -> Boolean = { true },
+        canChange: (Boolean) -> Boolean = { true },
     ) {
         preference(SwitchPreference(
             title = title,
@@ -67,21 +98,24 @@ class PreferenceCategoryScope(private val context: Context) {
             defaultValue = defaultValue,
             icon = icon,
             enabled = enabled,
+            visible = visible,
+            canChange = canChange,
         ))
     }
 
     fun seekBarPreference(
-        title: String,
-        summary: String?,
-        key: String,
-        defaultValue: Int,
-        minValue: Int,
-        maxValue: Int,
-        scale: Double,
-        icon: Drawable? = null,
-        unit: String? = null,
-        increment: Int = 1,
+        title: @Composable () -> String,
+        summary: @Composable () -> String?,
+        key: @Composable () -> String,
+        defaultValue: @Composable () -> Int,
+        minValue: @Composable () -> Int,
+        maxValue: @Composable () -> Int,
+        scale: @Composable () -> Double,
+        icon: @Composable () -> Painter? = { null },
+        unit: @Composable () -> String? = { null },
+        increment: @Composable () -> Int = { 1 },
         enabled: @Composable () -> Boolean = { true },
+        visible: @Composable () -> Boolean = { true },
     ) {
         preference(SeekBarPreference(
             title = title,
@@ -95,16 +129,18 @@ class PreferenceCategoryScope(private val context: Context) {
             unit = unit,
             increment = increment,
             enabled = enabled,
+            visible = visible,
         ))
     }
 
     fun colorPickerPreference(
-        title: String,
-        summary: String?,
-        key: String,
-        defaultValue: Int,
-        icon: Drawable? = null,
+        title: @Composable () -> String,
+        summary: @Composable () -> String?,
+        key: @Composable () -> String,
+        defaultValue: @Composable () -> Int,
+        icon: @Composable () -> Painter? = { null },
         enabled: @Composable () -> Boolean = { true },
+        visible: @Composable () -> Boolean = { true },
     ) {
         preference(ColorPickerPreference(
             title = title,
@@ -113,6 +149,7 @@ class PreferenceCategoryScope(private val context: Context) {
             defaultValue = defaultValue,
             icon = icon,
             enabled = enabled,
+            visible = visible,
         ))
     }
 }

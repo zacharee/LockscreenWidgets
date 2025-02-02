@@ -1,6 +1,5 @@
 package tk.zwander.common.compose.settings
 
-import android.graphics.drawable.Drawable
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsDraggedAsState
@@ -26,7 +25,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import com.google.accompanist.drawablepainter.rememberDrawablePainter
 import tk.zwander.common.compose.util.rememberPreferenceState
 import tk.zwander.common.util.prefManager
 import tk.zwander.lockscreenwidgets.R
@@ -38,42 +36,44 @@ import kotlin.math.min
 import kotlin.math.roundToInt
 
 open class SeekBarPreference(
-    title: String,
-    summary: String?,
-    key: String,
-    defaultValue: Int,
-    val minValue: Int,
-    val maxValue: Int,
-    val scale: Double,
-    icon: Drawable? = null,
-    val unit: String? = null,
-    val increment: Int = 1,
+    title: @Composable () -> String,
+    summary: @Composable () -> String?,
+    key: @Composable () -> String,
+    defaultValue: @Composable () -> Int,
+    val minValue: @Composable () -> Int,
+    val maxValue: @Composable () -> Int,
+    val scale: @Composable () -> Double,
+    icon: @Composable () -> Painter? = { null },
+    val unit: @Composable () -> String? = { null },
+    val increment: @Composable () -> Int = { 1 },
     enabled: @Composable () -> Boolean = { true },
+    visible: @Composable () -> Boolean = { true },
 ) : BasePreference<Int>(
     title = title,
     summary = summary,
     key = key,
     icon = icon,
     widget = null,
-    widgetPosition = WidgetPosition.BOTTOM,
+    widgetPosition = { WidgetPosition.BOTTOM },
     defaultValue = defaultValue,
     enabled = enabled,
+    visible = visible,
 ) {
     @Composable
     override fun Render(modifier: Modifier) {
         SeekBarPreference(
-            title = title,
-            summary = summary,
+            title = title(),
+            summary = summary(),
             modifier = modifier,
-            defaultValue = defaultValue,
-            minValue = minValue,
-            maxValue = maxValue,
-            scale = scale,
-            key = key,
-            icon = icon?.let { rememberDrawablePainter(icon) },
-            unit = unit,
-            increment = increment,
-            enabled = enabled,
+            defaultValue = defaultValue(),
+            minValue = minValue(),
+            maxValue = maxValue(),
+            scale = scale(),
+            key = key(),
+            icon = icon(),
+            unit = unit(),
+            increment = increment(),
+            enabled = enabled(),
         )
     }
 }
@@ -91,7 +91,7 @@ fun SeekBarPreference(
     icon: Painter? = null,
     unit: String? = null,
     increment: Int = 1,
-    enabled: @Composable () -> Boolean = { true },
+    enabled: Boolean = true,
 ) {
     val context = LocalContext.current
     var value by rememberPreferenceState(
@@ -131,7 +131,7 @@ fun SeekBarPreference(
     unit: String? = null,
     increment: Int = 1,
     scale: Double = 1.0,
-    enabled: @Composable () -> Boolean = { true },
+    enabled: Boolean = true,
 ) {
     BasePreferenceLayout(
         title = title,
@@ -168,7 +168,7 @@ private fun SeekBarLayout(
     modifier: Modifier = Modifier,
     scale: Double = 1.0,
     increment: Int = 1,
-    enabled: @Composable () -> Boolean = { true },
+    enabled: Boolean = true,
 ) {
     Row(
         modifier = modifier,
@@ -177,7 +177,7 @@ private fun SeekBarLayout(
     ) {
         IconButton(
             onClick = { onValueChanged(defaultValue) },
-            enabled = enabled(),
+            enabled = enabled,
         ) {
             Icon(
                 painter = painterResource(R.drawable.undo),
@@ -198,7 +198,7 @@ private fun SeekBarLayout(
             valueRange = range,
             modifier = Modifier.weight(1f),
             interactionSource = interactionSource,
-            enabled = enabled(),
+            enabled = enabled,
         )
 
         Box(
@@ -224,7 +224,7 @@ private fun SeekBarLayout(
         ) {
             IconButton(
                 onClick = { onValueChanged(min(maxValue, value + increment)) },
-                enabled = enabled(),
+                enabled = enabled,
             ) {
                 Icon(
                     painter = painterResource(R.drawable.arrow_up),
@@ -234,7 +234,7 @@ private fun SeekBarLayout(
 
             IconButton(
                 onClick = { onValueChanged(max(minValue, value - increment)) },
-                enabled = enabled(),
+                enabled = enabled,
             ) {
                 Icon(
                     painter = painterResource(R.drawable.arrow_up),

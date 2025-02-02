@@ -116,6 +116,13 @@ object FramePrefs {
     }
 
     fun generatePrefKey(baseKey: String, id: Int): String {
+        if (id == -1) {
+            when (baseKey) {
+                KEY_FRAME_COL_COUNT -> PrefManager.KEY_FRAME_COL_COUNT
+                KEY_FRAME_ROW_COUNT -> PrefManager.KEY_FRAME_ROW_COUNT
+            }
+        }
+
         return "${baseKey}_${id}"
     }
 }

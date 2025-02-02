@@ -1,6 +1,5 @@
 package tk.zwander.common.compose.settings
 
-import android.graphics.drawable.Drawable
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.animateFloatAsState
@@ -32,30 +31,30 @@ import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import com.google.accompanist.drawablepainter.rememberDrawablePainter
 
 open class BasePreference<ValueType>(
-    val title: String,
-    val summary: String?,
-    val key: String,
-    val icon: Drawable?,
-    val defaultValue: ValueType,
+    val title: @Composable () -> String,
+    val summary: @Composable () -> String?,
+    val key: @Composable () -> String,
+    val icon: @Composable () -> Painter?,
+    val defaultValue: @Composable () -> ValueType,
     val onClick: (() -> Unit)? = null,
     val widget: (@Composable () -> Unit)? = null,
-    val widgetPosition: WidgetPosition = WidgetPosition.END,
+    val widgetPosition: @Composable () -> WidgetPosition = { WidgetPosition.END },
     val enabled: @Composable () -> Boolean = { true },
+    val visible: @Composable () -> Boolean = { true },
 ) {
     @Composable
     open fun Render(modifier: Modifier) {
         BasePreferenceLayout(
-            title = title,
-            summary = summary,
+            title = title(),
+            summary = summary(),
             modifier = modifier,
-            icon = icon?.let { rememberDrawablePainter(icon) },
+            icon = icon(),
             onClick = onClick,
             widget = widget,
-            widgetPosition = widgetPosition,
-            enabled = enabled,
+            widgetPosition = widgetPosition(),
+            enabled = enabled(),
         )
     }
 }
@@ -70,11 +69,9 @@ fun BasePreferenceLayout(
     widget: (@Composable () -> Unit)? = null,
     widgetPosition: WidgetPosition = WidgetPosition.END,
     summaryMaxLines: Int = Int.MAX_VALUE,
-    enabled: @Composable () -> Boolean = { true }
+    enabled: Boolean = true,
 ) {
-    val isEnabled = enabled()
-
-    val animatedAlpha by animateFloatAsState(if (isEnabled) 1f else 0.7f)
+    val animatedAlpha by animateFloatAsState(if (enabled) 1f else 0.7f)
 
     Surface(
         modifier = modifier,
@@ -83,7 +80,7 @@ fun BasePreferenceLayout(
             modifier = Modifier
                 .alpha(animatedAlpha)
                 .then(
-                    if (onClick != null && isEnabled) {
+                    if (onClick != null && enabled) {
                         Modifier.clickable(onClick = onClick)
                     } else {
                         Modifier

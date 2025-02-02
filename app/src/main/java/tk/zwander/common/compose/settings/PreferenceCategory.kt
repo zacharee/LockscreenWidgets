@@ -26,11 +26,13 @@ fun PreferenceCategory(
     expanded: Boolean,
     onExpandChange: (Boolean) -> Unit,
     modifier: Modifier = Modifier,
-    enabled: @Composable () -> Boolean = { true },
+    enabled: Boolean = true,
 ) {
+    @Suppress("SimplifiableCallChain")
     BasePreferenceLayout(
         title = category.title ?: "",
-        summary = if (!expanded) category.items.take(3).joinToString(", ") { it.title } else null,
+        summary = if (!expanded) category.items.take(3).map { it.title() }
+            .joinToString(", ") else null,
         onClick = if (category.collapsible) {{ onExpandChange(!expanded) }} else null,
         icon = category.icon?.let { rememberDrawablePainter(category.icon) },
         widget = {
