@@ -31,6 +31,9 @@
     <string name="back">Back</string>
     <string name="clear">Clear</string>
     <string name="launcher">Launcher</string>
+    <string name="reset">Reset</string>
+    <string name="increase">Increase</string>
+    <string name="decrease">Decrease</string>
     <string name="drawer_enabled">ドロワー有効</string>
     <string name="frame_enabled">フレーム有効</string>
     <string name="add_id_hint">com.android.systemui:id/some_id_here</string>
