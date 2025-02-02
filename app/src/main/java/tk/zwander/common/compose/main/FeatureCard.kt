@@ -133,8 +133,6 @@ fun rememberFeatureCards(): List<FeatureCardInfo> {
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun FeatureCard(info: FeatureCardInfo) {
-    val context = LocalContext.current
-
     EventObserverEffect(info.eventObserver)
 
     Card(
@@ -160,10 +158,10 @@ fun FeatureCard(info: FeatureCardInfo) {
                 )
             }
 
-            var enabled by context.rememberBooleanPreferenceState(
+            var enabled by rememberBooleanPreferenceState(
                 key = info.enabledKey,
-                enabled = info.isEnabled,
-                onEnabledChanged = info.onEnabledChanged,
+                enabled = { info.isEnabled() },
+                onEnabledChanged = { _, v -> info.onEnabledChanged(v) },
             )
 
             CardSwitch(

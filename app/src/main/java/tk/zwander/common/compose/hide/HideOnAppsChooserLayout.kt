@@ -32,35 +32,35 @@ fun HideOnAppsChooserLayout(
         mutableStateOf<String?>(null)
     }
 
-    var checked by context.rememberPreferenceState<Set<String>>(
+    var checked by rememberPreferenceState<Set<String>>(
         key = PrefManager.KEY_HIDE_FRAME_ON_APPS,
         value = { context.prefManager.hideFrameOnApps.toMutableSet() },
-        onChanged = {
-            context.prefManager.hideFrameOnApps = it
-        }
+        onChanged = { _, v ->
+            context.prefManager.hideFrameOnApps = v
+        },
     )
 
     val (items, filteredItems) = items(
         filter = filter,
-        checked = checked
+        checked = checked,
     )
 
     AppTheme {
         Surface(
             modifier = Modifier
                 .fillMaxSize()
-                .statusBarsPadding()
+                .statusBarsPadding(),
         ) {
             Crossfade(
                 modifier = Modifier.fillMaxSize(),
                 targetState = items.isEmpty(),
-                label = "HideChooser"
+                label = "HideChooser",
             ) {
                 if (it) {
                     Loader(modifier = Modifier.fillMaxSize())
                 } else {
                     Column(
-                        modifier = Modifier.fillMaxSize()
+                        modifier = Modifier.fillMaxSize(),
                     ) {
                         SearchToolbar(
                             filter = filter,
@@ -68,7 +68,7 @@ fun HideOnAppsChooserLayout(
                             onBack = onBack,
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(8.dp)
+                                .padding(8.dp),
                         )
 
                         HideOnAppsChooserScroller(
@@ -77,7 +77,7 @@ fun HideOnAppsChooserLayout(
                             onCheckedChanged = { newChecked -> checked = newChecked },
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .weight(1f)
+                                .weight(1f),
                         )
                     }
                 }
