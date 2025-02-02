@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="version_template">Версия: %s</string>
-    <string name="edit_gesture_hint">Нажмите на виджет двумя пальцами, чтобы передвинуть или изменить его размер.</string>
+    <string name="edit_gesture_hint">Нажать на виджет двумя пальцами, чтобы передвинуть или изменить его размер.</string>
     <string name="edit_gesture_hint_2">Отлично! Нажмите двумя пальцами, чтобы спрятать интерфейс редактирования.</string>
-    <string name="hide_gesture_hint">Нажмите на виджет тремя пальцами, чтобы временно скрыть его. Он будет скрыт до тех пор, пока вы не выключите, а затем обратно включите экран.</string>
-    <string name="hide_gesture_hint_2">Выключите и включите экран, чтобы вернуть обратно виджет.</string>
+    <string name="hide_gesture_hint">Нажать на виджет тремя пальцами, чтобы временно скрыть его. Он будет скрыт до тех пор, пока вы не выключите, а затем обратно включите экран.</string>
+    <string name="hide_gesture_hint_2">Выключить и включить экран, чтобы вернуть обратно виджет.</string>
     <string name="accessibility_service_desc">Приложению требуется доступ к Специальным Возможностям, чтобы отображать виджеты на экране блокировки. Никакие данные не собираем и действия не совершаем.</string>
     <string name="add_widget">Добавить Виджет</string>
     <string name="grant">Предоставить</string>
@@ -81,11 +81,11 @@
     <string name="settings_screen_hide_on_notification_shade">Скрывать, когда центр уведомлений открыт</string>
     <string name="settings_screen_hide_on_notification_shade_desc">Попытается скрыть виджет, когда центр уведомлений выдвинут. Может не работать на вашей прошивке.</string>
     <string name="settings_screen_hide_on_security_input">Прятать при вводе пароля</string>
-    <string name="settings_screen_hide_on_security_input_desc">Попытается спрятать рамку виджета при вводе ключа разблокировки (пароля). Может не работать на некоторых устройствах.</string>
+    <string name="settings_screen_hide_on_security_input_desc">Попытается спрятать виджет при вводе ключа разблокировки (пароля). Может не работать на некоторых устройствах.</string>
     <string name="settings_screen_animate_show_hide">Анимация Показа/Скрытия</string>
     <string name="settings_screen_animate_show_hide_desc">Анимация появления и исчезновения виджетов.</string>
     <string name="settings_screen_debug_log">Журнал Отладки</string>
-    <string name="settings_screen_debug_log_desc">Включите это для сбора отладочной информации о состоянии приложения.</string>
+    <string name="settings_screen_debug_log_desc">Включить это для сбора отладочной информации о состоянии приложения.</string>
     <string name="settings_screen_clear_debug_log">Очистить Журнал Отладки</string>
     <string name="settings_screen_clear_debug_log_desc">Очищает предыдущие записи в журнал отладки.</string>
     <string name="settings_screen_export_debug_log">Экспорт Журнала Отладки</string>
@@ -96,12 +96,12 @@
     <string name="settings_screen_show_debug_id_view_desc">Показывает поверх рамки виджетов список \"ID Видов\", которые оно находит на экране в данный момент. Функция полезна для отладки и нахождения идентификаторов, которые могут использоваться для обнаружения состояний экрана блокировки.</string>
     <string name="settings_screen_accessibility_event_delay">Задержка События Спец. Возможностей</string>
     <string name="settings_screen_accessibility_event_delay_desc">Устанавливает задержку между Событиями Спец. Возможностей, на которые отвечает приложение. Чем короче задержка, тем быстрее реагирует виджет на изменения, но снижается скорость работы устройства и быстрее тратится батарея.</string>
-    <string name="settings_screen_non_present_ids">Скрывать на нетекущие ID</string>
+    <string name="settings_screen_non_present_ids">Скрыть отсутствующие идентификаторы</string>
     <string name="settings_screen_non_present_ids_desc">Виджеты экрана блокировки будут скрываться, когда эти идентификаторы не отображаются на экране. Вы можете найти, какие идентификаторы должны отображаться здесь, включив оба параметра отладки и посмотрев на идентификаторы, которые выделены красным цветом, если вы хотите, чтобы рамка была скрыта.</string>
     <string name="settings_screen_present_ids">Скрыть при наличии идентификаторов</string>
     <string name="settings_screen_present_ids_desc">Виджеты экрана блокировки будут скрываться, когда эти идентификаторы будут отображаться на экране. Вы можете найти, какие идентификаторы должны отображаться здесь, включив оба параметра отладки и посмотрев на идентификаторы, которые выделены зеленым цветом, если вы хотите, чтобы рамка была скрыта.</string>
     <string name="settings_screen_show_in_notification_center">Показывать, когда панель уведомлений полностью развернута</string>
-    <string name="settings_screen_show_in_notification_center_desc">Включение этой опции приведет к тому, что рамка виджета появится, когда панель уведомлений будет полностью развернута. Это состояние имеет собственное независимое позиционирование и размер.</string>
+    <string name="settings_screen_show_in_notification_center_desc">Включение этой опции приведет к тому, что виджет появится, когда панель уведомлений будет полностью развернута. Это состояние имеет собственное независимое позиционирование и размер.</string>
     <string name="settings_screen_show_on_main_lock_screen">Показать на экране блокировки</string>
     <string name="settings_screen_show_on_main_lock_screen_desc">Если вы используете опцию показа в центре уведомлений, вы можете не захотеть, чтобы виджеты отображались на экране блокировки. Отключите эту опцию, чтобы рамка появлялась только тогда, когда центр уведомлений полностью развернут.</string>
     <string name="settings_screen_corner_radius">Радиус углов</string>
@@ -115,17 +115,17 @@
     <string name="settings_screen_masked_mode_dim_amount">Количество прозрачности маскировки</string>
     <string name="settings_screen_masked_mode_dim_amount_desc">На некоторых устройствах обои на экране блокировки немного затемняются. Настройте этот параметр.</string>
     <string name="settings_screen_touch_protection">Защита от прикосновений</string>
-    <string name="settings_screen_touch_protection_desc">Игнорировать прикосновения к рамке виджета, когда датчик приближения закрыт.</string>
+    <string name="settings_screen_touch_protection_desc">Игнорировать прикосновения к виджету, когда датчик приближения закрыт.</string>
     <string name="settings_screen_request_unlock">Запрос на разблокировку/отключение центра уведомлений</string>
     <string name="settings_screen_request_unlock_desc">Если Lockscreen Widgets обнаружит, что виджет запускает приложение, он предложит разблокировать устройство и отключить центр уведомлений. Отключите этот параметр, чтобы предотвратить такое поведение.</string>
     <string name="settings_screen_hide_on_facewidgets">Скрыть на экране FaceWidgets</string>
     <string name="settings_screen_hide_on_facewidgets_desc">Спрятать рамку, когда отображается экран FaceWidgets</string>
     <string name="settings_screen_hide_in_landscape">Скрывать в ландшафте</string>
-    <string name="settings_screen_hide_in_landscape_desc">Спрятать рамку виджета, когда устройство находится в горизонтальной ориентации</string>
+    <string name="settings_screen_hide_in_landscape_desc">Спрятать виджет, когда устройство находится в горизонтальной ориентации</string>
     <string name="settings_screen_separate_position_for_lock_nc">Отдельное положение центра уведомлений, когда экран заблокирован</string>
-    <string name="settings_screen_separate_position_for_lock_nc_desc">В One UI 3 расположение центра уведомлений немного отличается при блокировке и разблокировке. Включите эту функцию, чтобы использовать раздельное позиционирование рамки виджета в этих двух режимах.</string>
+    <string name="settings_screen_separate_position_for_lock_nc_desc">В One UI 3 расположение центра уведомлений немного отличается при блокировке и разблокировке. Включите эту функцию, чтобы использовать раздельное позиционирование виджетов в этих двух режимах.</string>
     <string name="settings_screen_lock_widget_frame">Заблокировать рамку виджетов</string>
-    <string name="settings_screen_lock_widget_frame_desc">Когда функция включена, рамка виджета будет игнорировать все прямые прикосновения. Вы не сможете перемещать или изменять виджеты в рамке, но жест скрытия тремя пальцами по-прежнему будет работать, и вы сможете взаимодействовать с виджетами.</string>
+    <string name="settings_screen_lock_widget_frame_desc">Когда функция включена, виджет будет игнорировать все прямые прикосновения. Вы не сможете перемещать или изменять их в рамке, но жест скрытия тремя пальцами по-прежнему будет работать, и вы сможете взаимодействовать с виджетами.</string>
     <string name="settings_screen_ignore_widget_touches">Игнорировать касания виджета</string>
     <string name="settings_screen_ignore_widget_touches_desc">Когда функция включена, прикосновения к виджетам будут игнорироваться. Это предотвратит случайные запуски приложений, но также исключит взаимодействие с виджетами.</string>
     <string name="settings_screen_lock_widget_drawer">Заблокировать панель виджетов</string>
@@ -146,7 +146,7 @@
     <string name="settings_screen_hide_on_edge_panels">Скрыть на панелях Edge</string>
     <string name="settings_screen_hide_on_edge_panels_desc">Спрятать рамку виджета, когда открыты Edge-панели Samsung.</string>
     <string name="settings_screen_hide_on_present_apps">Скрыть при открытых приложениях</string>
-    <string name="settings_screen_hide_on_present_apps_desc">Выбрать приложения, которые должны скрывать рамку виджета, если они отображаются на экране блокировки.</string>
+    <string name="settings_screen_hide_on_present_apps_desc">Выбрать приложения, которые должны скрывать виджет, если они отображаются на экране блокировки.</string>
     <string name="settings_screen_separate_layout">Отдельный макет для ландшафтной ориентации</string>
     <string name="settings_screen_separate_layout_desc">Set different positions and sizes for the widget frame in landscape mode.</string>
     <string name="settings_screen_force_widget_update">Force Widget Update</string>
