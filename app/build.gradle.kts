@@ -120,4 +120,6 @@ dependencies {
     implementation(libs.shizuku.provider)
 
     implementation(libs.storage)
+
+    implementation(libs.colorpicker.compose)
 }

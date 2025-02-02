@@ -3,6 +3,7 @@ accompanist = "0.37.0"
 activityCompose = "1.10.0"
 androidGradlePlugin = "8.8.0"
 bugsnagAndroidPerformance = "1.11.0"
+colorpickerCompose = "1.1.2"
 shizuku = "13.1.5"
 appcompat = "1.7.0"
 atomicfu = "0.27.0"
@@ -45,6 +46,7 @@ bugsnag-exitinfo = { module = "com.bugsnag:bugsnag-plugin-android-exitinfo", ver
 byte-buddy-android = { module = "net.bytebuddy:byte-buddy-android", version.ref = "byteBuddyAndroid" }
 collapsiblePreferenceCategory = { module = "com.github.zacharee:CollapsiblePreferenceCategory", version.ref = "collapsiblepreferencecategory" }
 colorpicker = { module = "com.github.zacharee:colorpicker", version.ref = "colorpicker" }
+colorpicker-compose = { module = "com.github.skydoves:colorpicker-compose", version.ref = "colorpickerCompose" }
 compose-animation = { module = "androidx.compose.animation:animation" }
 compose-bom = { module = "androidx.compose:compose-bom", version.ref = "composeBom" }
 compose-foundation = { module = "androidx.compose.foundation:foundation" }

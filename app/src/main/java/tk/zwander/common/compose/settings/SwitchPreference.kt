@@ -12,16 +12,18 @@ import tk.zwander.common.compose.util.rememberBooleanPreferenceState
 
 open class SwitchPreference(
     title: String,
-    summary: String,
+    summary: String?,
     key: String,
     defaultValue: Boolean = false,
     icon: Drawable? = null,
+    enabled: @Composable () -> Boolean = { true },
 ) : BasePreference<Boolean>(
     title = title,
     summary = summary,
     key = key,
     defaultValue = defaultValue,
     icon = icon,
+    enabled = enabled,
 ) {
     @Composable
     override fun Render(modifier: Modifier) {
@@ -30,8 +32,9 @@ open class SwitchPreference(
             summary = summary,
             key = key,
             modifier = modifier,
-            icon = rememberDrawablePainter(icon),
+            icon = icon?.let { rememberDrawablePainter(icon) },
             defaultValue = defaultValue,
+            enabled = enabled,
         )
     }
 }
@@ -44,6 +47,7 @@ fun SwitchPreference(
     modifier: Modifier = Modifier,
     icon: Painter? = null,
     defaultValue: Boolean = false,
+    enabled: @Composable () -> Boolean = { true },
 ) {
     var value by rememberBooleanPreferenceState(
         key = key,
@@ -57,6 +61,7 @@ fun SwitchPreference(
         modifier = modifier,
         icon = icon,
         onCheckedChange = { value = it },
+        enabled = enabled,
     )
 }
 
@@ -68,6 +73,7 @@ fun SwitchPreference(
     onCheckedChange: (Boolean) -> Unit,
     modifier: Modifier = Modifier,
     icon: Painter? = null,
+    enabled: @Composable () -> Boolean = { true },
 ) {
     BasePreferenceLayout(
         title = title,
@@ -79,7 +85,9 @@ fun SwitchPreference(
             Switch(
                 checked = checked,
                 onCheckedChange = onCheckedChange,
+                enabled = enabled(),
             )
         },
+        enabled = enabled,
     )
 }

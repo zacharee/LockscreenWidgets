@@ -1,8 +1,14 @@
 package tk.zwander.common.compose.settings
 
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.add
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.ime
+import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -28,22 +34,31 @@ fun PreferenceScreen(
 
     LazyColumn(
         modifier = modifier,
+        contentPadding = (WindowInsets.systemBars.add(WindowInsets.ime)).asPaddingValues(),
     ) {
-        preferences.forEach { category ->
+        preferences.forEachIndexed { index, category ->
             if (category.title != null) {
                 item(key = category.key) {
                     PreferenceCategory(
                         category = category,
                         expanded = expandedStates[category.key]?.value ?: true,
                         onExpandChange = { expandedStates[category.key]?.value = it },
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier.fillMaxWidth().animateItem(),
                     )
                 }
             }
 
             if (expandedStates[category.key]!!.value) {
                 items(items = category.items, key = { it.key }) { item ->
-                    item.Render(modifier = Modifier.fillMaxWidth())
+                    item.Render(
+                        modifier = Modifier.fillMaxWidth().animateItem(),
+                    )
+                }
+            }
+
+            if (index < preferences.lastIndex) {
+                item(key = "divider_for_category-${category.key}") {
+                    HorizontalDivider(modifier = Modifier.animateItem())
                 }
             }
         }

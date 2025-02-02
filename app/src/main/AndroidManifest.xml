@@ -229,6 +229,10 @@
             android:label="@string/choose_icon_override"
             android:theme="@style/AppTheme.NoActionBar"
             />
+        <activity android:name="tk.zwander.widgetdrawer.activities.ComposeDrawerSettingsActivity"
+            android:exported="false"
+            android:theme="@style/AppTheme.NoActionBar"
+            />
 
         <service
             android:name="tk.zwander.lockscreenwidgets.services.Accessibility"

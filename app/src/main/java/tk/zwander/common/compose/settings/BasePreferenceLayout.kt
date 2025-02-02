@@ -2,6 +2,12 @@ package tk.zwander.common.compose.settings
 
 import android.graphics.drawable.Drawable
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -10,8 +16,10 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -19,7 +27,10 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.google.accompanist.drawablepainter.rememberDrawablePainter
 
@@ -32,6 +43,7 @@ open class BasePreference<ValueType>(
     val onClick: (() -> Unit)? = null,
     val widget: (@Composable () -> Unit)? = null,
     val widgetPosition: WidgetPosition = WidgetPosition.END,
+    val enabled: @Composable () -> Boolean = { true },
 ) {
     @Composable
     open fun Render(modifier: Modifier) {
@@ -43,6 +55,7 @@ open class BasePreference<ValueType>(
             onClick = onClick,
             widget = widget,
             widgetPosition = widgetPosition,
+            enabled = enabled,
         )
     }
 }
@@ -56,55 +69,84 @@ fun BasePreferenceLayout(
     onClick: (() -> Unit)? = null,
     widget: (@Composable () -> Unit)? = null,
     widgetPosition: WidgetPosition = WidgetPosition.END,
+    summaryMaxLines: Int = Int.MAX_VALUE,
+    enabled: @Composable () -> Boolean = { true }
 ) {
-    Row(
-        modifier = modifier.then(
-            if (onClick != null) {
-                Modifier.clickable(onClick = onClick)
-            } else {
-                Modifier
-            }.padding(vertical = 16.dp, horizontal = 8.dp),
-        ),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(16.dp),
+    val isEnabled = enabled()
+
+    val animatedAlpha by animateFloatAsState(if (isEnabled) 1f else 0.7f)
+
+    Surface(
+        modifier = modifier,
     ) {
-        Box(
-            modifier = Modifier.size(48.dp),
-            contentAlignment = Alignment.Center,
-        ) {
-            icon?.let {
-                Icon(
-                    painter = icon,
-                    contentDescription = null,
-                    modifier = Modifier.size(48.dp)
-                )
-            }
-        }
-
         Column(
-            modifier = Modifier.weight(1f),
-            verticalArrangement = Arrangement.spacedBy(8.dp),
-        ) {
-            Text(
-                text = title,
-                style = MaterialTheme.typography.bodyMedium,
-            )
-
-            AnimatedVisibility(visible = summary != null) {
-                val tempSummary by remember { mutableStateOf(summary ?: "") }
-
-                Text(
-                    text = tempSummary,
+            modifier = Modifier
+                .alpha(animatedAlpha)
+                .then(
+                    if (onClick != null && isEnabled) {
+                        Modifier.clickable(onClick = onClick)
+                    } else {
+                        Modifier
+                    },
                 )
+                .padding(vertical = 16.dp, horizontal = 8.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(16.dp),
+            ) {
+                Box(
+                    modifier = Modifier.width(48.dp),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    icon?.let {
+                        Icon(
+                            painter = icon,
+                            contentDescription = null,
+                            modifier = Modifier.size(32.dp),
+                        )
+                    }
+                }
+
+                Column(
+                    modifier = Modifier
+                        .weight(1f)
+                        .animateContentSize(),
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    Text(
+                        text = title,
+                        style = MaterialTheme.typography.bodyLarge,
+                        fontWeight = FontWeight.Bold,
+                    )
+
+                    AnimatedVisibility(
+                        visible = summary != null,
+                        enter = fadeIn() + expandVertically(expandFrom = Alignment.Top),
+                        exit = fadeOut() + shrinkVertically(shrinkTowards = Alignment.Top),
+                    ) {
+                        val tempSummary by remember { mutableStateOf(summary ?: "") }
+
+                        Text(
+                            text = tempSummary,
+                            maxLines = summaryMaxLines,
+                            overflow = TextOverflow.Ellipsis,
+                            style = MaterialTheme.typography.bodyMedium,
+                        )
+                    }
+                }
+
+                if (widgetPosition == WidgetPosition.END) {
+                    widget?.invoke()
+                }
             }
 
             if (widgetPosition == WidgetPosition.BOTTOM) {
                 widget?.invoke()
             }
-        }
-
-        if (widgetPosition == WidgetPosition.END) {
-            widget?.invoke()
         }
     }
 }

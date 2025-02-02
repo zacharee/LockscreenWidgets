@@ -17,6 +17,7 @@ data class PreferenceCategory(
     val items: List<BasePreference<*>>,
     val icon: Drawable? = null,
     val collapsible: Boolean = true,
+    val enabled: @Composable () -> Boolean = { true },
 )
 
 @Composable
@@ -25,12 +26,13 @@ fun PreferenceCategory(
     expanded: Boolean,
     onExpandChange: (Boolean) -> Unit,
     modifier: Modifier = Modifier,
+    enabled: @Composable () -> Boolean = { true },
 ) {
     BasePreferenceLayout(
         title = category.title ?: "",
-        summary = if (expanded) category.items.take(3).mapNotNull { it.summary }.joinToString(", ") else null,
+        summary = if (!expanded) category.items.take(3).joinToString(", ") { it.title } else null,
         onClick = if (category.collapsible) {{ onExpandChange(!expanded) }} else null,
-        icon = rememberDrawablePainter(category.icon),
+        icon = category.icon?.let { rememberDrawablePainter(category.icon) },
         widget = {
             val rotation by animateFloatAsState(if (expanded) 0f else 180f)
 
@@ -41,5 +43,7 @@ fun PreferenceCategory(
             )
         },
         modifier = modifier,
+        summaryMaxLines = 1,
+        enabled = enabled,
     )
 }
