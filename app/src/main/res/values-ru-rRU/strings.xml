@@ -8,7 +8,7 @@
     <string name="accessibility_service_desc">Приложению требуется доступ к Специальным Возможностям, чтобы отображать виджеты на экране блокировки. Никакие данные не собираем и действия не совершаем.</string>
     <string name="add_widget">Добавить Виджет</string>
     <string name="grant">Предоставить</string>
-    <string name="granted">Granted</string>
+    <string name="granted">Предоставлено</string>
     <string name="settings">Настройки</string>
     <string name="yes">Да</string>
     <string name="no">Нет</string>
@@ -30,10 +30,10 @@
     <string name="battery_whitelist">Запретить Выгрузку</string>
     <string name="back">Назад</string>
     <string name="clear">Очистить</string>
-    <string name="launcher">Launcher</string>
-    <string name="reset">Reset</string>
-    <string name="increase">Increase</string>
-    <string name="decrease">Decrease</string>
+    <string name="launcher">Лаунчер</string>
+    <string name="reset">Сброс</string>
+    <string name="increase">Увеличение</string>
+    <string name="decrease">Уменьшение</string>
     <string name="drawer_enabled">Боковая Панель Включена</string>
     <string name="frame_enabled">Рамка Включена</string>
     <string name="add_id_hint">com.android.systemui:id/some_id_здесь</string>
@@ -56,7 +56,7 @@
     <string name="shortcut_icon">Ярлык</string>
     <string name="expand">Расширить</string>
     <string name="alert_remove_widget_confirm">Удалить Виджет?</string>
-    <string name="alert_remove_widget_confirm_desc">Are you sure you want to remove this item?</string>
+    <string name="alert_remove_widget_confirm_desc">Вы уверены, что хотите удалить этот элемент?</string>
     <string name="main_screen_social_mastodon">Mastodon</string>
     <string name="main_screen_social_mastodon_desc">Подпишитесь на меня на Mastodon, чтобы знать об обновлениях моих приложений и интересных моментов разработки.</string>
     <string name="main_screen_social_website">Веб-сайт</string>
@@ -101,7 +101,7 @@
     <string name="settings_screen_present_ids">Скрыть при наличии идентификаторов</string>
     <string name="settings_screen_present_ids_desc">Виджеты экрана блокировки будут скрываться, когда эти идентификаторы будут отображаться на экране. Вы можете найти, какие идентификаторы должны отображаться здесь, включив оба параметра отладки и посмотрев на идентификаторы, которые выделены зеленым цветом, если вы хотите, чтобы рамка была скрыта.</string>
     <string name="settings_screen_show_in_notification_center">Показывать, когда панель уведомлений полностью развернута</string>
-    <string name="settings_screen_show_in_notification_center_desc">Enabling this option will cause the widget frame to appear when the shade is fully expanded. This state has its own independent positioning and size.</string>
+    <string name="settings_screen_show_in_notification_center_desc">Включение этой опции приведет к тому, что рамка виджета появится, когда панель уведомлений будет полностью развернута. Это состояние имеет собственное независимое позиционирование и размер.</string>
     <string name="settings_screen_show_on_main_lock_screen">Показать на экране блокировки</string>
     <string name="settings_screen_show_on_main_lock_screen_desc">Если вы используете опцию показа в центре уведомлений, вы можете не захотеть, чтобы виджеты отображались на экране блокировки. Отключите эту опцию, чтобы рамка появлялась только тогда, когда центр уведомлений полностью развернут.</string>
     <string name="settings_screen_corner_radius">Радиус углов</string>
@@ -144,10 +144,10 @@
     <string name="settings_screen_remember_position">Запомнить позицию</string>
     <string name="settings_screen_remember_position_desc">По умолчанию, виджеты Lockscreen Widgets запоминают, на какой странице они находились в последний раз, когда были на экране, и прокручиваются до этой позиции при каждом появлении. Отключите эту опцию, чтобы виджеты Lockscreen Widgets всегда показывали первую страницу при своем появлении.</string>
     <string name="settings_screen_hide_on_edge_panels">Скрыть на панелях Edge</string>
-    <string name="settings_screen_hide_on_edge_panels_desc">Hide the widget frame when Samsung\'s Edge Panels are open.</string>
-    <string name="settings_screen_hide_on_present_apps">Hide on Present Apps</string>
-    <string name="settings_screen_hide_on_present_apps_desc">Choose which apps should cause the widget frame to hide if they\'re shown on the lock screen.</string>
-    <string name="settings_screen_separate_layout">Separate Layout for Landscape</string>
+    <string name="settings_screen_hide_on_edge_panels_desc">Спрятать рамку виджета, когда открыты Edge-панели Samsung.</string>
+    <string name="settings_screen_hide_on_present_apps">Скрыть при открытых приложениях</string>
+    <string name="settings_screen_hide_on_present_apps_desc">Выбрать приложения, которые должны скрывать рамку виджета, если они отображаются на экране блокировки.</string>
+    <string name="settings_screen_separate_layout">Отдельный макет для ландшафтной ориентации</string>
     <string name="settings_screen_separate_layout_desc">Set different positions and sizes for the widget frame in landscape mode.</string>
     <string name="settings_screen_force_widget_update">Force Widget Update</string>
     <string name="settings_screen_force_widget_update_desc">When widgets are shown on the screen, pending widget updates aren\'t always dispatched. To work around this, Lockscreen Widgets forces all widgets to reload by default, which can cause short flashing. Disable this option to avoid flashing, at the potential cost of up-to-date widgets.</string>
