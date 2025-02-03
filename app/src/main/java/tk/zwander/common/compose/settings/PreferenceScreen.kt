@@ -91,12 +91,12 @@ fun PreferenceScreen(
                     }
 
                     if (expandedStates[category.key]?.value != false) {
-                        itemsIndexed(items = category.items, key = { itemIndex, _ -> renderedKeys[itemIndex] }) { index, item ->
+                        itemsIndexed(items = category.items, key = { itemIndex, _ -> renderedKeys[itemIndex] }) { itemIndex, item ->
                             item.Render(
                                 modifier = Modifier.fillMaxWidth().animateItem(),
                             )
 
-                            if (index < category.items.lastIndex) {
+                            if (itemIndex < category.items.lastIndex) {
                                 Box(
                                     modifier = Modifier.padding(start = 64.dp),
                                 ) {
