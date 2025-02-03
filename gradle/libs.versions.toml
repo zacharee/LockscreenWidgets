@@ -48,7 +48,7 @@ collapsiblePreferenceCategory = { module = "com.github.zacharee:CollapsiblePrefe
 colorpicker = { module = "com.github.zacharee:colorpicker", version.ref = "colorpicker" }
 colorpicker-compose = { module = "com.github.skydoves:colorpicker-compose", version.ref = "colorpickerCompose" }
 compose-animation = { module = "androidx.compose.animation:animation" }
-compose-bom = { module = "androidx.compose:compose-bom", version.ref = "composeBom" }
+compose-bom = { module = "androidx.compose:compose-bom-alpha", version.ref = "composeBom" }
 compose-foundation = { module = "androidx.compose.foundation:foundation" }
 compose-material3 = { module = "androidx.compose.material3:material3" }
 compose-spinkit = { module = "com.github.OCNYang:Compose-SpinKit", version.ref = "composeSpinkit" }
