@@ -81,7 +81,7 @@ class ComposeFrameSettingsActivity : BaseActivity(), EventObserver {
                                 )
                             )
                         },
-                        icon = { null },
+                        icon = { painterResource(R.drawable.wall) },
                         defaultValue = {},
                         visible = { frameCount > 1 },
                     )
