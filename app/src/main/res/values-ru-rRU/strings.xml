@@ -34,6 +34,7 @@
     <string name="reset">Сброс</string>
     <string name="increase">Увеличение</string>
     <string name="decrease">Уменьшение</string>
+    <string name="selected">Selected</string>
     <string name="drawer_enabled">Боковая Панель Включена</string>
     <string name="frame_enabled">Рамка Включена</string>
     <string name="add_id_hint">com.android.systemui:id/some_id_здесь</string>
