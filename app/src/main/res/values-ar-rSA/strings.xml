@@ -34,6 +34,7 @@
     <string name="reset">Reset</string>
     <string name="increase">Increase</string>
     <string name="decrease">Decrease</string>
+    <string name="selected">Selected</string>
     <string name="drawer_enabled">الدرج مفعل</string>
     <string name="frame_enabled">الاطار مفعل</string>
     <string name="add_id_hint">com.android.systemui:id/some_id_here</string>
