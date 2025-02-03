@@ -132,6 +132,9 @@ fun ListPreference(
                 )
             }
         },
+        onClick = {
+            showingDialog = true
+        },
     )
 
     if (showingDialog) {
