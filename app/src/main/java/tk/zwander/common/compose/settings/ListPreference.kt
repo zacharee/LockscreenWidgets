@@ -8,6 +8,8 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -153,8 +155,9 @@ fun ListPreference(
                 items(items = entries, key = { it.value ?: "NULL_VALUE" }) { entry ->
                     Row(
                         modifier = Modifier.fillMaxWidth()
-                            .heightIn(min = 36.dp)
-                            .clickable { onValueSelected(entry.value) },
+                            .heightIn(min = 64.dp)
+                            .clickable { onValueSelected(entry.value) }
+                            .padding(horizontal = 16.dp),
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
                         Text(
@@ -174,6 +177,7 @@ fun ListPreference(
                                 Icon(
                                     painter = painterResource(R.drawable.baseline_check_24),
                                     contentDescription = stringResource(R.string.selected),
+                                    modifier = Modifier.size(24.dp),
                                 )
                             }
                         }
