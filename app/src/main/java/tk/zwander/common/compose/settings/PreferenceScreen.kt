@@ -1,5 +1,6 @@
 package tk.zwander.common.compose.settings
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
@@ -9,15 +10,18 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.only
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.material3.DividerDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import tk.zwander.common.compose.components.TitleBar
 import tk.zwander.common.compose.util.rememberBooleanPreferenceState
 
@@ -87,10 +91,20 @@ fun PreferenceScreen(
                     }
 
                     if (expandedStates[category.key]?.value != false) {
-                        itemsIndexed(items = category.items, key = { itemIndex, _ -> renderedKeys[itemIndex] }) { _, item ->
+                        itemsIndexed(items = category.items, key = { itemIndex, _ -> renderedKeys[itemIndex] }) { index, item ->
                             item.Render(
                                 modifier = Modifier.fillMaxWidth().animateItem(),
                             )
+
+                            if (index < category.items.lastIndex) {
+                                Box(
+                                    modifier = Modifier.padding(start = 64.dp),
+                                ) {
+                                    HorizontalDivider(
+                                        color = DividerDefaults.color.copy(alpha = 0.5f),
+                                    )
+                                }
+                            }
                         }
                     }
 
