@@ -107,7 +107,7 @@ fun BasePreferenceLayout(
                         Icon(
                             painter = icon,
                             contentDescription = null,
-                            modifier = Modifier.size(32.dp),
+                            modifier = Modifier.size(24.dp),
                         )
                     }
                 }
