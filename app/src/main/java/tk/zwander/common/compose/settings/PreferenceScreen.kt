@@ -28,7 +28,7 @@ fun PreferenceScreen(
     modifier: Modifier = Modifier,
 ) {
     val expandedStates = categories.associate { category ->
-        category.key to if (category.collapsible) {
+        category.key to if (category.collapsible()) {
             rememberBooleanPreferenceState(
                 key = "${category.key}_category_expanded",
             )
@@ -42,14 +42,15 @@ fun PreferenceScreen(
     val filteredCategories = categories.mapNotNull { category ->
         val unfilteredCategoryIsEmpty = category.items.isEmpty()
 
+        val filteredRenderedItems = category.items.filter { it.visible() }
         val filteredCategory = category.copy(
-            items = category.items.filter { it.visible() },
+            items = filteredRenderedItems,
         )
 
-        if (filteredCategory.items.isEmpty() && !unfilteredCategoryIsEmpty) {
+        if (filteredRenderedItems.isEmpty() && !unfilteredCategoryIsEmpty) {
             null
         } else {
-            filteredCategory to filteredCategory.items.map { it.key() }
+            filteredCategory to filteredRenderedItems.map { it.key() }
         }
     }
 
@@ -77,13 +78,15 @@ fun PreferenceScreen(
                                 category = category,
                                 expanded = expandedStates[category.key]?.value ?: true,
                                 onExpandChange = { expandedStates[category.key]?.value = it },
-                                modifier = Modifier.fillMaxWidth().animateItem(),
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .animateItem(),
                                 enabled = category.enabled(),
                             )
                         }
                     }
 
-                    if (expandedStates[category.key]?.value == true) {
+                    if (expandedStates[category.key]?.value != false) {
                         itemsIndexed(items = category.items, key = { itemIndex, _ -> renderedKeys[itemIndex] }) { _, item ->
                             item.Render(
                                 modifier = Modifier.fillMaxWidth().animateItem(),

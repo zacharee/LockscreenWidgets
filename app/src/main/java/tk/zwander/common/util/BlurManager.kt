@@ -7,6 +7,12 @@ import android.view.View.OnAttachStateChangeListener
 import android.view.WindowManager
 import tk.zwander.common.drawable.BackgroundBlurDrawableCompat
 
+val Context.shouldShowBlurOptions: Boolean
+    get() {
+        return (isOneUI && Build.VERSION.SDK_INT < Build.VERSION_CODES.S) ||
+                (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && windowManager.isCrossWindowBlurEnabled)
+    }
+
 class BlurManager(
     private val windowManager: WindowManager,
     private val context: Context,

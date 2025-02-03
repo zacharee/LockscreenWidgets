@@ -1,5 +1,6 @@
 package tk.zwander.lockscreenwidgets.activities
 
+import android.os.Build
 import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.compose.runtime.getValue
@@ -11,18 +12,29 @@ import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.res.stringResource
 import tk.zwander.common.activities.BaseActivity
+import tk.zwander.common.activities.HideForIDsActivity
+import tk.zwander.common.activities.HideOnAppsChooserActivity
+import tk.zwander.common.activities.OnboardingActivity
 import tk.zwander.common.compose.AppTheme
 import tk.zwander.common.compose.settings.ListPreferenceEntry
 import tk.zwander.common.compose.settings.PreferenceScreen
 import tk.zwander.common.compose.settings.booleanPreferenceDependency
+import tk.zwander.common.compose.settings.createCommonSection
 import tk.zwander.common.compose.settings.rememberPreferenceScreen
 import tk.zwander.common.compose.util.rememberPreferenceState
 import tk.zwander.common.util.Event
 import tk.zwander.common.util.EventObserver
 import tk.zwander.common.util.PrefManager
+import tk.zwander.common.util.backup.BackupRestoreManager
+import tk.zwander.common.util.canReadWallpaper
 import tk.zwander.common.util.eventManager
+import tk.zwander.common.util.isOneUI
+import tk.zwander.common.util.isPixelUI
+import tk.zwander.common.util.isTouchWiz
 import tk.zwander.common.util.prefManager
+import tk.zwander.common.util.shouldShowBlurOptions
 import tk.zwander.lockscreenwidgets.R
+import tk.zwander.lockscreenwidgets.services.isNotificationListenerActive
 import tk.zwander.lockscreenwidgets.util.FramePrefs
 
 class ComposeFrameSettingsActivity : BaseActivity(), EventObserver {
@@ -38,6 +50,8 @@ class ComposeFrameSettingsActivity : BaseActivity(), EventObserver {
 
         eventManager.addObserver(this)
 
+        val canShowNCOptions = isOneUI || (isPixelUI && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S)
+
         setContent {
             var secondaryFrames by rememberPreferenceState(
                 key = PrefManager.KEY_CURRENT_FRAMES,
@@ -45,7 +59,11 @@ class ComposeFrameSettingsActivity : BaseActivity(), EventObserver {
                 onChanged = { _, v -> prefManager.currentSecondaryFrames = v },
             )
             val frameCount by rememberUpdatedState(secondaryFrames.size + 1)
-            val preferenceScreen = rememberPreferenceScreen(null) {
+
+            val commonSection = createCommonSection(BackupRestoreManager.Which.FRAME)
+            val preferenceScreen = rememberPreferenceScreen {
+                commonSection.addToPreferenceScreen(this)
+
                 category(
                     key = "frame_management_category",
                     title = resources.getString(R.string.frame_management),
@@ -127,6 +145,7 @@ class ComposeFrameSettingsActivity : BaseActivity(), EventObserver {
                         icon = { painterResource(R.drawable.ic_baseline_blur_on_24) },
                         key = { PrefManager.KEY_BLUR_BACKGROUND },
                         defaultValue = { false },
+                        visible = { shouldShowBlurOptions },
                     )
 
                     seekBarPreference(
@@ -139,6 +158,7 @@ class ComposeFrameSettingsActivity : BaseActivity(), EventObserver {
                         maxValue = { 1000 },
                         enabled = booleanPreferenceDependency(PrefManager.KEY_BLUR_BACKGROUND),
                         scale = { 1.0 },
+                        visible = { shouldShowBlurOptions },
                     )
 
                     switchPreference(
@@ -146,6 +166,12 @@ class ComposeFrameSettingsActivity : BaseActivity(), EventObserver {
                         summary = { stringResource(R.string.settings_screen_masked_mode_desc) },
                         icon = { painterResource(R.drawable.ic_baseline_opacity_24) },
                         key = { PrefManager.KEY_FRAME_MASKED_MODE },
+                        canChange = { newValue ->
+                            if (newValue && !canReadWallpaper) {
+                                OnboardingActivity.start(this@ComposeFrameSettingsActivity, OnboardingActivity.RetroMode.STORAGE)
+                                false
+                            } else true
+                        },
                     )
 
                     seekBarPreference(
@@ -240,6 +266,7 @@ class ComposeFrameSettingsActivity : BaseActivity(), EventObserver {
                         key = { PrefManager.KEY_SEPARATE_POS_FOR_LOCK_NC },
                         icon = { painterResource(R.drawable.ic_baseline_layers_24) },
                         enabled = booleanPreferenceDependency(PrefManager.KEY_SHOW_IN_NOTIFICATION_CENTER),
+                        visible = { canShowNCOptions },
                     )
 
                     switchPreference(
@@ -259,6 +286,12 @@ class ComposeFrameSettingsActivity : BaseActivity(), EventObserver {
                         summary = { stringResource(R.string.settings_screen_hide_when_notifications_shown_desc) },
                         key = { PrefManager.KEY_HIDE_ON_NOTIFICATIONS },
                         icon = { painterResource(R.drawable.ic_baseline_notifications_off_24) },
+                        canChange = { newValue ->
+                            if (newValue && !isNotificationListenerActive) {
+                                OnboardingActivity.start(this@ComposeFrameSettingsActivity, OnboardingActivity.RetroMode.NOTIFICATION)
+                                false
+                            } else true
+                        },
                     )
 
                     switchPreference(
@@ -281,6 +314,9 @@ class ComposeFrameSettingsActivity : BaseActivity(), EventObserver {
                         summary = { stringResource(R.string.settings_screen_hide_on_facewidgets_desc) },
                         key = { PrefManager.KEY_HIDE_ON_FACEWIDGETS },
                         icon = { painterResource(R.drawable.ic_baseline_widgets_24) },
+                        visible = {
+                            isOneUI && Build.VERSION.SDK_INT > Build.VERSION_CODES.Q
+                        },
                     )
 
                     switchPreference(
@@ -303,6 +339,7 @@ class ComposeFrameSettingsActivity : BaseActivity(), EventObserver {
                         key = { PrefManager.KEY_HIDE_ON_EDGE_PANEL },
                         icon = { painterResource(R.drawable.border_right) },
                         defaultValue = { true },
+                        visible = { isTouchWiz },
                     )
 
                     preference(
@@ -311,7 +348,9 @@ class ComposeFrameSettingsActivity : BaseActivity(), EventObserver {
                         key = { "present_ids_launch" },
                         icon = { painterResource(R.drawable.ic_baseline_visibility_off_24) },
                         defaultValue = {},
-                        onClick = {},
+                        onClick = {
+                            HideForIDsActivity.start(this@ComposeFrameSettingsActivity, HideForIDsActivity.Type.PRESENT)
+                        },
                     )
 
                     preference(
@@ -320,7 +359,9 @@ class ComposeFrameSettingsActivity : BaseActivity(), EventObserver {
                         key = { "non_present_ids_launch" },
                         icon = { painterResource(R.drawable.ic_baseline_visibility_off_24) },
                         defaultValue = {},
-                        onClick = {},
+                        onClick = {
+                            HideForIDsActivity.start(this@ComposeFrameSettingsActivity, HideForIDsActivity.Type.NON_PRESENT)
+                        },
                     )
 
                     preference(
@@ -329,7 +370,9 @@ class ComposeFrameSettingsActivity : BaseActivity(), EventObserver {
                         key = { "hide_on_present_apps" },
                         icon = { painterResource(R.drawable.ic_baseline_visibility_off_24) },
                         defaultValue = {},
-                        onClick = {},
+                        onClick = {
+                            HideOnAppsChooserActivity.start(this@ComposeFrameSettingsActivity)
+                        },
                     )
                 }
 
@@ -343,6 +386,7 @@ class ComposeFrameSettingsActivity : BaseActivity(), EventObserver {
                         key = { PrefManager.KEY_SHOW_IN_NOTIFICATION_CENTER },
                         icon = { painterResource(R.drawable.ic_baseline_notifications_active_24) },
                         defaultValue = { false },
+                        visible = { canShowNCOptions },
                     )
 
                     switchPreference(
@@ -352,6 +396,7 @@ class ComposeFrameSettingsActivity : BaseActivity(), EventObserver {
                         icon = { painterResource(R.drawable.ic_baseline_lock_24) },
                         defaultValue = { true },
                         enabled = booleanPreferenceDependency(PrefManager.KEY_SHOW_IN_NOTIFICATION_CENTER),
+                        visible = { canShowNCOptions },
                     )
 
                     switchPreference(
@@ -461,7 +506,7 @@ class ComposeFrameSettingsActivity : BaseActivity(), EventObserver {
 
             AppTheme {
                 PreferenceScreen(
-                    title = resources.getString(R.string.widget_drawer),
+                    title = resources.getString(R.string.settings),
                     categories = preferenceScreen,
                 )
             }

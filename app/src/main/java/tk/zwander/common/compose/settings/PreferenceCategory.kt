@@ -17,7 +17,7 @@ data class PreferenceCategory(
     val key: String,
     val items: List<BasePreference<*>>,
     val icon: Drawable? = null,
-    val collapsible: Boolean = true,
+    val collapsible: @Composable () -> Boolean = { true },
     val enabled: @Composable () -> Boolean = { true },
 )
 
@@ -34,8 +34,8 @@ fun PreferenceCategory(
         title = category.title ?: "",
         summary = if (!expanded) category.items.take(3).map { it.title() }
             .joinToString(", ") else null,
-        onClick = if (category.collapsible) {{ onExpandChange(!expanded) }} else null,
-        icon = category.icon?.let { rememberDrawablePainter(category.icon) },
+        onClick = if (category.collapsible()) {{ onExpandChange(!expanded) }} else null,
+        icon = category.icon?.let { rememberDrawablePainter(it) },
         widget = {
             val rotation by animateFloatAsState(if (expanded) 0f else 180f)
 
