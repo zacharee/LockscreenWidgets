@@ -2,9 +2,6 @@ package tk.zwander.widgetdrawer.activities
 
 import android.os.Bundle
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.Surface
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.core.content.res.ResourcesCompat
@@ -257,11 +254,10 @@ class ComposeDrawerSettingsActivity : BaseActivity() {
 
         setContent {
             AppTheme {
-                Surface(
-                    modifier = Modifier.fillMaxSize(),
-                ) {
-                    PreferenceScreen(prefs)
-                }
+                PreferenceScreen(
+                    title = resources.getString(R.string.widget_drawer),
+                    categories = prefs,
+                )
             }
         }
     }

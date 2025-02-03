@@ -3,6 +3,7 @@ package tk.zwander.common.compose.settings
 import android.graphics.drawable.Drawable
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
@@ -47,5 +48,6 @@ fun PreferenceCategory(
         modifier = modifier,
         summaryMaxLines = 1,
         enabled = enabled,
+        titleTextColor = MaterialTheme.colorScheme.primary,
     )
 }

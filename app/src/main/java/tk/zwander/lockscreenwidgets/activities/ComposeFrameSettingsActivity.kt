@@ -2,17 +2,17 @@ package tk.zwander.lockscreenwidgets.activities
 
 import android.os.Bundle
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.Surface
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.res.stringResource
 import tk.zwander.common.activities.BaseActivity
 import tk.zwander.common.compose.AppTheme
+import tk.zwander.common.compose.settings.ListPreferenceEntry
 import tk.zwander.common.compose.settings.PreferenceScreen
 import tk.zwander.common.compose.settings.booleanPreferenceDependency
 import tk.zwander.common.compose.settings.rememberPreferenceScreen
@@ -36,14 +36,16 @@ class ComposeFrameSettingsActivity : BaseActivity(), EventObserver {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        eventManager.addObserver(this)
+
         setContent {
             var secondaryFrames by rememberPreferenceState(
                 key = PrefManager.KEY_CURRENT_FRAMES,
                 value = { prefManager.currentSecondaryFrames },
                 onChanged = { _, v -> prefManager.currentSecondaryFrames = v },
             )
-            val frameCount = secondaryFrames.size + 1
-            val preferenceScreen = rememberPreferenceScreen(selectedFrame) {
+            val frameCount by rememberUpdatedState(secondaryFrames.size + 1)
+            val preferenceScreen = rememberPreferenceScreen(null) {
                 category(
                     key = "frame_management_category",
                     title = resources.getString(R.string.frame_management),
@@ -53,7 +55,13 @@ class ComposeFrameSettingsActivity : BaseActivity(), EventObserver {
                         summary = { stringResource(R.string.selected_frame, "$selectedFrame") },
                         key = { "select_secondary_frame" },
                         onClick = {
-                            eventManager.sendEvent(Event.PreviewFrames(Event.PreviewFrames.ShowMode.SHOW_FOR_SELECTION, 102, true))
+                            eventManager.sendEvent(
+                                Event.PreviewFrames(
+                                    Event.PreviewFrames.ShowMode.SHOW_FOR_SELECTION,
+                                    102,
+                                    true
+                                )
+                            )
                         },
                         icon = { null },
                         defaultValue = {},
@@ -62,7 +70,13 @@ class ComposeFrameSettingsActivity : BaseActivity(), EventObserver {
 
                     preference(
                         title = { stringResource(R.string.add_frame) },
-                        summary = { pluralStringResource(R.plurals.frame_count_info, frameCount, "$frameCount") },
+                        summary = {
+                            pluralStringResource(
+                                R.plurals.frame_count_info,
+                                frameCount,
+                                "$frameCount",
+                            )
+                        },
                         key = { "add_secondary_frame" },
                         onClick = {
                             val maxFrameId = secondaryFrames.maxOrNull() ?: 1
@@ -81,7 +95,13 @@ class ComposeFrameSettingsActivity : BaseActivity(), EventObserver {
                         summary = { null },
                         key = { "remove_secondary_frame" },
                         onClick = {
-                            eventManager.sendEvent(Event.PreviewFrames(Event.PreviewFrames.ShowMode.SHOW_FOR_SELECTION, 101, false))
+                            eventManager.sendEvent(
+                                Event.PreviewFrames(
+                                    Event.PreviewFrames.ShowMode.SHOW_FOR_SELECTION,
+                                    101,
+                                    false
+                                )
+                            )
                         },
                         icon = { painterResource(R.drawable.ic_baseline_remove_circle_24) },
                         defaultValue = {},
@@ -205,28 +225,262 @@ class ComposeFrameSettingsActivity : BaseActivity(), EventObserver {
 
                 category(
                     title = resources.getString(R.string.category_layout),
-                    key = "settings_category_layout",
+                    key = "settings_layout_category",
                 ) {
+                    switchPreference(
+                        title = { stringResource(R.string.settings_screen_lock_widget_frame) },
+                        summary = { stringResource(R.string.settings_screen_lock_widget_frame_desc) },
+                        key = { PrefManager.KEY_LOCK_WIDGET_FRAME },
+                        icon = { painterResource(R.drawable.ic_baseline_lock_24) },
+                    )
 
+                    switchPreference(
+                        title = { stringResource(R.string.settings_screen_separate_position_for_lock_nc) },
+                        summary = { stringResource(R.string.settings_screen_separate_position_for_lock_nc_desc) },
+                        key = { PrefManager.KEY_SEPARATE_POS_FOR_LOCK_NC },
+                        icon = { painterResource(R.drawable.ic_baseline_layers_24) },
+                        enabled = booleanPreferenceDependency(PrefManager.KEY_SHOW_IN_NOTIFICATION_CENTER),
+                    )
+
+                    switchPreference(
+                        title = { stringResource(R.string.settings_screen_separate_layout) },
+                        summary = { stringResource(R.string.settings_screen_separate_layout_desc) },
+                        key = { PrefManager.KEY_SEPARATE_LAYOUT_FOR_LANDSCAPE },
+                        icon = { painterResource(R.drawable.baseline_screen_rotation_24) },
+                    )
+                }
+
+                category(
+                    title = resources.getString(R.string.category_visibility),
+                    key = "settings_visibility_category",
+                ) {
+                    switchPreference(
+                        title = { stringResource(R.string.settings_screen_hide_when_notifications_shown) },
+                        summary = { stringResource(R.string.settings_screen_hide_when_notifications_shown_desc) },
+                        key = { PrefManager.KEY_HIDE_ON_NOTIFICATIONS },
+                        icon = { painterResource(R.drawable.ic_baseline_notifications_off_24) },
+                    )
+
+                    switchPreference(
+                        title = { stringResource(R.string.settings_screen_hide_on_notification_shade) },
+                        summary = { stringResource(R.string.settings_screen_hide_on_notification_shade_desc) },
+                        key = { PrefManager.KEY_HIDE_ON_NOTIFICATION_SHADE },
+                        icon = { painterResource(R.drawable.ic_baseline_clear_all_24) },
+                    )
+
+                    switchPreference(
+                        title = { stringResource(R.string.settings_screen_hide_on_security_input) },
+                        summary = { stringResource(R.string.settings_screen_hide_on_security_input_desc) },
+                        key = { PrefManager.KEY_HIDE_ON_SECURITY_PAGE },
+                        icon = { painterResource(R.drawable.is_baseline_password_24) },
+                        defaultValue = { true },
+                    )
+
+                    switchPreference(
+                        title = { stringResource(R.string.settings_screen_hide_on_facewidgets) },
+                        summary = { stringResource(R.string.settings_screen_hide_on_facewidgets_desc) },
+                        key = { PrefManager.KEY_HIDE_ON_FACEWIDGETS },
+                        icon = { painterResource(R.drawable.ic_baseline_widgets_24) },
+                    )
+
+                    switchPreference(
+                        title = { stringResource(R.string.settings_screen_hide_in_landscape) },
+                        summary = { stringResource(R.string.settings_screen_hide_in_landscape_desc) },
+                        key = { PrefManager.KEY_HIDE_IN_LANDSCAPE },
+                        icon = { painterResource(R.drawable.ic_baseline_crop_landscape_24) },
+                    )
+
+                    switchPreference(
+                        title = { stringResource(R.string.settings_screen_hide_when_keyboard_shown) },
+                        summary = { stringResource(R.string.settings_screen_hide_when_keyboard_shown_desc) },
+                        key = { PrefManager.KEY_FRAME_HIDE_WHEN_KEYBOARD_SHOWN },
+                        icon = { painterResource(R.drawable.baseline_keyboard_24) },
+                    )
+
+                    switchPreference(
+                        title = { stringResource(R.string.settings_screen_hide_on_edge_panels) },
+                        summary = { stringResource(R.string.settings_screen_hide_on_edge_panels_desc) },
+                        key = { PrefManager.KEY_HIDE_ON_EDGE_PANEL },
+                        icon = { painterResource(R.drawable.border_right) },
+                        defaultValue = { true },
+                    )
+
+                    preference(
+                        title = { stringResource(R.string.settings_screen_present_ids) },
+                        summary = { stringResource(R.string.settings_screen_present_ids_desc) },
+                        key = { "present_ids_launch" },
+                        icon = { painterResource(R.drawable.ic_baseline_visibility_off_24) },
+                        defaultValue = {},
+                        onClick = {},
+                    )
+
+                    preference(
+                        title = { stringResource(R.string.settings_screen_non_present_ids) },
+                        summary = { stringResource(R.string.settings_screen_non_present_ids_desc) },
+                        key = { "non_present_ids_launch" },
+                        icon = { painterResource(R.drawable.ic_baseline_visibility_off_24) },
+                        defaultValue = {},
+                        onClick = {},
+                    )
+
+                    preference(
+                        title = { stringResource(R.string.settings_screen_hide_on_present_apps) },
+                        summary = { stringResource(R.string.settings_screen_hide_on_present_apps_desc) },
+                        key = { "hide_on_present_apps" },
+                        icon = { painterResource(R.drawable.ic_baseline_visibility_off_24) },
+                        defaultValue = {},
+                        onClick = {},
+                    )
+                }
+
+                category(
+                    title = resources.getString(R.string.category_behavior),
+                    key = "settings_behavior_category",
+                ) {
+                    switchPreference(
+                        title = { stringResource(R.string.settings_screen_show_in_notification_center) },
+                        summary = { stringResource(R.string.settings_screen_show_in_notification_center_desc) },
+                        key = { PrefManager.KEY_SHOW_IN_NOTIFICATION_CENTER },
+                        icon = { painterResource(R.drawable.ic_baseline_notifications_active_24) },
+                        defaultValue = { false },
+                    )
+
+                    switchPreference(
+                        title = { stringResource(R.string.settings_screen_show_on_main_lock_screen) },
+                        summary = { stringResource(R.string.settings_screen_show_on_main_lock_screen_desc) },
+                        key = { PrefManager.KEY_SHOW_ON_MAIN_LOCK_SCREEN },
+                        icon = { painterResource(R.drawable.ic_baseline_lock_24) },
+                        defaultValue = { true },
+                        enabled = booleanPreferenceDependency(PrefManager.KEY_SHOW_IN_NOTIFICATION_CENTER),
+                    )
+
+                    switchPreference(
+                        title = { stringResource(R.string.settings_screen_remember_position) },
+                        summary = { stringResource(R.string.settings_screen_remember_position_desc) },
+                        key = { PrefManager.KEY_FRAME_REMEMBER_POSITION },
+                        icon = { painterResource(R.drawable.swap) },
+                        defaultValue = { true },
+                    )
+
+                    switchPreference(
+                        title = { stringResource(R.string.settings_screen_force_widget_update) },
+                        summary = { stringResource(R.string.settings_screen_force_widget_update_desc) },
+                        key = { PrefManager.KEY_FRAME_FORCE_RELOAD_WIDGETS },
+                        icon = { painterResource(R.drawable.baseline_refresh_24) },
+                        defaultValue = { true },
+                    )
+
+                    switchPreference(
+                        title = { stringResource(R.string.settings_screen_animate_show_hide) },
+                        summary = { stringResource(R.string.settings_screen_animate_show_hide_desc) },
+                        key = { PrefManager.KEY_ANIMATE_SHOW_HIDE },
+                        icon = { painterResource(R.drawable.ic_baseline_animation_24) },
+                        defaultValue = { true },
+                    )
+
+                    seekBarPreference(
+                        title = { stringResource(R.string.settings_screen_animation_duration) },
+                        summary = { stringResource(R.string.settings_screen_animation_duration_desc) },
+                        key = { PrefManager.KEY_ANIMATION_DURATION },
+                        icon = { painterResource(R.drawable.ic_baseline_timer_24) },
+                        defaultValue = { 300 },
+                        enabled = booleanPreferenceDependency(PrefManager.KEY_ANIMATE_SHOW_HIDE),
+                        minValue = { 0 },
+                        maxValue = { 2000 },
+                        unit = { "ms" },
+                        scale = { 1.0 },
+                    )
+
+                    listPreference(
+                        title = { stringResource(R.string.settings_screen_page_indicator_behavior) },
+                        key = { PrefManager.KEY_PAGE_INDICATOR_BEHAVIOR },
+                        icon = { painterResource(R.drawable.ic_baseline_visibility_24) },
+                        defaultValue = { "1" },
+                        entries = {
+                            val labels = stringArrayResource(R.array.page_indicator_behavior_names)
+                            val values = stringArrayResource(R.array.page_indicator_behavior_values)
+
+                            labels.zip(values) { label, value ->
+                                ListPreferenceEntry(label, value)
+                            }
+                        },
+                        summary = { null },
+                    )
+
+                    seekBarPreference(
+                        title = { stringResource(R.string.settings_screen_accessibility_event_delay) },
+                        summary = { stringResource(R.string.settings_screen_accessibility_event_delay_desc) },
+                        icon = { painterResource(R.drawable.ic_baseline_timer_24) },
+                        key = { PrefManager.KEY_ACCESSIBILITY_EVENT_DELAY },
+                        defaultValue = { 50 },
+                        minValue = { 0 },
+                        maxValue = { 5000 },
+                        unit = { "ms" },
+                        scale = { 1.0 },
+                    )
+                }
+
+                category(
+                    title = resources.getString(R.string.category_interaction),
+                    key = "settings_interaction_category",
+                ) {
+                    switchPreference(
+                        title = { stringResource(R.string.settings_screen_touch_protection) },
+                        summary = { stringResource(R.string.settings_screen_touch_protection_desc) },
+                        icon = { painterResource(R.drawable.ic_baseline_block_24) },
+                        key = { PrefManager.KEY_TOUCH_PROTECTION },
+                        defaultValue = { false },
+                    )
+
+                    switchPreference(
+                        title = { stringResource(R.string.settings_screen_ignore_widget_touches) },
+                        summary = { stringResource(R.string.settings_screen_ignore_widget_touches_desc) },
+                        key = { PrefManager.KEY_FRAME_IGNORE_WIDGET_TOUCHES },
+                        icon = { painterResource(R.drawable.baseline_do_not_touch_24) },
+                        defaultValue = { false },
+                    )
+
+                    switchPreference(
+                        title = { stringResource(R.string.settings_screen_request_unlock) },
+                        summary = { stringResource(R.string.settings_screen_request_unlock_desc) },
+                        key = { PrefManager.KEY_REQUEST_UNLOCK },
+                        icon = { painterResource(R.drawable.ic_baseline_launch_24) },
+                        defaultValue = { true },
+                    )
+
+                    switchPreference(
+                        title = { stringResource(R.string.directly_check_for_activity) },
+                        summary = { stringResource(R.string.directly_check_for_activity_desc) },
+                        key = { PrefManager.KEY_FRAME_DIRECTLY_CHECK_FOR_ACTIVITY },
+                        enabled = booleanPreferenceDependency(PrefManager.KEY_REQUEST_UNLOCK),
+                        icon = { painterResource(R.drawable.baseline_compare_24) },
+                        defaultValue = { true },
+                    )
                 }
             }
 
             AppTheme {
-                Surface(
-                    modifier = Modifier.fillMaxSize(),
-                ) {
-                    PreferenceScreen(preferenceScreen)
-                }
+                PreferenceScreen(
+                    title = resources.getString(R.string.widget_drawer),
+                    categories = preferenceScreen,
+                )
             }
         }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+
+        eventManager.removeObserver(this)
     }
 
     override fun onEvent(event: Event) {
         if (event is Event.FrameSelected) {
             if (event.frameId != null && event.requestCode == REQ_REMOVE_FRAME) {
-                prefManager.currentSecondaryFrames = prefManager.currentSecondaryFrames.toMutableList().apply {
-                    removeAll { it == event.frameId }
-                }
+                prefManager.currentSecondaryFrames =
+                    prefManager.currentSecondaryFrames.toMutableList().apply {
+                        removeAll { it == event.frameId }
+                    }
                 if (selectedFrame == event.frameId) {
                     selectedFrame = -1
                 }

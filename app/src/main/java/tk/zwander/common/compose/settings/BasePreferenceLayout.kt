@@ -1,7 +1,6 @@
 package tk.zwander.common.compose.settings
 
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
@@ -12,6 +11,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -21,12 +21,15 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -63,13 +66,14 @@ open class BasePreference<ValueType>(
 fun BasePreferenceLayout(
     title: String,
     summary: String?,
-    modifier: Modifier = Modifier.fillMaxWidth(),
+    modifier: Modifier = Modifier,
     icon: Painter? = null,
     onClick: (() -> Unit)? = null,
     widget: (@Composable () -> Unit)? = null,
     widgetPosition: WidgetPosition = WidgetPosition.END,
     summaryMaxLines: Int = Int.MAX_VALUE,
     enabled: Boolean = true,
+    titleTextColor: Color = Color.Unspecified,
 ) {
     val animatedAlpha by animateFloatAsState(if (enabled) 1f else 0.7f)
 
@@ -110,14 +114,13 @@ fun BasePreferenceLayout(
 
                 Column(
                     modifier = Modifier
-                        .weight(1f)
-                        .animateContentSize(),
-                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                        .weight(1f),
                 ) {
                     Text(
                         text = title,
                         style = MaterialTheme.typography.bodyLarge,
                         fontWeight = FontWeight.Bold,
+                        color = titleTextColor,
                     )
 
                     AnimatedVisibility(
@@ -125,7 +128,15 @@ fun BasePreferenceLayout(
                         enter = fadeIn() + expandVertically(expandFrom = Alignment.Top),
                         exit = fadeOut() + shrinkVertically(shrinkTowards = Alignment.Top),
                     ) {
-                        val tempSummary by remember { mutableStateOf(summary ?: "") }
+                        Spacer(modifier = Modifier.size(8.dp))
+
+                        var tempSummary by remember { mutableStateOf(summary ?: "") }
+
+                        LaunchedEffect(summary) {
+                            if (summary != null) {
+                                tempSummary = summary
+                            }
+                        }
 
                         Text(
                             text = tempSummary,
@@ -133,6 +144,12 @@ fun BasePreferenceLayout(
                             overflow = TextOverflow.Ellipsis,
                             style = MaterialTheme.typography.bodyMedium,
                         )
+                    }
+
+                    if (widgetPosition == WidgetPosition.BOTTOM_INLINE) {
+                        Spacer(modifier = Modifier.size(8.dp))
+
+                        widget?.invoke()
                     }
                 }
 
@@ -151,5 +168,6 @@ fun BasePreferenceLayout(
 enum class WidgetPosition {
     END,
     BOTTOM,
+    BOTTOM_INLINE,
     ;
 }

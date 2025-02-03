@@ -8,7 +8,10 @@ import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.platform.LocalContext
 
 @Composable
-fun rememberPreferenceScreen(vararg keys: Any? = arrayOf(), content: PreferenceScreenScope.() -> Unit): List<PreferenceCategory> {
+fun rememberPreferenceScreen(
+    vararg keys: Any?,
+    content: PreferenceScreenScope.() -> Unit
+): List<PreferenceCategory> {
     val context = LocalContext.current
 
     return remember(keys) {
@@ -36,13 +39,15 @@ class PreferenceScreenScope(private val context: Context) {
         val categoryScope = PreferenceCategoryScope(context)
         categoryScope.content()
 
-        categories.add(PreferenceCategory(
-            title = title,
-            key = key,
-            items = categoryScope.prefs,
-            icon = icon,
-            collapsible = collapsible,
-        ))
+        categories.add(
+            PreferenceCategory(
+                title = title,
+                key = key,
+                items = categoryScope.prefs,
+                icon = icon,
+                collapsible = collapsible,
+            )
+        )
     }
 }
 
@@ -66,18 +71,18 @@ class PreferenceCategoryScope(private val context: Context) {
         visible: @Composable () -> Boolean = { true },
     ) {
         preference(
-            BasePreference<T>(
-            title = title,
-            summary = summary,
-            key = key,
-            icon = icon,
-            defaultValue = defaultValue,
-            onClick = onClick,
-            widget = widget,
-            widgetPosition = widgetPosition,
-            enabled = enabled,
-            visible = visible,
-        )
+            BasePreference(
+                title = title,
+                summary = summary,
+                key = key,
+                icon = icon,
+                defaultValue = defaultValue,
+                onClick = onClick,
+                widget = widget,
+                widgetPosition = widgetPosition,
+                enabled = enabled,
+                visible = visible,
+            ),
         )
     }
 
@@ -91,16 +96,18 @@ class PreferenceCategoryScope(private val context: Context) {
         visible: @Composable () -> Boolean = { true },
         canChange: (Boolean) -> Boolean = { true },
     ) {
-        preference(SwitchPreference(
-            title = title,
-            summary = summary,
-            key = key,
-            defaultValue = defaultValue,
-            icon = icon,
-            enabled = enabled,
-            visible = visible,
-            canChange = canChange,
-        ))
+        preference(
+            SwitchPreference(
+                title = title,
+                summary = summary,
+                key = key,
+                defaultValue = defaultValue,
+                icon = icon,
+                enabled = enabled,
+                visible = visible,
+                canChange = canChange,
+            ),
+        )
     }
 
     fun seekBarPreference(
@@ -117,20 +124,22 @@ class PreferenceCategoryScope(private val context: Context) {
         enabled: @Composable () -> Boolean = { true },
         visible: @Composable () -> Boolean = { true },
     ) {
-        preference(SeekBarPreference(
-            title = title,
-            summary = summary,
-            key = key,
-            defaultValue = defaultValue,
-            minValue = minValue,
-            maxValue = maxValue,
-            scale = scale,
-            icon = icon,
-            unit = unit,
-            increment = increment,
-            enabled = enabled,
-            visible = visible,
-        ))
+        preference(
+            SeekBarPreference(
+                title = title,
+                summary = summary,
+                key = key,
+                defaultValue = defaultValue,
+                minValue = minValue,
+                maxValue = maxValue,
+                scale = scale,
+                icon = icon,
+                unit = unit,
+                increment = increment,
+                enabled = enabled,
+                visible = visible,
+            ),
+        )
     }
 
     fun colorPickerPreference(
@@ -142,14 +151,40 @@ class PreferenceCategoryScope(private val context: Context) {
         enabled: @Composable () -> Boolean = { true },
         visible: @Composable () -> Boolean = { true },
     ) {
-        preference(ColorPickerPreference(
-            title = title,
-            summary = summary,
-            key = key,
-            defaultValue = defaultValue,
-            icon = icon,
-            enabled = enabled,
-            visible = visible,
-        ))
+        preference(
+            ColorPickerPreference(
+                title = title,
+                summary = summary,
+                key = key,
+                defaultValue = defaultValue,
+                icon = icon,
+                enabled = enabled,
+                visible = visible,
+            ),
+        )
+    }
+
+    fun listPreference(
+        title: @Composable () -> String,
+        summary: @Composable () -> String?,
+        entries: @Composable () -> List<ListPreferenceEntry>,
+        key: @Composable () -> String,
+        defaultValue: @Composable () -> String?,
+        icon: @Composable () -> Painter? = { null },
+        enabled: @Composable () -> Boolean = { true },
+        visible: @Composable () -> Boolean = { true },
+    ) {
+        preference(
+            ListPreference(
+                title = title,
+                summary = summary,
+                entries = entries,
+                key = key,
+                defaultValue = defaultValue,
+                icon = icon,
+                enabled = enabled,
+                visible = visible,
+            ),
+        )
     }
 }

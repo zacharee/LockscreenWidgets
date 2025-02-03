@@ -50,9 +50,8 @@ import tk.zwander.common.util.eventManager
 import tk.zwander.common.util.prefManager
 import tk.zwander.lockscreenwidgets.BuildConfig
 import tk.zwander.lockscreenwidgets.R
-import tk.zwander.lockscreenwidgets.activities.SettingsActivity
+import tk.zwander.lockscreenwidgets.activities.ComposeFrameSettingsActivity
 import tk.zwander.lockscreenwidgets.activities.UsageActivity
-import tk.zwander.lockscreenwidgets.fragments.SettingsFragment
 import tk.zwander.widgetdrawer.activities.ComposeDrawerSettingsActivity
 
 @Composable
@@ -84,7 +83,7 @@ fun rememberFeatureCards(): List<FeatureCardInfo> {
                         R.drawable.ic_baseline_settings_24,
                         R.string.settings
                     ) {
-                        SettingsActivity.launch(context, SettingsFragment::class.java)
+                        context.startActivity(Intent(context, ComposeFrameSettingsActivity::class.java))
                     },
                 ),
                 onAddWidget = {
