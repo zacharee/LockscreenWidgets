@@ -86,8 +86,6 @@ dependencies {
     implementation(libs.material)
     implementation(libs.byte.buddy.android)
     implementation(libs.seekBarPreference)
-    implementation(libs.collapsiblePreferenceCategory)
-    implementation(libs.colorpicker)
     implementation(libs.patreonSupportersRetrieval)
     implementation(libs.spannedGridLayoutManager)
     implementation(libs.composeIntroSlider)
