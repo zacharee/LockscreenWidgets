@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
     <string name="version_template">%s</string>
     <string name="edit_gesture_hint">Toque no quadro do widget com dois dedos para mover e alterar o tamanho.</string>
     <string name="edit_gesture_hint_2">Ótimo! Toque com dois dedos para ocultar a interface de edição.</string>
@@ -31,6 +31,10 @@
     <string name="back">Back</string>
     <string name="clear">Clear</string>
     <string name="launcher">Launcher</string>
+    <string name="reset">Reset</string>
+    <string name="increase">Increase</string>
+    <string name="decrease">Decrease</string>
+    <string name="selected" tools:override="true">Selected</string>
     <string name="drawer_enabled">Drawer Enabled</string>
     <string name="frame_enabled">Frame Enabled</string>
     <string name="add_id_hint">com.android.systemui:id/some_id_here</string>
@@ -220,6 +224,8 @@
     <string name="drawer_hide_when_notification_panel_expanded_desc">Dismiss the widget drawer when the notification panel is expanded behind it.</string>
     <string name="drawer_handle_tap_to_open">Single-Tap Handle to Open Drawer</string>
     <string name="drawer_handle_tap_to_open_desc">Single-tapping the handle will open the drawer immediately instead of requiring a drag or a double tap.</string>
+    <string name="drawer_handle_lock_position">Lock Handle Position</string>
+    <string name="drawer_handle_lock_position_desc">Prevents the drawer handle from being moved.</string>
     <string name="show_only_when_locked">Show only when Locked</string>
     <string name="show_only_when_locked_desc">Only show the drawer handle when the device is on the lock screen.</string>
     <string name="icon_pack">Icon Pack</string>
@@ -256,6 +262,7 @@
     <string name="remove_frame_confirmation_message">Are you sure you want to remove this frame?</string>
     <string name="select">Select</string>
     <string name="cancel">Cancel</string>
+    <string name="apply">Apply</string>
     <string name="select_frame">Select Frame</string>
     <string name="selected_frame">Selected frame: %s</string>
     <string name="settings_screen_category_grid">Grid</string>

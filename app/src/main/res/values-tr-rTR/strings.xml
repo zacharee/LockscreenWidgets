@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
     <string name="version_template">v%s</string>
     <string name="edit_gesture_hint">Widget çerçevesine iki parmağınızla dokunarak onu taşıyabilir ve yeniden boyutlandırabilirsiniz.</string>
     <string name="edit_gesture_hint_2">Harika! Düzenleme arayüzünü gizlemek için iki parmağınızla dokunun.</string>
@@ -31,6 +31,10 @@
     <string name="back">Geri</string>
     <string name="clear">Temizle</string>
     <string name="launcher">Başlatıcı</string>
+    <string name="reset">Reset</string>
+    <string name="increase">Increase</string>
+    <string name="decrease">Decrease</string>
+    <string name="selected" tools:override="true">Selected</string>
     <string name="drawer_enabled">Çekmece Etkinleştirildi</string>
     <string name="frame_enabled">Çerçeve Etkinleştirildi</string>
     <string name="add_id_hint">com.android.systemui:id/some_id_here</string>
@@ -220,6 +224,8 @@
     <string name="drawer_hide_when_notification_panel_expanded_desc">Bildirim paneli arkaplanda genişletildiğinde widget çekmecesini kapatın.</string>
     <string name="drawer_handle_tap_to_open">Çekmeceyi Açmak İçin Tek Dokunuşlu Tutamaç</string>
     <string name="drawer_handle_tap_to_open_desc">Tutamacı tek kez tıkladığınızda çekmece hemen açılıyor; sürüklemek veya çift tıklamak gerekmiyor.</string>
+    <string name="drawer_handle_lock_position">Lock Handle Position</string>
+    <string name="drawer_handle_lock_position_desc">Prevents the drawer handle from being moved.</string>
     <string name="show_only_when_locked">Yalnızca Kilitli olduğunda göster</string>
     <string name="show_only_when_locked_desc">Çekmece tutamaçını yalnızca cihaz kilit ekranındayken göster.</string>
     <string name="icon_pack">Simge Paketi</string>
@@ -256,6 +262,7 @@
     <string name="remove_frame_confirmation_message">Are you sure you want to remove this frame?</string>
     <string name="select">Select</string>
     <string name="cancel">Cancel</string>
+    <string name="apply">Apply</string>
     <string name="select_frame">Select Frame</string>
     <string name="selected_frame">Selected frame: %s</string>
     <string name="settings_screen_category_grid">Grid</string>
