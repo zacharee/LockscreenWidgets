@@ -6,6 +6,8 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -15,10 +17,15 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.TextField
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -30,7 +37,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.core.graphics.toColorInt
 import com.github.skydoves.colorpicker.compose.AlphaSlider
 import com.github.skydoves.colorpicker.compose.AlphaTile
 import com.github.skydoves.colorpicker.compose.BrightnessSlider
@@ -38,6 +48,7 @@ import com.github.skydoves.colorpicker.compose.HsvColorPicker
 import com.github.skydoves.colorpicker.compose.rememberColorPickerController
 import tk.zwander.common.compose.util.rememberPreferenceState
 import tk.zwander.common.util.prefManager
+import tk.zwander.lockscreenwidgets.R
 
 class ColorPickerPreference(
     title: @Composable () -> String,
@@ -98,7 +109,7 @@ fun ColorPickerPreference(
     )
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalStdlibApi::class)
 @Composable
 fun ColorPickerPreference(
     title: String,
@@ -112,8 +123,6 @@ fun ColorPickerPreference(
     var showingPickerDialog by remember {
         mutableStateOf(false)
     }
-
-    val controller = rememberColorPickerController()
 
     BasePreferenceLayout(
         title = title,
@@ -140,9 +149,52 @@ fun ColorPickerPreference(
     )
 
     if (showingPickerDialog) {
+        val controller = rememberColorPickerController()
+        val currentControllerColor by controller.selectedColor
+
         val state = rememberModalBottomSheetState(
             skipPartiallyExpanded = true,
         )
+
+        var textFieldContents by remember {
+            mutableStateOf(color.toArgb().toHexString())
+        }
+        var textFieldValid by remember {
+            mutableStateOf(true)
+        }
+        var initialized by remember {
+            mutableStateOf(false)
+        }
+
+        LaunchedEffect(null) {
+            controller.selectByColor(color, false)
+            initialized = true
+        }
+
+        LaunchedEffect(currentControllerColor) {
+            if (initialized) {
+                val newColorInt = currentControllerColor.toArgb()
+                val currentColorInt = try {
+                    "#${textFieldContents}".toColorInt()
+                } catch (_: IllegalArgumentException) {
+                    null
+                }
+
+                if (newColorInt != currentColorInt) {
+                    textFieldContents = newColorInt.toHexString()
+                }
+            }
+        }
+
+        LaunchedEffect(textFieldContents) {
+            textFieldValid = try {
+                val newColor = Color("#${textFieldContents}".toColorInt())
+                controller.selectByColor(newColor, false)
+                true
+            } catch (_: IllegalArgumentException) {
+                false
+            }
+        }
 
         ModalBottomSheet(
             onDismissRequest = { showingPickerDialog = false },
@@ -152,7 +204,7 @@ fun ColorPickerPreference(
                 modifier = Modifier
                     .fillMaxWidth()
                     .verticalScroll(rememberScrollState())
-                    .padding(8.dp),
+                    .padding(16.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
@@ -161,10 +213,6 @@ fun ColorPickerPreference(
                         .fillMaxWidth()
                         .height(450.dp),
                     controller = controller,
-                    onColorChanged = {
-                        onColorChanged(it.color)
-                    },
-                    initialColor = color,
                 )
 
                 AlphaSlider(
@@ -181,12 +229,46 @@ fun ColorPickerPreference(
                         .height(36.dp),
                 )
 
+                Spacer(modifier = Modifier.size(8.dp))
+
+                TextField(
+                    value = textFieldContents,
+                    onValueChange = {
+                        textFieldContents = it.replace(Regex("[^a-fA-F0-9]"), "")
+                    },
+                    isError = !textFieldValid,
+                    textStyle = LocalTextStyle.current.copy(textAlign = TextAlign.Center),
+                    prefix = { Text(text = "#") },
+                )
+
                 AlphaTile(
                     modifier = Modifier
                         .size(84.dp)
                         .clip(RoundedCornerShape(8.dp)),
                     controller = controller,
                 )
+
+                Row(
+                    modifier = Modifier.align(Alignment.End),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    TextButton(
+                        onClick = { showingPickerDialog = false },
+                    ) {
+                        Text(text = stringResource(R.string.cancel))
+                    }
+
+                    TextButton(
+                        onClick = {
+                            showingPickerDialog = false
+                            onColorChanged(controller.selectedColor.value)
+                        },
+                        enabled = textFieldValid,
+                    ) {
+                        Text(text = stringResource(R.string.apply))
+                    }
+                }
             }
         }
     }
