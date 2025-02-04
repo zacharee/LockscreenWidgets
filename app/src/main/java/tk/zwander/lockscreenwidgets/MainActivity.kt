@@ -17,7 +17,6 @@ import kotlinx.coroutines.launch
 import tk.zwander.common.activities.BaseActivity
 import tk.zwander.common.activities.OnboardingActivity
 import tk.zwander.common.compose.main.MainContent
-import tk.zwander.common.tiles.NCTile
 import tk.zwander.common.tiles.widget.WidgetTileFive
 import tk.zwander.common.tiles.widget.WidgetTileFour
 import tk.zwander.common.tiles.widget.WidgetTileOne
@@ -58,7 +57,6 @@ class MainActivity : BaseActivity(), CoroutineScope by MainScope() {
             //We don't want the NC tile to show on non-One UI devices.
             launch(Dispatchers.IO) {
                 val components = arrayOf(
-                    NCTile::class.java,
                     WidgetTileOne::class.java,
                     WidgetTileTwo::class.java,
                     WidgetTileThree::class.java,

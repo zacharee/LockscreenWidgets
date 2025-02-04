@@ -39,6 +39,7 @@ import tk.zwander.common.util.vibrate
 import tk.zwander.lockscreenwidgets.activities.TaskerIsShowingFrame
 import tk.zwander.lockscreenwidgets.compose.IDListLayout
 import tk.zwander.lockscreenwidgets.databinding.WidgetFrameBinding
+import tk.zwander.lockscreenwidgets.util.FrameSpecificPreferences
 import kotlin.math.roundToInt
 
 /**
@@ -101,6 +102,10 @@ class WidgetFrameView(context: Context, attrs: AttributeSet) : ConstraintLayout(
 
     private val debugIdItems = MutableStateFlow<Set<String>>(setOf())
 
+    private val framePreferences by lazy {
+        FrameSpecificPreferences(frameId = frameId, context = context)
+    }
+
     enum class AnimationState {
         STATE_ADDING,
         STATE_REMOVING,
@@ -119,6 +124,8 @@ class WidgetFrameView(context: Context, attrs: AttributeSet) : ConstraintLayout(
         if (context.prefManager.firstViewing && frameId == -1) {
             binding.gestureHintView.root.isVisible = true
         }
+
+        updateFrameBackground()
     }
 
     @SuppressLint("ClickableViewAccessibility")
@@ -173,7 +180,6 @@ class WidgetFrameView(context: Context, attrs: AttributeSet) : ConstraintLayout(
 
         updateDebugIdViewVisibility()
         updatePageIndicatorBehavior()
-        updateFrameBackground()
     }
 
     override fun onAttachedToWindow() {
@@ -300,7 +306,7 @@ class WidgetFrameView(context: Context, attrs: AttributeSet) : ConstraintLayout(
     }
 
     fun updateFrameBackground() {
-        binding.frameCard.setCardBackgroundColor(context.prefManager.backgroundColor)
+        binding.frameCard.setCardBackgroundColor(framePreferences.backgroundColor)
     }
 
     fun updatePageIndicatorBehavior() {

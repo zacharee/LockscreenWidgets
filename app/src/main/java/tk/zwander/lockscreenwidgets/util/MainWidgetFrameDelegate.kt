@@ -181,8 +181,8 @@ open class MainWidgetFrameDelegate protected constructor(context: Context, prote
 
             return when {
                 id != -1 -> FrameSizeAndPosition.FrameType.SecondaryLockscreen.select(!isLandscape, id)
-                state.notificationsPanelFullyExpanded && prefManager.showInNotificationCenter -> {
-                    if (kgm.isKeyguardLocked && prefManager.separatePosForLockNC) {
+                state.notificationsPanelFullyExpanded && framePrefs.showInNotificationShade -> {
+                    if (kgm.isKeyguardLocked && framePrefs.separateLockNCPosition) {
                         FrameSizeAndPosition.FrameType.LockNotification.select(!isLandscape)
                     } else {
                         FrameSizeAndPosition.FrameType.NotificationNormal.select(!isLandscape)
@@ -240,6 +240,8 @@ open class MainWidgetFrameDelegate protected constructor(context: Context, prote
         )
     }
 
+    protected val framePrefs = FrameSpecificPreferences(context = context, frameId = id)
+
     override val prefsHandler = HandlerRegistry {
         handler(FramePrefs.generateCurrentWidgetsKey(id)) {
             //Make sure the adapter knows of any changes to the widget list
@@ -264,10 +266,13 @@ open class MainWidgetFrameDelegate protected constructor(context: Context, prote
             updateCounts()
             adapter.updateViews()
         }
-        handler(PrefManager.KEY_FRAME_BACKGROUND_COLOR) {
+        handler(FrameSpecificPreferences.keyFor(id, PrefManager.KEY_FRAME_BACKGROUND_COLOR)) {
             binding.frame.updateFrameBackground()
         }
-        handler(PrefManager.KEY_FRAME_MASKED_MODE, PrefManager.KEY_MASKED_MODE_DIM_AMOUNT) {
+        handler(
+            framePrefs.keyFor(PrefManager.KEY_FRAME_MASKED_MODE),
+            framePrefs.keyFor(PrefManager.KEY_MASKED_MODE_DIM_AMOUNT),
+        ) {
             updateWallpaperLayerIfNeeded()
         }
         handler(
@@ -276,7 +281,7 @@ open class MainWidgetFrameDelegate protected constructor(context: Context, prote
         ) {
             binding.frame.updateDebugIdViewVisibility()
         }
-        handler(PrefManager.KEY_SHOW_IN_NOTIFICATION_CENTER) {
+        handler(framePrefs.keyFor(PrefManager.KEY_SHOW_IN_NOTIFICATION_CENTER)) {
             updateState { it.copy(isPendingNotificationStateChange = true) }
         }
         handler(PrefManager.KEY_FRAME_CORNER_RADIUS) {
@@ -305,17 +310,20 @@ open class MainWidgetFrameDelegate protected constructor(context: Context, prote
     private val showWallpaperLayerCondition: Boolean
         get() = !state.isPreview &&
                 state.selectionPreviewRequestCode == null &&
-                prefManager.maskedMode &&
-                (!state.notificationsPanelFullyExpanded || !prefManager.showInNotificationCenter)
+                framePrefs.maskedMode &&
+                (!state.notificationsPanelFullyExpanded || !framePrefs.showInNotificationShade)
 
     override val blurManager by lazy {
         BlurManager(
             context = this,
             params = params,
             targetView = binding.blurBackground,
-            listenKeys = listOf(PrefManager.KEY_BLUR_BACKGROUND, PrefManager.KEY_BLUR_BACKGROUND_AMOUNT),
-            shouldBlur = { prefManager.blurBackground && !showWallpaperLayerCondition },
-            blurAmount = { prefManager.backgroundBlurAmount },
+            listenKeys = listOf(
+                framePrefs.keyFor(PrefManager.KEY_BLUR_BACKGROUND),
+                framePrefs.keyFor(PrefManager.KEY_BLUR_BACKGROUND_AMOUNT),
+            ),
+            shouldBlur = { framePrefs.blurBackground && !showWallpaperLayerCondition },
+            blurAmount = { framePrefs.blurBackgroundAmount },
             cornerRadius = { dpAsPx(prefManager.cornerRadiusDp).toFloat() },
             updateWindow = { binding.frame.updateWindow(wm, params) },
             windowManager = wm,
@@ -669,7 +677,7 @@ open class MainWidgetFrameDelegate protected constructor(context: Context, prote
      * =======
      * - [BaseDelegate.BaseState.isScreenOn] is true
      * - [State.isTempHide] is false
-     * - [State.notificationsPanelFullyExpanded] is true AND [PrefManager.showInNotificationCenter] is true
+     * - [State.notificationsPanelFullyExpanded] is true AND [FrameSpecificPreferences.showInNotificationShade] is true
      * - [State.hideForPresentIds] is false
      * - [State.hideForNonPresentIds] is false
      * - [PrefManager.widgetFrameEnabled] is true
@@ -680,14 +688,14 @@ open class MainWidgetFrameDelegate protected constructor(context: Context, prote
      * - [BaseDelegate.BaseState.wasOnKeyguard] is true
      * - [BaseDelegate.BaseState.isScreenOn] is true (i.e. the display is properly on: not in Doze or on the AOD)
      * - [State.isTempHide] is false
-     * - [PrefManager.showOnMainLockScreen] is true OR [PrefManager.showInNotificationCenter] is false
-     * - [PrefManager.hideOnFaceWidgets] is false OR [State.isOnFaceWidgets] is false
+     * - [FrameSpecificPreferences.showOnMainLockScreen] is true OR [FrameSpecificPreferences.showInNotificationShade] is false
+     * - [FrameSpecificPreferences.hideOnFaceWidgets] is false OR [State.isOnFaceWidgets] is false
      * - [State.currentAppLayer] is less than 0 (i.e. doesn't exist)
-     * - [State.isOnEdgePanel] is false OR [PrefManager.hideOnEdgePanel] is false
+     * - [State.isOnEdgePanel] is false OR [FrameSpecificPreferences.hideOnEdgePanel] is false
      * - [State.isOnScreenOffMemo] is false
-     * - [State.onMainLockscreen] is true OR [State.showingNotificationsPanel] is true OR [PrefManager.hideOnSecurityPage] is false
-     * - [State.showingNotificationsPanel] is false OR [PrefManager.hideOnNotificationShade] is false (OR [State.notificationsPanelFullyExpanded] is true AND [PrefManager.showInNotificationCenter] is true
-     * - [State.notificationCount] is 0 (i.e. no notifications shown on lock screen, not necessarily no notifications at all) OR [PrefManager.hideOnNotifications] is false
+     * - [State.onMainLockscreen] is true OR [State.showingNotificationsPanel] is true OR [FrameSpecificPreferences.hideOnSecurityPage] is false
+     * - [State.showingNotificationsPanel] is false OR [FrameSpecificPreferences.hideOnNotificationShade] is false (OR [State.notificationsPanelFullyExpanded] is true AND [FrameSpecificPreferences.showInNotificationShade] is true
+     * - [State.notificationCount] is 0 (i.e. no notifications shown on lock screen, not necessarily no notifications at all) OR [FrameSpecificPreferences.hideOnNotifications] is false
      * - [State.hideForPresentIds] is false OR [PrefManager.presentIds] is empty
      * - [State.hideForNonPresentIds] is false OR [PrefManager.nonPresentIds] is empty
      * - [PrefManager.hideInLandscape] is false OR [screenOrientation] represents a portrait rotation
@@ -707,24 +715,24 @@ open class MainWidgetFrameDelegate protected constructor(context: Context, prote
                     && prefManager.widgetFrameEnabled
                     && (!prefManager.hideInLandscape || commonState.screenOrientation == Surface.ROTATION_0 || commonState.screenOrientation == Surface.ROTATION_180)
                     && prefManager.canShowFrameFromTasker
-                    && (!prefManager.hideFrameWhenKeyboardShown || !state.showingKeyboard)
+                    && (!framePrefs.hideWhenKeyboardShown || !state.showingKeyboard)
         }
 
         fun forNotificationCenter(): Boolean {
-            return (id == -1 && state.notificationsPanelFullyExpanded && prefManager.showInNotificationCenter)
+            return (state.notificationsPanelFullyExpanded && framePrefs.showInNotificationShade)
                     && forCommon()
         }
 
         fun forLockscreen(): Boolean {
             return commonState.wasOnKeyguard
-                    && (prefManager.showOnMainLockScreen || !prefManager.showInNotificationCenter)
-                    && (!prefManager.hideOnFaceWidgets || !state.isOnFaceWidgets)
+                    && (framePrefs.showOnMainLockScreen || !framePrefs.showInNotificationShade)
+                    && (!framePrefs.hideOnFaceWidgets || !state.isOnFaceWidgets)
                     && (state.currentAppLayer < 0 && state.currentAppPackage == null)
-                    && (!state.isOnEdgePanel || !prefManager.hideOnEdgePanel)
+                    && (!state.isOnEdgePanel || !framePrefs.hideOnEdgePanel)
                     && !state.isOnScreenOffMemo
-                    && (state.onMainLockscreen || state.showingNotificationsPanel || !prefManager.hideOnSecurityPage)
-                    && (!state.showingNotificationsPanel || !prefManager.hideOnNotificationShade)
-                    && (state.notificationCount == 0 || !prefManager.hideOnNotifications)
+                    && (state.onMainLockscreen || state.showingNotificationsPanel || !framePrefs.hideOnSecurityPage)
+                    && (!state.showingNotificationsPanel || !framePrefs.hideOnNotificationShade)
+                    && (state.notificationCount == 0 || !framePrefs.hideOnNotifications)
                     && !state.hidingForPresentApp
                     && forCommon()
         }
@@ -735,21 +743,23 @@ open class MainWidgetFrameDelegate protected constructor(context: Context, prote
 
         return (forced() || forPreview() || forNotificationCenter() || forLockscreen()).also {
             logUtils.debugLog(
-                "canShow: $it\n" +
+                "canShow $id: $it\n" +
                         "state: $state\n " +
-                        "showOnMainLockScreen: ${prefManager.showOnMainLockScreen}\n" +
+                        "showOnMainLockScreen: ${framePrefs.showOnMainLockScreen}\n" +
                         "widgetFrameEnabled: ${prefManager.widgetFrameEnabled}\n" +
-                        "hideOnSecurityPage: ${prefManager.hideOnSecurityPage}\n" +
-                        "hideOnNotifications: ${prefManager.hideOnNotifications}\n" +
-                        "hideOnNotificationShade: ${prefManager.hideOnNotificationShade}\n" +
+                        "hideOnSecurityPage: ${framePrefs.hideOnSecurityPage}\n" +
+                        "hideOnNotifications: ${framePrefs.hideOnNotifications}\n" +
+                        "hideOnNotificationShade: ${framePrefs.hideOnNotificationShade}\n" +
                         "presentIds: ${prefManager.presentIds}\n" +
                         "nonPresentIds: ${prefManager.nonPresentIds}\n" +
                         "hideInLandscape: ${prefManager.hideInLandscape}\n" +
-                        "showInNotificationCenter: ${prefManager.showInNotificationCenter}\n" +
-                        "hideOnEdgePanel: ${prefManager.hideOnEdgePanel}\n" +
+                        "showInNotificationCenter: ${framePrefs.showInNotificationShade}\n" +
+                        "hideOnEdgePanel: ${framePrefs.hideOnEdgePanel}\n" +
                         "hidingForPresentApp: ${state.hidingForPresentApp}\n" +
                         "canShowFrameFromTasker: ${prefManager.canShowFrameFromTasker}\n" +
-                        "forceShowFrame: ${prefManager.forceShowFrame}\n",
+                        "forceShowFrame: ${prefManager.forceShowFrame}\n" +
+                        "hideOnFaceWidgets: ${framePrefs.hideOnFaceWidgets}\n" +
+                        "hideWhenKeyboardShown: ${framePrefs.hideWhenKeyboardShown}\n",
             )
         }
     }
@@ -787,7 +797,7 @@ open class MainWidgetFrameDelegate protected constructor(context: Context, prote
                     binding.wallpaperBackground.setImageDrawable(this)
                     binding.wallpaperBackground.colorFilter = PorterDuffColorFilter(
                         Color.argb(
-                            ((prefManager.wallpaperDimAmount / 100f) * 255).toInt(),
+                            ((framePrefs.maskedModeDimAmount / 100f) * 255).toInt(),
                             0, 0, 0
                         ), PorterDuff.Mode.SRC_ATOP
                     )

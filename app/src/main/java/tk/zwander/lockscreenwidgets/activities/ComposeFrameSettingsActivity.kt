@@ -20,6 +20,7 @@ import tk.zwander.common.compose.settings.ListPreferenceEntry
 import tk.zwander.common.compose.settings.PreferenceScreen
 import tk.zwander.common.compose.settings.booleanPreferenceDependency
 import tk.zwander.common.compose.settings.createCommonSection
+import tk.zwander.common.compose.settings.rememberBooleanPreferenceDependency
 import tk.zwander.common.compose.settings.rememberPreferenceScreen
 import tk.zwander.common.compose.util.rememberPreferenceState
 import tk.zwander.common.util.Event
@@ -36,6 +37,7 @@ import tk.zwander.common.util.shouldShowBlurOptions
 import tk.zwander.lockscreenwidgets.R
 import tk.zwander.lockscreenwidgets.services.isNotificationListenerActive
 import tk.zwander.lockscreenwidgets.util.FramePrefs
+import tk.zwander.lockscreenwidgets.util.FrameSpecificPreferences
 
 class ComposeFrameSettingsActivity : BaseActivity(), EventObserver {
     companion object {
@@ -135,7 +137,7 @@ class ComposeFrameSettingsActivity : BaseActivity(), EventObserver {
                         title = { stringResource(R.string.settings_screen_background_color) },
                         summary = { stringResource(R.string.settings_screen_background_color_desc) },
                         icon = { painterResource(R.drawable.ic_baseline_color_lens_24) },
-                        key = { PrefManager.KEY_FRAME_BACKGROUND_COLOR },
+                        key = { FrameSpecificPreferences.keyFor(selectedFrame, PrefManager.KEY_FRAME_BACKGROUND_COLOR) },
                         defaultValue = { 0 },
                     )
 
@@ -143,7 +145,7 @@ class ComposeFrameSettingsActivity : BaseActivity(), EventObserver {
                         title = { stringResource(R.string.settings_screen_blur_background) },
                         summary = { stringResource(R.string.settings_screen_blur_background_desc) },
                         icon = { painterResource(R.drawable.ic_baseline_blur_on_24) },
-                        key = { PrefManager.KEY_BLUR_BACKGROUND },
+                        key = { FrameSpecificPreferences.keyFor(selectedFrame, PrefManager.KEY_BLUR_BACKGROUND) },
                         defaultValue = { false },
                         visible = { shouldShowBlurOptions },
                     )
@@ -152,11 +154,18 @@ class ComposeFrameSettingsActivity : BaseActivity(), EventObserver {
                         title = { stringResource(R.string.settings_screen_blur_background_amount) },
                         summary = { stringResource(R.string.settings_screen_blur_background_amount_desc) },
                         icon = { painterResource(R.drawable.ic_baseline_deblur_24) },
-                        key = { PrefManager.KEY_BLUR_BACKGROUND_AMOUNT },
+                        key = { FrameSpecificPreferences.keyFor(selectedFrame, PrefManager.KEY_BLUR_BACKGROUND_AMOUNT) },
                         defaultValue = { 100 },
                         minValue = { 1 },
                         maxValue = { 1000 },
-                        enabled = booleanPreferenceDependency(PrefManager.KEY_BLUR_BACKGROUND),
+                        enabled = {
+                            rememberBooleanPreferenceDependency(
+                                FrameSpecificPreferences.keyFor(
+                                    selectedFrame,
+                                    PrefManager.KEY_BLUR_BACKGROUND
+                                )
+                            )
+                        },
                         scale = { 1.0 },
                         visible = { shouldShowBlurOptions },
                     )
@@ -165,7 +174,7 @@ class ComposeFrameSettingsActivity : BaseActivity(), EventObserver {
                         title = { stringResource(R.string.settings_screen_masked_mode) },
                         summary = { stringResource(R.string.settings_screen_masked_mode_desc) },
                         icon = { painterResource(R.drawable.ic_baseline_opacity_24) },
-                        key = { PrefManager.KEY_FRAME_MASKED_MODE },
+                        key = { FrameSpecificPreferences.keyFor(selectedFrame, PrefManager.KEY_FRAME_MASKED_MODE) },
                         canChange = { newValue ->
                             if (newValue && !canReadWallpaper) {
                                 OnboardingActivity.start(this@ComposeFrameSettingsActivity, OnboardingActivity.RetroMode.STORAGE)
@@ -178,9 +187,11 @@ class ComposeFrameSettingsActivity : BaseActivity(), EventObserver {
                         title = { stringResource(R.string.settings_screen_masked_mode_dim_amount) },
                         summary = { stringResource(R.string.settings_screen_masked_mode_dim_amount_desc) },
                         icon = { painterResource(R.drawable.ic_baseline_brightness_medium_24) },
-                        key = { PrefManager.KEY_MASKED_MODE_DIM_AMOUNT },
+                        key = { FrameSpecificPreferences.keyFor(selectedFrame, PrefManager.KEY_MASKED_MODE_DIM_AMOUNT) },
                         defaultValue = { 0 },
-                        enabled = booleanPreferenceDependency(PrefManager.KEY_FRAME_MASKED_MODE),
+                        enabled = {
+                            rememberBooleanPreferenceDependency(FrameSpecificPreferences.keyFor(selectedFrame, PrefManager.KEY_FRAME_MASKED_MODE))
+                        },
                         minValue = { 0 },
                         maxValue = { 10000 },
                         scale = { 0.01 },
@@ -222,7 +233,7 @@ class ComposeFrameSettingsActivity : BaseActivity(), EventObserver {
                         key = {
                             FramePrefs.generatePrefKey(
                                 FramePrefs.KEY_FRAME_COL_COUNT,
-                                selectedFrame
+                                selectedFrame,
                             )
                         },
                         defaultValue = { 1 },
@@ -238,7 +249,7 @@ class ComposeFrameSettingsActivity : BaseActivity(), EventObserver {
                         key = {
                             FramePrefs.generatePrefKey(
                                 FramePrefs.KEY_FRAME_ROW_COUNT,
-                                selectedFrame
+                                selectedFrame,
                             )
                         },
                         defaultValue = { 1 },
@@ -263,9 +274,11 @@ class ComposeFrameSettingsActivity : BaseActivity(), EventObserver {
                     switchPreference(
                         title = { stringResource(R.string.settings_screen_separate_position_for_lock_nc) },
                         summary = { stringResource(R.string.settings_screen_separate_position_for_lock_nc_desc) },
-                        key = { PrefManager.KEY_SEPARATE_POS_FOR_LOCK_NC },
+                        key = { FrameSpecificPreferences.keyFor(selectedFrame, PrefManager.KEY_SEPARATE_POS_FOR_LOCK_NC) },
                         icon = { painterResource(R.drawable.ic_baseline_layers_24) },
-                        enabled = booleanPreferenceDependency(PrefManager.KEY_SHOW_IN_NOTIFICATION_CENTER),
+                        enabled = {
+                            rememberBooleanPreferenceDependency(FrameSpecificPreferences.keyFor(selectedFrame, PrefManager.KEY_SHOW_IN_NOTIFICATION_CENTER))
+                        },
                         visible = { canShowNCOptions },
                     )
 
@@ -284,7 +297,7 @@ class ComposeFrameSettingsActivity : BaseActivity(), EventObserver {
                     switchPreference(
                         title = { stringResource(R.string.settings_screen_hide_when_notifications_shown) },
                         summary = { stringResource(R.string.settings_screen_hide_when_notifications_shown_desc) },
-                        key = { PrefManager.KEY_HIDE_ON_NOTIFICATIONS },
+                        key = { FrameSpecificPreferences.keyFor(selectedFrame, PrefManager.KEY_HIDE_ON_NOTIFICATIONS) },
                         icon = { painterResource(R.drawable.ic_baseline_notifications_off_24) },
                         canChange = { newValue ->
                             if (newValue && !isNotificationListenerActive) {
@@ -297,14 +310,14 @@ class ComposeFrameSettingsActivity : BaseActivity(), EventObserver {
                     switchPreference(
                         title = { stringResource(R.string.settings_screen_hide_on_notification_shade) },
                         summary = { stringResource(R.string.settings_screen_hide_on_notification_shade_desc) },
-                        key = { PrefManager.KEY_HIDE_ON_NOTIFICATION_SHADE },
+                        key = { FrameSpecificPreferences.keyFor(selectedFrame, PrefManager.KEY_HIDE_ON_NOTIFICATION_SHADE) },
                         icon = { painterResource(R.drawable.ic_baseline_clear_all_24) },
                     )
 
                     switchPreference(
                         title = { stringResource(R.string.settings_screen_hide_on_security_input) },
                         summary = { stringResource(R.string.settings_screen_hide_on_security_input_desc) },
-                        key = { PrefManager.KEY_HIDE_ON_SECURITY_PAGE },
+                        key = { FrameSpecificPreferences.keyFor(selectedFrame, PrefManager.KEY_HIDE_ON_SECURITY_PAGE) },
                         icon = { painterResource(R.drawable.is_baseline_password_24) },
                         defaultValue = { true },
                     )
@@ -312,7 +325,7 @@ class ComposeFrameSettingsActivity : BaseActivity(), EventObserver {
                     switchPreference(
                         title = { stringResource(R.string.settings_screen_hide_on_facewidgets) },
                         summary = { stringResource(R.string.settings_screen_hide_on_facewidgets_desc) },
-                        key = { PrefManager.KEY_HIDE_ON_FACEWIDGETS },
+                        key = { FrameSpecificPreferences.keyFor(selectedFrame, PrefManager.KEY_HIDE_ON_FACEWIDGETS) },
                         icon = { painterResource(R.drawable.ic_baseline_widgets_24) },
                         visible = {
                             isOneUI && Build.VERSION.SDK_INT > Build.VERSION_CODES.Q
@@ -329,14 +342,14 @@ class ComposeFrameSettingsActivity : BaseActivity(), EventObserver {
                     switchPreference(
                         title = { stringResource(R.string.settings_screen_hide_when_keyboard_shown) },
                         summary = { stringResource(R.string.settings_screen_hide_when_keyboard_shown_desc) },
-                        key = { PrefManager.KEY_FRAME_HIDE_WHEN_KEYBOARD_SHOWN },
+                        key = { FrameSpecificPreferences.keyFor(selectedFrame, PrefManager.KEY_FRAME_HIDE_WHEN_KEYBOARD_SHOWN) },
                         icon = { painterResource(R.drawable.baseline_keyboard_24) },
                     )
 
                     switchPreference(
                         title = { stringResource(R.string.settings_screen_hide_on_edge_panels) },
                         summary = { stringResource(R.string.settings_screen_hide_on_edge_panels_desc) },
-                        key = { PrefManager.KEY_HIDE_ON_EDGE_PANEL },
+                        key = { FrameSpecificPreferences.keyFor(selectedFrame, PrefManager.KEY_HIDE_ON_EDGE_PANEL) },
                         icon = { painterResource(R.drawable.border_right) },
                         defaultValue = { true },
                         visible = { isTouchWiz },
@@ -383,7 +396,7 @@ class ComposeFrameSettingsActivity : BaseActivity(), EventObserver {
                     switchPreference(
                         title = { stringResource(R.string.settings_screen_show_in_notification_center) },
                         summary = { stringResource(R.string.settings_screen_show_in_notification_center_desc) },
-                        key = { PrefManager.KEY_SHOW_IN_NOTIFICATION_CENTER },
+                        key = { FrameSpecificPreferences.keyFor(selectedFrame, PrefManager.KEY_SHOW_IN_NOTIFICATION_CENTER) },
                         icon = { painterResource(R.drawable.ic_baseline_notifications_active_24) },
                         defaultValue = { false },
                         visible = { canShowNCOptions },
@@ -392,10 +405,12 @@ class ComposeFrameSettingsActivity : BaseActivity(), EventObserver {
                     switchPreference(
                         title = { stringResource(R.string.settings_screen_show_on_main_lock_screen) },
                         summary = { stringResource(R.string.settings_screen_show_on_main_lock_screen_desc) },
-                        key = { PrefManager.KEY_SHOW_ON_MAIN_LOCK_SCREEN },
+                        key = { FrameSpecificPreferences.keyFor(selectedFrame, PrefManager.KEY_SHOW_ON_MAIN_LOCK_SCREEN) },
                         icon = { painterResource(R.drawable.ic_baseline_lock_24) },
                         defaultValue = { true },
-                        enabled = booleanPreferenceDependency(PrefManager.KEY_SHOW_IN_NOTIFICATION_CENTER),
+                        enabled = {
+                            rememberBooleanPreferenceDependency(FrameSpecificPreferences.keyFor(selectedFrame, PrefManager.KEY_SHOW_IN_NOTIFICATION_CENTER))
+                        },
                         visible = { canShowNCOptions },
                     )
 

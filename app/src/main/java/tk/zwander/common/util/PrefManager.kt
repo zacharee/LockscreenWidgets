@@ -395,34 +395,11 @@ class PrefManager private constructor(private val context: Context) {
             putBoolean(KEY_FIRST_RUN, value)
         }
 
-    //Whether or not the widget frame should hide when there are > min priority
-    //notifications shown.
-    var hideOnNotifications: Boolean
-        get() = getBoolean(KEY_HIDE_ON_NOTIFICATIONS, false)
-        set(value) {
-            putBoolean(KEY_HIDE_ON_NOTIFICATIONS, value)
-        }
-
     //Whether the widget frame is actually enabled.
     var widgetFrameEnabled: Boolean
         get() = getBoolean(KEY_WIDGET_FRAME_ENABLED, false)
         set(value) {
             putBoolean(KEY_WIDGET_FRAME_ENABLED, value)
-        }
-
-    //Whether the widget frame should hide on the password/pin/fingerprint/pattern
-    //input screen.
-    var hideOnSecurityPage: Boolean
-        get() = getBoolean(KEY_HIDE_ON_SECURITY_PAGE, true)
-        set(value) {
-            putBoolean(KEY_HIDE_ON_SECURITY_PAGE, value)
-        }
-
-    //Whether the widget frame should hide when the notification shade is down.
-    var hideOnNotificationShade: Boolean
-        get() = getBoolean(KEY_HIDE_ON_NOTIFICATION_SHADE, false)
-        set(value) {
-            putBoolean(KEY_HIDE_ON_NOTIFICATION_SHADE, value)
         }
 
     //Whether the widget frame should animate its hide/show sequences.
@@ -447,24 +424,10 @@ class PrefManager private constructor(private val context: Context) {
             putBoolean(KEY_SHOW_DEBUG_ID_VIEW, value)
         }
 
-    //Whether the widget frame should use a separate position in the notification center
-    //when locked.
-    var separatePosForLockNC: Boolean
-        get() = getBoolean(KEY_SEPARATE_POS_FOR_LOCK_NC, false)
-        set(value) {
-            putBoolean(KEY_SEPARATE_POS_FOR_LOCK_NC, value)
-        }
-
     var showDrawerHandleOnlyWhenLocked: Boolean
         get() = getBoolean(KEY_SHOW_DRAWER_HANDLE_ONLY_WHEN_LOCKED, false)
         set(value) {
             putBoolean(KEY_SHOW_DRAWER_HANDLE_ONLY_WHEN_LOCKED, value)
-        }
-
-    var hideFrameWhenKeyboardShown: Boolean
-        get() = getBoolean(KEY_FRAME_HIDE_WHEN_KEYBOARD_SHOWN, false)
-        set(value) {
-            putBoolean(KEY_FRAME_HIDE_WHEN_KEYBOARD_SHOWN, value)
         }
 
     //How the page indicator (scrollbar) should behave (always show, fade out on inactivity, never show).
@@ -475,30 +438,6 @@ class PrefManager private constructor(private val context: Context) {
         }
         set(value) {
             putString(KEY_PAGE_INDICATOR_BEHAVIOR, value.toString())
-        }
-
-    //The background color of the widget frame.
-    var backgroundColor: Int
-        get() = getInt(KEY_FRAME_BACKGROUND_COLOR, Color.TRANSPARENT)
-        set(value) {
-            putInt(KEY_FRAME_BACKGROUND_COLOR, value)
-        }
-
-    //Whether masked mode is enabled.
-    //On compatible devices with a proper wallpaper setup,
-    //this will emulate a transparent widget background by
-    //drawing the user's wallpaper as the frame background.
-    var maskedMode: Boolean
-        get() = getBoolean(KEY_FRAME_MASKED_MODE, false)
-        set(value) {
-            putBoolean(KEY_FRAME_MASKED_MODE, value)
-        }
-
-    //Whether the frame background should be blurred.
-    var blurBackground: Boolean
-        get() = getBoolean(KEY_BLUR_BACKGROUND, false)
-        set(value) {
-            putBoolean(KEY_BLUR_BACKGROUND, value)
         }
 
     var blurDrawerBackground: Boolean
@@ -527,13 +466,6 @@ class PrefManager private constructor(private val context: Context) {
             putInt(KEY_FRAME_ROW_COUNT, value)
         }
 
-    //The degree of the background blur
-    var backgroundBlurAmount: Int
-        get() = getInt(KEY_BLUR_BACKGROUND_AMOUNT, 100)
-        set(value) {
-            putInt(KEY_BLUR_BACKGROUND_AMOUNT, value)
-        }
-
     var drawerBackgroundBlurAmount: Int
         get() = getInt(KEY_BLUR_DRAWER_BACKGROUND_AMOUNT, 100)
         set(value) {
@@ -541,29 +473,11 @@ class PrefManager private constructor(private val context: Context) {
         }
 
     //How much to dim the masked mode wallpaper (in percent)
+    @Deprecated("Use FrameSpecificPreferences instead")
     var wallpaperDimAmount: Float
         get() = getInt(KEY_MASKED_MODE_DIM_AMOUNT, 0) / 100f
         set(value) {
             putInt(KEY_MASKED_MODE_DIM_AMOUNT, (value * 100f).toInt())
-        }
-
-    //Whether to show in the notification center.
-    //This mode has separate dimensions and positioning
-    //vs the standard lock screen mode.
-    //Only available for Samsung One UI 1.0 and later.
-    var showInNotificationCenter: Boolean
-        get() = getBoolean(KEY_SHOW_IN_NOTIFICATION_CENTER, false)
-        set(value) {
-            putBoolean(KEY_SHOW_IN_NOTIFICATION_CENTER, value)
-        }
-
-    //A dependent option for [showInNotificationCenter].
-    //Disabling this while [showInNotificationCenter] is enabled
-    //will cause the widget frame to only show in the notification center.
-    var showOnMainLockScreen: Boolean
-        get() = getBoolean(KEY_SHOW_ON_MAIN_LOCK_SCREEN, true) || !showInNotificationCenter
-        set(value) {
-            putBoolean(KEY_SHOW_ON_MAIN_LOCK_SCREEN, value)
         }
 
     //The corner radius for the widget frame
@@ -608,14 +522,6 @@ class PrefManager private constructor(private val context: Context) {
         get() = getBoolean(KEY_REQUEST_UNLOCK_DRAWER, true)
         set(value) {
             putBoolean(KEY_REQUEST_UNLOCK_DRAWER, value)
-        }
-
-    //Whether to hide the frame when Samsung's FaceWidgets screen is showing.
-    //(One UI 3.0+)
-    var hideOnFaceWidgets: Boolean
-        get() = getBoolean(KEY_HIDE_ON_FACEWIDGETS, false)
-        set(value) {
-            putBoolean(KEY_HIDE_ON_FACEWIDGETS, value)
         }
 
     //Whether to hide the frame in landscape.
@@ -668,12 +574,6 @@ class PrefManager private constructor(private val context: Context) {
         get() = getBoolean(KEY_SHOW_DRAWER_HANDLE, true)
         set(value) {
             putBoolean(KEY_SHOW_DRAWER_HANDLE, value)
-        }
-
-    var hideOnEdgePanel: Boolean
-        get() = getBoolean(KEY_HIDE_ON_EDGE_PANEL, true)
-        set(value) {
-            putBoolean(KEY_HIDE_ON_EDGE_PANEL, value)
         }
 
     var drawerHandleHeight: Int

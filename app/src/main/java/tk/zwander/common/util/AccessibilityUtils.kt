@@ -26,6 +26,7 @@ import tk.zwander.common.data.window.WindowInfo
 import tk.zwander.common.data.window.WindowRootPair
 import tk.zwander.lockscreenwidgets.appwidget.IDListProvider
 import tk.zwander.lockscreenwidgets.services.Accessibility
+import tk.zwander.lockscreenwidgets.util.FrameSpecificPreferences
 import tk.zwander.lockscreenwidgets.util.MainWidgetFrameDelegate
 import tk.zwander.widgetdrawer.util.DrawerDelegate
 import java.util.concurrent.ConcurrentLinkedQueue
@@ -44,7 +45,6 @@ object AccessibilityUtils {
     private fun Context.processNode(
         nodeState: NodeState,
         node: AccessibilityNodeInfo?,
-        isOnKeyguard: Boolean,
     ) {
         if (node == null) {
             return
@@ -55,7 +55,7 @@ object AccessibilityUtils {
         //checking for the existence of a security input, since there are a lot of different possible
         //IDs, and OEMs change them. "notification_panel" and "left_button" are largely unchanged,
         //although this method isn't perfect.
-        if (isOnKeyguard && prefManager.hideOnSecurityPage && !nodeState.onMainLockscreen.value) {
+        if (!nodeState.onMainLockscreen.value) {
             if (node.hasVisibleIds(
                     "com.android.systemui:id/notification_panel",
                     "com.android.systemui:id/left_button",
@@ -67,7 +67,7 @@ object AccessibilityUtils {
             }
         }
 
-        if (((isOnKeyguard && prefManager.hideOnNotificationShade) || prefManager.drawerHideWhenNotificationPanelOpen) && !nodeState.showingNotificationsPanel.value) {
+        if (!nodeState.showingNotificationsPanel.value) {
             if (node.hasVisibleIds(
                     "com.android.systemui:id/quick_settings_panel",
                     "com.android.systemui:id/settings_button",
@@ -90,20 +90,20 @@ object AccessibilityUtils {
         //check if the frame can actually show. This checks to the "more_button"
         //ID, which is unique to One UI (it's the three-dot button), and is only
         //visible when the NC is fully expanded.
-        if (prefManager.showInNotificationCenter && !nodeState.hasMoreButton.value) {
+        if (!nodeState.hasMoreButton.value) {
             if (node.hasVisibleIds("com.android.systemui:id/more_button") ||
                 node.hasVisibleIds("com.android.systemui:id/edit_button")) {
                 nodeState.hasMoreButton.value = true
             }
         }
 
-        if (prefManager.showInNotificationCenter && !nodeState.hasSettingsContainerButton.value) {
+        if (!nodeState.hasSettingsContainerButton.value) {
             if (node.hasVisibleIds("com.android.systemui:id/settings_button_container")) {
                 nodeState.hasSettingsContainerButton.value = isPixelUI
             }
         }
 
-        if (prefManager.showInNotificationCenter && !nodeState.hasClearAllButton.value) {
+        if (!nodeState.hasClearAllButton.value) {
             if (node.hasVisibleIds("com.android.systemui:id/clear_all")) {
                 nodeState.hasClearAllButton.value = true
             }
@@ -135,7 +135,6 @@ object AccessibilityUtils {
      */
     private suspend fun Context.getWindows(
         windows: List<AccessibilityWindowInfo>,
-        isOnKeyguard: Boolean,
     ): WindowInfo {
         val nodeState = NodeState()
 
@@ -183,7 +182,7 @@ object AccessibilityUtils {
                         sysUiWindowAwaits,
                     ) { node ->
                         launch(Dispatchers.IO) {
-                            processNode(nodeState, node, isOnKeyguard)
+                            processNode(nodeState, node)
                         }
                     }
                 }
@@ -335,7 +334,6 @@ object AccessibilityUtils {
                 "${initialRun}, " +
                 "${isScreenOn}, " +
                 "${isOnKeyguard}, " +
-                "${context.prefManager.showInNotificationCenter}, " +
                 "${context.prefManager.widgetFrameEnabled}, " +
                 "${context.prefManager.drawerEnabled}, " +
                 "${drawerDelegate.isAttached}, " +
@@ -347,13 +345,14 @@ object AccessibilityUtils {
             //The below block can (very rarely) take over half a second to execute, so only run it
             //if we actually need to (i.e. on the lock screen and screen is on).
             if (initialRun || (isScreenOn &&
-                (((isOnKeyguard || prefManager.showInNotificationCenter) && prefManager.widgetFrameEnabled /* This is only needed when the frame is enabled */) ||
+                (((isOnKeyguard || FrameSpecificPreferences.doAnyFramesHaveSettingEnabled(context, PrefManager.KEY_SHOW_IN_NOTIFICATION_CENTER)) &&
+                        prefManager.widgetFrameEnabled /* This is only needed when the frame is enabled */) ||
                         (prefManager.drawerEnabled && drawerDelegate.isAttached && prefManager.drawerHideWhenNotificationPanelOpen)))) {
 
                 logUtils.debugLog("Running window operation.", if (initialRun) LogUtils.DefaultException() else null)
 
                 val windowInfo = getWindows()?.let {
-                    getWindows(it, isOnKeyguard).also { windowInfo ->
+                    getWindows(it).also { windowInfo ->
                         logUtils.debugLog("Got windows $windowInfo", null)
                     }
                 }

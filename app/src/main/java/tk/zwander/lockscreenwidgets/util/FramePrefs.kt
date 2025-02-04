@@ -1,6 +1,7 @@
 package tk.zwander.lockscreenwidgets.util
 
 import android.content.Context
+import android.graphics.Color
 import com.google.gson.reflect.TypeToken
 import tk.zwander.common.data.WidgetData
 import tk.zwander.common.host.widgetHostCompat
@@ -8,6 +9,154 @@ import tk.zwander.common.util.FrameSizeAndPosition
 import tk.zwander.common.util.PrefManager
 import tk.zwander.common.util.frameSizeAndPosition
 import tk.zwander.common.util.prefManager
+
+class FrameSpecificPreferences(
+    val frameId: Int,
+    private val context: Context,
+) {
+    var currentWidgets: Set<WidgetData>
+        get() = FramePrefs.getWidgetsForFrame(context, frameId)
+        set(value) {
+            FramePrefs.setWidgetsForFrame(context, frameId, value)
+        }
+
+    var rowCount: Int
+        get() = FramePrefs.getRowCountForFrame(context, frameId)
+        set(value) {
+            FramePrefs.setRowCountForFrame(context, frameId, value)
+        }
+
+    var colCount: Int
+        get() = FramePrefs.getColCountForFrame(context, frameId)
+        set(value) {
+            FramePrefs.setColCountForFrame(context, frameId, value)
+        }
+
+    val gridSize: Pair<Int, Int>
+        get() = FramePrefs.getGridSizeForFrame(context, frameId)
+
+    var backgroundColor: Int
+        get() = getInt(PrefManager.KEY_FRAME_BACKGROUND_COLOR, Color.TRANSPARENT)
+        set(value) {
+            putInt(PrefManager.KEY_FRAME_BACKGROUND_COLOR, value)
+        }
+
+    var blurBackground: Boolean
+        get() = getBoolean(PrefManager.KEY_BLUR_BACKGROUND, false)
+        set(value) {
+            putBoolean(PrefManager.KEY_BLUR_BACKGROUND, value)
+        }
+
+    var blurBackgroundAmount: Int
+        get() = getInt(PrefManager.KEY_BLUR_BACKGROUND_AMOUNT, 100)
+        set(value) {
+            putInt(PrefManager.KEY_BLUR_BACKGROUND_AMOUNT, value)
+        }
+
+    var maskedMode: Boolean
+        get() = getBoolean(PrefManager.KEY_FRAME_MASKED_MODE, false)
+        set(value) {
+            putBoolean(PrefManager.KEY_FRAME_MASKED_MODE, value)
+        }
+
+    var maskedModeDimAmount: Float
+        get() = getInt(PrefManager.KEY_MASKED_MODE_DIM_AMOUNT, 0) / 100f
+        set(value) {
+            putInt(PrefManager.KEY_MASKED_MODE_DIM_AMOUNT, (value * 100f).toInt())
+        }
+
+    var hideOnNotifications: Boolean
+        get() = getBoolean(PrefManager.KEY_HIDE_ON_NOTIFICATIONS, false)
+        set(value) {
+            putBoolean(PrefManager.KEY_HIDE_ON_NOTIFICATIONS, value)
+        }
+
+    var hideOnNotificationShade: Boolean
+        get() = getBoolean(PrefManager.KEY_HIDE_ON_NOTIFICATION_SHADE, false)
+        set(value) {
+            putBoolean(PrefManager.KEY_HIDE_ON_NOTIFICATION_SHADE, value)
+        }
+
+    var hideOnSecurityPage: Boolean
+        get() = getBoolean(PrefManager.KEY_HIDE_ON_SECURITY_PAGE, true)
+        set(value) {
+            putBoolean(PrefManager.KEY_HIDE_ON_SECURITY_PAGE, value)
+        }
+
+    var hideOnFaceWidgets: Boolean
+        get() = getBoolean(PrefManager.KEY_HIDE_ON_FACEWIDGETS, false)
+        set(value) {
+            putBoolean(PrefManager.KEY_HIDE_ON_FACEWIDGETS, value)
+        }
+
+    var hideWhenKeyboardShown: Boolean
+        get() = getBoolean(PrefManager.KEY_FRAME_HIDE_WHEN_KEYBOARD_SHOWN, false)
+        set(value) {
+            putBoolean(PrefManager.KEY_FRAME_HIDE_WHEN_KEYBOARD_SHOWN, value)
+        }
+
+    var hideOnEdgePanel: Boolean
+        get() = getBoolean(PrefManager.KEY_HIDE_ON_EDGE_PANEL, true)
+        set(value) {
+            putBoolean(PrefManager.KEY_HIDE_ON_EDGE_PANEL, value)
+        }
+
+    var showOnMainLockScreen: Boolean
+        get() = getBoolean(PrefManager.KEY_SHOW_ON_MAIN_LOCK_SCREEN, true) || !showInNotificationShade
+        set(value) {
+            putBoolean(PrefManager.KEY_SHOW_ON_MAIN_LOCK_SCREEN, value)
+        }
+
+    var showInNotificationShade: Boolean
+        get() = getBoolean(PrefManager.KEY_SHOW_IN_NOTIFICATION_CENTER, false)
+        set(value) {
+            putBoolean(PrefManager.KEY_SHOW_IN_NOTIFICATION_CENTER, value)
+        }
+
+    var separateLockNCPosition: Boolean
+        get() = getBoolean(PrefManager.KEY_SEPARATE_POS_FOR_LOCK_NC, false)
+        set(value) {
+            putBoolean(PrefManager.KEY_SEPARATE_POS_FOR_LOCK_NC, value)
+        }
+
+    private fun getInt(baseKey: String, def: Int): Int {
+        return context.prefManager.getInt(keyFor(baseKey), def)
+    }
+    private fun putInt(baseKey: String, value: Int) {
+        context.prefManager.putInt(keyFor(baseKey), value)
+    }
+
+    private fun getBoolean(baseKey: String, def: Boolean): Boolean {
+        return context.prefManager.getBoolean(keyFor(baseKey), def)
+    }
+    private fun putBoolean(baseKey: String, value: Boolean) {
+        context.prefManager.putBoolean(keyFor(baseKey), value)
+    }
+
+    fun keyFor(baseKey: String): String {
+        return Companion.keyFor(frameId, baseKey)
+    }
+
+    companion object {
+        fun keyFor(frameId: Int, baseKey: String): String {
+            if (frameId == -1) {
+                return baseKey
+            }
+
+            return "${baseKey}_${frameId}"
+        }
+
+        fun doAnyFramesHaveSettingEnabled(
+            context: Context,
+            baseKey: String,
+            def: Boolean = false,
+        ): Boolean {
+            return (listOf(-1) + context.prefManager.currentSecondaryFrames).any { frameId ->
+                context.prefManager.getBoolean(keyFor(frameId, baseKey), def)
+            }
+        }
+    }
+}
 
 object FramePrefs {
     private const val KEY_FRAME_WIDGETS = "FRAME_WIDGETS_FOR_FRAME_"
