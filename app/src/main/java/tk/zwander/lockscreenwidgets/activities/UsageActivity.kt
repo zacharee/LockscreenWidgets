@@ -9,12 +9,7 @@ import com.bugsnag.android.performance.compose.MeasuredComposable
 import tk.zwander.common.activities.BaseActivity
 import tk.zwander.common.compose.AppTheme
 import tk.zwander.lockscreenwidgets.compose.UsageLayout
-import tk.zwander.lockscreenwidgets.fragments.UsageFragment
 
-/**
- * Host the usage instructions for Lockscreen Widgets.
- * See [UsageFragment]
- */
 class UsageActivity : BaseActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
