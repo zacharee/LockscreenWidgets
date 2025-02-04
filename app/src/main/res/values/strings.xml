@@ -1,4 +1,4 @@
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
     <string name="app_name" translatable="false">Lockscreen Widgets</string>
     <string name="widget_drawer" translatable="false">Widget Drawer</string>
     <string name="version_template">v%s</string>
@@ -37,7 +37,7 @@
     <string name="reset">Reset</string>
     <string name="increase">Increase</string>
     <string name="decrease">Decrease</string>
-    <string name="selected">Selected</string>
+    <string name="selected" tools:override="true">Selected</string>
 
     <string name="drawer_enabled">Drawer Enabled</string>
     <string name="frame_enabled">Frame Enabled</string>
@@ -361,6 +361,7 @@
 
     <string name="select">Select</string>
     <string name="cancel">Cancel</string>
+    <string name="apply">Apply</string>
 
     <string name="select_frame">Select Frame</string>
     <string name="selected_frame">Selected frame: %s</string>
