@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
     <string name="version_template">Версия: %s</string>
     <string name="edit_gesture_hint">Нажать на виджет двумя пальцами, чтобы передвинуть или изменить его размер.</string>
     <string name="edit_gesture_hint_2">Отлично! Нажмите двумя пальцами, чтобы спрятать интерфейс редактирования.</string>
@@ -34,7 +34,7 @@
     <string name="reset">Сброс</string>
     <string name="increase">Увеличение</string>
     <string name="decrease">Уменьшение</string>
-    <string name="selected">Selected</string>
+    <string name="selected" tools:override="true">Selected</string>
     <string name="drawer_enabled">Боковая Панель Включена</string>
     <string name="frame_enabled">Рамка Включена</string>
     <string name="add_id_hint">com.android.systemui:id/some_id_здесь</string>
@@ -262,6 +262,7 @@
     <string name="remove_frame_confirmation_message">Are you sure you want to remove this frame?</string>
     <string name="select">Select</string>
     <string name="cancel">Cancel</string>
+    <string name="apply">Apply</string>
     <string name="select_frame">Select Frame</string>
     <string name="selected_frame">Selected frame: %s</string>
     <string name="settings_screen_category_grid">Grid</string>
