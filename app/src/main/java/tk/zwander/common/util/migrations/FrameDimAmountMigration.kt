@@ -1,3 +1,5 @@
+@file:Suppress("DEPRECATION")
+
 package tk.zwander.common.util.migrations
 
 import android.content.Context
