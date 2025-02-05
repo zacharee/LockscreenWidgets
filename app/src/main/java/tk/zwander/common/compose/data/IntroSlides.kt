@@ -28,15 +28,15 @@ import androidx.lifecycle.Lifecycle
 import dev.zwander.composeintroslider.IntroPage
 import dev.zwander.composeintroslider.SimpleIntroPage
 import kotlinx.coroutines.launch
-import rikka.shizuku.ShizukuProvider
 import tk.zwander.common.activities.OnboardingActivity
 import tk.zwander.common.compose.AppTheme
 import tk.zwander.common.util.LifecycleEffect
-import tk.zwander.common.util.ShizukuUtils
 import tk.zwander.common.util.canReadWallpaper
 import tk.zwander.common.util.isAccessibilityEnabled
 import tk.zwander.common.util.launchUrl
 import tk.zwander.common.util.openAccessibilitySettings
+import tk.zwander.common.util.shizuku.ShizukuManager
+import tk.zwander.common.util.shizuku.shizukuManager
 import tk.zwander.lockscreenwidgets.BuildConfig
 import tk.zwander.lockscreenwidgets.R
 import tk.zwander.lockscreenwidgets.services.isNotificationListenerActive
@@ -250,31 +250,25 @@ fun rememberIntroSlides(
                 contentColor = { colorResource(id = R.color.slide_6_text) },
                 icon = { painterResource(id = R.drawable.ic_baseline_sd_storage_24) },
                 extraContent = {
-                    val shizukuInstalled by ShizukuUtils.rememberShizukuInstallStateAsState()
-                    val shizukuRunning by ShizukuUtils.rememberShizukuRunningStateAsState()
+                    val shizukuInstalled by ShizukuManager.rememberShizukuInstallStateAsState()
+                    val shizukuRunning by ShizukuManager.rememberShizukuRunningStateAsState()
 
                     OutlinedButton(
                         onClick = {
                             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                                 if (shizukuRunning) {
                                     scope.launch {
-                                        with(ShizukuUtils) {
-                                            context.runShizukuCommand {
-                                                grantReadExternalStorage()
-                                                canReadWallpaper = context.canReadWallpaper
-                                            }
+                                        context.shizukuManager.runShizukuCommand {
+                                            grantReadExternalStorage()
+                                            canReadWallpaper = context.canReadWallpaper
                                         }
                                     }
-                                } else if (shizukuInstalled) {
-                                    try {
-                                        context.startActivity(context.packageManager.getLaunchIntentForPackage(ShizukuProvider.MANAGER_APPLICATION_ID))
-                                    } catch (_: Exception) {}
-                                } else {
+                                } else if (!shizukuInstalled || !context.shizukuManager.launchShizuku()) {
                                     context.launchUrl("https://shizuku.rikka.app/download/")
                                 }
                             } else {
                                 storagePermissionLauncher.launch(
-                                    arrayOf(android.Manifest.permission.READ_EXTERNAL_STORAGE)
+                                    arrayOf(android.Manifest.permission.READ_EXTERNAL_STORAGE),
                                 )
                             }
                         },

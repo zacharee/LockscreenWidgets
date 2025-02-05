@@ -1,4 +1,4 @@
-package tk.zwander.common.util
+package tk.zwander.common.util.shizuku
 
 import android.content.pm.IPackageManager
 import android.os.Build

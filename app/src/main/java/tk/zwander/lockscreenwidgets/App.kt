@@ -2,16 +2,12 @@ package tk.zwander.lockscreenwidgets
 
 import android.app.Application
 import android.content.BroadcastReceiver
-import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
-import android.content.ServiceConnection
-import android.content.pm.PackageManager
 import android.database.ContentObserver
 import android.net.Uri
 import android.os.Build
-import android.os.IBinder
 import android.os.PowerManager
 import android.provider.Settings
 import androidx.core.content.ContextCompat
@@ -24,28 +20,21 @@ import com.bugsnag.android.performance.PerformanceConfiguration
 import com.getkeepsafe.relinker.ReLinker
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.MainScope
-import kotlinx.coroutines.launch
 import org.lsposed.hiddenapibypass.HiddenApiBypass
-import rikka.shizuku.Shizuku
 import tk.zwander.common.activities.add.BaseBindWidgetActivity
 import tk.zwander.common.util.Event
 import tk.zwander.common.util.EventObserver
 import tk.zwander.common.util.GlobalExceptionHandler
 import tk.zwander.common.util.LogUtils
-import tk.zwander.common.util.ShizukuService
 import tk.zwander.common.util.eventManager
 import tk.zwander.common.util.isOrHasDeadObject
 import tk.zwander.common.util.logUtils
 import tk.zwander.common.util.migrationManager
 import tk.zwander.common.util.prefManager
-import tk.zwander.common.util.safeApplicationContext
+import tk.zwander.common.util.shizuku.shizukuManager
 import tk.zwander.lockscreenwidgets.activities.add.AddFrameWidgetActivity
 import tk.zwander.lockscreenwidgets.util.FramePrefs
 import tk.zwander.widgetdrawer.activities.add.AddDrawerWidgetActivity
-import kotlin.coroutines.CoroutineContext
-
-val Context.app: App
-    get() = safeApplicationContext as App
 
 /**
  * The main application.
@@ -99,40 +88,6 @@ class App : Application(), CoroutineScope by MainScope(), EventObserver {
     }
 
     private val power by lazy { getSystemService(Context.POWER_SERVICE) as PowerManager }
-
-    private val queuedCommands = ArrayList<Pair<CoroutineContext, IShizukuService.() -> Unit>>()
-    private var userService: IShizukuService? = null
-        set(value) {
-            field = value
-
-            if (value != null) {
-                queuedCommands.forEach { (context, command) ->
-                    launch(context) {
-                        value.command()
-                    }
-                }
-                queuedCommands.clear()
-            }
-        }
-
-    private val userServiceConnection = object : ServiceConnection {
-        override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
-            userService = IShizukuService.Stub.asInterface(service)
-        }
-
-        override fun onServiceDisconnected(name: ComponentName?) {
-            userService = null
-        }
-    }
-
-    private val serviceArgs by lazy {
-        Shizuku.UserServiceArgs(ComponentName(packageName, ShizukuService::class.java.canonicalName!!))
-            .version(BuildConfig.VERSION_CODE + (if (BuildConfig.DEBUG) 101 else 0))
-            .processNameSuffix("granter")
-            .debuggable(BuildConfig.DEBUG)
-            .daemon(false)
-            .tag("${packageName}_granter")
-    }
 
     init {
         BugsnagPerformance.reportApplicationClassLoaded()
@@ -257,20 +212,7 @@ class App : Application(), CoroutineScope by MainScope(), EventObserver {
         eventManager.addObserver(this)
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            Shizuku.addBinderReceivedListenerSticky {
-                if (Shizuku.checkSelfPermission() == PackageManager.PERMISSION_GRANTED) {
-                    addUserService()
-                } else {
-                    Shizuku.addRequestPermissionResultListener(object : Shizuku.OnRequestPermissionResultListener {
-                        override fun onRequestPermissionResult(requestCode: Int, grantResult: Int) {
-                            if (grantResult == PackageManager.PERMISSION_GRANTED) {
-                                addUserService()
-                                Shizuku.removeRequestPermissionResultListener(this)
-                            }
-                        }
-                    })
-                }
-            }
+            shizukuManager.onCreate()
         }
     }
 
@@ -293,28 +235,5 @@ class App : Application(), CoroutineScope by MainScope(), EventObserver {
             }
             else -> {}
         }
-    }
-
-    fun postShizukuCommand(context: CoroutineContext, command: IShizukuService.() -> Unit) {
-        if (userService != null) {
-            launch(context) {
-                command(userService!!)
-            }
-        } else {
-            queuedCommands.add(context to command)
-        }
-    }
-
-    private fun addUserService() {
-        Shizuku.unbindUserService(
-            serviceArgs,
-            userServiceConnection,
-            true
-        )
-
-        Shizuku.bindUserService(
-            serviceArgs,
-            userServiceConnection,
-        )
     }
 }
