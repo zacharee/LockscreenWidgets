@@ -3,6 +3,7 @@ package tk.zwander.common.compose.settings
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -258,7 +259,14 @@ private fun SeekBarLayout(
         val interactionSource = remember { MutableInteractionSource() }
         val interaction by interactionSource.collectIsDraggedAsState()
         val animatedValue =
-            if (!interaction) animateFloatAsState((value * scale).toFloat()).value else (value * scale).toFloat()
+            if (!interaction) {
+                animateFloatAsState(
+                    targetValue = (value * scale).toFloat(),
+                    animationSpec = tween(),
+                ).value
+            } else {
+                (value * scale).toFloat()
+            }
         val sliderColors = SliderDefaults.colors()
         val animatedThumbColor by animateColorAsState(if (enabled) sliderColors.thumbColor else sliderColors.disabledThumbColor)
         val animatedThumbBackgroundColor by animateColorAsState(
