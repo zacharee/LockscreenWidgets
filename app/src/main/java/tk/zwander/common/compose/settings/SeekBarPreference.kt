@@ -1,6 +1,10 @@
 package tk.zwander.common.compose.settings
 
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsDraggedAsState
@@ -12,9 +16,11 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -24,11 +30,13 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LocalTextStyle
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Slider
+import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TextField
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
@@ -40,7 +48,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.compositeOver
 import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
@@ -48,7 +59,9 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import tk.zwander.common.compose.util.rememberPreferenceState
 import tk.zwander.common.util.prefManager
@@ -246,6 +259,30 @@ private fun SeekBarLayout(
         val interaction by interactionSource.collectIsDraggedAsState()
         val animatedValue =
             if (!interaction) animateFloatAsState((value * scale).toFloat()).value else (value * scale).toFloat()
+        val sliderColors = SliderDefaults.colors()
+        val animatedThumbColor by animateColorAsState(if (enabled) sliderColors.thumbColor else sliderColors.disabledThumbColor)
+        val animatedThumbBackgroundColor by animateColorAsState(
+            if (enabled) sliderColors.inactiveTrackColor else sliderColors.disabledInactiveTrackColor.compositeOver(
+                MaterialTheme.colorScheme.surface,
+            )
+        )
+        val animatedBorderWidth by animateDpAsState(if (value == defaultValue) 2.dp else 12.dp)
+
+        val animatedActiveTrackColor by animateColorAsState(if (enabled) sliderColors.activeTrackColor else sliderColors.disabledActiveTrackColor)
+        val animatedInactiveTrackColor by animateColorAsState(if (enabled) sliderColors.inactiveTrackColor else sliderColors.disabledInactiveTrackColor)
+        val animatedActiveTickColor by animateColorAsState(if (enabled) sliderColors.activeTickColor else sliderColors.disabledActiveTickColor)
+        val animatedInactiveTickColor by animateColorAsState(if (enabled) sliderColors.inactiveTickColor else sliderColors.disabledInactiveTickColor)
+
+        val trackColors = sliderColors.copy(
+            activeTrackColor = animatedActiveTrackColor,
+            inactiveTrackColor = animatedInactiveTrackColor,
+            activeTickColor = animatedActiveTickColor,
+            inactiveTickColor = animatedInactiveTickColor,
+            disabledActiveTrackColor = animatedActiveTrackColor,
+            disabledInactiveTrackColor = animatedInactiveTrackColor,
+            disabledActiveTickColor = animatedActiveTickColor,
+            disabledInactiveTickColor = animatedInactiveTickColor,
+        )
 
         Slider(
             value = animatedValue,
@@ -256,25 +293,77 @@ private fun SeekBarLayout(
             modifier = Modifier.weight(1f),
             interactionSource = interactionSource,
             enabled = enabled,
+            colors = sliderColors,
+            thumb = {
+                Box(
+                    modifier = Modifier
+                        .shadow(
+                            elevation = 8.dp,
+                            shape = CircleShape,
+                        )
+                        .background(
+                            color = animatedThumbBackgroundColor,
+                            shape = CircleShape,
+                        )
+                        .border(
+                            width = animatedBorderWidth,
+                            shape = CircleShape,
+                            color = animatedThumbColor,
+                        )
+                        .size(24.dp),
+                )
+            },
+            track = {
+                SliderDefaults.Track(
+                    colors = trackColors,
+                    enabled = enabled,
+                    sliderState = it,
+                    thumbTrackGapSize = 0.dp,
+                )
+            },
         )
 
-        Box(
-            modifier = Modifier,
-            contentAlignment = Alignment.Center,
-        ) {
-            Text(
-                text = unit?.let { "${formattedMaxValue}${unit}" } ?: formattedMaxValue,
-                modifier = Modifier.alpha(0f),
-            )
+        var maxValueWidth by remember {
+            mutableStateOf(0.dp)
+        }
 
-            Text(
-                text = unit?.let { "${formattedValue}${unit}" } ?: formattedValue,
-                modifier = Modifier.clickable(
+        Box(
+            modifier = Modifier
+                .clickable(
                     interactionSource = remember { MutableInteractionSource() },
                     indication = ripple(bounded = false),
                     onClick = { showingDialog = true },
                 )
-            )
+                .padding(4.dp),
+        ) {
+            Layout(
+                modifier = Modifier.size(DpSize.Zero),
+                content = {
+                    Text(
+                        text = unit?.let { "${formattedMaxValue}${unit}" } ?: formattedMaxValue,
+                        modifier = Modifier.alpha(0f),
+                    )
+                },
+            ) { measureable, _ ->
+                val placeable = measureable.first().measure(Constraints())
+                maxValueWidth = placeable.width.toDp()
+
+                layout(0, 0) {}
+            }
+
+            Column(
+                modifier = Modifier
+                    .width(maxValueWidth),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(1.dp),
+            ) {
+                Text(
+                    text = unit?.let { "${formattedValue}${unit}" } ?: formattedValue,
+                    textAlign = TextAlign.Center,
+                )
+
+                HorizontalDivider()
+            }
         }
 
         Column(
@@ -317,6 +406,9 @@ private fun SeekBarLayout(
             mutableStateOf(0.dp)
         }
         var maxValueWidth by remember {
+            mutableStateOf(0.dp)
+        }
+        var unitWidth by remember {
             mutableStateOf(0.dp)
         }
 
@@ -377,9 +469,9 @@ private fun SeekBarLayout(
                         contentDescription = null,
                     )
 
-                    TextField(
+                    OutlinedTextField(
                         value = tempValueState,
-                        onValueChange = { tempValueState = it },
+                        onValueChange = { tempValueState = it.replace(Regex("[^0-9${decimalSeparator}]"), "") },
                         singleLine = true,
                         isError = !canParse,
                         keyboardOptions = KeyboardOptions.Default.copy(
@@ -393,12 +485,20 @@ private fun SeekBarLayout(
                             .weight(1f, false)
                             .widthIn(min = 16.dp, max = Dp.Infinity),
                         textStyle = LocalTextStyle.current.copy(textAlign = TextAlign.Center),
-                        suffix = unit?.let { { Text(text = unit) } },
                         prefix = unit?.let {
+                            {
+                                Box(
+                                    modifier = Modifier.width(unitWidth),
+                                )
+                            }
+                        },
+                        suffix = unit?.let {
                             {
                                 Text(
                                     text = unit,
-                                    modifier = Modifier.alpha(0f),
+                                    modifier = Modifier.onSizeChanged {
+                                        unitWidth = with(density) { it.width.toDp() }
+                                    },
                                 )
                             }
                         },
