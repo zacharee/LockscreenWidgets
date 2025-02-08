@@ -495,7 +495,7 @@ class ComposeFrameSettingsActivity : BaseActivity(), EventObserver {
                     switchPreference(
                         title = { stringResource(R.string.settings_screen_ignore_widget_touches) },
                         summary = { stringResource(R.string.settings_screen_ignore_widget_touches_desc) },
-                        key = { PrefManager.KEY_FRAME_IGNORE_WIDGET_TOUCHES },
+                        key = { FrameSpecificPreferences.keyFor(selectedFrame, PrefManager.KEY_FRAME_IGNORE_WIDGET_TOUCHES) },
                         icon = { painterResource(R.drawable.baseline_do_not_touch_24) },
                         defaultValue = { false },
                     )

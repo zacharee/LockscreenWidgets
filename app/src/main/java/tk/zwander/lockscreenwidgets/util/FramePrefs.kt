@@ -119,6 +119,12 @@ class FrameSpecificPreferences(
             putBoolean(PrefManager.KEY_SEPARATE_POS_FOR_LOCK_NC, value)
         }
 
+    var ignoreWidgetTouches: Boolean
+        get() = getBoolean(PrefManager.KEY_FRAME_IGNORE_WIDGET_TOUCHES, false)
+        set(value) {
+            putBoolean(PrefManager.KEY_FRAME_IGNORE_WIDGET_TOUCHES, value)
+        }
+
     private fun getInt(baseKey: String, def: Int): Int {
         return context.prefManager.getInt(keyFor(baseKey), def)
     }

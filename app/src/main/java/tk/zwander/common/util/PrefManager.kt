@@ -544,12 +544,6 @@ class PrefManager private constructor(private val context: Context) {
             putBoolean(KEY_LOCK_WIDGET_DRAWER, value)
         }
 
-    var frameIgnoreWidgetTouches: Boolean
-        get() = getBoolean(KEY_FRAME_IGNORE_WIDGET_TOUCHES, false)
-        set(value) {
-            putBoolean(KEY_FRAME_IGNORE_WIDGET_TOUCHES, value)
-        }
-
     //The duration of the fade-in/out animation.
     var animationDuration: Int
         get() = getInt(KEY_ANIMATION_DURATION, 300)
