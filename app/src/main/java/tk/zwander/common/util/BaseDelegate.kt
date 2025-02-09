@@ -133,7 +133,9 @@ abstract class BaseDelegate<State : Any>(context: Context) : SafeContextWrapper(
                 val position = currentWidgets.indexOf(event.item)
 
                 if (event.remove && currentWidgets.contains(event.item)) {
-                    currentWidgets = currentWidgets.toMutableList().apply {
+                    updateCommonState { it.copy(updatedForMoveOrRemove = true) }
+
+                    val newWidgets = currentWidgets.toMutableList().apply {
                         remove(event.item)
                         when (event.item?.safeType) {
                             WidgetType.WIDGET -> widgetHost.deleteAppWidgetId(event.item.id)
@@ -146,7 +148,8 @@ abstract class BaseDelegate<State : Any>(context: Context) : SafeContextWrapper(
                     }
 
                     adapter.currentEditingInterfacePosition = -1
-                    adapter.updateWidgets(currentWidgets.toList())
+                    adapter.updateWidgets(newWidgets)
+                    currentWidgets = newWidgets
                 }
 
                 widgetRemovalConfirmed(event, position)
@@ -191,9 +194,9 @@ abstract class BaseDelegate<State : Any>(context: Context) : SafeContextWrapper(
     @CallSuper
     protected open fun onWidgetMoved(moved: Boolean) {
         if (moved) {
+            updateCommonState { it.copy(updatedForMoveOrRemove = true) }
             currentWidgets = adapter.widgets
             adapter.currentEditingInterfacePosition = -1
-            updateCommonState { it.copy(updatedForMove = true) }
         }
     }
 
@@ -221,7 +224,7 @@ abstract class BaseDelegate<State : Any>(context: Context) : SafeContextWrapper(
     data class BaseState(
         val isHoldingItem: Boolean = false,
         val isItemHighlighted: Boolean = false,
-        val updatedForMove: Boolean = false,
+        val updatedForMoveOrRemove: Boolean = false,
         val handlingClick: Boolean = false,
         val wasOnKeyguard: Boolean = false,
         val isScreenOn: Boolean = false,

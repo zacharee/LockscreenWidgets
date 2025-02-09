@@ -155,8 +155,6 @@ abstract class BaseAdapter(
                 notifyItemRangeInserted(0, itemCount)
             } else {
                 val oldWidgets = widgets.toList()
-                this.widgets.clear()
-                this.widgets.addAll(uniqueNewWidgets)
 
                 val result = DiffUtil.calculateDiff(object : DiffUtil.Callback() {
                     override fun areContentsTheSame(
@@ -181,6 +179,9 @@ abstract class BaseAdapter(
                         return oldWidgets.size
                     }
                 }, true)
+
+                widgets.clear()
+                widgets.addAll(uniqueNewWidgets)
 
                 result.dispatchUpdatesTo(this)
             }
