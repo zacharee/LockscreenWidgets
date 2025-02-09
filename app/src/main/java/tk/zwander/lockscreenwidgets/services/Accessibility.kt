@@ -120,14 +120,13 @@ class Accessibility : AccessibilityService(), EventObserver, CoroutineScope by M
 
         launch(Dispatchers.Main) {
             runWindowOperation(
-                context = this@Accessibility,
-                wm = wm,
                 frameDelegates = secondaryFrameDelegates + (-1 to frameDelegate),
                 drawerDelegate = drawerDelegate,
                 isScreenOn = power.isInteractive,
                 isOnKeyguard = kgm.isKeyguardLocked,
                 getWindows = ::getWindowsSafely,
                 initialRun = true,
+                wm = wm,
             )
         }
     }
