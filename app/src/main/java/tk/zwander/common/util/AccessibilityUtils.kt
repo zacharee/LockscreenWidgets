@@ -40,6 +40,7 @@ object AccessibilityUtils {
         val hideForNonPresentIds: AtomicBoolean = atomic(false),
         val hasClearAllButton: AtomicBoolean = atomic(false),
         val hasSettingsContainerButton: AtomicBoolean = atomic(false),
+        val onFaceWidgets: AtomicBoolean = atomic(false),
     )
 
     private fun Context.processNode(
@@ -48,6 +49,12 @@ object AccessibilityUtils {
     ) {
         if (node == null) {
             return
+        }
+
+        if (!nodeState.onFaceWidgets.value) {
+            if (node.hasWildcardId("com.samsung.android.app.aodservice:id/facewidget_")) {
+                nodeState.onFaceWidgets.value = true
+            }
         }
 
         //If the user has enabled the option to hide the frame on security (pin, pattern, password)
@@ -400,7 +407,7 @@ object AccessibilityUtils {
                                 //currentAppLayer check. Explicitly check for its existence here.
                                 isOnScreenOffMemo = isOnKeyguard && windowInfo.hasScreenOffMemoWindow,
                                 isOnEdgePanel = windowInfo.hasEdgePanelWindow,
-                                isOnFaceWidgets = windowInfo.hasFaceWidgetsWindow,
+                                isOnFaceWidgets = windowInfo.hasFaceWidgetsWindow || windowInfo.nodeState.onFaceWidgets.value,
                                 //Generate "layer" values for the System UI window and for the topmost app window, if
                                 //it exists.
                                 //currentAppLayer *should* be -1 even if there's an app open in the background,
@@ -684,6 +691,10 @@ fun AccessibilityEvent.copyCompat(): AccessibilityEvent {
 
 fun AccessibilityNodeInfo.hasVisibleIds(vararg ids: String): Boolean {
     return ids.contains(viewIdResourceName) && isVisibleToUser
+}
+
+fun AccessibilityNodeInfo.hasWildcardId(id: String): Boolean {
+    return viewIdResourceName?.contains(id) == true && isVisibleToUser
 }
 
 fun AccessibilityNodeInfo.hasVisibleIds(ids: Iterable<String>): Boolean {

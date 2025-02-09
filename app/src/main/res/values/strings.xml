@@ -158,8 +158,8 @@
     <string name="settings_screen_request_unlock">Prompt for Unlock/Dismiss Notification Center</string>
     <string name="settings_screen_request_unlock_desc">If Lockscreen Widgets detects that a widget is launching an app, it will prompt to unlock the device and dismiss the notification center. Disable this option to prevent that behavior.</string>
 
-    <string name="settings_screen_hide_on_facewidgets">Hide on FaceWidgets Screen</string>
-    <string name="settings_screen_hide_on_facewidgets_desc">Hide the frame when the FaceWidgets screen is shown.</string>
+    <string name="settings_screen_hide_on_facewidgets">Hide on FaceWidgets (Now Bar) Screen</string>
+    <string name="settings_screen_hide_on_facewidgets_desc">Hide the frame when the FaceWidgets screen is shown. This is also known as the expanded Now Bar screen on One UI 7 and later.</string>
 
     <string name="settings_screen_hide_in_landscape">Hide in Landscape</string>
     <string name="settings_screen_hide_in_landscape_desc">Hide the widget frame when the device is in landscape.</string>
