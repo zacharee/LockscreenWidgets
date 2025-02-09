@@ -119,8 +119,8 @@
     <string name="settings_screen_touch_protection_desc">تجاهل لمسات على إطار التطبيق المصغر عندما يكون مستشعر القرب مغطا.</string>
     <string name="settings_screen_request_unlock">سماح للقفل / تجاهل مركز الاشعارات</string>
     <string name="settings_screen_request_unlock_desc">اذا حدد التطبيق ان التطبيقات المصغرة ستقوم بتشغيل تطبيق،سيسمح بإلغاء القفل وتجاهل مركز الاشعارات. عطل هذا الخيار لتجنب هذا السلوك.</string>
-    <string name="settings_screen_hide_on_facewidgets">اخفاء في شاشة وجه التطبيق المصغر</string>
-    <string name="settings_screen_hide_on_facewidgets_desc">اخف الاطار حينما يكون وجه التطبيق المصغر معروض.</string>
+    <string name="settings_screen_hide_on_facewidgets">Hide on FaceWidgets (Now Bar) Screen</string>
+    <string name="settings_screen_hide_on_facewidgets_desc">Hide the frame when the FaceWidgets screen is shown. This is also known as the expanded Now Bar screen on One UI 7 and later.</string>
     <string name="settings_screen_hide_in_landscape">إخفاء في الوضع الأفقي</string>
     <string name="settings_screen_hide_in_landscape_desc">اخف التطبيق المصغر حينما يكون الجهاز في الوضع الأفقي.</string>
     <string name="settings_screen_separate_position_for_lock_nc">افصل مكان مركز الاشعارات حينما يكون مقفل</string>
