@@ -37,6 +37,16 @@ class SnappyRecyclerView(context: Context, attrs: AttributeSet) : RecyclerView(c
     private var prevX = 0f
     private var prevY = 0f
 
+    override fun onLayout(changed: Boolean, l: Int, t: Int, r: Int, b: Int) {
+        super.onLayout(changed, l, t, r, b)
+        val canScroll = when {
+            layoutManager?.canScrollHorizontally() == true -> computeHorizontalScrollRange() > width
+            layoutManager?.canScrollVertically() == true -> computeVerticalScrollRange() > height
+            else -> false
+        }
+        overScrollMode = if (canScroll) OVER_SCROLL_ALWAYS else OVER_SCROLL_NEVER
+    }
+
     @SuppressLint("ClickableViewAccessibility")
     override fun onTouchEvent(e: MotionEvent): Boolean {
         // We want the parent to handle all touch events--there's a lot going on there,

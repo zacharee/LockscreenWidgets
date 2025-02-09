@@ -433,7 +433,7 @@ class DrawerDelegate private constructor(context: Context) :
         tryShowHandle()
 
         displayManager.registerDisplayListener(displayListener, mainHandler)
-        gridLayoutManager.customHeight = resources.getDimensionPixelSize(R.dimen.drawer_row_height)
+        gridLayoutManager.customHeight = resources.getDimensionPixelSize(R.dimen.drawer_row_height).toDouble()
     }
 
     override fun onDestroy() {
