@@ -119,8 +119,8 @@
     <string name="settings_screen_touch_protection_desc">Ignorovat dotyky na rámečku widgetu, když je zakryt senzor přiblížení.</string>
     <string name="settings_screen_request_unlock">Výzva k odemknutí/zamítnutí centra oznámení</string>
     <string name="settings_screen_request_unlock_desc">Pokud widgety na zamykací obrazovce zjistí, že widget spustí aplikaci, bude vyzván k odemčení zařízení a zavření centra oznámení. Zakažte tuto možnost, abyste zabránili tomuto chování.</string>
-    <string name="settings_screen_hide_on_facewidgets">Skrýt na obrazovce FaceWidgetů</string>
-    <string name="settings_screen_hide_on_facewidgets_desc">Skrýt rámeček, když je zobrazena obrazovka Facewidgetů.</string>
+    <string name="settings_screen_hide_on_facewidgets">Hide on FaceWidgets (Now Bar) Screen</string>
+    <string name="settings_screen_hide_on_facewidgets_desc">Hide the frame when the FaceWidgets screen is shown. This is also known as the expanded Now Bar screen on One UI 7 and later.</string>
     <string name="settings_screen_hide_in_landscape">Skrýt v režimu na šířku</string>
     <string name="settings_screen_hide_in_landscape_desc">Skrýt widget, když je zařízení v režimu na šířku.</string>
     <string name="settings_screen_separate_position_for_lock_nc">Oddělit pozici centra oznámení při uzamčení</string>
