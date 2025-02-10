@@ -133,7 +133,7 @@ internal fun items(
                     } catch (e: PackageManager.NameNotFoundException) {
                         context.logUtils.debugLog(
                             "Unable to parse application info for shortcut",
-                            e
+                            e,
                         )
                     }
                 }
@@ -144,42 +144,49 @@ internal fun items(
                     },
                     0,
                 ).forEach { launcherItem ->
-                    val appInfo =
-                        packageManager.getApplicationInfoCompat(launcherItem.activityInfo.packageName)
-                    val appResources = packageManager.getResourcesForApplication(appInfo)
-                    val appName = appInfo.loadLabel(packageManager)
+                    try {
+                        val appInfo =
+                            packageManager.getApplicationInfoCompat(launcherItem.activityInfo.packageName)
+                        val appResources = packageManager.getResourcesForApplication(appInfo)
+                        val appName = appInfo.loadLabel(packageManager)
 
-                    val appEntry = apps.getOrPut(appInfo.packageName) {
-                        AppInfo(appName.toString(), appInfo)
-                    }
+                        val appEntry = apps.getOrPut(appInfo.packageName) {
+                            AppInfo(appName.toString(), appInfo)
+                        }
 
-                    appEntry.launcherItems.add(
-                        LauncherItemListInfo(
-                            appName = appName.toString(),
-                            icon = context.iconPackManager.currentIconPack.value
-                                ?.resolveIcon(
-                                    context,
-                                    launcherItem.componentInfo.componentNameCompat,
-                                )
-                                ?.toSafeBitmap(context.density, maxSize = 128.dp)
-                                ?.let { IconCompat.createWithBitmap(it) } ?: (
-                                    launcherItem.iconResource.run { if (this != 0) this else appInfo.icon }
-                                        .let { iconResource ->
-                                            try {
-                                                IconCompat.createWithResource(
-                                                    appResources,
-                                                    appInfo.packageName,
-                                                    iconResource
-                                                )
-                                            } catch (e: IllegalArgumentException) {
-                                                null
+                        appEntry.launcherItems.add(
+                            LauncherItemListInfo(
+                                appName = appName.toString(),
+                                icon = context.iconPackManager.currentIconPack.value
+                                    ?.resolveIcon(
+                                        context,
+                                        launcherItem.componentInfo.componentNameCompat,
+                                    )
+                                    ?.toSafeBitmap(context.density, maxSize = 128.dp)
+                                    ?.let { IconCompat.createWithBitmap(it) } ?: (
+                                        launcherItem.iconResource.run { if (this != 0) this else appInfo.icon }
+                                            .let { iconResource ->
+                                                try {
+                                                    IconCompat.createWithResource(
+                                                        appResources,
+                                                        appInfo.packageName,
+                                                        iconResource
+                                                    )
+                                                } catch (e: IllegalArgumentException) {
+                                                    null
+                                                }
                                             }
-                                        }
-                                    ),
-                            appInfo = appEntry,
-                            itemInfo = launcherItem,
-                        ),
-                    )
+                                        ),
+                                appInfo = appEntry,
+                                itemInfo = launcherItem,
+                            ),
+                        )
+                    } catch (e: PackageManager.NameNotFoundException) {
+                        context.logUtils.debugLog(
+                            "Unable to parse application info for launcher",
+                            e,
+                        )
+                    }
                 }
 
 //                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N_MR1) {
