@@ -952,17 +952,7 @@ open class MainWidgetFrameDelegate protected constructor(context: Context, prote
         }
 
         override fun getFixScrollPos(velocityX: Int, velocityY: Int): Int {
-            if (childCount == 0) return 0
-
-            return if (velocityX <= 0) {
-                val targetRow = (ceil(rectsHelper.getRowIndexForItemPosition(lastVisiblePosition).toDouble() / columnCount) * columnCount).toInt()
-                rectsHelper.rows[targetRow]?.lastOrNull() ?: lastVisiblePosition
-            } else {
-                val targetRow = (floor(rectsHelper.getRowIndexForItemPosition(firstVisiblePosition).toDouble() / columnCount) * columnCount).toInt()
-                rectsHelper.rows[targetRow]?.firstOrNull() ?: firstVisiblePosition
-            }.also {
-                prefManager.currentPage = it
-            }.run { if (this == -1) 0 else this }
+            return getPositionForVelocity(-velocityX, -velocityY)
         }
 
         override fun getPositionForVelocity(velocityX: Int, velocityY: Int): Int {
