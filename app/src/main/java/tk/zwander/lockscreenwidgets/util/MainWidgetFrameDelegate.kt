@@ -68,6 +68,8 @@ import tk.zwander.lockscreenwidgets.data.Mode
 import tk.zwander.lockscreenwidgets.databinding.WidgetFrameBinding
 import tk.zwander.lockscreenwidgets.services.Accessibility
 import tk.zwander.lockscreenwidgets.views.WidgetFrameView
+import kotlin.math.ceil
+import kotlin.math.floor
 
 /**
  * Handle most of the logic involving the widget frame.
@@ -952,10 +954,12 @@ open class MainWidgetFrameDelegate protected constructor(context: Context, prote
         override fun getFixScrollPos(velocityX: Int, velocityY: Int): Int {
             if (childCount == 0) return 0
 
-            return if (velocityX > 0) {
-                firstVisiblePosition
+            return if (velocityX <= 0) {
+                val targetRow = (ceil(rectsHelper.getRowIndexForItemPosition(lastVisiblePosition).toDouble() / columnCount) * columnCount).toInt()
+                rectsHelper.rows[targetRow]?.lastOrNull() ?: lastVisiblePosition
             } else {
-                lastVisiblePosition
+                val targetRow = (floor(rectsHelper.getRowIndexForItemPosition(firstVisiblePosition).toDouble() / columnCount) * columnCount).toInt()
+                rectsHelper.rows[targetRow]?.firstOrNull() ?: firstVisiblePosition
             }.also {
                 prefManager.currentPage = it
             }.run { if (this == -1) 0 else this }
@@ -965,9 +969,11 @@ open class MainWidgetFrameDelegate protected constructor(context: Context, prote
             if (childCount == 0) return 0
 
             return if (velocityX > 0) {
-                lastVisiblePosition
+                val targetRow = (ceil(rectsHelper.getRowIndexForItemPosition(lastVisiblePosition).toDouble() / columnCount) * columnCount).toInt()
+                rectsHelper.rows[targetRow]?.lastOrNull() ?: lastVisiblePosition
             } else {
-                firstVisiblePosition
+                val targetRow = (floor(rectsHelper.getRowIndexForItemPosition(firstVisiblePosition).toDouble() / columnCount) * columnCount).toInt()
+                rectsHelper.rows[targetRow]?.firstOrNull() ?: firstVisiblePosition
             }.also {
                 prefManager.currentPage = it
             }.run { if (this == -1) 0 else this }
