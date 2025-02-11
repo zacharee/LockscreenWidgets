@@ -740,7 +740,7 @@ open class MainWidgetFrameDelegate protected constructor(context: Context, prote
         }
 
         fun forced(): Boolean {
-            return prefManager.forceShowFrame
+            return prefManager.widgetFrameEnabled && prefManager.forceShowFrame
         }
 
         return (forced() || forPreview() || forNotificationCenter() || forLockscreen()).also {
