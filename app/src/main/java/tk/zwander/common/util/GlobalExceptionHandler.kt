@@ -9,7 +9,12 @@ class GlobalExceptionHandler(private val context: Context, private val previousH
         if (e is DeadObjectException || e.hasDeadObjectExceptionCause()) {
             exitProcess(100)
         } else {
-            context.logUtils.normalLog("Uncaught Exception!", e, false)
+            context.logUtils.normalLog(
+                message = "Uncaught Exception!",
+                throwable = e,
+                leaveBreadcrumb = false,
+                logToFile = true,
+            )
 
             previousHandler?.uncaughtException(t, e)
         }

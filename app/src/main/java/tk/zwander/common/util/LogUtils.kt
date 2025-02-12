@@ -93,7 +93,7 @@ class LogUtils private constructor(private val context: Context) {
         }
     }
 
-    fun normalLog(message: String, throwable: Throwable? = DefaultException(), leaveBreadcrumb: Boolean = true) {
+    fun normalLog(message: String, throwable: Throwable? = DefaultException(), leaveBreadcrumb: Boolean = true, logToFile: Boolean = false) {
         val fullMessage = generateFullMessage(message, throwable)
 
         Log.e(NORMAL_LOG_TAG, fullMessage)
@@ -106,7 +106,7 @@ class LogUtils private constructor(private val context: Context) {
             )
         }
 
-        if (context.isDebug) {
+        if (context.isDebug || logToFile) {
             synchronized(logFile) {
                 logFileHandle.writeSafely("\n\n$fullMessage")
             }
@@ -145,6 +145,7 @@ class LogUtils private constructor(private val context: Context) {
     private fun BufferedWriter.writeSafely(string: String) {
         try {
             write(string)
+            flush()
         } catch (e: Exception) {
             Bugsnag.leaveBreadcrumb("Unable to write to log file.", mapOf("error" to e.stringify()), BreadcrumbType.ERROR)
         }
