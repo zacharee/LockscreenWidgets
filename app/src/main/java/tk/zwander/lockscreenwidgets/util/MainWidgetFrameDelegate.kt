@@ -313,7 +313,8 @@ open class MainWidgetFrameDelegate protected constructor(context: Context, prote
         get() = !state.isPreview &&
                 state.selectionPreviewRequestCode == null &&
                 framePrefs.maskedMode &&
-                (!state.notificationsPanelFullyExpanded || !framePrefs.showInNotificationShade)
+                (!state.notificationsPanelFullyExpanded || !framePrefs.showInNotificationShade) &&
+                (!state.showingNotificationsPanel || framePrefs.hideOnNotificationShade)
 
     override val blurManager by lazy {
         BlurManager(
