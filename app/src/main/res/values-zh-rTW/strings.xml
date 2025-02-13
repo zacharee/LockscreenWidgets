@@ -31,7 +31,7 @@
     <string name="back">返回</string>
     <string name="clear">清除</string>
     <string name="launcher">Launcher</string>
-    <string name="reset">Reset</string>
+    <string name="reset">重置</string>
     <string name="increase">Increase</string>
     <string name="decrease">Decrease</string>
     <string name="selected" tools:override="true">Selected</string>
@@ -57,7 +57,7 @@
     <string name="shortcut_icon">捷徑 Icon</string>
     <string name="expand">展開</string>
     <string name="alert_remove_widget_confirm">移除小工具?</string>
-    <string name="alert_remove_widget_confirm_desc">Are you sure you want to remove this item?</string>
+    <string name="alert_remove_widget_confirm_desc">你想要移除這個物件嗎？</string>
     <string name="main_screen_social_mastodon">Mastodon</string>
     <string name="main_screen_social_mastodon_desc">Follow me on Mastodon for updates about my apps and random development-related nonsense.</string>
     <string name="main_screen_social_website">網站</string>
