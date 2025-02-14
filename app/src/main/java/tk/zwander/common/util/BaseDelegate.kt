@@ -1,5 +1,6 @@
 package tk.zwander.common.util
 
+import android.annotation.SuppressLint
 import android.app.WallpaperManager
 import android.content.Context
 import android.hardware.display.DisplayManager
@@ -27,6 +28,7 @@ import tk.zwander.common.data.WidgetType
 import tk.zwander.common.host.WidgetHostCompat
 import tk.zwander.common.host.widgetHostCompat
 import tk.zwander.common.util.mitigations.SafeContextWrapper
+import java.util.concurrent.ConcurrentLinkedDeque
 
 @Suppress("MemberVisibilityCanBePrivate")
 abstract class BaseDelegate<State : Any>(context: Context) : SafeContextWrapper(context),
@@ -126,6 +128,7 @@ abstract class BaseDelegate<State : Any>(context: Context) : SafeContextWrapper(
         scope.cancel()
     }
 
+    @SuppressLint("NotifyDataSetChanged")
     @CallSuper
     override fun onEvent(event: Event) {
         when (event) {
@@ -149,6 +152,11 @@ abstract class BaseDelegate<State : Any>(context: Context) : SafeContextWrapper(
 
                     adapter.currentEditingInterfacePosition = -1
                     adapter.updateWidgets(newWidgets)
+                    gridLayoutManager.doOnLayoutCompleted {
+                        if (!recyclerView.isComputingLayout) {
+                            adapter.notifyDataSetChanged()
+                        }
+                    }
                     currentWidgets = newWidgets
                 }
 
@@ -242,10 +250,12 @@ abstract class BaseDelegate<State : Any>(context: Context) : SafeContextWrapper(
         rowCount,
         colCount
     ) {
+        private val onLayoutCompletedCallbacks = ConcurrentLinkedDeque<() -> Unit>()
+
         override fun makeAndAddView(
             position: Int,
             direction: Direction,
-            recycler: RecyclerView.Recycler
+            recycler: RecyclerView.Recycler,
         ): View {
             return try {
                 super.makeAndAddView(position, direction, recycler)
@@ -253,6 +263,21 @@ abstract class BaseDelegate<State : Any>(context: Context) : SafeContextWrapper(
                 context.logUtils.normalLog("Error laying out widget view at $position.", e)
                 context.createWidgetErrorView()
             }
+        }
+
+        override fun onLayoutCompleted(state: RecyclerView.State?) {
+            super.onLayoutCompleted(state)
+
+            onLayoutCompletedCallbacks.removeAll {
+                mainHandler.post {
+                    it()
+                }
+                true
+            }
+        }
+
+        fun doOnLayoutCompleted(callback: () -> Unit) {
+            onLayoutCompletedCallbacks.add(callback)
         }
     }
 }
