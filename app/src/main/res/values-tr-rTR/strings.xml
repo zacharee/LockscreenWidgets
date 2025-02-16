@@ -119,8 +119,8 @@
     <string name="settings_screen_touch_protection_desc">Yakınlık sensörü kapalıyken widget çerçevesine yapılan dokunuşları dikkate almayın.</string>
     <string name="settings_screen_request_unlock">Bildirim Merkezi\'nin Kilidini Açma/Kapatma İstemi</string>
     <string name="settings_screen_request_unlock_desc">Lockscreen Widgets bir widget\'ın bir uygulamayı başlattığını algılarsa, cihazın kilidini açmanızı ve bildirim merkezini kapatmanızı ister. Bu davranışı önlemek için bu seçeneği devre dışı bırakın.</string>
-    <string name="settings_screen_hide_on_facewidgets">Hide on FaceWidgets (Now Bar) Screen</string>
-    <string name="settings_screen_hide_on_facewidgets_desc">Hide the frame when the FaceWidgets screen is shown. This is also known as the expanded Now Bar screen on One UI 7 and later.</string>
+    <string name="settings_screen_hide_on_facewidgets">FaceWidgets (Now Bar) Ekranında Gizle</string>
+    <string name="settings_screen_hide_on_facewidgets_desc">FaceWidgets ekranı gösterildiğinde çerçeveyi gizle. Bu, One UI 7 ve sonraki sürümlerde genişletilmiş Now Bar ekranı olarak da bilinir.</string>
     <string name="settings_screen_hide_in_landscape">Yatay Modda Gizle</string>
     <string name="settings_screen_hide_in_landscape_desc">Cihaz yatay moddayken widget çerçevesini gizle.</string>
     <string name="settings_screen_separate_position_for_lock_nc">Kilitliyken Ayrı Bildirim Merkezi Konumu</string>
