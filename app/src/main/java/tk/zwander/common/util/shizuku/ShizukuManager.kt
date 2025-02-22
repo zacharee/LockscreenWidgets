@@ -152,7 +152,7 @@ class ShizukuManager private constructor(private val context: Context) : Corouti
     }
 
     private val serviceArgs by lazy {
-        Shizuku.UserServiceArgs(ComponentName(context.packageName, ShizukuService::class.java.canonicalName!!))
+        Shizuku.UserServiceArgs(ComponentName(context, ShizukuService::class.java))
             .version(BuildConfig.VERSION_CODE + (if (BuildConfig.DEBUG) 101 else 0))
             .processNameSuffix("granter")
             .debuggable(BuildConfig.DEBUG)
@@ -192,40 +192,45 @@ class ShizukuManager private constructor(private val context: Context) : Corouti
         coroutineContext: CoroutineContext = EmptyCoroutineContext,
         block: IShizukuService.() -> Unit,
     ): ShizukuCommandResult = coroutineScope {
-        if (isShizukuRunning) {
-            if (Shizuku.checkSelfPermission() == PackageManager.PERMISSION_GRANTED) {
-                postShizukuCommand(coroutineContext, block)
-                ShizukuCommandResult.POSTED
-            } else {
-                withContext(Dispatchers.IO) {
-                    val granted = suspendCoroutine { cont ->
-                        val listener = object : Shizuku.OnRequestPermissionResultListener {
-                            override fun onRequestPermissionResult(
-                                requestCode: Int,
-                                grantResult: Int,
-                            ) {
-                                Shizuku.removeRequestPermissionResultListener(this)
-                                cont.resume(grantResult == PackageManager.PERMISSION_GRANTED)
+        try {
+            if (isShizukuRunning) {
+                if (Shizuku.checkSelfPermission() == PackageManager.PERMISSION_GRANTED) {
+                    postShizukuCommand(coroutineContext, block)
+                    ShizukuCommandResult.POSTED
+                } else {
+                    withContext(Dispatchers.IO) {
+                        val granted = suspendCoroutine { cont ->
+                            val listener = object : Shizuku.OnRequestPermissionResultListener {
+                                override fun onRequestPermissionResult(
+                                    requestCode: Int,
+                                    grantResult: Int,
+                                ) {
+                                    Shizuku.removeRequestPermissionResultListener(this)
+                                    cont.resume(grantResult == PackageManager.PERMISSION_GRANTED)
+                                }
                             }
+                            Shizuku.addRequestPermissionResultListener(listener)
+                            Shizuku.requestPermission(100)
                         }
-                        Shizuku.addRequestPermissionResultListener(listener)
-                        Shizuku.requestPermission(100)
-                    }
 
-                    if (granted) {
-                        postShizukuCommand(coroutineContext, block)
-                        ShizukuCommandResult.POSTED
-                    } else {
-                        ShizukuCommandResult.PERMISSION_DENIED
+                        if (granted) {
+                            postShizukuCommand(coroutineContext, block)
+                            ShizukuCommandResult.POSTED
+                        } else {
+                            ShizukuCommandResult.PERMISSION_DENIED
+                        }
                     }
                 }
-            }
-        } else {
-            if (isShizukuInstalled) {
-                ShizukuCommandResult.INSTALLED_NOT_RUNNING
             } else {
-                ShizukuCommandResult.NOT_INSTALLED
+                if (isShizukuInstalled) {
+                    ShizukuCommandResult.INSTALLED_NOT_RUNNING
+                } else {
+                    ShizukuCommandResult.NOT_INSTALLED
+                }
             }
+        } catch (e: IllegalStateException) {
+            context.logUtils.normalLog("Unable to post Shizuku command", e)
+            ShizukuCommandResult.ERROR
         }
     }
 
@@ -244,16 +249,20 @@ class ShizukuManager private constructor(private val context: Context) : Corouti
     }
 
     private fun addUserService() {
-        Shizuku.unbindUserService(
-            serviceArgs,
-            userServiceConnection,
-            true
-        )
+        try {
+            Shizuku.unbindUserService(
+                serviceArgs,
+                userServiceConnection,
+                true,
+            )
 
-        Shizuku.bindUserService(
-            serviceArgs,
-            userServiceConnection,
-        )
+            Shizuku.bindUserService(
+                serviceArgs,
+                userServiceConnection,
+            )
+        } catch (e: IllegalStateException) {
+            context.logUtils.normalLog("Unable to bind Shizuku service", e)
+        }
     }
 }
 
@@ -262,4 +271,6 @@ enum class ShizukuCommandResult {
     INSTALLED_NOT_RUNNING,
     PERMISSION_DENIED,
     POSTED,
+    ERROR,
+    ;
 }
