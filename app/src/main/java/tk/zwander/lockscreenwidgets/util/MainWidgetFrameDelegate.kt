@@ -10,6 +10,7 @@ import android.graphics.PointF
 import android.graphics.PorterDuff
 import android.graphics.PorterDuffColorFilter
 import android.graphics.drawable.GradientDrawable
+import android.hardware.display.DisplayManager.DisplayListener
 import android.view.ContextThemeWrapper
 import android.view.Gravity
 import android.view.LayoutInflater
@@ -333,6 +334,16 @@ open class MainWidgetFrameDelegate protected constructor(context: Context, prote
         )
     }
 
+    private val displayListener = object : DisplayListener {
+        override fun onDisplayAdded(displayId: Int) {}
+        override fun onDisplayRemoved(displayId: Int) {}
+
+        override fun onDisplayChanged(displayId: Int) {
+            logUtils.normalLog("Display $displayId changed", null)
+            updateParamsIfNeeded()
+        }
+    }
+
     override fun onEvent(event: Event) {
         super.onEvent(event)
 
@@ -587,6 +598,8 @@ open class MainWidgetFrameDelegate protected constructor(context: Context, prote
         try {
             scrollToStoredPosition(false)
         } catch (_: Exception) {}
+
+        displayManager.registerDisplayListener(displayListener, null)
     }
 
     override fun onDestroy() {
@@ -597,6 +610,8 @@ open class MainWidgetFrameDelegate protected constructor(context: Context, prote
         if (id == -1) {
             invalidateInstance()
         }
+
+        displayManager.unregisterDisplayListener(displayListener)
     }
 
     override fun isLocked(): Boolean {
@@ -888,6 +903,8 @@ open class MainWidgetFrameDelegate protected constructor(context: Context, prote
      */
     private fun updateParamsIfNeeded() {
         logUtils.debugLog("Checking if params need to be updated")
+
+        logUtils.debugLog("Possibly updating params with display size $screenSize", null)
 
         val (newX, newY) = frameSizeAndPosition.getPositionForType(saveMode)
         val (newW, newH) = frameSizeAndPosition.getSizeForType(saveMode).run {

@@ -6,6 +6,7 @@ import android.appwidget.AppWidgetProviderInfo
 import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
+import android.hardware.display.DisplayManagerGlobal
 import android.net.Uri
 import android.os.Build
 import android.os.Handler
@@ -114,12 +115,15 @@ fun AppWidgetProviderInfo.createPersistablePreviewBitmap(context: Context): Stri
     return loadPreviewOrIcon(context, maxSize = 128.dp)?.toBase64()
 }
 
-@Suppress("DEPRECATION")
 val Context.defaultDisplayCompat: Display
-    get() = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-        displayNoVerify ?: windowManager.defaultDisplay
-    } else {
-        windowManager.defaultDisplay
+    get() {
+        val displayId = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            displayNoVerify?.displayId ?: Display.DEFAULT_DISPLAY
+        } else {
+            Display.DEFAULT_DISPLAY
+        }
+
+        return DisplayManagerGlobal.getInstance().getRealDisplay(displayId)
     }
 
 fun Context.vibrate(duration: Long = 50L) {

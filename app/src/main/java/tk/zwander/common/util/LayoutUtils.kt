@@ -7,6 +7,7 @@ import android.animation.ObjectAnimator
 import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Point
+import android.util.DisplayMetrics
 import android.util.TypedValue
 import android.view.View
 import androidx.compose.ui.unit.Density
@@ -99,12 +100,12 @@ fun Context.dpAsPx(dpVal: Number) =
     TypedValue.applyDimension(
         TypedValue.COMPLEX_UNIT_DIP,
         dpVal.toFloat(),
-        resources.displayMetrics
+        displayMetrics,
     ).roundToInt()
 
 //Take a pixel value and return its representation in DP.
 fun Context.pxAsDp(pxVal: Number) =
-    pxVal.toFloat() / resources.displayMetrics.density
+    pxVal.toFloat() / displayMetrics.density
 
 //Fade a View to 0% alpha and 95% scale. Used when hiding the widget frame.
 fun View.fadeAndScaleOut(endListener: () -> Unit) {
@@ -153,6 +154,14 @@ val Context.screenSize: Point
         @Suppress("DEPRECATION")
         return Point().apply {
             defaultDisplayCompat.getRealSize(this)
+        }
+    }
+
+val Context.displayMetrics: DisplayMetrics
+    get() {
+        @Suppress("DEPRECATION")
+        return DisplayMetrics().apply {
+            defaultDisplayCompat.getRealMetrics(this)
         }
     }
 
