@@ -8,6 +8,7 @@ import kotlin.math.min
 private const val MAX_SIZE = 10_000f
 
 @Parcelize
+@ConsistentCopyVisibility
 data class SafePointF private constructor(
     val x: Float,
     val y: Float,
