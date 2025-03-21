@@ -33,7 +33,7 @@
         android:translationY="?android:actionBarSize"
         tools:translationY="0dp">
 
-        <ImageView
+        <androidx.appcompat.widget.AppCompatImageView
             android:id="@+id/open_close_toolbar"
             android:layout_width="32dp"
             android:layout_height="32dp"

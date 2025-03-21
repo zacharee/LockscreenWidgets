@@ -13,6 +13,7 @@ import android.hardware.display.DisplayManager
 import android.os.Handler
 import android.os.Looper
 import android.util.TypedValue
+import android.view.ContextThemeWrapper
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
@@ -132,7 +133,7 @@ class DrawerDelegate private constructor(context: Context) :
     val scrollingOpen: Boolean
         get() = handle.scrollingOpen
 
-    private val drawer by lazy { DrawerLayoutBinding.inflate(LayoutInflater.from(this)) }
+    private val drawer by lazy { DrawerLayoutBinding.inflate(LayoutInflater.from(ContextThemeWrapper(this, R.style.AppTheme))) }
     private val handle by lazy { Handle(this) }
 
     override val adapter by lazy {
