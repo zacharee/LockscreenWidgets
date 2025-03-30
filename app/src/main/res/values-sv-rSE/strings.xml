@@ -4,7 +4,6 @@
     <string name="edit_gesture_hint">Tryck på widget-ramen med två fingrar för att flytta och ändra storlek.</string>
     <string name="edit_gesture_hint_2">Bra! Tryck med två fingrar för att dölja redigeringsgränssnittet.</string>
     <string name="hide_gesture_hint">Tryck på widget-ramen med tre fingrar för att dölja den tillfälligt. Den kommer förbli dold tills det att du stänger av och sätter igång skärmen igen.</string>
-    <string name="hide_gesture_hint_2">Stäng av och sätt igång skärmen igen för att få tillbaka widget-ramen.</string>
     <string name="accessibility_service_desc">Lockscreen Widget behöver en Tillgänglighetsservice för att synas på låsskärmen och i notifikationscentret. Ingen data kommer samlas in, och ingen åtgärd kommer göras på enheten.</string>
     <string name="add_widget">Lägg till Widget</string>
     <string name="grant">Bevilja</string>

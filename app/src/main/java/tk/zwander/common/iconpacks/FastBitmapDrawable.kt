@@ -1,7 +1,6 @@
 package tk.zwander.common.iconpacks
 
 import android.animation.ObjectAnimator
-import android.annotation.TargetApi
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Color
@@ -19,10 +18,12 @@ import android.view.animation.DecelerateInterpolator
 import android.view.animation.Interpolator
 import android.view.animation.PathInterpolator
 import androidx.annotation.ColorInt
+import androidx.annotation.RequiresApi
 import androidx.core.graphics.ColorUtils
 import tk.zwander.common.iconpacks.BitmapInfo.DrawableCreationFlags
+import androidx.core.graphics.withSave
 
-@TargetApi(Build.VERSION_CODES.N)
+@RequiresApi(Build.VERSION_CODES.N)
 open class FastBitmapDrawable protected constructor(
     @JvmField protected val mBitmap: Bitmap,
     @JvmField protected val mIconColor: Int
@@ -64,14 +65,14 @@ open class FastBitmapDrawable protected constructor(
 
     override fun draw(canvas: Canvas) {
         if (mScale != 1f) {
-            val count: Int = canvas.save()
-            val bounds: Rect = bounds
-            canvas.scale(mScale, mScale, bounds.exactCenterX(), bounds.exactCenterY())
-            drawInternal(canvas, bounds)
-            if (mBadge != null) {
-                mBadge!!.draw(canvas)
+            canvas.withSave {
+                val bounds: Rect = bounds
+                canvas.scale(mScale, mScale, bounds.exactCenterX(), bounds.exactCenterY())
+                drawInternal(canvas, bounds)
+                if (mBadge != null) {
+                    mBadge!!.draw(canvas)
+                }
             }
-            canvas.restoreToCount(count)
         } else {
             drawInternal(canvas, bounds)
             if (mBadge != null) {

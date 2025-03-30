@@ -4,7 +4,6 @@
     <string name="edit_gesture_hint">二本指でタップして移動やリサイズします</string>
     <string name="edit_gesture_hint_2">二本指でタップして編集モードを終了します</string>
     <string name="hide_gesture_hint">三本指でタップして一時的に非表示にできます。画面をOFF→ONすることで再度表示されます</string>
-    <string name="hide_gesture_hint_2">画面をOFFにして再度ONにするとウィジェットが復帰します</string>
     <string name="accessibility_service_desc">このアプリでは、ロック画面の通知の中央にウィジェットを表示するため、アクセシビリティサービスが必要です。これ以外の動作には使用せず、情報の収集も行いません。</string>
     <string name="add_widget">ウィジェット追加</string>
     <string name="grant">許可</string>

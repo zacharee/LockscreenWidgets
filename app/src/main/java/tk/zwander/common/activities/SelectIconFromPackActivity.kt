@@ -1,6 +1,5 @@
 package tk.zwander.common.activities
 
-import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
@@ -149,7 +148,7 @@ class SelectIconFromPackActivity : BaseActivity() {
                                                         prefManager.shortcutOverrideIcons = prefManager.shortcutOverrideIcons.apply {
                                                             this[shortcutId!!] = icon.entry
                                                         }
-                                                        setResult(Activity.RESULT_OK)
+                                                        setResult(RESULT_OK)
                                                         finish()
                                                     }
                                                     .padding(16.dp),

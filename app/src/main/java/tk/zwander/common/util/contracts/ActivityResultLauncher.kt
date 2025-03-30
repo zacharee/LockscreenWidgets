@@ -1,3 +1,5 @@
+@file:Suppress("unused")
+
 package tk.zwander.common.util.contracts
 
 import android.content.ActivityNotFoundException
@@ -57,7 +59,7 @@ fun <I, O> rememberLauncherForActivityResultWithFallback(
             override fun launch(input: I, options: ActivityOptionsCompat?) {
                 try {
                     realLauncher.launch(input, options)
-                } catch (e: ActivityNotFoundException) {
+                } catch (_: ActivityNotFoundException) {
                     onResult(fallback(input))
                 }
             }
@@ -101,7 +103,7 @@ fun <I, O> ActivityResultCaller.registerForActivityResultWithFallback(
         override fun launch(input: I, options: ActivityOptionsCompat?) {
             try {
                 realLauncher.launch(input, options)
-            } catch (e: ActivityNotFoundException) {
+            } catch (_: ActivityNotFoundException) {
                 onResult(fallback(input))
             }
         }

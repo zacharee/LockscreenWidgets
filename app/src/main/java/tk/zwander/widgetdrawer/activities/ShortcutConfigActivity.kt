@@ -1,6 +1,5 @@
 package tk.zwander.widgetdrawer.activities
 
-import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
@@ -38,7 +37,7 @@ class ShortcutConfigActivity : AppCompatActivity() {
 
         resultIntent.putExtra(Intent.EXTRA_SHORTCUT_ICON_RESOURCE, iconRes)
 
-        setResult(Activity.RESULT_OK, resultIntent)
+        setResult(RESULT_OK, resultIntent)
 
         finish()
     }

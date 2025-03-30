@@ -236,7 +236,7 @@ private fun icon(
                     e,
                 )
                 null
-            } catch (e: Resources.NotFoundException) {
+            } catch (_: Resources.NotFoundException) {
                 info.appInfo.appInfo.loadIcon(context.packageManager)
             } ?: info.appInfo.appInfo.loadIcon(context.packageManager)
         }

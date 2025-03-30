@@ -2,7 +2,6 @@ package tk.zwander.lockscreenwidgets.services
 
 import android.accessibilityservice.AccessibilityService
 import android.annotation.SuppressLint
-import android.content.Context
 import android.os.PowerManager
 import android.view.WindowManager
 import android.view.accessibility.AccessibilityEvent
@@ -46,9 +45,9 @@ import tk.zwander.widgetdrawer.util.DrawerDelegate
  */
 class Accessibility : AccessibilityService(), EventObserver, CoroutineScope by MainScope() {
     private val kgm by lazy { keyguardManager }
-    private val wm by lazy { getSystemService(Context.WINDOW_SERVICE) as WindowManager }
-    private val power by lazy { getSystemService(Context.POWER_SERVICE) as PowerManager }
-    private val imm by lazy { getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager }
+    private val wm by lazy { getSystemService(WINDOW_SERVICE) as WindowManager }
+    private val power by lazy { getSystemService(POWER_SERVICE) as PowerManager }
+    private val imm by lazy { getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager }
     private val frameDelegate: MainWidgetFrameDelegate
         get() = MainWidgetFrameDelegate.getInstance(this)
     private val drawerDelegate: DrawerDelegate
@@ -194,7 +193,7 @@ class Accessibility : AccessibilityService(), EventObserver, CoroutineScope by M
     private fun getWindowsSafely(): List<AccessibilityWindowInfo>? {
         return try {
             ArrayList(windows)
-        } catch (e: SecurityException) {
+        } catch (_: SecurityException) {
             // Sometimes throws a SecurityException talking about mismatching
             // user IDs. In that case, return null and don't update any window-based
             // state items.

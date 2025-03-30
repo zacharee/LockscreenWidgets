@@ -165,7 +165,7 @@ object AccessibilityUtils {
         val processed = windows.mapIndexedParallel { index, rawWindow ->
             val safeRoot = try {
                 rawWindow.root
-            } catch (e: NullPointerException) {
+            } catch (_: NullPointerException) {
                 null
             } catch (e: Exception) {
                 logUtils.normalLog("Error getting window root", e)
@@ -181,16 +181,14 @@ object AccessibilityUtils {
                     minSysUiWindowIndex = index
                 }
 
-                safeRoot?.let { root ->
-                    addAllNodesToList(
-                        root,
-                        sysUiWindowNodes,
-                        sysUiWindowViewIds,
-                        sysUiWindowAwaits,
-                    ) { node ->
-                        launch(Dispatchers.IO) {
-                            processNode(nodeState, node)
-                        }
+                addAllNodesToList(
+                    safeRoot,
+                    sysUiWindowNodes,
+                    sysUiWindowViewIds,
+                    sysUiWindowAwaits,
+                ) { node ->
+                    launch(Dispatchers.IO) {
+                        processNode(nodeState, node)
                     }
                 }
             }
@@ -292,23 +290,23 @@ object AccessibilityUtils {
             awaits.add(async {
                 val child = try {
                     parentNode.getChild(i)
-                } catch (e: SecurityException) {
+                } catch (_: SecurityException) {
                     //Sometimes a SecurityException gets thrown here (on Huawei devices)
                     //so just return null if it happens
                     null
-                } catch (e: NullPointerException) {
+                } catch (_: NullPointerException) {
                     //Sometimes a NullPointerException is thrown here with this error:
                     //"Attempt to read from field 'com.android.server.appwidget.AppWidgetServiceImpl$ProviderId
                     //com.android.server.appwidget.AppWidgetServiceImpl$Provider.id' on a null object reference"
                     //so just return null if that happens.
                     null
-                } catch (e: IllegalStateException) {
+                } catch (_: IllegalStateException) {
                     try {
                         parentNode.isSealed = true
                         parentNode.getChild(i).also {
                             parentNode.isSealed = false
                         }
-                    } catch (e: Exception) {
+                    } catch (_: Exception) {
                         null
                     }
                 }
@@ -494,7 +492,7 @@ object AccessibilityUtils {
                 frameDelegate.updateState {
                     try {
                         it.copy(showingKeyboard = imm.inputMethodWindowVisibleHeight > 0)
-                    } catch (e: Throwable) {
+                    } catch (_: Throwable) {
                         // Fetching the IME height can cause the system to throw an NPE:
                         // "Attempt to read from field 'com.android.server.wm.DisplayFrames com.android.server.wm.DisplayContent.mDisplayFrames' on a null object reference".
                         // If this happens, assume the keyboard isn't showing.
@@ -628,7 +626,7 @@ object AccessibilityUtils {
                 //Make sure to recycle the copy of the event.
                 @Suppress("DEPRECATION")
                 event.recycle()
-            } catch (e: IllegalStateException) {
+            } catch (_: IllegalStateException) {
                 //Sometimes the event is already recycled somehow.
             }
 
@@ -644,7 +642,7 @@ val Context.isAccessibilityEnabled: Boolean
     get() = Settings.Secure.getString(
         contentResolver,
         Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES
-    )?.contains(ComponentName(this, Accessibility::class.java).flattenToString()) ?: false
+    )?.contains(ComponentName(this, Accessibility::class.java).flattenToString()) == true
 
 fun Context.openAccessibilitySettings() {
     //Samsung devices have a separate Activity for listing

@@ -8,7 +8,6 @@ import android.app.WallpaperManager
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
-import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
 import android.os.Build
 import android.os.Bundle
@@ -17,6 +16,7 @@ import android.os.Looper
 import android.os.ParcelFileDescriptor
 import android.os.ServiceManager
 import androidx.annotation.RequiresApi
+import androidx.core.graphics.drawable.toDrawable
 
 val Context.wallpaperUtils: WallpaperUtils
     get() = WallpaperUtils.getInstance(this)
@@ -63,9 +63,7 @@ class WallpaperUtils private constructor(private val context: Context) {
         @SuppressLint("MissingPermission")
         get() {
             return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                peekWallpaperBitmap()?.let {
-                    BitmapDrawable(context.resources, it)
-                } ?: wallpaper.drawable
+                peekWallpaperBitmap()?.toDrawable(context.resources) ?: wallpaper.drawable
             } else {
                 wallpaper.drawable
             }
@@ -134,11 +132,14 @@ class WallpaperUtils private constructor(private val context: Context) {
                         Int::class.java, Bundle::class.java, Int::class.java,
                     ).invoke(
                         iWallpaper,
-                        context.packageName, context.attributionTag, callback,
+                        context.packageName,
+                        @SuppressLint("NewApi")
+                        context.attributionTag,
+                        callback,
                         flag, bundle, context.userId,
                     ) as? ParcelFileDescriptor
                 }
-            } catch (e: NoSuchMethodError) {
+            } catch (_: NoSuchMethodError) {
                 context.logUtils.debugLog("Missing getWallpaperWithFeature, using getWallpaper instead.", null)
                 old()
             }

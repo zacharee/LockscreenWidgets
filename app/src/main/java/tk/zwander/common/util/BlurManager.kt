@@ -6,6 +6,7 @@ import android.view.View
 import android.view.View.OnAttachStateChangeListener
 import android.view.WindowManager
 import tk.zwander.common.drawable.BackgroundBlurDrawableCompat
+import java.util.function.Consumer
 
 val Context.shouldShowBlurOptions: Boolean
     get() {
@@ -29,7 +30,7 @@ class BlurManager(
             updateBlur()
         }
     }
-    private val crossBlurEnabledListener = { _: Boolean ->
+    private val crossBlurEnabledListener = Consumer<Boolean> {
         updateBlur()
     }
 
@@ -93,7 +94,7 @@ class BlurManager(
         } else {
             val f = try {
                 params::class.java.getDeclaredField("samsungFlags")
-            } catch (e: Exception) {
+            } catch (_: Exception) {
                 return
             }
 

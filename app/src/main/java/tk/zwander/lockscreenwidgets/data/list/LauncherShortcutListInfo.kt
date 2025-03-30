@@ -1,12 +1,12 @@
 package tk.zwander.lockscreenwidgets.data.list
 
-import android.annotation.TargetApi
 import android.content.pm.ShortcutInfo
 import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.core.graphics.drawable.IconCompat
 import tk.zwander.common.data.BaseAppInfo
 
-@TargetApi(Build.VERSION_CODES.N_MR1)
+@RequiresApi(Build.VERSION_CODES.N_MR1)
 class LauncherShortcutListInfo(
     shortcutName: String,
     icon: IconCompat?,

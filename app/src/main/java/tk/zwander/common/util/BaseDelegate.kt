@@ -36,10 +36,10 @@ abstract class BaseDelegate<State : Any>(context: Context) : SafeContextWrapper(
     protected val wm by lazy { windowManager }
     protected val power by lazy { getSystemService(POWER_SERVICE) as PowerManager }
     protected val kgm by lazy { keyguardManager }
-    protected val wallpaper by lazy { getSystemService(Context.WALLPAPER_SERVICE) as WallpaperManager }
+    protected val wallpaper by lazy { getSystemService(WALLPAPER_SERVICE) as WallpaperManager }
     protected val widgetHost by lazy { widgetHostCompat }
     protected val displayManager by lazy {
-        getSystemService(Context.DISPLAY_SERVICE) as DisplayManager
+        getSystemService(DISPLAY_SERVICE) as DisplayManager
     }
 
     open var commonState: BaseState = BaseState()

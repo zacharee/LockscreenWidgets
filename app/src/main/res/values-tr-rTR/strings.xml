@@ -4,7 +4,6 @@
     <string name="edit_gesture_hint">Widget çerçevesine iki parmağınızla dokunarak onu taşıyabilir ve yeniden boyutlandırabilirsiniz.</string>
     <string name="edit_gesture_hint_2">Harika! Düzenleme arayüzünü gizlemek için iki parmağınızla dokunun.</string>
     <string name="hide_gesture_hint">Widget çerçevesine üç parmağınızla dokunarak geçici olarak gizleyebilirsiniz. Ekranı kapatıp tekrar açana kadar gizli kalacaktır.</string>
-    <string name="hide_gesture_hint_2">Widget çerçevesini geri getirmek için ekranı kapatıp tekrar açın.</string>
     <string name="accessibility_service_desc">Kilit Ekranı Widget\'larının kilit ekranında ve bildirim merkezinde görüntülenmesi için bir Erişilebilirlik Hizmeti gerekir. Hiçbir veri toplanmaz ve cihazda hiçbir işlem gerçekleştirilmez.</string>
     <string name="add_widget">Widget ekle</string>
     <string name="grant">İzin ver</string>

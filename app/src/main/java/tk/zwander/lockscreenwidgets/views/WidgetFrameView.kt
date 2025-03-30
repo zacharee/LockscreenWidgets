@@ -469,12 +469,12 @@ class WidgetFrameView(context: Context, attrs: AttributeSet) : ConstraintLayout(
 
                     val velX = try {
                         (newX - prevExpandX).roundToInt()
-                    } catch (e: IllegalArgumentException) {
+                    } catch (_: IllegalArgumentException) {
                         0
                     }
                     val velY = try {
                         (newY - prevExpandY).roundToInt()
-                    } catch (e: IllegalArgumentException) {
+                    } catch (_: IllegalArgumentException) {
                         0
                     }
 
@@ -487,7 +487,7 @@ class WidgetFrameView(context: Context, attrs: AttributeSet) : ConstraintLayout(
                     //If the velocity is odd, the frame may over-compensate, causing it
                     //to push the opposite side the opposite direction by a pixel every time
                     //this is invoked.
-                    listener?.invoke(velX.makeEven(), velY.makeEven(), false) ?: false
+                    listener?.invoke(velX.makeEven(), velY.makeEven(), false) == true
                 }
                 MotionEvent.ACTION_UP -> {
                     listener?.invoke(0, 0, true)

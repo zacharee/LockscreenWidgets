@@ -154,11 +154,11 @@ data class WidgetData(
                 widgetProviderComponent
             ) ?: (try {
                 context.packageManager.getActivityIcon(widgetProviderComponent)
-            } catch (e: Exception) {
+            } catch (_: Exception) {
                 null
             }) ?: (try {
                 context.packageManager.getApplicationIcon(widgetProviderComponent.packageName)
-            } catch (e: Exception) {
+            } catch (_: Exception) {
                 null
             }))?.toSafeBitmap(context.density, maxSize = 128.dp)
         }
@@ -205,7 +205,7 @@ data class WidgetData(
             try {
                 context.getRemoteDrawable(this.packageName, this)
                     .toSafeBitmap(context.density, maxSize = 128.dp)
-            } catch (e: PackageManager.NameNotFoundException) {
+            } catch (_: PackageManager.NameNotFoundException) {
                 null
             }
         }

@@ -119,7 +119,7 @@ class ShizukuManager private constructor(private val context: Context) : Corouti
         get() = try {
             context.packageManager.getPackageInfo(ShizukuProvider.MANAGER_APPLICATION_ID, 0)
             true
-        } catch (e: Throwable) {
+        } catch (_: Throwable) {
             false
         }
 

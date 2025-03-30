@@ -447,7 +447,7 @@ open class MainWidgetFrameDelegate protected constructor(context: Context, prote
                             widgetHost.stopListening(this)
                             lifecycleRegistry.currentState = Lifecycle.State.STARTED
                         }
-                    } catch (e: NullPointerException) {
+                    } catch (_: NullPointerException) {
                         //The stupid "Attempt to read from field 'com.android.server.appwidget.AppWidgetServiceImpl$ProviderId
                         //com.android.server.appwidget.AppWidgetServiceImpl$Provider.id' on a null object reference"
                         //Exception is thrown on stopListening() as well for some reason.

@@ -41,7 +41,7 @@ val Context.isNotificationListenerActive: Boolean
     get() = Settings.Secure.getString(contentResolver, "enabled_notification_listeners")?.run {
         val cmp = ComponentName(this@isNotificationListenerActive, NotificationListener::class.java)
         contains(cmp.flattenToString()) || contains(cmp.flattenToShortString())
-    } ?: false
+    } == true
 
 /**
  * Used to notify the Accessibility service about changes in notification count,
@@ -52,7 +52,7 @@ val Context.isNotificationListenerActive: Boolean
  */
 @Suppress("unused")
 class NotificationListener : NotificationListenerService(), EventObserver, CoroutineScope by MainScope() {
-    private val nm by lazy { getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager }
+    private val nm by lazy { getSystemService(NOTIFICATION_SERVICE) as NotificationManager }
     private val handler by lazy { Handler(Looper.getMainLooper()) }
 
     private val isListening = atomic(false)
@@ -256,7 +256,7 @@ class NotificationListener : NotificationListenerService(), EventObserver, Corou
             return true
         }
 
-    private inner class NougatListenerWrapper : NotificationListenerService.NotificationListenerWrapper() {
+    private inner class NougatListenerWrapper : NotificationListenerWrapper() {
         override fun onTransact(code: Int, data: Parcel, reply: Parcel?, flags: Int): Boolean {
             return try {
                 super.onTransact(code, data, reply, flags)

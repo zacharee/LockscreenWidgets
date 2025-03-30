@@ -4,7 +4,6 @@
     <string name="edit_gesture_hint">اضغط على التطبيق المصغر بإصبعين للتحريك وضبط الحجم.</string>
     <string name="edit_gesture_hint_2">حسناً! اضغط بإصبعين لإخفاء عناصر الواجهة.</string>
     <string name="hide_gesture_hint">اضغط على اطار التطبيق المصغر بثلاث اصابع لإخفائة مؤقتاً. سيبقى مخفياً حتى تطفئ وتشغل الشاشة مجددا.</string>
-    <string name="hide_gesture_hint_2">اطفئ واعد تشغيل الشاشة مجددا لجلب التطبيق المصغر.</string>
     <string name="accessibility_service_desc">التطبيقات المصغرة لشاشة القفل تحتاح الى خدمة إمكانية الوصول للعرض على شاشة القفل ومركز الاشعارات. لن يتم جمع بيانات. ولا إجراء سيتم في الجهاز.</string>
     <string name="add_widget">اضافة تطبيق مصغر</string>
     <string name="grant">سماح</string>

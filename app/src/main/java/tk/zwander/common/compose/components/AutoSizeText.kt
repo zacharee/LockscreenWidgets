@@ -1,5 +1,6 @@
 package tk.zwander.common.compose.components
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.Text
@@ -30,6 +31,7 @@ import kotlin.math.absoluteValue
 import kotlin.math.ceil
 
 // https://stackoverflow.com/a/71416530/5496177
+@SuppressLint("UnusedBoxWithConstraintsScope")
 @Composable
 fun AutoSizeText(
     text: String,

@@ -1,7 +1,6 @@
 package tk.zwander.lockscreenwidgets
 
 import android.annotation.SuppressLint
-import android.app.Activity
 import android.content.ComponentName
 import android.content.pm.PackageManager
 import android.os.Build
@@ -38,7 +37,7 @@ import tk.zwander.common.util.prefManager
 class MainActivity : BaseActivity(), CoroutineScope by MainScope() {
     private val introRequest =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-            if (result.resultCode != Activity.RESULT_OK) {
+            if (result.resultCode != RESULT_OK) {
                 //The intro sequence or permissions request wasn't successful. Quit.
                 finish()
             } else {

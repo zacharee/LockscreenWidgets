@@ -4,7 +4,6 @@
     <string name="edit_gesture_hint">使用兩隻手指點擊小工具以移動它並調整大小。</string>
     <string name="edit_gesture_hint_2">很棒！ 用兩隻手指點擊可以隱藏編輯畫面。</string>
     <string name="hide_gesture_hint">用三隻手指點擊小工具可以暫時隱藏它。 它將保持隱藏狀態，直到您關閉並再次打開螢幕。</string>
-    <string name="hide_gesture_hint_2">關閉螢幕後再打開螢幕，可以讓小工具再次出現。</string>
     <string name="accessibility_service_desc">鎖定螢幕小工具需要輔助服務才能顯示在鎖定畫面和通知中心。 不會收集任何數據，也不會在設備上執行任何操作。</string>
     <string name="add_widget">新增小工具</string>
     <string name="grant">授權</string>

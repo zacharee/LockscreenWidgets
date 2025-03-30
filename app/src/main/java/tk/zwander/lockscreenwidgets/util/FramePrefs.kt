@@ -1,3 +1,5 @@
+@file:Suppress("unused")
+
 package tk.zwander.lockscreenwidgets.util
 
 import android.content.Context
@@ -140,7 +142,7 @@ class FrameSpecificPreferences(
     }
 
     fun keyFor(baseKey: String): String {
-        return Companion.keyFor(frameId, baseKey)
+        return keyFor(frameId, baseKey)
     }
 
     companion object {

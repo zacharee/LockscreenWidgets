@@ -49,14 +49,14 @@ class WidgetHostCompat(
         @SuppressLint("PrivateApi")
         private val ON_CLICK_HANDLER_CLASS = try {
             Class.forName("android.widget.RemoteViews\$OnClickHandler")
-        } catch (e: ClassNotFoundException) {
+        } catch (_: ClassNotFoundException) {
             null
         }
 
         @SuppressLint("PrivateApi")
         private val INTERACTION_HANDLER_CLASS = try {
             Class.forName("android.widget.RemoteViews\$InteractionHandler")
-        } catch (e: ClassNotFoundException) {
+        } catch (_: ClassNotFoundException) {
             null
         }
 

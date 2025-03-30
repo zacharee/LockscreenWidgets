@@ -1,3 +1,5 @@
+@file:Suppress("unused")
+
 package tk.zwander.common.util
 
 import android.annotation.SuppressLint
@@ -69,13 +71,8 @@ class EventManager private constructor(private val context: Context) {
         observers.add(observer)
     }
 
-    inline fun <reified T : Event> removeListener(noinline listener: (T) -> Unit) {
-        removeListener(
-            ListenerInfo(
-                T::class.java,
-                listener
-            )
-        )
+    fun <T : Event> removeListener(listener: (T) -> Unit) {
+        listeners.removeAll { it.listener == listener }
     }
 
     fun <T : Event> removeListener(listenerInfo: ListenerInfo<T>) {

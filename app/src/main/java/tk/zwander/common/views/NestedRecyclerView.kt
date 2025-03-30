@@ -93,7 +93,7 @@ open class NestedRecyclerView @JvmOverloads constructor(
         onStartNestedScroll(child, target, axes)
 
     override fun onNestedScrollAccepted(child: View, target: View, axes: Int) {
-        if (axes and View.SCROLL_AXIS_VERTICAL != 0) {
+        if (axes and SCROLL_AXIS_VERTICAL != 0) {
             // A descendant started scrolling, so we'll observe it.
             setTarget(target)
         }
@@ -102,7 +102,7 @@ open class NestedRecyclerView @JvmOverloads constructor(
 
     /*  Introduced with NestedScrollingParent2. */
     override fun onNestedScrollAccepted(child: View, target: View, axes: Int, type: Int) {
-        if (axes and View.SCROLL_AXIS_VERTICAL != 0) {
+        if (axes and SCROLL_AXIS_VERTICAL != 0) {
             // A descendant started scrolling, so we'll observe it.
             setTarget(target)
         }

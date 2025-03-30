@@ -1,5 +1,6 @@
 package tk.zwander.lockscreenwidgets.activities
 
+import android.annotation.SuppressLint
 import android.os.Build
 import android.os.Bundle
 import androidx.activity.compose.setContent
@@ -52,6 +53,7 @@ class ComposeFrameSettingsActivity : BaseActivity(), EventObserver {
 
         eventManager.addObserver(this)
 
+        @SuppressLint("ObsoleteSdkInt")
         val canShowNCOptions = isOneUI || (isPixelUI && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S)
 
         setContent {

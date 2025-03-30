@@ -211,16 +211,16 @@ abstract class BaseAdapter(
     }
 
     override fun getItemCount(): Int {
-        return if (widgets.size == 0) 1 else widgets.size
+        return if (widgets.isEmpty()) 1 else widgets.size
     }
 
     override fun getItemViewType(position: Int): Int {
-        return if (widgets.size == 0) VIEW_TYPE_ADD
+        return if (widgets.isEmpty()) VIEW_TYPE_ADD
         else VIEW_TYPE_WIDGET
     }
 
     override fun getItemId(position: Int): Long {
-        return if (widgets.size == 0) {
+        return if (widgets.isEmpty()) {
             VIEW_TYPE_ADD.toLong()
         } else {
             widgets.getOrNull(position)?.id?.toLong() ?: -1

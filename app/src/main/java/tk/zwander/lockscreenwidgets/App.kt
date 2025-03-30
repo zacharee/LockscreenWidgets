@@ -87,7 +87,7 @@ class App : Application(), CoroutineScope by MainScope(), EventObserver {
         }
     }
 
-    private val power by lazy { getSystemService(Context.POWER_SERVICE) as PowerManager }
+    private val power by lazy { getSystemService(POWER_SERVICE) as PowerManager }
 
     init {
         BugsnagPerformance.reportApplicationClassLoaded()
@@ -143,7 +143,7 @@ class App : Application(), CoroutineScope by MainScope(), EventObserver {
                                     widget.copy(icon = null, iconRes = null)
                                 }
                             )
-                        } catch (e: OutOfMemoryError) {
+                        } catch (_: OutOfMemoryError) {
                             "Too large to parse."
                         },
                         "drawerWidgets" to try {
@@ -152,7 +152,7 @@ class App : Application(), CoroutineScope by MainScope(), EventObserver {
                                     widget.copy(icon = null, iconRes = null)
                                 }
                             )
-                        } catch (e: OutOfMemoryError) {
+                        } catch (_: OutOfMemoryError) {
                             "Too large to parse."
                         },
                     ).apply {
@@ -165,14 +165,14 @@ class App : Application(), CoroutineScope by MainScope(), EventObserver {
                                             widget.copy(icon = null, iconRes = null)
                                         },
                                     )
-                                } catch (e: OutOfMemoryError) {
+                                } catch (_: OutOfMemoryError) {
                                     "Too large to parse."
                                 },
                             )
                         }
                     },
                 )
-            } catch (e: OutOfMemoryError) {
+            } catch (_: OutOfMemoryError) {
                 it.addMetadata(
                     "widget_data",
                     hashMapOf("OOM" to "OOM thrown when trying to add current widget data."),

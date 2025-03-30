@@ -4,7 +4,6 @@
     <string name="edit_gesture_hint">Dotknij ramki z widżetami dwoma palcami, aby ją przesunąć i zmienić jej rozmiar.</string>
     <string name="edit_gesture_hint_2">Dotknij dwoma palcami, aby ukryć edytowanie UI.</string>
     <string name="hide_gesture_hint">Dotknij ramki widżetu trzema palcami, aby tymczasowo ją ukryć. Pozostanie ona ukryta do momentu ponownego włączenia ekranu.</string>
-    <string name="hide_gesture_hint_2">Włącz i włącz ponownie ekran, by przywrócić ramkę z widżetami.</string>
     <string name="accessibility_service_desc">Lockscreen Widgets wymaga włączenia ułatwienia dostępu, aby móc wyświetlać widgety na ekranie blokady i w centrum powiadomień. Żadne dane nie są zbierane, ani żadne akcje nie będą wykonywane na tym urządzeniu.</string>
     <string name="add_widget">Dodaj widżet</string>
     <string name="grant">Przydziel dostęp</string>

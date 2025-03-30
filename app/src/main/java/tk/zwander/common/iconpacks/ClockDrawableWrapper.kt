@@ -1,6 +1,7 @@
+@file:Suppress("unused")
+
 package tk.zwander.common.iconpacks
 
-import android.annotation.TargetApi
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.ColorFilter
@@ -11,6 +12,8 @@ import android.graphics.drawable.Drawable
 import android.graphics.drawable.LayerDrawable
 import android.os.Build
 import android.os.SystemClock
+import androidx.annotation.RequiresApi
+import androidx.core.graphics.withTranslation
 import androidx.core.util.Supplier
 import java.util.Calendar
 import java.util.concurrent.TimeUnit
@@ -19,7 +22,7 @@ import java.util.concurrent.TimeUnit
  * Wrapper over [AdaptiveIconDrawable] to intercept icon flattening logic for dynamic
  * clock icons
  */
-@TargetApi(Build.VERSION_CODES.O)
+@RequiresApi(Build.VERSION_CODES.O)
 class ClockDrawableWrapper private constructor(base: AdaptiveIconDrawable) :
     AdaptiveIconDrawable(base.background, base.foreground) {
     private val mAnimationInfo = AnimationInfo()
@@ -125,7 +128,7 @@ class ClockDrawableWrapper private constructor(base: AdaptiveIconDrawable) :
             mFullDrawable.setBounds(0, 0, bounds.width(), bounds.height())
         }
 
-        public override fun drawInternal(canvas: Canvas, bounds: Rect) {
+        override fun drawInternal(canvas: Canvas, bounds: Rect) {
             if (mAnimInfo == null) {
                 super.drawInternal(canvas, bounds)
                 return
@@ -134,12 +137,11 @@ class ClockDrawableWrapper private constructor(base: AdaptiveIconDrawable) :
 
             // prepare and draw the foreground
             mAnimInfo.applyTime(mTime, mFG)
-            val saveCount = canvas.save()
-            canvas.translate(bounds.left.toFloat(), bounds.top.toFloat())
-            canvas.scale(mCanvasScale, mCanvasScale, bounds.width() / 2f, bounds.height() / 2f)
-            canvas.clipPath(mFullDrawable.iconMask)
-            mFG.draw(canvas)
-            canvas.restoreToCount(saveCount)
+            canvas.withTranslation(bounds.left.toFloat(), bounds.top.toFloat()) {
+                canvas.scale(mCanvasScale, mCanvasScale, bounds.width() / 2f, bounds.height() / 2f)
+                canvas.clipPath(mFullDrawable.iconMask)
+                mFG.draw(canvas)
+            }
 
             reschedule()
         }
@@ -187,7 +189,7 @@ class ClockDrawableWrapper private constructor(base: AdaptiveIconDrawable) :
             scheduleSelf(this, upTime - ((upTime % step)) + step)
         }
 
-        public override fun newConstantState(): FastBitmapConstantState {
+        override fun newConstantState(): FastBitmapConstantState {
             return ClockConstantState(
                 mBitmap, mIconColor, mThemedFgColor, mBoundsOffset,
                 mAnimInfo, mBG, mBgPaint.colorFilter
@@ -203,7 +205,7 @@ class ClockDrawableWrapper private constructor(base: AdaptiveIconDrawable) :
             val mBG: Bitmap,
             val mBgFilter: ColorFilter
         ) : FastBitmapConstantState(bitmap, color) {
-            public override fun createDrawable(): FastBitmapDrawable {
+            override fun createDrawable(): FastBitmapDrawable {
                 return ClockIconDrawable(this)
             }
         }

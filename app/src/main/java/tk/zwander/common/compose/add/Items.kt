@@ -78,7 +78,7 @@ internal fun items(
                                             appInfo.packageName,
                                             iconResource
                                         )
-                                    } catch (e: IllegalArgumentException) {
+                                    } catch (_: IllegalArgumentException) {
                                         null
                                     }
                                 },
@@ -122,7 +122,7 @@ internal fun items(
                                                 appInfo.packageName,
                                                 iconResource
                                             )
-                                        } catch (e: IllegalArgumentException) {
+                                        } catch (_: IllegalArgumentException) {
                                             null
                                         }
                                     },
@@ -172,7 +172,7 @@ internal fun items(
                                                         appInfo.packageName,
                                                         iconResource
                                                     )
-                                                } catch (e: IllegalArgumentException) {
+                                                } catch (_: IllegalArgumentException) {
                                                     null
                                                 }
                                             }

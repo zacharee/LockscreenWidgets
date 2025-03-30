@@ -1,6 +1,5 @@
 package tk.zwander.common.activities
 
-import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
@@ -78,7 +77,7 @@ class SelectIconPackActivity : BaseActivity() {
 
     private val shortcutOverrideLauncher =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-            if (result.resultCode == Activity.RESULT_OK) {
+            if (result.resultCode == RESULT_OK) {
                 if (fromDrawer) {
                     eventManager.sendEvent(Event.ShowDrawer)
                 }

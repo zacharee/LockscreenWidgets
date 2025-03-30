@@ -3,7 +3,6 @@ package tk.zwander.common.tiles.widget
 import android.app.PendingIntent
 import android.appwidget.AppWidgetHost.AppWidgetHostListener
 import android.appwidget.AppWidgetProviderInfo
-import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
 import android.content.res.Resources
@@ -48,7 +47,7 @@ import java.util.concurrent.atomic.AtomicReference
 abstract class BaseWidgetTile : TileService(), SharedPreferences.OnSharedPreferenceChangeListener {
     protected val iManager: IAppWidgetService by lazy {
         IAppWidgetService.Stub.asInterface(
-            ServiceManager.getService(Context.APPWIDGET_SERVICE)
+            ServiceManager.getService(APPWIDGET_SERVICE)
         )
     }
 
@@ -73,7 +72,7 @@ abstract class BaseWidgetTile : TileService(), SharedPreferences.OnSharedPrefere
                 val packageName = widgetPackage ?: return null
                 val appInfo = packageManager.getApplicationInfoInAnyState(packageName)
                 packageManager.getResourcesForApplication(appInfo)
-            } catch (e: Exception) {
+            } catch (_: Exception) {
                 null
             }
         }

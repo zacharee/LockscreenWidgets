@@ -8,13 +8,13 @@ import android.content.ComponentName
 import android.content.Intent
 import android.content.pm.LauncherApps
 import android.content.pm.PackageManager
-import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.telephony.PhoneNumberUtils
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.ui.unit.dp
+import androidx.core.net.toUri
 import com.bugsnag.android.Bugsnag
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import tk.zwander.common.activities.BaseActivity
@@ -88,7 +88,7 @@ abstract class BaseBindWidgetActivity : BaseActivity() {
                             val iconBmp =
                                 data.getParcelableExtra(Intent.EXTRA_SHORTCUT_ICON) ?: try {
                                     iconRes?.let { getRemoteDrawable(iconRes.packageName, iconRes) }?.toSafeBitmap(density, maxSize = 128.dp)
-                                } catch (e: PackageManager.NameNotFoundException) {
+                                } catch (_: PackageManager.NameNotFoundException) {
                                     null
                                 }
 
@@ -133,13 +133,11 @@ abstract class BaseBindWidgetActivity : BaseActivity() {
                                     Intent().apply {
                                         action?.let { this.action = it.toString() }
                                         setData(
-                                            Uri.parse(
-                                                "tel://${
-                                                    PhoneNumberUtils.convertAndStrip(
-                                                        number.toString()
-                                                    )
-                                                }"
-                                            )
+                                            "tel://${
+                                                PhoneNumberUtils.convertAndStrip(
+                                                    number.toString()
+                                                )
+                                            }".toUri()
                                         )
                                     }
                                 } else {

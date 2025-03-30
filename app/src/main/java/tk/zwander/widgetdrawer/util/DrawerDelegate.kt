@@ -310,7 +310,7 @@ class DrawerDelegate private constructor(context: Context) :
                 } else {
                     try {
                         widgetHost.stopListening(this)
-                    } catch (e: NullPointerException) {
+                    } catch (_: NullPointerException) {
                         //AppWidgetServiceImpl$ProviderId NPE
                     }
                     lifecycleRegistry.currentState = Lifecycle.State.STARTED
@@ -534,7 +534,6 @@ class DrawerDelegate private constructor(context: Context) :
                                 if (callListener) eventManager.sendEvent(Event.DrawerHidden)
                             } catch (e: Exception) {
                                 logUtils.debugLog("Error hiding drawer", e)
-                            } finally {
                             }
                         }, 10)
                         isHiding = false

@@ -4,7 +4,6 @@
     <string name="edit_gesture_hint">Klepněte na widget dvěma prsty pro přesun a změnu velikosti.</string>
     <string name="edit_gesture_hint_2">Skvělé! Klepnutím dvěma prsty skryjete uživatelské rozhraní pro úpravy.</string>
     <string name="hide_gesture_hint">Klepněte na widget třemi prsty pro dočasně skrytí. Bude skrytý, dokud obrazovku nevypnete a znovu zapnete.</string>
-    <string name="hide_gesture_hint_2">Vypněte a znovu zapněte displej pro zobrazení rámečku widgetu.</string>
     <string name="accessibility_service_desc">Widgety na zamykací obrazovce vyžadují službu Usnadnění zobrazení na zamykací obrazovce a v oznamovací centru. Nejsou shromažďována žádná data a na zařízení nebudou prováděny žádné akce.</string>
     <string name="add_widget">Přidat Widget</string>
     <string name="grant">Udělit</string>

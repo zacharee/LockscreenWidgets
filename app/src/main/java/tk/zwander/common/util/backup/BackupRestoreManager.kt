@@ -175,7 +175,7 @@ class BackupRestoreManager private constructor(private val context: Context) {
             try {
                 context.logUtils.normalLog("Error parsing input string $string", e)
             } catch (e2: OutOfMemoryError) {
-                context.logUtils.normalLog("Error parsing input string. Input is too large.", e)
+                context.logUtils.normalLog("Error parsing input string. Input is too large.", e2)
             }
             false
         }

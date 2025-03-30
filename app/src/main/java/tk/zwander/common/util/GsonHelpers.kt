@@ -13,6 +13,7 @@ import com.google.gson.JsonSerializationContext
 import com.google.gson.JsonSerializer
 import tk.zwander.common.data.SafePointF
 import java.lang.reflect.Type
+import androidx.core.net.toUri
 
 class CrashFixExclusionStrategy : ExclusionStrategy {
     private val fieldsToAvoid = setOf(
@@ -39,8 +40,8 @@ class GsonUriHandler : JsonDeserializer<Uri?>, JsonSerializer<Uri?> {
     ): Uri? {
         return src?.let {
             try {
-                Uri.parse(src.asString)
-            } catch (e: Exception) {
+                src.asString.toUri()
+            } catch (_: Exception) {
                 null
             }
         }
@@ -60,7 +61,7 @@ class GsonIntentHandler : JsonSerializer<Intent?>, JsonDeserializer<Intent?> {
         return json?.let {
             try {
                 Intent.parseUri(json.asString, 0)
-            } catch (e: Exception) {
+            } catch (_: Exception) {
                 null
             }
         }

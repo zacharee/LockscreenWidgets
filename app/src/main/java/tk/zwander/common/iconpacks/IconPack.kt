@@ -59,7 +59,7 @@ data class IconPack(
     private fun getIconDrawable(context: Context, entry: IconEntry): Drawable? {
         val packResources = try {
             context.packageManager.getResourcesForApplication(entry.packPackageName)
-        } catch (e: PackageManager.NameNotFoundException) {
+        } catch (_: PackageManager.NameNotFoundException) {
             return null
         }
 
@@ -69,7 +69,7 @@ data class IconPack(
 
         return try {
             ResourcesCompat.getDrawable(packResources, drawableId, context.theme)
-        } catch (e: Resources.NotFoundException) {
+        } catch (_: Resources.NotFoundException) {
             null
         }
     }

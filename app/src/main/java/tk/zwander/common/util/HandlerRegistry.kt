@@ -1,3 +1,5 @@
+@file:Suppress("unused")
+
 package tk.zwander.common.util
 
 import android.content.Context

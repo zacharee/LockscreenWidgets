@@ -80,7 +80,7 @@ fun PreferenceScreen(
                         item(key = category.key) {
                             PreferenceCategory(
                                 category = category,
-                                expanded = expandedStates[category.key]?.value ?: true,
+                                expanded = expandedStates[category.key]?.value != false,
                                 onExpandChange = { expandedStates[category.key]?.value = it },
                                 modifier = Modifier
                                     .fillMaxWidth()

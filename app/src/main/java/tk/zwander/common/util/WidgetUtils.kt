@@ -20,7 +20,7 @@ fun AppWidgetProviderInfo.getSamsungConfigureComponent(context: Context): Compon
             PackageManager.GET_META_DATA
         ).metaData?.getString("android.appwidget.provider.semConfigureActivity")
             ?.let { ComponentName.unflattenFromString("${provider.packageName}/$it") }
-    } catch (e: PackageManager.NameNotFoundException) {
+    } catch (_: PackageManager.NameNotFoundException) {
         null
     }
 }
