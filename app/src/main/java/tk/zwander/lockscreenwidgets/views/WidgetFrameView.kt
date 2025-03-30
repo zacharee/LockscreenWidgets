@@ -433,19 +433,16 @@ class WidgetFrameView(context: Context, attrs: AttributeSet) : ConstraintLayout(
         isProxTooClose = false
     }
 
-    private fun onTouch(event: MotionEvent): Boolean {
-        return when (event.action) {
+    private fun onTouch(event: MotionEvent) {
+        when (event.action) {
             MotionEvent.ACTION_DOWN -> {
                 context.eventManager.sendEvent(Event.FrameIntercept(frameId, true))
-                false
             }
             MotionEvent.ACTION_CANCEL,
             MotionEvent.ACTION_UP -> {
                 context.eventManager.sendEvent(Event.FrameIntercept(frameId, false))
                 alreadyIndicatedMoving = false
-                false
             }
-            else -> false
         }
     }
 
