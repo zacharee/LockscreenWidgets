@@ -1,12 +1,14 @@
 package tk.zwander.lockscreenwidgets.views
 
 import android.annotation.SuppressLint
+import android.content.ComponentCallbacks2
 import android.content.Context
 import android.graphics.Canvas
 import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener2
 import android.hardware.SensorManager
+import android.os.Build
 import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
@@ -22,6 +24,7 @@ import com.bugsnag.android.performance.compose.MeasuredComposable
 import com.joaomgcd.taskerpluginlibrary.extensions.requestQuery
 import kotlinx.coroutines.flow.MutableStateFlow
 import tk.zwander.common.util.Event
+import tk.zwander.common.util.EventObserver
 import tk.zwander.common.util.HandlerRegistry
 import tk.zwander.common.util.PrefManager
 import tk.zwander.common.util.eventManager
@@ -49,7 +52,7 @@ import kotlin.math.roundToInt
  * the logic relating to moving, resizing, etc, is handled by the Accessibility service,
  * this View listens for and notifies of the relevant events.
  */
-class WidgetFrameView(context: Context, attrs: AttributeSet) : ConstraintLayout(context, attrs) {
+class WidgetFrameView(context: Context, attrs: AttributeSet) : ConstraintLayout(context, attrs), EventObserver {
     var animationState = AnimationState.STATE_IDLE
     private var frameId: Int = Int.MIN_VALUE
 
@@ -126,6 +129,11 @@ class WidgetFrameView(context: Context, attrs: AttributeSet) : ConstraintLayout(
         }
 
         updateFrameBackground()
+        context.eventManager.addObserver(this)
+    }
+
+    fun onDestroy() {
+        context.eventManager.removeObserver(this)
     }
 
     @SuppressLint("ClickableViewAccessibility")
@@ -209,6 +217,23 @@ class WidgetFrameView(context: Context, attrs: AttributeSet) : ConstraintLayout(
         isInEditingMode = false
         context.eventManager.sendEvent(Event.FrameAttachmentState(frameId, false))
         animationState = AnimationState.STATE_IDLE
+    }
+
+    override fun onEvent(event: Event) {
+        when (event) {
+            is Event.TrimMemory -> {
+                @Suppress("DEPRECATION")
+                if (event.level >= ComponentCallbacks2.TRIM_MEMORY_COMPLETE && Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                    try {
+                        context.logUtils.debugLog("Attempting to destroy surface because of memory pressure.", null)
+                        viewRootImpl?.mSurface?.destroy()
+                    } catch (e: Throwable) {
+                        context.logUtils.debugLog("Unable to destroy surface.", e)
+                    }
+                }
+            }
+            else -> {}
+        }
     }
 
     override fun dispatchTouchEvent(ev: MotionEvent): Boolean {

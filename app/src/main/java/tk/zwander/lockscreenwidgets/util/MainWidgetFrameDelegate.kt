@@ -605,6 +605,7 @@ open class MainWidgetFrameDelegate protected constructor(context: Context, prote
     override fun onDestroy() {
         super.onDestroy()
 
+        binding.frame.onDestroy()
         binding.frame.removeWindow(wm)
 
         if (id == -1) {

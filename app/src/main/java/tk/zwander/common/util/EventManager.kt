@@ -144,6 +144,7 @@ sealed class Event {
         }
     }
     data class FrameSelected(val frameId: Int?, val requestCode: Int?) : Event()
+    data class TrimMemory(val level: Int) : Event()
 
     //*** Widget Drawer
     data object CloseDrawer : Event()

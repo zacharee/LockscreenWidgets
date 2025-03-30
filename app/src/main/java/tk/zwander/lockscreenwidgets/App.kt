@@ -95,6 +95,11 @@ class App : Application(), CoroutineScope by MainScope(), EventObserver {
 
     private external fun setUpAborter()
 
+    override fun onTrimMemory(level: Int) {
+        super.onTrimMemory(level)
+        eventManager.sendEvent(Event.TrimMemory(level))
+    }
+
     override fun onCreate() {
         super.onCreate()
 
