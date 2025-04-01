@@ -27,14 +27,14 @@
     <string name="disabled">Deshabilitado</string>
     <string name="accessibility_settings">Ajustes de Accesibilidad</string>
     <string name="battery_whitelist">Lista de apps sin restricción de batería</string>
-    <string name="back">Back</string>
-    <string name="clear">Clear</string>
-    <string name="launcher">Launcher</string>
-    <string name="reset">Reset</string>
-    <string name="increase">Increase</string>
-    <string name="decrease">Decrease</string>
-    <string name="selected" tools:override="true">Selected</string>
-    <string name="drawer_enabled">Drawer Enabled</string>
+    <string name="back">Volver</string>
+    <string name="clear">Borrar</string>
+    <string name="launcher">Lanzador</string>
+    <string name="reset">Restablecer</string>
+    <string name="increase">Aumentar</string>
+    <string name="decrease">Reducir</string>
+    <string name="selected" tools:override="true">Seleccionados</string>
+    <string name="drawer_enabled">Cajón de aplicaciones Habilitado</string>
     <string name="frame_enabled">Frame Enabled</string>
     <string name="add_id_hint">com.android.systemui:id/some_id_here</string>
     <string name="category_appearance">Appearance</string>
