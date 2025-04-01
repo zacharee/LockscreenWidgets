@@ -120,10 +120,10 @@
     <string name="settings_screen_request_unlock_desc">If Lockscreen Widgets detects that a widget is launching an app, it will prompt to unlock the device and dismiss the notification center. Disable this option to prevent that behavior.</string>
     <string name="settings_screen_hide_on_facewidgets">Hide on FaceWidgets (Now Bar) Screen</string>
     <string name="settings_screen_hide_on_facewidgets_desc">Hide the frame when the FaceWidgets screen is shown. This is also known as the expanded Now Bar screen on One UI 7 and later.</string>
-    <string name="settings_screen_hide_in_landscape">Hide in Landscape</string>
-    <string name="settings_screen_hide_in_landscape_desc">Hide the widget frame when the device is in landscape.</string>
-    <string name="settings_screen_separate_position_for_lock_nc">Separate Notification Center Position when Locked</string>
-    <string name="settings_screen_separate_position_for_lock_nc_desc">En One UI 3, el diseño del centro de notificación es ligeramente diferente cuando está bloqueado y desbloqueado. Habilita esta opción para separar el posicionamiento del widget en los dos modos.</string>
+    <string name="settings_screen_hide_in_landscape">Ocultar en Modo Apaisado</string>
+    <string name="settings_screen_hide_in_landscape_desc">Ocultar el marco del widget cuando el dispositivo esté en Modo Apaisado.</string>
+    <string name="settings_screen_separate_position_for_lock_nc">Separar diseños de posición de widgets en el Centro de Notificaciones al Bloquear</string>
+    <string name="settings_screen_separate_position_for_lock_nc_desc">En One UI 3, el diseño del centro de notificación es ligeramente diferente cuando está bloqueado y desbloqueado. Habilita esta opción para que haya que el diseño de posición del widget sea distinto para cada modo.</string>
     <string name="settings_screen_lock_widget_frame">Bloquear marco del widget</string>
     <string name="settings_screen_lock_widget_frame_desc">Cuando está activado, el marco del widget ignorará todos los toques directos. No podrás moverlo o modificar los marcos de los widgers, pero el gesto de ocultar tres dedos seguirá funcionando y podrás seguir interactuando con los widgets.</string>
     <string name="settings_screen_ignore_widget_touches">Ignorar toques de pantalla en widgets</string>
