@@ -175,7 +175,7 @@
     <string name="usage_temp_hide">Ocultar temporalmente</string>
     <string name="usage_temp_hide_desc">Si necesitas ocultar el Panel de Widgets durante un rato, toca con los tres dedos sobre él. También puedes entrar en la pantalla de edición con un toque de dos dedos y presionar el botón del ojo en la parte superior izquierda. Esto ocultará el Panel de Widgets hasta que la pantalla se apague y se vuelva a encender.</string>
     <string name="usage_reorder_widgets">Reorganizar widgets</string>
-    <string name="usage_reorder_widgets_desc">To change the order of the widgets, simply long-press the widget you want to move and drag it to where you want it to be.</string>
+    <string name="usage_reorder_widgets_desc">Para cambiar el orden de los widgets, simplemente mantén presionado el widget que quieres mover y arrástralo donde quieras.</string>
     <string name="usage_remove_widgets">Eliminar/Redimensionar Widgets</string>
     <string name="usage_remove_widgets_desc">To remove a widget, long-press it without dragging and tap the red button that appears in the top right. Long-pressing a widget will also show four \"draggers\" around the edges, which you can use to resize the widget.</string>
     <string name="usage_id_blacklists">Lista negra de IDs</string>
