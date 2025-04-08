@@ -69,7 +69,7 @@ class WidgetFrameView(context: Context, attrs: AttributeSet) : ConstraintLayout(
         set(value) {
             field = value
             binding.editWrapper.isVisible = value
-            binding.removeFrame.isVisible = value && id != -1
+            binding.removeFrame.isVisible = value && frameId != -1
         }
 
     private val sensorManager by lazy { context.getSystemService(Context.SENSOR_SERVICE) as SensorManager }
