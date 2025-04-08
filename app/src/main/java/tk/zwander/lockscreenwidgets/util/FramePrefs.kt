@@ -275,8 +275,9 @@ object FramePrefs {
     fun generatePrefKey(baseKey: String, id: Int): String {
         if (id == -1) {
             when (baseKey) {
-                KEY_FRAME_COL_COUNT -> PrefManager.KEY_FRAME_COL_COUNT
-                KEY_FRAME_ROW_COUNT -> PrefManager.KEY_FRAME_ROW_COUNT
+                KEY_FRAME_COL_COUNT -> return PrefManager.KEY_FRAME_COL_COUNT
+                KEY_FRAME_ROW_COUNT -> return PrefManager.KEY_FRAME_ROW_COUNT
+                KEY_FRAME_WIDGETS -> return PrefManager.KEY_CURRENT_WIDGETS
             }
         }
 
