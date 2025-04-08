@@ -103,19 +103,19 @@
     <string name="settings_screen_show_in_notification_center">Mostrar cuando la Barra de Notificaciones esté completamente desplegada</string>
     <string name="settings_screen_show_in_notification_center_desc">Habilitar esta opción hará que el marco del widget aparezca cuando la Barra de Notificaciones esté completamente desplegada. Este estado tiene su propia posición y tamaño independientes.</string>
     <string name="settings_screen_show_on_main_lock_screen">Mostrar en Pantalla de Bloqueo principal</string>
-    <string name="settings_screen_show_on_main_lock_screen_desc">Si estás utilizando la opción de \"Mostrar en el Centro de Notificaciones\", es posible que no quieras que los Widgets de Lockscreen se muestren en la Pantalla de Bloqueo principal. Desactiva esta opción para que el marco sólo se muestre cuando el Centro de Notificaciones esté completamente ampliado.</string>
+    <string name="settings_screen_show_on_main_lock_screen_desc">Si estás utilizando la opción de \"Mostrar en el Panelo de Notificaciones\", puede que no quieras que Lockscreen Widgets se muestre en la Pantalla de bloqueo principal. Desactiva esta opción para que el Panel de widgets sólo se muestre cuando el Panel de Notificaciones esté completamente ampliado.</string>
     <string name="settings_screen_corner_radius">Radio de esquina</string>
-    <string name="settings_screen_corner_radius_desc">Cambia lo redondeadas que están las esquinas del marco del widget.</string>
+    <string name="settings_screen_corner_radius_desc">Cambia lo redondeadas que están las esquinas de los Contenedores de widgets.</string>
     <string name="settings_screen_widget_corner_radius">Radio de esquina del widget</string>
     <string name="settings_screen_widget_corner_radius_desc">Cambia lo redondeadas que están las esquinas del widget.</string>
     <string name="settings_screen_background_color">Color de fondo</string>
-    <string name="settings_screen_background_color_desc">Establece el color de fondo del marco del widget, incluyendo transparencia.</string>
+    <string name="settings_screen_background_color_desc">Establece el color de fondo del Panel de widgets, incluyendo transparencia.</string>
     <string name="settings_screen_masked_mode">Modo Máscara (Experimental)</string>
-    <string name="settings_screen_masked_mode_desc">El Modo Máscara intenta poner tu fondo de pantalla como fondo del marco del widget. En un dispositivo compatible, parecerá que el widget es transparente, y a la vez podrás seguir añadiendo elementos de UI.</string>
+    <string name="settings_screen_masked_mode_desc">El Modo Máscara intenta poner tu fondo de pantalla como fondo del Panel de widgets. En un dispositivo compatible, parecerá que los contenedores de widgets son transparentes, y a la vez podrás seguir colocando más elementos.</string>
     <string name="settings_screen_masked_mode_dim_amount">Nivel de Difuminado</string>
     <string name="settings_screen_masked_mode_dim_amount_desc">Algunos dispositivos difuminan un poco el fondo de pantalla en la Pantalla de Bloqueo. Ajusta este valor para que coincida con el nivel de difuminado.</string>
     <string name="settings_screen_touch_protection">Protección Anti-toque</string>
-    <string name="settings_screen_touch_protection_desc">Ignorar toques en el marco del widget cuando el sensor de proximidad se active.</string>
+    <string name="settings_screen_touch_protection_desc">Ignorar toques en el Panel de widgets cuando se active el sensor de proximidad.</string>
     <string name="settings_screen_request_unlock">Pantalla de Desbloqueo/Cerrar Panel de Notificaciones</string>
     <string name="settings_screen_request_unlock_desc">Si Lockscreen Widgets detecta que un widget va a abrir una aplicación, te pondrá la pantalla de desbloqueo del dispositivo y no la del Centro de Notificaciones. Deshabilita esta opción para que esto no ocurra.</string>
     <string name="settings_screen_hide_on_facewidgets">Ocultar en la pantalla de FaceWidgets (Now Bar)</string>
@@ -228,10 +228,10 @@
     <string name="show_only_when_locked">Show only when Locked</string>
     <string name="show_only_when_locked_desc">Only show the drawer handle when the device is on the lock screen.</string>
     <string name="icon_pack">Icon Pack</string>
-    <string name="icon_pack_desc">Choose an icon pack for shortcut icons. This applies to both the frame and the drawer.</string>
+    <string name="icon_pack_desc">Elige un paquete de iconos para los Iconos de Acceso Directo. Se aplicarán tanto al Panel como al Cajón.</string>
     <string name="allow_show_frame">Permitir mostrar fotograma</string>
     <string name="disallow_show_frame">No permitir mostrar fotograma</string>
-    <string name="frame_allowed_to_show">Frame Allowed to Show</string>
+    <string name="frame_allowed_to_show">Contenedores que se pueden mostrar</string>
     <string name="is_showing_frame">Está mostrando el tirador</string>
     <string name="is_showing_drawer">Está mostrando el Cajón</string>
     <string name="force_show_frame">Forzar Mostrar fotograma</string>
@@ -241,7 +241,7 @@
     <string name="on_lock_screen">En Pantalla de Bloqueo</string>
     <string name="in_notification_center">En el Panel de Notificaciones</string>
     <string name="in_locked_notification_center">En el Panel de Notificaciones bloqueado</string>
-    <string name="reset_frame_position_size_confirm_message">Are you sure you want to reset the position and size?</string>
+    <string name="reset_frame_position_size_confirm_message">¿Seguro que quieres restablecer la posición y el tamaño?</string>
     <string name="install_shizuku">Install Shizuku</string>
     <string name="open_shizuku">Open Shizuku</string>
     <string name="grant_read_media_images">Grant READ_MEDIA_IMAGES</string>
@@ -258,16 +258,16 @@
     <string name="blank_widget">Widget en blanco</string>
     <string name="add_frame">Añadir Panel de Widgets</string>
     <string name="remove_frame">Eliminar Panel de Widgets</string>
-    <string name="remove_frame_confirmation_message">Are you sure you want to remove this frame?</string>
+    <string name="remove_frame_confirmation_message">¿Estás seguro de que quieres eliminar este contenedor?</string>
     <string name="select">Seleccionar</string>
     <string name="cancel">Cancelar</string>
     <string name="apply">Aplicar</string>
     <string name="select_frame">Seleccionar fotograma</string>
-    <string name="selected_frame">Selected frame: %s</string>
+    <string name="selected_frame">Contenedor seleccionado: %s</string>
     <string name="settings_screen_category_grid">Cuadrícula</string>
     <plurals name="frame_count_info">
-        <item quantity="one">%s frame added</item>
+        <item quantity="one">%s contenedores activos</item>
         <item quantity="other">%s frames added</item>
     </plurals>
-    <string name="frame_management">Frame Management</string>
+    <string name="frame_management">Configuración de contenedores</string>
 </resources>
