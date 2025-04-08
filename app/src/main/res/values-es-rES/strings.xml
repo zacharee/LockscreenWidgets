@@ -95,7 +95,7 @@
     <string name="settings_screen_show_debug_id_view">Mostrar Vista ID de Depuración</string>
     <string name="settings_screen_show_debug_id_view_desc">Superpone el marco del widget con una lista de las IDs de Vista que son detectadas en la pantalla actual. Es una función útil para depurar y encontrar IDs que se pueden utilizar para detectar varios estados de pantalla de bloqueo.</string>
     <string name="settings_screen_accessibility_event_delay">Tiempo de espera entre Eventos de accesibilidad</string>
-    <string name="settings_screen_accessibility_event_delay_desc">Establece el retraso entre los Eventos de Accesibilidad a los que responde Lockscreen Widgets. Valores más bajos significan que el marco responderá más rápido a los cambios, a costa de un menor rendimiento del dispositivo y la duración de la batería.</string>
+    <string name="settings_screen_accessibility_event_delay_desc">Establece el retraso entre los Eventos de Accesibilidad a los que responde Lockscreen Widgets. Valores más bajos significan que el Panel se actualizará más rápido a costa de un menor rendimiento del dispositivo y la duración de la batería.</string>
     <string name="settings_screen_non_present_ids">Ocultar en IDs No Presentes</string>
     <string name="settings_screen_non_present_ids_desc">Los Widgets de Lockscreen se ocultarán cuando estos IDs no estén en la pantalla. Puedes saber qué IDs deberían ir aquí habilitando ambos interruptores de Depuración y mirando los IDs que estén resaltados en rojo cuando quieras que el marco esté oculto.</string>
     <string name="settings_screen_present_ids">Ocultar en IDs Presentes</string>
