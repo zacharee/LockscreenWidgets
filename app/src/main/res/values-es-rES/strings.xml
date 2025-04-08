@@ -90,8 +90,8 @@
     <string name="settings_screen_clear_debug_log_desc">Borrar registros de depuración anteriores.</string>
     <string name="settings_screen_export_debug_log">Exportar registros de depuración</string>
     <string name="settings_screen_export_debug_log_desc">Exportar registros de depuración a un archivo.</string>
-    <string name="settings_screen_frame_col_count">Columnas por página</string>
-    <string name="settings_screen_frame_row_count">Filas por página</string>
+    <string name="settings_screen_frame_col_count">Columnas por contenedor</string>
+    <string name="settings_screen_frame_row_count">Filas por contenedor</string>
     <string name="settings_screen_show_debug_id_view">Mostrar Vista ID de Depuración</string>
     <string name="settings_screen_show_debug_id_view_desc">Superpone el marco del widget con una lista de las IDs de Vista que son detectadas en la pantalla actual. Es una función útil para depurar y encontrar IDs que se pueden utilizar para detectar varios estados de pantalla de bloqueo.</string>
     <string name="settings_screen_accessibility_event_delay">Tiempo de espera entre Eventos de accesibilidad</string>
