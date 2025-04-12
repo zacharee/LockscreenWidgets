@@ -1,8 +1,10 @@
 package tk.zwander.common.tiles.widget
 
+import android.annotation.SuppressLint
 import android.app.PendingIntent
 import android.appwidget.AppWidgetHost.AppWidgetHostListener
 import android.appwidget.AppWidgetProviderInfo
+import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
 import android.content.res.Resources
@@ -92,7 +94,7 @@ abstract class BaseWidgetTile : TileService(), SharedPreferences.OnSharedPrefere
                 }
 
                 override fun updateAppWidget(views: RemoteViews?) {
-                    this@BaseWidgetTile.views.set(views?.getRemoteViewsToApply(this@BaseWidgetTile, null))
+                    this@BaseWidgetTile.views.set(views?.getRemoteViewsToApplyCompat(this@BaseWidgetTile))
                     notifySystemUIOfChanges()
                 }
             }
@@ -220,7 +222,7 @@ abstract class BaseWidgetTile : TileService(), SharedPreferences.OnSharedPrefere
                 logUtils.debugLog("Custom widget loaded for tile ID $tileId")
 
                 //Success, set it.
-                outerView = widgetView.getRemoteViewsToApply(this, null)
+                outerView = widgetView.getRemoteViewsToApplyCompat(this)
             } else {
                 logUtils.debugLog("Custom widget view is null for tile ID $tileId")
                 //Error retrieving widget, or widget not selected.
@@ -277,5 +279,17 @@ abstract class BaseWidgetTile : TileService(), SharedPreferences.OnSharedPrefere
 
         qsTile?.state = if (widgetInfo != null) Tile.STATE_ACTIVE else Tile.STATE_INACTIVE
         qsTile?.updateTile()
+    }
+}
+
+@SuppressLint("DiscouragedPrivateApi")
+private fun RemoteViews.getRemoteViewsToApplyCompat(context: Context): RemoteViews {
+    return try {
+        getRemoteViewsToApply(context, null)
+    } catch (_: NoSuchMethodError) {
+        RemoteViews::class.java
+            .getDeclaredMethod("getRemoteViewsToApply", Context::class.java)
+            .apply { isAccessible = true }
+            .invoke(this, context) as RemoteViews
     }
 }
