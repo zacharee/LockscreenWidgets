@@ -42,6 +42,13 @@ class WallpaperUtils private constructor(private val context: Context) {
         // "Fix" for Huawei.
         @Suppress("unused")
         fun onBlurWallpaperChanged() {}
+
+        // "Fix" for Honor.
+        @Suppress("unused")
+        fun onWallpaperChanged(value: Int) {
+            onWallpaperChanged()
+        }
+
         override fun onWallpaperColorsChanged(colors: WallpaperColors?, which: Int, userId: Int) {}
 
         override fun onWallpaperChanged() {
