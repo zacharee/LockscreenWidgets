@@ -19,6 +19,7 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
@@ -88,10 +89,8 @@ fun AutoSizeText(
                 constraints = Constraints(maxWidth = ceil(LocalDensity.current.run { maxWidth.toPx() }).toInt()),
                 density = LocalDensity.current,
                 fontFamilyResolver = LocalFontFamilyResolver.current,
-                spanStyles = listOf(),
-                placeholders = listOf(),
                 maxLines = maxLines,
-                ellipsis = true,
+                overflow = TextOverflow.Ellipsis,
             )
         }
 
