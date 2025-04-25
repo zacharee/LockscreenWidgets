@@ -98,7 +98,7 @@ fun AutoSizeText(
 
         val targetWidth = maxWidth - acceptableError / 2f
 
-        check(targetWidth.isFinite || maxFontSize.isSpecified) { "maxFontSize must be specified if the target with isn't finite!" }
+        check(targetWidth.isFinite || maxFontSize.isSpecified) { "maxFontSize must be specified if the target width isn't finite!" }
 
         with (LocalDensity.current) {
             // this loop will attempt to quickly find the correct size font by scaling it by the error
