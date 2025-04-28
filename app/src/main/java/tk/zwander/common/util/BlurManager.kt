@@ -30,22 +30,26 @@ class BlurManager(
             updateBlur()
         }
     }
-    private val crossBlurEnabledListener = Consumer<Boolean> {
-        updateBlur()
+    private val crossBlurEnabledListener = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+        Consumer<Boolean> {
+            updateBlur()
+        }
+    } else {
+        null
     }
 
     private var blurDrawable: BackgroundBlurDrawableCompat? = null
 
     override fun onViewAttachedToWindow(v: View) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            windowManager.addCrossWindowBlurEnabledListener(crossBlurEnabledListener)
+            crossBlurEnabledListener?.let { windowManager.addCrossWindowBlurEnabledListener(it) }
         }
         updateBlur()
     }
 
     override fun onViewDetachedFromWindow(v: View) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            windowManager.removeCrossWindowBlurEnabledListener(crossBlurEnabledListener)
+            crossBlurEnabledListener?.let { windowManager.removeCrossWindowBlurEnabledListener(it) }
         }
         targetView.background = null
         blurDrawable = null
