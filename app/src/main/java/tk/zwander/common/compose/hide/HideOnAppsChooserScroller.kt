@@ -52,7 +52,7 @@ fun HideOnAppsChooserScroller(
                 title = it.appName,
                 summary = it.appInfo.packageName,
                 icon = rememberDrawablePainter(
-                    drawable = it.appInfo.loadIcon(context.packageManager)
+                    drawable = it.appInfo.loadIcon(context.packageManager),
                 ),
                 titleTextStyle = MaterialTheme.typography.titleMedium,
                 summaryTextStyle = MaterialTheme.typography.bodySmall,
