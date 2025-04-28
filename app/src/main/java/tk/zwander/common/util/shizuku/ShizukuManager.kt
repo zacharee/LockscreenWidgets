@@ -163,17 +163,21 @@ class ShizukuManager private constructor(private val context: Context) : Corouti
     @RequiresApi(Build.VERSION_CODES.M)
     fun onCreate() {
         Shizuku.addBinderReceivedListenerSticky {
-            if (Shizuku.checkSelfPermission() == PackageManager.PERMISSION_GRANTED) {
-                addUserService()
-            } else {
-                Shizuku.addRequestPermissionResultListener(object : Shizuku.OnRequestPermissionResultListener {
-                    override fun onRequestPermissionResult(requestCode: Int, grantResult: Int) {
-                        if (grantResult == PackageManager.PERMISSION_GRANTED) {
-                            addUserService()
-                            Shizuku.removeRequestPermissionResultListener(this)
+            try {
+                if (Shizuku.checkSelfPermission() == PackageManager.PERMISSION_GRANTED) {
+                    addUserService()
+                } else {
+                    Shizuku.addRequestPermissionResultListener(object : Shizuku.OnRequestPermissionResultListener {
+                        override fun onRequestPermissionResult(requestCode: Int, grantResult: Int) {
+                            if (grantResult == PackageManager.PERMISSION_GRANTED) {
+                                addUserService()
+                                Shizuku.removeRequestPermissionResultListener(this)
+                            }
                         }
-                    }
-                })
+                    })
+                }
+            } catch (e: Throwable) {
+                context.logUtils.normalLog("Unable to check for Shizuku permission.", e)
             }
         }
     }
