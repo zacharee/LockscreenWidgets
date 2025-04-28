@@ -181,8 +181,13 @@ private fun AppHeader(
 
             LaunchedEffect(key1 = app.appInfo.packageName) {
                 icon = withContext(Dispatchers.IO) {
-                    app.appInfo.loadIcon(context.packageManager)
-                        .mutate()
+                    try {
+                        app.appInfo.loadIcon(context.packageManager)
+                            .mutate()
+                    } catch (e: Throwable) {
+                        context.logUtils.normalLog("Unable to load app icon for ${app.appInfo.packageName}", e)
+                        null
+                    }
                 }
             }
 
@@ -220,19 +225,19 @@ private fun icon(
                 info.icon?.loadDrawable(context)
             } catch (e: PackageManager.NameNotFoundException) {
                 context.logUtils.normalLog(
-                    "Unable to load icon for ${info.appInfo.appInfo.packageName}.",
+                    "Unable to load icon for ${info.appInfo.appInfo.packageName}, ${key}.",
                     e,
                 )
                 null
             } catch (e: NullPointerException) {
                 context.logUtils.normalLog(
-                    "Unable to load icon for ${info.appInfo.appInfo.packageName}.",
+                    "Unable to load icon for ${info.appInfo.appInfo.packageName}, ${key}.",
                     e,
                 )
                 null
             } catch (e: OutOfMemoryError) {
                 context.logUtils.normalLog(
-                    "Unable to load icon for ${info.appInfo.appInfo.packageName}",
+                    "Unable to load icon for ${info.appInfo.appInfo.packageName}, ${key}.",
                     e,
                 )
                 null
