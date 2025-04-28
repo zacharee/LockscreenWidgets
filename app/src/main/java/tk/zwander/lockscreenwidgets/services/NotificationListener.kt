@@ -97,7 +97,7 @@ class NotificationListener : NotificationListenerService(), EventObserver, Corou
                                 .withParameters(Int::class.java, Parcel::class.java, Parcel::class.java, Int::class.java)
                                 .intercept(MethodDelegation.to(LollipopListenerWrapper(original as INotificationListener.Stub)))
                                 .make()
-                                .load(wrapperClass.classLoader, ClassLoadingStrategy.ForUnsafeInjection())
+                                .load(NotificationListenerService::class.java.classLoader, ClassLoadingStrategy.ForUnsafeInjection())
                                 .loaded
                                 .getDeclaredConstructor()
                                 .apply { isAccessible = true }
