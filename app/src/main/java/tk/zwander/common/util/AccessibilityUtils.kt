@@ -12,6 +12,7 @@ import android.view.accessibility.AccessibilityEvent
 import android.view.accessibility.AccessibilityNodeInfo
 import android.view.accessibility.AccessibilityWindowInfo
 import android.view.inputmethod.InputMethodManager
+import android.widget.Toast
 import kotlinx.atomicfu.AtomicBoolean
 import kotlinx.atomicfu.atomic
 import kotlinx.coroutines.CoroutineScope
@@ -24,6 +25,7 @@ import kotlinx.coroutines.launch
 import tk.zwander.common.activities.DismissOrUnlockActivity
 import tk.zwander.common.data.window.WindowInfo
 import tk.zwander.common.data.window.WindowRootPair
+import tk.zwander.lockscreenwidgets.R
 import tk.zwander.lockscreenwidgets.appwidget.IDListProvider
 import tk.zwander.lockscreenwidgets.services.Accessibility
 import tk.zwander.lockscreenwidgets.util.FrameSpecificPreferences
@@ -662,8 +664,22 @@ fun Context.openAccessibilitySettings() {
         startActivity(accIntent)
     } catch (e: Exception) {
         logUtils.debugLog("Error opening Installed Services:", e)
-        val accIntent = Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)
-        startActivity(accIntent)
+
+        try {
+            val accIntent = Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)
+            startActivity(accIntent)
+        } catch (e: Exception) {
+            logUtils.debugLog("Error opening Accessibility Settings", e)
+
+            try {
+                val settingsIntent = Intent(Settings.ACTION_SETTINGS)
+                startActivity(settingsIntent)
+            } catch (e: Exception) {
+                logUtils.debugLog("Error opening Settings", e)
+
+                Toast.makeText(this, R.string.unable_to_open_settings, Toast.LENGTH_SHORT).show()
+            }
+        }
     }
 }
 
