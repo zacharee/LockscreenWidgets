@@ -116,22 +116,57 @@ class ConfigureLauncher(
 
             activity.logUtils.debugLog("Configure complete for id $id $currentConfigId", null)
 
-            if (resultCode == RESULT_OK && id != null && id != -1) {
-                activity.logUtils.debugLog("Successfully configured widget.", null)
-
+            if (id != null && id != -1) {
                 val widgetInfo = activity.appWidgetManager.getAppWidgetInfo(id)
+                var resultOk = resultCode == RESULT_OK
 
-                if (widgetInfo == null) {
-                    activity.logUtils.debugLog("Unable to get widget info for $id, not adding", null)
-                    finishIfNoErrors()
-                    return
+                if (widgetInfo.configure != null) {
+                    val matchedComponents = activity.packageManager.queryIntentActivities(
+                        Intent(AppWidgetManager.ACTION_APPWIDGET_CONFIGURE).apply {
+                            addCategory(Intent.CATEGORY_DEFAULT)
+                        },
+                        0,
+                    ) + activity.packageManager.queryIntentActivities(
+                        Intent(AppWidgetManager.ACTION_APPWIDGET_CONFIGURE),
+                        0,
+                    )
+
+                    if (matchedComponents.isEmpty() || !matchedComponents.any { it.activityInfo.componentNameCompat == widgetInfo.configure }) {
+                        activity.logUtils.debugLog("Found a widget configuration that probably wasn't expecting to be launched here. Assuming a canceled result should still continue. ${widgetInfo.provider}, ${widgetInfo.configure}", null)
+                        resultOk = true
+                    }
+                } else {
+                    activity.logUtils.debugLog("Found a widget configuration that no longer exists? ${widgetInfo.provider}", null)
+                    resultOk = true
                 }
 
-                currentConfigId = null
+                if (resultOk) {
+                    activity.logUtils.debugLog("Successfully configured widget.", null)
 
-                addNewWidget(id, widgetInfo)
+                    if (widgetInfo == null) {
+                        activity.logUtils.debugLog(
+                            "Unable to get widget info for $id, not adding",
+                            null
+                        )
+                        finishIfNoErrors()
+                        return
+                    }
+
+                    currentConfigId = null
+
+                    addNewWidget(id, widgetInfo)
+                } else {
+                    activity.logUtils.debugLog(
+                        "Failed to configure widget. Result code $resultCode, id $id.",
+                        null
+                    )
+                    finishIfNoErrors()
+                }
             } else {
-                activity.logUtils.debugLog("Failed to configure widget. Result code $resultCode, id $id.", null)
+                activity.logUtils.debugLog(
+                    "Failed to configure widget. Result code $resultCode, id $id.",
+                    null
+                )
                 finishIfNoErrors()
             }
         }

@@ -29,6 +29,7 @@ import tk.zwander.common.util.createPersistablePreviewBitmap
 import tk.zwander.common.util.density
 import tk.zwander.common.util.frameSizeAndPosition
 import tk.zwander.common.util.getRemoteDrawable
+import tk.zwander.common.util.hasConfiguration
 import tk.zwander.common.util.logUtils
 import tk.zwander.common.util.prefManager
 import tk.zwander.common.util.shortcutIdManager
@@ -243,7 +244,7 @@ abstract class BaseBindWidgetActivity : BaseActivity() {
         else {
             //Only launch the config Activity if the widget isn't already bound (avoid reconfiguring it
             //every time the app restarts)
-            if (info.configure != null && !currentIds.contains(id)) {
+            if (info.hasConfiguration(this) && !currentIds.contains(id)) {
                 configureWidget(id, info)
             } else {
                 addNewWidget(id, info)
