@@ -4,6 +4,7 @@ import android.content.pm.PackageManager
 import android.content.res.Resources
 import android.graphics.drawable.Drawable
 import android.os.Build
+import android.view.LayoutInflater
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -41,9 +42,11 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import tk.zwander.common.data.AppInfo
 import tk.zwander.common.util.componentNameCompat
+import tk.zwander.common.util.loadPreviewOrIconDrawable
 import tk.zwander.common.util.logUtils
 import tk.zwander.lockscreenwidgets.R
 import tk.zwander.lockscreenwidgets.data.list.BaseListInfo
+import tk.zwander.lockscreenwidgets.data.list.WidgetListInfo
 
 @Composable
 fun AddWidgetScroller(
@@ -85,8 +88,21 @@ fun AddWidgetScroller(
                             key = widget.itemInfo.provider,
                         )
 
+                        val previewLayout = remember(widget.itemInfo.provider) {
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                                widget.itemInfo.previewLayout.takeIf { it != 0 }?.let {
+                                    val contextForProvider = context.createApplicationContext(widget.itemInfo.providerInfo.applicationInfo, 0)
+
+                                    LayoutInflater.from(contextForProvider).inflate(it, null)
+                                }
+                            } else {
+                                null
+                            }
+                        }
+
                         WidgetItem(
                             image = icon,
+                            previewLayout = previewLayout,
                             label = widget.itemInfo.loadLabel(context.packageManager),
                             subLabel = "${widget.itemInfo.minWidth}x${widget.itemInfo.minHeight}",
                         ) {
@@ -221,7 +237,11 @@ private fun icon(
 
     LaunchedEffect(key) {
         icon = withContext(Dispatchers.IO) {
-            try {
+            val previewOrIcon = if (info is WidgetListInfo) {
+                info.itemInfo.loadPreviewOrIconDrawable(context)
+            } else null
+
+            previewOrIcon ?: try {
                 info.icon?.loadDrawable(context)
             } catch (e: PackageManager.NameNotFoundException) {
                 context.logUtils.normalLog(

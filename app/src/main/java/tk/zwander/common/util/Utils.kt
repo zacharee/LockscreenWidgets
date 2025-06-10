@@ -6,6 +6,7 @@ import android.appwidget.AppWidgetProviderInfo
 import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
+import android.graphics.drawable.Drawable
 import android.hardware.display.DisplayManagerGlobal
 import android.net.Uri
 import android.os.Build
@@ -109,8 +110,12 @@ suspend inline fun <T, S> Collection<T>.mapIndexedParallel(crossinline action: s
 val Context.safeApplicationContext: Context
     get() = this as? Application ?: applicationContext
 
+fun AppWidgetProviderInfo.loadPreviewOrIconDrawable(context: Context, density: Int = 0): Drawable? {
+    return (loadPreviewImage(context, density) ?: loadIcon(context, density))
+}
+
 fun AppWidgetProviderInfo.loadPreviewOrIcon(context: Context, density: Int = 0, maxSize: Dp = 128.dp): Bitmap? {
-    return (loadPreviewImage(context, density) ?: loadIcon(context, density))?.toSafeBitmap(context.density, maxSize = maxSize)
+    return loadPreviewOrIconDrawable(context, density)?.toSafeBitmap(context.density, maxSize = maxSize)
 }
 
 fun AppWidgetProviderInfo.createPersistablePreviewBitmap(context: Context): String? {

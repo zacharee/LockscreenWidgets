@@ -1,7 +1,9 @@
 package tk.zwander.common.compose.add
 
 import android.graphics.drawable.Drawable
+import android.view.View
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.padding
@@ -15,14 +17,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.viewinterop.AndroidView
 import com.google.accompanist.drawablepainter.rememberDrawablePainter
 
 @Composable
 fun WidgetItem(
     image: Drawable?,
+    previewLayout: View? = null,
     label: String?,
     subLabel: String?,
-    onClick: () -> Unit
+    onClick: () -> Unit,
 ) {
     OutlinedCard(
         onClick = onClick,
@@ -46,14 +50,30 @@ fun WidgetItem(
 
             Spacer(Modifier.size(8.dp))
 
-            if (image != null) {
-                Image(
-                    painter = rememberDrawablePainter(image),
-                    contentDescription = label,
-                    modifier = Modifier.weight(1f)
-                )
-            } else {
-                Spacer(Modifier.weight(1f))
+            when {
+                previewLayout != null -> {
+                    Box(
+                        modifier = Modifier.weight(1f),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        AndroidView(
+                            factory = { previewLayout },
+                            update = {},
+                        )
+                    }
+                }
+
+                image != null -> {
+                    Image(
+                        painter = rememberDrawablePainter(image),
+                        contentDescription = label,
+                        modifier = Modifier.weight(1f)
+                    )
+                }
+
+                else -> {
+                    Spacer(Modifier.weight(1f))
+                }
             }
         }
     }
