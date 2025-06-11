@@ -90,10 +90,15 @@ fun AddWidgetScroller(
 
                         val previewLayout = remember(widget.itemInfo.provider) {
                             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                                widget.itemInfo.previewLayout.takeIf { it != 0 }?.let {
-                                    val contextForProvider = context.createApplicationContext(widget.itemInfo.providerInfo.applicationInfo, 0)
+                                try {
+                                    widget.itemInfo.previewLayout.takeIf { it != 0 }?.let {
+                                        val contextForProvider = context.createApplicationContext(widget.itemInfo.providerInfo.applicationInfo, 0)
 
-                                    LayoutInflater.from(contextForProvider).inflate(it, null)
+                                        LayoutInflater.from(contextForProvider).inflate(it, null)
+                                    }
+                                } catch (e: Throwable) {
+                                    context.logUtils.debugLog("Unable to inflate widget preview.", e)
+                                    null
                                 }
                             } else {
                                 null
