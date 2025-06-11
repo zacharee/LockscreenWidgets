@@ -494,7 +494,8 @@ object AccessibilityUtils {
                 frameDelegate.updateState {
                     try {
                         it.copy(showingKeyboard = imm.inputMethodWindowVisibleHeight > 0)
-                    } catch (_: Throwable) {
+                    } catch (e: Throwable) {
+                        logUtils.debugLog("Unable to check if keyboard is showing, assuming it's not", e)
                         // Fetching the IME height can cause the system to throw an NPE:
                         // "Attempt to read from field 'com.android.server.wm.DisplayFrames com.android.server.wm.DisplayContent.mDisplayFrames' on a null object reference".
                         // If this happens, assume the keyboard isn't showing.
