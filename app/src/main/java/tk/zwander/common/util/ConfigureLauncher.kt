@@ -117,10 +117,10 @@ class ConfigureLauncher(
             activity.logUtils.debugLog("Configure complete for id $id $currentConfigId", null)
 
             if (id != null && id != -1) {
-                val widgetInfo = activity.appWidgetManager.getAppWidgetInfo(id)
+                val widgetInfo: AppWidgetProviderInfo? = activity.appWidgetManager.getAppWidgetInfo(id)
                 var resultOk = resultCode == RESULT_OK
 
-                if (widgetInfo.configure != null) {
+                if (widgetInfo?.configure != null) {
                     val matchedComponents = activity.packageManager.queryIntentActivities(
                         Intent(AppWidgetManager.ACTION_APPWIDGET_CONFIGURE).apply {
                             addCategory(Intent.CATEGORY_DEFAULT)
@@ -135,7 +135,7 @@ class ConfigureLauncher(
                         activity.logUtils.debugLog("Found a widget configuration that probably wasn't expecting to be launched here. Assuming a canceled result should still continue. ${widgetInfo.provider}, ${widgetInfo.configure}", null)
                         resultOk = true
                     }
-                } else {
+                } else if (widgetInfo != null) {
                     activity.logUtils.debugLog("Found a widget configuration that no longer exists? ${widgetInfo.provider}", null)
                     resultOk = true
                 }
