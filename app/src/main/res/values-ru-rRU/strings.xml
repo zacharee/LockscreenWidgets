@@ -258,6 +258,7 @@
     <string name="blank_widget">Пустой виджет</string>
     <string name="add_frame">Добавить рамку виджета</string>
     <string name="remove_frame">Удалить рамку виджета</string>
+    <string name="unable_to_open_settings">Unable to open Settings.</string>
     <string name="remove_frame_confirmation_message">Вы уверены, что хотите удалить эту рамку?</string>
     <string name="select">Выбрать</string>
     <string name="cancel">Отмена</string>

@@ -258,6 +258,7 @@
     <string name="blank_widget">Boş Widget</string>
     <string name="add_frame">Widget Çerçevesi Ekle</string>
     <string name="remove_frame">Widget Çerçevesini Kaldır</string>
+    <string name="unable_to_open_settings">Unable to open Settings.</string>
     <string name="remove_frame_confirmation_message">Bu çerçeveyi kaldırmak istediğinizden emin misiniz?</string>
     <string name="select">Seçim</string>
     <string name="cancel">İptal</string>
