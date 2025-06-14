@@ -42,9 +42,9 @@ class ConfigureLauncher(
     fun launch(id: Int): Boolean {
         try {
             val samsungConfigComponent = activity.appWidgetManager.getAppWidgetInfo(id)
-                .getSamsungConfigureComponent(activity)
+                ?.getSamsungConfigureComponent(activity)
 
-            activity.logUtils.debugLog("Found Samsung config component $samsungConfigComponent.")
+            activity.logUtils.debugLog("Found Samsung config component $samsungConfigComponent for $id.")
 
             if (samsungConfigComponent != null) {
                 val launchIntent = Intent(AppWidgetManager.ACTION_APPWIDGET_CONFIGURE)

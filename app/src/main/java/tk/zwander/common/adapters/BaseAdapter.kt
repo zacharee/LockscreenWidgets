@@ -472,7 +472,7 @@ abstract class BaseAdapter(
                 }
             }
 
-            binding.openWidgetConfig.isVisible = widgetInfo.hasConfiguration(context) == true
+            binding.openWidgetConfig.isVisible = widgetInfo.hasConfiguration(context)
 
             if (widgetInfo != null) {
                 binding.widgetReconfigure.isVisible = false

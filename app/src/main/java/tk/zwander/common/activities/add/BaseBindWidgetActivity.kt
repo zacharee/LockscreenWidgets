@@ -53,21 +53,36 @@ abstract class BaseBindWidgetActivity : BaseActivity() {
         get() = currentWidgets.map { it.id }
     protected open val deleteOnConfigureError: Boolean = true
 
+    private var currentRequestId: Int? = null
+
     private val permRequest =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-            val id = result.data?.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, -1)
-                ?: return@registerForActivityResult
+            try {
+                val id = result.data?.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, currentRequestId ?: -1) ?: currentRequestId
 
-            if (result.resultCode == RESULT_OK) {
-                //The user has granted permission for Lockscreen Widgets
-                //so retry binding the widget
-                tryBindWidget(
-                    appWidgetManager.getAppWidgetInfo(id)
-                )
-            } else {
-                //The user didn't allow Lockscreen Widgets to bind
-                //widgets, so delete the allocated ID
-                widgetHost.deleteAppWidgetId(id)
+                if (id == null || id == -1) {
+                    logUtils.debugLog("Unable to get widget ID.", null)
+                    return@registerForActivityResult
+                }
+
+                if (result.resultCode == RESULT_OK) {
+                    val widgetInfo = appWidgetManager.getAppWidgetInfo(id)
+
+                    if (widgetInfo == null) {
+                        logUtils.debugLog("Unable to get app widget info for ID $id", null)
+                        widgetHost.deleteAppWidgetId(id)
+                    } else {
+                        //The user has granted permission for Lockscreen Widgets
+                        //so retry binding the widget
+                        tryBindWidget(widgetInfo)
+                    }
+                } else {
+                    //The user didn't allow Lockscreen Widgets to bind
+                    //widgets, so delete the allocated ID
+                    widgetHost.deleteAppWidgetId(id)
+                }
+            } finally {
+                currentRequestId = null
             }
         }
 
@@ -293,10 +308,25 @@ abstract class BaseBindWidgetActivity : BaseActivity() {
             intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, id)
             intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_PROVIDER, provider)
 
+            currentRequestId = id
             permRequest.launch(intent)
         } catch (e: ActivityNotFoundException) {
             logUtils.normalLog("Unable to launch widget permission request", e)
             widgetHost.deleteAppWidgetId(id)
+            pendingErrors++
+
+            MaterialAlertDialogBuilder(this)
+                .setTitle(R.string.error)
+                .setMessage(
+                    resources.getString(
+                        R.string.bind_widget_error,
+                        provider,
+                    ),
+                )
+                .setPositiveButton(android.R.string.ok) { _, _ ->
+                    pendingErrors--
+                }
+                .show()
         }
     }
 
@@ -315,8 +345,8 @@ abstract class BaseBindWidgetActivity : BaseActivity() {
                 .setMessage(
                     resources.getString(
                         R.string.configure_widget_error,
-                        provider
-                    )
+                        provider,
+                    ),
                 )
                 .setPositiveButton(android.R.string.ok) { _, _ ->
                     pendingErrors--
