@@ -2,15 +2,16 @@
 accompanist = "0.37.3"
 activityCompose = "1.10.1"
 androidGradlePlugin = "8.10.1"
-bugsnagAndroidPerformance = "1.14.0"
+bugsnagAndroidPerformance = "1.15.0"
 colorpickerCompose = "1.1.2"
 shizuku = "13.1.5"
 appcompat = "1.7.1"
 atomicfu = "0.28.0"
 bugsnagAndroid = "6.14.0"
 bugsnagGradlePlugin = "0.4.0"
-byteBuddyAndroid = "1.17.5"
+byteBuddyAndroid = "1.17.6"
 composeBom = "2025.06.00"
+compose-material-icons-core = "compose-material-icons-core"
 composeintroslider = "a611e4f624"
 composeSpinkit = "1.0.4"
 constraintlayout = "2.2.1"
@@ -44,9 +45,10 @@ bugsnag-exitinfo = { module = "com.bugsnag:bugsnag-plugin-android-exitinfo", ver
 byte-buddy-android = { module = "net.bytebuddy:byte-buddy-android", version.ref = "byteBuddyAndroid" }
 colorpicker-compose = { module = "com.github.skydoves:colorpicker-compose", version.ref = "colorpickerCompose" }
 compose-animation = { module = "androidx.compose.animation:animation" }
-compose-bom = { module = "androidx.compose:compose-bom", version.ref = "composeBom" }
+compose-bom = { module = "androidx.compose:compose-bom-alpha", version.ref = "composeBom" }
 compose-foundation = { module = "androidx.compose.foundation:foundation" }
 compose-material3 = { module = "androidx.compose.material3:material3" }
+compose-material-icons-core = { module = "androidx.compose.material:material-icons-core", version.ref = "compose-material-icons-core" }
 compose-spinkit = { module = "com.github.OCNYang:Compose-SpinKit", version.ref = "composeSpinkit" }
 compose-ui-tooling = { module = "androidx.compose.ui:ui-tooling" }
 composeIntroSlider = { module = "com.github.zacharee:ComposeIntroSlider", version.ref = "composeintroslider" }
