@@ -28,7 +28,7 @@ import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import net.bytebuddy.ByteBuddy
-import net.bytebuddy.dynamic.loading.ClassLoadingStrategy
+import net.bytebuddy.android.AndroidClassLoadingStrategy
 import net.bytebuddy.implementation.MethodDelegation
 import tk.zwander.common.util.Event
 import tk.zwander.common.util.EventObserver
@@ -97,7 +97,10 @@ class NotificationListener : NotificationListenerService(), EventObserver, Corou
                                 .withParameters(Int::class.java, Parcel::class.java, Parcel::class.java, Int::class.java)
                                 .intercept(MethodDelegation.to(LollipopListenerWrapper(original as INotificationListener.Stub)))
                                 .make()
-                                .load(NotificationListenerService::class.java.classLoader, ClassLoadingStrategy.Default.CHILD_FIRST)
+                                .load(
+                                    NotificationListenerService::class.java.classLoader,
+                                    AndroidClassLoadingStrategy.Wrapping(cacheDir),
+                                )
                                 .loaded
                                 .getDeclaredConstructor()
                                 .apply { isAccessible = true }
