@@ -75,7 +75,7 @@ class ConfigureLauncher(
                         ActivityOptionsCompat.makeBasic()
                             .apply {
                                 internalActivityOptions?.setPendingIntentBackgroundActivityStartMode(
-                                    ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOWED
+                                    ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOW_ALWAYS
                                 )
                             }
                     } else {
@@ -97,7 +97,7 @@ class ConfigureLauncher(
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
                     ActivityOptions
                         .makeBasic()
-                        .setPendingIntentBackgroundActivityStartMode(ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOWED)
+                        .setPendingIntentBackgroundActivityStartMode(ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOW_ALWAYS)
                         .toBundle()
                 } else null,
             )
