@@ -8,7 +8,6 @@ import android.provider.Settings
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -30,6 +29,7 @@ import dev.zwander.composeintroslider.SimpleIntroPage
 import kotlinx.coroutines.launch
 import tk.zwander.common.activities.OnboardingActivity
 import tk.zwander.common.compose.AppTheme
+import tk.zwander.common.compose.components.ContentColoredOutlinedButton
 import tk.zwander.common.util.LifecycleEffect
 import tk.zwander.common.util.canReadWallpaper
 import tk.zwander.common.util.isAccessibilityEnabled
@@ -146,7 +146,7 @@ fun rememberIntroSlides(
                 contentColor = { colorResource(id = R.color.slide_3_text) },
                 icon = { painterResource(id = R.drawable.info) },
                 extraContent = {
-                    OutlinedButton(
+                    ContentColoredOutlinedButton(
                         onClick = {
                             context.launchUrl("https://github.com/zacharee/LockscreenWidgets/blob/master/PRIVACY.md")
                         }
@@ -171,7 +171,7 @@ fun rememberIntroSlides(
                         mutableStateOf(false)
                     }
 
-                    OutlinedButton(
+                    ContentColoredOutlinedButton(
                         onClick = { showingDialog = true },
                         enabled = !hasAccessibility,
                     ) {
@@ -219,7 +219,7 @@ fun rememberIntroSlides(
                 contentColor = { colorResource(id = R.color.slide_5_text) },
                 icon = { painterResource(id = R.drawable.ic_baseline_notifications_active_24) },
                 extraContent = {
-                    OutlinedButton(
+                    ContentColoredOutlinedButton(
                         onClick = {
                             val notifIntent = Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS)
                             context.startActivity(notifIntent)
@@ -253,7 +253,7 @@ fun rememberIntroSlides(
                     val shizukuInstalled by ShizukuManager.rememberShizukuInstallStateAsState()
                     val shizukuRunning by ShizukuManager.rememberShizukuRunningStateAsState()
 
-                    OutlinedButton(
+                    ContentColoredOutlinedButton(
                         onClick = {
                             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                                 if (shizukuRunning) {
@@ -299,7 +299,7 @@ fun rememberIntroSlides(
                         )
                     }
 
-                    OutlinedButton(
+                    ContentColoredOutlinedButton(
                         onClick = {
                             context.launchUrl("https://github.com/zacharee/LockscreenWidgets/blob/master/PRIVACY.md")
                         }
@@ -321,7 +321,7 @@ fun rememberIntroSlides(
                 contentColor = { colorResource(id = R.color.slide_7_text) },
                 icon = { painterResource(id = R.drawable.ic_baseline_battery_alert_24) },
                 extraContent = {
-                    OutlinedButton(
+                    ContentColoredOutlinedButton(
                         onClick = {
                             context.launchUrl("https://dontkillmyapp.com/?app=Lockscreen%20Widgets")
                         }

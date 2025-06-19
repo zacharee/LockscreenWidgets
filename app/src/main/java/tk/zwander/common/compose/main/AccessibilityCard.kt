@@ -12,7 +12,6 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -25,6 +24,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import tk.zwander.common.activities.OnboardingActivity
+import tk.zwander.common.compose.components.ContentColoredOutlinedButton
 import tk.zwander.common.util.openAccessibilitySettings
 import tk.zwander.lockscreenwidgets.R
 
@@ -67,7 +67,7 @@ fun AccessibilityCard() {
                 verticalArrangement = Arrangement.spacedBy(0.dp),
                 horizontalArrangement = Arrangement.SpaceAround,
             ) {
-                OutlinedButton(
+                ContentColoredOutlinedButton(
                     onClick = {
                         OnboardingActivity.start(
                             context,
@@ -84,7 +84,7 @@ fun AccessibilityCard() {
                     Text(text = stringResource(id = R.string.battery_whitelist))
                 }
 
-                OutlinedButton(
+                ContentColoredOutlinedButton(
                     onClick = { context.openAccessibilitySettings() },
                     colors = ButtonDefaults.outlinedButtonColors(
                         containerColor = Color.Transparent,

@@ -26,7 +26,6 @@ import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.contentColorFor
@@ -45,6 +44,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import tk.zwander.common.activities.DismissOrUnlockActivity
 import tk.zwander.common.compose.AppTheme
+import tk.zwander.common.compose.components.ContentColoredOutlinedButton
 import tk.zwander.common.data.WidgetData
 import tk.zwander.common.util.BaseDelegate
 import tk.zwander.common.util.BlurManager
@@ -572,7 +572,7 @@ open class MainWidgetFrameDelegate protected constructor(context: Context, prote
                                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                                     verticalArrangement = Arrangement.spacedBy(8.dp),
                                 ) {
-                                    OutlinedButton(
+                                    ContentColoredOutlinedButton(
                                         onClick = {
                                             eventManager.sendEvent(Event.FrameSelected(null, state.selectionPreviewRequestCode))
                                         },
@@ -580,7 +580,7 @@ open class MainWidgetFrameDelegate protected constructor(context: Context, prote
                                         Text(text = stringResource(R.string.cancel))
                                     }
 
-                                    OutlinedButton(
+                                    ContentColoredOutlinedButton(
                                         onClick = { eventManager.sendEvent(Event.FrameSelected(id, state.selectionPreviewRequestCode)) },
                                     ) {
                                         Text(text = stringResource(R.string.select))
