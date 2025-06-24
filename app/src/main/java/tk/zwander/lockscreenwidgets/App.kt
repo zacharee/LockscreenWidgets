@@ -119,7 +119,9 @@ class App : Application(), CoroutineScope by MainScope(), EventObserver {
             projectPackages = setOf("tk.zwander.lockscreenwidgets", "tk.zwander.widgetdrawer", "tk.zwander.common")
         })
         BugsnagPerformance.start(PerformanceConfiguration.load(this).apply {
-            autoInstrumentRendering = true
+            enabledMetrics.rendering = true
+            enabledMetrics.cpu = true
+            enabledMetrics.memory = true
         })
 
         Bugsnag.addOnError {
