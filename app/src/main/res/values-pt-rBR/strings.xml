@@ -4,7 +4,7 @@
     <string name="edit_gesture_hint">Toque no quadro do widget com dois dedos para mover e alterar o tamanho.</string>
     <string name="edit_gesture_hint_2">Ótimo! Toque com dois dedos para ocultar a interface de edição.</string>
     <string name="hide_gesture_hint">Toque no quadro do widget com três dedos para ocultá-lo. O widget seguirá oculto até você ligar e desligar a tela novamente.</string>
-    <string name="accessibility_service_desc">Lockscreen Widgets requires an Accessibility Service to display on the lock screen and in the notification center. No data is collected, and no actions will be performed on the device.</string>
+    <string name="accessibility_service_desc">Widgets na Tela de Bloqueio requerem um Serviço de Acessibilidade para serem exibidos na tela de bloqueio e no centro de notificações. Nenhum dado é coletado e nenhuma ação será executada no dispositivo.</string>
     <string name="add_widget">Add Widget</string>
     <string name="grant">Grant</string>
     <string name="granted">Granted</string>
