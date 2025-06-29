@@ -7,7 +7,6 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.drawable.GradientDrawable
 import android.os.Build
-import android.os.Bundle
 import android.util.SizeF
 import android.view.ContextThemeWrapper
 import android.view.LayoutInflater
@@ -60,6 +59,7 @@ import kotlinx.coroutines.withContext
 import tk.zwander.common.activities.DismissOrUnlockActivity
 import tk.zwander.common.activities.PermissionIntentLaunchActivity
 import tk.zwander.common.compose.AppTheme
+import tk.zwander.common.compose.util.widgetViewCacheRegistry
 import tk.zwander.common.data.WidgetData
 import tk.zwander.common.data.WidgetType
 import tk.zwander.common.host.widgetHostCompat
@@ -117,6 +117,7 @@ abstract class BaseAdapter(
 
     protected val host = context.widgetHostCompat
     protected val manager = context.appWidgetManager
+    protected val viewCacheRegistry = context.widgetViewCacheRegistry
 
     private val baseLayoutInflater =
         LayoutInflater.from(context).cloneInContext(ContextThemeWrapper(context, R.style.AppTheme))
@@ -489,10 +490,10 @@ abstract class BaseAdapter(
                             // way to do things. However, it's not trivial to just set a new source on an AppWidgetHostView,
                             // so this makes the most sense right now.
                             addView(withContext(Dispatchers.Main) {
-                                host.createView(
+                                viewCacheRegistry.getOrCreateView(
                                     SafeContextWrapper(itemView.context),
                                     data.id,
-                                    widgetInfo
+                                    widgetInfo,
                                 ).apply hostView@{
                                     findScrollableViewsInHierarchy(this).forEach { list ->
                                         list.isNestedScrollingEnabled = true
@@ -513,7 +514,7 @@ abstract class BaseAdapter(
 
                                     // Workaround to fix the One UI 5.1 battery grid widget on some devices.
                                     if (widgetInfo.provider.packageName == "com.android.settings.intelligence") {
-                                        updateAppWidgetOptions(Bundle().apply {
+                                        updateAppWidgetOptions(manager.getAppWidgetOptions(appWidgetId).apply {
                                             putBoolean("hsIsHorizontalIcon", false)
                                             putInt("semAppWidgetRowSpan", 1)
                                         })
@@ -521,7 +522,7 @@ abstract class BaseAdapter(
 
                                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                                         updateAppWidgetSize(
-                                            Bundle(),
+                                            manager.getAppWidgetOptions(appWidgetId),
                                             listOf(
                                                 SizeF(
                                                     width + 2 * paddingValue,
@@ -535,7 +536,7 @@ abstract class BaseAdapter(
 
                                         @Suppress("DEPRECATION")
                                         updateAppWidgetSize(
-                                            null,
+                                            manager.getAppWidgetOptions(appWidgetId),
                                             adjustedWidth.toInt(),
                                             adjustedHeight.toInt(),
                                             adjustedWidth.toInt(),

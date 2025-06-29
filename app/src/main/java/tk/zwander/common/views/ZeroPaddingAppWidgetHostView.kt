@@ -1,5 +1,6 @@
 package tk.zwander.common.views
 
+import android.annotation.SuppressLint
 import android.appwidget.AppWidgetHostView
 import android.appwidget.AppWidgetProviderInfo
 import android.content.Context
@@ -11,11 +12,21 @@ import tk.zwander.common.util.logUtils
  * An implementation of [AppWidgetHostView] that decreases the default widget padding
  * to 0dp.
  */
-class ZeroPaddingAppWidgetHostView(context: Context) : AppWidgetHostView(context) {
+@SuppressLint("ViewConstructor")
+class ZeroPaddingAppWidgetHostView(
+    context: Context,
+    private val onAttach: (AppWidgetHostView) -> Unit,
+) : AppWidgetHostView(context) {
     override fun setAppWidget(appWidgetId: Int, info: AppWidgetProviderInfo?) {
         super.setAppWidget(appWidgetId, info)
 
         setPadding(0, 0, 0, 0)
+    }
+
+    override fun onAttachedToWindow() {
+        super.onAttachedToWindow()
+
+        onAttach(this)
     }
 
     override fun dispatchDraw(canvas: Canvas) {

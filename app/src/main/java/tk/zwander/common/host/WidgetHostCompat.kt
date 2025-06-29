@@ -18,6 +18,7 @@ import android.widget.RemoteViews
 import net.bytebuddy.ByteBuddy
 import net.bytebuddy.android.AndroidClassLoadingStrategy
 import net.bytebuddy.implementation.MethodDelegation
+import tk.zwander.common.compose.util.widgetViewCacheRegistry
 import tk.zwander.common.util.logUtils
 import tk.zwander.common.views.ZeroPaddingAppWidgetHostView
 import tk.zwander.lockscreenwidgets.util.IconPrefs
@@ -46,18 +47,22 @@ class WidgetHostCompat(
     companion object {
         private const val HOST_ID = 1003
 
-        @SuppressLint("PrivateApi")
-        private val ON_CLICK_HANDLER_CLASS = try {
-            Class.forName("android.widget.RemoteViews\$OnClickHandler")
-        } catch (_: ClassNotFoundException) {
-            null
+        private val ON_CLICK_HANDLER_CLASS by lazy {
+            try {
+                @SuppressLint("PrivateApi")
+                Class.forName("android.widget.RemoteViews\$OnClickHandler")
+            } catch (_: ClassNotFoundException) {
+                null
+            }
         }
 
-        @SuppressLint("PrivateApi")
-        private val INTERACTION_HANDLER_CLASS = try {
-            Class.forName("android.widget.RemoteViews\$InteractionHandler")
-        } catch (_: ClassNotFoundException) {
-            null
+        private val INTERACTION_HANDLER_CLASS by lazy {
+            try {
+                @SuppressLint("PrivateApi")
+                Class.forName("android.widget.RemoteViews\$InteractionHandler")
+            } catch (_: ClassNotFoundException) {
+                null
+            }
         }
 
         @SuppressLint("StaticFieldLeak")
@@ -68,9 +73,9 @@ class WidgetHostCompat(
         fun getInstance(context: Context): WidgetHostCompat {
             return instance ?: run {
                 val mode = when {
-                    INTERACTION_HANDLER_CLASS != null && INTERACTION_HANDLER_CLASS.isInterface -> Mode.Interface(INTERACTION_HANDLER_CLASS)
-                    ON_CLICK_HANDLER_CLASS != null && ON_CLICK_HANDLER_CLASS.isInterface -> Mode.Interface(ON_CLICK_HANDLER_CLASS)
-                    ON_CLICK_HANDLER_CLASS != null && !ON_CLICK_HANDLER_CLASS.isInterface -> Mode.Class(ON_CLICK_HANDLER_CLASS)
+                    INTERACTION_HANDLER_CLASS != null && INTERACTION_HANDLER_CLASS!!.isInterface -> Mode.Interface(INTERACTION_HANDLER_CLASS!!)
+                    ON_CLICK_HANDLER_CLASS != null && ON_CLICK_HANDLER_CLASS!!.isInterface -> Mode.Interface(ON_CLICK_HANDLER_CLASS!!)
+                    ON_CLICK_HANDLER_CLASS != null && !ON_CLICK_HANDLER_CLASS!!.isInterface -> Mode.Class(ON_CLICK_HANDLER_CLASS!!)
                     else -> {
                         throw IllegalStateException("Unable to find correct click/interaction handler!\n" +
                                 "Interaction Handler: ${INTERACTION_HANDLER_CLASS?.run { "$canonicalName / $isInterface" }}\n" +
@@ -166,6 +171,7 @@ class WidgetHostCompat(
         super.deleteAppWidgetId(appWidgetId)
 
         IconPrefs.removeIcon(context, appWidgetId)
+        context.widgetViewCacheRegistry.removeView(appWidgetId)
     }
 
     @SuppressLint("PrivateApi")
@@ -174,14 +180,31 @@ class WidgetHostCompat(
         appWidgetId: Int,
         appWidget: AppWidgetProviderInfo?,
     ): AppWidgetHostView {
+        val clickHandler = createOnClickHandlerForWidget(appWidgetId)
+
         AppWidgetHost::class.java
             .getDeclaredField(if (ON_CLICK_HANDLER_CLASS == null) "mInteractionHandler" else "mOnClickHandler")
             .apply {
                 isAccessible = true
-                set(this@WidgetHostCompat, createOnClickHandlerForWidget(appWidgetId))
+                set(this@WidgetHostCompat, clickHandler)
             }
 
-        return ZeroPaddingAppWidgetHostView(context)
+        return ZeroPaddingAppWidgetHostView(context) { hostView ->
+            try {
+                AppWidgetHostView::class.java
+                    .getMethod(
+                        if (INTERACTION_HANDLER_CLASS != null) {
+                            "setInteractionHandler"
+                        } else {
+                            "setOnClickHandler"
+                        },
+                        INTERACTION_HANDLER_CLASS ?: ON_CLICK_HANDLER_CLASS,
+                    )
+                    .invoke(hostView, clickHandler)
+            } catch (e: Throwable) {
+                context.logUtils.normalLog("Unable to update interaction handler on window attach for widget $appWidgetId, ${appWidget?.provider}.", e)
+            }
+        }
     }
 
     @Suppress("MemberVisibilityCanBePrivate")
