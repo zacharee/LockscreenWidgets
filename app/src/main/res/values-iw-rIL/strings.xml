@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <string name="version_template">v%s</string>
-    <string name="edit_gesture_hint">Tap the widget frame with two fingers to move and resize it.</string>
+    <string name="version_template">גרסא%s.</string>
+    <string name="edit_gesture_hint">לחץ על מסגרת התוסף עם שתי אצבעות כדי לשנות גודל.</string>
     <string name="edit_gesture_hint_2">Great! Tap with two fingers to hide the editing UI.</string>
     <string name="hide_gesture_hint">Tap the widget frame with three fingers to temporarily hide it. It will remain hidden until you turn the display off and on again.</string>
     <string name="accessibility_service_desc">Lockscreen Widgets requires an Accessibility Service to display on the lock screen and in the notification center. No data is collected, and no actions will be performed on the device.</string>
@@ -44,12 +44,12 @@
     <string name="category_interaction">Interaction</string>
     <string name="category_debug">Debug</string>
     <string name="remove">Remove</string>
-    <string name="expand_down">Expand Down</string>
-    <string name="expand_up">Expand Up</string>
-    <string name="expand_left">Expand Left</string>
-    <string name="expand_right">Expand Right</string>
-    <string name="reconfigure">Reconfigure</string>
-    <string name="center_vertically">Center Vertically</string>
+    <string name="expand_down">הרחב למטה</string>
+    <string name="expand_up">הרחב למעלה</string>
+    <string name="expand_left">הרחב שמאלה</string>
+    <string name="expand_right">הרחב ימינה</string>
+    <string name="reconfigure">שנה תצורה</string>
+    <string name="center_vertically">מרכז אנכית</string>
     <string name="center_horizontally">Center Horizontally</string>
     <string name="move">Move</string>
     <string name="hide">Hide</string>
