@@ -43,6 +43,7 @@ import tk.zwander.widgetdrawer.util.DrawerDelegate
  * check that the left lock screen shortcut is no longer visible, since it hides when the notification shade
  * is shown.
  */
+@SuppressLint("AccessibilityPolicy")
 class Accessibility : AccessibilityService(), EventObserver, CoroutineScope by MainScope() {
     private val kgm by lazy { keyguardManager }
     private val wm by lazy { getSystemService(WINDOW_SERVICE) as WindowManager }

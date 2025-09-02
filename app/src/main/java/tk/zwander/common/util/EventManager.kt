@@ -101,7 +101,6 @@ class EventManager private constructor(private val context: Context) {
 sealed class Event {
     data object LockscreenDismissed : Event()
     data object ScreenOff : Event()
-    data object ScreenOn : Event()
     data object NightModeUpdate : Event()
     data object RequestNotificationCount : Event()
 

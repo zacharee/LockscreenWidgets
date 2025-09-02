@@ -29,8 +29,10 @@ import androidx.core.view.updateLayoutParams
 import androidx.core.view.updatePaddingRelative
 import androidx.lifecycle.Lifecycle
 import androidx.recyclerview.widget.RecyclerView
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
 import tk.zwander.common.activities.DismissOrUnlockActivity
 import tk.zwander.common.data.WidgetData
 import tk.zwander.common.util.BaseDelegate
@@ -40,6 +42,7 @@ import tk.zwander.common.util.HandlerRegistry
 import tk.zwander.common.util.PrefManager
 import tk.zwander.common.util.dpAsPx
 import tk.zwander.common.util.eventManager
+import tk.zwander.common.util.globalState
 import tk.zwander.common.util.handler
 import tk.zwander.common.util.logUtils
 import tk.zwander.common.util.mainHandler
@@ -184,7 +187,7 @@ class DrawerDelegate private constructor(context: Context) :
         handler(PrefManager.KEY_SHOW_DRAWER_HANDLE_ONLY_WHEN_LOCKED) {
             if (!prefManager.showDrawerHandleOnlyWhenLocked) {
                 tryShowHandle()
-            } else if (!commonState.wasOnKeyguard) {
+            } else if (!globalState.wasOnKeyguard.value) {
                 handle.hide(wm)
             }
         }
@@ -257,14 +260,6 @@ class DrawerDelegate private constructor(context: Context) :
 
             Event.DrawerHidden -> {
                 tryShowHandle()
-            }
-
-            Event.ScreenOn -> {
-                tryShowHandle()
-            }
-
-            Event.ScreenOff -> {
-                hideAll()
             }
 
             is Event.DrawerAttachmentState -> {
@@ -372,7 +367,7 @@ class DrawerDelegate private constructor(context: Context) :
             }
 
             Event.LockscreenDismissed -> {
-                if (prefManager.showDrawerHandleOnlyWhenLocked && !commonState.wasOnKeyguard) {
+                if (prefManager.showDrawerHandleOnlyWhenLocked && !globalState.wasOnKeyguard.value) {
                     handle.hide(wm)
                 }
             }
@@ -387,7 +382,11 @@ class DrawerDelegate private constructor(context: Context) :
                 DismissOrUnlockActivity.launch(this)
                 eventManager.sendEvent(Event.CloseDrawer)
             } else {
-                updateCommonState { it.copy(handlingClick = prefManager.requestUnlockDrawer) }
+                if (prefManager.requestUnlockDrawer) {
+                    globalState.handlingClick.value = globalState.handlingClick.value.toMutableMap().also {
+                        it[-2] = Unit
+                    }
+                }
             }
 
             true
@@ -435,6 +434,16 @@ class DrawerDelegate private constructor(context: Context) :
 
         displayManager.registerDisplayListener(displayListener, mainHandler)
         gridLayoutManager.customHeight = resources.getDimensionPixelSize(R.dimen.drawer_row_height).toDouble()
+
+        scope.launch(Dispatchers.IO) {
+            globalState.isScreenOn.collect { isScreenOn ->
+                if (isScreenOn) {
+                    tryShowHandle()
+                } else {
+                    hideAll()
+                }
+            }
+        }
     }
 
     override fun onDestroy() {
@@ -464,8 +473,8 @@ class DrawerDelegate private constructor(context: Context) :
     }
 
     private fun tryShowHandle() {
-        if (prefManager.drawerEnabled && prefManager.showDrawerHandle && commonState.isScreenOn) {
-            if (prefManager.showDrawerHandleOnlyWhenLocked && !commonState.wasOnKeyguard) {
+        if (prefManager.drawerEnabled && prefManager.showDrawerHandle && globalState.isScreenOn.value) {
+            if (prefManager.showDrawerHandleOnlyWhenLocked && !globalState.wasOnKeyguard.value) {
                 return
             }
 
@@ -514,7 +523,7 @@ class DrawerDelegate private constructor(context: Context) :
             if (!isHiding) {
                 isHiding = true
 
-                updateCommonState { it.copy(handlingClick = false) }
+                globalState.handlingClick.value = globalState.handlingClick.value.toMutableMap().also { it.remove(-2) }
                 adapter.currentEditingInterfacePosition = -1
 
                 currentVisibilityAnim?.cancel()

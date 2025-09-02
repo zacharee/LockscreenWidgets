@@ -4,8 +4,6 @@ import android.annotation.SuppressLint
 import android.app.WallpaperManager
 import android.content.Context
 import android.hardware.display.DisplayManager
-import android.os.PowerManager
-import android.view.Surface
 import android.view.View
 import android.view.WindowManager
 import androidx.annotation.CallSuper
@@ -34,7 +32,6 @@ import java.util.concurrent.ConcurrentLinkedDeque
 abstract class BaseDelegate<State : Any>(context: Context) : SafeContextWrapper(context),
     EventObserver, WidgetHostCompat.OnClickCallback, SavedStateRegistryOwner {
     protected val wm by lazy { windowManager }
-    protected val power by lazy { getSystemService(POWER_SERVICE) as PowerManager }
     protected val kgm by lazy { keyguardManager }
     protected val wallpaper by lazy { getSystemService(WALLPAPER_SERVICE) as WallpaperManager }
     protected val widgetHost by lazy { widgetHostCompat }
@@ -103,13 +100,6 @@ abstract class BaseDelegate<State : Any>(context: Context) : SafeContextWrapper(
         }
         rootView.setViewTreeLifecycleOwner(this)
         rootView.setViewTreeSavedStateRegistryOwner(this)
-
-        updateCommonState {
-            it.copy(
-                wasOnKeyguard = kgm.isKeyguardLocked,
-                isScreenOn = power.isInteractive,
-            )
-        }
     }
 
     @CallSuper
@@ -161,14 +151,6 @@ abstract class BaseDelegate<State : Any>(context: Context) : SafeContextWrapper(
                 }
 
                 widgetRemovalConfirmed(event, position)
-            }
-
-            Event.ScreenOff -> {
-                updateCommonState { it.copy(isScreenOn = false) }
-            }
-
-            Event.ScreenOn -> {
-                updateCommonState { it.copy(isScreenOn = true) }
             }
 
             else -> {}
@@ -233,10 +215,6 @@ abstract class BaseDelegate<State : Any>(context: Context) : SafeContextWrapper(
         val isHoldingItem: Boolean = false,
         val isItemHighlighted: Boolean = false,
         val updatedForMoveOrRemove: Boolean = false,
-        val handlingClick: Boolean = false,
-        val wasOnKeyguard: Boolean = false,
-        val isScreenOn: Boolean = false,
-        val screenOrientation: Int = Surface.ROTATION_0,
     )
 
     abstract class LayoutManager(

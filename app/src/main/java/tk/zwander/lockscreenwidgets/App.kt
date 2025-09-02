@@ -19,7 +19,9 @@ import com.bugsnag.android.performance.BugsnagPerformance
 import com.bugsnag.android.performance.PerformanceConfiguration
 import com.getkeepsafe.relinker.ReLinker
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.launch
 import org.lsposed.hiddenapibypass.HiddenApiBypass
 import tk.zwander.common.activities.add.BaseBindWidgetActivity
 import tk.zwander.common.util.Event
@@ -27,6 +29,7 @@ import tk.zwander.common.util.EventObserver
 import tk.zwander.common.util.GlobalExceptionHandler
 import tk.zwander.common.util.LogUtils
 import tk.zwander.common.util.eventManager
+import tk.zwander.common.util.globalState
 import tk.zwander.common.util.isOrHasDeadObject
 import tk.zwander.common.util.logUtils
 import tk.zwander.common.util.migrationManager
@@ -57,6 +60,7 @@ class App : Application(), CoroutineScope by MainScope(), EventObserver {
                     logUtils.debugLog("Received screen off: ${power.isInteractive}", null)
 
                     if (!power.isInteractive) {
+                        globalState.isScreenOn.value = false
                         eventManager.sendEvent(Event.ScreenOff)
 
                         logUtils.debugLog("Sending screen off", null)
@@ -66,7 +70,7 @@ class App : Application(), CoroutineScope by MainScope(), EventObserver {
                     logUtils.debugLog("Received screen on: ${power.isInteractive}", null)
 
                     if (power.isInteractive) {
-                        eventManager.sendEvent(Event.ScreenOn)
+                        globalState.isScreenOn.value = true
 
                         logUtils.debugLog("Sending screen on", null)
                     }
@@ -202,6 +206,8 @@ class App : Application(), CoroutineScope by MainScope(), EventObserver {
 
         LogUtils.createInstance(this)
 
+        globalState.onCreate(this)
+
         ContextCompat.registerReceiver(
             this,
             screenStateReceiver,
@@ -220,6 +226,16 @@ class App : Application(), CoroutineScope by MainScope(), EventObserver {
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             shizukuManager.onCreate()
+        }
+
+        launch(Dispatchers.IO) {
+            globalState.wasOnKeyguard.collect { wasOnKeyguard ->
+                if (!wasOnKeyguard) {
+                    //Update the keyguard dismissal Activity that the lock screen
+                    //has been dismissed.
+                    eventManager.sendEvent(Event.LockscreenDismissed)
+                }
+            }
         }
     }
 

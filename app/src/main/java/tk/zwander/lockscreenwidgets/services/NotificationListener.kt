@@ -33,6 +33,7 @@ import net.bytebuddy.implementation.MethodDelegation
 import tk.zwander.common.util.Event
 import tk.zwander.common.util.EventObserver
 import tk.zwander.common.util.eventManager
+import tk.zwander.common.util.globalState
 import tk.zwander.common.util.logUtils
 import tk.zwander.common.util.stringify
 
@@ -169,9 +170,7 @@ class NotificationListener : NotificationListenerService(), EventObserver, Corou
                         activeNotifications
                     } ?: arrayOf()
                     logUtils.debugLog("Filtering notifications ${activeNotifications.size}", null)
-                    eventManager.sendEvent(
-                        Event.NewNotificationCount(activeNotifications.count { it.shouldCount }),
-                    )
+                    globalState.notificationCount.value = activeNotifications.count { it.shouldCount }
                 } catch (e: BadParcelableException) {
                     logUtils.normalLog("Error sending notification count update", e)
 
