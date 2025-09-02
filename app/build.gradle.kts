@@ -79,6 +79,7 @@ dependencies {
     implementation(libs.kotlinx.coroutines.core)
     implementation(libs.kotlinx.coroutines.android)
     implementation(libs.atomicfu)
+    implementation(kotlin("reflect"))
 
     implementation(libs.core.ktx)
     implementation(libs.core.remoteviews)

@@ -459,11 +459,13 @@ object AccessibilityUtils {
                 }
             }
 
-            logUtils.debugLog("NewState\n" +
-                    "${frameDelegates.values.first().state}\n" +
-                    "${drawerDelegate.state}\n" +
-                    "$globalState"
-                , null)
+            logUtils.debugLog(
+                "NewState\n" +
+                "${frameDelegates.values.first().state}\n" +
+                "${drawerDelegate.state}\n" +
+                "$globalState",
+                null,
+            )
 
             windowInfo?.let {
                 windowInfo.sysUiWindowNodes.forEachParallel { node ->
