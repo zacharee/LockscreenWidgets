@@ -386,7 +386,7 @@ object AccessibilityUtils {
                 logUtils.debugLog("Found IDs\n${sysUiWindowViewIds.joinToString("\n")}", null)
                 //Update any ID list widgets on the new IDs
                 coroutineScope {
-                    launch {
+                    launch(Dispatchers.Main) {
                         eventManager.sendEvent(Event.DebugIdsUpdated(sysUiWindowViewIds))
                         IDListProvider.sendUpdate(this@runWindowOperation)
                     }
