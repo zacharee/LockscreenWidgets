@@ -210,7 +210,9 @@ class ShizukuManager private constructor(private val context: Context) : Corouti
                                     grantResult: Int,
                                 ) {
                                     Shizuku.removeRequestPermissionResultListener(this)
-                                    cont.resume(grantResult == PackageManager.PERMISSION_GRANTED)
+                                    try {
+                                        cont.resume(grantResult == PackageManager.PERMISSION_GRANTED)
+                                    } catch (_: IllegalStateException) {}
                                 }
                             }
                             Shizuku.addRequestPermissionResultListener(listener)
