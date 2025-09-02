@@ -228,7 +228,7 @@ class App : Application(), CoroutineScope by MainScope(), EventObserver {
             shizukuManager.onCreate()
         }
 
-        launch(Dispatchers.IO) {
+        launch(Dispatchers.Main) {
             globalState.wasOnKeyguard.collect { wasOnKeyguard ->
                 if (!wasOnKeyguard) {
                     //Update the keyguard dismissal Activity that the lock screen

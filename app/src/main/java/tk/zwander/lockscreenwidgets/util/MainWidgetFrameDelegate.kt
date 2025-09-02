@@ -568,7 +568,7 @@ open class MainWidgetFrameDelegate protected constructor(context: Context, prote
 
         displayManager.registerDisplayListener(displayListener, null)
 
-        scope.launch(Dispatchers.IO) {
+        scope.launch(Dispatchers.Main) {
             globalState.isScreenOn.collect { isScreenOn ->
                 if (!isScreenOn) {
                     globalState.notificationsPanelFullyExpanded.value = false
@@ -579,19 +579,19 @@ open class MainWidgetFrameDelegate protected constructor(context: Context, prote
             }
         }
 
-        scope.launch(Dispatchers.IO) {
+        scope.launch(Dispatchers.Main) {
             globalState.screenOrientation.collect { screenOrientation ->
                 updateState { it.copy(isPendingOrientationStateChange = true, isPreview = false) }
             }
         }
 
-        scope.launch(Dispatchers.IO) {
+        scope.launch(Dispatchers.Main) {
             globalState.notificationsPanelFullyExpanded.collect { notificationsPanelFullyExpanded ->
                 updateState { it.copy(isPendingNotificationStateChange = true, isPreview = false) }
             }
         }
 
-        scope.launch(Dispatchers.IO) {
+        scope.launch(Dispatchers.Main) {
             globalState.notificationCount.collect { notificationCount ->
                 //Receive updates from our notification listener service on how many
                 //notifications are currently shown to the user. This count excludes

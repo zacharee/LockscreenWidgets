@@ -435,7 +435,7 @@ class DrawerDelegate private constructor(context: Context) :
         displayManager.registerDisplayListener(displayListener, mainHandler)
         gridLayoutManager.customHeight = resources.getDimensionPixelSize(R.dimen.drawer_row_height).toDouble()
 
-        scope.launch(Dispatchers.IO) {
+        scope.launch(Dispatchers.Main) {
             globalState.isScreenOn.collect { isScreenOn ->
                 if (isScreenOn) {
                     tryShowHandle()
