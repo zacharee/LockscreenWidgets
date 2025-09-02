@@ -1,5 +1,6 @@
 package tk.zwander.common.compose.data
 
+import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.database.ContentObserver
 import android.net.Uri
@@ -47,6 +48,7 @@ fun rememberIntroSlides(
     finish: () -> Unit,
 ): List<IntroPage> {
     val context = LocalContext.current
+
     val slides = remember(startReason) {
         mutableStateListOf<IntroPage>()
     }
@@ -253,13 +255,21 @@ fun rememberIntroSlides(
                     val shizukuInstalled by ShizukuManager.rememberShizukuInstallStateAsState()
                     val shizukuRunning by ShizukuManager.rememberShizukuRunningStateAsState()
 
+                    var showingGrantFailureDialog by remember {
+                        mutableStateOf(false)
+                    }
+
                     ContentColoredOutlinedButton(
                         onClick = {
                             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                                 if (shizukuRunning) {
                                     scope.launch {
                                         context.shizukuManager.runShizukuCommand {
-                                            grantReadExternalStorage()
+                                            try {
+                                                grantReadExternalStorage()
+                                            } catch (_: SecurityException) {
+                                                showingGrantFailureDialog = true
+                                            }
                                             canReadWallpaper = context.canReadWallpaper
                                         }
                                     }
@@ -305,6 +315,38 @@ fun rememberIntroSlides(
                         }
                     ) {
                         Text(text = stringResource(id = R.string.privacy_policy))
+                    }
+
+                    if (showingGrantFailureDialog) {
+                        AlertDialog(
+                            onDismissRequest = { showingGrantFailureDialog = false },
+                            title = { Text(text = stringResource(R.string.unable_to_grant_storage)) },
+                            text = { Text(text = stringResource(R.string.unable_to_grant_storage_desc)) },
+                            confirmButton = {
+                                AppTheme {
+                                    if (Settings.Global.getInt(context.contentResolver, Settings.Global.DEVELOPMENT_SETTINGS_ENABLED, 0) == 1) {
+                                        TextButton(
+                                            onClick = {
+                                                showingGrantFailureDialog = false
+                                                try {
+                                                    context.startActivity(
+                                                        Intent(Settings.ACTION_APPLICATION_DEVELOPMENT_SETTINGS),
+                                                    )
+                                                } catch (_: ActivityNotFoundException) {}
+                                            },
+                                        ) {
+                                            Text(text = stringResource(R.string.developer_options))
+                                        }
+                                    }
+
+                                    TextButton(
+                                        onClick = { showingGrantFailureDialog = false },
+                                    ) {
+                                        Text(text = stringResource(android.R.string.ok))
+                                    }
+                                }
+                            },
+                        )
                     }
                 },
                 canMoveForward = { startReason != OnboardingActivity.RetroMode.STORAGE || canReadWallpaper || BuildConfig.DEBUG },
