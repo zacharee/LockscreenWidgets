@@ -318,7 +318,7 @@ open class MainWidgetFrameDelegate protected constructor(context: Context, prote
         override fun onDisplayRemoved(displayId: Int) {}
 
         override fun onDisplayChanged(displayId: Int) {
-            logUtils.normalLog("Display $displayId changed", null)
+            logUtils.debugLog("Display $displayId changed", null)
             updateParamsIfNeeded()
         }
     }
