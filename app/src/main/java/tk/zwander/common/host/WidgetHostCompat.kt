@@ -219,7 +219,9 @@ class WidgetHostCompat(
             onClickCallbacks: MutableSet<OnClickCallback>,
         ) : BaseInnerOnClickHandler(context, onClickCallbacks, widgetId), InvocationHandler {
             @SuppressLint("BlockedPrivateApi", "PrivateApi")
-            override fun invoke(proxy: Any?, method: Method?, args: Array<out Any>?): Any {
+            override fun invoke(proxy: Any?, method: Method?, args: Array<out Any>?): Any? {
+                if (method?.name == "onScroll") return null
+
                 val view = args?.getOrNull(0) as? View
                 val pi = args?.getOrNull(1) as? PendingIntent
                 val response = args?.getOrNull(2)
