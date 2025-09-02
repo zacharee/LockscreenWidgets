@@ -410,6 +410,9 @@ open class MainWidgetFrameDelegate protected constructor(context: Context, prote
                 if (event.frameId == id) {
                     try {
                         if (event.attached) {
+                            if (lifecycleRegistry.currentState < Lifecycle.State.CREATED) {
+                                lifecycleRegistry.currentState = Lifecycle.State.CREATED
+                            }
                             lifecycleRegistry.currentState = Lifecycle.State.RESUMED
                             widgetHost.startListening(this)
                             updateWallpaperLayerIfNeeded()

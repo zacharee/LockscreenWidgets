@@ -301,6 +301,9 @@ class DrawerDelegate private constructor(context: Context) :
                     }
 
                     drawer.root.setBackgroundColor(prefManager.drawerBackgroundColor)
+                    if (lifecycleRegistry.currentState < Lifecycle.State.CREATED) {
+                        lifecycleRegistry.currentState = Lifecycle.State.CREATED
+                    }
                     lifecycleRegistry.currentState = Lifecycle.State.RESUMED
                 } else {
                     try {
