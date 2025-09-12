@@ -13,6 +13,9 @@ import tk.zwander.lockscreenwidgets.data.IDData
  */
 class IDWidgetFactory(private val context: Context) : RemoteViewsService.RemoteViewsFactory {
     private val oldItems = ArrayList<String>()
+
+    private val tempItems = ArrayList<String>()
+
     private val items = SortedList(IDData::class.java, object: SortedList.Callback<IDData>() {
         override fun areItemsTheSame(item1: IDData?, item2: IDData?): Boolean {
             return item1 == item2
@@ -40,11 +43,18 @@ class IDWidgetFactory(private val context: Context) : RemoteViewsService.RemoteV
 
     @Synchronized
     fun setItems(newItems: Collection<String>) {
-        if (newItems.containsAll(oldItems) && oldItems.containsAll(newItems))
+        tempItems.clear()
+        tempItems.addAll(newItems)
+    }
+
+    override fun onCreate() {}
+    override fun onDestroy() {}
+    override fun onDataSetChanged() {
+        if (tempItems.containsAll(oldItems) && oldItems.containsAll(tempItems))
             return
 
-        val removed = oldItems - newItems.toSet()
-        val added = newItems - oldItems.toSet()
+        val removed = oldItems - tempItems.toSet()
+        val added = tempItems - oldItems.toSet()
         val same = oldItems - removed.toSet() - added.toSet()
 
         val newList = ArrayList<IDData>()
@@ -62,14 +72,10 @@ class IDWidgetFactory(private val context: Context) : RemoteViewsService.RemoteV
         }
 
         oldItems.clear()
-        oldItems.addAll(newItems)
+        oldItems.addAll(tempItems)
 
         items.replaceAll(newList)
     }
-
-    override fun onCreate() {}
-    override fun onDestroy() {}
-    override fun onDataSetChanged() {}
 
     @Synchronized
     override fun getCount(): Int {

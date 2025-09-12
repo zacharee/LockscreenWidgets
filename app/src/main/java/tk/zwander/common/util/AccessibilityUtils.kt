@@ -26,7 +26,6 @@ import tk.zwander.common.activities.DismissOrUnlockActivity
 import tk.zwander.common.data.window.WindowInfo
 import tk.zwander.common.data.window.WindowRootPair
 import tk.zwander.lockscreenwidgets.R
-import tk.zwander.lockscreenwidgets.appwidget.IDListProvider
 import tk.zwander.lockscreenwidgets.services.Accessibility
 import tk.zwander.lockscreenwidgets.util.FrameSpecificPreferences
 import tk.zwander.lockscreenwidgets.util.MainWidgetFrameDelegate
@@ -388,7 +387,6 @@ object AccessibilityUtils {
                 coroutineScope {
                     launch(Dispatchers.Main) {
                         eventManager.sendEvent(Event.DebugIdsUpdated(sysUiWindowViewIds))
-                        IDListProvider.sendUpdate(this@runWindowOperation)
                     }
                 }
             }
