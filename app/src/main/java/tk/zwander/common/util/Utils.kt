@@ -1,6 +1,5 @@
 package tk.zwander.common.util
 
-import android.app.ActivityOptions
 import android.app.Application
 import android.appwidget.AppWidgetProviderInfo
 import android.content.Context
@@ -19,7 +18,6 @@ import android.view.Display
 import android.widget.AbsListView
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.core.app.ActivityOptionsCompat
 import androidx.core.net.toUri
 import com.google.gson.GsonBuilder
 import kotlinx.coroutines.CoroutineScope
@@ -73,7 +71,6 @@ fun Context.launchEmail(to: String, subject: String) {
 //If the integer is even, return itself.
 //If the integer is odd and negative, return itself - 1
 //If the integer is odd and positive, return itself + 1
-@Suppress("KotlinConstantConditions")
 fun Int.makeEven(): Int {
     return when {
         this == 0 -> 0
@@ -154,17 +151,6 @@ val AbsListView.verticalScrollOffset: Int
         return AbsListView::class.java.getDeclaredMethod("computeVerticalScrollOffset")
             .apply { isAccessible = true }
             .invoke(this) as Int
-    }
-
-val ActivityOptionsCompat.internalActivityOptions: ActivityOptions?
-    get() {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
-            return null
-        }
-
-        return this::class.java.getDeclaredField("mActivityOptions")
-            .apply { isAccessible = true }
-            .get(this) as? ActivityOptions
     }
 
 fun Throwable.stringify(): String {
