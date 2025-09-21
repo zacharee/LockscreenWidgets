@@ -71,15 +71,16 @@ class ConfigureLauncher(
                 configLauncher.launch(
                     IntentSenderRequest.Builder(intentSender)
                         .build(),
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
-                        ActivityOptionsCompat.makeBasic()
-                            .apply {
-                                internalActivityOptions?.setPendingIntentBackgroundActivityStartMode(
-                                    ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOW_ALWAYS
-                                )
+                    ActivityOptionsCompat.makeBasic().apply {
+                        @SuppressLint("WrongConstant")
+                        setPendingIntentBackgroundActivityStartMode(
+                            if (Build.VERSION.SDK_INT > Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+                                ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOW_ALWAYS
+                            } else {
+                                @Suppress("DEPRECATION")
+                                ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOWED
                             }
-                    } else {
-                        null
+                        )
                     },
                 )
                 currentConfigId = id
