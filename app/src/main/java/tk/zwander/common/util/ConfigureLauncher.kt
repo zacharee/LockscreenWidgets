@@ -79,7 +79,7 @@ class ConfigureLauncher(
                             } else {
                                 @Suppress("DEPRECATION")
                                 ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOWED
-                            }
+                            },
                         )
                     },
                 )
