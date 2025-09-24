@@ -175,25 +175,27 @@ open class MainWidgetFrameDelegate protected constructor(context: Context, prote
         }
 
     //The size, position, and such of the widget frame on the lock screen.
-    final override val params = WindowManager.LayoutParams().apply {
-        type = WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY
+    final override val params by lazy {
+        WindowManager.LayoutParams().apply {
+            type = WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY
 
-        frameSizeAndPosition.getSizeForType(saveMode).let { size ->
-            width = dpAsPx(size.x)
-            height = dpAsPx(size.y)
+            frameSizeAndPosition.getSizeForType(saveMode).let { size ->
+                width = dpAsPx(size.x)
+                height = dpAsPx(size.y)
+            }
+            frameSizeAndPosition.getPositionForType(saveMode).let { pos ->
+                x = pos.x
+                y = pos.y
+            }
+
+            gravity = Gravity.CENTER
+
+            flags =
+                WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or
+                        WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN or
+                        WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS
+            format = PixelFormat.RGBA_8888
         }
-        frameSizeAndPosition.getPositionForType(saveMode).let { pos ->
-            x = pos.x
-            y = pos.y
-        }
-
-        gravity = Gravity.CENTER
-
-        flags =
-            WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or
-                    WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN or
-                    WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS
-        format = PixelFormat.RGBA_8888
     }
     override val rootView: View
         get() = binding.root

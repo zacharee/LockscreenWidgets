@@ -113,15 +113,17 @@ class DrawerDelegate private constructor(context: Context) :
             updateDrawer()
         }
 
-    override val params = WindowManager.LayoutParams().apply {
-        val displaySize = screenSize
-        type = WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY
-        flags = WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN or
-                WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS
-        width = displaySize.x
-        height = displaySize.y
-        format = PixelFormat.RGBA_8888
-        gravity = Gravity.TOP or Gravity.CENTER
+    override val params by lazy {
+        WindowManager.LayoutParams().apply {
+            val displaySize = screenSize
+            type = WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY
+            flags = WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN or
+                    WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS
+            width = displaySize.x
+            height = displaySize.y
+            format = PixelFormat.RGBA_8888
+            gravity = Gravity.TOP or Gravity.CENTER
+        }
     }
     override val rootView: View
         get() = drawer.root
