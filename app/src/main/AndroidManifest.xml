@@ -111,7 +111,6 @@
         <activity-alias
             android:name=".activities.LaunchDrawer"
             android:targetActivity="tk.zwander.widgetdrawer.activities.TriggerActivity"
-            android:launchMode="singleInstancePerTask"
             android:exported="true"
             android:label="@string/open_widget_drawer">
             <intent-filter>
@@ -241,7 +240,8 @@
         <service
             android:name="tk.zwander.lockscreenwidgets.services.Accessibility"
             android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE"
-            android:exported="true">
+            android:exported="true"
+            tools:ignore="AccessibilityPolicy">
             <intent-filter>
                 <action android:name="android.accessibilityservice.AccessibilityService" />
             </intent-filter>
