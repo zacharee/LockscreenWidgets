@@ -15,7 +15,7 @@ android {
     defaultConfig {
         namespace = "tk.zwander.lockscreenwidgets"
         applicationId = "tk.zwander.lockscreenwidgets"
-        minSdk = 22
+        minSdk = 23
         targetSdk = 36
         versionCode = 145
         versionName = "2.23.0"
