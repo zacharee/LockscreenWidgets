@@ -8,9 +8,7 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.content.ServiceConnection
 import android.content.pm.PackageManager
-import android.os.Build
 import android.os.IBinder
-import androidx.annotation.RequiresApi
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.State
@@ -160,7 +158,6 @@ class ShizukuManager private constructor(private val context: Context) : Corouti
             .tag("${context.packageName}_granter")
     }
 
-    @RequiresApi(Build.VERSION_CODES.M)
     fun onCreate() {
         Shizuku.addBinderReceivedListenerSticky {
             try {

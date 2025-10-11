@@ -224,9 +224,7 @@ class App : Application(), CoroutineScope by MainScope(), EventObserver {
 
         eventManager.addObserver(this)
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            shizukuManager.onCreate()
-        }
+        shizukuManager.onCreate()
 
         launch(Dispatchers.Main) {
             globalState.wasOnKeyguard.collect { wasOnKeyguard ->
