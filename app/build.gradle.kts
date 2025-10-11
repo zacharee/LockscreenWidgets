@@ -128,4 +128,6 @@ dependencies {
     implementation(libs.storage)
 
     implementation(libs.colorpicker.compose)
+
+    coreLibraryDesugaring(libs.desugar.jdk.libs)
 }

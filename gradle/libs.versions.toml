@@ -4,6 +4,7 @@ activityCompose = "1.10.1"
 androidGradlePlugin = "8.11.0"
 bugsnagAndroidPerformance = "1.16.0"
 colorpickerCompose = "1.1.2"
+desugar_jdk_libs = "2.1.5"
 shizuku = "13.1.5"
 appcompat = "1.7.1"
 atomicfu = "0.28.0"
@@ -55,6 +56,7 @@ composeIntroSlider = { module = "com.github.zacharee:ComposeIntroSlider", versio
 constraintlayout = { module = "androidx.constraintlayout:constraintlayout", version.ref = "constraintlayout" }
 core-ktx = { module = "androidx.core:core-ktx", version.ref = "coreKtx" }
 core-remoteviews = { module = "androidx.core:core-remoteviews", version.ref = "core-remoteviews" }
+desugar_jdk_libs = { module = "com.android.tools:desugar_jdk_libs", version.ref = "desugar_jdk_libs" }
 gson = { module = "com.google.code.gson:gson", version.ref = "gson" }
 hiddenapibypass = { module = "org.lsposed.hiddenapibypass:hiddenapibypass", version.ref = "hiddenapibypass" }
 kotlin-stdlib = { module = "org.jetbrains.kotlin:kotlin-stdlib", version.ref = "kotlin" }
