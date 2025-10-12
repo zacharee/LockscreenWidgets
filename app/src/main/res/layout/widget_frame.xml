@@ -65,178 +65,11 @@
             android:visibility="gone"
             />
 
-        <androidx.constraintlayout.widget.ConstraintLayout
+        <androidx.compose.ui.platform.ComposeView
             android:id="@+id/edit_wrapper"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:clickable="true"
-            android:focusable="true"
-            android:visibility="gone"
-            android:background="@color/backdrop"
-            tools:visibility="visible">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="48dp"
-                android:orientation="horizontal"
-                android:gravity="center"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toEndOf="parent">
-
-                <androidx.appcompat.widget.AppCompatImageView
-                    android:id="@+id/center_vertically"
-                    android:layout_width="32dp"
-                    android:layout_height="32dp"
-                    android:layout_marginStart="8dp"
-                    android:layout_marginEnd="8dp"
-                    android:src="@drawable/ic_baseline_vertical_align_center_24"
-                    android:clickable="true"
-                    android:focusable="true"
-                    app:tint="@color/white"
-                    android:background="?selectableItemBackgroundBorderless"
-                    android:contentDescription="@string/center_vertically"
-                    />
-
-                <androidx.appcompat.widget.AppCompatImageView
-                    android:id="@+id/move"
-                    android:layout_width="32dp"
-                    android:layout_height="32dp"
-                    android:layout_marginStart="8dp"
-                    android:layout_marginEnd="8dp"
-                    android:src="@drawable/ic_baseline_move_24"
-                    android:clickable="true"
-                    android:focusable="true"
-                    app:tint="@color/white"
-                    android:contentDescription="@string/move"
-                    />
-
-                <androidx.appcompat.widget.AppCompatImageView
-                    android:id="@+id/center_horizontally"
-                    android:layout_width="32dp"
-                    android:layout_height="32dp"
-                    android:layout_marginStart="8dp"
-                    android:layout_marginEnd="8dp"
-                    android:rotation="90"
-                    android:src="@drawable/ic_baseline_vertical_align_center_24"
-                    android:clickable="true"
-                    android:focusable="true"
-                    app:tint="@color/white"
-                    android:background="?selectableItemBackgroundBorderless"
-                    android:contentDescription="@string/center_horizontally"
-                    />
-
-            </LinearLayout>
-
-            <View
-                android:id="@+id/edit_outline"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:background="@drawable/outline"
-                />
-
-            <androidx.appcompat.widget.AppCompatImageView
-                android:id="@+id/left_dragger"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:src="@drawable/handle_left"
-                android:clickable="true"
-                android:focusable="true"
-                android:contentDescription="@string/expand_left"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintLeft_toLeftOf="parent"
-                />
-
-            <androidx.appcompat.widget.AppCompatImageView
-                android:id="@+id/top_dragger"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:src="@drawable/handle_top"
-                android:clickable="true"
-                android:focusable="true"
-                android:contentDescription="@string/expand_up"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintLeft_toLeftOf="parent"
-                app:layout_constraintRight_toRightOf="parent"
-                />
-
-            <androidx.appcompat.widget.AppCompatImageView
-                android:id="@+id/right_dragger"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:src="@drawable/handle_right"
-                android:clickable="true"
-                android:focusable="true"
-                android:contentDescription="@string/expand_right"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintRight_toRightOf="parent"
-                />
-
-            <androidx.appcompat.widget.AppCompatImageView
-                android:id="@+id/bottom_dragger"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:src="@drawable/handle_bottom"
-                android:clickable="true"
-                android:focusable="true"
-                android:contentDescription="@string/expand_down"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintLeft_toLeftOf="parent"
-                app:layout_constraintRight_toRightOf="parent"
-                />
-
-            <androidx.appcompat.widget.AppCompatImageView
-                android:id="@+id/add_widget"
-                android:layout_width="32dp"
-                android:layout_height="32dp"
-                android:src="@drawable/ic_baseline_add_24"
-                android:clickable="true"
-                android:focusable="true"
-                android:background="?android:selectableItemBackgroundBorderless"
-                android:layout_marginTop="16dp"
-                android:layout_marginEnd="16dp"
-                android:contentDescription="@string/add"
-                app:tint="@color/white"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                />
-
-            <androidx.appcompat.widget.AppCompatImageView
-                android:id="@+id/temp_hide_frame"
-                android:layout_width="32dp"
-                android:layout_height="32dp"
-                android:src="@drawable/ic_baseline_visibility_off_24"
-                android:clickable="true"
-                android:focusable="true"
-                android:background="?android:selectableItemBackgroundBorderless"
-                android:layout_marginTop="16dp"
-                android:layout_marginStart="16dp"
-                android:contentDescription="@string/hide"
-                app:tint="@color/white"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                />
-
-            <androidx.appcompat.widget.AppCompatImageView
-                android:id="@+id/remove_frame"
-                android:layout_width="32dp"
-                android:layout_height="32dp"
-                android:src="@drawable/ic_baseline_remove_circle_24"
-                android:clickable="true"
-                android:focusable="true"
-                android:layout_marginTop="16dp"
-                android:layout_marginEnd="16dp"
-                android:layout_gravity="top|end"
-                android:contentDescription="@string/remove"
-                android:visibility="gone"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintEnd_toStartOf="@id/add_widget"
-                app:tint="@android:color/holo_red_dark" />
-
-        </androidx.constraintlayout.widget.ConstraintLayout>
+            />
 
         <androidx.compose.ui.platform.ComposeView
             android:id="@+id/remove_view"
@@ -250,12 +83,12 @@
             android:layout_height="match_parent"
             />
 
-        <include
+        <androidx.compose.ui.platform.ComposeView
             android:id="@+id/touch_protection_view"
-            android:visibility="gone"
-            layout="@layout/touch_protection_layer"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
             />
-        
+
         <androidx.compose.ui.platform.ComposeView
             android:id="@+id/select_frame_layout"
             android:layout_width="match_parent"

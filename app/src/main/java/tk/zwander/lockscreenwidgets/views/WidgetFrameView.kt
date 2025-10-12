@@ -17,14 +17,19 @@ import android.view.WindowManager
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.Text
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.res.stringResource
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.isVisible
 import com.bugsnag.android.performance.compose.MeasuredComposable
@@ -32,6 +37,7 @@ import com.joaomgcd.taskerpluginlibrary.extensions.requestQuery
 import kotlinx.coroutines.flow.MutableStateFlow
 import tk.zwander.common.compose.AppTheme
 import tk.zwander.common.compose.components.ConfirmFrameRemovalLayout
+import tk.zwander.common.compose.components.FrameEditWrapperLayout
 import tk.zwander.common.util.Event
 import tk.zwander.common.util.EventObserver
 import tk.zwander.common.util.HandlerRegistry
@@ -42,17 +48,15 @@ import tk.zwander.common.util.fadeAndScaleOut
 import tk.zwander.common.util.handler
 import tk.zwander.common.util.logUtils
 import tk.zwander.common.util.mainHandler
-import tk.zwander.common.util.makeEven
 import tk.zwander.common.util.prefManager
 import tk.zwander.common.util.safeAddView
 import tk.zwander.common.util.safeRemoveView
 import tk.zwander.common.util.safeUpdateViewLayout
-import tk.zwander.common.util.vibrate
+import tk.zwander.lockscreenwidgets.R
 import tk.zwander.lockscreenwidgets.activities.TaskerIsShowingFrame
 import tk.zwander.lockscreenwidgets.compose.IDListLayout
 import tk.zwander.lockscreenwidgets.databinding.WidgetFrameBinding
 import tk.zwander.lockscreenwidgets.util.FrameSpecificPreferences
-import kotlin.math.roundToInt
 
 /**
  * The widget frame itself.
@@ -67,19 +71,9 @@ class WidgetFrameView(context: Context, attrs: AttributeSet) : ConstraintLayout(
 
     private var maxPointerCount = 0
     private var alreadyIndicatedMoving = false
-    private var isProxTooClose = false
-        set(value) {
-            field = value
+    private var isProxTooClose by mutableStateOf(false)
 
-            updateProximity(value)
-        }
-
-    private var isInEditingMode = false
-        set(value) {
-            field = value
-            binding.editWrapper.isVisible = value
-            binding.removeFrame.isVisible = value && frameId != -1
-        }
+    private var isInEditingMode by mutableStateOf(false)
 
     private val sensorManager by lazy { context.getSystemService(Context.SENSOR_SERVICE) as SensorManager }
 
@@ -116,6 +110,8 @@ class WidgetFrameView(context: Context, attrs: AttributeSet) : ConstraintLayout(
 
     private var removing by mutableStateOf(false)
 
+    private var debugListShown by mutableStateOf(false)
+
     private val framePreferences by lazy {
         FrameSpecificPreferences(frameId = frameId, context = context)
     }
@@ -128,12 +124,6 @@ class WidgetFrameView(context: Context, attrs: AttributeSet) : ConstraintLayout(
 
     fun onCreate(frameId: Int) {
         this.frameId = frameId
-
-        if (frameId != -1) {
-            binding.removeFrame.setOnClickListener {
-                removing = true
-            }
-        }
 
         if (context.prefManager.firstViewing && frameId == -1) {
             binding.gestureHintView.root.isVisible = true
@@ -155,46 +145,26 @@ class WidgetFrameView(context: Context, attrs: AttributeSet) : ConstraintLayout(
         binding.frameCard.scaleX = 0.95f
         binding.frameCard.scaleY = 0.95f
 
-        binding.move.setOnTouchListener(MoveTouchListener())
-        binding.centerHorizontally.setOnClickListener {
-            context.eventManager.sendEvent(Event.CenterFrameHorizontally(frameId))
-        }
-        binding.centerVertically.setOnClickListener {
-            context.eventManager.sendEvent(Event.CenterFrameVertically(frameId))
-        }
-
-        binding.leftDragger.setOnTouchListener(ExpandTouchListener { velX, _, isUp ->
-            context.eventManager.sendEvent(Event.FrameResized(frameId, Event.FrameResized.Side.LEFT, velX, isUp))
-            true
-        })
-        binding.rightDragger.setOnTouchListener(ExpandTouchListener { velX, _, isUp ->
-            context.eventManager.sendEvent(Event.FrameResized(frameId, Event.FrameResized.Side.RIGHT, velX, isUp))
-            true
-        })
-        binding.topDragger.setOnTouchListener(ExpandTouchListener { _, velY, isUp ->
-            context.eventManager.sendEvent(Event.FrameResized(frameId, Event.FrameResized.Side.TOP, velY, isUp))
-            true
-        })
-        binding.bottomDragger.setOnTouchListener(ExpandTouchListener { _, velY, isUp ->
-            context.eventManager.sendEvent(Event.FrameResized(frameId, Event.FrameResized.Side.BOTTOM, velY, isUp))
-            true
-        })
-        binding.addWidget.setOnClickListener {
-            context.eventManager.sendEvent(Event.LaunchAddWidget(frameId))
-        }
-        binding.tempHideFrame.setOnClickListener {
-            context.eventManager.sendEvent(Event.TempHide(frameId))
-        }
-
         binding.idList.setContent {
             AppTheme {
-                MeasuredComposable(name = "IDList") {
-                    val items by debugIdItems.collectAsState()
-
-                    IDListLayout(
-                        items = items,
+                AnimatedVisibility(
+                    visible = debugListShown,
+                    enter = fadeIn(),
+                    exit = fadeOut(),
+                ) {
+                    Box(
                         modifier = Modifier.fillMaxSize(),
-                    )
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        MeasuredComposable(name = "IDList") {
+                            val items by debugIdItems.collectAsState()
+
+                            IDListLayout(
+                                items = items,
+                                modifier = Modifier.fillMaxSize(),
+                            )
+                        }
+                    }
                 }
             }
         }
@@ -216,6 +186,49 @@ class WidgetFrameView(context: Context, attrs: AttributeSet) : ConstraintLayout(
                                 context.eventManager.sendEvent(Event.RemoveFrameConfirmed(removed, frameId))
                                 removing = false
                             },
+                        )
+                    }
+                }
+            }
+        }
+
+        binding.editWrapper.setContent {
+            AppTheme {
+                AnimatedVisibility(
+                    visible = isInEditingMode,
+                    enter = fadeIn(),
+                    exit = fadeOut(),
+                ) {
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        FrameEditWrapperLayout(
+                            frameId = frameId,
+                            onRemovePressed = {
+                                removing = true
+                            },
+                        )
+                    }
+                }
+            }
+        }
+
+        binding.touchProtectionView.setContent {
+            AppTheme {
+                AnimatedVisibility(
+                    visible = isProxTooClose,
+                    enter = fadeIn(),
+                    exit = fadeOut(),
+                ) {
+                    Box(
+                        modifier = Modifier.fillMaxSize()
+                            .background(colorResource(R.color.backdrop)),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        Text(
+                            text = stringResource(R.string.touch_protection_active),
+                            color = Color.White,
                         )
                     }
                 }
@@ -396,7 +409,7 @@ class WidgetFrameView(context: Context, attrs: AttributeSet) : ConstraintLayout(
     }
 
     fun updateDebugIdViewVisibility() {
-        binding.idList.isVisible = context.prefManager.showDebugIdView && frameId == -1
+        debugListShown = context.prefManager.showDebugIdView && frameId == -1
     }
 
     fun addWindow(wm: WindowManager, params: WindowManager.LayoutParams) {
@@ -452,10 +465,6 @@ class WidgetFrameView(context: Context, attrs: AttributeSet) : ConstraintLayout(
         }
     }
 
-    private fun updateProximity(tooClose: Boolean) {
-        binding.touchProtectionView.root.isVisible = tooClose
-    }
-
     private fun registerProxListener() {
         sensorManager.registerListener(
             proximityListener,
@@ -478,97 +487,6 @@ class WidgetFrameView(context: Context, attrs: AttributeSet) : ConstraintLayout(
             MotionEvent.ACTION_UP -> {
                 context.eventManager.sendEvent(Event.FrameIntercept(frameId, false))
                 alreadyIndicatedMoving = false
-            }
-        }
-    }
-
-    inner class ExpandTouchListener(private val listener: ((velX: Int, velY: Int, isUp: Boolean) -> Boolean)?) : OnTouchListener {
-        private var prevExpandX = 0f
-        private var prevExpandY = 0f
-
-        @SuppressLint("ClickableViewAccessibility")
-        override fun onTouch(v: View, event: MotionEvent): Boolean {
-            return when (event.action) {
-                MotionEvent.ACTION_DOWN -> {
-                    prevExpandX = event.rawX
-                    prevExpandY = event.rawY
-                    false
-                }
-                MotionEvent.ACTION_MOVE -> {
-                    if (!alreadyIndicatedMoving) {
-                        alreadyIndicatedMoving = true
-
-                        context.vibrate()
-                    }
-                    val newX = event.rawX
-                    val newY = event.rawY
-
-                    val velX = try {
-                        (newX - prevExpandX).roundToInt()
-                    } catch (_: IllegalArgumentException) {
-                        0
-                    }
-                    val velY = try {
-                        (newY - prevExpandY).roundToInt()
-                    } catch (_: IllegalArgumentException) {
-                        0
-                    }
-
-                    prevExpandX = newX
-                    prevExpandY = newY
-
-                    //Make sure the velocities are even.
-                    //This prevents an issue where the frame moves when resizing,
-                    //since its position needs to be compensated by half the velocity.
-                    //If the velocity is odd, the frame may over-compensate, causing it
-                    //to push the opposite side the opposite direction by a pixel every time
-                    //this is invoked.
-                    listener?.invoke(velX.makeEven(), velY.makeEven(), false) == true
-                }
-                MotionEvent.ACTION_UP -> {
-                    listener?.invoke(0, 0, true)
-                    false
-                }
-                else -> false
-            }
-        }
-    }
-
-    inner class MoveTouchListener : OnTouchListener {
-        private var prevX = 0f
-        private var prevY = 0f
-
-        @SuppressLint("ClickableViewAccessibility")
-        override fun onTouch(v: View, event: MotionEvent): Boolean {
-            return when (event.action) {
-                MotionEvent.ACTION_DOWN -> {
-                    prevX = event.rawX
-                    prevY = event.rawY
-                    false
-                }
-                MotionEvent.ACTION_MOVE -> {
-                    if (!alreadyIndicatedMoving) {
-                        alreadyIndicatedMoving = true
-
-                        context.vibrate()
-                    }
-                    val newX = event.rawX
-                    val newY = event.rawY
-
-                    val velX = newX - prevX
-                    val velY = newY - prevY
-
-                    prevX = newX
-                    prevY = newY
-
-                    context.eventManager.sendEvent(Event.FrameMoved(frameId, velX, velY))
-                    true
-                }
-                MotionEvent.ACTION_UP -> {
-                    context.eventManager.sendEvent(Event.FrameMoveFinished(frameId))
-                    true
-                }
-                else -> false
             }
         }
     }

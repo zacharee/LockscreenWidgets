@@ -9,7 +9,6 @@ import android.graphics.Point
 import android.graphics.PointF
 import android.graphics.PorterDuff
 import android.graphics.PorterDuffColorFilter
-import android.graphics.drawable.GradientDrawable
 import android.hardware.display.DisplayManager.DisplayListener
 import android.view.ContextThemeWrapper
 import android.view.Gravity
@@ -903,10 +902,6 @@ open class MainWidgetFrameDelegate protected constructor(context: Context, prote
     private fun updateCornerRadius() {
         val radius = dpAsPx(prefManager.cornerRadiusDp).toFloat()
         binding.frameCard.radius = radius
-
-        binding.editOutline.background = (binding.editOutline.background.mutate() as GradientDrawable).apply {
-            this.cornerRadius = radius
-        }
     }
 
     /**
