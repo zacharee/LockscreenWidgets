@@ -12,20 +12,18 @@ import android.graphics.PixelFormat
 import android.hardware.display.DisplayManager
 import android.os.Handler
 import android.os.Looper
-import android.util.TypedValue
 import android.view.ContextThemeWrapper
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewConfiguration
-import android.view.ViewGroup
 import android.view.WindowManager
 import android.view.animation.AccelerateInterpolator
 import android.view.animation.DecelerateInterpolator
 import android.widget.Toast
+import androidx.compose.ui.platform.ComposeView
 import androidx.core.animation.doOnEnd
 import androidx.core.content.ContextCompat
-import androidx.core.view.updateLayoutParams
 import androidx.core.view.updatePaddingRelative
 import androidx.lifecycle.Lifecycle
 import androidx.recyclerview.widget.RecyclerView
@@ -129,6 +127,8 @@ class DrawerDelegate private constructor(context: Context) :
         get() = drawer.root
     override val recyclerView: RecyclerView
         get() = drawer.widgetGrid
+    override val removeConfirmationView: ComposeView
+        get() = drawer.removeView
     override var currentWidgets: List<WidgetData>
         get() = prefManager.drawerWidgets.toList()
         set(value) {
@@ -143,7 +143,7 @@ class DrawerDelegate private constructor(context: Context) :
 
     override val adapter by lazy {
         DrawerAdapter(context, rootView) { widget, _ ->
-            removeWidget(widget)
+            itemToRemove = widget
         }
     }
     override val prefsHandler = HandlerRegistry {
@@ -414,14 +414,6 @@ class DrawerDelegate private constructor(context: Context) :
             ContextCompat.RECEIVER_EXPORTED,
         )
 
-        dpAsPx(16).apply {
-            drawer.removeWidgetConfirmation.root.setContentPadding(this, this, this, this)
-        }
-        drawer.removeWidgetConfirmation.confirmDeleteText.setTextSize(
-            TypedValue.COMPLEX_UNIT_SP,
-            24f
-        )
-
         drawer.widgetGrid.nestedScrollingListener = {
             itemTouchHelper.attachToRecyclerView(
                 if (it) {
@@ -559,13 +551,6 @@ class DrawerDelegate private constructor(context: Context) :
 
     override fun retrieveCounts(): Pair<Int?, Int?> {
         return null to prefManager.drawerColCount
-    }
-
-    private fun removeWidget(info: WidgetData) {
-        drawer.removeWidgetConfirmation.root.updateLayoutParams<ViewGroup.LayoutParams> {
-            height = (screenSize.y / 2f).toInt()
-        }
-        drawer.removeWidgetConfirmation.root.show(info)
     }
 
     private fun updateSidePadding() {

@@ -14,15 +14,24 @@ import android.view.MotionEvent
 import android.view.View
 import android.view.ViewConfiguration
 import android.view.WindowManager
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.isVisible
 import com.bugsnag.android.performance.compose.MeasuredComposable
 import com.joaomgcd.taskerpluginlibrary.extensions.requestQuery
 import kotlinx.coroutines.flow.MutableStateFlow
+import tk.zwander.common.compose.AppTheme
+import tk.zwander.common.compose.components.ConfirmFrameRemovalLayout
 import tk.zwander.common.util.Event
 import tk.zwander.common.util.EventObserver
 import tk.zwander.common.util.HandlerRegistry
@@ -105,6 +114,8 @@ class WidgetFrameView(context: Context, attrs: AttributeSet) : ConstraintLayout(
 
     private val debugIdItems = MutableStateFlow<Set<String>>(setOf())
 
+    private var removing by mutableStateOf(false)
+
     private val framePreferences by lazy {
         FrameSpecificPreferences(frameId = frameId, context = context)
     }
@@ -120,7 +131,7 @@ class WidgetFrameView(context: Context, attrs: AttributeSet) : ConstraintLayout(
 
         if (frameId != -1) {
             binding.removeFrame.setOnClickListener {
-                binding.removeFrameConfirmation.root.show(frameId)
+                removing = true
             }
         }
 
@@ -176,13 +187,38 @@ class WidgetFrameView(context: Context, attrs: AttributeSet) : ConstraintLayout(
         }
 
         binding.idList.setContent {
-            MeasuredComposable(name = "IDList") {
-                val items by debugIdItems.collectAsState()
+            AppTheme {
+                MeasuredComposable(name = "IDList") {
+                    val items by debugIdItems.collectAsState()
 
-                IDListLayout(
-                    items = items,
-                    modifier = Modifier.fillMaxSize(),
-                )
+                    IDListLayout(
+                        items = items,
+                        modifier = Modifier.fillMaxSize(),
+                    )
+                }
+            }
+        }
+
+        binding.removeFrameConfirm.setContent {
+            AppTheme {
+                AnimatedVisibility(
+                    visible = removing,
+                    enter = fadeIn(),
+                    exit = fadeOut(),
+                ) {
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        ConfirmFrameRemovalLayout(
+                            itemToRemove = frameId,
+                            onItemRemovalConfirmed = { removed, data ->
+                                context.eventManager.sendEvent(Event.RemoveFrameConfirmed(removed, frameId))
+                                removing = false
+                            },
+                        )
+                    }
+                }
             }
         }
 

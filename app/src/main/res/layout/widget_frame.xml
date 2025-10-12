@@ -25,7 +25,7 @@
             android:layout_height="match_parent"
             />
 
-        <ImageView
+        <androidx.appcompat.widget.AppCompatImageView
             android:id="@+id/wallpaper_background"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
@@ -85,7 +85,7 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintEnd_toEndOf="parent">
 
-                <ImageView
+                <androidx.appcompat.widget.AppCompatImageView
                     android:id="@+id/center_vertically"
                     android:layout_width="32dp"
                     android:layout_height="32dp"
@@ -94,11 +94,12 @@
                     android:src="@drawable/ic_baseline_vertical_align_center_24"
                     android:clickable="true"
                     android:focusable="true"
+                    app:tint="@color/white"
                     android:background="?selectableItemBackgroundBorderless"
                     android:contentDescription="@string/center_vertically"
                     />
 
-                <ImageView
+                <androidx.appcompat.widget.AppCompatImageView
                     android:id="@+id/move"
                     android:layout_width="32dp"
                     android:layout_height="32dp"
@@ -107,10 +108,11 @@
                     android:src="@drawable/ic_baseline_move_24"
                     android:clickable="true"
                     android:focusable="true"
+                    app:tint="@color/white"
                     android:contentDescription="@string/move"
                     />
 
-                <ImageView
+                <androidx.appcompat.widget.AppCompatImageView
                     android:id="@+id/center_horizontally"
                     android:layout_width="32dp"
                     android:layout_height="32dp"
@@ -120,6 +122,7 @@
                     android:src="@drawable/ic_baseline_vertical_align_center_24"
                     android:clickable="true"
                     android:focusable="true"
+                    app:tint="@color/white"
                     android:background="?selectableItemBackgroundBorderless"
                     android:contentDescription="@string/center_horizontally"
                     />
@@ -133,7 +136,7 @@
                 android:background="@drawable/outline"
                 />
 
-            <ImageView
+            <androidx.appcompat.widget.AppCompatImageView
                 android:id="@+id/left_dragger"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -146,7 +149,7 @@
                 app:layout_constraintLeft_toLeftOf="parent"
                 />
 
-            <ImageView
+            <androidx.appcompat.widget.AppCompatImageView
                 android:id="@+id/top_dragger"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -159,7 +162,7 @@
                 app:layout_constraintRight_toRightOf="parent"
                 />
 
-            <ImageView
+            <androidx.appcompat.widget.AppCompatImageView
                 android:id="@+id/right_dragger"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -172,7 +175,7 @@
                 app:layout_constraintRight_toRightOf="parent"
                 />
 
-            <ImageView
+            <androidx.appcompat.widget.AppCompatImageView
                 android:id="@+id/bottom_dragger"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -185,7 +188,7 @@
                 app:layout_constraintRight_toRightOf="parent"
                 />
 
-            <ImageView
+            <androidx.appcompat.widget.AppCompatImageView
                 android:id="@+id/add_widget"
                 android:layout_width="32dp"
                 android:layout_height="32dp"
@@ -196,11 +199,12 @@
                 android:layout_marginTop="16dp"
                 android:layout_marginEnd="16dp"
                 android:contentDescription="@string/add"
+                app:tint="@color/white"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 />
 
-            <ImageView
+            <androidx.appcompat.widget.AppCompatImageView
                 android:id="@+id/temp_hide_frame"
                 android:layout_width="32dp"
                 android:layout_height="32dp"
@@ -211,11 +215,12 @@
                 android:layout_marginTop="16dp"
                 android:layout_marginStart="16dp"
                 android:contentDescription="@string/hide"
+                app:tint="@color/white"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 />
 
-            <ImageView
+            <androidx.appcompat.widget.AppCompatImageView
                 android:id="@+id/remove_frame"
                 android:layout_width="32dp"
                 android:layout_height="32dp"
@@ -233,16 +238,16 @@
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 
-        <include
-            android:id="@+id/remove_widget_confirmation"
-            android:visibility="gone"
-            layout="@layout/remove_widget_confirmation_layout"
+        <androidx.compose.ui.platform.ComposeView
+            android:id="@+id/remove_view"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
             />
 
-        <include
-            android:id="@+id/remove_frame_confirmation"
-            android:visibility="gone"
-            layout="@layout/remove_frame_confirmation_layout"
+        <androidx.compose.ui.platform.ComposeView
+            android:id="@+id/remove_frame_confirm"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
             />
 
         <include

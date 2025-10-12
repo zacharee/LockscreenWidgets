@@ -7,6 +7,17 @@ import android.hardware.display.DisplayManager
 import android.view.View
 import android.view.WindowManager
 import androidx.annotation.CallSuper
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.ComposeView
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleRegistry
 import androidx.lifecycle.setViewTreeLifecycleOwner
@@ -21,6 +32,8 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.cancel
 import tk.zwander.common.adapters.BaseAdapter
+import tk.zwander.common.compose.AppTheme
+import tk.zwander.common.compose.components.ConfirmWidgetRemovalLayout
 import tk.zwander.common.data.WidgetData
 import tk.zwander.common.data.WidgetType
 import tk.zwander.common.host.WidgetHostCompat
@@ -52,12 +65,15 @@ abstract class BaseDelegate<State : Any>(context: Context) : SafeContextWrapper(
     protected abstract val params: WindowManager.LayoutParams
     protected abstract val rootView: View
     protected abstract val recyclerView: RecyclerView
+    protected abstract val removeConfirmationView: ComposeView
     protected abstract var currentWidgets: List<WidgetData>
 
     protected val lifecycleRegistry by lazy { LifecycleRegistry(this) }
     protected val savedStateRegistryController by lazy { SavedStateRegistryController.create(this) }
     override val lifecycle: Lifecycle = lifecycleRegistry
     override val savedStateRegistry: SavedStateRegistry by lazy { savedStateRegistryController.savedStateRegistry }
+
+    protected var itemToRemove by mutableStateOf<WidgetData?>(null)
 
     private val touchHelperCallback by lazy {
         createTouchHelperCallback(
@@ -100,6 +116,29 @@ abstract class BaseDelegate<State : Any>(context: Context) : SafeContextWrapper(
         }
         rootView.setViewTreeLifecycleOwner(this)
         rootView.setViewTreeSavedStateRegistryOwner(this)
+
+        removeConfirmationView.setContent {
+            AppTheme {
+                AnimatedVisibility(
+                    visible = itemToRemove != null,
+                    enter = fadeIn(),
+                    exit = fadeOut(),
+                ) {
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        ConfirmWidgetRemovalLayout(
+                            itemToRemove = itemToRemove,
+                            onItemRemovalConfirmed = { removed, data ->
+                                eventManager.sendEvent(Event.RemoveWidgetConfirmed(removed, data))
+                                itemToRemove = null
+                            },
+                        )
+                    }
+                }
+            }
+        }
     }
 
     @CallSuper

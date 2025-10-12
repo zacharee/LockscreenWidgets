@@ -31,6 +31,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.contentColorFor
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.core.graphics.component1
@@ -201,6 +202,8 @@ open class MainWidgetFrameDelegate protected constructor(context: Context, prote
         get() = binding.root
     override val recyclerView: RecyclerView
         get() = binding.widgetsPager
+    override val removeConfirmationView: ComposeView
+        get() = binding.removeView
     override var currentWidgets: List<WidgetData>
         get() = FramePrefs.getWidgetsForFrame(this, id).toList()
         set(value) {
@@ -218,7 +221,7 @@ open class MainWidgetFrameDelegate protected constructor(context: Context, prote
             context = context,
             rootView = rootView,
             onRemoveCallback = { item, _ ->
-                binding.removeWidgetConfirmation.root.show(item)
+                itemToRemove = item
             },
             saveTypeGetter = { saveMode },
         )
