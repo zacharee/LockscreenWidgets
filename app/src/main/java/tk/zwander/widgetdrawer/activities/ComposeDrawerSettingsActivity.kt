@@ -1,5 +1,7 @@
 package tk.zwander.widgetdrawer.activities
 
+import android.content.Context
+import android.os.Build
 import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.compose.ui.res.painterResource
@@ -13,10 +15,17 @@ import tk.zwander.common.compose.settings.createCommonSection
 import tk.zwander.common.compose.settings.rememberPreferenceScreen
 import tk.zwander.common.util.PrefManager
 import tk.zwander.common.util.backup.BackupRestoreManager
-import tk.zwander.common.util.shouldShowBlurOptions
+import tk.zwander.common.util.isOneUI
+import tk.zwander.common.util.windowManager
 import tk.zwander.lockscreenwidgets.R
 
 class ComposeDrawerSettingsActivity : BaseActivity() {
+    private val Context.shouldShowBlurOptions: Boolean
+        get() {
+            return (isOneUI && Build.VERSION.SDK_INT < Build.VERSION_CODES.S) ||
+                    (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && windowManager.isCrossWindowBlurEnabled)
+        }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 

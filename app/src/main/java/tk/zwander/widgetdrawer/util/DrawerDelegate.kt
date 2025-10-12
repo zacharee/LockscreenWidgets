@@ -21,6 +21,8 @@ import android.view.WindowManager
 import android.view.animation.AccelerateInterpolator
 import android.view.animation.DecelerateInterpolator
 import android.widget.Toast
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
 import androidx.core.animation.doOnEnd
 import androidx.core.content.ContextCompat
@@ -32,9 +34,9 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import tk.zwander.common.activities.DismissOrUnlockActivity
+import tk.zwander.common.compose.components.BlurView
 import tk.zwander.common.data.WidgetData
 import tk.zwander.common.util.BaseDelegate
-import tk.zwander.common.util.BlurManager
 import tk.zwander.common.util.Event
 import tk.zwander.common.util.HandlerRegistry
 import tk.zwander.common.util.PrefManager
@@ -194,20 +196,6 @@ class DrawerDelegate private constructor(context: Context) :
             }
         }
     }
-
-    override val blurManager = BlurManager(
-        context = context,
-        params = params,
-        targetView = drawer.blurBackground,
-        listenKeys = listOf(
-            PrefManager.KEY_BLUR_DRAWER_BACKGROUND,
-            PrefManager.KEY_BLUR_DRAWER_BACKGROUND_AMOUNT,
-        ),
-        shouldBlur = { prefManager.blurDrawerBackground },
-        blurAmount = { prefManager.drawerBackgroundBlurAmount },
-        updateWindow = ::updateDrawer,
-        windowManager = wm,
-    )
 
     override val gridLayoutManager = SpannedLayoutManager()
 
@@ -421,6 +409,15 @@ class DrawerDelegate private constructor(context: Context) :
                 } else {
                     drawer.widgetGrid
                 }
+            )
+        }
+        drawer.blurBackground.setContent {
+            BlurView(
+                blurKey = PrefManager.KEY_BLUR_DRAWER_BACKGROUND,
+                blurAmountKey = PrefManager.KEY_BLUR_DRAWER_BACKGROUND_AMOUNT,
+                params = params,
+                updateWindow = { updateDrawer() },
+                modifier = Modifier.fillMaxSize(),
             )
         }
 

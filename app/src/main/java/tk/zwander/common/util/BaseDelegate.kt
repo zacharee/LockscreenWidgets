@@ -59,7 +59,6 @@ abstract class BaseDelegate<State : Any>(context: Context) : SafeContextWrapper(
         protected set
 
     protected abstract val prefsHandler: HandlerRegistry
-    protected abstract val blurManager: BlurManager
     protected abstract val adapter: BaseAdapter
     protected abstract val gridLayoutManager: LayoutManager
     protected abstract val params: WindowManager.LayoutParams
@@ -99,7 +98,6 @@ abstract class BaseDelegate<State : Any>(context: Context) : SafeContextWrapper(
 
         prefsHandler.register(this)
         eventManager.addObserver(this)
-        blurManager.onCreate()
         widgetHost.addOnClickCallback(this)
         gridLayoutManager.spanSizeLookup = adapter.spanSizeLookup
         recyclerView.setHasFixedSize(true)
@@ -145,7 +143,6 @@ abstract class BaseDelegate<State : Any>(context: Context) : SafeContextWrapper(
     open fun onDestroy() {
         eventManager.removeObserver(this)
         prefsHandler.unregister(this)
-        blurManager.onDestroy()
         widgetHost.removeOnClickCallback(this)
         itemTouchHelper.attachToRecyclerView(null)
 

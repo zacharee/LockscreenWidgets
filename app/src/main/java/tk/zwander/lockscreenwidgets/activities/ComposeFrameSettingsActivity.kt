@@ -1,6 +1,7 @@
 package tk.zwander.lockscreenwidgets.activities
 
 import android.annotation.SuppressLint
+import android.content.Context
 import android.os.Build
 import android.os.Bundle
 import androidx.activity.compose.setContent
@@ -34,7 +35,7 @@ import tk.zwander.common.util.isOneUI
 import tk.zwander.common.util.isPixelUI
 import tk.zwander.common.util.isTouchWiz
 import tk.zwander.common.util.prefManager
-import tk.zwander.common.util.shouldShowBlurOptions
+import tk.zwander.common.util.windowManager
 import tk.zwander.lockscreenwidgets.R
 import tk.zwander.lockscreenwidgets.services.isNotificationListenerActive
 import tk.zwander.lockscreenwidgets.util.FramePrefs
@@ -47,6 +48,12 @@ class ComposeFrameSettingsActivity : BaseActivity(), EventObserver {
     }
 
     private var selectedFrame by mutableIntStateOf(-1)
+
+    private val Context.shouldShowBlurOptions: Boolean
+        get() {
+            return (isOneUI && Build.VERSION.SDK_INT < Build.VERSION_CODES.S) ||
+                    (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && windowManager.isCrossWindowBlurEnabled)
+        }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

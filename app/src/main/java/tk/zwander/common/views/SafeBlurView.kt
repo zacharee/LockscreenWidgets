@@ -15,7 +15,7 @@ import kotlinx.atomicfu.atomic
 import tk.zwander.common.util.logUtils
 import tk.zwander.common.util.windowManager
 
-class SafeBlurView(context: Context, attrs: AttributeSet) : FrameLayout(context, attrs) {
+class SafeBlurView(context: Context, attrs: AttributeSet? = null) : FrameLayout(context, attrs) {
     private val canDrawOnSurface = atomic(false)
 
     private val surfaceChangedCallback by lazy {

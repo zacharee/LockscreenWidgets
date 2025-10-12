@@ -45,10 +45,10 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import tk.zwander.common.activities.DismissOrUnlockActivity
 import tk.zwander.common.compose.AppTheme
+import tk.zwander.common.compose.components.BlurView
 import tk.zwander.common.compose.components.ContentColoredOutlinedButton
 import tk.zwander.common.data.WidgetData
 import tk.zwander.common.util.BaseDelegate
-import tk.zwander.common.util.BlurManager
 import tk.zwander.common.util.Event
 import tk.zwander.common.util.FrameSizeAndPosition
 import tk.zwander.common.util.GlobalState
@@ -300,24 +300,6 @@ open class MainWidgetFrameDelegate protected constructor(context: Context, prote
                 (!globalState.notificationsPanelFullyExpanded.value || !framePrefs.showInNotificationShade) &&
                 (!globalState.showingNotificationsPanel.value || framePrefs.hideOnNotificationShade)
 
-    override val blurManager by lazy {
-        BlurManager(
-            context = this,
-            params = params,
-            targetView = binding.blurBackground,
-            listenKeys = listOf(
-                framePrefs.keyFor(PrefManager.KEY_BLUR_BACKGROUND),
-                framePrefs.keyFor(PrefManager.KEY_BLUR_BACKGROUND_AMOUNT),
-                PrefManager.KEY_FRAME_CORNER_RADIUS,
-            ),
-            shouldBlur = { framePrefs.blurBackground && !showWallpaperLayerCondition },
-            blurAmount = { framePrefs.blurBackgroundAmount },
-            cornerRadius = { dpAsPx(prefManager.cornerRadiusDp).toFloat() },
-            updateWindow = { binding.frame.updateWindow(wm, params) },
-            windowManager = wm,
-        )
-    }
-
     private val displayListener = object : DisplayListener {
         override fun onDisplayAdded(displayId: Int) {}
         override fun onDisplayRemoved(displayId: Int) {}
@@ -566,6 +548,18 @@ open class MainWidgetFrameDelegate protected constructor(context: Context, prote
                     }
                 }
             }
+        }
+        binding.blurBackground.setContent {
+            BlurView(
+                modifier = Modifier.fillMaxSize(),
+                blurKey = framePrefs.keyFor(PrefManager.KEY_BLUR_BACKGROUND),
+                blurAmountKey = framePrefs.keyFor(PrefManager.KEY_BLUR_BACKGROUND_AMOUNT),
+                params = params,
+                updateWindow = {
+                    updateOverlay()
+                },
+                cornerRadiusKey = PrefManager.KEY_FRAME_CORNER_RADIUS,
+            )
         }
 
         //Scroll to the stored page, making sure to catch a potential
@@ -955,7 +949,6 @@ open class MainWidgetFrameDelegate protected constructor(context: Context, prote
             binding.frame.updateWindow(wm, params)
             mainHandler.post {
                 updateWallpaperLayerIfNeeded()
-                blurManager.updateBlur(fromParamsUpdate = true)
                 adapter.updateViews()
                 scrollToStoredPosition(true)
             }
