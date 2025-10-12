@@ -422,8 +422,6 @@ class DrawerDelegate private constructor(context: Context) :
             24f
         )
 
-        drawer.addWidget.setOnClickListener { pickWidget() }
-        drawer.closeDrawer.setOnClickListener { hideDrawer() }
         drawer.widgetGrid.nestedScrollingListener = {
             itemTouchHelper.attachToRecyclerView(
                 if (it) {
@@ -561,11 +559,6 @@ class DrawerDelegate private constructor(context: Context) :
 
     override fun retrieveCounts(): Pair<Int?, Int?> {
         return null to prefManager.drawerColCount
-    }
-
-    private fun pickWidget() {
-        hideDrawer()
-        eventManager.sendEvent(Event.LaunchAddDrawerWidget(true))
     }
 
     private fun removeWidget(info: WidgetData) {
