@@ -275,7 +275,7 @@ class DrawerDelegate private constructor(context: Context) :
                         widgetHost.startListening(this)
                     }
 
-                    drawer.root.setPadding(
+                    drawer.widgetGrid.setPadding(
                         drawer.root.paddingLeft,
                         statusBarHeight,
                         drawer.root.paddingRight,

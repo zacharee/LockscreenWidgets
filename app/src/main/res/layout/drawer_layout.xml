@@ -18,6 +18,7 @@
         android:layout_height="match_parent"
         android:orientation="vertical"
         android:animateLayoutChanges="false"
+        android:clipToPadding="false"
         />
 
     <androidx.compose.ui.platform.ComposeView
