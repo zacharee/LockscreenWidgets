@@ -308,6 +308,7 @@ open class MainWidgetFrameDelegate protected constructor(context: Context, prote
             listenKeys = listOf(
                 framePrefs.keyFor(PrefManager.KEY_BLUR_BACKGROUND),
                 framePrefs.keyFor(PrefManager.KEY_BLUR_BACKGROUND_AMOUNT),
+                PrefManager.KEY_FRAME_CORNER_RADIUS,
             ),
             shouldBlur = { framePrefs.blurBackground && !showWallpaperLayerCondition },
             blurAmount = { framePrefs.blurBackgroundAmount },
