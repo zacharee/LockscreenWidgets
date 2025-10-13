@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.app.WallpaperManager
 import android.content.Context
 import android.hardware.display.DisplayManager
+import android.hardware.display.DisplayManager.DisplayListener
 import android.view.View
 import android.view.WindowManager
 import androidx.annotation.CallSuper
@@ -67,6 +68,16 @@ abstract class BaseDelegate<State : Any>(context: Context) : SafeContextWrapper(
     protected abstract val removeConfirmationView: ComposeView
     protected abstract var currentWidgets: List<WidgetData>
 
+    protected  val displayListener = object : DisplayListener {
+        override fun onDisplayAdded(displayId: Int) {}
+        override fun onDisplayRemoved(displayId: Int) {}
+
+        override fun onDisplayChanged(displayId: Int) {
+            logUtils.debugLog("Display $displayId changed", null)
+            updateWindow()
+        }
+    }
+
     protected val lifecycleRegistry by lazy { LifecycleRegistry(this) }
     protected val savedStateRegistryController by lazy { SavedStateRegistryController.create(this) }
     override val lifecycle: Lifecycle = lifecycleRegistry
@@ -105,6 +116,7 @@ abstract class BaseDelegate<State : Any>(context: Context) : SafeContextWrapper(
         recyclerView.layoutManager = gridLayoutManager
         itemTouchHelper.attachToRecyclerView(recyclerView)
         adapter.updateWidgets(currentWidgets)
+        displayManager.registerDisplayListener(displayListener, null)
 
         updateCounts()
         if (lifecycleRegistry.currentState == Lifecycle.State.INITIALIZED) {
@@ -145,6 +157,7 @@ abstract class BaseDelegate<State : Any>(context: Context) : SafeContextWrapper(
         prefsHandler.unregister(this)
         widgetHost.removeOnClickCallback(this)
         itemTouchHelper.attachToRecyclerView(null)
+        displayManager.unregisterDisplayListener(displayListener)
 
         currentWidgets = ArrayList(adapter.widgets)
         if (lifecycleRegistry.currentState.isAtLeast(Lifecycle.State.CREATED)) {
@@ -246,6 +259,8 @@ abstract class BaseDelegate<State : Any>(context: Context) : SafeContextWrapper(
     protected abstract fun retrieveCounts(): Pair<Int?, Int?>
 
     protected open fun widgetRemovalConfirmed(event: Event.RemoveWidgetConfirmed, position: Int) {}
+
+    protected abstract fun updateWindow()
 
     data class BaseState(
         val isHoldingItem: Boolean = false,

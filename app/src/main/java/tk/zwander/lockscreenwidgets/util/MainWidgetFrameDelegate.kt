@@ -9,7 +9,6 @@ import android.graphics.Point
 import android.graphics.PointF
 import android.graphics.PorterDuff
 import android.graphics.PorterDuffColorFilter
-import android.hardware.display.DisplayManager.DisplayListener
 import android.view.ContextThemeWrapper
 import android.view.Gravity
 import android.view.LayoutInflater
@@ -300,16 +299,6 @@ open class MainWidgetFrameDelegate protected constructor(context: Context, prote
                 (!globalState.notificationsPanelFullyExpanded.value || !framePrefs.showInNotificationShade) &&
                 (!globalState.showingNotificationsPanel.value || framePrefs.hideOnNotificationShade)
 
-    private val displayListener = object : DisplayListener {
-        override fun onDisplayAdded(displayId: Int) {}
-        override fun onDisplayRemoved(displayId: Int) {}
-
-        override fun onDisplayChanged(displayId: Int) {
-            logUtils.debugLog("Display $displayId changed", null)
-            updateParamsIfNeeded()
-        }
-    }
-
     override fun onEvent(event: Event) {
         super.onEvent(event)
 
@@ -337,7 +326,7 @@ open class MainWidgetFrameDelegate protected constructor(context: Context, prote
                             frameSizeAndPosition.getPositionForType(saveMode).y
                         )
                     )
-                    updateParamsIfNeeded()
+                    updateWindow()
                 }
             }
             is Event.CenterFrameVertically -> {
@@ -349,7 +338,7 @@ open class MainWidgetFrameDelegate protected constructor(context: Context, prote
                             0
                         )
                     )
-                    updateParamsIfNeeded()
+                    updateWindow()
                 }
             }
             is Event.FrameResized -> {
@@ -568,8 +557,6 @@ open class MainWidgetFrameDelegate protected constructor(context: Context, prote
             scrollToStoredPosition(false)
         } catch (_: Exception) {}
 
-        displayManager.registerDisplayListener(displayListener, null)
-
         scope.launch(Dispatchers.Main) {
             globalState.isScreenOn.collect { isScreenOn ->
                 if (!isScreenOn) {
@@ -614,8 +601,6 @@ open class MainWidgetFrameDelegate protected constructor(context: Context, prote
         if (id == -1) {
             invalidateInstance()
         }
-
-        displayManager.unregisterDisplayListener(displayListener)
     }
 
     override fun isLocked(): Boolean {
@@ -654,7 +639,7 @@ open class MainWidgetFrameDelegate protected constructor(context: Context, prote
         logUtils.debugLog("Adding overlay")
 
         if (!binding.frame.isAttachedToWindow) {
-            updateParamsIfNeeded()
+            updateWindow()
         }
         binding.frame.addWindow(wm, params)
     }
@@ -863,7 +848,7 @@ open class MainWidgetFrameDelegate protected constructor(context: Context, prote
     private fun updateAccessibilityPass() {
         if (binding.frame.animationState == WidgetFrameView.AnimationState.STATE_IDLE) {
             if (state.isPendingNotificationStateChange || state.isPendingOrientationStateChange) {
-                updateParamsIfNeeded()
+                updateWindow()
                 updateState {
                     it.copy(
                         isPendingNotificationStateChange = false,
@@ -903,7 +888,7 @@ open class MainWidgetFrameDelegate protected constructor(context: Context, prote
      * Update the frame's params for its current state (normal
      * or in expanded notification center).
      */
-    private fun updateParamsIfNeeded() {
+    override fun updateWindow() {
         logUtils.debugLog("Checking if params need to be updated")
 
         logUtils.debugLog("Possibly updating params with display size $screenSize", null)

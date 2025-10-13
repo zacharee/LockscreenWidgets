@@ -9,7 +9,6 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.graphics.PixelFormat
-import android.hardware.display.DisplayManager
 import android.os.Handler
 import android.os.Looper
 import android.view.ContextThemeWrapper
@@ -110,7 +109,7 @@ class DrawerDelegate private constructor(context: Context) :
     override var state = State()
         set(value) {
             field = value
-            updateDrawer()
+            updateWindow()
         }
 
     override val params by lazy {
@@ -209,15 +208,6 @@ class DrawerDelegate private constructor(context: Context) :
             }
         }
     }
-    private val displayListener = object : DisplayManager.DisplayListener {
-        override fun onDisplayChanged(displayId: Int) {
-            updateDrawer()
-        }
-
-        override fun onDisplayAdded(displayId: Int) {}
-        override fun onDisplayRemoved(displayId: Int) {}
-    }
-
     private var currentVisibilityAnim: Animator? = null
         set(value) {
             isHiding = false
@@ -324,7 +314,7 @@ class DrawerDelegate private constructor(context: Context) :
                 if (event.initial) {
                     showDrawer(hideHandle = false)
                 } else {
-                    updateDrawer()
+                    updateWindow()
                 }
             }
 
@@ -341,7 +331,7 @@ class DrawerDelegate private constructor(context: Context) :
                 val animator = ValueAnimator.ofInt(params.x, if (metThreshold) 0 else -params.width)
                 animator.addUpdateListener {
                     params.x = it.animatedValue as Int
-                    updateDrawer()
+                    updateWindow()
                 }
                 animator.duration = ANIM_DURATION
                 animator.interpolator =
@@ -416,7 +406,7 @@ class DrawerDelegate private constructor(context: Context) :
                 blurKey = PrefManager.KEY_BLUR_DRAWER_BACKGROUND,
                 blurAmountKey = PrefManager.KEY_BLUR_DRAWER_BACKGROUND_AMOUNT,
                 params = params,
-                updateWindow = { updateDrawer() },
+                updateWindow = { updateWindow() },
                 modifier = Modifier.fillMaxSize(),
             )
         }
@@ -424,7 +414,6 @@ class DrawerDelegate private constructor(context: Context) :
         updateSidePadding()
         tryShowHandle()
 
-        displayManager.registerDisplayListener(displayListener, mainHandler)
         gridLayoutManager.customHeight = resources.getDimensionPixelSize(R.dimen.drawer_row_height).toDouble()
 
         scope.launch(Dispatchers.Main) {
@@ -446,8 +435,6 @@ class DrawerDelegate private constructor(context: Context) :
 
         unregisterReceiver(globalReceiver)
         invalidateInstance()
-
-        displayManager.unregisterDisplayListener(displayListener)
     }
 
     override fun onItemSelected(selected: Boolean, highlighted: Boolean) {
@@ -492,7 +479,7 @@ class DrawerDelegate private constructor(context: Context) :
         }
     }
 
-    private fun updateDrawer(wm: WindowManager = this.wm) {
+    override fun updateWindow() {
         mainHandler.post {
             params.apply {
                 val displaySize = screenSize
