@@ -7,7 +7,9 @@ import android.content.Intent
 import android.content.SharedPreferences
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener
 import android.graphics.Color
+import android.hardware.display.DisplayManager
 import android.net.Uri
+import android.view.Display
 import android.view.Gravity
 import androidx.core.content.edit
 import androidx.core.content.res.ResourcesCompat
@@ -139,6 +141,14 @@ class PrefManager private constructor(private val context: Context) {
             }
         }
     }
+
+    // This shouldn't be used for most things. It's just here to allow deprecated functions to be migrated.
+    private val defaultDisplay: LSDisplay
+        get() = LSDisplay(
+            display = (context.getSystemService(Context.DISPLAY_SERVICE) as DisplayManager)
+                .getDisplay(Display.DEFAULT_DISPLAY),
+            fontScale = 1f,
+        )
 
     //The actual SharedPreferences implementation
     private val prefs: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(context)
@@ -285,7 +295,10 @@ class PrefManager private constructor(private val context: Context) {
     //The horizontal position of the center of the frame in the NC (from the center of the screen) in pixels
     @Deprecated("Use [FrameSizeAndPosition] instead.")
     var notificationPosX: Int
-        get() = getInt(KEY_NOTIFICATION_POS_X, context.calculateNCPosXFromRightDefault(FrameSizeAndPosition.FrameType.NotificationNormal.Portrait))
+        get() = getInt(KEY_NOTIFICATION_POS_X, context.calculateNCPosXFromRightDefault(
+            FrameSizeAndPosition.FrameType.NotificationNormal.Portrait,
+            defaultDisplay,
+        ))
         set(value) {
             putInt(KEY_NOTIFICATION_POS_X, value)
         }
@@ -293,7 +306,10 @@ class PrefManager private constructor(private val context: Context) {
     //The horizontal position of the center of the frame in the locked NC (from the center of the screen) in pixels
     @Deprecated("Use [FrameSizeAndPosition] instead.")
     var lockNotificationPosX: Int
-        get() = getInt(KEY_LOCK_NOTIFICATION_POS_X, context.calculateNCPosXFromRightDefault(FrameSizeAndPosition.FrameType.LockNotification.Portrait))
+        get() = getInt(KEY_LOCK_NOTIFICATION_POS_X, context.calculateNCPosXFromRightDefault(
+            FrameSizeAndPosition.FrameType.LockNotification.Portrait,
+            defaultDisplay,
+        ))
         set(value) {
             putInt(KEY_LOCK_NOTIFICATION_POS_X, value)
         }
@@ -317,7 +333,10 @@ class PrefManager private constructor(private val context: Context) {
     //The vertical position of the center of the frame in the NC (from the center of the screen) in pixels
     @Deprecated("Use [FrameSizeAndPosition] instead.")
     var notificationPosY: Int
-        get() = getInt(KEY_NOTIFICATION_POS_Y, context.calculateNCPosYFromTopDefault(FrameSizeAndPosition.FrameType.NotificationNormal.Portrait))
+        get() = getInt(KEY_NOTIFICATION_POS_Y, context.calculateNCPosYFromTopDefault(
+            FrameSizeAndPosition.FrameType.NotificationNormal.Portrait,
+            defaultDisplay,
+        ))
         set(value) {
             putInt(KEY_NOTIFICATION_POS_Y, value)
         }
@@ -325,7 +344,10 @@ class PrefManager private constructor(private val context: Context) {
     //The vertical position of the center of the frame in the NC (from the center of the screen) in pixels
     @Deprecated("Use [FrameSizeAndPosition] instead.")
     var lockNotificationPosY: Int
-        get() = getInt(KEY_LOCK_NOTIFICATION_POS_Y, context.calculateNCPosYFromTopDefault(FrameSizeAndPosition.FrameType.LockNotification.Portrait))
+        get() = getInt(KEY_LOCK_NOTIFICATION_POS_Y, context.calculateNCPosYFromTopDefault(
+            FrameSizeAndPosition.FrameType.LockNotification.Portrait,
+            defaultDisplay,
+        ))
         set(value) {
             putInt(KEY_LOCK_NOTIFICATION_POS_Y, value)
         }

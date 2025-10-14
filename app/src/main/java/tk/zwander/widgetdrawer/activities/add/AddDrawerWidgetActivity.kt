@@ -3,14 +3,12 @@ package tk.zwander.widgetdrawer.activities.add
 import android.appwidget.AppWidgetProviderInfo
 import android.content.Context
 import android.content.Intent
-import tk.zwander.lockscreenwidgets.R
 import tk.zwander.common.activities.add.AddWidgetActivity
 import tk.zwander.common.data.WidgetData
 import tk.zwander.common.util.Event
 import tk.zwander.common.util.eventManager
 import tk.zwander.common.util.prefManager
-import tk.zwander.common.util.pxAsDp
-import tk.zwander.common.util.screenSize
+import tk.zwander.lockscreenwidgets.R
 import kotlin.math.floor
 
 /**
@@ -34,9 +32,9 @@ class AddDrawerWidgetActivity : AddWidgetActivity() {
     override val rowCount: Int
         get() = 1
     override val width: Float
-        get() = pxAsDp(screenSize.x)
+        get() = display.pxToDp(display.realSize.x)
     override val height: Float
-        get() = pxAsDp(screenSize.y)
+        get() = display.pxToDp(display.realSize.y)
 
     override var currentWidgets: MutableSet<WidgetData>
         get() = prefManager.drawerWidgets
@@ -49,9 +47,9 @@ class AddDrawerWidgetActivity : AddWidgetActivity() {
     override fun calculateInitialWidgetRowSpan(provider: AppWidgetProviderInfo): Int {
         val rowHeight = resources.getDimensionPixelSize(R.dimen.drawer_row_height)
 
-        return floor(provider.minHeight.toFloat() / pxAsDp(rowHeight)).toInt()
+        return floor(provider.minHeight.toFloat() / display.pxToDp(rowHeight)).toInt()
             .coerceAtLeast(10)
-            .coerceAtMost((screenSize.y / rowHeight) - 10)
+            .coerceAtMost((display.realSize.y / rowHeight) - 10)
     }
 
     override fun onDestroy() {

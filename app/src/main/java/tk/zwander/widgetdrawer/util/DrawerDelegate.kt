@@ -19,7 +19,6 @@ import android.view.ViewConfiguration
 import android.view.WindowManager
 import android.view.animation.AccelerateInterpolator
 import android.view.animation.DecelerateInterpolator
-import android.widget.Toast
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
@@ -39,14 +38,12 @@ import tk.zwander.common.util.BaseDelegate
 import tk.zwander.common.util.Event
 import tk.zwander.common.util.HandlerRegistry
 import tk.zwander.common.util.PrefManager
-import tk.zwander.common.util.dpAsPx
 import tk.zwander.common.util.eventManager
 import tk.zwander.common.util.globalState
 import tk.zwander.common.util.handler
 import tk.zwander.common.util.logUtils
 import tk.zwander.common.util.mainHandler
 import tk.zwander.common.util.prefManager
-import tk.zwander.common.util.screenSize
 import tk.zwander.common.util.statusBarHeight
 import tk.zwander.lockscreenwidgets.R
 import tk.zwander.lockscreenwidgets.databinding.DrawerLayoutBinding
@@ -56,8 +53,8 @@ import tk.zwander.widgetdrawer.views.Handle
 import kotlin.math.absoluteValue
 import kotlin.math.sign
 
-class DrawerDelegate private constructor(context: Context) :
-    BaseDelegate<DrawerDelegate.State>(context) {
+class DrawerDelegate private constructor(context: Context, wm: WindowManager, displayId: Int) :
+    BaseDelegate<DrawerDelegate.State>(context, wm, displayId) {
     companion object {
         const val ANIM_DURATION = 200L
 
@@ -74,27 +71,16 @@ class DrawerDelegate private constructor(context: Context) :
                 return null
             }
 
-            return getInstance(context)
+            return instance.value
         }
 
         @Synchronized
-        @Suppress("unused")
-        fun retrieveInstance(context: Context): DrawerDelegate? {
-            return peekInstance(context).also {
-                if (it == null) {
-                    Toast.makeText(context, R.string.accessibility_not_started, Toast.LENGTH_SHORT)
-                        .show()
-                }
-            }
-        }
-
-        @Synchronized
-        fun getInstance(context: Context): DrawerDelegate {
+        fun getInstance(context: Context, wm: WindowManager, displayId: Int): DrawerDelegate {
             return instance.value ?: run {
                 if (context !is Accessibility) {
                     throw IllegalStateException("Delegate can only be initialized by Accessibility Service!")
                 } else {
-                    DrawerDelegate(context).also {
+                    DrawerDelegate(context, wm, displayId).also {
                         instance.value = it
                     }
                 }
@@ -114,7 +100,7 @@ class DrawerDelegate private constructor(context: Context) :
 
     override val params by lazy {
         WindowManager.LayoutParams().apply {
-            val displaySize = screenSize
+            val displaySize = display.realSize
             type = WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY
             flags = WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN or
                     WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS
@@ -140,10 +126,10 @@ class DrawerDelegate private constructor(context: Context) :
         get() = handle.scrollingOpen
 
     private val drawer by lazy { DrawerLayoutBinding.inflate(LayoutInflater.from(ContextThemeWrapper(this, R.style.AppTheme))) }
-    private val handle by lazy { Handle(this) }
+    private val handle by lazy { Handle(this, displayId) }
 
     override val adapter by lazy {
-        DrawerAdapter(context, rootView) { widget, _ ->
+        DrawerAdapter(context, rootView, displayId) { widget, _ ->
             itemToRemove = widget
         }
     }
@@ -326,7 +312,7 @@ class DrawerDelegate private constructor(context: Context) :
                     event.from == Gravity.LEFT -> latestScrollInVelocity > 0
                     else -> latestScrollInVelocity < 0
                 }
-                val metThreshold = distanceFromEdge > dpAsPx(100) && velocityMatches
+                val metThreshold = distanceFromEdge > display.dpToPx(100f) && velocityMatches
 
                 val animator = ValueAnimator.ofInt(params.x, if (metThreshold) 0 else -params.width)
                 animator.addUpdateListener {
@@ -408,6 +394,7 @@ class DrawerDelegate private constructor(context: Context) :
                 params = params,
                 updateWindow = { updateWindow() },
                 modifier = Modifier.fillMaxSize(),
+                wm = wm,
             )
         }
 
@@ -482,7 +469,7 @@ class DrawerDelegate private constructor(context: Context) :
     override fun updateWindow() {
         mainHandler.post {
             params.apply {
-                val displaySize = screenSize
+                val displaySize = display.realSize
                 width = displaySize.x
                 height = displaySize.y
             }
@@ -538,7 +525,7 @@ class DrawerDelegate private constructor(context: Context) :
     }
 
     private fun updateSidePadding() {
-        val padding = dpAsPx(prefManager.drawerSidePadding)
+        val padding = display.dpToPx(prefManager.drawerSidePadding)
 
         drawer.widgetGrid.updatePaddingRelative(
             start = padding,

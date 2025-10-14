@@ -16,7 +16,6 @@ import tk.zwander.common.compose.settings.rememberPreferenceScreen
 import tk.zwander.common.util.PrefManager
 import tk.zwander.common.util.backup.BackupRestoreManager
 import tk.zwander.common.util.isOneUI
-import tk.zwander.common.util.windowManager
 import tk.zwander.lockscreenwidgets.R
 
 class ComposeDrawerSettingsActivity : BaseActivity() {

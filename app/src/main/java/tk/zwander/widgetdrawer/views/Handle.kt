@@ -11,7 +11,6 @@ import android.graphics.PixelFormat
 import android.os.Handler
 import android.os.Looper
 import android.os.Message
-import android.util.AttributeSet
 import android.view.GestureDetector
 import android.view.Gravity
 import android.view.MotionEvent
@@ -24,28 +23,25 @@ import androidx.appcompat.content.res.AppCompatResources
 import tk.zwander.common.util.Event
 import tk.zwander.common.util.HandlerRegistry
 import tk.zwander.common.util.PrefManager
-import tk.zwander.common.util.dpAsPx
 import tk.zwander.common.util.eventManager
 import tk.zwander.common.util.handler
 import tk.zwander.common.util.logUtils
 import tk.zwander.common.util.mainHandler
 import tk.zwander.common.util.prefManager
-import tk.zwander.common.util.screenSize
+import tk.zwander.common.util.requireLsDisplayManager
 import tk.zwander.common.util.vibrate
 import tk.zwander.lockscreenwidgets.R
 import tk.zwander.widgetdrawer.util.DrawerDelegate
 import kotlin.math.absoluteValue
 
-class Handle : LinearLayout {
+@SuppressLint("ViewConstructor")
+class Handle(context: Context, private val displayId: Int) : LinearLayout(context) {
     companion object {
         private const val MSG_LONG_PRESS = 0
 
         private const val LONG_PRESS_DELAY = 300
         private const val SWIPE_THRESHOLD = 20
     }
-
-    constructor(context: Context) : super(context)
-    constructor(context: Context, attrs: AttributeSet) : super(context, attrs)
 
     private var inMoveMode = false
     private var calledOpen = false
@@ -65,6 +61,8 @@ class Handle : LinearLayout {
     private val handleRight =
         AppCompatResources.getDrawable(context, R.drawable.drawer_handle_right)
 
+    private val display = context.requireLsDisplayManager.availableDisplays.value[displayId]!!
+
     @SuppressLint("HandlerLeak")
     private val longClickHandler = object : Handler(Looper.getMainLooper()) {
         override fun handleMessage(msg: Message) {
@@ -77,8 +75,8 @@ class Handle : LinearLayout {
     val params = WindowManager.LayoutParams().apply {
         type = WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY
         flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
-        width = context.dpAsPx(context.prefManager.drawerHandleWidth)
-        height = context.dpAsPx(context.prefManager.drawerHandleHeight)
+        width = display.dpToPx(context.prefManager.drawerHandleWidth)
+        height = display.dpToPx(context.prefManager.drawerHandleHeight)
         gravity = Gravity.TOP or context.prefManager.drawerHandleSide
         y = context.prefManager.drawerHandleYPosition
         format = PixelFormat.RGBA_8888
@@ -86,12 +84,12 @@ class Handle : LinearLayout {
 
     private val prefsHandler = HandlerRegistry {
         handler(PrefManager.KEY_DRAWER_HANDLE_HEIGHT) {
-            params.height = context.dpAsPx(context.prefManager.drawerHandleHeight)
+            params.height = display.dpToPx(context.prefManager.drawerHandleHeight)
             updateLayout()
         }
 
         handler(PrefManager.KEY_DRAWER_HANDLE_WIDTH) {
-            params.width = context.dpAsPx(context.prefManager.drawerHandleWidth)
+            params.width = display.dpToPx(context.prefManager.drawerHandleWidth)
             updateLayout()
         }
 
@@ -101,7 +99,7 @@ class Handle : LinearLayout {
 
         handler(PrefManager.KEY_SHOW_DRAWER_HANDLE_SHADOW) {
             elevation =
-                if (context.prefManager.drawerHandleShadow) context.dpAsPx(8).toFloat() else 0f
+                if (context.prefManager.drawerHandleShadow) display.dpToPx(8).toFloat() else 0f
         }
     }
 
@@ -109,7 +107,7 @@ class Handle : LinearLayout {
         setSide()
         setTint(context.prefManager.drawerHandleColor)
         isClickable = true
-        elevation = if (context.prefManager.drawerHandleShadow) context.dpAsPx(8).toFloat() else 0f
+        elevation = if (context.prefManager.drawerHandleShadow) display.dpToPx(8).toFloat() else 0f
         contentDescription = resources.getString(R.string.open_widget_drawer)
         prefsHandler.register(context)
     }
@@ -118,7 +116,7 @@ class Handle : LinearLayout {
     override fun onTouchEvent(event: MotionEvent): Boolean {
         when (event.action) {
             MotionEvent.ACTION_DOWN -> {
-                screenWidth = context.screenSize.x
+                screenWidth = display.realSize.x
                 longClickHandler.sendEmptyMessageAtTime(
                     MSG_LONG_PRESS,
                     event.downTime + LONG_PRESS_DELAY

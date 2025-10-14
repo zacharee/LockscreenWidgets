@@ -508,8 +508,6 @@ object AccessibilityUtils {
             //This block here runs even when unlocked, but it only takes a millisecond at most,
             //so it shouldn't be noticeable to the user. We use this to check the current keyguard
             //state and, if applicable, send the keyguard dismissal broadcast.
-            globalState.screenOrientation.value = defaultDisplayCompat.rotation
-
             globalState.showingKeyboard.value = try {
                 imm.inputMethodWindowVisibleHeight > 0
             } catch (e: Throwable) {
@@ -556,6 +554,11 @@ object AccessibilityUtils {
                 frameDelegate.updateStateAndWindowState(
                     wm = wm,
                     updateAccessibility = true,
+                    transform = {
+                        it.copy(
+                            screenOrientation = frameDelegate.display.screenOrientation,
+                        )
+                    },
                 )
             }
 

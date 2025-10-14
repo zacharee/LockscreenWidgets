@@ -20,7 +20,6 @@ import tk.zwander.common.compose.util.rememberPreferenceState
 import tk.zwander.common.drawable.BackgroundBlurDrawableCompat
 import tk.zwander.common.util.logUtils
 import tk.zwander.common.util.prefManager
-import tk.zwander.common.util.windowManager
 import java.util.function.Consumer
 
 @Composable
@@ -28,15 +27,13 @@ fun BlurView(
     blurKey: String,
     blurAmountKey: String,
     params: WindowManager.LayoutParams,
+    wm: WindowManager,
     updateWindow: () -> Unit,
     modifier: Modifier = Modifier,
     cornerRadiusKey: String? = null,
 ) {
     val view = LocalView.current
     val context = LocalContext.current
-    val wm = remember {
-        context.windowManager
-    }
     var currentDrawable by remember {
         mutableStateOf<BackgroundBlurDrawableCompat?>(null)
     }

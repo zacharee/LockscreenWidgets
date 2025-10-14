@@ -8,9 +8,11 @@ import android.content.ComponentName
 import android.content.Intent
 import android.content.pm.LauncherApps
 import android.content.pm.PackageManager
+import android.hardware.display.DisplayManager
 import android.os.Build
 import android.os.Bundle
 import android.telephony.PhoneNumberUtils
+import android.view.Display
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.ui.unit.dp
@@ -23,6 +25,7 @@ import tk.zwander.common.data.WidgetSizeData
 import tk.zwander.common.host.widgetHostCompat
 import tk.zwander.common.util.ConfigureLauncher
 import tk.zwander.common.util.FrameSizeAndPosition
+import tk.zwander.common.util.LSDisplay
 import tk.zwander.common.util.appWidgetManager
 import tk.zwander.common.util.componentNameCompat
 import tk.zwander.common.util.createPersistablePreviewBitmap
@@ -52,6 +55,14 @@ abstract class BaseBindWidgetActivity : BaseActivity() {
     protected open val currentIds: Collection<Int>
         get() = currentWidgets.map { it.id }
     protected open val deleteOnConfigureError: Boolean = true
+
+    protected val displayManager by lazy { getSystemService(DISPLAY_SERVICE) as DisplayManager }
+    protected val display: LSDisplay by lazy {
+        LSDisplay(
+            display = displayManager.getDisplay(Display.DEFAULT_DISPLAY),
+            fontScale = resources.configuration.fontScale,
+        )
+    }
 
     private var currentRequestId: Int? = null
 
@@ -374,9 +385,15 @@ abstract class BaseBindWidgetActivity : BaseActivity() {
     protected open val rowCount: Int
         get() = FramePrefs.getRowCountForFrame(this, holderId)
     protected open val height: Float
-        get() = frameSizeAndPosition.getSizeForType(FrameSizeAndPosition.FrameType.LockNormal.Portrait).y
+        get() = frameSizeAndPosition.getSizeForType(
+            FrameSizeAndPosition.FrameType.LockNormal.Portrait,
+            display,
+        ).y
     protected open val width: Float
-        get() = frameSizeAndPosition.getSizeForType(FrameSizeAndPosition.FrameType.LockNormal.Portrait).y
+        get() = frameSizeAndPosition.getSizeForType(
+            FrameSizeAndPosition.FrameType.LockNormal.Portrait,
+            display,
+        ).y
 
     protected open fun calculateInitialWidgetColSpan(provider: AppWidgetProviderInfo): Int {
         val widthRatio = provider.minWidth.toFloat() / width

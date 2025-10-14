@@ -67,17 +67,17 @@ import tk.zwander.common.listeners.WidgetResizeListener
 import tk.zwander.common.util.BrokenAppsRegistry
 import tk.zwander.common.util.Event
 import tk.zwander.common.util.EventObserver
+import tk.zwander.common.util.LSDisplay
 import tk.zwander.common.util.appWidgetManager
 import tk.zwander.common.util.compat.LayoutInflaterFactory2Compat
 import tk.zwander.common.util.createWidgetErrorView
-import tk.zwander.common.util.dpAsPx
 import tk.zwander.common.util.eventManager
 import tk.zwander.common.util.getAllInstalledWidgetProviders
 import tk.zwander.common.util.hasConfiguration
 import tk.zwander.common.util.logUtils
 import tk.zwander.common.util.mainHandler
 import tk.zwander.common.util.mitigations.SafeContextWrapper
-import tk.zwander.common.util.pxAsDp
+import tk.zwander.common.util.requireLsDisplayManager
 import tk.zwander.lockscreenwidgets.R
 import tk.zwander.lockscreenwidgets.databinding.ComposeViewHolderBinding
 import tk.zwander.lockscreenwidgets.databinding.FrameShortcutViewBinding
@@ -91,6 +91,7 @@ abstract class BaseAdapter(
     protected val context: Context,
     protected val rootView: View,
     protected val onRemoveCallback: (WidgetData, Int) -> Unit,
+    protected val displayId: Int,
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>(), CoroutineScope by MainScope() {
     companion object {
         const val VIEW_TYPE_WIDGET = 0
@@ -118,6 +119,9 @@ abstract class BaseAdapter(
     protected val host = context.widgetHostCompat
     protected val manager = context.appWidgetManager
     protected val viewCacheRegistry = context.widgetViewCacheRegistry
+
+    protected val display: LSDisplay
+        get() = context.requireLsDisplayManager.availableDisplays.value[displayId]!!
 
     private val baseLayoutInflater =
         LayoutInflater.from(context).cloneInContext(ContextThemeWrapper(context, R.style.AppTheme))
@@ -419,7 +423,7 @@ abstract class BaseAdapter(
                     WidgetType.HEADER -> {}
                 }
 
-                binding.card.radius = context.dpAsPx(widgetCornerRadius).toFloat()
+                binding.card.radius = display.dpToPx(widgetCornerRadius).toFloat()
                 binding.widgetEditOutline.background =
                     (binding.widgetEditOutline.background.mutate() as GradientDrawable).apply {
                         this.cornerRadius = binding.card.radius
@@ -505,10 +509,10 @@ abstract class BaseAdapter(
                                         }
                                     }
 
-                                    val width = context.pxAsDp(itemView.width)
-                                    val height = context.pxAsDp(itemView.height)
+                                    val width = this@BaseAdapter.display.pxToDp(itemView.width)
+                                    val height = this@BaseAdapter.display.pxToDp(itemView.height)
 
-                                    val paddingValue = context.pxAsDp(
+                                    val paddingValue = this@BaseAdapter.display.pxToDp(
                                         context.resources.getDimensionPixelSize(R.dimen.app_widget_padding),
                                     )
 

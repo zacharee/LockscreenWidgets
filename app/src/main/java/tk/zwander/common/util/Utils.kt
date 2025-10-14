@@ -6,7 +6,6 @@ import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.drawable.Drawable
-import android.hardware.display.DisplayManagerGlobal
 import android.net.Uri
 import android.os.Build
 import android.os.Handler
@@ -14,7 +13,6 @@ import android.os.Looper
 import android.os.VibrationEffect
 import android.os.Vibrator
 import android.os.VibratorManager
-import android.view.Display
 import android.widget.AbsListView
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -64,23 +62,6 @@ fun Context.launchEmail(to: String, subject: String) {
     }
 }
 
-//Take an integer and make it even.
-//If the integer == 0, return itself (0).
-//If the integer is 1, return 2.
-//If the integer is -1, return -2.
-//If the integer is even, return itself.
-//If the integer is odd and negative, return itself - 1
-//If the integer is odd and positive, return itself + 1
-fun Int.makeEven(): Int {
-    return when {
-        this == 0 -> 0
-        this == 1 -> 2
-        this == -1 -> -2
-        this % 2 == 0 -> this
-        else -> this + if (this < 0) -1 else 1
-    }
-}
-
 suspend inline fun <T> Collection<T>.forEachParallel(crossinline action: suspend CoroutineScope.(T) -> Unit) {
     coroutineScope {
         val awaits = ArrayList<Deferred<*>>(size)
@@ -118,17 +99,6 @@ fun AppWidgetProviderInfo.loadPreviewOrIcon(context: Context, density: Int = 0, 
 fun AppWidgetProviderInfo.createPersistablePreviewBitmap(context: Context): String? {
     return loadPreviewOrIcon(context, maxSize = 128.dp)?.toBase64()
 }
-
-val Context.defaultDisplayCompat: Display
-    get() {
-        val displayId = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            displayNoVerify?.displayId ?: Display.DEFAULT_DISPLAY
-        } else {
-            Display.DEFAULT_DISPLAY
-        }
-
-        return DisplayManagerGlobal.getInstance().getRealDisplay(displayId)
-    }
 
 fun Context.vibrate(duration: Long = 50L) {
     val vibrator = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {

@@ -10,8 +10,6 @@ import tk.zwander.common.util.Event
 import tk.zwander.common.util.createPersistablePreviewBitmap
 import tk.zwander.common.util.eventManager
 import tk.zwander.common.util.prefManager
-import tk.zwander.common.util.pxAsDp
-import tk.zwander.common.util.screenSize
 import tk.zwander.lockscreenwidgets.R
 import kotlin.math.floor
 
@@ -54,9 +52,9 @@ class ReconfigureDrawerWidgetActivity : ReconfigureWidgetActivity() {
 
                 val rowHeight = resources.getDimensionPixelSize(R.dimen.drawer_row_height)
 
-                val defaultRowSpan = floor(provider.minHeight.toFloat() / pxAsDp(rowHeight)).toInt()
+                val defaultRowSpan = floor(provider.minHeight.toFloat() / display.pxToDp(rowHeight)).toInt()
                     .coerceAtLeast(10)
-                    .coerceAtMost((screenSize.y / rowHeight) - 10)
+                    .coerceAtMost((display.realSize.y / rowHeight) - 10)
 
                 WidgetSizeData(defaultColSpan, defaultRowSpan)
             }

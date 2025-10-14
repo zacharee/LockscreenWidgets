@@ -54,7 +54,6 @@ import tk.zwander.common.util.GlobalState
 import tk.zwander.common.util.HandlerRegistry
 import tk.zwander.common.util.ISnappyLayoutManager
 import tk.zwander.common.util.PrefManager
-import tk.zwander.common.util.dpAsPx
 import tk.zwander.common.util.eventManager
 import tk.zwander.common.util.frameSizeAndPosition
 import tk.zwander.common.util.globalState
@@ -62,8 +61,6 @@ import tk.zwander.common.util.handler
 import tk.zwander.common.util.logUtils
 import tk.zwander.common.util.mainHandler
 import tk.zwander.common.util.prefManager
-import tk.zwander.common.util.pxAsDp
-import tk.zwander.common.util.screenSize
 import tk.zwander.common.util.wallpaperUtils
 import tk.zwander.lockscreenwidgets.R
 import tk.zwander.lockscreenwidgets.adapters.WidgetFrameAdapter
@@ -77,7 +74,12 @@ import kotlin.math.floor
 /**
  * Handle most of the logic involving the widget frame.
  */
-open class MainWidgetFrameDelegate protected constructor(context: Context, protected val id: Int = -1) : BaseDelegate<MainWidgetFrameDelegate.State>(context) {
+open class MainWidgetFrameDelegate protected constructor(
+    context: Context,
+    protected val id: Int = -1,
+    wm: WindowManager,
+    displayId: Int,
+) : BaseDelegate<MainWidgetFrameDelegate.State>(context, wm, displayId) {
     companion object {
         private val instance = MutableStateFlow<MainWidgetFrameDelegate?>(null)
 
@@ -91,16 +93,16 @@ open class MainWidgetFrameDelegate protected constructor(context: Context, prote
                 return null
             }
 
-            return getInstance(context)
+            return instance.value
         }
 
         @Synchronized
-        fun getInstance(context: Context): MainWidgetFrameDelegate {
+        fun getInstance(context: Context, wm: WindowManager, displayId: Int): MainWidgetFrameDelegate {
             return instance.value ?: run {
                 if (context !is Accessibility) {
                     throw IllegalStateException("Delegate can only be initialized by Accessibility Service!")
                 } else {
-                    MainWidgetFrameDelegate(context).also {
+                    MainWidgetFrameDelegate(context, wm = wm, displayId = displayId).also {
                         instance.value = it
                     }
                 }
@@ -123,6 +125,11 @@ open class MainWidgetFrameDelegate protected constructor(context: Context, prote
             if (actualNewState.isTempHide != oldState.isTempHide && actualNewState.isTempHide) {
                 actualNewState = actualNewState.copy(isPreview = false)
             }
+
+            if (actualNewState.screenOrientation != oldState.screenOrientation) {
+                actualNewState = actualNewState.copy(isPendingOrientationStateChange = true, isPreview = false)
+            }
+
             // ------------ //
 
             field = actualNewState
@@ -157,8 +164,8 @@ open class MainWidgetFrameDelegate protected constructor(context: Context, prote
     private val saveMode: FrameSizeAndPosition.FrameType
         get() {
             val isLandscape = prefManager.separateFrameLayoutForLandscape &&
-                    (globalState.screenOrientation.value == Surface.ROTATION_90 ||
-                        globalState.screenOrientation.value == Surface.ROTATION_270)
+                    (state.screenOrientation == Surface.ROTATION_90 ||
+                        state.screenOrientation == Surface.ROTATION_270)
 
             return when {
                 id != -1 -> FrameSizeAndPosition.FrameType.SecondaryLockscreen.select(!isLandscape, id)
@@ -178,11 +185,11 @@ open class MainWidgetFrameDelegate protected constructor(context: Context, prote
         WindowManager.LayoutParams().apply {
             type = WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY
 
-            frameSizeAndPosition.getSizeForType(saveMode).let { size ->
-                width = dpAsPx(size.x)
-                height = dpAsPx(size.y)
+            frameSizeAndPosition.getSizeForType(saveMode, display).let { size ->
+                width = display.dpToPx(size.x)
+                height = display.dpToPx(size.y)
             }
-            frameSizeAndPosition.getPositionForType(saveMode).let { pos ->
+            frameSizeAndPosition.getPositionForType(saveMode, display).let { pos ->
                 x = pos.x
                 y = pos.y
             }
@@ -221,6 +228,7 @@ open class MainWidgetFrameDelegate protected constructor(context: Context, prote
             onRemoveCallback = { item, _ ->
                 itemToRemove = item
             },
+            displayId = displayId,
             saveTypeGetter = { saveMode },
         )
     }
@@ -323,7 +331,7 @@ open class MainWidgetFrameDelegate protected constructor(context: Context, prote
                         saveMode,
                         Point(
                             0,
-                            frameSizeAndPosition.getPositionForType(saveMode).y
+                            frameSizeAndPosition.getPositionForType(saveMode, display).y
                         )
                     )
                     updateWindow()
@@ -334,7 +342,7 @@ open class MainWidgetFrameDelegate protected constructor(context: Context, prote
                     frameSizeAndPosition.setPositionForType(
                         saveMode,
                         Point(
-                            frameSizeAndPosition.getPositionForType(saveMode).x,
+                            frameSizeAndPosition.getPositionForType(saveMode, display).x,
                             0
                         )
                     )
@@ -370,7 +378,7 @@ open class MainWidgetFrameDelegate protected constructor(context: Context, prote
                     )
                     frameSizeAndPosition.setSizeForType(
                         saveMode,
-                        PointF(pxAsDp(params.width), pxAsDp(params.height))
+                        PointF(display.pxToDp(params.width), display.pxToDp(params.height))
                     )
 
                     if (event.isUp) {
@@ -548,6 +556,7 @@ open class MainWidgetFrameDelegate protected constructor(context: Context, prote
                     updateOverlay()
                 },
                 cornerRadiusKey = PrefManager.KEY_FRAME_CORNER_RADIUS,
+                wm = wm,
             )
         }
 
@@ -565,12 +574,6 @@ open class MainWidgetFrameDelegate protected constructor(context: Context, prote
                 }
 
                 updateWindowState(wm)
-            }
-        }
-
-        scope.launch(Dispatchers.Main) {
-            globalState.screenOrientation.collect { screenOrientation ->
-                updateState { it.copy(isPendingOrientationStateChange = true, isPreview = false) }
             }
         }
 
@@ -690,7 +693,7 @@ open class MainWidgetFrameDelegate protected constructor(context: Context, prote
      * - [GlobalState.hideForPresentIds] is false
      * - [GlobalState.hideForNonPresentIds] is false
      * - [PrefManager.widgetFrameEnabled] is true
-     * - [PrefManager.hideInLandscape] is false OR [GlobalState.screenOrientation] represents a portrait rotation
+     * - [PrefManager.hideInLandscape] is false OR [State.screenOrientation] represents a portrait rotation
      * =======
      * OR
      * =======
@@ -707,7 +710,7 @@ open class MainWidgetFrameDelegate protected constructor(context: Context, prote
      * - [GlobalState.notificationCount] is 0 (i.e. no notifications shown on lock screen, not necessarily no notifications at all) OR [FrameSpecificPreferences.hideOnNotifications] is false
      * - [GlobalState.hideForPresentIds] is false OR [PrefManager.presentIds] is empty
      * - [GlobalState.hideForNonPresentIds] is false OR [PrefManager.nonPresentIds] is empty
-     * - [PrefManager.hideInLandscape] is false OR [GlobalState.screenOrientation] represents a portrait rotation
+     * - [PrefManager.hideInLandscape] is false OR [State.screenOrientation] represents a portrait rotation
      * - [PrefManager.widgetFrameEnabled] is true (i.e. the widget frame is actually enabled)
      * =======
      */
@@ -722,7 +725,7 @@ open class MainWidgetFrameDelegate protected constructor(context: Context, prote
                     && !globalState.hideForPresentIds.value
                     && !globalState.hideForNonPresentIds.value
                     && prefManager.widgetFrameEnabled
-                    && (!prefManager.hideInLandscape || globalState.screenOrientation.value == Surface.ROTATION_0 || globalState.screenOrientation.value == Surface.ROTATION_180)
+                    && (!prefManager.hideInLandscape || state.screenOrientation == Surface.ROTATION_0 || state.screenOrientation == Surface.ROTATION_180)
                     && prefManager.canShowFrameFromTasker
                     && (!framePrefs.hideWhenKeyboardShown || !globalState.showingKeyboard.value)
         }
@@ -812,7 +815,7 @@ open class MainWidgetFrameDelegate protected constructor(context: Context, prote
                     )
                     binding.wallpaperBackground.scaleType = ImageView.ScaleType.MATRIX
                     binding.wallpaperBackground.imageMatrix = Matrix().apply {
-                        val realSize = screenSize
+                        val realSize = display.realSize
                         val loc = binding.root.locationOnScreen ?: intArrayOf(0, 0)
 
                         val dWidth: Int = intrinsicWidth
@@ -880,7 +883,7 @@ open class MainWidgetFrameDelegate protected constructor(context: Context, prote
     }
 
     private fun updateCornerRadius() {
-        val radius = dpAsPx(prefManager.cornerRadiusDp).toFloat()
+        val radius = display.dpToPx(prefManager.cornerRadiusDp).toFloat()
         binding.frameCard.radius = radius
     }
 
@@ -891,11 +894,11 @@ open class MainWidgetFrameDelegate protected constructor(context: Context, prote
     override fun updateWindow() {
         logUtils.debugLog("Checking if params need to be updated")
 
-        logUtils.debugLog("Possibly updating params with display size $screenSize", null)
+        logUtils.debugLog("Possibly updating params with display size ${display.realSize}", null)
 
-        val (newX, newY) = frameSizeAndPosition.getPositionForType(saveMode)
-        val (newW, newH) = frameSizeAndPosition.getSizeForType(saveMode).run {
-            Point(dpAsPx(x), dpAsPx(y))
+        val (newX, newY) = frameSizeAndPosition.getPositionForType(saveMode, display)
+        val (newW, newH) = frameSizeAndPosition.getSizeForType(saveMode, display).run {
+            Point(display.dpToPx(x), display.dpToPx(y))
         }
 
         var changed = false
@@ -997,5 +1000,6 @@ open class MainWidgetFrameDelegate protected constructor(context: Context, prote
         val isPendingNotificationStateChange: Boolean = false,
         val isPendingOrientationStateChange: Boolean = false,
         val isTempHide: Boolean = false,
+        val screenOrientation: Int = Surface.ROTATION_0,
     )
 }

@@ -11,10 +11,10 @@ import tk.zwander.lockscreenwidgets.R
 val Context.frameSizeAndPosition: FrameSizeAndPosition
     get() = FrameSizeAndPosition.getInstance(this)
 
-fun Context.calculateNCPosXFromRightDefault(type: FrameSizeAndPosition.FrameType): Int {
-    val fromRight = dpAsPx(resources.getInteger(R.integer.def_notification_pos_x_from_right_dp))
-    val screenWidth = screenSize.x
-    val frameWidthPx = dpAsPx(frameSizeAndPosition.getSizeForType(type).x)
+fun Context.calculateNCPosXFromRightDefault(type: FrameSizeAndPosition.FrameType, display: LSDisplay): Int {
+    val fromRight = display.dpToPx(resources.getInteger(R.integer.def_notification_pos_x_from_right_dp))
+    val screenWidth = display.realSize.x
+    val frameWidthPx = display.dpToPx(frameSizeAndPosition.getSizeForType(type, display).x)
 
     val frameRight = (frameWidthPx / 2f)
     val coord = (screenWidth / 2f) - fromRight - frameRight
@@ -22,10 +22,10 @@ fun Context.calculateNCPosXFromRightDefault(type: FrameSizeAndPosition.FrameType
     return coord.toInt()
 }
 
-fun Context.calculateNCPosYFromTopDefault(type: FrameSizeAndPosition.FrameType): Int {
-    val fromTop = dpAsPx(resources.getInteger(R.integer.def_notification_pos_y_from_top_dp))
-    val screenHeight = screenSize.y
-    val frameHeightPx = dpAsPx(frameSizeAndPosition.getSizeForType(type).y)
+fun Context.calculateNCPosYFromTopDefault(type: FrameSizeAndPosition.FrameType, display: LSDisplay): Int {
+    val fromTop = display.dpToPx(resources.getInteger(R.integer.def_notification_pos_y_from_top_dp))
+    val screenHeight = display.realSize.y
+    val frameHeightPx = display.dpToPx(frameSizeAndPosition.getSizeForType(type, display).y)
 
     val frameTop = (frameHeightPx / 2f)
     val coord = -(screenHeight / 2f) + frameTop + fromTop
@@ -75,8 +75,8 @@ class FrameSizeAndPosition private constructor(private val context: Context) {
             )
         }
 
-    fun getPositionForType(type: FrameType): Point {
-        return positionsMap[type.key] ?: getDefaultPositionForType(type)
+    fun getPositionForType(type: FrameType, display: LSDisplay): Point {
+        return positionsMap[type.key] ?: getDefaultPositionForType(type, display)
     }
 
     fun setPositionForType(type: FrameType, position: Point) {
@@ -91,8 +91,8 @@ class FrameSizeAndPosition private constructor(private val context: Context) {
         }
     }
 
-    fun getSizeForType(type: FrameType): PointF {
-        return sizesMap[type.key] ?: getDefaultSizeForType(type)
+    fun getSizeForType(type: FrameType, display: LSDisplay): PointF {
+        return sizesMap[type.key] ?: getDefaultSizeForType(type, display)
     }
 
     fun setSizeForType(type: FrameType, size: PointF) {
@@ -107,15 +107,7 @@ class FrameSizeAndPosition private constructor(private val context: Context) {
         }
     }
 
-    fun setDefaultSizeForType(type: FrameType) {
-        setSizeForType(type, getDefaultSizeForType(type))
-    }
-
-    fun setDefaultPositionForType(type: FrameType) {
-        setPositionForType(type, getDefaultPositionForType(type))
-    }
-
-    private fun getDefaultPositionForType(type: FrameType): Point {
+    private fun getDefaultPositionForType(type: FrameType, display: LSDisplay): Point {
         return when (type) {
             FrameType.LockNormal.Portrait,
             FrameType.Preview.Portrait,
@@ -124,21 +116,21 @@ class FrameSizeAndPosition private constructor(private val context: Context) {
 
             FrameType.LockNotification.Portrait,
             FrameType.NotificationNormal.Portrait -> Point(
-                context.calculateNCPosXFromRightDefault(type),
-                context.calculateNCPosYFromTopDefault(type),
+                context.calculateNCPosXFromRightDefault(type, display),
+                context.calculateNCPosYFromTopDefault(type, display),
             )
 
             // These are getting the *current* position for portrait, which is to keep things somewhat
             // consistent on squarer displays.
-            FrameType.LockNormal.Landscape -> getPositionForType(FrameType.LockNormal.Portrait)
-            FrameType.LockNotification.Landscape -> getPositionForType(FrameType.LockNotification.Portrait)
-            FrameType.NotificationNormal.Landscape -> getPositionForType(FrameType.NotificationNormal.Portrait)
-            FrameType.Preview.Landscape -> getPositionForType(FrameType.Preview.Portrait)
-            is FrameType.SecondaryLockscreen.Landscape -> getPositionForType(FrameType.SecondaryLockscreen.Portrait(type.id))
+            FrameType.LockNormal.Landscape -> getPositionForType(FrameType.LockNormal.Portrait, display)
+            FrameType.LockNotification.Landscape -> getPositionForType(FrameType.LockNotification.Portrait, display)
+            FrameType.NotificationNormal.Landscape -> getPositionForType(FrameType.NotificationNormal.Portrait, display)
+            FrameType.Preview.Landscape -> getPositionForType(FrameType.Preview.Portrait, display)
+            is FrameType.SecondaryLockscreen.Landscape -> getPositionForType(FrameType.SecondaryLockscreen.Portrait(type.id), display)
         }
     }
 
-    private fun getDefaultSizeForType(type: FrameType): PointF {
+    private fun getDefaultSizeForType(type: FrameType, display: LSDisplay): PointF {
         return when (type) {
             FrameType.LockNormal.Portrait,
             FrameType.Preview.Portrait,
@@ -155,11 +147,11 @@ class FrameSizeAndPosition private constructor(private val context: Context) {
 
             // These are getting the *current* size for portrait, which is to keep things somewhat
             // consistent on squarer displays.
-            FrameType.LockNormal.Landscape -> getSizeForType(FrameType.LockNormal.Portrait)
-            FrameType.LockNotification.Landscape -> getSizeForType(FrameType.LockNotification.Portrait)
-            FrameType.NotificationNormal.Landscape -> getSizeForType(FrameType.NotificationNormal.Portrait)
-            FrameType.Preview.Landscape -> getSizeForType(FrameType.Preview.Portrait)
-            is FrameType.SecondaryLockscreen.Landscape -> getSizeForType(FrameType.SecondaryLockscreen.Portrait(type.id))
+            FrameType.LockNormal.Landscape -> getSizeForType(FrameType.LockNormal.Portrait, display)
+            FrameType.LockNotification.Landscape -> getSizeForType(FrameType.LockNotification.Portrait, display)
+            FrameType.NotificationNormal.Landscape -> getSizeForType(FrameType.NotificationNormal.Portrait, display)
+            FrameType.Preview.Landscape -> getSizeForType(FrameType.Preview.Portrait, display)
+            is FrameType.SecondaryLockscreen.Landscape -> getSizeForType(FrameType.SecondaryLockscreen.Portrait(type.id), display)
         }
     }
 

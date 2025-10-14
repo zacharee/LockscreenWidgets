@@ -35,7 +35,6 @@ import tk.zwander.common.util.isOneUI
 import tk.zwander.common.util.isPixelUI
 import tk.zwander.common.util.isTouchWiz
 import tk.zwander.common.util.prefManager
-import tk.zwander.common.util.windowManager
 import tk.zwander.lockscreenwidgets.R
 import tk.zwander.lockscreenwidgets.services.isNotificationListenerActive
 import tk.zwander.lockscreenwidgets.util.FramePrefs

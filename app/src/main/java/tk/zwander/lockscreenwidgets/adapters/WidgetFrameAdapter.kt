@@ -23,9 +23,10 @@ open class WidgetFrameAdapter(
     frameId: Int,
     context: Context,
     rootView: View,
+    displayId: Int,
     onRemoveCallback: (WidgetData, Int) -> Unit,
     private val saveTypeGetter: () -> FrameSizeAndPosition.FrameType,
-) : BaseAdapter(frameId, context, rootView, onRemoveCallback) {
+) : BaseAdapter(frameId, context, rootView, onRemoveCallback, displayId) {
     override val colCount: Int
         get() = FramePrefs.getColCountForFrame(context, holderId)
     override val rowCount: Int
@@ -68,7 +69,7 @@ open class WidgetFrameAdapter(
 
     override fun getThresholdPx(which: WidgetResizeListener.Which): Int {
         return context.run {
-            val frameSize = frameSizeAndPosition.getSizeForType(saveTypeGetter())
+            val frameSize = frameSizeAndPosition.getSizeForType(saveTypeGetter(), this@WidgetFrameAdapter.display)
             if (which == WidgetResizeListener.Which.LEFT || which == WidgetResizeListener.Which.RIGHT) {
                 frameSize.x.toInt() / colCount
             } else {

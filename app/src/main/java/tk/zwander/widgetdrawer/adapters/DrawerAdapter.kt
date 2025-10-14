@@ -11,24 +11,25 @@ import tk.zwander.common.listeners.WidgetResizeListener
 import tk.zwander.common.util.Event
 import tk.zwander.common.util.eventManager
 import tk.zwander.common.util.prefManager
-import tk.zwander.common.util.screenSize
 import tk.zwander.lockscreenwidgets.R
 import tk.zwander.widgetdrawer.activities.add.ReconfigureDrawerWidgetActivity
 
 class DrawerAdapter(
     context: Context,
     rootView: View,
+    displayId: Int,
     onRemoveCallback: (WidgetData, Int) -> Unit,
 ) : BaseAdapter(
     -2,
     context,
     rootView,
     onRemoveCallback,
+    displayId,
 ) {
     override val colCount: Int
         get() = context.prefManager.drawerColCount
     override val rowCount: Int
-        get() = (context.screenSize.y / context.resources.getDimensionPixelSize(R.dimen.drawer_row_height)) - 5
+        get() = (display.realSize.y / context.resources.getDimensionPixelSize(R.dimen.drawer_row_height)) - 5
     override val minRowSpan: Int
         get() = 5
     override val rowSpanForAddButton: Int
@@ -63,7 +64,7 @@ class DrawerAdapter(
     override fun getThresholdPx(which: WidgetResizeListener.Which): Int {
         return context.run {
             if (which == WidgetResizeListener.Which.LEFT || which == WidgetResizeListener.Which.RIGHT) {
-                screenSize.x / colCount
+                this@DrawerAdapter.display.realSize.x / colCount
             } else {
                 resources.getDimensionPixelSize(R.dimen.drawer_row_height)
             }

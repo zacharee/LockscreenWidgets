@@ -6,9 +6,6 @@ import android.animation.AnimatorSet
 import android.animation.ObjectAnimator
 import android.annotation.SuppressLint
 import android.content.Context
-import android.graphics.Point
-import android.util.DisplayMetrics
-import android.util.TypedValue
 import android.view.View
 import androidx.compose.ui.unit.Density
 import androidx.recyclerview.widget.ItemTouchHelper
@@ -95,18 +92,6 @@ fun createTouchHelperCallback(
     }
 }
 
-//Take a DP value and return its representation in pixels.
-fun Context.dpAsPx(dpVal: Number) =
-    TypedValue.applyDimension(
-        TypedValue.COMPLEX_UNIT_DIP,
-        dpVal.toFloat(),
-        displayMetrics,
-    ).roundToInt()
-
-//Take a pixel value and return its representation in DP.
-fun Context.pxAsDp(pxVal: Number) =
-    pxVal.toFloat() / displayMetrics.density
-
 //Fade a View to 0% alpha and 95% scale. Used when hiding the widget frame.
 fun View.fadeAndScaleOut(endListener: () -> Unit) {
     clearAnimation()
@@ -148,22 +133,6 @@ fun View.fadeAndScaleIn(endListener: () -> Unit) {
     }
     animator.start()
 }
-
-val Context.screenSize: Point
-    get() {
-        @Suppress("DEPRECATION")
-        return Point().apply {
-            defaultDisplayCompat.getRealSize(this)
-        }
-    }
-
-val Context.displayMetrics: DisplayMetrics
-    get() {
-        @Suppress("DEPRECATION")
-        return DisplayMetrics().apply {
-            defaultDisplayCompat.getRealMetrics(this)
-        }
-    }
 
 val Context.statusBarHeight: Int
     @SuppressLint("InternalInsetResource", "DiscouragedApi")

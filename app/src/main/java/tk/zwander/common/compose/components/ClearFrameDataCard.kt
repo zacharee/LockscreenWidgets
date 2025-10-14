@@ -51,16 +51,16 @@ fun ClearFrameDataCard(
             FrameDataItem(
                 title = R.string.on_lock_screen,
                 action = {
-                    context.frameSizeAndPosition.setDefaultSizeForType(
+                    context.frameSizeAndPosition.removeSizeForType(
                         FrameSizeAndPosition.FrameType.LockNormal.Portrait,
                     )
-                    context.frameSizeAndPosition.setDefaultSizeForType(
+                    context.frameSizeAndPosition.removeSizeForType(
                         FrameSizeAndPosition.FrameType.LockNormal.Landscape,
                     )
-                    context.frameSizeAndPosition.setDefaultPositionForType(
+                    context.frameSizeAndPosition.removeSizeForType(
                         FrameSizeAndPosition.FrameType.LockNormal.Portrait,
                     )
-                    context.frameSizeAndPosition.setDefaultPositionForType(
+                    context.frameSizeAndPosition.removeSizeForType(
                         FrameSizeAndPosition.FrameType.LockNormal.Landscape,
                     )
                 },
@@ -68,16 +68,16 @@ fun ClearFrameDataCard(
             FrameDataItem(
                 title = R.string.in_notification_center,
                 action = {
-                    context.frameSizeAndPosition.setDefaultSizeForType(
+                    context.frameSizeAndPosition.removeSizeForType(
                         FrameSizeAndPosition.FrameType.NotificationNormal.Portrait,
                     )
-                    context.frameSizeAndPosition.setDefaultSizeForType(
+                    context.frameSizeAndPosition.removeSizeForType(
                         FrameSizeAndPosition.FrameType.NotificationNormal.Landscape,
                     )
-                    context.frameSizeAndPosition.setDefaultPositionForType(
+                    context.frameSizeAndPosition.removeSizeForType(
                         FrameSizeAndPosition.FrameType.NotificationNormal.Portrait,
                     )
-                    context.frameSizeAndPosition.setDefaultPositionForType(
+                    context.frameSizeAndPosition.removeSizeForType(
                         FrameSizeAndPosition.FrameType.NotificationNormal.Landscape,
                     )
                 },
@@ -85,16 +85,16 @@ fun ClearFrameDataCard(
             FrameDataItem(
                 title = R.string.in_locked_notification_center,
                 action = {
-                    context.frameSizeAndPosition.setDefaultSizeForType(
+                    context.frameSizeAndPosition.removeSizeForType(
                         FrameSizeAndPosition.FrameType.LockNotification.Portrait,
                     )
-                    context.frameSizeAndPosition.setDefaultSizeForType(
+                    context.frameSizeAndPosition.removeSizeForType(
                         FrameSizeAndPosition.FrameType.LockNotification.Landscape,
                     )
-                    context.frameSizeAndPosition.setDefaultPositionForType(
+                    context.frameSizeAndPosition.removeSizeForType(
                         FrameSizeAndPosition.FrameType.LockNotification.Portrait,
                     )
-                    context.frameSizeAndPosition.setDefaultPositionForType(
+                    context.frameSizeAndPosition.removeSizeForType(
                         FrameSizeAndPosition.FrameType.LockNotification.Landscape,
                     )
                 },

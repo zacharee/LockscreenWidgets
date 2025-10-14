@@ -43,15 +43,20 @@ import tk.zwander.common.util.mitigations.SafeContextWrapper
 import java.util.concurrent.ConcurrentLinkedDeque
 
 @Suppress("MemberVisibilityCanBePrivate")
-abstract class BaseDelegate<State : Any>(context: Context) : SafeContextWrapper(context),
+abstract class BaseDelegate<State : Any>(
+    context: Context,
+    protected val wm: WindowManager,
+    protected val targetDisplayId: Int,
+) : SafeContextWrapper(context),
     EventObserver, WidgetHostCompat.OnClickCallback, SavedStateRegistryOwner {
-    protected val wm by lazy { windowManager }
     protected val kgm by lazy { keyguardManager }
     protected val wallpaper by lazy { getSystemService(WALLPAPER_SERVICE) as WallpaperManager }
     protected val widgetHost by lazy { widgetHostCompat }
     protected val displayManager by lazy {
         getSystemService(DISPLAY_SERVICE) as DisplayManager
     }
+    val display: LSDisplay
+        get() = requireLsDisplayManager.availableDisplays.value[targetDisplayId]!!
 
     open var commonState: BaseState = BaseState()
         protected set
@@ -73,7 +78,6 @@ abstract class BaseDelegate<State : Any>(context: Context) : SafeContextWrapper(
         override fun onDisplayRemoved(displayId: Int) {}
 
         override fun onDisplayChanged(displayId: Int) {
-            logUtils.debugLog("Display $displayId changed", null)
             updateWindow()
         }
     }

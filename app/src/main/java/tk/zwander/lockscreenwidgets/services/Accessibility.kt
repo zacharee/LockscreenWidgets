@@ -3,6 +3,7 @@ package tk.zwander.lockscreenwidgets.services
 import android.accessibilityservice.AccessibilityService
 import android.annotation.SuppressLint
 import android.os.PowerManager
+import android.view.Display
 import android.view.WindowManager
 import android.view.accessibility.AccessibilityEvent
 import android.view.accessibility.AccessibilityWindowInfo
@@ -19,6 +20,7 @@ import tk.zwander.common.util.AccessibilityUtils.runWindowOperation
 import tk.zwander.common.util.Event
 import tk.zwander.common.util.EventObserver
 import tk.zwander.common.util.HandlerRegistry
+import tk.zwander.common.util.LSDisplayManager
 import tk.zwander.common.util.PrefManager
 import tk.zwander.common.util.copyCompat
 import tk.zwander.common.util.eventManager
@@ -46,13 +48,14 @@ import tk.zwander.widgetdrawer.util.DrawerDelegate
 @SuppressLint("AccessibilityPolicy")
 class Accessibility : AccessibilityService(), EventObserver, CoroutineScope by MainScope() {
     private val kgm by lazy { keyguardManager }
-    private val wm by lazy { getSystemService(WINDOW_SERVICE) as WindowManager }
     private val power by lazy { getSystemService(POWER_SERVICE) as PowerManager }
     private val imm by lazy { getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager }
+    private val lsDisplayManager by lazy { LSDisplayManager.getInstance(this) }
+    private val wm by lazy { lsDisplayManager.windowManager }
     private val frameDelegate: MainWidgetFrameDelegate
-        get() = MainWidgetFrameDelegate.getInstance(this)
+        get() = MainWidgetFrameDelegate.getInstance(this, wm, Display.DEFAULT_DISPLAY)
     private val drawerDelegate: DrawerDelegate
-        get() = DrawerDelegate.getInstance(this)
+        get() = DrawerDelegate.getInstance(this, wm, Display.DEFAULT_DISPLAY)
     private val secondaryFrameDelegates = hashMapOf<Int, SecondaryWidgetFrameDelegate>()
 
     private val sharedPreferencesChangeHandler = HandlerRegistry {
@@ -79,7 +82,7 @@ class Accessibility : AccessibilityService(), EventObserver, CoroutineScope by M
             }
 
             addedFrameIds.forEach { id ->
-                val newFrame = SecondaryWidgetFrameDelegate(this@Accessibility, id)
+                val newFrame = SecondaryWidgetFrameDelegate(this@Accessibility, id, wm, Display.DEFAULT_DISPLAY)
                 newFrame.onCreate()
                 currentFrames.values.firstOrNull()?.let { referenceFrame ->
                     newFrame.updateState { referenceFrame.state }
@@ -108,9 +111,10 @@ class Accessibility : AccessibilityService(), EventObserver, CoroutineScope by M
 
         frameDelegate.onCreate()
         drawerDelegate.onCreate()
+        lsDisplayManager.onCreate()
 
         prefManager.currentSecondaryFrames.forEach { secondaryId ->
-            secondaryFrameDelegates[secondaryId] = SecondaryWidgetFrameDelegate(this, secondaryId).also {
+            secondaryFrameDelegates[secondaryId] = SecondaryWidgetFrameDelegate(this, secondaryId, wm, Display.DEFAULT_DISPLAY).also {
                 it.onCreate()
             }
         }
@@ -181,6 +185,7 @@ class Accessibility : AccessibilityService(), EventObserver, CoroutineScope by M
         }
 
         eventManager.removeObserver(this)
+        lsDisplayManager.onDestroy()
 
         Bugsnag.leaveBreadcrumb("Accessibility service destroyed.")
     }

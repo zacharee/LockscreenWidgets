@@ -1,7 +1,6 @@
 package tk.zwander.common.util
 
 import android.content.Context
-import android.view.Surface
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlin.reflect.full.declaredMemberProperties
 
@@ -12,7 +11,6 @@ val globalState: GlobalState
 data class GlobalState private constructor(
     val wasOnKeyguard: MutableStateFlow<Boolean> = MutableStateFlow(false),
     val isScreenOn: MutableStateFlow<Boolean> = MutableStateFlow(false),
-    val screenOrientation: MutableStateFlow<Int> = MutableStateFlow(Surface.ROTATION_0),
     val isOnFaceWidgets: MutableStateFlow<Boolean> = MutableStateFlow(false),
     val currentAppLayer: MutableStateFlow<Int> = MutableStateFlow(0),
     val isOnScreenOffMemo: MutableStateFlow<Boolean> = MutableStateFlow(false),
