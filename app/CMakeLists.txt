@@ -34,3 +34,5 @@ add_library(
 find_package(bugsnag-plugin-android-ndk REQUIRED CONFIG)
 
 target_link_libraries(${CMAKE_PROJECT_NAME} android log bugsnag-plugin-android-ndk::bugsnag-ndk)
+
+add_link_options("-Wl,--build-id=none")

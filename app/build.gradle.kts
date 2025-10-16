@@ -1,4 +1,5 @@
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import java.util.UUID
 
 plugins {
     alias(libs.plugins.android.application)
@@ -21,6 +22,7 @@ android {
         versionName = "2.23.0"
 
         extensions.getByType(BasePluginExtension::class.java).archivesName.set("LockscreenWidgets_${versionName}")
+        manifestPlaceholders["build_uuid"] = UUID.nameUUIDFromBytes("InstallWithOptions_${versionCode}".toByteArray()).toString()
 
         @Suppress("UnstableApiUsage")
         externalNativeBuild {
