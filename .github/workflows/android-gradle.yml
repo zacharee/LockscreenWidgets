@@ -71,7 +71,7 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: LockscreenWidgets
-        path: ${{ env.STRIPPED_NAME }}
+        path: ${{ env.SIGNED_RELEASE_FILE }}
       env:
         SIGNED_RELEASE_FILE: ${{ env.STRIPPED_NAME }}
     - name: Upload Release APK
