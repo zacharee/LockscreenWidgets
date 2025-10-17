@@ -66,18 +66,19 @@ jobs:
       run: |
         STRIPPED_NAME=$(echo "${{ steps.sign_apk.outputs.signedReleaseFile }}" | sed s/"-unsigned-signed"//)
         mv ${{ steps.sign_apk.outputs.signedReleaseFile }} $STRIPPED_NAME
+        echo "STRIPPED_NAME=$STRIPPED_NAME" >> $GITHUB_ENV
     - name: Upload APK
       if: ${{ always() }}
       uses: actions/upload-artifact@v4
       with:
         name: LockscreenWidgets
-        path: ${{ env.SIGNED_RELEASE_FILE }}
+        path: ${{ env.STRIPPED_NAME }}
       env:
         SIGNED_RELEASE_FILE: ${{ env.STRIPPED_NAME }}
     - name: Upload Release APK
       uses: ncipollo/release-action@v1
       with:
-        artifacts: ${{ env.SIGNED_RELEASE_FILE }}
+        artifacts: ${{ env.STRIPPED_NAME }}
         token: ${{ secrets.GITHUB_TOKEN }}
         allowUpdates: true
         replacesArtifacts: false
