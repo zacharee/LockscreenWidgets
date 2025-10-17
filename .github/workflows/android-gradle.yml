@@ -41,9 +41,9 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: logs
-        path: ${{ github.workspace }}/android/build/outputs/logs/
+        path: ${{ github.workspace }}/app/build/outputs/logs/
     - name: Check Output Exists
-      run: ls -laR ${{ github.workspace }}/android/build/outputs/apk/
+      run: ls -laR ${{ github.workspace }}/app/build/outputs/apk/
     # https://github.com/r0adkll/sign-android-release/issues/84#issuecomment-1889636075
     - name: Set up build tool version variable
       shell: bash
