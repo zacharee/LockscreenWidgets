@@ -30,7 +30,7 @@ jobs:
       run: chmod +x gradlew
     - name: Build with Gradle
       run: |
-        ./gradlew :android:packageRelease
+        ./gradlew :app:packageRelease
         ./gradlew --stop
     - name: Upload Logs
       if: ${{ always() }}
@@ -51,19 +51,33 @@ jobs:
       id: sign_apk
       uses: filippoLeporati93/android-release-signer@v1
       with:
-        releaseDirectory: build/outputs/apk/release
+        releaseDirectory: app/build/outputs/apk/release
         signingKeyBase64: ${{ secrets.ANDROID_SIGNING_KEY }}
         alias: ${{ secrets.ANDROID_SIGNING_KEY_ALIAS }}
         keyStorePassword: ${{ secrets.ANDROID_SIGNING_KEY_PWD }}
         keyPassword: ${{ secrets.ANDROID_SIGNING_KEY_PWD }}
       env:
         BUILD_TOOLS_VERSION: ${{ env.BUILD_TOOL_VERSION }}
+    - name: Rename APK
+      run: |
+        STRIPPED_NAME=${${{ steps.sign_apk.outputs.signedReleaseFile }}/-unsigned-aligned-signed/""}
+        mv ${{ steps.sign_apk.outputs.signedReleaseFile }} ${STRIPPED_NAME}
+    - name: Upload APK
+      if: ${{ always() }}
+      uses: actions/upload-artifact@v4
+      with:
+        name: LockscreenWidgets
+        path: ${{ env.STRIPPED_NAME }}
+      env:
+        SIGNED_RELEASE_FILE: ${{ env.STRIPPED_NAME }}
     - name: Upload Release APK
       uses: ncipollo/release-action@v1
       with:
-        artifacts: ${{ steps.sign_apk.outputs.signedReleaseFile }}
+        artifacts: ${{ env.SIGNED_RELEASE_FILE }}
         token: ${{ secrets.GITHUB_TOKEN }}
         allowUpdates: true
         replacesArtifacts: false
         omitBodyDuringUpdate: true
         tag: ${{ steps.release.outputs.release }}
+      env:
+        SIGNED_RELEASE_FILE: ${{ env.STRIPPED_NAME }}
