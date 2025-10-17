@@ -64,8 +64,8 @@ jobs:
         BUILD_TOOLS_VERSION: ${{ env.BUILD_TOOL_VERSION }}
     - name: Rename APK
       run: |
-        STRIPPED_NAME=${${{ steps.sign_apk.outputs.signedReleaseFile }}/-unsigned-aligned-signed/""}
-        mv ${{ steps.sign_apk.outputs.signedReleaseFile }} ${STRIPPED_NAME}
+        STRIPPED_NAME=$(echo ${{ steps.sign_apk.outputs.signedReleaseFile }} | sed s/"-unsigned-signed"//
+        mv ${{ steps.sign_apk.outputs.signedReleaseFile }} $STRIPPED_NAME
     - name: Upload APK
       if: ${{ always() }}
       uses: actions/upload-artifact@v4
