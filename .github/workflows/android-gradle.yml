@@ -1,0 +1,69 @@
+# This workflow will build a Java project with Gradle
+# For more information see: https://help.github.com/actions/language-and-framework-guides/building-and-testing-java-with-gradle
+
+name: Build for Android
+
+on:
+  release:
+    types:
+      - published
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: Set up JDK 21
+      uses: actions/setup-java@v4
+      with:
+        distribution: 'corretto'
+        java-version: '21'
+    - name: Get Latest Release
+      id: release
+      uses: pozetroninc/github-action-get-latest-release@master
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        repository: ${{ github.repository }}
+    - name: Grant execute permission for gradlew
+      run: chmod +x gradlew
+    - name: Build with Gradle
+      run: |
+        ./gradlew :android:packageRelease
+        ./gradlew --stop
+    - name: Upload Logs
+      if: ${{ always() }}
+      uses: actions/upload-artifact@v4
+      with:
+        name: logs
+        path: ${{ github.workspace }}/android/build/outputs/logs/
+    - name: Check Output Exists
+      run: ls -laR ${{ github.workspace }}/android/build/outputs/apk/
+    # https://github.com/r0adkll/sign-android-release/issues/84#issuecomment-1889636075
+    - name: Set up build tool version variable
+      shell: bash
+      run: |
+        BUILD_TOOL_VERSION=$(ls /usr/local/lib/android/sdk/build-tools/ | tail -n 1)
+        echo "BUILD_TOOL_VERSION=$BUILD_TOOL_VERSION" >> $GITHUB_ENV
+        echo Last build tool version is: $BUILD_TOOL_VERSION
+    - name: Sign APK
+      id: sign_apk
+      uses: filippoLeporati93/android-release-signer@v1
+      with:
+        releaseDirectory: build/outputs/apk/release
+        signingKeyBase64: ${{ secrets.ANDROID_SIGNING_KEY }}
+        alias: ${{ secrets.ANDROID_SIGNING_KEY_ALIAS }}
+        keyStorePassword: ${{ secrets.ANDROID_SIGNING_KEY_PWD }}
+        keyPassword: ${{ secrets.ANDROID_SIGNING_KEY_PWD }}
+      env:
+        BUILD_TOOLS_VERSION: ${{ env.BUILD_TOOL_VERSION }}
+    - name: Upload Release APK
+      uses: ncipollo/release-action@v1
+      with:
+        artifacts: ${{ steps.sign_apk.outputs.signedReleaseFile }}
+        token: ${{ secrets.GITHUB_TOKEN }}
+        allowUpdates: true
+        replacesArtifacts: false
+        omitBodyDuringUpdate: true
+        tag: ${{ steps.release.outputs.release }}
