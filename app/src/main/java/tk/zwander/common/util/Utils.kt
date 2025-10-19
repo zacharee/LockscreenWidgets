@@ -18,6 +18,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
 import com.google.gson.GsonBuilder
+import com.google.gson.Strictness
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
@@ -123,6 +124,15 @@ val AbsListView.verticalScrollOffset: Int
             .invoke(this) as Int
     }
 
-fun Throwable.stringify(): String {
-    return GsonBuilder().create().toJson(this)
+fun Throwable.stringify(): String? {
+    return try {
+        GsonBuilder()
+            .setStrictness(Strictness.LENIENT)
+            .enableComplexMapKeySerialization()
+            .create()
+            .toJson(this)
+    } catch (e: Throwable) {
+        peekLogUtils?.normalLog("Unable to serialize throwable.", e)
+        null
+    }
 }
