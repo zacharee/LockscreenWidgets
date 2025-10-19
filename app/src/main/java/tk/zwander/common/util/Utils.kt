@@ -73,7 +73,7 @@ suspend inline fun <T> Collection<T>.forEachParallel(crossinline action: suspend
     }
 }
 
-suspend inline fun <T, S> Collection<T>.mapIndexedParallel(crossinline action: suspend CoroutineScope.(Int, T) -> S): List<S> {
+suspend inline fun <T, S : Any> Collection<T>.mapIndexedParallel(crossinline action: suspend CoroutineScope.(Int, T) -> S): List<S> {
     return coroutineScope {
         val awaits = ArrayList<Deferred<*>>(size)
         val results = ConcurrentSkipListMap<Int, S>()

@@ -50,7 +50,7 @@ class WidgetHostCompat(
         private val ON_CLICK_HANDLER_CLASS by lazy {
             try {
                 @SuppressLint("PrivateApi")
-                Class.forName("android.widget.RemoteViews\$OnClickHandler")
+                Class.forName($$"android.widget.RemoteViews$OnClickHandler")
             } catch (_: ClassNotFoundException) {
                 null
             }
@@ -59,7 +59,7 @@ class WidgetHostCompat(
         private val INTERACTION_HANDLER_CLASS by lazy {
             try {
                 @SuppressLint("PrivateApi")
-                Class.forName("android.widget.RemoteViews\$InteractionHandler")
+                Class.forName($$"android.widget.RemoteViews$InteractionHandler")
             } catch (_: ClassNotFoundException) {
                 null
             }
@@ -226,7 +226,7 @@ class WidgetHostCompat(
                 val pi = args?.getOrNull(1) as? PendingIntent
                 val response = args?.getOrNull(2)
 
-                val responseClass = Class.forName("android.widget.RemoteViews\$RemoteResponse")
+                val responseClass = Class.forName($$"android.widget.RemoteViews$RemoteResponse")
 
                 val getLaunchOptions = responseClass.getDeclaredMethod("getLaunchOptions", View::class.java)
                 val startPendingIntent = RemoteViews::class.java.getDeclaredMethod(

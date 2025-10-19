@@ -646,7 +646,7 @@ fun Context.openAccessibilitySettings() {
         accIntent.`package` = "com.android.settings"
         accIntent.component = ComponentName(
             "com.android.settings",
-            "com.android.settings.Settings\$AccessibilityInstalledServiceActivity"
+            $$"com.android.settings.Settings$AccessibilityInstalledServiceActivity"
         )
         startActivity(accIntent)
     } catch (e: Exception) {
