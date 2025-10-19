@@ -46,7 +46,7 @@ bugsnag-exitinfo = { module = "com.bugsnag:bugsnag-plugin-android-exitinfo", ver
 byte-buddy-android = { module = "net.bytebuddy:byte-buddy-android", version.ref = "byteBuddyAndroid" }
 colorpicker-compose = { module = "com.github.skydoves:colorpicker-compose", version.ref = "colorpickerCompose" }
 compose-animation = { module = "androidx.compose.animation:animation" }
-compose-bom = { module = "androidx.compose:compose-bom-alpha", version.ref = "composeBom" }
+compose-bom = { module = "androidx.compose:compose-bom", version.ref = "composeBom" }
 compose-foundation = { module = "androidx.compose.foundation:foundation" }
 compose-material3 = { module = "androidx.compose.material3:material3" }
 compose-material-icons-core = { module = "androidx.compose.material:material-icons-core", version.ref = "compose-material-icons-core" }

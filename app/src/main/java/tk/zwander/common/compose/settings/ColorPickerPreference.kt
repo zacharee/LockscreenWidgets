@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -19,7 +20,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
@@ -46,6 +46,7 @@ import com.github.skydoves.colorpicker.compose.AlphaTile
 import com.github.skydoves.colorpicker.compose.BrightnessSlider
 import com.github.skydoves.colorpicker.compose.HsvColorPicker
 import com.github.skydoves.colorpicker.compose.rememberColorPickerController
+import tk.zwander.common.compose.components.AnimatedBottomSheet
 import tk.zwander.common.compose.util.rememberPreferenceState
 import tk.zwander.common.util.prefManager
 import tk.zwander.lockscreenwidgets.R
@@ -124,6 +125,53 @@ fun ColorPickerPreference(
         mutableStateOf(false)
     }
 
+    val bottomSheetState = rememberModalBottomSheetState(
+        skipPartiallyExpanded = true,
+    )
+
+    val controller = rememberColorPickerController()
+    val currentControllerColor by controller.selectedColor
+
+    var textFieldContents by remember(showingPickerDialog) {
+        mutableStateOf(color.toArgb().toHexString())
+    }
+    var textFieldValid by remember(showingPickerDialog) {
+        mutableStateOf(true)
+    }
+    var initialized by remember(showingPickerDialog) {
+        mutableStateOf(false)
+    }
+
+    LaunchedEffect(showingPickerDialog) {
+        controller.selectByColor(color, false)
+        initialized = true
+    }
+
+    LaunchedEffect(currentControllerColor) {
+        if (initialized) {
+            val newColorInt = currentControllerColor.toArgb()
+            val currentColorInt = try {
+                "#${textFieldContents}".toColorInt()
+            } catch (_: IllegalArgumentException) {
+                null
+            }
+
+            if (newColorInt != currentColorInt) {
+                textFieldContents = newColorInt.toHexString()
+            }
+        }
+    }
+
+    LaunchedEffect(textFieldContents) {
+        textFieldValid = try {
+            val newColor = Color("#${textFieldContents}".toColorInt())
+            controller.selectByColor(newColor, false)
+            true
+        } catch (_: IllegalArgumentException) {
+            false
+        }
+    }
+
     BasePreferenceLayout(
         title = title,
         summary = summary,
@@ -148,126 +196,79 @@ fun ColorPickerPreference(
         enabled = enabled,
     )
 
-    if (showingPickerDialog) {
-        val controller = rememberColorPickerController()
-        val currentControllerColor by controller.selectedColor
-
-        val state = rememberModalBottomSheetState(
-            skipPartiallyExpanded = true,
-        )
-
-        var textFieldContents by remember {
-            mutableStateOf(color.toArgb().toHexString())
-        }
-        var textFieldValid by remember {
-            mutableStateOf(true)
-        }
-        var initialized by remember {
-            mutableStateOf(false)
-        }
-
-        LaunchedEffect(null) {
-            controller.selectByColor(color, false)
-            initialized = true
-        }
-
-        LaunchedEffect(currentControllerColor) {
-            if (initialized) {
-                val newColorInt = currentControllerColor.toArgb()
-                val currentColorInt = try {
-                    "#${textFieldContents}".toColorInt()
-                } catch (_: IllegalArgumentException) {
-                    null
-                }
-
-                if (newColorInt != currentColorInt) {
-                    textFieldContents = newColorInt.toHexString()
-                }
-            }
-        }
-
-        LaunchedEffect(textFieldContents) {
-            textFieldValid = try {
-                val newColor = Color("#${textFieldContents}".toColorInt())
-                controller.selectByColor(newColor, false)
-                true
-            } catch (_: IllegalArgumentException) {
-                false
-            }
-        }
-
-        ModalBottomSheet(
-            onDismissRequest = { showingPickerDialog = false },
-            sheetState = state,
+    AnimatedBottomSheet(
+        onDismissRequest = { showingPickerDialog = false },
+        sheetState = bottomSheetState,
+        isVisible = showingPickerDialog,
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxHeight()
+                .fillMaxWidth()
+                .verticalScroll(rememberScrollState())
+                .padding(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
-            Column(
+            HsvColorPicker(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .verticalScroll(rememberScrollState())
-                    .padding(16.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(8.dp),
+                    .height(450.dp),
+                controller = controller,
+            )
+
+            AlphaSlider(
+                controller = controller,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(36.dp),
+            )
+
+            BrightnessSlider(
+                controller = controller,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(36.dp),
+            )
+
+            Spacer(modifier = Modifier.size(8.dp))
+
+            TextField(
+                value = textFieldContents,
+                onValueChange = {
+                    textFieldContents = it.replace(Regex("[^a-fA-F0-9]"), "")
+                },
+                isError = !textFieldValid,
+                textStyle = LocalTextStyle.current.copy(textAlign = TextAlign.Center),
+                prefix = { Text(text = "#") },
+            )
+
+            AlphaTile(
+                modifier = Modifier
+                    .size(84.dp)
+                    .clip(RoundedCornerShape(8.dp)),
+                controller = controller,
+            )
+
+            Row(
+                modifier = Modifier.align(Alignment.End),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
             ) {
-                HsvColorPicker(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(450.dp),
-                    controller = controller,
-                )
-
-                AlphaSlider(
-                    controller = controller,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(36.dp),
-                )
-
-                BrightnessSlider(
-                    controller = controller,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(36.dp),
-                )
-
-                Spacer(modifier = Modifier.size(8.dp))
-
-                TextField(
-                    value = textFieldContents,
-                    onValueChange = {
-                        textFieldContents = it.replace(Regex("[^a-fA-F0-9]"), "")
-                    },
-                    isError = !textFieldValid,
-                    textStyle = LocalTextStyle.current.copy(textAlign = TextAlign.Center),
-                    prefix = { Text(text = "#") },
-                )
-
-                AlphaTile(
-                    modifier = Modifier
-                        .size(84.dp)
-                        .clip(RoundedCornerShape(8.dp)),
-                    controller = controller,
-                )
-
-                Row(
-                    modifier = Modifier.align(Alignment.End),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                TextButton(
+                    onClick = { showingPickerDialog = false },
                 ) {
-                    TextButton(
-                        onClick = { showingPickerDialog = false },
-                    ) {
-                        Text(text = stringResource(R.string.cancel))
-                    }
+                    Text(text = stringResource(R.string.cancel))
+                }
 
-                    TextButton(
-                        onClick = {
-                            showingPickerDialog = false
-                            onColorChanged(controller.selectedColor.value)
-                        },
-                        enabled = textFieldValid,
-                    ) {
-                        Text(text = stringResource(R.string.apply))
-                    }
+                TextButton(
+                    onClick = {
+                        showingPickerDialog = false
+                        onColorChanged(controller.selectedColor.value)
+                    },
+                    enabled = textFieldValid,
+                ) {
+                    Text(text = stringResource(R.string.apply))
                 }
             }
         }

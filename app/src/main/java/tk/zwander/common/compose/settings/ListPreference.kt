@@ -16,7 +16,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
@@ -31,6 +30,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import tk.zwander.common.compose.components.AnimatedBottomSheet
 import tk.zwander.common.compose.util.rememberPreferenceState
 import tk.zwander.common.util.prefManager
 import tk.zwander.lockscreenwidgets.R
@@ -118,6 +118,9 @@ fun ListPreference(
     var showingDialog by remember {
         mutableStateOf(false)
     }
+    val state = rememberModalBottomSheetState(
+        skipPartiallyExpanded = true,
+    )
 
     BasePreferenceLayout(
         title = title,
@@ -139,47 +142,42 @@ fun ListPreference(
         },
     )
 
-    if (showingDialog) {
-        val state = rememberModalBottomSheetState(
-            skipPartiallyExpanded = true,
-        )
-
-        ModalBottomSheet(
-            onDismissRequest = { showingDialog = false },
-            sheetState = state,
+    AnimatedBottomSheet(
+        onDismissRequest = { showingDialog = false },
+        sheetState = state,
+        isVisible = showingDialog,
+    ) {
+        LazyColumn(
+            modifier = Modifier.fillMaxWidth(),
+            contentPadding = PaddingValues(vertical = 8.dp),
         ) {
-            LazyColumn(
-                modifier = Modifier.fillMaxWidth(),
-                contentPadding = PaddingValues(vertical = 8.dp),
-            ) {
-                items(items = entries, key = { it.value ?: "NULL_VALUE" }) { entry ->
-                    Row(
-                        modifier = Modifier.fillMaxWidth()
-                            .heightIn(min = 64.dp)
-                            .clickable { onValueSelected(entry.value) }
-                            .padding(horizontal = 16.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        Text(
-                            text = entry.label,
-                            modifier = Modifier.weight(1f),
-                        )
+            items(items = entries, key = { it.value ?: "NULL_VALUE" }) { entry ->
+                Row(
+                    modifier = Modifier.fillMaxWidth()
+                        .heightIn(min = 64.dp)
+                        .clickable { onValueSelected(entry.value) }
+                        .padding(horizontal = 16.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Text(
+                        text = entry.label,
+                        modifier = Modifier.weight(1f),
+                    )
 
-                        Box(
-                            modifier = Modifier.width(48.dp).heightIn(min = 36.dp),
-                            contentAlignment = Alignment.Center,
+                    Box(
+                        modifier = Modifier.width(48.dp).heightIn(min = 36.dp),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        androidx.compose.animation.AnimatedVisibility(
+                            visible = currentValue == entry.value,
+                            enter = fadeIn(),
+                            exit = fadeOut(),
                         ) {
-                            androidx.compose.animation.AnimatedVisibility(
-                                visible = currentValue == entry.value,
-                                enter = fadeIn(),
-                                exit = fadeOut(),
-                            ) {
-                                Icon(
-                                    painter = painterResource(R.drawable.baseline_check_24),
-                                    contentDescription = stringResource(R.string.selected),
-                                    modifier = Modifier.size(24.dp),
-                                )
-                            }
+                            Icon(
+                                painter = painterResource(R.drawable.baseline_check_24),
+                                contentDescription = stringResource(R.string.selected),
+                                modifier = Modifier.size(24.dp),
+                            )
                         }
                     }
                 }

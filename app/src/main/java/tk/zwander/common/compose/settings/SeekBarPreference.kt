@@ -32,7 +32,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderDefaults
@@ -52,7 +51,7 @@ import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.compositeOver
 import androidx.compose.ui.graphics.painter.Painter
-import androidx.compose.ui.layout.Layout
+import androidx.compose.ui.layout.SubcomposeLayout
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
@@ -62,8 +61,8 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
+import tk.zwander.common.compose.components.AnimatedBottomSheet
 import tk.zwander.common.compose.util.rememberPreferenceState
 import tk.zwander.common.util.prefManager
 import tk.zwander.lockscreenwidgets.R
@@ -211,6 +210,8 @@ private fun SeekBarLayout(
     increment: Int = 1,
     enabled: Boolean = true,
 ) {
+    val density = LocalDensity.current
+
     var showingDialog by remember {
         mutableStateOf(false)
     }
@@ -238,6 +239,38 @@ private fun SeekBarLayout(
                 10.0
             ).roundToInt(), RoundingMode.HALF_UP
         ).toString()
+    }
+
+    var tempValueState by remember(showingDialog) {
+        mutableStateOf(formattedValue)
+    }
+    var textInputHeight by remember(showingDialog) {
+        mutableStateOf(0.dp)
+    }
+    var unitWidth by remember(showingDialog) {
+        mutableStateOf(0.dp)
+    }
+
+    val sheetState = rememberModalBottomSheetState(
+        skipPartiallyExpanded = true,
+    )
+
+    val decimalSeparator = remember {
+        DecimalFormatSymbols.getInstance().decimalSeparator
+    }
+    val canParse = remember(tempValueState) {
+        when {
+            tempValueState.isBlank() -> false
+            tempValueState.toFloatOrNull() == null -> false
+            (tempValueState.toFloat() / scale).let { it > maxValue || it < minValue } -> false
+            scale == 1.0 &&
+                    tempValueState.contains(decimalSeparator) &&
+                    tempValueState.toFloat().toInt()
+                        .toFloat() != tempValueState.toFloat() -> false
+
+            BigDecimal(tempValueState).scale() > -log(scale, 10.0).roundToInt() -> false
+            else -> true
+        }
     }
 
     Row(
@@ -331,10 +364,6 @@ private fun SeekBarLayout(
             },
         )
 
-        var maxValueWidth by remember {
-            mutableStateOf(0.dp)
-        }
-
         Box(
             modifier = Modifier
                 .clickable(
@@ -344,33 +373,41 @@ private fun SeekBarLayout(
                 )
                 .padding(4.dp),
         ) {
-            Layout(
-                modifier = Modifier.size(DpSize.Zero),
-                content = {
-                    Text(
-                        text = unit?.let { "${formattedMaxValue}${unit}" } ?: formattedMaxValue,
-                        modifier = Modifier.alpha(0f),
-                    )
-                },
-            ) { measureable, _ ->
-                val placeable = measureable.first().measure(Constraints())
-                maxValueWidth = placeable.width.toDp()
+            SubcomposeLayout { constraints ->
+                val textWidth = with (density) {
+                    subcompose(
+                        slotId = "ValueText",
+                        content = {
+                            Text(
+                                text = unit?.let { "${formattedMaxValue}${unit}" } ?: formattedMaxValue,
+                                modifier = Modifier.alpha(0f),
+                            )
+                        },
+                    ).map { it.measure(Constraints()) }[0].width.toDp()
+                }
 
-                layout(0, 0) {}
-            }
+                val contents = subcompose(
+                    slotId = "Contents",
+                    content = {
+                        Column(
+                            modifier = Modifier
+                                .width(textWidth),
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.spacedBy(1.dp),
+                        ) {
+                            Text(
+                                text = unit?.let { "${formattedValue}${unit}" } ?: formattedValue,
+                                textAlign = TextAlign.Center,
+                            )
 
-            Column(
-                modifier = Modifier
-                    .width(maxValueWidth),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(1.dp),
-            ) {
-                Text(
-                    text = unit?.let { "${formattedValue}${unit}" } ?: formattedValue,
-                    textAlign = TextAlign.Center,
-                )
+                            HorizontalDivider()
+                        }
+                    },
+                ).map { it.measure(constraints.copy(maxHeight = Constraints.Infinity)) }[0]
 
-                HorizontalDivider()
+                layout(contents.width, contents.height) {
+                    contents.place(0, 0)
+                }
             }
         }
 
@@ -401,164 +438,147 @@ private fun SeekBarLayout(
         }
     }
 
-    if (showingDialog) {
-        val state = rememberModalBottomSheetState(
-            skipPartiallyExpanded = true,
-        )
-        val density = LocalDensity.current
-
-        var tempValueState by remember {
-            mutableStateOf(formattedValue)
-        }
-        var textInputHeight by remember {
-            mutableStateOf(0.dp)
-        }
-        var maxValueWidth by remember {
-            mutableStateOf(0.dp)
-        }
-        var unitWidth by remember {
-            mutableStateOf(0.dp)
-        }
-
-        val decimalSeparator = remember {
-            DecimalFormatSymbols.getInstance().decimalSeparator
-        }
-        val canParse = remember(tempValueState) {
-            when {
-                tempValueState.isBlank() -> false
-                tempValueState.toFloatOrNull() == null -> false
-                (tempValueState.toFloat() / scale).let { it > maxValue || it < minValue } -> false
-                scale == 1.0 &&
-                        tempValueState.contains(decimalSeparator) &&
-                        tempValueState.toFloat().toInt()
-                            .toFloat() != tempValueState.toFloat() -> false
-
-                BigDecimal(tempValueState).scale() > -log(scale, 10.0).roundToInt() -> false
-                else -> true
-            }
-        }
-
-        ModalBottomSheet(
-            onDismissRequest = { showingDialog = false },
-            sheetState = state,
+    AnimatedBottomSheet(
+        onDismissRequest = { showingDialog = false },
+        sheetState = sheetState,
+        isVisible = showingDialog,
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = 32.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .verticalScroll(rememberScrollState())
-                    .padding(horizontal = 32.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-            ) {
-                Row(
-                    modifier = Modifier,
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .heightIn(min = textInputHeight)
-                            .width(IntrinsicSize.Max),
-                        contentAlignment = Alignment.Center,
-                    ) {
-                        Text(
-                            text = formattedMinValue,
-                            textAlign = TextAlign.Center,
-                            modifier = Modifier.widthIn(min = maxValueWidth),
-                        )
-
-                        HorizontalDivider(
-                            modifier = Modifier.align(Alignment.BottomCenter),
-                        )
-                    }
-
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Default.KeyboardArrowLeft,
-                        contentDescription = null,
-                    )
-
-                    OutlinedTextField(
-                        value = tempValueState,
-                        onValueChange = { tempValueState = it.replace(Regex("[^0-9${decimalSeparator}]"), "") },
-                        singleLine = true,
-                        isError = !canParse,
-                        keyboardOptions = KeyboardOptions.Default.copy(
-                            autoCorrectEnabled = false,
-                            keyboardType = if (scale == 1.0) KeyboardType.Number else KeyboardType.Decimal,
-                        ),
-                        modifier = Modifier
-                            .onSizeChanged {
-                                textInputHeight = with(density) { it.height.toDp() }
-                            }
-                            .weight(1f, false)
-                            .widthIn(min = 16.dp, max = Dp.Infinity),
-                        textStyle = LocalTextStyle.current.copy(textAlign = TextAlign.Center),
-                        prefix = unit?.let {
-                            {
-                                Box(
-                                    modifier = Modifier.width(unitWidth),
-                                )
-                            }
+            SubcomposeLayout { constraints ->
+                val textWidth = with (density) {
+                    subcompose(
+                        slotId = "ValueText",
+                        content = {
+                            Text(
+                                text = formattedMaxValue,
+                                modifier = Modifier.alpha(0f),
+                            )
                         },
-                        suffix = unit?.let {
-                            {
-                                Text(
-                                    text = unit,
-                                    modifier = Modifier.onSizeChanged {
-                                        unitWidth = with(density) { it.width.toDp() }
-                                    },
-                                )
-                            }
-                        },
-                    )
-
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Default.KeyboardArrowLeft,
-                        contentDescription = null,
-                    )
-
-                    Box(
-                        modifier = Modifier
-                            .heightIn(min = textInputHeight)
-                            .width(IntrinsicSize.Max),
-                        contentAlignment = Alignment.Center,
-                    ) {
-                        Text(
-                            text = formattedMaxValue,
-                            textAlign = TextAlign.Center,
-                            modifier = Modifier.onSizeChanged {
-                                maxValueWidth = with(density) { it.width.toDp() }
-                            }
-                        )
-
-                        HorizontalDivider(
-                            modifier = Modifier.align(Alignment.BottomCenter),
-                        )
-                    }
+                    ).map { it.measure(Constraints()) }[0].width.toDp()
                 }
 
-                Row(
-                    modifier = Modifier.align(Alignment.End),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                ) {
-                    TextButton(
-                        onClick = { showingDialog = false },
-                    ) {
-                        Text(text = stringResource(R.string.cancel))
-                    }
+                val contents = subcompose(
+                    slotId = "Contents",
+                    content = {
+                        Row(
+                            modifier = Modifier,
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .heightIn(min = textInputHeight)
+                                    .width(IntrinsicSize.Max),
+                                contentAlignment = Alignment.Center,
+                            ) {
+                                Text(
+                                    text = formattedMinValue,
+                                    textAlign = TextAlign.Center,
+                                    modifier = Modifier.widthIn(min = textWidth),
+                                )
 
-                    TextButton(
-                        onClick = {
-                            showingDialog = false
-                            tempValueState.toFloatOrNull()?.let {
-                                onValueChanged((it / scale).toInt())
+                                HorizontalDivider(
+                                    modifier = Modifier.align(Alignment.BottomCenter),
+                                )
                             }
-                        },
-                        enabled = canParse,
-                    ) {
-                        Text(text = stringResource(R.string.apply))
-                    }
+
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Default.KeyboardArrowLeft,
+                                contentDescription = null,
+                            )
+
+                            OutlinedTextField(
+                                value = tempValueState,
+                                onValueChange = { tempValueState = it.replace(Regex("[^0-9${decimalSeparator}]"), "") },
+                                singleLine = true,
+                                isError = !canParse,
+                                keyboardOptions = KeyboardOptions.Default.copy(
+                                    autoCorrectEnabled = false,
+                                    keyboardType = if (scale == 1.0) KeyboardType.Number else KeyboardType.Decimal,
+                                ),
+                                modifier = Modifier
+                                    .onSizeChanged {
+                                        textInputHeight = with(density) { it.height.toDp() }
+                                    }
+                                    .weight(1f, false)
+                                    .widthIn(min = 16.dp, max = Dp.Infinity),
+                                textStyle = LocalTextStyle.current.copy(textAlign = TextAlign.Center),
+                                prefix = unit?.let {
+                                    {
+                                        Box(
+                                            modifier = Modifier.width(unitWidth),
+                                        )
+                                    }
+                                },
+                                suffix = unit?.let {
+                                    {
+                                        Text(
+                                            text = unit,
+                                            modifier = Modifier.onSizeChanged {
+                                                unitWidth = with(density) { it.width.toDp() }
+                                            },
+                                        )
+                                    }
+                                },
+                            )
+
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Default.KeyboardArrowLeft,
+                                contentDescription = null,
+                            )
+
+                            Box(
+                                modifier = Modifier
+                                    .heightIn(min = textInputHeight)
+                                    .width(IntrinsicSize.Max),
+                                contentAlignment = Alignment.Center,
+                            ) {
+                                Text(
+                                    text = formattedMaxValue,
+                                    textAlign = TextAlign.Center,
+                                )
+
+                                HorizontalDivider(
+                                    modifier = Modifier.align(Alignment.BottomCenter),
+                                )
+                            }
+                        }
+                    },
+                ).map { it.measure(constraints.copy(maxHeight = Constraints.Infinity)) }[0]
+
+                layout(constraints.maxWidth, contents.height) {
+                    contents.place(0, 0)
+                }
+            }
+
+            Row(
+                modifier = Modifier.align(Alignment.End),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                TextButton(
+                    onClick = { showingDialog = false },
+                ) {
+                    Text(text = stringResource(R.string.cancel))
+                }
+
+                TextButton(
+                    onClick = {
+                        showingDialog = false
+                        tempValueState.toFloatOrNull()?.let {
+                            onValueChanged((it / scale).toInt())
+                        }
+                    },
+                    enabled = canParse,
+                ) {
+                    Text(text = stringResource(R.string.apply))
                 }
             }
         }
