@@ -5,10 +5,23 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 import tk.zwander.common.util.prefManager
+
+@Composable
+fun <T> rememberPreferenceState(
+    key: String,
+    value: (String) -> T,
+): State<T> {
+    return rememberPreferenceState(
+        key = key,
+        value = value,
+        onChanged = { _, _ -> },
+    )
+}
 
 @Composable
 fun <T> rememberPreferenceState(

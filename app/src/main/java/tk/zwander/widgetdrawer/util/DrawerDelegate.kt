@@ -20,19 +20,25 @@ import android.view.WindowManager
 import android.view.animation.AccelerateInterpolator
 import android.view.animation.DecelerateInterpolator
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
 import androidx.core.animation.doOnEnd
 import androidx.core.content.ContextCompat
 import androidx.core.view.updatePaddingRelative
 import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.setViewTreeLifecycleOwner
 import androidx.recyclerview.widget.RecyclerView
+import androidx.savedstate.setViewTreeSavedStateRegistryOwner
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import tk.zwander.common.activities.DismissOrUnlockActivity
 import tk.zwander.common.compose.components.BlurView
+import tk.zwander.common.compose.components.DrawerHandle
 import tk.zwander.common.data.WidgetData
 import tk.zwander.common.util.BaseDelegate
 import tk.zwander.common.util.Event
@@ -44,12 +50,14 @@ import tk.zwander.common.util.handler
 import tk.zwander.common.util.logUtils
 import tk.zwander.common.util.mainHandler
 import tk.zwander.common.util.prefManager
+import tk.zwander.common.util.safeAddView
+import tk.zwander.common.util.safeRemoveView
+import tk.zwander.common.util.safeUpdateViewLayout
 import tk.zwander.common.util.statusBarHeight
 import tk.zwander.lockscreenwidgets.R
 import tk.zwander.lockscreenwidgets.databinding.DrawerLayoutBinding
 import tk.zwander.lockscreenwidgets.services.Accessibility
 import tk.zwander.widgetdrawer.adapters.DrawerAdapter
-import tk.zwander.widgetdrawer.views.Handle
 import kotlin.math.absoluteValue
 import kotlin.math.sign
 
@@ -122,11 +130,44 @@ class DrawerDelegate private constructor(context: Context, wm: WindowManager, di
             prefManager.drawerWidgets = LinkedHashSet(value)
         }
 
-    val scrollingOpen: Boolean
-        get() = handle.scrollingOpen
+    var scrollingOpen: Boolean = false
+
+    var handleVisible by mutableStateOf(false)
+
+    private val handleParams by lazy {
+        WindowManager.LayoutParams().apply {
+            type = WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY
+            flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
+            width = display.dpToPx(context.prefManager.drawerHandleWidth)
+            height = display.dpToPx(context.prefManager.drawerHandleHeight)
+            gravity = Gravity.TOP or context.prefManager.drawerHandleSide
+            y = context.prefManager.drawerHandleYPosition
+            format = PixelFormat.RGBA_8888
+        }
+    }
 
     private val drawer by lazy { DrawerLayoutBinding.inflate(LayoutInflater.from(ContextThemeWrapper(this, R.style.AppTheme))) }
-    private val handle by lazy { Handle(this, displayId) }
+    private val handle by lazy {
+        ComposeView(ContextThemeWrapper(this, R.style.AppTheme)).apply {
+            setContent {
+                DrawerHandle(
+                    params = handleParams,
+                    visible = handleVisible,
+                    displayId = displayId,
+                    updateWindow = {
+                        wm.safeUpdateViewLayout(this, handleParams)
+                    },
+                    onScrollStateChanged = {
+                        scrollingOpen = it
+                    },
+                    fadeOutComplete = {
+                        wm.safeRemoveView(this)
+                    },
+                    modifier = Modifier.fillMaxSize(),
+                )
+            }
+        }
+    }
 
     override val adapter by lazy {
         DrawerAdapter(context, rootView, displayId) { widget, _ ->
@@ -177,7 +218,7 @@ class DrawerDelegate private constructor(context: Context, wm: WindowManager, di
             if (!prefManager.showDrawerHandleOnlyWhenLocked) {
                 tryShowHandle()
             } else if (!globalState.wasOnKeyguard.value) {
-                handle.hide(wm)
+                hideHandle()
             }
         }
     }
@@ -230,7 +271,7 @@ class DrawerDelegate private constructor(context: Context, wm: WindowManager, di
 
             is Event.DrawerAttachmentState -> {
                 if (event.attached) {
-                    if (!handle.scrollingOpen) {
+                    if (!scrollingOpen) {
                         Handler(Looper.getMainLooper()).postDelayed({
                             if (prefManager.drawerForceWidgetReload) {
                                 adapter.updateViews()
@@ -246,7 +287,7 @@ class DrawerDelegate private constructor(context: Context, wm: WindowManager, di
                         drawer.root.paddingBottom
                     )
 
-                    if (!handle.scrollingOpen) {
+                    if (!scrollingOpen) {
                         drawer.root.handler?.postDelayed({
                             currentVisibilityAnim?.cancel()
                             val anim = ValueAnimator.ofFloat(drawer.root.alpha, 1f)
@@ -277,7 +318,10 @@ class DrawerDelegate private constructor(context: Context, wm: WindowManager, di
                     } catch (_: NullPointerException) {
                         //AppWidgetServiceImpl$ProviderId NPE
                     }
-                    lifecycleRegistry.currentState = Lifecycle.State.STARTED
+
+                    if (!handle.isAttachedToWindow) {
+                        lifecycleRegistry.currentState = Lifecycle.State.STARTED
+                    }
                 }
             }
 
@@ -337,7 +381,7 @@ class DrawerDelegate private constructor(context: Context, wm: WindowManager, di
 
             Event.LockscreenDismissed -> {
                 if (prefManager.showDrawerHandleOnlyWhenLocked && !globalState.wasOnKeyguard.value) {
-                    handle.hide(wm)
+                    hideHandle()
                 }
             }
 
@@ -377,6 +421,9 @@ class DrawerDelegate private constructor(context: Context, wm: WindowManager, di
             },
             ContextCompat.RECEIVER_EXPORTED,
         )
+
+        handle.setViewTreeLifecycleOwner(this)
+        handle.setViewTreeSavedStateRegistryOwner(this)
 
         drawer.widgetGrid.nestedScrollingListener = {
             itemTouchHelper.attachToRecyclerView(
@@ -418,7 +465,7 @@ class DrawerDelegate private constructor(context: Context, wm: WindowManager, di
         super.onDestroy()
 
         hideDrawer(false)
-        handle.hide(wm)
+        hideHandle()
 
         unregisterReceiver(globalReceiver)
         invalidateInstance()
@@ -435,7 +482,7 @@ class DrawerDelegate private constructor(context: Context, wm: WindowManager, di
 
     private fun hideAll() {
         hideDrawer(false)
-        handle.hide(wm)
+        hideHandle()
     }
 
     private fun tryShowHandle() {
@@ -444,12 +491,22 @@ class DrawerDelegate private constructor(context: Context, wm: WindowManager, di
                 return
             }
 
-            handle.show(wm)
+            if (lifecycleRegistry.currentState < Lifecycle.State.CREATED) {
+                lifecycleRegistry.currentState = Lifecycle.State.CREATED
+            }
+            lifecycleRegistry.currentState = Lifecycle.State.RESUMED
+
+            wm.safeAddView(handle, handleParams)
+            handleVisible = true
         }
     }
 
     private fun hideHandle() {
-        handle.hide(wm)
+        if (!drawer.root.isAttachedToWindow) {
+            lifecycleRegistry.currentState = Lifecycle.State.STARTED
+        }
+
+        handleVisible = false
     }
 
     private fun showDrawer(wm: WindowManager = this.wm, hideHandle: Boolean = true) {
@@ -462,7 +519,7 @@ class DrawerDelegate private constructor(context: Context, wm: WindowManager, di
         }
 
         if (hideHandle) {
-            handle.hide(wm)
+            hideHandle()
         }
     }
 

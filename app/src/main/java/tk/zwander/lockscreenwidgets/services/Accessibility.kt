@@ -109,9 +109,9 @@ class Accessibility : AccessibilityService(), EventObserver, CoroutineScope by M
             notificationTimeout = prefManager.accessibilityEventDelay.toLong()
         }
 
+        lsDisplayManager.onCreate()
         frameDelegate.onCreate()
         drawerDelegate.onCreate()
-        lsDisplayManager.onCreate()
 
         prefManager.currentSecondaryFrames.forEach { secondaryId ->
             secondaryFrameDelegates[secondaryId] = SecondaryWidgetFrameDelegate(this, secondaryId, wm, Display.DEFAULT_DISPLAY).also {
