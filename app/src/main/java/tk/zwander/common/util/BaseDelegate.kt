@@ -56,7 +56,7 @@ abstract class BaseDelegate<State : Any>(
         getSystemService(DISPLAY_SERVICE) as DisplayManager
     }
     val display: LSDisplay
-        get() = requireLsDisplayManager.availableDisplays.value[targetDisplayId]!!
+        get() = requireLsDisplayManager.requireDisplay(targetDisplayId)
 
     open var commonState: BaseState = BaseState()
         protected set

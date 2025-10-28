@@ -121,7 +121,7 @@ abstract class BaseAdapter(
     protected val viewCacheRegistry = context.widgetViewCacheRegistry
 
     protected val display: LSDisplay
-        get() = context.requireLsDisplayManager.availableDisplays.value[displayId]!!
+        get() = context.requireLsDisplayManager.requireDisplay(displayId)
 
     private val baseLayoutInflater =
         LayoutInflater.from(context).cloneInContext(ContextThemeWrapper(context, R.style.AppTheme))

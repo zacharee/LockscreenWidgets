@@ -1,5 +1,6 @@
 package tk.zwander.common.compose.components
 
+import android.annotation.SuppressLint
 import android.view.Gravity
 import android.view.MotionEvent
 import android.view.WindowManager
@@ -21,6 +22,7 @@ import androidx.compose.foundation.shape.AbsoluteRoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -45,6 +47,7 @@ import tk.zwander.common.util.vibrate
 import tk.zwander.lockscreenwidgets.R
 import kotlin.math.absoluteValue
 
+@SuppressLint("RtlHardcoded")
 @Composable
 fun DrawerHandle(
     params: WindowManager.LayoutParams,
@@ -57,11 +60,9 @@ fun DrawerHandle(
 ) {
     val context = LocalContext.current
     val density = LocalDensity.current
-    val screenWidth = remember(displayId) {
-        val display = context.requireLsDisplayManager
-            .availableDisplays
-            .value[displayId]!!
-        display.realSize.x
+    val currentDisplay by context.requireLsDisplayManager.collectDisplay(displayId).collectAsState(null)
+    val screenWidth = remember(currentDisplay) {
+        currentDisplay?.realSize?.x ?: 1
     }
 
     var side by rememberPreferenceState(

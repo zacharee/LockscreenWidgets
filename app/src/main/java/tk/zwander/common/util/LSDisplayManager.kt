@@ -10,7 +10,9 @@ import android.view.Display
 import android.view.WindowManager
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.map
 import tk.zwander.lockscreenwidgets.services.Accessibility
 import kotlin.math.roundToInt
 
@@ -73,7 +75,7 @@ class LSDisplayManager private constructor(context: Context) : ContextWrapper(co
         }
     }
 
-    val availableDisplays = MutableStateFlow(mapOf<Int, LSDisplay>())
+    private val availableDisplays = MutableStateFlow(mapOf<Int, LSDisplay>())
 
     fun onCreate() {
         availableDisplays.value = displayManager.displays.map {
@@ -91,12 +93,17 @@ class LSDisplayManager private constructor(context: Context) : ContextWrapper(co
         instance = null
     }
 
-    fun realSizeForDisplay(displayId: Int): Point? {
-        return availableDisplays.value[displayId]?.realSize
+    fun getDisplay(displayId: Int): LSDisplay? {
+        return availableDisplays.value[displayId]
     }
 
-    fun metricsForDisplay(displayId: Int): DisplayMetrics? {
-        return availableDisplays.value[displayId]?.realMetrics
+    fun requireDisplay(displayId: Int): LSDisplay {
+        return getDisplay(displayId)
+            ?: throw NullPointerException("Display for $displayId not found!")
+    }
+
+    fun collectDisplay(displayId: Int): Flow<LSDisplay?> {
+        return availableDisplays.map { it[displayId] }
     }
 }
 
