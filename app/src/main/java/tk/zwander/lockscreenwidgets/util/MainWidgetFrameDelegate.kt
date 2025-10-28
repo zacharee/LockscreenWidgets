@@ -547,16 +547,11 @@ open class MainWidgetFrameDelegate protected constructor(
             }
         }
         binding.blurBackground.setContent {
-            BlurView(
+            viewModel.BlurView(
                 modifier = Modifier.fillMaxSize(),
                 blurKey = framePrefs.keyFor(PrefManager.KEY_BLUR_BACKGROUND),
                 blurAmountKey = framePrefs.keyFor(PrefManager.KEY_BLUR_BACKGROUND_AMOUNT),
-                params = params,
-                updateWindow = {
-                    updateOverlay()
-                },
                 cornerRadiusKey = PrefManager.KEY_FRAME_CORNER_RADIUS,
-                wm = wm,
             )
         }
 

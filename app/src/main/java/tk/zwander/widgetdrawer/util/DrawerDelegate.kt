@@ -27,17 +27,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
 import androidx.core.animation.doOnEnd
 import androidx.core.content.ContextCompat
-import androidx.core.view.updatePaddingRelative
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.setViewTreeLifecycleOwner
 import androidx.recyclerview.widget.RecyclerView
 import androidx.savedstate.setViewTreeSavedStateRegistryOwner
+import com.joaomgcd.taskerpluginlibrary.extensions.requestQuery
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import tk.zwander.common.activities.DismissOrUnlockActivity
-import tk.zwander.common.compose.components.BlurView
 import tk.zwander.common.compose.components.DrawerHandle
 import tk.zwander.common.data.WidgetData
 import tk.zwander.common.util.BaseDelegate
@@ -53,11 +52,13 @@ import tk.zwander.common.util.prefManager
 import tk.zwander.common.util.safeAddView
 import tk.zwander.common.util.safeRemoveView
 import tk.zwander.common.util.safeUpdateViewLayout
-import tk.zwander.common.util.statusBarHeight
 import tk.zwander.lockscreenwidgets.R
-import tk.zwander.lockscreenwidgets.databinding.DrawerLayoutBinding
+import tk.zwander.lockscreenwidgets.databinding.ComposeViewHolderBinding
 import tk.zwander.lockscreenwidgets.services.Accessibility
+import tk.zwander.widgetdrawer.activities.TaskerIsShowingDrawer
 import tk.zwander.widgetdrawer.adapters.DrawerAdapter
+import tk.zwander.widgetdrawer.compose.Drawer
+import tk.zwander.widgetdrawer.views.DrawerRecycler
 import kotlin.math.absoluteValue
 import kotlin.math.sign
 
@@ -121,9 +122,7 @@ class DrawerDelegate private constructor(context: Context, wm: WindowManager, di
     override val rootView: View
         get() = drawer.root
     override val recyclerView: RecyclerView
-        get() = drawer.widgetGrid
-    override val removeConfirmationView: ComposeView
-        get() = drawer.removeView
+        get() = widgetGrid
     override var currentWidgets: List<WidgetData>
         get() = prefManager.drawerWidgets.toList()
         set(value) {
@@ -146,7 +145,36 @@ class DrawerDelegate private constructor(context: Context, wm: WindowManager, di
         }
     }
 
-    private val drawer by lazy { DrawerLayoutBinding.inflate(LayoutInflater.from(ContextThemeWrapper(this, R.style.AppTheme))) }
+    private val widgetGrid by lazy {
+        DrawerRecycler(
+            ContextThemeWrapper(this, R.style.AppTheme),
+        )
+    }
+
+    private val drawer by lazy {
+        ComposeViewHolderBinding.inflate(
+            LayoutInflater.from(
+                ContextThemeWrapper(this, R.style.AppTheme),
+            ),
+        ).apply {
+            root.setContent {
+                viewModel.Drawer(
+                    widgetGrid = widgetGrid,
+                    modifier = Modifier.fillMaxSize(),
+                )
+            }
+
+            root.addOnAttachStateChangeListener(object : View.OnAttachStateChangeListener {
+                override fun onViewAttachedToWindow(v: View) {
+                    eventManager.sendEvent(Event.DrawerAttachmentState(true))
+                }
+
+                override fun onViewDetachedFromWindow(v: View) {
+                    eventManager.sendEvent(Event.DrawerAttachmentState(false))
+                }
+            })
+        }
+    }
     private val handle by lazy {
         ComposeView(ContextThemeWrapper(this, R.style.AppTheme)).apply {
             setContent {
@@ -211,9 +239,6 @@ class DrawerDelegate private constructor(context: Context, wm: WindowManager, di
         handler(PrefManager.KEY_LOCK_WIDGET_DRAWER) {
             adapter.currentEditingInterfacePosition = -1
         }
-        handler(PrefManager.KEY_DRAWER_SIDE_PADDING) {
-            updateSidePadding()
-        }
         handler(PrefManager.KEY_SHOW_DRAWER_HANDLE_ONLY_WHEN_LOCKED) {
             if (!prefManager.showDrawerHandleOnlyWhenLocked) {
                 tryShowHandle()
@@ -224,6 +249,8 @@ class DrawerDelegate private constructor(context: Context, wm: WindowManager, di
     }
 
     override val gridLayoutManager = SpannedLayoutManager()
+
+    override val viewModel = DrawerViewModel(this)
 
     @Suppress("DEPRECATION")
     private val globalReceiver = object : BroadcastReceiver() {
@@ -270,6 +297,7 @@ class DrawerDelegate private constructor(context: Context, wm: WindowManager, di
             }
 
             is Event.DrawerAttachmentState -> {
+                TaskerIsShowingDrawer::class.java.requestQuery(this)
                 if (event.attached) {
                     if (!scrollingOpen) {
                         Handler(Looper.getMainLooper()).postDelayed({
@@ -279,13 +307,6 @@ class DrawerDelegate private constructor(context: Context, wm: WindowManager, di
                         }, 50)
                         widgetHost.startListening(this)
                     }
-
-                    drawer.widgetGrid.setPadding(
-                        drawer.root.paddingLeft,
-                        statusBarHeight,
-                        drawer.root.paddingRight,
-                        drawer.root.paddingBottom
-                    )
 
                     if (!scrollingOpen) {
                         drawer.root.handler?.postDelayed({
@@ -425,27 +446,6 @@ class DrawerDelegate private constructor(context: Context, wm: WindowManager, di
         handle.setViewTreeLifecycleOwner(this)
         handle.setViewTreeSavedStateRegistryOwner(this)
 
-        drawer.widgetGrid.nestedScrollingListener = {
-            itemTouchHelper.attachToRecyclerView(
-                if (it) {
-                    null
-                } else {
-                    drawer.widgetGrid
-                }
-            )
-        }
-        drawer.blurBackground.setContent {
-            BlurView(
-                blurKey = PrefManager.KEY_BLUR_DRAWER_BACKGROUND,
-                blurAmountKey = PrefManager.KEY_BLUR_DRAWER_BACKGROUND_AMOUNT,
-                params = params,
-                updateWindow = { updateWindow() },
-                modifier = Modifier.fillMaxSize(),
-                wm = wm,
-            )
-        }
-
-        updateSidePadding()
         tryShowHandle()
 
         gridLayoutManager.customHeight = resources.getDimensionPixelSize(R.dimen.drawer_row_height).toDouble()
@@ -473,7 +473,7 @@ class DrawerDelegate private constructor(context: Context, wm: WindowManager, di
 
     override fun onItemSelected(selected: Boolean, highlighted: Boolean) {
         super.onItemSelected(selected, highlighted)
-        drawer.widgetGrid.selectedItem = selected
+        viewModel.selectedItem.value = selected
     }
 
     override fun isLocked(): Boolean {
@@ -581,15 +581,6 @@ class DrawerDelegate private constructor(context: Context, wm: WindowManager, di
         return null to prefManager.drawerColCount
     }
 
-    private fun updateSidePadding() {
-        val padding = display.dpToPx(prefManager.drawerSidePadding)
-
-        drawer.widgetGrid.updatePaddingRelative(
-            start = padding,
-            end = padding
-        )
-    }
-
     inner class SpannedLayoutManager : LayoutManager(
         this@DrawerDelegate,
         RecyclerView.VERTICAL,
@@ -602,4 +593,8 @@ class DrawerDelegate private constructor(context: Context, wm: WindowManager, di
     }
 
     class State
+
+    class DrawerViewModel(delegate: DrawerDelegate) : BaseViewModel<State>(delegate) {
+        val selectedItem = MutableStateFlow(false)
+    }
 }

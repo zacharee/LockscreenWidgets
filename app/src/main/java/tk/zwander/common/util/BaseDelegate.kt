@@ -21,6 +21,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleRegistry
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.setViewTreeLifecycleOwner
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
@@ -32,6 +33,7 @@ import com.arasthel.spannedgridlayoutmanager.SpannedGridLayoutManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.flow.MutableStateFlow
 import tk.zwander.common.adapters.BaseAdapter
 import tk.zwander.common.compose.AppTheme
 import tk.zwander.common.compose.components.ConfirmWidgetRemovalLayout
@@ -61,6 +63,8 @@ abstract class BaseDelegate<State : Any>(
     open var commonState: BaseState = BaseState()
         protected set
 
+    open val viewModel = BaseViewModel(this)
+
     abstract var state: State
         protected set
 
@@ -70,7 +74,7 @@ abstract class BaseDelegate<State : Any>(
     protected abstract val params: WindowManager.LayoutParams
     protected abstract val rootView: View
     protected abstract val recyclerView: RecyclerView
-    protected abstract val removeConfirmationView: ComposeView
+    protected open val removeConfirmationView: ComposeView? = null
     protected abstract var currentWidgets: List<WidgetData>
 
     protected  val displayListener = object : DisplayListener {
@@ -131,7 +135,7 @@ abstract class BaseDelegate<State : Any>(
         rootView.setViewTreeLifecycleOwner(this)
         rootView.setViewTreeSavedStateRegistryOwner(this)
 
-        removeConfirmationView.setContent {
+        removeConfirmationView?.setContent {
             AppTheme {
                 AnimatedVisibility(
                     visible = itemToRemove != null,
@@ -311,6 +315,23 @@ abstract class BaseDelegate<State : Any>(
 
         fun doOnLayoutCompleted(callback: () -> Unit) {
             onLayoutCompletedCallbacks.add(callback)
+        }
+    }
+
+    open class BaseViewModel<State : Any>(private val delegate: BaseDelegate<State>) : ViewModel() {
+        val itemToRemove = MutableStateFlow<WidgetData?>(null)
+
+        val params: WindowManager.LayoutParams
+            get() = delegate.params
+
+        val wm: WindowManager
+            get() = delegate.wm
+
+        val itemTouchHelper: ItemTouchHelper
+            get() = delegate.itemTouchHelper
+
+        fun updateWindow() {
+            delegate.updateWindow()
         }
     }
 }

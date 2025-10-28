@@ -18,17 +18,15 @@ import com.google.accompanist.drawablepainter.rememberDrawablePainter
 import tk.zwander.common.compose.util.rememberBooleanPreferenceState
 import tk.zwander.common.compose.util.rememberPreferenceState
 import tk.zwander.common.drawable.BackgroundBlurDrawableCompat
+import tk.zwander.common.util.BaseDelegate
 import tk.zwander.common.util.logUtils
 import tk.zwander.common.util.prefManager
 import java.util.function.Consumer
 
 @Composable
-fun BlurView(
+fun BaseDelegate.BaseViewModel<*>.BlurView(
     blurKey: String,
     blurAmountKey: String,
-    params: WindowManager.LayoutParams,
-    wm: WindowManager,
-    updateWindow: () -> Unit,
     modifier: Modifier = Modifier,
     cornerRadiusKey: String? = null,
 ) {
