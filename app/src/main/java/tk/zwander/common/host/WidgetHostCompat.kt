@@ -233,7 +233,9 @@ class WidgetHostCompat(
                     "startPendingIntent", View::class.java, PendingIntent::class.java, android.util.Pair::class.java)
 
                 @Suppress("UNCHECKED_CAST")
-                val launchOptions = getLaunchOptions.invoke(response, view) as android.util.Pair<Intent, ActivityOptions>
+                val launchOptions = response?.let {
+                    getLaunchOptions.invoke(response, view) as? android.util.Pair<Intent, ActivityOptions>
+                }
 
                 return if (checkPendingIntent(pi, widgetId)) {
                     startPendingIntent.invoke(null, view, pi, launchOptions) as Boolean
