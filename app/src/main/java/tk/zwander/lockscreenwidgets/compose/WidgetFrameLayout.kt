@@ -60,6 +60,7 @@ import com.google.accompanist.drawablepainter.rememberDrawablePainter
 import tk.zwander.common.compose.AppTheme
 import tk.zwander.common.compose.components.BlurView
 import tk.zwander.common.compose.components.ConfirmFrameRemovalLayout
+import tk.zwander.common.compose.components.ConfirmWidgetRemovalLayout
 import tk.zwander.common.compose.components.ContentColoredOutlinedButton
 import tk.zwander.common.compose.components.FrameEditWrapperLayout
 import tk.zwander.common.compose.util.rememberPreferenceState
@@ -102,6 +103,7 @@ fun MainWidgetFrameDelegate.WidgetFrameViewModel.WidgetFrameLayout(
         key = framePrefs.keyFor(PrefManager.KEY_MASKED_MODE_DIM_AMOUNT),
         value = { framePrefs.maskedModeDimAmount },
     )
+    var itemToRemove by this.itemToRemove.collectAsMutableState()
     @Suppress("VariableNeverRead")
     var acknowledgedTwoFingerTap by this.acknowledgedTwoFingerTap.collectAsMutableState()
 
@@ -231,10 +233,30 @@ fun MainWidgetFrameDelegate.WidgetFrameViewModel.WidgetFrameLayout(
                 )
 
                 androidx.compose.animation.AnimatedVisibility(
-                    visible = debugIdVisibility,
+                    visible = itemToRemove != null,
                     enter = fadeIn(),
                     exit = fadeOut(),
                     modifier = Modifier.zIndex(3f),
+                ) {
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        ConfirmWidgetRemovalLayout(
+                            itemToRemove = itemToRemove,
+                            onItemRemovalConfirmed = { removed, data ->
+                                context.eventManager.sendEvent(Event.RemoveWidgetConfirmed(removed, data))
+                                itemToRemove = null
+                            },
+                        )
+                    }
+                }
+
+                androidx.compose.animation.AnimatedVisibility(
+                    visible = debugIdVisibility,
+                    enter = fadeIn(),
+                    exit = fadeOut(),
+                    modifier = Modifier.zIndex(4f),
                 ) {
                     Box(
                         modifier = Modifier.fillMaxSize(),
@@ -255,7 +277,7 @@ fun MainWidgetFrameDelegate.WidgetFrameViewModel.WidgetFrameLayout(
                     visible = isInEditingMode,
                     enter = fadeIn(),
                     exit = fadeOut(),
-                    modifier = Modifier.zIndex(4f),
+                    modifier = Modifier.zIndex(5f),
                 ) {
                     Box(
                         modifier = Modifier.fillMaxSize(),
@@ -274,7 +296,7 @@ fun MainWidgetFrameDelegate.WidgetFrameViewModel.WidgetFrameLayout(
                     visible = removing,
                     enter = fadeIn(),
                     exit = fadeOut(),
-                    modifier = Modifier.zIndex(5f),
+                    modifier = Modifier.zIndex(6f),
                 ) {
                     Box(
                         modifier = Modifier.fillMaxSize(),
@@ -294,7 +316,7 @@ fun MainWidgetFrameDelegate.WidgetFrameViewModel.WidgetFrameLayout(
                     visible = proxTooClose,
                     enter = fadeIn(),
                     exit = fadeOut(),
-                    modifier = Modifier.zIndex(6f),
+                    modifier = Modifier.zIndex(7f),
                 ) {
                     Box(
                         modifier = Modifier
@@ -316,7 +338,7 @@ fun MainWidgetFrameDelegate.WidgetFrameViewModel.WidgetFrameLayout(
                     visible = selectingFrame,
                     enter = fadeIn(),
                     exit = fadeOut(),
-                    modifier = Modifier.zIndex(7f),
+                    modifier = Modifier.zIndex(8f),
                 ) {
                     MeasuredComposable(name = "SelectFrameLayoutContent") {
                         AppTheme {

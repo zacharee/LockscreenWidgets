@@ -224,7 +224,7 @@ open class MainWidgetFrameDelegate protected constructor(
             context = context,
             rootView = rootView,
             onRemoveCallback = { item, _ ->
-                itemToRemove = item
+                viewModel.itemToRemove.value = item
             },
             displayId = displayId,
             saveTypeGetter = { saveMode },

@@ -59,6 +59,7 @@ import kotlinx.coroutines.withContext
 import tk.zwander.common.activities.DismissOrUnlockActivity
 import tk.zwander.common.activities.PermissionIntentLaunchActivity
 import tk.zwander.common.compose.AppTheme
+import tk.zwander.common.compose.components.ShortcutItemLayout
 import tk.zwander.common.compose.util.widgetViewCacheRegistry
 import tk.zwander.common.data.WidgetData
 import tk.zwander.common.data.WidgetType
@@ -68,6 +69,7 @@ import tk.zwander.common.util.BrokenAppsRegistry
 import tk.zwander.common.util.Event
 import tk.zwander.common.util.EventObserver
 import tk.zwander.common.util.LSDisplay
+import tk.zwander.common.util.PrefManager
 import tk.zwander.common.util.appWidgetManager
 import tk.zwander.common.util.compat.LayoutInflaterFactory2Compat
 import tk.zwander.common.util.createWidgetErrorView
@@ -80,8 +82,8 @@ import tk.zwander.common.util.mitigations.SafeContextWrapper
 import tk.zwander.common.util.requireLsDisplayManager
 import tk.zwander.lockscreenwidgets.R
 import tk.zwander.lockscreenwidgets.databinding.ComposeViewHolderBinding
-import tk.zwander.lockscreenwidgets.databinding.FrameShortcutViewBinding
 import tk.zwander.lockscreenwidgets.databinding.WidgetPageHolderBinding
+import tk.zwander.widgetdrawer.adapters.DrawerAdapter
 import java.util.Collections
 import kotlin.math.min
 
@@ -600,24 +602,30 @@ abstract class BaseAdapter(
                 launchShortcutIconOverride(data.id)
             }
 
-            val shortcutView = FrameShortcutViewBinding.inflate(baseLayoutInflater)
-            val icon = data.getIconBitmap(context)
+            val shortcutView = ComposeViewHolderBinding.inflate(baseLayoutInflater)
+            shortcutView.root.setContent {
+                ShortcutItemLayout(
+                    icon = data.getIconBitmap(context),
+                    name = null,
+                    onClick = {
+                        val launchIntent = Intent(Intent.ACTION_MAIN)
+                        launchIntent.addCategory(Intent.CATEGORY_LAUNCHER)
+                        launchIntent.`package` = data.widgetProviderComponent?.packageName
+                        launchIntent.component = data.widgetProviderComponent
+                        launchIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
 
-            shortcutView.shortcutName.isVisible = false
-            shortcutView.shortcutRoot.setOnClickListener {
-                val launchIntent = Intent(Intent.ACTION_MAIN)
-                launchIntent.addCategory(Intent.CATEGORY_LAUNCHER)
-                launchIntent.`package` = data.widgetProviderComponent?.packageName
-                launchIntent.component = data.widgetProviderComponent
-                launchIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-
-                DismissOrUnlockActivity.launch(
-                    context = context,
-                    activityIntent = launchIntent,
+                        DismissOrUnlockActivity.launch(
+                            context = context,
+                            activityIntent = launchIntent,
+                        )
+                    },
+                    cornerRadiusKey = if (this@BaseAdapter is DrawerAdapter) {
+                        PrefManager.KEY_DRAWER_WIDGET_CORNER_RADIUS
+                    } else {
+                        PrefManager.KEY_FRAME_WIDGET_CORNER_RADIUS
+                    },
                 )
             }
-            shortcutView.shortcutIcon.setImageBitmap(icon)
-
             binding.widgetHolder.addView(shortcutView.root)
         }
 
@@ -632,23 +640,29 @@ abstract class BaseAdapter(
                 launchShortcutIconOverride(data.id)
             }
 
-            val shortcutView = FrameShortcutViewBinding.inflate(baseLayoutInflater)
-            val icon = data.getIconBitmap(context)
+            val shortcutView = ComposeViewHolderBinding.inflate(baseLayoutInflater)
+            shortcutView.root.setContent {
+                ShortcutItemLayout(
+                    icon = data.getIconBitmap(context),
+                    name = data.label,
+                    onClick = {
+                        data.shortcutIntent?.apply {
+                            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
 
-            shortcutView.shortcutRoot.setOnClickListener {
-                data.shortcutIntent?.apply {
-                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-
-                    PermissionIntentLaunchActivity.start(
-                        context = context,
-                        intent = this,
-                        launchType = PermissionIntentLaunchActivity.LaunchType.ACTIVITY,
-                    )
-                }
+                            PermissionIntentLaunchActivity.start(
+                                context = context,
+                                intent = this,
+                                launchType = PermissionIntentLaunchActivity.LaunchType.ACTIVITY,
+                            )
+                        }
+                    },
+                    cornerRadiusKey = if (this@BaseAdapter is DrawerAdapter) {
+                        PrefManager.KEY_DRAWER_WIDGET_CORNER_RADIUS
+                    } else {
+                        PrefManager.KEY_FRAME_WIDGET_CORNER_RADIUS
+                    },
+                )
             }
-            shortcutView.shortcutIcon.setImageBitmap(icon)
-            shortcutView.shortcutName.text = data.label
-
             binding.widgetHolder.addView(shortcutView.root)
         }
 
