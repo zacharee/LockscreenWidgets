@@ -13,7 +13,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.unit.dp
 import com.google.accompanist.drawablepainter.rememberDrawablePainter
 import tk.zwander.common.compose.util.rememberBooleanPreferenceState
 import tk.zwander.common.compose.util.rememberPreferenceState
@@ -24,12 +26,13 @@ import tk.zwander.common.util.prefManager
 import java.util.function.Consumer
 
 @Composable
-fun BaseDelegate.BaseViewModel<*>.BlurView(
+fun BaseDelegate.BaseViewModel<*, *>.BlurView(
     blurKey: String,
     blurAmountKey: String,
     modifier: Modifier = Modifier,
     cornerRadiusKey: String? = null,
 ) {
+    val density = LocalDensity.current
     val view = LocalView.current
     val context = LocalContext.current
     var currentDrawable by remember {
@@ -53,7 +56,7 @@ fun BaseDelegate.BaseViewModel<*>.BlurView(
         value = { context.prefManager.getInt(blurAmountKey, 100) },
         onChanged = { _, _ -> },
     )
-    val cornerRadius by if (cornerRadiusKey != null) {
+    val cornerRadiusPx by if (cornerRadiusKey != null) {
         rememberPreferenceState(
             key = cornerRadiusKey,
             value = { context.prefManager.getInt(cornerRadiusKey, 20) / 10f },
@@ -91,7 +94,7 @@ fun BaseDelegate.BaseViewModel<*>.BlurView(
         crossBlurEnabled,
         shouldBlur,
         blurAmount,
-        cornerRadius,
+        cornerRadiusPx,
     ) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             var newBlurDrawable: BackgroundBlurDrawableCompat? = currentDrawable
@@ -110,7 +113,11 @@ fun BaseDelegate.BaseViewModel<*>.BlurView(
             }
 
             newBlurDrawable?.setBlurRadius(blurAmount)
-            newBlurDrawable?.setCornerRadius(cornerRadius)
+            newBlurDrawable?.setCornerRadius(
+                with(density) {
+                    cornerRadiusPx.dp.toPx()
+                },
+            )
 
             context.logUtils.debugLog("Setting blur drawable $newBlurDrawable on target view with current background ${currentDrawable}.", null)
 
