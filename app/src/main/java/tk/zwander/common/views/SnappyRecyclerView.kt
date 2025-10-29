@@ -10,7 +10,7 @@ import tk.zwander.common.util.ISnappyLayoutManager
 import kotlin.math.absoluteValue
 
 //Based on https://stackoverflow.com/a/26445064/5496177
-class SnappyRecyclerView(context: Context, attrs: AttributeSet) : RecyclerView(context, attrs) {
+class SnappyRecyclerView(context: Context, attrs: AttributeSet? = null) : RecyclerView(context, attrs) {
     private var latestVX = 0
     private var latestVY = 0
 

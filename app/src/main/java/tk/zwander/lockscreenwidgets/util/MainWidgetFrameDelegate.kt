@@ -2,50 +2,28 @@ package tk.zwander.lockscreenwidgets.util
 
 import android.content.Context
 import android.graphics.Bitmap
-import android.graphics.Color
 import android.graphics.Matrix
 import android.graphics.PixelFormat
 import android.graphics.Point
 import android.graphics.PointF
-import android.graphics.PorterDuff
-import android.graphics.PorterDuffColorFilter
-import android.view.ContextThemeWrapper
+import android.graphics.drawable.Drawable
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.Surface
 import android.view.View
 import android.view.WindowManager
-import android.widget.ImageView
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
-import androidx.compose.material3.contentColorFor
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.ComposeView
-import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.dp
 import androidx.core.graphics.component1
 import androidx.core.graphics.component2
-import androidx.core.view.isVisible
 import androidx.lifecycle.Lifecycle
 import androidx.recyclerview.widget.RecyclerView
-import com.bugsnag.android.performance.compose.MeasuredComposable
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import tk.zwander.common.activities.DismissOrUnlockActivity
-import tk.zwander.common.compose.AppTheme
-import tk.zwander.common.compose.components.BlurView
-import tk.zwander.common.compose.components.ContentColoredOutlinedButton
 import tk.zwander.common.data.WidgetData
 import tk.zwander.common.util.BaseDelegate
 import tk.zwander.common.util.Event
@@ -55,19 +33,24 @@ import tk.zwander.common.util.HandlerRegistry
 import tk.zwander.common.util.ISnappyLayoutManager
 import tk.zwander.common.util.PrefManager
 import tk.zwander.common.util.eventManager
+import tk.zwander.common.util.fadeAndScaleIn
+import tk.zwander.common.util.fadeAndScaleOut
 import tk.zwander.common.util.frameSizeAndPosition
 import tk.zwander.common.util.globalState
 import tk.zwander.common.util.handler
 import tk.zwander.common.util.logUtils
 import tk.zwander.common.util.mainHandler
 import tk.zwander.common.util.prefManager
+import tk.zwander.common.util.safeAddView
+import tk.zwander.common.util.safeRemoveView
+import tk.zwander.common.util.safeUpdateViewLayout
 import tk.zwander.common.util.wallpaperUtils
-import tk.zwander.lockscreenwidgets.R
+import tk.zwander.common.views.SnappyRecyclerView
 import tk.zwander.lockscreenwidgets.adapters.WidgetFrameAdapter
+import tk.zwander.lockscreenwidgets.compose.WidgetFrameLayout
 import tk.zwander.lockscreenwidgets.data.Mode
-import tk.zwander.lockscreenwidgets.databinding.WidgetFrameBinding
+import tk.zwander.lockscreenwidgets.databinding.ComposeViewHolderBinding
 import tk.zwander.lockscreenwidgets.services.Accessibility
-import tk.zwander.lockscreenwidgets.views.WidgetFrameView
 import kotlin.math.ceil
 import kotlin.math.floor
 
@@ -137,11 +120,11 @@ open class MainWidgetFrameDelegate protected constructor(
             if (actualNewState.isPreview != oldState.isPreview) {
                 if (actualNewState.isPreview) {
                     if (canShow()) {
-                        addWindow(wm)
+                        addWindow()
                     }
                 } else {
                     if (!canShow()) {
-                        removeWindow(wm)
+                        removeWindow()
                     }
                 }
             }
@@ -149,13 +132,13 @@ open class MainWidgetFrameDelegate protected constructor(
             if (actualNewState.selectionPreviewRequestCode != oldState.selectionPreviewRequestCode) {
                 if (actualNewState.selectionPreviewRequestCode != null) {
                     if (canShow()) {
-                        addWindow(wm)
-                        binding.selectFrameLayout.isVisible = true
+                        addWindow()
+                        viewModel.isSelectingFrame.value = true
                     }
                 } else {
                     if (!canShow()) {
-                        removeWindow(wm)
-                        binding.selectFrameLayout.isVisible = false
+                        removeWindow()
+                        viewModel.isSelectingFrame.value = false
                     }
                 }
             }
@@ -203,23 +186,38 @@ open class MainWidgetFrameDelegate protected constructor(
             format = PixelFormat.RGBA_8888
         }
     }
+
+    private val widgetGrid by lazy {
+        SnappyRecyclerView(themeWrapper)
+    }
+
+    private val frame by lazy {
+        ComposeViewHolderBinding.inflate(
+            LayoutInflater.from(themeWrapper),
+        ).apply {
+            root.setContent {
+                viewModel.WidgetFrameLayout(
+                    widgetGrid = widgetGrid,
+                    modifier = Modifier.fillMaxSize(),
+                )
+            }
+        }
+    }
+
+    override val gridLayoutManager = SpannedLayoutManager()
+
     override val rootView: View
-        get() = binding.root
+        get() = frame.root
     override val recyclerView: RecyclerView
-        get() = binding.widgetsPager
-    override val removeConfirmationView: ComposeView
-        get() = binding.removeView
+        get() = widgetGrid
     override var currentWidgets: List<WidgetData>
         get() = FramePrefs.getWidgetsForFrame(this, id).toList()
         set(value) {
             FramePrefs.setWidgetsForFrame(this, id, value)
         }
 
-    //The actual frame View
-    private val binding by lazy {
-        WidgetFrameBinding.inflate(LayoutInflater.from(ContextThemeWrapper(this, R.style.AppTheme)))
-    }
-    override val gridLayoutManager = SpannedLayoutManager()
+    override val viewModel = WidgetFrameViewModel(this)
+
     override val adapter by lazy {
         WidgetFrameAdapter(
             frameId = id,
@@ -249,9 +247,6 @@ open class MainWidgetFrameDelegate protected constructor(
                 updateCommonState { it.copy(updatedForMoveOrRemove = false) }
             }
         }
-        handler(PrefManager.KEY_PAGE_INDICATOR_BEHAVIOR) {
-            binding.frame.updatePageIndicatorBehavior()
-        }
         handler(
             FramePrefs.generatePrefKey(FramePrefs.KEY_FRAME_ROW_COUNT, id),
             FramePrefs.generatePrefKey(FramePrefs.KEY_FRAME_COL_COUNT, id),
@@ -259,26 +254,14 @@ open class MainWidgetFrameDelegate protected constructor(
             updateCounts()
             adapter.updateViews()
         }
-        handler(FrameSpecificPreferences.keyFor(id, PrefManager.KEY_FRAME_BACKGROUND_COLOR)) {
-            binding.frame.updateFrameBackground()
-        }
         handler(
             framePrefs.keyFor(PrefManager.KEY_FRAME_MASKED_MODE),
             framePrefs.keyFor(PrefManager.KEY_MASKED_MODE_DIM_AMOUNT),
         ) {
             updateWallpaperLayerIfNeeded()
         }
-        handler(
-            PrefManager.KEY_SHOW_DEBUG_ID_VIEW,
-            PrefManager.KEY_DEBUG_LOG,
-        ) {
-            binding.frame.updateDebugIdViewVisibility()
-        }
         handler(framePrefs.keyFor(PrefManager.KEY_SHOW_IN_NOTIFICATION_CENTER)) {
             updateState { it.copy(isPendingNotificationStateChange = true) }
-        }
-        handler(PrefManager.KEY_FRAME_CORNER_RADIUS) {
-            updateCornerRadius()
         }
         handler(
             PrefManager.KEY_LOCK_WIDGET_FRAME,
@@ -288,15 +271,15 @@ open class MainWidgetFrameDelegate protected constructor(
         handler(
             PrefManager.KEY_FRAME_WIDGET_CORNER_RADIUS,
         ) {
-            if (binding.frame.isAttachedToWindow) {
+            if (frame.root.isAttachedToWindow) {
                 adapter.updateViews()
             }
         }
         handler(PrefManager.KEY_WIDGET_FRAME_ENABLED) {
-            updateWindowState(wm)
+            updateWindowState()
         }
         handler(PrefManager.KEY_CAN_SHOW_FRAME_FROM_TASKER, PrefManager.KEY_FORCE_SHOW_FRAME) {
-            updateWindowState(wm)
+            updateWindowState()
         }
     }
 
@@ -319,7 +302,7 @@ open class MainWidgetFrameDelegate protected constructor(
             is Event.TempHide -> {
                 if (event.frameId == id) {
                     updateState { it.copy(isTempHide = true) }
-                    updateWindowState(wm)
+                    updateWindowState()
                 }
             }
             Event.NightModeUpdate -> {
@@ -400,7 +383,6 @@ open class MainWidgetFrameDelegate protected constructor(
                             lifecycleRegistry.currentState = Lifecycle.State.RESUMED
                             widgetHost.startListening(this)
                             updateWallpaperLayerIfNeeded()
-                            updateCornerRadius()
                             //Even with the startListening() call above,
                             //it doesn't seem like pending updates always get
                             //dispatched. Rebinding all the widgets forces
@@ -435,7 +417,7 @@ open class MainWidgetFrameDelegate protected constructor(
             }
             is Event.FrameIntercept -> {
                 if (event.frameId == id) {
-                    forceWakelock(wm, event.down)
+                    forceWakelock(event.down)
                 }
             }
             Event.ScreenOff -> {
@@ -444,9 +426,8 @@ open class MainWidgetFrameDelegate protected constructor(
                 //and the current screen content has "frozen," causing the widget frame to show
                 //where it shouldn't. ACTION_SCREEN_OFF is called early enough that we can remove
                 //the frame before it's frozen in place.
-                forceWakelock(wm, false)
+                forceWakelock(false)
                 updateStateAndWindowState(
-                    wm = wm,
                     transform = {
                         it.copy(
                             isTempHide = false,
@@ -502,59 +483,6 @@ open class MainWidgetFrameDelegate protected constructor(
     override fun onCreate() {
         super.onCreate()
 
-        binding.frame.onCreate(id)
-        binding.selectFrameLayout.setContent {
-            MeasuredComposable(name = "SelectFrameLayoutContent") {
-                AppTheme {
-                    Surface(
-                        modifier = Modifier.fillMaxSize(),
-                        color = MaterialTheme.colorScheme.surface.copy(alpha = 0.75f),
-                        contentColor = MaterialTheme.colorScheme.contentColorFor(MaterialTheme.colorScheme.surface),
-                    ) {
-                        Box(
-                            modifier = Modifier.fillMaxSize(),
-                            contentAlignment = Alignment.Center,
-                        ) {
-                            Column(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalAlignment = Alignment.CenterHorizontally,
-                                verticalArrangement = Arrangement.spacedBy(8.dp),
-                            ) {
-                                Text(text = "$id")
-
-                                FlowRow(
-                                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                                    verticalArrangement = Arrangement.spacedBy(8.dp),
-                                ) {
-                                    ContentColoredOutlinedButton(
-                                        onClick = {
-                                            eventManager.sendEvent(Event.FrameSelected(null, state.selectionPreviewRequestCode))
-                                        },
-                                    ) {
-                                        Text(text = stringResource(R.string.cancel))
-                                    }
-
-                                    ContentColoredOutlinedButton(
-                                        onClick = { eventManager.sendEvent(Event.FrameSelected(id, state.selectionPreviewRequestCode)) },
-                                    ) {
-                                        Text(text = stringResource(R.string.select))
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        binding.blurBackground.setContent {
-            viewModel.BlurView(
-                modifier = Modifier.fillMaxSize(),
-                blurKey = framePrefs.keyFor(PrefManager.KEY_BLUR_BACKGROUND),
-                blurAmountKey = framePrefs.keyFor(PrefManager.KEY_BLUR_BACKGROUND_AMOUNT),
-                cornerRadiusKey = PrefManager.KEY_FRAME_CORNER_RADIUS,
-            )
-        }
-
         //Scroll to the stored page, making sure to catch a potential
         //out-of-bounds error.
         try {
@@ -568,24 +496,24 @@ open class MainWidgetFrameDelegate protected constructor(
                     updateState { it.copy(isPreview = false, isTempHide = false) }
                 }
 
-                updateWindowState(wm)
+                updateWindowState()
             }
         }
 
         scope.launch(Dispatchers.Main) {
-            globalState.notificationsPanelFullyExpanded.collect { notificationsPanelFullyExpanded ->
+            globalState.notificationsPanelFullyExpanded.collect {
                 updateState { it.copy(isPendingNotificationStateChange = true, isPreview = false) }
             }
         }
 
         scope.launch(Dispatchers.Main) {
-            globalState.notificationCount.collect { notificationCount ->
+            globalState.notificationCount.collect {
                 //Receive updates from our notification listener service on how many
                 //notifications are currently shown to the user. This count excludes
                 //notifications not visible on the lock screen.
                 //If the notification count is > 0, and the user has the option enabled,
                 //make sure to hide the widget frame.
-                updateWindowState(wm)
+                updateWindowState()
             }
         }
     }
@@ -593,8 +521,7 @@ open class MainWidgetFrameDelegate protected constructor(
     override fun onDestroy() {
         super.onDestroy()
 
-        binding.frame.onDestroy()
-        binding.frame.removeWindow(wm)
+        removeWindow()
 
         if (id == -1) {
             invalidateInstance()
@@ -606,14 +533,13 @@ open class MainWidgetFrameDelegate protected constructor(
     }
 
     fun updateStateAndWindowState(
-        wm: WindowManager,
         updateAccessibility: Boolean = false,
         transform: (State) -> State = { it },
         commonTransform: (BaseState) -> BaseState = { it },
     ) {
         updateState(transform)
         updateCommonState(commonTransform)
-        updateWindowState(wm, updateAccessibility)
+        updateWindowState(updateAccessibility)
     }
 
     override fun retrieveCounts(): Pair<Int, Int> {
@@ -622,27 +548,45 @@ open class MainWidgetFrameDelegate protected constructor(
 
     override fun widgetRemovalConfirmed(event: Event.RemoveWidgetConfirmed, position: Int) {
         if (event.remove) {
-            binding.widgetsPager.post {
+            widgetGrid.post {
                 val pos = when (val pos = gridLayoutManager.firstVisiblePosition) {
                     RecyclerView.NO_POSITION -> (position - 1).coerceAtLeast(0)
                     else -> pos
                 }
 
-                binding.widgetsPager.scrollToPosition(pos)
+                widgetGrid.scrollToPosition(pos)
             }
         }
     }
 
-    private fun addWindow(wm: WindowManager) {
+    private fun addWindow() {
         logUtils.debugLog("Adding overlay")
 
-        if (!binding.frame.isAttachedToWindow) {
+        if (!frame.root.isAttachedToWindow) {
             updateWindow()
         }
-        binding.frame.addWindow(wm, params)
+
+        mainHandler.post {
+            logUtils.debugLog("Trying to add overlay ${viewModel.animationState.value}", null)
+
+            if (!frame.root.isAttachedToWindow && viewModel.animationState.value != AnimationState.STATE_ADDING) {
+                logUtils.debugLog("Adding overlay", null)
+
+                viewModel.animationState.value = AnimationState.STATE_ADDING
+
+                if (!wm.safeAddView(frame.root, params)) {
+                    viewModel.animationState.value = AnimationState.STATE_IDLE
+                } else {
+                    frame.root.fadeAndScaleIn {
+                        viewModel.animationState.value = AnimationState.STATE_IDLE
+                        eventManager.sendEvent(Event.FrameAttachmentState(id, true))
+                    }
+                }
+            }
+        }
     }
 
-    private fun removeWindow(wm: WindowManager) {
+    private fun removeWindow() {
         if (isAttached) {
             logUtils.debugLog("Removing overlay")
         }
@@ -652,20 +596,46 @@ open class MainWidgetFrameDelegate protected constructor(
         globalState.handlingClick.value = globalState.handlingClick.value.toMutableMap().also {
             it.remove(id)
         }
-        forceWakelock(wm, false)
-        binding.frame.removeWindow(wm)
+        forceWakelock(false)
+
+        mainHandler.post {
+            logUtils.debugLog("Trying to remove overlay ${viewModel.animationState.value}", null)
+
+            if (frame.root.isAttachedToWindow && viewModel.animationState.value != AnimationState.STATE_REMOVING) {
+                viewModel.animationState.value = AnimationState.STATE_REMOVING
+
+                logUtils.debugLog("Pre-animation removal", null)
+
+                frame.root.fadeAndScaleOut {
+                    logUtils.debugLog("Post-animation removal", null)
+
+                    mainHandler.postDelayed({
+                        logUtils.debugLog("Posted removal", null)
+
+                        if (frame.root.isAttachedToWindow) {
+                            wm.safeRemoveView(frame.root)
+                        }
+                        viewModel.animationState.value = AnimationState.STATE_IDLE
+                    }, 50)
+                }
+            } else if (!frame.root.isAttachedToWindow) {
+                wm.safeRemoveView(frame.root, false)
+
+                viewModel.animationState.value = AnimationState.STATE_IDLE
+            }
+        }
     }
 
     fun setNewDebugIdItems(items: List<String>) {
-        binding.frame.setNewDebugIdItems(items)
+        viewModel.debugIdItems.value = items.toSet()
     }
 
-    fun updateWindowState(wm: WindowManager, updateAccessibility: Boolean = false) {
+    fun updateWindowState(updateAccessibility: Boolean = false) {
         if (canShow()) {
             if (updateAccessibility) updateAccessibilityPass()
-            addWindow(wm)
+            addWindow()
         } else {
-            removeWindow(wm)
+            removeWindow()
             if (updateAccessibility) updateAccessibilityPass()
         }
     }
@@ -790,7 +760,7 @@ open class MainWidgetFrameDelegate protected constructor(
 
         logUtils.debugLog("updateWallpaperLayerIfNeeded() called $showWallpaperLayer")
 
-        if (showWallpaperLayer) {
+        val wallpaperInfo = if (showWallpaperLayer) {
             logUtils.debugLog("Trying to retrieve wallpaper", null)
 
             try {
@@ -798,43 +768,39 @@ open class MainWidgetFrameDelegate protected constructor(
 
                 logUtils.debugLog("Retrieved wallpaper: $drawable", null)
 
-                drawable?.mutate()?.apply {
+                drawable?.mutate()?.let {
                     logUtils.debugLog("Setting wallpaper drawable.", null)
 
-                    binding.wallpaperBackground.setImageDrawable(this)
-                    binding.wallpaperBackground.colorFilter = PorterDuffColorFilter(
-                        Color.argb(
-                            ((framePrefs.maskedModeDimAmount / 100f) * 255).toInt(),
-                            0, 0, 0
-                        ), PorterDuff.Mode.SRC_ATOP
+                    val realSize = display.realSize
+                    val loc = frame.root.locationOnScreen ?: intArrayOf(0, 0)
+
+                    val dWidth: Int = it.intrinsicWidth
+                    val dHeight: Int = it.intrinsicHeight
+
+                    val wallpaperAdjustmentX = (dWidth - realSize.x) / 2f
+                    val wallpaperAdjustmentY = (dHeight - realSize.y) / 2f
+
+                    val dx = (-loc[0].toFloat() - wallpaperAdjustmentX)
+                    //TODO: a bunch of skins don't like this
+                    val dy = (-loc[1].toFloat() - wallpaperAdjustmentY)
+
+                    WallpaperInfo(
+                        drawable = it,
+                        dx = dx,
+                        dy = dy,
                     )
-                    binding.wallpaperBackground.scaleType = ImageView.ScaleType.MATRIX
-                    binding.wallpaperBackground.imageMatrix = Matrix().apply {
-                        val realSize = display.realSize
-                        val loc = binding.root.locationOnScreen ?: intArrayOf(0, 0)
 
-                        val dWidth: Int = intrinsicWidth
-                        val dHeight: Int = intrinsicHeight
-
-                        val wallpaperAdjustmentX = (dWidth - realSize.x) / 2f
-                        val wallpaperAdjustmentY = (dHeight - realSize.y) / 2f
-
-                        setTranslate(
-                            (-loc[0].toFloat() - wallpaperAdjustmentX),
-                            //TODO: a bunch of skins don't like this
-                            (-loc[1].toFloat() - wallpaperAdjustmentY)
-                        )
-                    }
-                } ?: binding.wallpaperBackground.setImageDrawable(null)
+                }
             } catch (e: Exception) {
                 logUtils.normalLog("Error setting wallpaper", e)
-                binding.wallpaperBackground.setImageDrawable(null)
+                null
             }
         } else {
             logUtils.debugLog("Removing wallpaper", null)
-
-            binding.wallpaperBackground.setImageDrawable(null)
+            null
         }
+
+        viewModel.wallpaperInfo.value = wallpaperInfo
     }
 
     /**
@@ -844,7 +810,7 @@ open class MainWidgetFrameDelegate protected constructor(
      * upon the frame's state after an event.
      */
     private fun updateAccessibilityPass() {
-        if (binding.frame.animationState == WidgetFrameView.AnimationState.STATE_IDLE) {
+        if (viewModel.animationState.value == AnimationState.STATE_IDLE) {
             if (state.isPendingNotificationStateChange || state.isPendingOrientationStateChange) {
                 updateWindow()
                 updateState {
@@ -863,23 +829,18 @@ open class MainWidgetFrameDelegate protected constructor(
      * @param wm the WindowManager to use.
      * @param on whether to add or remove the force flag.
      */
-    private fun forceWakelock(wm: WindowManager, on: Boolean) {
+    private fun forceWakelock(on: Boolean) {
         if (on) {
             params.flags = params.flags or WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON
         } else {
             params.flags = params.flags and WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON.inv()
         }
 
-        binding.frame.updateWindow(wm, params)
+        updateOverlay()
     }
 
     private fun updateOverlay() {
-        binding.frame.updateWindow(wm, params)
-    }
-
-    private fun updateCornerRadius() {
-        val radius = display.dpToPx(prefManager.cornerRadiusDp).toFloat()
-        binding.frameCard.radius = radius
+        wm.safeUpdateViewLayout(frame.root, params)
     }
 
     /**
@@ -929,7 +890,7 @@ open class MainWidgetFrameDelegate protected constructor(
         if (changed) {
             logUtils.debugLog("Updating params", null)
 
-            binding.frame.updateWindow(wm, params)
+            updateOverlay()
             mainHandler.post {
                 updateWallpaperLayerIfNeeded()
                 adapter.updateViews()
@@ -997,4 +958,30 @@ open class MainWidgetFrameDelegate protected constructor(
         val isTempHide: Boolean = false,
         val screenOrientation: Int = Surface.ROTATION_0,
     )
+
+    open class WidgetFrameViewModel(delegate: MainWidgetFrameDelegate) : BaseViewModel<State, MainWidgetFrameDelegate>(delegate) {
+        val isSelectingFrame = MutableStateFlow(false)
+        val wallpaperInfo = MutableStateFlow<WallpaperInfo?>(null)
+        val debugIdItems = MutableStateFlow<Set<String>>(setOf())
+        val animationState = MutableStateFlow(AnimationState.STATE_IDLE)
+        val acknowledgedTwoFingerTap = MutableStateFlow(false)
+
+        val framePrefs: FrameSpecificPreferences
+            get() = delegate.framePrefs
+
+        val frameId: Int
+            get() = delegate.id
+    }
+
+    data class WallpaperInfo(
+        val drawable: Drawable?,
+        val dx: Float,
+        val dy: Float,
+    )
+
+    enum class AnimationState {
+        STATE_ADDING,
+        STATE_REMOVING,
+        STATE_IDLE,
+    }
 }

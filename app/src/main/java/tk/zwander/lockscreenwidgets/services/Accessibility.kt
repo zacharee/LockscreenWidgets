@@ -130,7 +130,6 @@ class Accessibility : AccessibilityService(), EventObserver, CoroutineScope by M
                 isOnKeyguard = kgm.isKeyguardLocked,
                 getWindows = ::getWindowsSafely,
                 initialRun = true,
-                wm = wm,
             )
         }
     }
@@ -151,7 +150,6 @@ class Accessibility : AccessibilityService(), EventObserver, CoroutineScope by M
                     drawerDelegate = drawerDelegate,
                     power = power,
                     kgm = kgm,
-                    wm = wm,
                     imm = imm,
                     getWindows = ::getWindowsSafely,
                 ),

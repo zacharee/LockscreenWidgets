@@ -7,7 +7,6 @@ import android.content.Intent
 import android.os.Build
 import android.os.PowerManager
 import android.provider.Settings
-import android.view.WindowManager
 import android.view.accessibility.AccessibilityEvent
 import android.view.accessibility.AccessibilityNodeInfo
 import android.view.accessibility.AccessibilityWindowInfo
@@ -347,7 +346,6 @@ object AccessibilityUtils {
     }
 
     suspend fun Context.runWindowOperation(
-        wm: WindowManager,
         frameDelegates: Map<Int, MainWidgetFrameDelegate>,
         drawerDelegate: DrawerDelegate,
         isScreenOn: Boolean,
@@ -443,7 +441,6 @@ object AccessibilityUtils {
 
                 frameDelegates.forEach { (_, frameDelegate) ->
                     frameDelegate.updateWindowState(
-                        wm = wm,
                         updateAccessibility = true,
                     )
                 }
@@ -498,7 +495,6 @@ object AccessibilityUtils {
         drawerDelegate: DrawerDelegate,
         power: PowerManager,
         kgm: KeyguardManager,
-        wm: WindowManager,
         imm: InputMethodManager,
         getWindows: () -> List<AccessibilityWindowInfo>?,
     ) = async(Dispatchers.Main) {
@@ -552,7 +548,6 @@ object AccessibilityUtils {
 
             frameDelegates.forEach { (_, frameDelegate) ->
                 frameDelegate.updateStateAndWindowState(
-                    wm = wm,
                     updateAccessibility = true,
                     transform = {
                         it.copy(
@@ -563,7 +558,6 @@ object AccessibilityUtils {
             }
 
             runWindowOperation(
-                wm = wm,
                 frameDelegates = frameDelegates,
                 drawerDelegate = drawerDelegate,
                 isOnKeyguard = globalState.wasOnKeyguard.value,
@@ -620,7 +614,7 @@ object AccessibilityUtils {
             }
 
             frameDelegates.forEach { (_, frameDelegate) ->
-                frameDelegate.updateStateAndWindowState(wm, true)
+                frameDelegate.updateStateAndWindowState(true)
             }
         }
     }

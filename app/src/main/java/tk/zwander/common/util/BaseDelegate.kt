@@ -8,6 +8,7 @@ import android.hardware.display.DisplayManager.DisplayListener
 import android.view.View
 import android.view.WindowManager
 import androidx.annotation.CallSuper
+import androidx.appcompat.view.ContextThemeWrapper
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -42,6 +43,7 @@ import tk.zwander.common.data.WidgetType
 import tk.zwander.common.host.WidgetHostCompat
 import tk.zwander.common.host.widgetHostCompat
 import tk.zwander.common.util.mitigations.SafeContextWrapper
+import tk.zwander.lockscreenwidgets.R
 import java.util.concurrent.ConcurrentLinkedDeque
 
 @Suppress("MemberVisibilityCanBePrivate")
@@ -63,7 +65,7 @@ abstract class BaseDelegate<State : Any>(
     open var commonState: BaseState = BaseState()
         protected set
 
-    open val viewModel = BaseViewModel(this)
+    open val viewModel: BaseViewModel<out State, out BaseDelegate<State>> = BaseViewModel(this)
 
     abstract var state: State
         protected set
@@ -76,6 +78,13 @@ abstract class BaseDelegate<State : Any>(
     protected abstract val recyclerView: RecyclerView
     protected open val removeConfirmationView: ComposeView? = null
     protected abstract var currentWidgets: List<WidgetData>
+
+    protected val themeWrapper by lazy {
+        ContextThemeWrapper(
+            this,
+            R.style.AppTheme,
+        )
+    }
 
     protected  val displayListener = object : DisplayListener {
         override fun onDisplayAdded(displayId: Int) {}
@@ -318,7 +327,7 @@ abstract class BaseDelegate<State : Any>(
         }
     }
 
-    open class BaseViewModel<State : Any>(private val delegate: BaseDelegate<State>) : ViewModel() {
+    open class BaseViewModel<State : Any, Delegate : BaseDelegate<State>>(protected val delegate: Delegate) : ViewModel() {
         val itemToRemove = MutableStateFlow<WidgetData?>(null)
 
         val params: WindowManager.LayoutParams
@@ -329,6 +338,9 @@ abstract class BaseDelegate<State : Any>(
 
         val itemTouchHelper: ItemTouchHelper
             get() = delegate.itemTouchHelper
+
+        val state: State
+            get() = delegate.state
 
         fun updateWindow() {
             delegate.updateWindow()

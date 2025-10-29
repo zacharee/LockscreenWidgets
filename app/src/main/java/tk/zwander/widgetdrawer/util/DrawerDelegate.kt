@@ -594,7 +594,7 @@ class DrawerDelegate private constructor(context: Context, wm: WindowManager, di
 
     class State
 
-    class DrawerViewModel(delegate: DrawerDelegate) : BaseViewModel<State>(delegate) {
+    class DrawerViewModel(delegate: DrawerDelegate) : BaseViewModel<State, DrawerDelegate>(delegate) {
         val selectedItem = MutableStateFlow(false)
     }
 }
