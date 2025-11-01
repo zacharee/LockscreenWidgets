@@ -34,6 +34,7 @@
     <string name="increase">Augmenter</string>
     <string name="decrease">Diminuer</string>
     <string name="selected" tools:override="true">Sélectionné</string>
+    <string name="general">General</string>
     <string name="drawer_enabled">Drawer activé</string>
     <string name="frame_enabled">Cadre activé</string>
     <string name="add_id_hint">com.android.systemui:id/un_id_ici</string>
