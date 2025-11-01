@@ -34,7 +34,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
@@ -96,7 +95,7 @@ abstract class BaseAdapter(
     protected val onRemoveCallback: (WidgetData, Int) -> Unit,
     protected val displayId: Int,
     protected val viewModel: BaseDelegate.BaseViewModel<*, *>,
-) : RecyclerView.Adapter<RecyclerView.ViewHolder>(), CoroutineScope by MainScope() {
+) : RecyclerView.Adapter<BaseAdapter.BaseVH<*>>(), CoroutineScope by MainScope() {
     companion object {
         const val VIEW_TYPE_WIDGET = 0
         const val VIEW_TYPE_ADD = 1
@@ -216,7 +215,7 @@ abstract class BaseAdapter(
         }
     }
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): BaseVH<*> {
         val inflater = baseLayoutInflater
 
         val view = ComposeViewHolderBinding.inflate(inflater, parent, false)
@@ -228,15 +227,17 @@ abstract class BaseAdapter(
         }
     }
 
-    override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
+    override fun onBindViewHolder(holder: BaseVH<*>, position: Int) {
+        holder.setCompositionContext()
+
         if (position < widgets.size) {
-            (holder as WidgetVH).bind(widgets[position])
+            (holder as WidgetVH).performBind(widgets[position])
         }
 
-        (holder as? AddWidgetVH)?.bind(Unit)
+        (holder as? AddWidgetVH)?.performBind(Unit)
     }
 
-    override fun onViewRecycled(holder: RecyclerView.ViewHolder) {
+    override fun onViewRecycled(holder: BaseVH<*>) {
         (holder as? WidgetVH)?.onDestroy()
     }
 
@@ -637,7 +638,6 @@ abstract class BaseAdapter(
      * added to the frame.
      */
     inner class AddWidgetVH(binding: ComposeViewHolderBinding) : BaseVH<Unit>(binding) {
-        @OptIn(ExperimentalComposeUiApi::class)
         override fun performBind(data: Unit) {
             binding.root.setThemedContent {
                 MeasuredComposable(name = "AddWidgetLayout") {
@@ -704,10 +704,8 @@ abstract class BaseAdapter(
 
     abstract inner class BaseVH<Data : Any>(protected val binding: ComposeViewHolderBinding) :
         RecyclerView.ViewHolder(binding.root) {
-        fun bind(data: Data) {
+        fun setCompositionContext() {
             binding.root.setParentCompositionContext(rootView.createLifecycleAwareWindowRecomposer())
-
-            performBind(data)
         }
 
         abstract fun performBind(data: Data)
