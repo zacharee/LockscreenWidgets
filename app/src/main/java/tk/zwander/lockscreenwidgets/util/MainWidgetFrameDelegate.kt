@@ -520,9 +520,9 @@ open class MainWidgetFrameDelegate protected constructor(
     }
 
     override fun onDestroy() {
-        super.onDestroy()
-
         removeWindow()
+
+        super.onDestroy()
 
         if (id == -1) {
             invalidateInstance()

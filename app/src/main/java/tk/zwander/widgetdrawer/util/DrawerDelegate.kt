@@ -426,12 +426,13 @@ class DrawerDelegate private constructor(context: Context, wm: WindowManager, di
     }
 
     override fun onDestroy() {
-        super.onDestroy()
-
         hideDrawer(false)
         hideHandle()
 
         unregisterReceiver(globalReceiver)
+
+        super.onDestroy()
+
         invalidateInstance()
     }
 
