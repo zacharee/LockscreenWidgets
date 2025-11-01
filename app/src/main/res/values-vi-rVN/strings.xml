@@ -34,6 +34,7 @@
     <string name="increase">Increase</string>
     <string name="decrease">Decrease</string>
     <string name="selected" tools:override="true">Selected</string>
+    <string name="general">General</string>
     <string name="drawer_enabled">Drawer Enabled</string>
     <string name="frame_enabled">Frame Enabled</string>
     <string name="add_id_hint">com.android.systemui:id/some_id_here</string>

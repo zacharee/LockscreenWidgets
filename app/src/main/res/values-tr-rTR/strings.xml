@@ -34,6 +34,7 @@
     <string name="increase">Arttır</string>
     <string name="decrease">Azalt</string>
     <string name="selected" tools:override="true">Seçili</string>
+    <string name="general">General</string>
     <string name="drawer_enabled">Çekmece Etkinleştirildi</string>
     <string name="frame_enabled">Çerçeve Etkinleştirildi</string>
     <string name="add_id_hint">com.android.systemui:id/some_id_here</string>

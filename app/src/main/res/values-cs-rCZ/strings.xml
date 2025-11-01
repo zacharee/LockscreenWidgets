@@ -34,6 +34,7 @@
     <string name="increase">Increase</string>
     <string name="decrease">Decrease</string>
     <string name="selected" tools:override="true">Vybráno</string>
+    <string name="general">General</string>
     <string name="drawer_enabled">Nabídka povolena</string>
     <string name="frame_enabled">Rámeček povolen</string>
     <string name="add_id_hint">com.android.systemui:id/some_id_here</string>

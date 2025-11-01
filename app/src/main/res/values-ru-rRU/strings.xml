@@ -34,6 +34,7 @@
     <string name="increase">Увеличение</string>
     <string name="decrease">Уменьшение</string>
     <string name="selected" tools:override="true">Выбрано</string>
+    <string name="general">General</string>
     <string name="drawer_enabled">Боковая панель включена</string>
     <string name="frame_enabled">Рамка включена</string>
     <string name="add_id_hint">com.android.systemui:id/some_id_здесь</string>
