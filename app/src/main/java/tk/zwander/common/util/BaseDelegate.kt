@@ -50,7 +50,7 @@ abstract class BaseDelegate<State : Any>(
     open var commonState: BaseState = BaseState()
         protected set
 
-    open val viewModel: BaseViewModel<out State, out BaseDelegate<State>> = BaseViewModel(this)
+    abstract val viewModel: BaseViewModel<out State, out BaseDelegate<State>>
 
     abstract var state: State
         protected set
@@ -99,6 +99,8 @@ abstract class BaseDelegate<State : Any>(
     @CallSuper
     open fun onCreate() {
         scope = MainScope()
+        rootView.setViewTreeLifecycleOwner(this)
+        rootView.setViewTreeSavedStateRegistryOwner(this)
 
         prefsHandler.register(this)
         eventManager.addObserver(this)
@@ -117,8 +119,6 @@ abstract class BaseDelegate<State : Any>(
             savedStateRegistryController.performRestore(null)
             lifecycleRegistry.currentState = Lifecycle.State.CREATED
         }
-        rootView.setViewTreeLifecycleOwner(this)
-        rootView.setViewTreeSavedStateRegistryOwner(this)
     }
 
     @CallSuper
@@ -280,7 +280,10 @@ abstract class BaseDelegate<State : Any>(
         }
     }
 
-    open class BaseViewModel<State : Any, Delegate : BaseDelegate<State>>(protected val delegate: Delegate) : ViewModel() {
+    @SuppressLint("StaticFieldLeak")
+    abstract class BaseViewModel<State : Any, Delegate : BaseDelegate<State>>(
+        protected val delegate: Delegate,
+    ) : ViewModel() {
         val itemToRemove = MutableStateFlow<WidgetData?>(null)
         val isResizingItem = MutableStateFlow(false)
         val currentEditingInterfacePosition = MutableStateFlow(-1)
@@ -296,6 +299,9 @@ abstract class BaseDelegate<State : Any>(
 
         val state: State
             get() = delegate.state
+
+        abstract val widgetCornerRadiusKey: String
+        abstract val containerCornerRadiusKey: String?
 
         fun updateWindow() {
             delegate.updateWindow()

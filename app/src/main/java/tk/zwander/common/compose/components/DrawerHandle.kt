@@ -4,12 +4,8 @@ import android.annotation.SuppressLint
 import android.view.Gravity
 import android.view.MotionEvent
 import android.view.WindowManager
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
-import androidx.compose.animation.core.MutableTransitionState
 import androidx.compose.animation.core.animateDpAsState
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.gestures.Orientation
@@ -55,7 +51,6 @@ fun DrawerDelegate.DrawerViewModel.DrawerHandle(
     params: WindowManager.LayoutParams,
     displayId: Int,
     updateWindow: () -> Unit,
-    fadeOutComplete: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val context = LocalContext.current
@@ -64,7 +59,6 @@ fun DrawerDelegate.DrawerViewModel.DrawerHandle(
     val screenWidth = remember(currentDisplay) {
         currentDisplay?.realSize?.x ?: 1
     }
-    val visible by handleVisible.collectAsState()
 
     var side by rememberPreferenceState(
         key = PrefManager.KEY_DRAWER_HANDLE_SIDE,
@@ -136,154 +130,140 @@ fun DrawerDelegate.DrawerViewModel.DrawerHandle(
     val updatedLockPosition by rememberUpdatedState(lockPosition)
     val updatedSide by rememberUpdatedState(side)
 
-    val transitionState = remember { MutableTransitionState(false) }
-
     val animatedElevation by animateDpAsState(if (showShadow) 8.dp else 0.dp)
 
-    LaunchedEffect(visible) {
-        transitionState.targetState = visible
+    DisposableEffect(null) {
+        onDispose {
+            isScrollingOpen = false
+            scrollTotalX = 0f
+        }
     }
 
-    AnimatedVisibility(
-        visibleState = transitionState,
-        enter = fadeIn(),
-        exit = fadeOut(),
-    ) {
-        DisposableEffect(null) {
-            onDispose {
-                isScrollingOpen = false
-                scrollTotalX = 0f
-
-                fadeOutComplete()
-            }
-        }
-
-        Box(
-            modifier = modifier
-                .absolutePadding(
-                    left = if (side == Gravity.LEFT) 0.dp else 4.dp,
-                    right = if (side == Gravity.RIGHT) 0.dp else 4.dp,
-                    bottom = 4.dp,
-                )
-                .shadow(
-                    elevation = animatedElevation,
-                    shape = handleShape,
-                    clip = false,
-                )
-                .background(
-                    color = shownColor,
-                    shape = handleShape,
-                )
-                .motionEventSpy { event ->
-                    when (event.action) {
-                        MotionEvent.ACTION_UP -> {
-                            if (updatedScrollingOpen) {
-                                context.eventManager.sendEvent(
-                                    Event.ScrollOpenFinish(side),
-                                )
-                            }
-
-                            isScrollingOpen = false
-                            isMoving = false
-                            scrollTotalX = 0f
+    Box(
+        modifier = modifier
+            .absolutePadding(
+                left = if (side == Gravity.LEFT) 0.dp else 4.dp,
+                right = if (side == Gravity.RIGHT) 0.dp else 4.dp,
+                bottom = 4.dp,
+            )
+            .shadow(
+                elevation = animatedElevation,
+                shape = handleShape,
+                clip = false,
+            )
+            .background(
+                color = shownColor,
+                shape = handleShape,
+            )
+            .motionEventSpy { event ->
+                when (event.action) {
+                    MotionEvent.ACTION_UP -> {
+                        if (updatedScrollingOpen) {
+                            context.eventManager.sendEvent(
+                                Event.ScrollOpenFinish(side),
+                            )
                         }
 
-                        MotionEvent.ACTION_MOVE -> {
-                            if (updatedIsMoving) {
-                                val oldGravity = updatedSide
-                                val gravity = when {
-                                    event.rawX <= 1 / 3f * screenWidth -> {
-                                        Gravity.LEFT
-                                    }
+                        isScrollingOpen = false
+                        isMoving = false
+                        scrollTotalX = 0f
+                    }
 
-                                    event.rawX >= 2 / 3f * screenWidth -> {
-                                        Gravity.RIGHT
-                                    }
-
-                                    else -> -1
+                    MotionEvent.ACTION_MOVE -> {
+                        if (updatedIsMoving) {
+                            val oldGravity = updatedSide
+                            val gravity = when {
+                                event.rawX <= 1 / 3f * screenWidth -> {
+                                    Gravity.LEFT
                                 }
-                                if (gravity != -1) {
-                                    params.gravity = Gravity.TOP or gravity
-                                    @Suppress("AssignedValueIsNeverRead")
-                                    side = gravity
 
-                                    if (oldGravity != gravity) {
-                                        updateWindow()
-                                    }
+                                event.rawX >= 2 / 3f * screenWidth -> {
+                                    Gravity.RIGHT
+                                }
+
+                                else -> -1
+                            }
+                            if (gravity != -1) {
+                                params.gravity = Gravity.TOP or gravity
+                                @Suppress("AssignedValueIsNeverRead")
+                                side = gravity
+
+                                if (oldGravity != gravity) {
+                                    updateWindow()
                                 }
                             }
                         }
                     }
                 }
-                .draggable(
-                    state = rememberDraggableState { offset ->
-                        if (!updatedScrollingOpen) {
-                            if (offset.absoluteValue > 20) {
-                                context.vibrate(25L)
-                                isScrollingOpen = true
-
-                                context.eventManager.sendEvent(
-                                    Event.ScrollInDrawer(
-                                        context.prefManager.drawerHandleSide,
-                                        scrollTotalX.absoluteValue,
-                                        true,
-                                        offset,
-                                    )
-                                )
-                            }
-                        } else {
-                            scrollTotalX += offset
+            }
+            .draggable(
+                state = rememberDraggableState { offset ->
+                    if (!updatedScrollingOpen) {
+                        if (offset.absoluteValue > 20) {
+                            context.vibrate(25L)
+                            isScrollingOpen = true
 
                             context.eventManager.sendEvent(
                                 Event.ScrollInDrawer(
                                     context.prefManager.drawerHandleSide,
                                     scrollTotalX.absoluteValue,
-                                    false,
+                                    true,
                                     offset,
                                 )
                             )
                         }
-                    },
-                    orientation = Orientation.Horizontal,
-                    enabled = !isMoving,
-                    interactionSource = interactionSource,
-                )
-                .draggable(
-                    state = rememberDraggableState { offset ->
-                        if (updatedIsMoving) {
-                            params.y += offset.toInt()
-                            updateWindow()
-                            context.prefManager.drawerHandleYPosition = params.y
-                        }
-                    },
-                    orientation = Orientation.Vertical,
-                    interactionSource = interactionSource,
-                )
-                .combinedClickable(
-                    interactionSource = interactionSource,
-                    indication = null,
-                    onLongClickLabel = stringResource(R.string.move),
-                    onLongClick = {
-                        if (!updatedScrollingOpen && !updatedIsMoving && !updatedLockPosition) {
-                            context.vibrate()
-                            @Suppress("AssignedValueIsNeverRead")
-                            isMoving = true
-                        }
-                    },
-                    onDoubleClick = if (tapToOpen) null else {
-                        {
-                            context.vibrate(25L)
-                            context.eventManager.sendEvent(Event.ShowDrawer)
-                        }
-                    },
-                    onClick = {
-                        if (tapToOpen) {
-                            context.vibrate(25L)
-                            context.eventManager.sendEvent(Event.ShowDrawer)
-                        }
-                    },
-                    enabled = !isMoving,
-                ),
-        )
-    }
+                    } else {
+                        scrollTotalX += offset
+
+                        context.eventManager.sendEvent(
+                            Event.ScrollInDrawer(
+                                context.prefManager.drawerHandleSide,
+                                scrollTotalX.absoluteValue,
+                                false,
+                                offset,
+                            )
+                        )
+                    }
+                },
+                orientation = Orientation.Horizontal,
+                enabled = !isMoving,
+                interactionSource = interactionSource,
+            )
+            .draggable(
+                state = rememberDraggableState { offset ->
+                    if (updatedIsMoving) {
+                        params.y += offset.toInt()
+                        updateWindow()
+                        context.prefManager.drawerHandleYPosition = params.y
+                    }
+                },
+                orientation = Orientation.Vertical,
+                interactionSource = interactionSource,
+            )
+            .combinedClickable(
+                interactionSource = interactionSource,
+                indication = null,
+                onLongClickLabel = stringResource(R.string.move),
+                onLongClick = {
+                    if (!updatedScrollingOpen && !updatedIsMoving && !updatedLockPosition) {
+                        context.vibrate()
+                        @Suppress("AssignedValueIsNeverRead")
+                        isMoving = true
+                    }
+                },
+                onDoubleClick = if (tapToOpen) null else {
+                    {
+                        context.vibrate(25L)
+                        context.eventManager.sendEvent(Event.ShowDrawer)
+                    }
+                },
+                onClick = {
+                    if (tapToOpen) {
+                        context.vibrate(25L)
+                        context.eventManager.sendEvent(Event.ShowDrawer)
+                    }
+                },
+                enabled = !isMoving,
+            ),
+    )
 }

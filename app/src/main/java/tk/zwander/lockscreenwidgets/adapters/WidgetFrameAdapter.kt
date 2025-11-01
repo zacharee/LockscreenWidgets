@@ -12,7 +12,6 @@ import tk.zwander.common.util.Event
 import tk.zwander.common.util.FrameSizeAndPosition
 import tk.zwander.common.util.eventManager
 import tk.zwander.common.util.frameSizeAndPosition
-import tk.zwander.common.util.prefManager
 import tk.zwander.lockscreenwidgets.activities.add.ReconfigureFrameWidgetActivity
 import tk.zwander.lockscreenwidgets.util.FramePrefs
 import tk.zwander.lockscreenwidgets.util.MainWidgetFrameDelegate
@@ -42,8 +41,6 @@ open class WidgetFrameAdapter(
         set(value) {
             FramePrefs.setWidgetsForFrame(context, holderId, value)
         }
-    override val widgetCornerRadius: Float
-        get() = context.prefManager.frameWidgetCornerRadiusDp
 
     override fun launchAddActivity() {
         context.eventManager.sendEvent(Event.LaunchAddWidget(holderId))

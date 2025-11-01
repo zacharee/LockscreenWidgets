@@ -62,6 +62,7 @@ import tk.zwander.common.activities.DismissOrUnlockActivity
 import tk.zwander.common.activities.PermissionIntentLaunchActivity
 import tk.zwander.common.compose.components.ShortcutItemLayout
 import tk.zwander.common.compose.components.WidgetItemLayout
+import tk.zwander.common.compose.util.rememberPreferenceState
 import tk.zwander.common.compose.util.widgetViewCacheRegistry
 import tk.zwander.common.data.WidgetData
 import tk.zwander.common.data.WidgetType
@@ -72,19 +73,18 @@ import tk.zwander.common.util.BrokenAppsRegistry
 import tk.zwander.common.util.Event
 import tk.zwander.common.util.EventObserver
 import tk.zwander.common.util.LSDisplay
-import tk.zwander.common.util.PrefManager
 import tk.zwander.common.util.appWidgetManager
 import tk.zwander.common.util.createWidgetErrorView
 import tk.zwander.common.util.eventManager
 import tk.zwander.common.util.getAllInstalledWidgetProviders
 import tk.zwander.common.util.logUtils
 import tk.zwander.common.util.mitigations.SafeContextWrapper
+import tk.zwander.common.util.prefManager
 import tk.zwander.common.util.requireLsDisplayManager
 import tk.zwander.common.util.setThemedContent
 import tk.zwander.common.util.themedLayoutInflater
 import tk.zwander.lockscreenwidgets.R
 import tk.zwander.lockscreenwidgets.databinding.ComposeViewHolderBinding
-import tk.zwander.widgetdrawer.adapters.DrawerAdapter
 import java.util.Collections
 import kotlin.math.min
 
@@ -122,7 +122,6 @@ abstract class BaseAdapter(
     protected abstract val minRowSpan: Int
     protected abstract val rowSpanForAddButton: Int
     protected abstract var currentWidgets: Collection<WidgetData>
-    protected abstract val widgetCornerRadius: Float
 
     init {
         setHasStableIds(true)
@@ -301,9 +300,13 @@ abstract class BaseAdapter(
                 onResize(data, 0, 1)
 
                 val widgetInfo = withContext(Dispatchers.Main) {
-                    try {
-                        manager.getAppWidgetInfo(data.id)
-                    } catch (_: PackageManager.NameNotFoundException) {
+                    if (data.type == WidgetType.WIDGET) {
+                        try {
+                            manager.getAppWidgetInfo(data.id)
+                        } catch (_: PackageManager.NameNotFoundException) {
+                            null
+                        }
+                    } else {
                         null
                     }
                 }
@@ -325,11 +328,7 @@ abstract class BaseAdapter(
                                 WidgetType.HEADER -> {}
                             }
                         },
-                        cornerRadiusKey = if (this@BaseAdapter is DrawerAdapter) {
-                            PrefManager.KEY_DRAWER_WIDGET_CORNER_RADIUS
-                        } else {
-                            PrefManager.KEY_FRAME_CORNER_RADIUS
-                        },
+                        cornerRadiusKey = viewModel.widgetCornerRadiusKey,
                         launchIconOverride = {
                             launchShortcutIconOverride(data.id)
                         },
@@ -519,11 +518,7 @@ abstract class BaseAdapter(
                         activityIntent = launchIntent,
                     )
                 },
-                cornerRadiusKey = if (this@BaseAdapter is DrawerAdapter) {
-                    PrefManager.KEY_DRAWER_WIDGET_CORNER_RADIUS
-                } else {
-                    PrefManager.KEY_FRAME_WIDGET_CORNER_RADIUS
-                },
+                cornerRadiusKey = viewModel.widgetCornerRadiusKey,
                 modifier = modifier,
             )
         }
@@ -545,11 +540,7 @@ abstract class BaseAdapter(
                         )
                     }
                 },
-                cornerRadiusKey = if (this@BaseAdapter is DrawerAdapter) {
-                    PrefManager.KEY_DRAWER_WIDGET_CORNER_RADIUS
-                } else {
-                    PrefManager.KEY_FRAME_WIDGET_CORNER_RADIUS
-                },
+                cornerRadiusKey = viewModel.widgetCornerRadiusKey,
                 modifier = modifier,
             )
         }
@@ -643,6 +634,17 @@ abstract class BaseAdapter(
         override fun performBind(data: Unit) {
             binding.root.setThemedContent {
                 MeasuredComposable(name = "AddWidgetLayout") {
+                    val resources = LocalResources.current
+                    val widgetCornerRadius by rememberPreferenceState(
+                        key = viewModel.widgetCornerRadiusKey,
+                        value = {
+                            (context.prefManager.getInt(
+                                it,
+                                resources.getInteger(R.integer.def_corner_radius_dp_scaled_10x),
+                            ) / 10f).dp
+                        },
+                    )
+
                     Card(
                         modifier = Modifier.fillMaxSize(),
                         colors = CardColors(
@@ -651,7 +653,7 @@ abstract class BaseAdapter(
                             disabledContentColor = Color.White,
                             disabledContainerColor = Color.Transparent,
                         ),
-                        shape = RoundedCornerShape(widgetCornerRadius.dp),
+                        shape = RoundedCornerShape(widgetCornerRadius),
                     ) {
                         Box(
                             modifier = Modifier

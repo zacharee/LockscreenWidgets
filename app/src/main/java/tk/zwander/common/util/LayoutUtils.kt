@@ -122,6 +122,30 @@ fun View.fadeAndScaleOut(endListener: () -> Unit) {
         duration = if (context.prefManager.animateShowHide) context.prefManager.animationDuration.toLong() else 0L
         addListener(object : AnimatorListenerAdapter() {
             override fun onAnimationEnd(animation: Animator) {
+                scaleX = 0.95f
+                scaleY = 0.95f
+                alpha = 0f
+
+                clearAnimation()
+                endListener()
+            }
+        })
+    }
+    animator.start()
+}
+
+fun View.fadeOut(endListener: () -> Unit) {
+    clearAnimation()
+
+    val animator = AnimatorSet().apply {
+        playTogether(
+            ObjectAnimator.ofFloat(this@fadeOut, "alpha", alpha, 0f),
+        )
+        duration = if (context.prefManager.animateShowHide) context.prefManager.animationDuration.toLong() else 0L
+        addListener(object : AnimatorListenerAdapter() {
+            override fun onAnimationEnd(animation: Animator) {
+                alpha = 0f
+
                 clearAnimation()
                 endListener()
             }
@@ -143,6 +167,30 @@ fun View.fadeAndScaleIn(endListener: () -> Unit) {
         duration = if (context.prefManager.animateShowHide) context.prefManager.animationDuration.toLong() else 0L
         addListener(object : AnimatorListenerAdapter() {
             override fun onAnimationEnd(animation: Animator) {
+                scaleX = 1f
+                scaleY = 1f
+                alpha = 1f
+
+                clearAnimation()
+                endListener()
+            }
+        })
+    }
+    animator.start()
+}
+
+fun View.fadeIn(endListener: () -> Unit) {
+    clearAnimation()
+
+    val animator = AnimatorSet().apply {
+        playTogether(
+            ObjectAnimator.ofFloat(this@fadeIn, "alpha", alpha, 1f),
+        )
+        duration = if (context.prefManager.animateShowHide) context.prefManager.animationDuration.toLong() else 0L
+        addListener(object : AnimatorListenerAdapter() {
+            override fun onAnimationEnd(animation: Animator) {
+                alpha = 1f
+
                 clearAnimation()
                 endListener()
             }
