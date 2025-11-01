@@ -312,6 +312,9 @@
     <string name="drawer_handle_lock_position">Lock Handle Position</string>
     <string name="drawer_handle_lock_position_desc">Prevents the drawer handle from being moved.</string>
 
+    <string name="drawer_blur_status_bar_area">Blur Status Bar Area</string>
+    <string name="drawer_blur_status_bar_area_desc">Show the blur effect over the status bar area.</string>
+
     <string name="show_only_when_locked">Show only when Locked</string>
     <string name="show_only_when_locked_desc">Only show the drawer handle when the device is on the lock screen.</string>
 

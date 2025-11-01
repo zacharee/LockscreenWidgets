@@ -147,6 +147,18 @@ class ComposeDrawerSettingsActivity : BaseActivity() {
                         visible = { shouldShowBlurOptions },
                     )
 
+                    switchPreference(
+                        title = { stringResource(R.string.drawer_blur_status_bar_area) },
+                        summary = { stringResource(R.string.drawer_blur_status_bar_area_desc) },
+                        key = { PrefManager.KEY_BLUR_DRAWER_STATUS_BAR_AREA },
+                        defaultValue = { true },
+                        icon = {
+                            painterResource(R.drawable.ic_baseline_blur_on_24)
+                        },
+                        visible = { shouldShowBlurOptions },
+                        enabled = booleanPreferenceDependency(PrefManager.KEY_BLUR_DRAWER_BACKGROUND),
+                    )
+
                     colorPickerPreference(
                         title = { stringResource(R.string.drawer_background_color) },
                         summary = { stringResource(R.string.drawer_background_color_desc) },
