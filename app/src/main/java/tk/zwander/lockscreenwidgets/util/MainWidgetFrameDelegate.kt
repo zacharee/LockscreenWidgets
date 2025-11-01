@@ -44,6 +44,7 @@ import tk.zwander.common.util.safeAddView
 import tk.zwander.common.util.safeRemoveView
 import tk.zwander.common.util.safeUpdateViewLayout
 import tk.zwander.common.util.setThemedContent
+import tk.zwander.common.util.themedContext
 import tk.zwander.common.util.themedLayoutInflater
 import tk.zwander.common.util.wallpaperUtils
 import tk.zwander.common.views.SnappyRecyclerView
@@ -189,7 +190,7 @@ open class MainWidgetFrameDelegate protected constructor(
     }
 
     private val widgetGrid by lazy {
-        SnappyRecyclerView(themeWrapper)
+        SnappyRecyclerView(themedContext)
     }
 
     private val frame by lazy {

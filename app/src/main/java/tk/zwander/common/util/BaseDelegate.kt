@@ -8,7 +8,6 @@ import android.hardware.display.DisplayManager.DisplayListener
 import android.view.View
 import android.view.WindowManager
 import androidx.annotation.CallSuper
-import androidx.appcompat.view.ContextThemeWrapper
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleRegistry
 import androidx.lifecycle.ViewModel
@@ -30,7 +29,6 @@ import tk.zwander.common.data.WidgetType
 import tk.zwander.common.host.WidgetHostCompat
 import tk.zwander.common.host.widgetHostCompat
 import tk.zwander.common.util.mitigations.SafeContextWrapper
-import tk.zwander.lockscreenwidgets.R
 import java.util.concurrent.ConcurrentLinkedDeque
 
 @Suppress("MemberVisibilityCanBePrivate")
@@ -64,13 +62,6 @@ abstract class BaseDelegate<State : Any>(
     protected abstract val rootView: View
     protected abstract val recyclerView: RecyclerView
     protected abstract var currentWidgets: List<WidgetData>
-
-    protected val themeWrapper by lazy {
-        ContextThemeWrapper(
-            this,
-            R.style.AppTheme,
-        )
-    }
 
     protected  val displayListener = object : DisplayListener {
         override fun onDisplayAdded(displayId: Int) {}

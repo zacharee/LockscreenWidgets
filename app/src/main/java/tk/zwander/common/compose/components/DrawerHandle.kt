@@ -40,21 +40,21 @@ import androidx.compose.ui.unit.dp
 import tk.zwander.common.compose.util.rememberPreferenceState
 import tk.zwander.common.util.Event
 import tk.zwander.common.util.PrefManager
+import tk.zwander.common.util.collectAsMutableState
 import tk.zwander.common.util.eventManager
 import tk.zwander.common.util.prefManager
 import tk.zwander.common.util.requireLsDisplayManager
 import tk.zwander.common.util.vibrate
 import tk.zwander.lockscreenwidgets.R
+import tk.zwander.widgetdrawer.util.DrawerDelegate
 import kotlin.math.absoluteValue
 
 @SuppressLint("RtlHardcoded")
 @Composable
-fun DrawerHandle(
+fun DrawerDelegate.DrawerViewModel.DrawerHandle(
     params: WindowManager.LayoutParams,
-    visible: Boolean,
     displayId: Int,
     updateWindow: () -> Unit,
-    onScrollStateChanged: (Boolean) -> Unit,
     fadeOutComplete: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -64,6 +64,7 @@ fun DrawerHandle(
     val screenWidth = remember(currentDisplay) {
         currentDisplay?.realSize?.x ?: 1
     }
+    val visible by handleVisible.collectAsState()
 
     var side by rememberPreferenceState(
         key = PrefManager.KEY_DRAWER_HANDLE_SIDE,
@@ -107,9 +108,7 @@ fun DrawerHandle(
     var isMoving by remember {
         mutableStateOf(false)
     }
-    var isScrollingOpen by remember {
-        mutableStateOf(false)
-    }
+    var isScrollingOpen by this.scrollingOpen.collectAsMutableState()
     var scrollTotalX = remember { 0f }
 
     val shownColor by animateColorAsState(
@@ -140,10 +139,6 @@ fun DrawerHandle(
     val transitionState = remember { MutableTransitionState(false) }
 
     val animatedElevation by animateDpAsState(if (showShadow) 8.dp else 0.dp)
-
-    LaunchedEffect(isScrollingOpen) {
-        onScrollStateChanged(isScrollingOpen)
-    }
 
     LaunchedEffect(visible) {
         transitionState.targetState = visible

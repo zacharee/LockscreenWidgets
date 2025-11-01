@@ -445,7 +445,7 @@ object AccessibilityUtils {
                     )
                 }
 
-                if (!drawerDelegate.scrollingOpen &&
+                if (!drawerDelegate.viewModel.scrollingOpen.value &&
                     notificationsWereOpen != notificationsAreOpen &&
                     notificationsAreOpen &&
                     drawerDelegate.isAttached &&

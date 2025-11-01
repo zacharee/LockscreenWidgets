@@ -9,9 +9,6 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.graphics.PixelFormat
-import android.os.Handler
-import android.os.Looper
-import android.view.ContextThemeWrapper
 import android.view.Gravity
 import android.view.View
 import android.view.ViewConfiguration
@@ -19,9 +16,6 @@ import android.view.WindowManager
 import android.view.animation.AccelerateInterpolator
 import android.view.animation.DecelerateInterpolator
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
 import androidx.core.animation.doOnEnd
@@ -52,6 +46,7 @@ import tk.zwander.common.util.safeAddView
 import tk.zwander.common.util.safeRemoveView
 import tk.zwander.common.util.safeUpdateViewLayout
 import tk.zwander.common.util.setThemedContent
+import tk.zwander.common.util.themedContext
 import tk.zwander.common.util.themedLayoutInflater
 import tk.zwander.lockscreenwidgets.R
 import tk.zwander.lockscreenwidgets.databinding.ComposeViewHolderBinding
@@ -130,10 +125,6 @@ class DrawerDelegate private constructor(context: Context, wm: WindowManager, di
             prefManager.drawerWidgets = LinkedHashSet(value)
         }
 
-    var scrollingOpen: Boolean = false
-
-    var handleVisible by mutableStateOf(false)
-
     private val handleParams by lazy {
         WindowManager.LayoutParams().apply {
             type = WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY
@@ -147,9 +138,7 @@ class DrawerDelegate private constructor(context: Context, wm: WindowManager, di
     }
 
     private val widgetGrid by lazy {
-        DrawerRecycler(
-            ContextThemeWrapper(this, R.style.AppTheme),
-        )
+        DrawerRecycler(themedContext)
     }
 
     private val drawer by lazy {
@@ -173,17 +162,13 @@ class DrawerDelegate private constructor(context: Context, wm: WindowManager, di
         }
     }
     private val handle by lazy {
-        ComposeView(ContextThemeWrapper(this, R.style.AppTheme)).apply {
+        ComposeView(themedContext).apply {
             setThemedContent {
-                DrawerHandle(
+                viewModel.DrawerHandle(
                     params = handleParams,
-                    visible = handleVisible,
                     displayId = displayId,
                     updateWindow = {
                         wm.safeUpdateViewLayout(this, handleParams)
-                    },
-                    onScrollStateChanged = {
-                        scrollingOpen = it
                     },
                     fadeOutComplete = {
                         wm.safeRemoveView(this)
@@ -261,11 +246,9 @@ class DrawerDelegate private constructor(context: Context, wm: WindowManager, di
     }
     private var currentVisibilityAnim: Animator? = null
         set(value) {
-            isHiding = false
+            viewModel.isHiding.value = false
             field = value
         }
-    private var isHiding: Boolean = false
-    private var latestScrollInVelocity: Float = 0f
 
     @SuppressLint("RtlHardcoded")
     override fun onEvent(event: Event) {
@@ -296,16 +279,14 @@ class DrawerDelegate private constructor(context: Context, wm: WindowManager, di
             is Event.DrawerAttachmentState -> {
                 TaskerIsShowingDrawer::class.java.requestQuery(this)
                 if (event.attached) {
-                    if (!scrollingOpen) {
-                        Handler(Looper.getMainLooper()).postDelayed({
+                    if (!viewModel.scrollingOpen.value) {
+                        mainHandler.postDelayed({
                             if (prefManager.drawerForceWidgetReload) {
                                 adapter.updateViews()
                             }
                         }, 50)
                         widgetHost.startListening(this)
-                    }
 
-                    if (!scrollingOpen) {
                         drawer.root.handler?.postDelayed({
                             currentVisibilityAnim?.cancel()
                             val anim = ValueAnimator.ofFloat(drawer.root.alpha, 1f)
@@ -348,11 +329,11 @@ class DrawerDelegate private constructor(context: Context, wm: WindowManager, di
             }
 
             is Event.ScrollInDrawer -> {
-                if (event.velocity.sign != latestScrollInVelocity.sign) {
-                    latestScrollInVelocity = 0f
+                if (event.velocity.sign != viewModel.latestScrollInVelocity.value.sign) {
+                    viewModel.latestScrollInVelocity.value = 0f
                 }
 
-                latestScrollInVelocity += event.velocity
+                viewModel.latestScrollInVelocity.value += event.velocity
 
                 val distanceFromEdge = (params.width - event.dist)
 
@@ -370,9 +351,9 @@ class DrawerDelegate private constructor(context: Context, wm: WindowManager, di
                 val distanceFromEdge = (params.width + params.x).absoluteValue
                 val touchSlop = ViewConfiguration.get(this).scaledTouchSlop
                 val velocityMatches = when {
-                    latestScrollInVelocity.absoluteValue < touchSlop -> true
-                    event.from == Gravity.LEFT -> latestScrollInVelocity > 0
-                    else -> latestScrollInVelocity < 0
+                    viewModel.latestScrollInVelocity.value.absoluteValue < touchSlop -> true
+                    event.from == Gravity.LEFT -> viewModel.latestScrollInVelocity.value > 0
+                    else -> viewModel.latestScrollInVelocity.value < 0
                 }
                 val metThreshold = distanceFromEdge > display.dpToPx(100f) && velocityMatches
 
@@ -494,7 +475,7 @@ class DrawerDelegate private constructor(context: Context, wm: WindowManager, di
             lifecycleRegistry.currentState = Lifecycle.State.RESUMED
 
             wm.safeAddView(handle, handleParams)
-            handleVisible = true
+            viewModel.handleVisible.value = true
         }
     }
 
@@ -503,7 +484,7 @@ class DrawerDelegate private constructor(context: Context, wm: WindowManager, di
             lifecycleRegistry.currentState = Lifecycle.State.STARTED
         }
 
-        handleVisible = false
+        viewModel.handleVisible.value = false
     }
 
     private fun showDrawer(wm: WindowManager = this.wm, hideHandle: Boolean = true) {
@@ -540,8 +521,8 @@ class DrawerDelegate private constructor(context: Context, wm: WindowManager, di
 
     private fun hideDrawer(callListener: Boolean = true) {
         mainHandler.post {
-            if (!isHiding) {
-                isHiding = true
+            if (!viewModel.isHiding.value) {
+                viewModel.isHiding.value = true
 
                 globalState.handlingClick.value = globalState.handlingClick.value.toMutableMap().also { it.remove(-2) }
                 viewModel.currentEditingInterfacePosition.value = -1
@@ -565,7 +546,7 @@ class DrawerDelegate private constructor(context: Context, wm: WindowManager, di
                                 logUtils.debugLog("Error hiding drawer", e)
                             }
                         }, 10)
-                        isHiding = false
+                        viewModel.isHiding.value = false
                     }
                 })
                 anim.start()
@@ -593,5 +574,9 @@ class DrawerDelegate private constructor(context: Context, wm: WindowManager, di
 
     class DrawerViewModel(delegate: DrawerDelegate) : BaseViewModel<State, DrawerDelegate>(delegate) {
         val selectedItem = MutableStateFlow(false)
+        val handleVisible = MutableStateFlow(false)
+        val scrollingOpen = MutableStateFlow(false)
+        val isHiding = MutableStateFlow(false)
+        val latestScrollInVelocity = MutableStateFlow(0f)
     }
 }
