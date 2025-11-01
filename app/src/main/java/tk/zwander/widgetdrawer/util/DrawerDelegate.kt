@@ -261,6 +261,7 @@ class DrawerDelegate private constructor(context: Context, wm: WindowManager, di
             }
 
             Event.DrawerShown -> {
+                adapter.updateViews()
                 hideHandle()
             }
 

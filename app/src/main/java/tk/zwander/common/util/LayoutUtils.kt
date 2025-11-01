@@ -26,6 +26,7 @@ import tk.zwander.lockscreenwidgets.R
 import kotlin.math.roundToInt
 import kotlin.math.sign
 
+
 fun createTouchHelperCallback(
     adapter: BaseAdapter,
     widgetMoved: (moved: Boolean) -> Unit,
@@ -127,7 +128,10 @@ fun View.fadeAndScaleOut(endListener: () -> Unit) {
                 alpha = 0f
 
                 clearAnimation()
-                endListener()
+
+                handler?.postDelayed({
+                    endListener()
+                }, 1)
             }
         })
     }
@@ -137,21 +141,22 @@ fun View.fadeAndScaleOut(endListener: () -> Unit) {
 fun View.fadeOut(endListener: () -> Unit) {
     clearAnimation()
 
-    val animator = AnimatorSet().apply {
-        playTogether(
-            ObjectAnimator.ofFloat(this@fadeOut, "alpha", alpha, 0f),
-        )
-        duration = if (context.prefManager.animateShowHide) context.prefManager.animationDuration.toLong() else 0L
-        addListener(object : AnimatorListenerAdapter() {
+    val alphaAnimation = ObjectAnimator.ofFloat(this, "alpha", alpha, 0f)
+    alphaAnimation.duration = if (context.prefManager.animateShowHide) context.prefManager.animationDuration.toLong() else 0L
+    alphaAnimation.addListener(
+        object : AnimatorListenerAdapter() {
             override fun onAnimationEnd(animation: Animator) {
                 alpha = 0f
 
                 clearAnimation()
-                endListener()
+
+                handler?.postDelayed({
+                    endListener()
+                }, 1)
             }
-        })
-    }
-    animator.start()
+        },
+    )
+    alphaAnimation.start()
 }
 
 //Fade a View to 100% alpha and 100% scale. Used when showing the widget frame.
