@@ -226,8 +226,12 @@
     <string name="drawer_handle_tap_to_open_desc">Однократное нажатие на триггер сразу откроет панель, вместо нужды в  перетаскивании или в двойном нажатии.</string>
     <string name="drawer_handle_lock_position">Блокировка позиции триггера</string>
     <string name="drawer_handle_lock_position_desc">Предотвращение смещения триггера.</string>
+    <string name="drawer_blur_status_bar_area">Blur Status Bar Area</string>
+    <string name="drawer_blur_status_bar_area_desc">Show the blur effect over the status bar area.</string>
     <string name="show_only_when_locked">Показывать только когда заблокировано</string>
     <string name="show_only_when_locked_desc">Показывать триггер панели только тогда, когда устройство находится на экране блокировки.</string>
+    <string name="debug_enable_bugsnag">Enable Bugsnag</string>
+    <string name="debug_enable_bugsnag_desc">Lockscreen Widgets uses Bugsnag to collect anonymous crash reports. Not that to fully disable collection, you\'ll have to force stop and reopen Lockscreen Widgets.</string>
     <string name="icon_pack">Набор значков</string>
     <string name="icon_pack_desc">Выбрать набор значков для ярлыков. Это относится как к рамке, так и к панели.</string>
     <string name="allow_show_frame">Разрешить показ рамки</string>
