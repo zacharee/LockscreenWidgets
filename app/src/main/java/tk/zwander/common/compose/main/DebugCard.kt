@@ -106,6 +106,15 @@ fun DebugCard() {
                     textAlign = TextAlign.Center,
                 )
 
+                Spacer(modifier = Modifier.size(8.dp))
+
+                PreferenceSwitch(
+                    key = PrefManager.KEY_ENABLE_BUGSNAG,
+                    title = stringResource(id = R.string.debug_enable_bugsnag),
+                    summary = stringResource(id = R.string.debug_enable_bugsnag_desc),
+                    defaultValue = true,
+                )
+
                 AnimatedVisibility(
                     visible = expanded,
                     modifier = Modifier.wrapContentHeight(),

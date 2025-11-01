@@ -107,97 +107,99 @@ class App : Application(), CoroutineScope by MainScope(), EventObserver {
     override fun onCreate() {
         super.onCreate()
 
-        ReLinker.loadLibrary(this, "bugsnag-ndk")
-        ReLinker.loadLibrary(this, "bugsnag-plugin-android-anr")
-        ReLinker.loadLibrary(this, "lockscreenwidgets")
+        if (prefManager.enableBugsnag) {
+            ReLinker.loadLibrary(this, "bugsnag-ndk")
+            ReLinker.loadLibrary(this, "bugsnag-plugin-android-anr")
+            ReLinker.loadLibrary(this, "lockscreenwidgets")
 
-        setUpAborter()
+            setUpAborter()
 
-        Bugsnag.start(this, Configuration.load(this).apply {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                addPlugin(BugsnagExitInfoPlugin(ExitInfoPluginConfiguration().apply {
-                    includeLogcat = true
-                }))
-            }
-            maxBreadcrumbs = 500
-            projectPackages = setOf("tk.zwander.lockscreenwidgets", "tk.zwander.widgetdrawer", "tk.zwander.common")
-        })
-        BugsnagPerformance.start(PerformanceConfiguration.load(this).apply {
-            enabledMetrics.rendering = true
-            enabledMetrics.cpu = true
-            enabledMetrics.memory = true
-        })
+            Bugsnag.start(this, Configuration.load(this).apply {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                    addPlugin(BugsnagExitInfoPlugin(ExitInfoPluginConfiguration().apply {
+                        includeLogcat = true
+                    }))
+                }
+                maxBreadcrumbs = 500
+                projectPackages = setOf("tk.zwander.lockscreenwidgets", "tk.zwander.widgetdrawer", "tk.zwander.common")
+            })
+            BugsnagPerformance.start(PerformanceConfiguration.load(this).apply {
+                enabledMetrics.rendering = true
+                enabledMetrics.cpu = true
+                enabledMetrics.memory = true
+            })
 
-        Bugsnag.addOnError {
-            val error = it.originalError
+            Bugsnag.addOnError {
+                val error = it.originalError
 
-            if (error is ClassCastException && error.stackTrace.firstOrNull()?.className?.contains("PmsHookApplication") == true) {
-                return@addOnError false
-            }
+                if (error is ClassCastException && error.stackTrace.firstOrNull()?.className?.contains("PmsHookApplication") == true) {
+                    return@addOnError false
+                }
 
-            if (error?.isOrHasDeadObject == true) {
-                return@addOnError false
-            }
+                if (error?.isOrHasDeadObject == true) {
+                    return@addOnError false
+                }
 
-            try {
-                it.addMetadata(
-                    "widget_data",
-                    hashMapOf(
-                        "currentWidgets" to try {
-                            prefManager.gson.toJson(
-                                prefManager.currentWidgets.map { widget ->
-                                    widget.copy(icon = null, iconRes = null)
-                                }
-                            )
-                        } catch (_: OutOfMemoryError) {
-                            "Too large to parse."
+                try {
+                    it.addMetadata(
+                        "widget_data",
+                        hashMapOf(
+                            "currentWidgets" to try {
+                                prefManager.gson.toJson(
+                                    prefManager.currentWidgets.map { widget ->
+                                        widget.copy(icon = null, iconRes = null)
+                                    }
+                                )
+                            } catch (_: OutOfMemoryError) {
+                                "Too large to parse."
+                            },
+                            "drawerWidgets" to try {
+                                prefManager.gson.toJson(
+                                    prefManager.drawerWidgets.map { widget ->
+                                        widget.copy(icon = null, iconRes = null)
+                                    }
+                                )
+                            } catch (_: OutOfMemoryError) {
+                                "Too large to parse."
+                            },
+                        ).apply {
+                            prefManager.currentSecondaryFrames.forEach { frameId ->
+                                put(
+                                    "secondaryFrame${frameId}Widgets",
+                                    try {
+                                        prefManager.gson.toJson(
+                                            FramePrefs.getWidgetsForFrame(this@App, frameId).map { widget ->
+                                                widget.copy(icon = null, iconRes = null)
+                                            },
+                                        )
+                                    } catch (_: OutOfMemoryError) {
+                                        "Too large to parse."
+                                    },
+                                )
+                            }
                         },
-                        "drawerWidgets" to try {
-                            prefManager.gson.toJson(
-                                prefManager.drawerWidgets.map { widget ->
-                                    widget.copy(icon = null, iconRes = null)
-                                }
-                            )
-                        } catch (_: OutOfMemoryError) {
-                            "Too large to parse."
-                        },
-                    ).apply {
-                        prefManager.currentSecondaryFrames.forEach { frameId ->
-                            put(
-                                "secondaryFrame${frameId}Widgets",
-                                try {
-                                    prefManager.gson.toJson(
-                                        FramePrefs.getWidgetsForFrame(this@App, frameId).map { widget ->
-                                            widget.copy(icon = null, iconRes = null)
-                                        },
-                                    )
-                                } catch (_: OutOfMemoryError) {
-                                    "Too large to parse."
-                                },
-                            )
-                        }
-                    },
-                )
-            } catch (_: OutOfMemoryError) {
+                    )
+                } catch (_: OutOfMemoryError) {
+                    it.addMetadata(
+                        "widget_data",
+                        hashMapOf("OOM" to "OOM thrown when trying to add current widget data."),
+                    )
+                }
+
                 it.addMetadata(
-                    "widget_data",
-                    hashMapOf("OOM" to "OOM thrown when trying to add current widget data."),
+                    "settings",
+                    mapOf(
+                        "drawer_enabled" to prefManager.drawerEnabled,
+                        "frame_enabled" to prefManager.widgetFrameEnabled,
+                    ),
                 )
+
+                true
             }
 
-            it.addMetadata(
-                "settings",
-                mapOf(
-                    "drawer_enabled" to prefManager.drawerEnabled,
-                    "frame_enabled" to prefManager.widgetFrameEnabled,
-                ),
-            )
-
-            true
+            val previousHandler = Thread.getDefaultUncaughtExceptionHandler()
+            Thread.setDefaultUncaughtExceptionHandler(GlobalExceptionHandler(this, previousHandler))
         }
-
-        val previousHandler = Thread.getDefaultUncaughtExceptionHandler()
-        Thread.setDefaultUncaughtExceptionHandler(GlobalExceptionHandler(this, previousHandler))
 
         //Make sure we can access hidden APIs
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {

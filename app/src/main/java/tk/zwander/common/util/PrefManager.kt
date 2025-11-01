@@ -66,6 +66,7 @@ class PrefManager private constructor(private val context: Context) {
         const val KEY_FRAME_COL_COUNT = "frame_col_count"
         const val KEY_FRAME_ROW_COUNT = "frame_row_count"
         const val KEY_SHOW_DEBUG_ID_VIEW = "show_debug_id_view"
+        const val KEY_ENABLE_BUGSNAG = "enable_bugsnag"
         const val KEY_ACCESSIBILITY_EVENT_DELAY = "accessibility_event_delay"
         const val KEY_PRESENT_IDS = "present_ids"
         const val KEY_NON_PRESENT_IDS = "non_present_ids"
@@ -453,6 +454,12 @@ class PrefManager private constructor(private val context: Context) {
         get() = getBoolean(KEY_SHOW_DEBUG_ID_VIEW, false) && debugLog
         set(value) {
             putBoolean(KEY_SHOW_DEBUG_ID_VIEW, value)
+        }
+
+    var enableBugsnag: Boolean
+        get() = getBoolean(KEY_ENABLE_BUGSNAG, true)
+        set(value) {
+            putBoolean(KEY_ENABLE_BUGSNAG, value)
         }
 
     var showDrawerHandleOnlyWhenLocked: Boolean
