@@ -226,8 +226,12 @@
     <string name="drawer_handle_tap_to_open_desc">Un simple appui sur la poignée ouvrira le tiroir immédiatement au lieu de nécessiter un glissement ou un double appui.</string>
     <string name="drawer_handle_lock_position">Verrouiller la position de la poignée</string>
     <string name="drawer_handle_lock_position_desc">Empêche le déplacement de la poignée du tiroir.</string>
+    <string name="drawer_blur_status_bar_area">Blur Status Bar Area</string>
+    <string name="drawer_blur_status_bar_area_desc">Show the blur effect over the status bar area.</string>
     <string name="show_only_when_locked">Afficher uniquement quand verrouillé</string>
     <string name="show_only_when_locked_desc">Ne montrer la poignée du tiroir que lorsque l\'appareil est sur l\'écran de verrouillage.</string>
+    <string name="debug_enable_bugsnag">Enable Bugsnag</string>
+    <string name="debug_enable_bugsnag_desc">Lockscreen Widgets uses Bugsnag to collect anonymous crash reports. Not that to fully disable collection, you\'ll have to force stop and reopen Lockscreen Widgets.</string>
     <string name="icon_pack">Pack d\'icônes</string>
     <string name="icon_pack_desc">Choisissez un pack d\'icônes pour les raccourcis. Cela s\'applique à la fois au cadre et au tiroir.</string>
     <string name="allow_show_frame">Affichage du cadre</string>
