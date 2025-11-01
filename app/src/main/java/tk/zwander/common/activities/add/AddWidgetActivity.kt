@@ -4,7 +4,6 @@ import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import android.view.MenuItem
-import androidx.activity.compose.setContent
 import androidx.compose.ui.unit.dp
 import com.bugsnag.android.performance.compose.MeasuredComposable
 import kotlinx.coroutines.CoroutineScope
@@ -16,6 +15,7 @@ import tk.zwander.common.data.WidgetData
 import tk.zwander.common.data.WidgetSizeData
 import tk.zwander.common.util.componentNameCompat
 import tk.zwander.common.util.density
+import tk.zwander.common.util.setThemedContent
 import tk.zwander.common.util.shortcutIdManager
 import tk.zwander.common.util.toSafeBitmap
 import tk.zwander.lockscreenwidgets.data.list.LauncherItemListInfo
@@ -38,7 +38,7 @@ abstract class AddWidgetActivity : BaseBindWidgetActivity(), CoroutineScope by M
          */
         DismissOrUnlockActivity.launch(this)
 
-        setContent {
+        setThemedContent {
             MeasuredComposable(name = "AddWidgetLayout") {
                 AddWidgetLayout(
                     showShortcuts = showShortcuts,

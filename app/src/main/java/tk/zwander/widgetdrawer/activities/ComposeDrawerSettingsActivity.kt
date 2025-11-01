@@ -3,12 +3,10 @@ package tk.zwander.widgetdrawer.activities
 import android.content.Context
 import android.os.Build
 import android.os.Bundle
-import androidx.activity.compose.setContent
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.core.content.res.ResourcesCompat
 import tk.zwander.common.activities.BaseActivity
-import tk.zwander.common.compose.AppTheme
 import tk.zwander.common.compose.settings.PreferenceScreen
 import tk.zwander.common.compose.settings.booleanPreferenceDependency
 import tk.zwander.common.compose.settings.createCommonSection
@@ -16,6 +14,7 @@ import tk.zwander.common.compose.settings.rememberPreferenceScreen
 import tk.zwander.common.util.PrefManager
 import tk.zwander.common.util.backup.BackupRestoreManager
 import tk.zwander.common.util.isOneUI
+import tk.zwander.common.util.setThemedContent
 import tk.zwander.lockscreenwidgets.R
 
 class ComposeDrawerSettingsActivity : BaseActivity() {
@@ -28,7 +27,7 @@ class ComposeDrawerSettingsActivity : BaseActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        setContent {
+        setThemedContent {
             val commonSection = createCommonSection(BackupRestoreManager.Which.DRAWER)
             val prefs = rememberPreferenceScreen {
                 commonSection.addToPreferenceScreen(this)
@@ -269,12 +268,10 @@ class ComposeDrawerSettingsActivity : BaseActivity() {
                 }
             }
 
-            AppTheme {
-                PreferenceScreen(
-                    title = resources.getString(R.string.settings),
-                    categories = prefs,
-                )
-            }
+            PreferenceScreen(
+                title = resources.getString(R.string.settings),
+                categories = prefs,
+            )
         }
     }
 }

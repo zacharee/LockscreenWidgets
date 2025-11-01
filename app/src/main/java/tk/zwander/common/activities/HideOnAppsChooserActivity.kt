@@ -3,9 +3,9 @@ package tk.zwander.common.activities
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import androidx.activity.compose.setContent
 import com.bugsnag.android.performance.compose.MeasuredComposable
 import tk.zwander.common.compose.hide.HideOnAppsChooserLayout
+import tk.zwander.common.util.setThemedContent
 
 class HideOnAppsChooserActivity : BaseActivity() {
     companion object {
@@ -20,7 +20,7 @@ class HideOnAppsChooserActivity : BaseActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        setContent {
+        setThemedContent {
             MeasuredComposable(name = "HideOnAppsChooser") {
                 HideOnAppsChooserLayout(onBackPressedDispatcher::onBackPressed)
             }

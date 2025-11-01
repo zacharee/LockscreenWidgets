@@ -3,7 +3,6 @@ package tk.zwander.common.activities
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.Image
@@ -47,7 +46,6 @@ import com.bugsnag.android.performance.compose.MeasuredComposable
 import com.google.accompanist.drawablepainter.rememberDrawablePainter
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import tk.zwander.common.compose.AppTheme
 import tk.zwander.common.compose.add.SearchToolbar
 import tk.zwander.common.compose.components.Loader
 import tk.zwander.common.iconpacks.LoadedIconPack
@@ -55,6 +53,7 @@ import tk.zwander.common.iconpacks.iconPackManager
 import tk.zwander.common.util.Event
 import tk.zwander.common.util.eventManager
 import tk.zwander.common.util.prefManager
+import tk.zwander.common.util.setThemedContent
 import tk.zwander.lockscreenwidgets.R
 
 class SelectIconPackActivity : BaseActivity() {
@@ -88,7 +87,7 @@ class SelectIconPackActivity : BaseActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        setContent {
+        setThemedContent {
             var filter by remember {
                 mutableStateOf<String?>(null)
             }
@@ -114,121 +113,120 @@ class SelectIconPackActivity : BaseActivity() {
             }
 
             MeasuredComposable(name = "SelectIconPack") {
-                AppTheme {
-                    Surface(
+                Surface(
+                    modifier = Modifier.fillMaxSize(),
+                ) {
+                    Crossfade(
                         modifier = Modifier.fillMaxSize(),
-                    ) {
-                        Crossfade(
-                            modifier = Modifier.fillMaxSize(),
-                            targetState = items.isEmpty(),
-                            label = "SelectIconPack",
-                        ) { loading ->
-                            if (loading) {
-                                Loader(modifier = Modifier.fillMaxSize())
-                            } else {
-                                var searchBarHeight by remember {
-                                    mutableIntStateOf(0)
-                                }
+                        targetState = items.isEmpty(),
+                        label = "SelectIconPack",
+                    ) { loading ->
+                        if (loading) {
+                            Loader(modifier = Modifier.fillMaxSize())
+                        } else {
+                            var searchBarHeight by remember {
+                                mutableIntStateOf(0)
+                            }
 
-                                Box(
+                            Box(
+                                modifier = Modifier.fillMaxSize(),
+                                contentAlignment = Alignment.TopCenter,
+                            ) {
+                                LazyColumn(
                                     modifier = Modifier.fillMaxSize(),
-                                    contentAlignment = Alignment.TopCenter,
+                                    contentPadding = WindowInsets
+                                        .systemBars
+                                        .add(WindowInsets.ime)
+                                        .add(WindowInsets(top = searchBarHeight))
+                                        .add(WindowInsets(top = 8.dp))
+                                        .asPaddingValues(),
                                 ) {
-                                    LazyColumn(
-                                        modifier = Modifier.fillMaxSize(),
-                                        contentPadding = WindowInsets
-                                            .systemBars
-                                            .add(WindowInsets.ime)
-                                            .add(WindowInsets(top = searchBarHeight))
-                                            .add(WindowInsets(top = 8.dp))
-                                            .asPaddingValues(),
-                                    ) {
-                                        items(
-                                            items = filteredItems,
-                                            key = { item ->
-                                                item.packageName ?: "SystemIconPack__"
-                                            }) { pack ->
-                                            Row(
-                                                modifier = Modifier
-                                                    .fillMaxWidth()
-                                                    .heightIn(min = 48.dp)
-                                                    .clickable {
-                                                        if (shortcutId == null) {
-                                                            prefManager.selectedIconPackPackage =
-                                                                pack.packageName
+                                    items(
+                                        items = filteredItems,
+                                        key = { item ->
+                                            item.packageName ?: "SystemIconPack__"
+                                        }) { pack ->
+                                        Row(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .heightIn(min = 48.dp)
+                                                .clickable {
+                                                    if (shortcutId == null) {
+                                                        prefManager.selectedIconPackPackage =
+                                                            pack.packageName
+                                                        finish()
+                                                    } else {
+                                                        if (pack.packageName == null) {
+                                                            prefManager.shortcutOverrideIcons =
+                                                                prefManager.shortcutOverrideIcons.apply {
+                                                                    remove(shortcutId)
+                                                                }
                                                             finish()
                                                         } else {
-                                                            if (pack.packageName == null) {
-                                                                prefManager.shortcutOverrideIcons =
-                                                                    prefManager.shortcutOverrideIcons.apply {
-                                                                        remove(shortcutId)
-                                                                    }
-                                                                finish()
-                                                            } else {
-                                                                shortcutOverrideLauncher.launch(
-                                                                    SelectIconFromPackActivity.createIntent(
-                                                                        this@SelectIconPackActivity,
-                                                                        shortcutId!!,
-                                                                        pack.packageName,
-                                                                    ),
-                                                                )
-                                                            }
+                                                            shortcutOverrideLauncher.launch(
+                                                                SelectIconFromPackActivity.createIntent(
+                                                                    this@SelectIconPackActivity,
+                                                                    shortcutId!!,
+                                                                    pack.packageName,
+                                                                ),
+                                                            )
                                                         }
                                                     }
-                                                    .padding(16.dp),
-                                                verticalAlignment = Alignment.CenterVertically,
-                                                horizontalArrangement = Arrangement.spacedBy(16.dp),
+                                                }
+                                                .padding(16.dp),
+                                            verticalAlignment = Alignment.CenterVertically,
+                                            horizontalArrangement = Arrangement.spacedBy(16.dp),
+                                        ) {
+                                            Image(
+                                                painter = rememberDrawablePainter(pack.packIcon),
+                                                contentDescription = pack.label,
+                                                modifier = Modifier.size(48.dp),
+                                            )
+
+                                            Column(
+                                                modifier = Modifier.weight(1f),
                                             ) {
-                                                Image(
-                                                    painter = rememberDrawablePainter(pack.packIcon),
-                                                    contentDescription = pack.label,
-                                                    modifier = Modifier.size(48.dp),
+                                                Text(
+                                                    text = pack.label
+                                                        ?: stringResource(R.string.system_icons),
+                                                    fontWeight = FontWeight.Bold,
                                                 )
 
-                                                Column(
-                                                    modifier = Modifier.weight(1f),
-                                                ) {
+                                                pack.packageName?.let {
                                                     Text(
-                                                        text = pack.label
-                                                            ?: stringResource(R.string.system_icons),
-                                                        fontWeight = FontWeight.Bold,
-                                                    )
-
-                                                    pack.packageName?.let {
-                                                        Text(
-                                                            text = it,
-                                                        )
-                                                    }
-                                                }
-
-                                                if ((shortcutId == null && pack.packageName == prefManager.selectedIconPackPackage) ||
-                                                    (shortcutId != null && prefManager.shortcutOverrideIcons[shortcutId!!]?.packPackageName == pack.packageName)) {
-                                                    Icon(
-                                                        painter = painterResource(R.drawable.baseline_check_24),
-                                                        contentDescription = stringResource(R.string.selected_pack),
+                                                        text = it,
                                                     )
                                                 }
                                             }
+
+                                            if ((shortcutId == null && pack.packageName == prefManager.selectedIconPackPackage) ||
+                                                (shortcutId != null && prefManager.shortcutOverrideIcons[shortcutId!!]?.packPackageName == pack.packageName)
+                                            ) {
+                                                Icon(
+                                                    painter = painterResource(R.drawable.baseline_check_24),
+                                                    contentDescription = stringResource(R.string.selected_pack),
+                                                )
+                                            }
                                         }
                                     }
+                                }
 
-                                    Box(
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .statusBarsPadding()
+                                        .padding(horizontal = 8.dp),
+                                ) {
+                                    SearchToolbar(
+                                        filter = filter,
+                                        onFilterChanged = { f -> filter = f },
+                                        onBack = ::finish,
                                         modifier = Modifier
                                             .fillMaxWidth()
-                                            .statusBarsPadding()
-                                            .padding(horizontal = 8.dp),
-                                    ) {
-                                        SearchToolbar(
-                                            filter = filter,
-                                            onFilterChanged = { f -> filter = f },
-                                            onBack = ::finish,
-                                            modifier = Modifier
-                                                .fillMaxWidth()
-                                                .onSizeChanged { size ->
-                                                    searchBarHeight = size.height
-                                                },
-                                        )
-                                    }
+                                            .onSizeChanged { size ->
+                                                searchBarHeight = size.height
+                                            },
+                                    )
                                 }
                             }
                         }

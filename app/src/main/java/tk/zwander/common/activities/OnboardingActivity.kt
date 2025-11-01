@@ -7,7 +7,6 @@ import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
-import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.ActivityResultLauncher
 import androidx.compose.foundation.layout.fillMaxSize
@@ -16,8 +15,8 @@ import androidx.compose.ui.graphics.luminance
 import androidx.core.view.WindowInsetsControllerCompat
 import com.bugsnag.android.performance.compose.MeasuredComposable
 import dev.zwander.composeintroslider.IntroSlider
-import tk.zwander.common.compose.AppTheme
 import tk.zwander.common.compose.data.rememberIntroSlides
+import tk.zwander.common.util.setThemedContent
 
 /**
  * The introduction for the app.
@@ -93,25 +92,24 @@ class OnboardingActivity : ComponentActivity() {
 
         val insetsControllerCompat = WindowInsetsControllerCompat(window, window.decorView)
 
-        setContent {
+        setThemedContent {
             MeasuredComposable(name = "OnboardingActivity") {
-                AppTheme {
-                    IntroSlider(
-                        pages = rememberIntroSlides(startReason = retroMode, finish = ::finish),
-                        onExit = ::finish,
-                        onDone = {
-                            setResult(RESULT_OK)
-                            finish()
-                        },
-                        modifier = Modifier.fillMaxSize(),
-                        backPressedDispatcher = LocalOnBackPressedDispatcherOwner.current?.onBackPressedDispatcher,
-                        normalizeElements = true,
-                        onContentColorChanged = {
-                            insetsControllerCompat.isAppearanceLightNavigationBars = it.luminance() <= 0.5
-                            insetsControllerCompat.isAppearanceLightStatusBars = it.luminance() <= 0.5
-                        },
-                    )
-                }
+                IntroSlider(
+                    pages = rememberIntroSlides(startReason = retroMode, finish = ::finish),
+                    onExit = ::finish,
+                    onDone = {
+                        setResult(RESULT_OK)
+                        finish()
+                    },
+                    modifier = Modifier.fillMaxSize(),
+                    backPressedDispatcher = LocalOnBackPressedDispatcherOwner.current?.onBackPressedDispatcher,
+                    normalizeElements = true,
+                    onContentColorChanged = {
+                        insetsControllerCompat.isAppearanceLightNavigationBars =
+                            it.luminance() <= 0.5
+                        insetsControllerCompat.isAppearanceLightStatusBars = it.luminance() <= 0.5
+                    },
+                )
             }
         }
     }

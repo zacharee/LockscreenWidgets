@@ -17,7 +17,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.unit.dp
-import tk.zwander.common.compose.AppTheme
 import tk.zwander.common.compose.components.Loader
 import tk.zwander.lockscreenwidgets.data.list.BaseListInfo
 
@@ -36,51 +35,50 @@ fun AddWidgetLayout(
         showShortcuts = showShortcuts,
     )
 
-    AppTheme {
-        Surface(
-            modifier = Modifier
-                .fillMaxSize(),
+    Surface(
+        modifier = Modifier
+            .fillMaxSize(),
+    ) {
+        Crossfade(
+            modifier = Modifier.fillMaxSize(),
+            targetState = items.isEmpty(),
+            label = "AddWidget",
         ) {
-            Crossfade(
-                modifier = Modifier.fillMaxSize(),
-                targetState = items.isEmpty(),
-                label = "AddWidget",
-            ) {
-                if (it) {
-                    Loader(modifier = Modifier.fillMaxSize())
-                } else {
-                    var searchBarHeight by remember {
-                        mutableIntStateOf(0)
-                    }
+            if (it) {
+                Loader(modifier = Modifier.fillMaxSize())
+            } else {
+                var searchBarHeight by remember {
+                    mutableIntStateOf(0)
+                }
+
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.TopCenter,
+                ) {
+                    AddWidgetScroller(
+                        filteredItems = filteredItems,
+                        onSelected = onSelected,
+                        searchBarHeight = searchBarHeight,
+                        modifier = Modifier
+                            .fillMaxSize(),
+                    )
 
                     Box(
-                        modifier = Modifier.fillMaxSize(),
-                        contentAlignment = Alignment.TopCenter,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .statusBarsPadding()
+                            .padding(horizontal = 8.dp),
                     ) {
-                        AddWidgetScroller(
-                            filteredItems = filteredItems,
-                            onSelected = onSelected,
-                            searchBarHeight = searchBarHeight,
+                        SearchToolbar(
+                            filter = filter,
+                            onFilterChanged = { f -> filter = f },
+                            onBack = onBack,
                             modifier = Modifier
-                                .fillMaxSize(),
+                                .fillMaxWidth()
+                                .onSizeChanged { size ->
+                                    searchBarHeight = size.height
+                                },
                         )
-
-                        Box(
-                            modifier = Modifier.fillMaxWidth()
-                                .statusBarsPadding()
-                                .padding(horizontal = 8.dp),
-                        ) {
-                            SearchToolbar(
-                                filter = filter,
-                                onFilterChanged = { f -> filter = f },
-                                onBack = onBack,
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .onSizeChanged { size ->
-                                        searchBarHeight = size.height
-                                    },
-                            )
-                        }
                     }
                 }
             }

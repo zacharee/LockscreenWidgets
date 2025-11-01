@@ -7,8 +7,6 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
 import android.util.SizeF
-import android.view.ContextThemeWrapper
-import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ListView
@@ -30,6 +28,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -48,7 +47,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
-import androidx.core.view.LayoutInflaterCompat
 import androidx.core.view.forEach
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
@@ -62,7 +60,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import tk.zwander.common.activities.DismissOrUnlockActivity
 import tk.zwander.common.activities.PermissionIntentLaunchActivity
-import tk.zwander.common.compose.AppTheme
 import tk.zwander.common.compose.components.ShortcutItemLayout
 import tk.zwander.common.compose.components.WidgetItemLayout
 import tk.zwander.common.compose.util.widgetViewCacheRegistry
@@ -77,13 +74,14 @@ import tk.zwander.common.util.EventObserver
 import tk.zwander.common.util.LSDisplay
 import tk.zwander.common.util.PrefManager
 import tk.zwander.common.util.appWidgetManager
-import tk.zwander.common.util.compat.LayoutInflaterFactory2Compat
 import tk.zwander.common.util.createWidgetErrorView
 import tk.zwander.common.util.eventManager
 import tk.zwander.common.util.getAllInstalledWidgetProviders
 import tk.zwander.common.util.logUtils
 import tk.zwander.common.util.mitigations.SafeContextWrapper
 import tk.zwander.common.util.requireLsDisplayManager
+import tk.zwander.common.util.setThemedContent
+import tk.zwander.common.util.themedLayoutInflater
 import tk.zwander.lockscreenwidgets.R
 import tk.zwander.lockscreenwidgets.databinding.ComposeViewHolderBinding
 import tk.zwander.widgetdrawer.adapters.DrawerAdapter
@@ -107,8 +105,6 @@ abstract class BaseAdapter(
     val widgets = ArrayList<WidgetData>()
     val spanSizeLookup = WidgetSpanSizeLookup()
 
-    var currentEditingInterfacePosition by mutableStateOf(-1)
-
     private var didResize = false
 
     protected val host = context.widgetHostCompat
@@ -118,14 +114,7 @@ abstract class BaseAdapter(
     protected val display: LSDisplay
         get() = context.requireLsDisplayManager.requireDisplay(displayId)
 
-    private val baseLayoutInflater =
-        LayoutInflater.from(context).cloneInContext(ContextThemeWrapper(context, R.style.AppTheme))
-            .apply {
-                LayoutInflaterCompat.setFactory2(
-                    this,
-                    LayoutInflaterFactory2Compat(),
-                )
-            }
+    private val baseLayoutInflater = context.themedLayoutInflater
 
     protected abstract val colCount: Int
     protected abstract val rowCount: Int
@@ -274,7 +263,8 @@ abstract class BaseAdapter(
      * has specified for the frame.
      */
     @SuppressLint("ClickableViewAccessibility")
-    inner class WidgetVH(binding: ComposeViewHolderBinding) : BaseVH<WidgetData>(binding), EventObserver {
+    inner class WidgetVH(binding: ComposeViewHolderBinding) : BaseVH<WidgetData>(binding),
+        EventObserver {
         private fun openWidgetConfig(currentData: WidgetData) {
             val provider = currentData.widgetProviderComponent
 
@@ -316,58 +306,58 @@ abstract class BaseAdapter(
                     }
                 }
 
-                binding.root.setContent {
-                    AppTheme {
-                        viewModel.WidgetItemLayout(
-                            needsReconfigure = data.type == WidgetType.WIDGET && widgetInfo == null,
-                            widgetData = data,
-                            widgetContents = { modifier ->
-                                when (data.safeType) {
-                                    WidgetType.WIDGET -> WidgetContents(data, widgetInfo!!, modifier)
-                                    WidgetType.SHORTCUT, WidgetType.LAUNCHER_SHORTCUT -> {
-                                        ShortcutContent(data, modifier)
-                                    }
+                binding.root.setThemedContent {
+                    val currentEditingPosition by viewModel.currentEditingInterfacePosition.collectAsState()
 
-                                    WidgetType.LAUNCHER_ITEM -> LauncherIconContent(data, modifier)
-                                    WidgetType.HEADER -> {}
+                    viewModel.WidgetItemLayout(
+                        needsReconfigure = data.type == WidgetType.WIDGET && widgetInfo == null,
+                        widgetData = data,
+                        widgetContents = { modifier ->
+                            when (data.safeType) {
+                                WidgetType.WIDGET -> WidgetContents(data, widgetInfo!!, modifier)
+                                WidgetType.SHORTCUT, WidgetType.LAUNCHER_SHORTCUT -> {
+                                    ShortcutContent(data, modifier)
                                 }
-                            },
-                            cornerRadiusKey = if (this@BaseAdapter is DrawerAdapter) {
-                                PrefManager.KEY_DRAWER_WIDGET_CORNER_RADIUS
-                            } else {
-                                PrefManager.KEY_FRAME_CORNER_RADIUS
-                            },
-                            launchIconOverride = {
-                                launchShortcutIconOverride(data.id)
-                            },
-                            launchReconfigure = {
-                                openWidgetConfig(data)
-                            },
-                            remove = {
-                                onRemoveCallback(data, data.id)
-                            },
-                            getResizeThresholdPx = {
-                                getThresholdPx(it)
-                            },
-                            onResize = { overThreshold, step, amount, direction, vertical ->
-                                handleResize(
-                                    currentData = data,
-                                    overThreshold = overThreshold,
-                                    step = step,
-                                    amount = amount,
-                                    direction = direction,
-                                    vertical = vertical,
-                                )
-                            },
-                            liftCallback = {
-                                notifyItemChanged(bindingAdapterPosition)
-                            },
-                            rowCount = rowCount,
-                            colCount = colCount,
-                            isEditing = currentEditingInterfacePosition == bindingAdapterPosition,
-                            modifier = Modifier.fillMaxSize(),
-                        )
-                    }
+
+                                WidgetType.LAUNCHER_ITEM -> LauncherIconContent(data, modifier)
+                                WidgetType.HEADER -> {}
+                            }
+                        },
+                        cornerRadiusKey = if (this@BaseAdapter is DrawerAdapter) {
+                            PrefManager.KEY_DRAWER_WIDGET_CORNER_RADIUS
+                        } else {
+                            PrefManager.KEY_FRAME_CORNER_RADIUS
+                        },
+                        launchIconOverride = {
+                            launchShortcutIconOverride(data.id)
+                        },
+                        launchReconfigure = {
+                            openWidgetConfig(data)
+                        },
+                        remove = {
+                            onRemoveCallback(data, data.id)
+                        },
+                        getResizeThresholdPx = {
+                            getThresholdPx(it)
+                        },
+                        onResize = { overThreshold, step, amount, direction, vertical ->
+                            handleResize(
+                                currentData = data,
+                                overThreshold = overThreshold,
+                                step = step,
+                                amount = amount,
+                                direction = direction,
+                                vertical = vertical,
+                            )
+                        },
+                        liftCallback = {
+                            notifyItemChanged(bindingAdapterPosition)
+                        },
+                        rowCount = rowCount,
+                        colCount = colCount,
+                        isEditing = currentEditingPosition == bindingAdapterPosition,
+                        modifier = Modifier.fillMaxSize(),
+                    )
                 }
             }
         }
@@ -649,63 +639,61 @@ abstract class BaseAdapter(
     inner class AddWidgetVH(binding: ComposeViewHolderBinding) : BaseVH<Unit>(binding) {
         @OptIn(ExperimentalComposeUiApi::class)
         override fun performBind(data: Unit) {
-            binding.root.setContent {
+            binding.root.setThemedContent {
                 MeasuredComposable(name = "AddWidgetLayout") {
-                    AppTheme {
-                        Card(
-                            modifier = Modifier.fillMaxSize(),
-                            colors = CardColors(
-                                containerColor = Color.Transparent,
-                                contentColor = Color.White,
-                                disabledContentColor = Color.White,
-                                disabledContainerColor = Color.Transparent,
-                            ),
-                            shape = RoundedCornerShape(widgetCornerRadius.dp),
+                    Card(
+                        modifier = Modifier.fillMaxSize(),
+                        colors = CardColors(
+                            containerColor = Color.Transparent,
+                            contentColor = Color.White,
+                            disabledContentColor = Color.White,
+                            disabledContainerColor = Color.Transparent,
+                        ),
+                        shape = RoundedCornerShape(widgetCornerRadius.dp),
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .clickable(
+                                    enabled = true,
+                                    interactionSource = remember { MutableInteractionSource() },
+                                    onClick = { launchAddActivity() },
+                                    indication = ripple(
+                                        color = Color.Black,
+                                    ),
+                                ),
+                            contentAlignment = Alignment.Center,
                         ) {
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .clickable(
-                                        enabled = true,
-                                        interactionSource = remember { MutableInteractionSource() },
-                                        onClick = { launchAddActivity() },
-                                        indication = ripple(
+                            Column(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                            ) {
+                                Icon(
+                                    painter = painterResource(R.drawable.ic_baseline_add_24),
+                                    contentDescription = stringResource(R.string.add_widget),
+                                    tint = Color.White,
+                                    modifier = Modifier
+                                        .size(48.dp)
+                                        .background(
+                                            brush = Brush.radialGradient(
+                                                0f to Color.Black.copy(alpha = 0.5f),
+                                                1f to Color.Transparent,
+                                            ),
+                                        ),
+                                )
+
+                                Text(
+                                    text = stringResource(R.string.add_widget),
+                                    fontWeight = FontWeight.Bold,
+                                    style = LocalTextStyle.current.copy(
+                                        shadow = Shadow(
                                             color = Color.Black,
+                                            offset = Offset(3f, 3f),
+                                            blurRadius = 5f,
                                         ),
                                     ),
-                                contentAlignment = Alignment.Center,
-                            ) {
-                                Column(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    horizontalAlignment = Alignment.CenterHorizontally,
-                                ) {
-                                    Icon(
-                                        painter = painterResource(R.drawable.ic_baseline_add_24),
-                                        contentDescription = stringResource(R.string.add_widget),
-                                        tint = Color.White,
-                                        modifier = Modifier
-                                            .size(48.dp)
-                                            .background(
-                                                brush = Brush.radialGradient(
-                                                    0f to Color.Black.copy(alpha = 0.5f),
-                                                    1f to Color.Transparent,
-                                                ),
-                                            ),
-                                    )
-
-                                    Text(
-                                        text = stringResource(R.string.add_widget),
-                                        fontWeight = FontWeight.Bold,
-                                        style = LocalTextStyle.current.copy(
-                                            shadow = Shadow(
-                                                color = Color.Black,
-                                                offset = Offset(3f, 3f),
-                                                blurRadius = 5f,
-                                            ),
-                                        ),
-                                        fontSize = 20.sp,
-                                    )
-                                }
+                                    fontSize = 20.sp,
+                                )
                             }
                         }
                     }
@@ -714,7 +702,8 @@ abstract class BaseAdapter(
         }
     }
 
-    abstract inner class BaseVH<Data : Any>(protected val binding: ComposeViewHolderBinding) : RecyclerView.ViewHolder(binding.root) {
+    abstract inner class BaseVH<Data : Any>(protected val binding: ComposeViewHolderBinding) :
+        RecyclerView.ViewHolder(binding.root) {
         fun bind(data: Data) {
             binding.root.setParentCompositionContext(rootView.createLifecycleAwareWindowRecomposer())
 

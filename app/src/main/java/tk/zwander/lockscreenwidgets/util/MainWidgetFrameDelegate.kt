@@ -8,7 +8,6 @@ import android.graphics.Point
 import android.graphics.PointF
 import android.graphics.drawable.Drawable
 import android.view.Gravity
-import android.view.LayoutInflater
 import android.view.Surface
 import android.view.View
 import android.view.WindowManager
@@ -44,6 +43,8 @@ import tk.zwander.common.util.prefManager
 import tk.zwander.common.util.safeAddView
 import tk.zwander.common.util.safeRemoveView
 import tk.zwander.common.util.safeUpdateViewLayout
+import tk.zwander.common.util.setThemedContent
+import tk.zwander.common.util.themedLayoutInflater
 import tk.zwander.common.util.wallpaperUtils
 import tk.zwander.common.views.SnappyRecyclerView
 import tk.zwander.lockscreenwidgets.adapters.WidgetFrameAdapter
@@ -192,10 +193,8 @@ open class MainWidgetFrameDelegate protected constructor(
     }
 
     private val frame by lazy {
-        ComposeViewHolderBinding.inflate(
-            LayoutInflater.from(themeWrapper),
-        ).apply {
-            root.setContent {
+        ComposeViewHolderBinding.inflate(themedLayoutInflater).apply {
+            root.setThemedContent {
                 viewModel.WidgetFrameLayout(
                     widgetGrid = widgetGrid,
                     modifier = Modifier.fillMaxSize(),
@@ -267,7 +266,7 @@ open class MainWidgetFrameDelegate protected constructor(
         handler(
             PrefManager.KEY_LOCK_WIDGET_FRAME,
         ) {
-            adapter.currentEditingInterfacePosition = -1
+            viewModel.currentEditingInterfacePosition.value = -1
         }
         handler(
             PrefManager.KEY_FRAME_WIDGET_CORNER_RADIUS,
@@ -592,7 +591,7 @@ open class MainWidgetFrameDelegate protected constructor(
             logUtils.debugLog("Removing overlay")
         }
 
-        adapter.currentEditingInterfacePosition = -1
+        viewModel.currentEditingInterfacePosition.value = -1
 
         globalState.handlingClick.value = globalState.handlingClick.value.toMutableMap().also {
             it.remove(id)
@@ -912,7 +911,7 @@ open class MainWidgetFrameDelegate protected constructor(
         FramePrefs.getColCountForFrame(this@MainWidgetFrameDelegate, id),
     ), ISnappyLayoutManager {
         override fun canScrollHorizontally(): Boolean {
-            return (adapter.currentEditingInterfacePosition == -1 || commonState.isHoldingItem) && super.canScrollHorizontally()
+            return (viewModel.currentEditingInterfacePosition.value == -1 || commonState.isHoldingItem) && super.canScrollHorizontally()
         }
 
         override fun getFixScrollPos(velocityX: Int, velocityY: Int): Int {
@@ -934,7 +933,7 @@ open class MainWidgetFrameDelegate protected constructor(
         }
 
         override fun canSnap(): Boolean {
-            return adapter.currentEditingInterfacePosition == -1
+            return viewModel.currentEditingInterfacePosition.value == -1
         }
     }
 

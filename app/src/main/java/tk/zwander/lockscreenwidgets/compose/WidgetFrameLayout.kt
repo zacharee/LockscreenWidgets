@@ -7,7 +7,6 @@ import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener2
 import android.hardware.SensorManager
-import android.util.Log
 import android.view.ViewConfiguration
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.fadeIn
@@ -57,7 +56,6 @@ import androidx.compose.ui.zIndex
 import androidx.core.content.res.ResourcesCompat
 import com.bugsnag.android.performance.compose.MeasuredComposable
 import com.google.accompanist.drawablepainter.rememberDrawablePainter
-import tk.zwander.common.compose.AppTheme
 import tk.zwander.common.compose.components.BlurView
 import tk.zwander.common.compose.components.ConfirmFrameRemovalLayout
 import tk.zwander.common.compose.components.ConfirmWidgetRemovalLayout
@@ -104,6 +102,7 @@ fun MainWidgetFrameDelegate.WidgetFrameViewModel.WidgetFrameLayout(
         value = { framePrefs.maskedModeDimAmount },
     )
     var itemToRemove by this.itemToRemove.collectAsMutableState()
+
     @Suppress("VariableNeverRead")
     var acknowledgedTwoFingerTap by this.acknowledgedTwoFingerTap.collectAsMutableState()
 
@@ -118,8 +117,6 @@ fun MainWidgetFrameDelegate.WidgetFrameViewModel.WidgetFrameLayout(
     var removing by remember {
         mutableStateOf(false)
     }
-
-    Log.e("LSW", "Background $backgroundColor, $frameCornerRadius, $proxTooClose")
 
     DisposableEffect(null) {
         val sensorManager by lazy { context.getSystemService(Context.SENSOR_SERVICE) as SensorManager }
@@ -139,7 +136,7 @@ fun MainWidgetFrameDelegate.WidgetFrameViewModel.WidgetFrameLayout(
         sensorManager.registerListener(
             proximityListener,
             sensorManager.getDefaultSensor(Sensor.TYPE_PROXIMITY),
-            1 * 200 * 1000 /* 200ms */,
+            1 * 200 * 1000, /* 200ms */
         )
 
         onDispose {
@@ -147,235 +144,273 @@ fun MainWidgetFrameDelegate.WidgetFrameViewModel.WidgetFrameLayout(
         }
     }
 
-    AppTheme {
-        Card(
-            modifier = modifier.pointerInput(null) {
-                awaitEachGesture {
-                    awaitFirstDown(pass = PointerEventPass.Initial)
+    Card(
+        modifier = modifier.pointerInput(null) {
+            awaitEachGesture {
+                awaitFirstDown(pass = PointerEventPass.Initial)
 
-                    val event = awaitPointerEvent(PointerEventPass.Initial)
+                val event = awaitPointerEvent(PointerEventPass.Initial)
 
-                    when (event.changes.size) {
-                        2 -> {
-                            isInEditingMode = !isInEditingMode
-                            @Suppress("AssignedValueIsNeverRead")
-                            acknowledgedTwoFingerTap = true
+                when (event.changes.size) {
+                    2 -> {
+                        isInEditingMode = !isInEditingMode
+                        @Suppress("AssignedValueIsNeverRead")
+                        acknowledgedTwoFingerTap = true
 
-                            event.changes.forEach { it.consume() }
-                        }
-                        3 -> {
-                            context.eventManager.sendEvent(Event.TempHide(frameId = frameId))
+                        event.changes.forEach { it.consume() }
+                    }
 
-                            event.changes.forEach { it.consume() }
-                        }
+                    3 -> {
+                        context.eventManager.sendEvent(Event.TempHide(frameId = frameId))
+
+                        event.changes.forEach { it.consume() }
                     }
                 }
-            },
-            shape = RoundedCornerShape(size = frameCornerRadius),
-            elevation = CardDefaults.outlinedCardElevation(),
-            colors = CardDefaults.cardColors().copy(
-                containerColor = animatedBackgroundColor,
-            ),
+            }
+        },
+        shape = RoundedCornerShape(size = frameCornerRadius),
+        elevation = CardDefaults.outlinedCardElevation(),
+        colors = CardDefaults.cardColors().copy(
+            containerColor = animatedBackgroundColor,
+        ),
+    ) {
+        Box(
+            modifier = Modifier.fillMaxSize(),
         ) {
-            Box(
-                modifier = Modifier.fillMaxSize(),
-            ) {
-                BlurView(
-                    modifier = Modifier.fillMaxSize().zIndex(-1f),
-                    blurKey = framePrefs.keyFor(PrefManager.KEY_BLUR_BACKGROUND),
-                    blurAmountKey = framePrefs.keyFor(PrefManager.KEY_BLUR_BACKGROUND_AMOUNT),
-                    cornerRadiusKey = PrefManager.KEY_FRAME_CORNER_RADIUS,
-                )
+            BlurView(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .zIndex(-1f),
+                blurKey = framePrefs.keyFor(PrefManager.KEY_BLUR_BACKGROUND),
+                blurAmountKey = framePrefs.keyFor(PrefManager.KEY_BLUR_BACKGROUND_AMOUNT),
+                cornerRadiusKey = PrefManager.KEY_FRAME_CORNER_RADIUS,
+            )
 
-                wallpaper?.let { wallpaper ->
-                    wallpaper.drawable?.let { drawable ->
-                        Image(
-                            painter = rememberDrawablePainter(drawable),
-                            contentDescription = null,
-                            modifier = Modifier.graphicsLayer {
+            wallpaper?.let { wallpaper ->
+                wallpaper.drawable?.let { drawable ->
+                    Image(
+                        painter = rememberDrawablePainter(drawable),
+                        contentDescription = null,
+                        modifier = Modifier
+                            .graphicsLayer {
                                 translationX = wallpaper.dx
                                 translationY = wallpaper.dy
-                            }.zIndex(0f),
-                            colorFilter = PorterDuffColorFilter(
-                                android.graphics.Color.argb(
-                                    ((maskedModeDimAmount / 100f) * 255).toInt(),
-                                    0, 0, 0,
-                                ), PorterDuff.Mode.SRC_ATOP
-                            ).asComposeColorFilter(),
-                        )
-                    }
-                }
-
-                AndroidView(
-                    factory = {
-                        widgetGrid.apply {
-                            horizontalScrollbarThumbDrawable = ResourcesCompat.getDrawable(resources, R.drawable.scrollbar, context.theme)
-                            horizontalScrollbarTrackDrawable = ResourcesCompat.getDrawable(resources, R.drawable.scroll_track, context.theme)
-                            scrollBarSize = with (density) {
-                                4.dp.roundToPx()
                             }
+                            .zIndex(0f),
+                        colorFilter = PorterDuffColorFilter(
+                            android.graphics.Color.argb(
+                                ((maskedModeDimAmount / 100f) * 255).toInt(),
+                                0, 0, 0,
+                            ), PorterDuff.Mode.SRC_ATOP
+                        ).asComposeColorFilter(),
+                    )
+                }
+            }
+
+            AndroidView(
+                factory = {
+                    widgetGrid.apply {
+                        horizontalScrollbarThumbDrawable = ResourcesCompat.getDrawable(
+                            resources,
+                            R.drawable.scrollbar,
+                            context.theme
+                        )
+                        horizontalScrollbarTrackDrawable = ResourcesCompat.getDrawable(
+                            resources,
+                            R.drawable.scroll_track,
+                            context.theme
+                        )
+                        scrollBarSize = with(density) {
+                            4.dp.roundToPx()
                         }
-                    },
-                    update = {
-                        it.isHorizontalScrollBarEnabled = pageIndicatorBehavior != PrefManager.VALUE_PAGE_INDICATOR_BEHAVIOR_HIDDEN
-                        it.isScrollbarFadingEnabled = pageIndicatorBehavior == PrefManager.VALUE_PAGE_INDICATOR_BEHAVIOR_AUTO_HIDE
-                        it.scrollBarFadeDuration = if (pageIndicatorBehavior == PrefManager.VALUE_PAGE_INDICATOR_BEHAVIOR_AUTO_HIDE) {
+                    }
+                },
+                update = {
+                    it.isHorizontalScrollBarEnabled =
+                        pageIndicatorBehavior != PrefManager.VALUE_PAGE_INDICATOR_BEHAVIOR_HIDDEN
+                    it.isScrollbarFadingEnabled =
+                        pageIndicatorBehavior == PrefManager.VALUE_PAGE_INDICATOR_BEHAVIOR_AUTO_HIDE
+                    it.scrollBarFadeDuration =
+                        if (pageIndicatorBehavior == PrefManager.VALUE_PAGE_INDICATOR_BEHAVIOR_AUTO_HIDE) {
                             ViewConfiguration.getScrollBarFadeDuration()
                         } else {
                             0
                         }
-                    },
-                    modifier = Modifier.fillMaxSize().zIndex(1f),
-                )
+                },
+                modifier = Modifier
+                    .fillMaxSize()
+                    .zIndex(1f),
+            )
 
-                HintIntroLayout(
-                    modifier = Modifier.fillMaxSize().zIndex(2f),
-                )
+            HintIntroLayout(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .zIndex(2f),
+            )
 
-                androidx.compose.animation.AnimatedVisibility(
-                    visible = itemToRemove != null,
-                    enter = fadeIn(),
-                    exit = fadeOut(),
-                    modifier = Modifier.zIndex(3f),
+            androidx.compose.animation.AnimatedVisibility(
+                visible = itemToRemove != null,
+                enter = fadeIn(),
+                exit = fadeOut(),
+                modifier = Modifier.zIndex(3f),
+            ) {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center,
                 ) {
-                    Box(
-                        modifier = Modifier.fillMaxSize(),
-                        contentAlignment = Alignment.Center,
-                    ) {
-                        ConfirmWidgetRemovalLayout(
-                            itemToRemove = itemToRemove,
-                            onItemRemovalConfirmed = { removed, data ->
-                                context.eventManager.sendEvent(Event.RemoveWidgetConfirmed(removed, data))
-                                itemToRemove = null
-                            },
-                        )
-                    }
-                }
-
-                androidx.compose.animation.AnimatedVisibility(
-                    visible = debugIdVisibility,
-                    enter = fadeIn(),
-                    exit = fadeOut(),
-                    modifier = Modifier.zIndex(4f),
-                ) {
-                    Box(
-                        modifier = Modifier.fillMaxSize(),
-                        contentAlignment = Alignment.Center,
-                    ) {
-                        MeasuredComposable(name = "IDList") {
-                            val items by debugIdItems.collectAsState()
-
-                            IDListLayout(
-                                items = items,
-                                modifier = Modifier.fillMaxSize(),
+                    ConfirmWidgetRemovalLayout(
+                        itemToRemove = itemToRemove,
+                        onItemRemovalConfirmed = { removed, data ->
+                            context.eventManager.sendEvent(
+                                Event.RemoveWidgetConfirmed(
+                                    removed,
+                                    data
+                                )
                             )
-                        }
+                            itemToRemove = null
+                        },
+                    )
+                }
+            }
+
+            androidx.compose.animation.AnimatedVisibility(
+                visible = debugIdVisibility,
+                enter = fadeIn(),
+                exit = fadeOut(),
+                modifier = Modifier.zIndex(4f),
+            ) {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    MeasuredComposable(name = "IDList") {
+                        val items by debugIdItems.collectAsState()
+
+                        IDListLayout(
+                            items = items,
+                            modifier = Modifier.fillMaxSize(),
+                        )
                     }
                 }
+            }
 
-                androidx.compose.animation.AnimatedVisibility(
-                    visible = isInEditingMode,
-                    enter = fadeIn(),
-                    exit = fadeOut(),
-                    modifier = Modifier.zIndex(5f),
+            androidx.compose.animation.AnimatedVisibility(
+                visible = isInEditingMode,
+                enter = fadeIn(),
+                exit = fadeOut(),
+                modifier = Modifier.zIndex(5f),
+            ) {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center,
                 ) {
-                    Box(
+                    FrameEditWrapperLayout(
+                        frameId = frameId,
+                        onRemovePressed = {
+                            removing = true
+                        },
+                    )
+                }
+            }
+
+            androidx.compose.animation.AnimatedVisibility(
+                visible = removing,
+                enter = fadeIn(),
+                exit = fadeOut(),
+                modifier = Modifier.zIndex(6f),
+            ) {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    ConfirmFrameRemovalLayout(
+                        itemToRemove = frameId,
+                        onItemRemovalConfirmed = { removed, data ->
+                            context.eventManager.sendEvent(
+                                Event.RemoveFrameConfirmed(
+                                    removed,
+                                    data
+                                )
+                            )
+                            removing = false
+                        },
+                    )
+                }
+            }
+
+            androidx.compose.animation.AnimatedVisibility(
+                visible = proxTooClose,
+                enter = fadeIn(),
+                exit = fadeOut(),
+                modifier = Modifier.zIndex(7f),
+            ) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(colorResource(R.color.backdrop))
+                        .padding(8.dp),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Text(
+                        text = stringResource(R.string.touch_protection_active),
+                        color = Color.White,
+                        textAlign = TextAlign.Center,
+                        fontSize = 18.sp,
+                    )
+                }
+            }
+
+            androidx.compose.animation.AnimatedVisibility(
+                visible = selectingFrame,
+                enter = fadeIn(),
+                exit = fadeOut(),
+                modifier = Modifier.zIndex(8f),
+            ) {
+                MeasuredComposable(name = "SelectFrameLayoutContent") {
+                    Surface(
                         modifier = Modifier.fillMaxSize(),
-                        contentAlignment = Alignment.Center,
+                        color = MaterialTheme.colorScheme.surface.copy(alpha = 0.75f),
+                        contentColor = MaterialTheme.colorScheme.contentColorFor(MaterialTheme.colorScheme.surface),
                     ) {
-                        FrameEditWrapperLayout(
-                            frameId = frameId,
-                            onRemovePressed = {
-                                removing = true
-                            },
-                        )
-                    }
-                }
-
-                androidx.compose.animation.AnimatedVisibility(
-                    visible = removing,
-                    enter = fadeIn(),
-                    exit = fadeOut(),
-                    modifier = Modifier.zIndex(6f),
-                ) {
-                    Box(
-                        modifier = Modifier.fillMaxSize(),
-                        contentAlignment = Alignment.Center,
-                    ) {
-                        ConfirmFrameRemovalLayout(
-                            itemToRemove = frameId,
-                            onItemRemovalConfirmed = { removed, data ->
-                                context.eventManager.sendEvent(Event.RemoveFrameConfirmed(removed, data))
-                                removing = false
-                            },
-                        )
-                    }
-                }
-
-                androidx.compose.animation.AnimatedVisibility(
-                    visible = proxTooClose,
-                    enter = fadeIn(),
-                    exit = fadeOut(),
-                    modifier = Modifier.zIndex(7f),
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .background(colorResource(R.color.backdrop))
-                            .padding(8.dp),
-                        contentAlignment = Alignment.Center,
-                    ) {
-                        Text(
-                            text = stringResource(R.string.touch_protection_active),
-                            color = Color.White,
-                            textAlign = TextAlign.Center,
-                            fontSize = 18.sp,
-                        )
-                    }
-                }
-
-                androidx.compose.animation.AnimatedVisibility(
-                    visible = selectingFrame,
-                    enter = fadeIn(),
-                    exit = fadeOut(),
-                    modifier = Modifier.zIndex(8f),
-                ) {
-                    MeasuredComposable(name = "SelectFrameLayoutContent") {
-                        AppTheme {
-                            Surface(
-                                modifier = Modifier.fillMaxSize(),
-                                color = MaterialTheme.colorScheme.surface.copy(alpha = 0.75f),
-                                contentColor = MaterialTheme.colorScheme.contentColorFor(MaterialTheme.colorScheme.surface),
+                        Box(
+                            modifier = Modifier.fillMaxSize(),
+                            contentAlignment = Alignment.Center,
+                        ) {
+                            Column(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                verticalArrangement = Arrangement.spacedBy(8.dp),
                             ) {
-                                Box(
-                                    modifier = Modifier.fillMaxSize(),
-                                    contentAlignment = Alignment.Center,
+                                Text(text = "$frameId")
+
+                                FlowRow(
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                    verticalArrangement = Arrangement.spacedBy(8.dp),
                                 ) {
-                                    Column(
-                                        modifier = Modifier.fillMaxWidth(),
-                                        horizontalAlignment = Alignment.CenterHorizontally,
-                                        verticalArrangement = Arrangement.spacedBy(8.dp),
+                                    ContentColoredOutlinedButton(
+                                        onClick = {
+                                            context.eventManager.sendEvent(
+                                                Event.FrameSelected(
+                                                    null,
+                                                    state.selectionPreviewRequestCode
+                                                )
+                                            )
+                                        },
                                     ) {
-                                        Text(text = "$frameId")
+                                        Text(text = stringResource(R.string.cancel))
+                                    }
 
-                                        FlowRow(
-                                            horizontalArrangement = Arrangement.spacedBy(8.dp),
-                                            verticalArrangement = Arrangement.spacedBy(8.dp),
-                                        ) {
-                                            ContentColoredOutlinedButton(
-                                                onClick = {
-                                                    context.eventManager.sendEvent(Event.FrameSelected(null, state.selectionPreviewRequestCode))
-                                                },
-                                            ) {
-                                                Text(text = stringResource(R.string.cancel))
-                                            }
-
-                                            ContentColoredOutlinedButton(
-                                                onClick = { context.eventManager.sendEvent(Event.FrameSelected(frameId, state.selectionPreviewRequestCode)) },
-                                            ) {
-                                                Text(text = stringResource(R.string.select))
-                                            }
-                                        }
+                                    ContentColoredOutlinedButton(
+                                        onClick = {
+                                            context.eventManager.sendEvent(
+                                                Event.FrameSelected(
+                                                    frameId,
+                                                    state.selectionPreviewRequestCode
+                                                )
+                                            )
+                                        },
+                                    ) {
+                                        Text(text = stringResource(R.string.select))
                                     }
                                 }
                             }

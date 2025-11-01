@@ -13,7 +13,6 @@ import android.os.Handler
 import android.os.Looper
 import android.view.ContextThemeWrapper
 import android.view.Gravity
-import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewConfiguration
 import android.view.WindowManager
@@ -52,6 +51,8 @@ import tk.zwander.common.util.prefManager
 import tk.zwander.common.util.safeAddView
 import tk.zwander.common.util.safeRemoveView
 import tk.zwander.common.util.safeUpdateViewLayout
+import tk.zwander.common.util.setThemedContent
+import tk.zwander.common.util.themedLayoutInflater
 import tk.zwander.lockscreenwidgets.R
 import tk.zwander.lockscreenwidgets.databinding.ComposeViewHolderBinding
 import tk.zwander.lockscreenwidgets.services.Accessibility
@@ -152,12 +153,8 @@ class DrawerDelegate private constructor(context: Context, wm: WindowManager, di
     }
 
     private val drawer by lazy {
-        ComposeViewHolderBinding.inflate(
-            LayoutInflater.from(
-                ContextThemeWrapper(this, R.style.AppTheme),
-            ),
-        ).apply {
-            root.setContent {
+        ComposeViewHolderBinding.inflate(themedLayoutInflater).apply {
+            root.setThemedContent {
                 viewModel.Drawer(
                     widgetGrid = widgetGrid,
                     modifier = Modifier.fillMaxSize(),
@@ -177,7 +174,7 @@ class DrawerDelegate private constructor(context: Context, wm: WindowManager, di
     }
     private val handle by lazy {
         ComposeView(ContextThemeWrapper(this, R.style.AppTheme)).apply {
-            setContent {
+            setThemedContent {
                 DrawerHandle(
                     params = handleParams,
                     visible = handleVisible,
@@ -237,7 +234,7 @@ class DrawerDelegate private constructor(context: Context, wm: WindowManager, di
             }
         }
         handler(PrefManager.KEY_LOCK_WIDGET_DRAWER) {
-            adapter.currentEditingInterfacePosition = -1
+            viewModel.currentEditingInterfacePosition.value = -1
         }
         handler(PrefManager.KEY_SHOW_DRAWER_HANDLE_ONLY_WHEN_LOCKED) {
             if (!prefManager.showDrawerHandleOnlyWhenLocked) {
@@ -547,7 +544,7 @@ class DrawerDelegate private constructor(context: Context, wm: WindowManager, di
                 isHiding = true
 
                 globalState.handlingClick.value = globalState.handlingClick.value.toMutableMap().also { it.remove(-2) }
-                adapter.currentEditingInterfacePosition = -1
+                viewModel.currentEditingInterfacePosition.value = -1
 
                 currentVisibilityAnim?.cancel()
                 val anim = ValueAnimator.ofFloat(1f, 0f)
@@ -588,7 +585,7 @@ class DrawerDelegate private constructor(context: Context, wm: WindowManager, di
         prefManager.drawerColCount,
     ) {
         override fun canScrollVertically(): Boolean {
-            return (adapter.currentEditingInterfacePosition == -1 || commonState.isHoldingItem) && super.canScrollVertically()
+            return (viewModel.currentEditingInterfacePosition.value == -1 || commonState.isHoldingItem) && super.canScrollVertically()
         }
     }
 

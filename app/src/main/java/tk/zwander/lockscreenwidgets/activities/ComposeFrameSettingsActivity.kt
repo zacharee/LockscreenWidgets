@@ -4,7 +4,6 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.os.Build
 import android.os.Bundle
-import androidx.activity.compose.setContent
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.rememberUpdatedState
@@ -17,7 +16,6 @@ import tk.zwander.common.activities.BaseActivity
 import tk.zwander.common.activities.HideForIDsActivity
 import tk.zwander.common.activities.HideOnAppsChooserActivity
 import tk.zwander.common.activities.OnboardingActivity
-import tk.zwander.common.compose.AppTheme
 import tk.zwander.common.compose.settings.ListPreferenceEntry
 import tk.zwander.common.compose.settings.PreferenceScreen
 import tk.zwander.common.compose.settings.booleanPreferenceDependency
@@ -35,6 +33,7 @@ import tk.zwander.common.util.isOneUI
 import tk.zwander.common.util.isPixelUI
 import tk.zwander.common.util.isTouchWiz
 import tk.zwander.common.util.prefManager
+import tk.zwander.common.util.setThemedContent
 import tk.zwander.lockscreenwidgets.R
 import tk.zwander.lockscreenwidgets.services.isNotificationListenerActive
 import tk.zwander.lockscreenwidgets.util.FramePrefs
@@ -62,7 +61,7 @@ class ComposeFrameSettingsActivity : BaseActivity(), EventObserver {
         @SuppressLint("ObsoleteSdkInt")
         val canShowNCOptions = isOneUI || (isPixelUI && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S)
 
-        setContent {
+        setThemedContent {
             var secondaryFrames by rememberPreferenceState(
                 key = PrefManager.KEY_CURRENT_FRAMES,
                 value = { prefManager.currentSecondaryFrames },
@@ -527,12 +526,10 @@ class ComposeFrameSettingsActivity : BaseActivity(), EventObserver {
                 }
             }
 
-            AppTheme {
-                PreferenceScreen(
-                    title = resources.getString(R.string.settings),
-                    categories = preferenceScreen,
-                )
-            }
+            PreferenceScreen(
+                title = resources.getString(R.string.settings),
+                categories = preferenceScreen,
+            )
         }
     }
 

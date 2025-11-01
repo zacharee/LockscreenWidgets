@@ -5,7 +5,6 @@ import android.content.ComponentName
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
-import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
 import com.bugsnag.android.performance.compose.MeasuredComposable
 import kotlinx.coroutines.CoroutineScope
@@ -26,6 +25,7 @@ import tk.zwander.common.util.eventManager
 import tk.zwander.common.util.isAccessibilityEnabled
 import tk.zwander.common.util.isOneUI
 import tk.zwander.common.util.prefManager
+import tk.zwander.common.util.setThemedContent
 
 /**
  * Host the main page of the app (the social links). It also hosts the buttons to add a widget, view usage
@@ -74,7 +74,7 @@ class MainActivity : BaseActivity(), CoroutineScope by MainScope() {
             }
         }
 
-        setContent {
+        setThemedContent {
             MeasuredComposable(name = "MainContentLayout") {
                 MainContent()
             }

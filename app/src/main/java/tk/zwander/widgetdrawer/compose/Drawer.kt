@@ -20,7 +20,6 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.zIndex
-import tk.zwander.common.compose.AppTheme
 import tk.zwander.common.compose.components.BlurView
 import tk.zwander.common.compose.components.ConfirmWidgetRemovalLayout
 import tk.zwander.common.compose.components.DrawerToolbar
@@ -71,70 +70,73 @@ fun DrawerDelegate.DrawerViewModel.Drawer(
         )
     }
 
-    AppTheme {
-        Box(
-            modifier = modifier.background(backgroundColor),
-        ) {
-            BlurView(
-                blurKey = PrefManager.KEY_BLUR_DRAWER_BACKGROUND,
-                blurAmountKey = PrefManager.KEY_BLUR_DRAWER_BACKGROUND_AMOUNT,
-                modifier = Modifier.fillMaxSize().zIndex(-1f),
-            )
+    Box(
+        modifier = modifier.background(backgroundColor),
+    ) {
+        BlurView(
+            blurKey = PrefManager.KEY_BLUR_DRAWER_BACKGROUND,
+            blurAmountKey = PrefManager.KEY_BLUR_DRAWER_BACKGROUND_AMOUNT,
+            modifier = Modifier
+                .fillMaxSize()
+                .zIndex(-1f),
+        )
 
-            AndroidView(
-                factory = {
-                    widgetGrid.apply {
-                        widgetGrid.nestedScrollingListener = {
-                            itemTouchHelper.attachToRecyclerView(
-                                if (it) {
-                                    null
-                                } else {
-                                    widgetGrid
-                                }
-                            )
-                        }
+        AndroidView(
+            factory = {
+                widgetGrid.apply {
+                    widgetGrid.nestedScrollingListener = {
+                        itemTouchHelper.attachToRecyclerView(
+                            if (it) {
+                                null
+                            } else {
+                                widgetGrid
+                            }
+                        )
                     }
-                },
-                modifier = Modifier.fillMaxSize()
-                    .zIndex(0f),
-            )
-
-            DrawerToolbar(
-                addWidget = {
-                    context.eventManager.sendEvent(Event.CloseDrawer)
-                    context.eventManager.sendEvent(Event.LaunchAddDrawerWidget(true))
-                },
-                closeDrawer = {
-                    context.eventManager.sendEvent(Event.CloseDrawer)
-                },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .align(Alignment.BottomCenter)
-                    .zIndex(1f),
-            )
-
-            AnimatedVisibility(
-                visible = itemToRemove != null,
-                enter = fadeIn(),
-                exit = fadeOut(),
-            ) {
-                Box(
-                    modifier = Modifier.fillMaxSize().zIndex(2f),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    ConfirmWidgetRemovalLayout(
-                        itemToRemove = itemToRemove,
-                        onItemRemovalConfirmed = { removed, data ->
-                            context.eventManager.sendEvent(
-                                Event.RemoveWidgetConfirmed(
-                                    removed,
-                                    data
-                                )
-                            )
-                            itemToRemove = null
-                        },
-                    )
                 }
+            },
+            modifier = Modifier
+                .fillMaxSize()
+                .zIndex(0f),
+        )
+
+        DrawerToolbar(
+            addWidget = {
+                context.eventManager.sendEvent(Event.CloseDrawer)
+                context.eventManager.sendEvent(Event.LaunchAddDrawerWidget(true))
+            },
+            closeDrawer = {
+                context.eventManager.sendEvent(Event.CloseDrawer)
+            },
+            modifier = Modifier
+                .fillMaxWidth()
+                .align(Alignment.BottomCenter)
+                .zIndex(1f),
+        )
+
+        AnimatedVisibility(
+            visible = itemToRemove != null,
+            enter = fadeIn(),
+            exit = fadeOut(),
+        ) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .zIndex(2f),
+                contentAlignment = Alignment.Center,
+            ) {
+                ConfirmWidgetRemovalLayout(
+                    itemToRemove = itemToRemove,
+                    onItemRemovalConfirmed = { removed, data ->
+                        context.eventManager.sendEvent(
+                            Event.RemoveWidgetConfirmed(
+                                removed,
+                                data
+                            )
+                        )
+                        itemToRemove = null
+                    },
+                )
             }
         }
     }

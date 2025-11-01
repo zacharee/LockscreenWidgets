@@ -9,7 +9,6 @@ import android.view.View
 import android.view.WindowManager
 import androidx.annotation.CallSuper
 import androidx.appcompat.view.ContextThemeWrapper
-import androidx.compose.ui.platform.ComposeView
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleRegistry
 import androidx.lifecycle.ViewModel
@@ -64,7 +63,6 @@ abstract class BaseDelegate<State : Any>(
     protected abstract val params: WindowManager.LayoutParams
     protected abstract val rootView: View
     protected abstract val recyclerView: RecyclerView
-    protected open val removeConfirmationView: ComposeView? = null
     protected abstract var currentWidgets: List<WidgetData>
 
     protected val themeWrapper by lazy {
@@ -170,7 +168,7 @@ abstract class BaseDelegate<State : Any>(
                         }
                     }
 
-                    adapter.currentEditingInterfacePosition = -1
+                    viewModel.currentEditingInterfacePosition.value = -1
                     adapter.updateWidgets(newWidgets)
                     gridLayoutManager.doOnLayoutCompleted {
                         if (!recyclerView.isComputingLayout) {
@@ -216,7 +214,7 @@ abstract class BaseDelegate<State : Any>(
         if (moved) {
             updateCommonState { it.copy(updatedForMoveOrRemove = true) }
             currentWidgets = adapter.widgets
-            adapter.currentEditingInterfacePosition = -1
+            viewModel.currentEditingInterfacePosition.value = -1
         }
     }
 
@@ -294,6 +292,7 @@ abstract class BaseDelegate<State : Any>(
     open class BaseViewModel<State : Any, Delegate : BaseDelegate<State>>(protected val delegate: Delegate) : ViewModel() {
         val itemToRemove = MutableStateFlow<WidgetData?>(null)
         val isResizingItem = MutableStateFlow(false)
+        val currentEditingInterfacePosition = MutableStateFlow(-1)
 
         val params: WindowManager.LayoutParams
             get() = delegate.params

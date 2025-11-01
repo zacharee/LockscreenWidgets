@@ -6,12 +6,23 @@ import android.animation.AnimatorSet
 import android.animation.ObjectAnimator
 import android.annotation.SuppressLint
 import android.content.Context
+import android.content.ContextWrapper
+import android.view.LayoutInflater
 import android.view.View
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
+import androidx.appcompat.view.ContextThemeWrapper
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.unit.Density
+import androidx.core.view.LayoutInflaterCompat
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import tk.zwander.common.adapters.BaseAdapter
+import tk.zwander.common.compose.AppTheme
 import tk.zwander.common.data.WidgetType
+import tk.zwander.common.util.compat.LayoutInflaterFactory2Compat
+import tk.zwander.lockscreenwidgets.R
 import kotlin.math.roundToInt
 import kotlin.math.sign
 
@@ -58,11 +69,14 @@ fun createTouchHelperCallback(
                     //The user has long-pressed a widget. Show the editing UI on that widget.
                     //If the UI is already shown on it, hide it.
                     val adapterPos = viewHolder?.bindingAdapterPosition ?: -1
-                    adapter.currentEditingInterfacePosition =
-                        if (adapter.currentEditingInterfacePosition == adapterPos) -1 else adapterPos
+                    viewModel.currentEditingInterfacePosition.value =
+                        if (viewModel.currentEditingInterfacePosition.value == adapterPos) -1 else adapterPos
                 }
 
-                onItemSelected(actionState == ItemTouchHelper.ACTION_STATE_DRAG, adapter.currentEditingInterfacePosition != -1)
+                onItemSelected(
+                    actionState == ItemTouchHelper.ACTION_STATE_DRAG,
+                    viewModel.currentEditingInterfacePosition.value != -1,
+                )
             }
 
             super.onSelectedChanged(viewHolder, actionState)
@@ -143,3 +157,30 @@ val Context.statusBarHeight: Int
 
 val Context.density: Density
     get() = Density(this)
+
+val Context.themedContext: ContextWrapper
+    get() = ContextThemeWrapper(this, R.style.AppTheme)
+
+val Context.themedLayoutInflater: LayoutInflater
+    get() = LayoutInflater.from(themedContext).apply {
+        LayoutInflaterCompat.setFactory2(
+            this,
+            LayoutInflaterFactory2Compat(),
+        )
+    }
+
+fun ComposeView.setThemedContent(content: @Composable () -> Unit) {
+    setContent {
+        AppTheme {
+            content()
+        }
+    }
+}
+
+fun ComponentActivity.setThemedContent(content: @Composable () -> Unit) {
+    setContent {
+        AppTheme {
+            content()
+        }
+    }
+}

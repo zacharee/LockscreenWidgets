@@ -20,7 +20,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import tk.zwander.common.compose.AppTheme
 import tk.zwander.common.compose.util.insetsContentPadding
 import tk.zwander.lockscreenwidgets.util.MainWidgetFrameDelegate
 import tk.zwander.widgetdrawer.util.DrawerDelegate
@@ -31,55 +30,55 @@ fun MainContent() {
     val features = rememberFeatureCards()
     val links = rememberLinks()
 
-    val hasFrameDelegateInstance = MainWidgetFrameDelegate.readOnlyInstance.collectAsState().value != null
+    val hasFrameDelegateInstance =
+        MainWidgetFrameDelegate.readOnlyInstance.collectAsState().value != null
     val hasDrawerDelegateInstance = DrawerDelegate.readOnlyInstance.collectAsState().value != null
 
-    AppTheme {
-        Surface(
-            modifier = Modifier.fillMaxSize(),
+    Surface(
+        modifier = Modifier.fillMaxSize(),
+    ) {
+        LazyVerticalStaggeredGrid(
+            columns = StaggeredGridCells.Adaptive(400.dp),
+            contentPadding = insetsContentPadding(
+                WindowInsets.systemBars,
+                WindowInsets.ime,
+                extraPadding = PaddingValues(16.dp),
+            ),
+            verticalItemSpacing = 8.dp,
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
         ) {
-            LazyVerticalStaggeredGrid(
-                columns = StaggeredGridCells.Adaptive(400.dp),
-                contentPadding = insetsContentPadding(
-                    WindowInsets.systemBars,
-                    WindowInsets.ime,
-                    extraPadding = PaddingValues(16.dp),
-                ),
-                verticalItemSpacing = 8.dp,
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-            ) {
-                if (!hasFrameDelegateInstance || !hasDrawerDelegateInstance) {
-                    item {
-                        AccessibilityCard()
-                    }
-                }
-
-                items(features.size) {
-                    FeatureCard(info = features[it])
-                }
-
+            if (!hasFrameDelegateInstance || !hasDrawerDelegateInstance) {
                 item {
-                    DebugCard()
+                    AccessibilityCard()
                 }
+            }
 
-                item(span = StaggeredGridItemSpan.FullLine) {
+            items(features.size) {
+                FeatureCard(info = features[it])
+            }
+
+            item {
+                DebugCard()
+            }
+
+            item(span = StaggeredGridItemSpan.FullLine) {
+                Box(
+                    modifier = Modifier.fillMaxWidth(),
+                    contentAlignment = Alignment.Center,
+                ) {
                     Box(
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier
+                            .fillMaxWidth(0.25f)
+                            .padding(vertical = 4.dp),
                         contentAlignment = Alignment.Center,
                     ) {
-                        Box(
-                            modifier = Modifier.fillMaxWidth(0.25f)
-                                .padding(vertical = 4.dp),
-                            contentAlignment = Alignment.Center,
-                        ) {
-                            HorizontalDivider()
-                        }
+                        HorizontalDivider()
                     }
                 }
+            }
 
-                items(links.size) {
-                    LinkItem(option = links[it])
-                }
+            items(links.size) {
+                LinkItem(option = links[it])
             }
         }
     }
