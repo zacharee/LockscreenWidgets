@@ -238,7 +238,7 @@ abstract class BaseAdapter(
     }
 
     override fun onViewRecycled(holder: BaseVH<*>) {
-        (holder as? WidgetVH)?.onDestroy()
+        holder.onDestroy()
     }
 
     fun updateViews() {
@@ -363,7 +363,7 @@ abstract class BaseAdapter(
             }
         }
 
-        fun onDestroy() {
+        override fun onDestroy() {
             context.eventManager.removeObserver(this)
         }
 
@@ -709,6 +709,8 @@ abstract class BaseAdapter(
         }
 
         abstract fun performBind(data: Data)
+
+        open fun onDestroy() {}
     }
 
     inner class WidgetSpanSizeLookup : SpannedGridLayoutManager.SpanSizeLookup({ position ->
