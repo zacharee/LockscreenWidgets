@@ -31,6 +31,7 @@ import tk.zwander.common.activities.DismissOrUnlockActivity
 import tk.zwander.common.compose.components.DrawerHandle
 import tk.zwander.common.data.WidgetData
 import tk.zwander.common.util.BaseDelegate
+import tk.zwander.common.util.DrawerOrFrame
 import tk.zwander.common.util.Event
 import tk.zwander.common.util.HandlerRegistry
 import tk.zwander.common.util.PrefManager
@@ -61,8 +62,6 @@ import kotlin.math.sign
 class DrawerDelegate private constructor(context: Context, wm: WindowManager, displayId: Int) :
     BaseDelegate<DrawerDelegate.State>(context, wm, displayId) {
     companion object {
-        const val ANIM_DURATION = 200L
-
         @SuppressLint("StaticFieldLeak")
         private val instance = MutableStateFlow<DrawerDelegate?>(null)
 
@@ -279,7 +278,7 @@ class DrawerDelegate private constructor(context: Context, wm: WindowManager, di
                         widgetHost.startListening(this)
 
                         drawer.root.handler?.postDelayed({
-                            drawer.root.fadeIn {
+                            drawer.root.fadeIn(DrawerOrFrame.DRAWER) {
                                 eventManager.sendEvent(Event.DrawerShown)
                                 viewModel.drawerAnimationState.value = AnimationState.IDLE
                             }
@@ -344,7 +343,7 @@ class DrawerDelegate private constructor(context: Context, wm: WindowManager, di
                     params.x = it.animatedValue as Int
                     updateWindow()
                 }
-                animator.duration = ANIM_DURATION
+                animator.duration = with (DrawerOrFrame.DRAWER) { duration() }
                 animator.interpolator =
                     if (metThreshold) DecelerateInterpolator() else AccelerateInterpolator()
                 animator.addListener(object : AnimatorListenerAdapter() {
@@ -462,7 +461,7 @@ class DrawerDelegate private constructor(context: Context, wm: WindowManager, di
             if (!handle.root.isAttachedToWindow && viewModel.handleAnimationState.value != AnimationState.ADDING) {
                 wm.safeAddView(handle.root, handleParams)
                 handle.root.alpha = 0f
-                handle.root.fadeIn {
+                handle.root.fadeIn(DrawerOrFrame.DRAWER) {
                     viewModel.handleAnimationState.value = AnimationState.IDLE
                 }
             }
@@ -475,7 +474,7 @@ class DrawerDelegate private constructor(context: Context, wm: WindowManager, di
         }
 
         if (handle.root.isAttachedToWindow && viewModel.handleAnimationState.value != AnimationState.REMOVING) {
-            handle.root.fadeOut {
+            handle.root.fadeOut(DrawerOrFrame.DRAWER) {
                 viewModel.handleAnimationState.value = AnimationState.IDLE
                 wm.safeRemoveView(handle.root)
             }
@@ -518,7 +517,7 @@ class DrawerDelegate private constructor(context: Context, wm: WindowManager, di
                     globalState.handlingClick.value.toMutableMap().also { it.remove(-2) }
                 viewModel.currentEditingInterfacePosition.value = -1
 
-                drawer.root.fadeOut {
+                drawer.root.fadeOut(DrawerOrFrame.DRAWER) {
                     drawer.root.handler?.postDelayed({
                         wm.safeRemoveView(drawer.root)
                         viewModel.drawerAnimationState.value = AnimationState.IDLE

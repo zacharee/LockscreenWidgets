@@ -58,7 +58,9 @@ class PrefManager private constructor(private val context: Context) {
         const val KEY_HIDE_ON_SECURITY_PAGE = "hide_on_security_page"
         const val KEY_HIDE_ON_NOTIFICATION_SHADE = "hide_on_notification_shade"
         const val KEY_ANIMATE_SHOW_HIDE = "animate_show_hide"
+        const val KEY_ANIMATE_DRAWER_SHOW_HIDE = "animate_drawer_show_hide"
         const val KEY_ANIMATION_DURATION = "animation_duration"
+        const val KEY_DRAWER_ANIMATION_DURATION = "drawer_animation_duration"
         const val KEY_CURRENT_PAGE = "current_page"
         const val KEY_DEBUG_LOG = "debug_log"
         const val KEY_FRAME_COL_COUNT = "frame_col_count"
@@ -431,6 +433,12 @@ class PrefManager private constructor(private val context: Context) {
             putBoolean(KEY_ANIMATE_SHOW_HIDE, value)
         }
 
+    var animateDrawerShowHide: Boolean
+        get() = getBoolean(KEY_ANIMATE_DRAWER_SHOW_HIDE, true)
+        set(value) {
+            putBoolean(KEY_ANIMATE_DRAWER_SHOW_HIDE, value)
+        }
+
     //Whether to create verbose logs for debugging purposes.
     var debugLog: Boolean
         get() = getBoolean(KEY_DEBUG_LOG, false)
@@ -571,6 +579,12 @@ class PrefManager private constructor(private val context: Context) {
         get() = getInt(KEY_ANIMATION_DURATION, 300)
         set(value) {
             putInt(KEY_ANIMATION_DURATION, value)
+        }
+
+    var drawerAnimationDuration: Int
+        get() = getInt(KEY_DRAWER_ANIMATION_DURATION, 300)
+        set(value) {
+            putInt(KEY_DRAWER_ANIMATION_DURATION, value)
         }
 
     //The current widget database version. Used for migrations.

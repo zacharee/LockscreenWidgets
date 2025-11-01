@@ -25,6 +25,7 @@ import kotlinx.coroutines.launch
 import tk.zwander.common.activities.DismissOrUnlockActivity
 import tk.zwander.common.data.WidgetData
 import tk.zwander.common.util.BaseDelegate
+import tk.zwander.common.util.DrawerOrFrame
 import tk.zwander.common.util.Event
 import tk.zwander.common.util.FrameSizeAndPosition
 import tk.zwander.common.util.GlobalState
@@ -578,7 +579,7 @@ open class MainWidgetFrameDelegate protected constructor(
                 if (!wm.safeAddView(frame.root, params)) {
                     viewModel.animationState.value = AnimationState.STATE_IDLE
                 } else {
-                    frame.root.fadeAndScaleIn {
+                    frame.root.fadeAndScaleIn(DrawerOrFrame.FRAME) {
                         viewModel.animationState.value = AnimationState.STATE_IDLE
                         eventManager.sendEvent(Event.FrameAttachmentState(id, true))
                     }
@@ -607,7 +608,7 @@ open class MainWidgetFrameDelegate protected constructor(
 
                 logUtils.debugLog("Pre-animation removal", null)
 
-                frame.root.fadeAndScaleOut {
+                frame.root.fadeAndScaleOut(DrawerOrFrame.FRAME) {
                     logUtils.debugLog("Post-animation removal", null)
 
                     mainHandler.postDelayed({

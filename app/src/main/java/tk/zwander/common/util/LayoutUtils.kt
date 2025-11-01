@@ -113,8 +113,23 @@ fun createTouchHelperCallback(
     }
 }
 
+enum class DrawerOrFrame {
+    DRAWER {
+        override fun Context.duration(): Long {
+            return if (prefManager.animateDrawerShowHide) prefManager.drawerAnimationDuration.toLong() else 0L
+        }
+    },
+    FRAME {
+        override fun Context.duration(): Long {
+            return if (prefManager.animateShowHide) prefManager.animationDuration.toLong() else 0L
+        }
+    };
+
+    abstract fun Context.duration(): Long
+}
+
 //Fade a View to 0% alpha and 95% scale. Used when hiding the widget frame.
-fun View.fadeAndScaleOut(endListener: () -> Unit) {
+fun View.fadeAndScaleOut(drawerOrFrame: DrawerOrFrame, endListener: () -> Unit) {
     clearAnimation()
 
     val animator = AnimatorSet().apply {
@@ -123,7 +138,7 @@ fun View.fadeAndScaleOut(endListener: () -> Unit) {
             ObjectAnimator.ofFloat(this@fadeAndScaleOut, "scaleY", scaleY, 0.95f),
             ObjectAnimator.ofFloat(this@fadeAndScaleOut, "alpha", alpha, 0f)
         )
-        duration = if (context.prefManager.animateShowHide) context.prefManager.animationDuration.toLong() else 0L
+        duration = with (drawerOrFrame) { context.duration() }
         addListener(object : AnimatorListenerAdapter() {
             override fun onAnimationEnd(animation: Animator) {
                 scaleX = 0.95f
@@ -141,11 +156,11 @@ fun View.fadeAndScaleOut(endListener: () -> Unit) {
     animator.start()
 }
 
-fun View.fadeOut(endListener: () -> Unit) {
+fun View.fadeOut(drawerOrFrame: DrawerOrFrame, endListener: () -> Unit) {
     clearAnimation()
 
     val alphaAnimation = ObjectAnimator.ofFloat(this, "alpha", alpha, 0f)
-    alphaAnimation.duration = if (context.prefManager.animateShowHide) context.prefManager.animationDuration.toLong() else 0L
+    alphaAnimation.duration = with (drawerOrFrame) { context.duration() }
     alphaAnimation.addListener(
         object : AnimatorListenerAdapter() {
             override fun onAnimationEnd(animation: Animator) {
@@ -163,7 +178,7 @@ fun View.fadeOut(endListener: () -> Unit) {
 }
 
 //Fade a View to 100% alpha and 100% scale. Used when showing the widget frame.
-fun View.fadeAndScaleIn(endListener: () -> Unit) {
+fun View.fadeAndScaleIn(drawerOrFrame: DrawerOrFrame, endListener: () -> Unit) {
     clearAnimation()
 
     val animator = AnimatorSet().apply {
@@ -172,7 +187,7 @@ fun View.fadeAndScaleIn(endListener: () -> Unit) {
             ObjectAnimator.ofFloat(this@fadeAndScaleIn, "scaleY", scaleY, 1.0f),
             ObjectAnimator.ofFloat(this@fadeAndScaleIn, "alpha", alpha, 1.0f)
         )
-        duration = if (context.prefManager.animateShowHide) context.prefManager.animationDuration.toLong() else 0L
+        duration = with (drawerOrFrame) { context.duration() }
         addListener(object : AnimatorListenerAdapter() {
             override fun onAnimationEnd(animation: Animator) {
                 scaleX = 1f
@@ -187,14 +202,14 @@ fun View.fadeAndScaleIn(endListener: () -> Unit) {
     animator.start()
 }
 
-fun View.fadeIn(endListener: () -> Unit) {
+fun View.fadeIn(drawerOrFrame: DrawerOrFrame, endListener: () -> Unit) {
     clearAnimation()
 
     val animator = AnimatorSet().apply {
         playTogether(
             ObjectAnimator.ofFloat(this@fadeIn, "alpha", alpha, 1f),
         )
-        duration = if (context.prefManager.animateShowHide) context.prefManager.animationDuration.toLong() else 0L
+        duration = with (drawerOrFrame) { context.duration() }
         addListener(object : AnimatorListenerAdapter() {
             override fun onAnimationEnd(animation: Animator) {
                 alpha = 1f

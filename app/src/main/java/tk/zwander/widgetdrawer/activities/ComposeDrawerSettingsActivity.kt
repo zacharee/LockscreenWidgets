@@ -33,6 +33,32 @@ class ComposeDrawerSettingsActivity : BaseActivity() {
                 commonSection.addToPreferenceScreen(this)
 
                 category(
+                    title = resources.getString(R.string.general),
+                    key = "general_options",
+                ) {
+                    switchPreference(
+                        title = { stringResource(R.string.settings_screen_animate_show_hide) },
+                        summary = { stringResource(R.string.settings_screen_animate_show_hide_desc) },
+                        key = { PrefManager.KEY_ANIMATE_DRAWER_SHOW_HIDE },
+                        icon = { painterResource(R.drawable.ic_baseline_animation_24) },
+                        defaultValue = { true },
+                    )
+
+                    seekBarPreference(
+                        title = { stringResource(R.string.settings_screen_animation_duration) },
+                        summary = { stringResource(R.string.settings_screen_animation_duration_desc) },
+                        key = { PrefManager.KEY_DRAWER_ANIMATION_DURATION },
+                        icon = { painterResource(R.drawable.ic_baseline_timer_24) },
+                        defaultValue = { 300 },
+                        enabled = booleanPreferenceDependency(PrefManager.KEY_ANIMATE_DRAWER_SHOW_HIDE),
+                        minValue = { 0 },
+                        maxValue = { 2000 },
+                        unit = { "ms" },
+                        scale = { 1.0 },
+                    )
+                }
+
+                category(
                     title = resources.getString(R.string.drawer),
                     key = "drawer_options",
                 ) {
