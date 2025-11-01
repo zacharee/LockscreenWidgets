@@ -31,6 +31,7 @@ fun createTouchHelperCallback(
     adapter: BaseAdapter,
     widgetMoved: (moved: Boolean) -> Unit,
     onItemSelected: (selected: Boolean, highlighted: Boolean) -> Unit,
+    onItemActive: (Boolean) -> Unit,
     frameLocked: () -> Boolean,
     viewModel: BaseDelegate.BaseViewModel<*, *>,
 ): ItemTouchHelper.SimpleCallback {
@@ -63,6 +64,7 @@ fun createTouchHelperCallback(
         }
 
         override fun onSelectedChanged(viewHolder: RecyclerView.ViewHolder?, actionState: Int) {
+            onItemActive(true)
             if (!viewModel.isResizingItem.value) {
                 if (actionState != ItemTouchHelper.ACTION_STATE_IDLE) {
                     viewHolder?.itemView?.alpha = 0.5f
@@ -89,6 +91,7 @@ fun createTouchHelperCallback(
         ) {
             super.clearView(recyclerView, viewHolder)
 
+            onItemActive(false)
             onItemSelected(false, false)
 
             viewHolder.itemView.alpha = 1.0f

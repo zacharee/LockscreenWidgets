@@ -19,6 +19,7 @@ import net.bytebuddy.ByteBuddy
 import net.bytebuddy.android.AndroidClassLoadingStrategy
 import net.bytebuddy.implementation.MethodDelegation
 import tk.zwander.common.compose.util.widgetViewCacheRegistry
+import tk.zwander.common.util.globalState
 import tk.zwander.common.util.logUtils
 import tk.zwander.common.views.ZeroPaddingAppWidgetHostView
 import tk.zwander.lockscreenwidgets.util.IconPrefs
@@ -291,7 +292,7 @@ class WidgetHostCompat(
                         "creatorPackage: ${pendingIntent?.creatorPackage}",
             )
 
-            return if (pendingIntent != null) {
+            val allowedByCallback = if (pendingIntent != null) {
                 val triggerUnlockOrDismiss = pendingIntent.isActivity
                 // This package check is so the frame/drawer doesn't dismiss itself when the
                 // Open Drawer widget is tapped.
@@ -309,6 +310,8 @@ class WidgetHostCompat(
             } else {
                 true
             }
+
+            return allowedByCallback && !globalState.itemIsActive.value
         }
     }
 

@@ -83,6 +83,9 @@ abstract class BaseDelegate<State : Any>(
             widgetMoved = this::onWidgetMoved,
             onItemSelected = this::onItemSelected,
             frameLocked = this::isLocked,
+            onItemActive = {
+                globalState.itemIsActive.value = it
+            },
             viewModel = viewModel,
         )
     }

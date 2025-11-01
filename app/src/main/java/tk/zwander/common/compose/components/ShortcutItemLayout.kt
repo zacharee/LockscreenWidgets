@@ -9,6 +9,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -21,6 +22,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import tk.zwander.common.compose.util.rememberPreferenceState
+import tk.zwander.common.util.globalState
 import tk.zwander.common.util.prefManager
 import tk.zwander.lockscreenwidgets.R
 
@@ -45,6 +47,8 @@ fun ShortcutItemLayout(
     )
     val animatedCornerRadius by animateDpAsState(widgetCornerRadius)
 
+    val itemIsSelected by globalState.itemIsActive.collectAsState()
+
     Card(
         modifier = modifier,
         colors = CardDefaults.outlinedCardColors(
@@ -53,7 +57,11 @@ fun ShortcutItemLayout(
         ),
         elevation = CardDefaults.outlinedCardElevation(),
         shape = RoundedCornerShape(animatedCornerRadius),
-        onClick = onClick,
+        onClick = {
+            if (!itemIsSelected) {
+                onClick()
+            }
+        },
     ) {
         Image(
             bitmap = icon?.asImageBitmap() ?: ImageBitmap(1, 1),
