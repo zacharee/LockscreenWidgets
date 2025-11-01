@@ -228,6 +228,7 @@ open class MainWidgetFrameDelegate protected constructor(
             },
             displayId = displayId,
             saveTypeGetter = { saveMode },
+            viewModel = viewModel,
         )
     }
 

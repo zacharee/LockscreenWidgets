@@ -15,6 +15,7 @@ import tk.zwander.common.util.frameSizeAndPosition
 import tk.zwander.common.util.prefManager
 import tk.zwander.lockscreenwidgets.activities.add.ReconfigureFrameWidgetActivity
 import tk.zwander.lockscreenwidgets.util.FramePrefs
+import tk.zwander.lockscreenwidgets.util.MainWidgetFrameDelegate
 
 /**
  * The adapter for the widget frame itself.
@@ -25,8 +26,9 @@ open class WidgetFrameAdapter(
     rootView: View,
     displayId: Int,
     onRemoveCallback: (WidgetData, Int) -> Unit,
+    viewModel: MainWidgetFrameDelegate.WidgetFrameViewModel,
     private val saveTypeGetter: () -> FrameSizeAndPosition.FrameType,
-) : BaseAdapter(frameId, context, rootView, onRemoveCallback, displayId) {
+) : BaseAdapter(frameId, context, rootView, onRemoveCallback, displayId, viewModel) {
     override val colCount: Int
         get() = FramePrefs.getColCountForFrame(context, holderId)
     override val rowCount: Int

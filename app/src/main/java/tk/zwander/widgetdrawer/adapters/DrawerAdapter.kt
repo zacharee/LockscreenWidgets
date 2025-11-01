@@ -13,11 +13,13 @@ import tk.zwander.common.util.eventManager
 import tk.zwander.common.util.prefManager
 import tk.zwander.lockscreenwidgets.R
 import tk.zwander.widgetdrawer.activities.add.ReconfigureDrawerWidgetActivity
+import tk.zwander.widgetdrawer.util.DrawerDelegate
 
 class DrawerAdapter(
     context: Context,
     rootView: View,
     displayId: Int,
+    viewModel: DrawerDelegate.DrawerViewModel,
     onRemoveCallback: (WidgetData, Int) -> Unit,
 ) : BaseAdapter(
     -2,
@@ -25,6 +27,7 @@ class DrawerAdapter(
     rootView,
     onRemoveCallback,
     displayId,
+    viewModel,
 ) {
     override val colCount: Int
         get() = context.prefManager.drawerColCount

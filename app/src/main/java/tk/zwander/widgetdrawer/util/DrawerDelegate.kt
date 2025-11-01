@@ -198,7 +198,7 @@ class DrawerDelegate private constructor(context: Context, wm: WindowManager, di
     }
 
     override val adapter by lazy {
-        DrawerAdapter(context, rootView, displayId) { widget, _ ->
+        DrawerAdapter(context, rootView, displayId, viewModel) { widget, _ ->
             viewModel.itemToRemove.value = widget
         }
     }

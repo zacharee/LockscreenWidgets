@@ -5,7 +5,6 @@ import android.appwidget.AppWidgetProviderInfo
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.graphics.drawable.GradientDrawable
 import android.os.Build
 import android.util.SizeF
 import android.view.ContextThemeWrapper
@@ -29,7 +28,12 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.Text
 import androidx.compose.material3.ripple
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
@@ -43,9 +47,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.view.LayoutInflaterCompat
 import androidx.core.view.forEach
-import androidx.core.view.isVisible
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.arasthel.spannedgridlayoutmanager.SpanSize
@@ -60,11 +64,13 @@ import tk.zwander.common.activities.DismissOrUnlockActivity
 import tk.zwander.common.activities.PermissionIntentLaunchActivity
 import tk.zwander.common.compose.AppTheme
 import tk.zwander.common.compose.components.ShortcutItemLayout
+import tk.zwander.common.compose.components.WidgetItemLayout
 import tk.zwander.common.compose.util.widgetViewCacheRegistry
 import tk.zwander.common.data.WidgetData
 import tk.zwander.common.data.WidgetType
 import tk.zwander.common.host.widgetHostCompat
 import tk.zwander.common.listeners.WidgetResizeListener
+import tk.zwander.common.util.BaseDelegate
 import tk.zwander.common.util.BrokenAppsRegistry
 import tk.zwander.common.util.Event
 import tk.zwander.common.util.EventObserver
@@ -75,14 +81,11 @@ import tk.zwander.common.util.compat.LayoutInflaterFactory2Compat
 import tk.zwander.common.util.createWidgetErrorView
 import tk.zwander.common.util.eventManager
 import tk.zwander.common.util.getAllInstalledWidgetProviders
-import tk.zwander.common.util.hasConfiguration
 import tk.zwander.common.util.logUtils
-import tk.zwander.common.util.mainHandler
 import tk.zwander.common.util.mitigations.SafeContextWrapper
 import tk.zwander.common.util.requireLsDisplayManager
 import tk.zwander.lockscreenwidgets.R
 import tk.zwander.lockscreenwidgets.databinding.ComposeViewHolderBinding
-import tk.zwander.lockscreenwidgets.databinding.WidgetPageHolderBinding
 import tk.zwander.widgetdrawer.adapters.DrawerAdapter
 import java.util.Collections
 import kotlin.math.min
@@ -94,6 +97,7 @@ abstract class BaseAdapter(
     protected val rootView: View,
     protected val onRemoveCallback: (WidgetData, Int) -> Unit,
     protected val displayId: Int,
+    protected val viewModel: BaseDelegate.BaseViewModel<*, *>,
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>(), CoroutineScope by MainScope() {
     companion object {
         const val VIEW_TYPE_WIDGET = 0
@@ -103,18 +107,7 @@ abstract class BaseAdapter(
     val widgets = ArrayList<WidgetData>()
     val spanSizeLookup = WidgetSpanSizeLookup()
 
-    var currentEditingInterfacePosition = -1
-        set(value) {
-            val changed = field != value
-
-            field = value
-
-            if (changed) {
-                mainHandler.post {
-                    context.eventManager.sendEvent(Event.EditingIndexUpdated(value, holderId))
-                }
-            }
-        }
+    var currentEditingInterfacePosition by mutableStateOf(-1)
 
     private var didResize = false
 
@@ -237,19 +230,21 @@ abstract class BaseAdapter(
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         val inflater = baseLayoutInflater
 
+        val view = ComposeViewHolderBinding.inflate(inflater, parent, false)
+
         return if (viewType == VIEW_TYPE_ADD) {
-            AddWidgetVH(inflater.inflate(R.layout.compose_view_holder, parent, false))
+            AddWidgetVH(view)
         } else {
-            WidgetVH(inflater.inflate(R.layout.widget_page_holder, parent, false))
+            WidgetVH(view)
         }
     }
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         if (position < widgets.size) {
-            (holder as WidgetVH).onBind(widgets[position])
+            (holder as WidgetVH).bind(widgets[position])
         }
 
-        (holder as? AddWidgetVH)?.onBind()
+        (holder as? AddWidgetVH)?.bind(Unit)
     }
 
     override fun onViewRecycled(holder: RecyclerView.ViewHolder) {
@@ -268,6 +263,7 @@ abstract class BaseAdapter(
         amount: Int,
         direction: Int,
     )
+
     abstract fun launchShortcutIconOverride(id: Int)
 
     abstract fun getThresholdPx(which: WidgetResizeListener.Which): Int
@@ -278,115 +274,9 @@ abstract class BaseAdapter(
      * has specified for the frame.
      */
     @SuppressLint("ClickableViewAccessibility")
-    inner class WidgetVH(view: View) : RecyclerView.ViewHolder(view), EventObserver {
-        private val binding = WidgetPageHolderBinding.bind(view)
-
-        private var editingInterfaceShown: Boolean
-            get() = binding.widgetEditWrapper.isVisible
-            set(value) {
-                binding.widgetEditWrapper.isVisible = value
-                showHorizontalSizers = value && colCount > 1
-                showVerticalSizers = value && rowCount > 1
-            }
-        private var showHorizontalSizers: Boolean
-            get() = binding.widgetLeftDragger.isVisible && binding.widgetRightDragger.isVisible
-            set(value) {
-                binding.widgetLeftDragger.isVisible = value
-                binding.widgetRightDragger.isVisible = value
-            }
-        private var showVerticalSizers: Boolean
-            get() = binding.widgetTopDragger.isVisible && binding.widgetBottomDragger.isVisible
-            set(value) {
-                binding.widgetTopDragger.isVisible = value
-                binding.widgetBottomDragger.isVisible = value
-            }
-
-        private var currentData: WidgetData?
-            get() = bindingAdapterPosition.let { if (it != -1) widgets.getOrNull(it) else null }
-            set(value) {
-                if (value != null) {
-                    bindingAdapterPosition.takeIf { it != -1 }?.let { pos ->
-                        currentWidgets = widgets.apply {
-                            this[pos] = value
-                        }
-                    }
-                }
-            }
-
-        init {
-            binding.removeWidget.setOnClickListener {
-                currentData?.let {
-                    onRemoveCallback(it, bindingAdapterPosition)
-                }
-            }
-
-            binding.widgetLeftDragger.setOnTouchListener(WidgetResizeListener(
-                ::getThresholdPx,
-                WidgetResizeListener.Which.LEFT,
-                { overThreshold, step, amount ->
-                    handleResize(
-                        overThreshold,
-                        step,
-                        amount,
-                        -1,
-                        false
-                    )
-                }
-            ) { notifyItemChanged(bindingAdapterPosition) })
-
-            binding.widgetTopDragger.setOnTouchListener(WidgetResizeListener(
-                ::getThresholdPx,
-                WidgetResizeListener.Which.TOP,
-                { overThreshold, step, amount ->
-                    handleResize(
-                        overThreshold,
-                        step,
-                        amount,
-                        -1,
-                        true
-                    )
-                }
-            ) { notifyItemChanged(bindingAdapterPosition) })
-
-            binding.widgetRightDragger.setOnTouchListener(WidgetResizeListener(
-                ::getThresholdPx,
-                WidgetResizeListener.Which.RIGHT,
-                { overThreshold, step, amount ->
-                    handleResize(
-                        overThreshold,
-                        step,
-                        amount,
-                        1,
-                        false
-                    )
-                }
-            ) { notifyItemChanged(bindingAdapterPosition) })
-
-            binding.widgetBottomDragger.setOnTouchListener(WidgetResizeListener(
-                ::getThresholdPx,
-                WidgetResizeListener.Which.BOTTOM,
-                { overThreshold, step, amount ->
-                    handleResize(
-                        overThreshold,
-                        step,
-                        amount,
-                        1,
-                        true
-                    )
-                }
-            ) { notifyItemChanged(bindingAdapterPosition) })
-
-            binding.widgetReconfigure.setOnClickListener {
-                openWidgetConfig()
-            }
-            binding.openWidgetConfig.setOnClickListener {
-                openWidgetConfig()
-            }
-        }
-
-        private fun openWidgetConfig() {
-            val data = currentData ?: return
-            val provider = data.widgetProviderComponent
+    inner class WidgetVH(binding: ComposeViewHolderBinding) : BaseVH<WidgetData>(binding), EventObserver {
+        private fun openWidgetConfig(currentData: WidgetData) {
+            val provider = currentData.widgetProviderComponent
 
             if (provider == null) {
                 Toast.makeText(context, R.string.error_reconfiguring_widget, Toast.LENGTH_SHORT)
@@ -394,7 +284,7 @@ abstract class BaseAdapter(
                 context.logUtils.normalLog("Unable to reconfigure widget: provider is null.")
             } else {
                 val pkg = provider.packageName
-                val providerInfo = manager.getAppWidgetInfo(data.id)
+                val providerInfo = manager.getAppWidgetInfo(currentData.id)
                     ?: (context.getAllInstalledWidgetProviders(pkg)
                         .find { info -> info.provider == provider })
 
@@ -403,33 +293,82 @@ abstract class BaseAdapter(
                         .show()
                     context.logUtils.normalLog("Unable to reconfigure widget $provider: provider info is null.")
                 } else {
-                    launchReconfigure(data.id, providerInfo)
+                    launchReconfigure(
+                        id = currentData.id,
+                        providerInfo = providerInfo,
+                    )
                 }
             }
         }
 
-        fun onBind(data: WidgetData) {
+        override fun performBind(data: WidgetData) {
             launch {
                 context.logUtils.debugLog("Binding ${data.copy(icon = null, iconRes = null)}", null)
                 context.eventManager.addObserver(this@WidgetVH)
 
                 onResize(data, 0, 1)
-                updateEditingUI(currentEditingInterfacePosition)
 
-                binding.widgetHolder.removeAllViews()
-
-                when (data.safeType) {
-                    WidgetType.WIDGET -> bindWidget(data)
-                    WidgetType.SHORTCUT, WidgetType.LAUNCHER_SHORTCUT -> bindShortcut(data)
-                    WidgetType.LAUNCHER_ITEM -> bindLauncherItem(data)
-                    WidgetType.HEADER -> {}
+                val widgetInfo = withContext(Dispatchers.Main) {
+                    try {
+                        manager.getAppWidgetInfo(data.id)
+                    } catch (_: PackageManager.NameNotFoundException) {
+                        null
+                    }
                 }
 
-                binding.card.radius = display.dpToPx(widgetCornerRadius).toFloat()
-                binding.widgetEditOutline.background =
-                    (binding.widgetEditOutline.background.mutate() as GradientDrawable).apply {
-                        this.cornerRadius = binding.card.radius
+                binding.root.setContent {
+                    AppTheme {
+                        viewModel.WidgetItemLayout(
+                            needsReconfigure = data.type == WidgetType.WIDGET && widgetInfo == null,
+                            widgetData = data,
+                            widgetContents = { modifier ->
+                                when (data.safeType) {
+                                    WidgetType.WIDGET -> WidgetContents(data, widgetInfo!!, modifier)
+                                    WidgetType.SHORTCUT, WidgetType.LAUNCHER_SHORTCUT -> {
+                                        ShortcutContent(data, modifier)
+                                    }
+
+                                    WidgetType.LAUNCHER_ITEM -> LauncherIconContent(data, modifier)
+                                    WidgetType.HEADER -> {}
+                                }
+                            },
+                            cornerRadiusKey = if (this@BaseAdapter is DrawerAdapter) {
+                                PrefManager.KEY_DRAWER_WIDGET_CORNER_RADIUS
+                            } else {
+                                PrefManager.KEY_FRAME_CORNER_RADIUS
+                            },
+                            launchIconOverride = {
+                                launchShortcutIconOverride(data.id)
+                            },
+                            launchReconfigure = {
+                                openWidgetConfig(data)
+                            },
+                            remove = {
+                                onRemoveCallback(data, data.id)
+                            },
+                            getResizeThresholdPx = {
+                                getThresholdPx(it)
+                            },
+                            onResize = { overThreshold, step, amount, direction, vertical ->
+                                handleResize(
+                                    currentData = data,
+                                    overThreshold = overThreshold,
+                                    step = step,
+                                    amount = amount,
+                                    direction = direction,
+                                    vertical = vertical,
+                                )
+                            },
+                            liftCallback = {
+                                notifyItemChanged(bindingAdapterPosition)
+                            },
+                            rowCount = rowCount,
+                            colCount = colCount,
+                            isEditing = currentEditingInterfacePosition == bindingAdapterPosition,
+                            modifier = Modifier.fillMaxSize(),
+                        )
                     }
+                }
             }
         }
 
@@ -449,221 +388,177 @@ abstract class BaseAdapter(
                     }
                 }
 
-                is Event.EditingIndexUpdated -> {
-                    if (event.frameId == holderId) {
-                        updateEditingUI(event.index)
-                    }
-                }
-
                 else -> {}
             }
         }
 
-        private fun updateEditingUI(index: Int) {
-            val oldState = editingInterfaceShown
-            val newState = index != -1 && (index == bindingAdapterPosition)
-            editingInterfaceShown = newState
-            if (oldState != newState && index != -1 && index == bindingAdapterPosition) {
-                notifyItemChanged(bindingAdapterPosition)
-            }
-        }
-
-        private suspend fun bindWidget(data: WidgetData) {
-            binding.overrideIcon.isVisible = false
-
-            val widgetInfo = withContext(Dispatchers.Main) {
-                try {
-                    manager.getAppWidgetInfo(data.id)
-                } catch (_: PackageManager.NameNotFoundException) {
-                    null
-                }
+        @Composable
+        private fun WidgetContents(
+            data: WidgetData,
+            widgetInfo: AppWidgetProviderInfo,
+            modifier: Modifier = Modifier,
+        ) {
+            var widgetView by remember {
+                mutableStateOf<View?>(null)
             }
 
-            binding.openWidgetConfig.isVisible = widgetInfo.hasConfiguration(context)
+            LaunchedEffect(null) {
+                if (!BrokenAppsRegistry.isBroken(widgetInfo)) {
+                    try {
+                        withContext(Dispatchers.Main) {
+                            widgetView = viewCacheRegistry.getOrCreateView(
+                                SafeContextWrapper(itemView.context),
+                                data.id,
+                                widgetInfo,
+                            ).apply hostView@{
+                                findScrollableViewsInHierarchy(this).forEach { list ->
+                                    list.isNestedScrollingEnabled = true
+                                }
 
-            if (widgetInfo != null) {
-                binding.widgetReconfigure.isVisible = false
-                binding.widgetHolder.apply {
-                    isVisible = true
-
-                    if (!BrokenAppsRegistry.isBroken(widgetInfo)) {
-                        context.logUtils.debugLog(
-                            "Attempting to create view for ${widgetInfo.provider}.",
-                            null
-                        )
-                        try {
-                            // We're recreating the AppWidgetHostView here each time, which probably isn't the most efficient
-                            // way to do things. However, it's not trivial to just set a new source on an AppWidgetHostView,
-                            // so this makes the most sense right now.
-                            addView(withContext(Dispatchers.Main) {
-                                viewCacheRegistry.getOrCreateView(
-                                    SafeContextWrapper(itemView.context),
-                                    data.id,
-                                    widgetInfo,
-                                ).apply hostView@{
+                                this.viewTreeObserver.addOnGlobalLayoutListener {
                                     findScrollableViewsInHierarchy(this).forEach { list ->
                                         list.isNestedScrollingEnabled = true
                                     }
+                                }
 
-                                    this.viewTreeObserver.addOnGlobalLayoutListener {
-                                        findScrollableViewsInHierarchy(this).forEach { list ->
-                                            list.isNestedScrollingEnabled = true
-                                        }
-                                    }
+                                val width = this@BaseAdapter.display.pxToDp(itemView.width)
+                                val height = this@BaseAdapter.display.pxToDp(itemView.height)
 
-                                    val width = this@BaseAdapter.display.pxToDp(itemView.width)
-                                    val height = this@BaseAdapter.display.pxToDp(itemView.height)
+                                val paddingValue = this@BaseAdapter.display.pxToDp(
+                                    context.resources.getDimensionPixelSize(R.dimen.app_widget_padding),
+                                )
 
-                                    val paddingValue = this@BaseAdapter.display.pxToDp(
-                                        context.resources.getDimensionPixelSize(R.dimen.app_widget_padding),
-                                    )
-
-                                    // Workaround to fix the One UI 5.1 battery grid widget on some devices.
-                                    if (widgetInfo.provider.packageName == "com.android.settings.intelligence") {
-                                        updateAppWidgetOptions(manager.getAppWidgetOptions(appWidgetId).apply {
+                                // Workaround to fix the One UI 5.1 battery grid widget on some devices.
+                                if (widgetInfo.provider.packageName == "com.android.settings.intelligence") {
+                                    updateAppWidgetOptions(
+                                        manager.getAppWidgetOptions(appWidgetId).apply {
                                             putBoolean("hsIsHorizontalIcon", false)
                                             putInt("semAppWidgetRowSpan", 1)
                                         })
-                                    }
+                                }
 
-                                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                                        updateAppWidgetSize(
-                                            manager.getAppWidgetOptions(appWidgetId),
-                                            listOf(
-                                                SizeF(
-                                                    width + 2 * paddingValue,
-                                                    height + 2 * paddingValue,
-                                                ),
+                                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                                    updateAppWidgetSize(
+                                        manager.getAppWidgetOptions(appWidgetId),
+                                        listOf(
+                                            SizeF(
+                                                width + 2 * paddingValue,
+                                                height + 2 * paddingValue,
                                             ),
-                                        )
-                                    } else {
-                                        val adjustedWidth = width + 2 * paddingValue
-                                        val adjustedHeight = height + 2 * paddingValue
+                                        ),
+                                    )
+                                } else {
+                                    val adjustedWidth = width + 2 * paddingValue
+                                    val adjustedHeight = height + 2 * paddingValue
 
-                                        @Suppress("DEPRECATION")
-                                        updateAppWidgetSize(
-                                            manager.getAppWidgetOptions(appWidgetId),
-                                            adjustedWidth.toInt(),
-                                            adjustedHeight.toInt(),
-                                            adjustedWidth.toInt(),
-                                            adjustedHeight.toInt(),
-                                        )
-                                    }
+                                    @Suppress("DEPRECATION")
+                                    updateAppWidgetSize(
+                                        manager.getAppWidgetOptions(appWidgetId),
+                                        adjustedWidth.toInt(),
+                                        adjustedHeight.toInt(),
+                                        adjustedWidth.toInt(),
+                                        adjustedHeight.toInt(),
+                                    )
                                 }
-                            })
-                        } catch (e: Throwable) {
-                            context.logUtils.normalLog(
-                                "Unable to bind widget view ${widgetInfo.provider}",
-                                e
-                            )
-
-                            if (e is SecurityException) {
-                                Toast.makeText(
-                                    context,
-                                    resources.getString(
-                                        R.string.bind_widget_error,
-                                        widgetInfo.provider
-                                    ),
-                                    Toast.LENGTH_LONG,
-                                ).show()
-                                currentWidgets = currentWidgets.toMutableList().apply {
-                                    remove(data)
-                                    host.deleteAppWidgetId(data.id)
-                                }
-                            } else {
-                                addView(context.createWidgetErrorView())
                             }
                         }
-                    } else {
+                    } catch (e: Throwable) {
                         context.logUtils.normalLog(
-                            "Broken app widget detected: ${widgetInfo.provider}. Removing from adapter list.",
-                            null,
+                            "Unable to bind widget view ${widgetInfo.provider}",
+                            e
                         )
-                        currentWidgets = currentWidgets.toMutableList().apply {
-                            remove(data)
-                            host.deleteAppWidgetId(data.id)
+
+                        if (e is SecurityException) {
+                            Toast.makeText(
+                                context,
+                                context.resources.getString(
+                                    R.string.bind_widget_error,
+                                    widgetInfo.provider
+                                ),
+                                Toast.LENGTH_LONG,
+                            ).show()
+                            currentWidgets = currentWidgets.toMutableList().apply {
+                                remove(data)
+                                host.deleteAppWidgetId(data.id)
+                            }
+                        } else {
+                            widgetView = context.createWidgetErrorView()
                         }
                     }
+                } else {
+                    context.logUtils.normalLog(
+                        "Broken app widget detected: ${widgetInfo.provider}. Removing from adapter list.",
+                        null,
+                    )
+                    currentWidgets = currentWidgets.toMutableList().apply {
+                        remove(data)
+                        host.deleteAppWidgetId(data.id)
+                    }
                 }
-            } else {
-                binding.widgetReconfigure.isVisible = true
-                binding.widgetPreview.setImageBitmap(data.getIconBitmap(context))
-                binding.widgetLabel.text = data.label
+            }
+
+            widgetView?.let { widgetView ->
+                AndroidView(
+                    factory = {
+                        widgetView.apply {
+                            (parent as? ViewGroup)?.removeView(this)
+                        }
+                    },
+                    modifier = modifier,
+                )
             }
         }
 
-        private fun bindLauncherItem(data: WidgetData) {
-            binding.widgetReconfigure.isVisible = false
-            binding.widgetHolder.isVisible = true
-            binding.openWidgetConfig.isVisible = false
-            binding.overrideIcon.isVisible = true
+        @Composable
+        private fun LauncherIconContent(data: WidgetData, modifier: Modifier) {
+            ShortcutItemLayout(
+                icon = data.getIconBitmap(context),
+                name = null,
+                onClick = {
+                    val launchIntent = Intent(Intent.ACTION_MAIN)
+                    launchIntent.addCategory(Intent.CATEGORY_LAUNCHER)
+                    launchIntent.`package` = data.widgetProviderComponent?.packageName
+                    launchIntent.component = data.widgetProviderComponent
+                    launchIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
 
-            binding.overrideIcon.setOnClickListener {
-                launchShortcutIconOverride(data.id)
-            }
-
-            val shortcutView = ComposeViewHolderBinding.inflate(baseLayoutInflater)
-            shortcutView.root.setContent {
-                ShortcutItemLayout(
-                    icon = data.getIconBitmap(context),
-                    name = null,
-                    onClick = {
-                        val launchIntent = Intent(Intent.ACTION_MAIN)
-                        launchIntent.addCategory(Intent.CATEGORY_LAUNCHER)
-                        launchIntent.`package` = data.widgetProviderComponent?.packageName
-                        launchIntent.component = data.widgetProviderComponent
-                        launchIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-
-                        DismissOrUnlockActivity.launch(
-                            context = context,
-                            activityIntent = launchIntent,
-                        )
-                    },
-                    cornerRadiusKey = if (this@BaseAdapter is DrawerAdapter) {
-                        PrefManager.KEY_DRAWER_WIDGET_CORNER_RADIUS
-                    } else {
-                        PrefManager.KEY_FRAME_WIDGET_CORNER_RADIUS
-                    },
-                )
-            }
-            binding.widgetHolder.addView(shortcutView.root)
+                    DismissOrUnlockActivity.launch(
+                        context = context,
+                        activityIntent = launchIntent,
+                    )
+                },
+                cornerRadiusKey = if (this@BaseAdapter is DrawerAdapter) {
+                    PrefManager.KEY_DRAWER_WIDGET_CORNER_RADIUS
+                } else {
+                    PrefManager.KEY_FRAME_WIDGET_CORNER_RADIUS
+                },
+                modifier = modifier,
+            )
         }
 
         @SuppressLint("DiscouragedApi")
-        private fun bindShortcut(data: WidgetData) {
-            binding.widgetReconfigure.isVisible = false
-            binding.widgetHolder.isVisible = true
-            binding.openWidgetConfig.isVisible = false
-            binding.overrideIcon.isVisible = true
+        @Composable
+        private fun ShortcutContent(data: WidgetData, modifier: Modifier) {
+            ShortcutItemLayout(
+                icon = data.getIconBitmap(context),
+                name = data.label,
+                onClick = {
+                    data.shortcutIntent?.apply {
+                        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
 
-            binding.overrideIcon.setOnClickListener {
-                launchShortcutIconOverride(data.id)
-            }
-
-            val shortcutView = ComposeViewHolderBinding.inflate(baseLayoutInflater)
-            shortcutView.root.setContent {
-                ShortcutItemLayout(
-                    icon = data.getIconBitmap(context),
-                    name = data.label,
-                    onClick = {
-                        data.shortcutIntent?.apply {
-                            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-
-                            PermissionIntentLaunchActivity.start(
-                                context = context,
-                                intent = this,
-                                launchType = PermissionIntentLaunchActivity.LaunchType.ACTIVITY,
-                            )
-                        }
-                    },
-                    cornerRadiusKey = if (this@BaseAdapter is DrawerAdapter) {
-                        PrefManager.KEY_DRAWER_WIDGET_CORNER_RADIUS
-                    } else {
-                        PrefManager.KEY_FRAME_WIDGET_CORNER_RADIUS
-                    },
-                )
-            }
-            binding.widgetHolder.addView(shortcutView.root)
+                        PermissionIntentLaunchActivity.start(
+                            context = context,
+                            intent = this,
+                            launchType = PermissionIntentLaunchActivity.LaunchType.ACTIVITY,
+                        )
+                    }
+                },
+                cornerRadiusKey = if (this@BaseAdapter is DrawerAdapter) {
+                    PrefManager.KEY_DRAWER_WIDGET_CORNER_RADIUS
+                } else {
+                    PrefManager.KEY_FRAME_WIDGET_CORNER_RADIUS
+                },
+                modifier = modifier,
+            )
         }
 
         private fun findScrollableViewsInHierarchy(root: View): List<View> {
@@ -687,15 +582,18 @@ abstract class BaseAdapter(
         }
 
         private fun handleResize(
+            currentData: WidgetData,
             overThreshold: Boolean,
             step: Int,
             amount: Int,
             direction: Int,
             vertical: Boolean
         ) {
-            context.logUtils.debugLog("handleResize($overThreshold, $step, $amount, $direction, $vertical)", null)
+            context.logUtils.debugLog(
+                "handleResize($overThreshold, $step, $amount, $direction, $vertical)",
+                null
+            )
 
-            val currentData = currentData ?: return
             val sizeInfo = currentData.safeSize
 
             val newSizeInfo = if (overThreshold) {
@@ -724,7 +622,11 @@ abstract class BaseAdapter(
 
             onResize(newData, amount, step)
             didResize = true
-            this.currentData = newData
+            bindingAdapterPosition.takeIf { it != -1 }?.let { pos ->
+                currentWidgets = widgets.apply {
+                    this[pos] = newData
+                }
+            }
         }
 
         //Make sure the item's size is properly updated on a frame resize, or on initial bind
@@ -744,12 +646,9 @@ abstract class BaseAdapter(
      * Represents the "add button" page when no widgets are currently
      * added to the frame.
      */
-    inner class AddWidgetVH(view: View) : RecyclerView.ViewHolder(view) {
-        private val binding = ComposeViewHolderBinding.bind(view)
-
+    inner class AddWidgetVH(binding: ComposeViewHolderBinding) : BaseVH<Unit>(binding) {
         @OptIn(ExperimentalComposeUiApi::class)
-        fun onBind() {
-            binding.root.setParentCompositionContext(rootView.createLifecycleAwareWindowRecomposer())
+        override fun performBind(data: Unit) {
             binding.root.setContent {
                 MeasuredComposable(name = "AddWidgetLayout") {
                     AppTheme {
@@ -813,6 +712,16 @@ abstract class BaseAdapter(
                 }
             }
         }
+    }
+
+    abstract inner class BaseVH<Data : Any>(protected val binding: ComposeViewHolderBinding) : RecyclerView.ViewHolder(binding.root) {
+        fun bind(data: Data) {
+            binding.root.setParentCompositionContext(rootView.createLifecycleAwareWindowRecomposer())
+
+            performBind(data)
+        }
+
+        abstract fun performBind(data: Data)
     }
 
     inner class WidgetSpanSizeLookup : SpannedGridLayoutManager.SpanSizeLookup({ position ->

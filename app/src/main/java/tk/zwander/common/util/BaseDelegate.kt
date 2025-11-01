@@ -9,9 +9,6 @@ import android.view.View
 import android.view.WindowManager
 import androidx.annotation.CallSuper
 import androidx.appcompat.view.ContextThemeWrapper
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.ComposeView
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleRegistry
@@ -97,6 +94,7 @@ abstract class BaseDelegate<State : Any>(
             widgetMoved = this::onWidgetMoved,
             onItemSelected = this::onItemSelected,
             frameLocked = this::isLocked,
+            viewModel = viewModel,
         )
     }
     protected val itemTouchHelper by lazy {
@@ -295,6 +293,7 @@ abstract class BaseDelegate<State : Any>(
 
     open class BaseViewModel<State : Any, Delegate : BaseDelegate<State>>(protected val delegate: Delegate) : ViewModel() {
         val itemToRemove = MutableStateFlow<WidgetData?>(null)
+        val isResizingItem = MutableStateFlow(false)
 
         val params: WindowManager.LayoutParams
             get() = delegate.params

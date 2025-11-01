@@ -20,6 +20,7 @@ fun createTouchHelperCallback(
     widgetMoved: (moved: Boolean) -> Unit,
     onItemSelected: (selected: Boolean, highlighted: Boolean) -> Unit,
     frameLocked: () -> Boolean,
+    viewModel: BaseDelegate.BaseViewModel<*, *>,
 ): ItemTouchHelper.SimpleCallback {
     return object : ItemTouchHelper.SimpleCallback(
         ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT or ItemTouchHelper.UP or ItemTouchHelper.DOWN,
@@ -40,7 +41,7 @@ fun createTouchHelperCallback(
             recyclerView: RecyclerView,
             viewHolder: RecyclerView.ViewHolder,
         ): Int {
-            return if (viewHolder is BaseAdapter.AddWidgetVH || frameLocked()) 0
+            return if (viewHolder is BaseAdapter.AddWidgetVH || frameLocked() || viewModel.isResizingItem.value) 0
             else super.getDragDirs(recyclerView, viewHolder)
         }
 
@@ -50,17 +51,19 @@ fun createTouchHelperCallback(
         }
 
         override fun onSelectedChanged(viewHolder: RecyclerView.ViewHolder?, actionState: Int) {
-            if (actionState != ItemTouchHelper.ACTION_STATE_IDLE) {
-                viewHolder?.itemView?.alpha = 0.5f
+            if (!viewModel.isResizingItem.value) {
+                if (actionState != ItemTouchHelper.ACTION_STATE_IDLE) {
+                    viewHolder?.itemView?.alpha = 0.5f
 
-                //The user has long-pressed a widget. Show the editing UI on that widget.
-                //If the UI is already shown on it, hide it.
-                val adapterPos = viewHolder?.bindingAdapterPosition ?: -1
-                adapter.currentEditingInterfacePosition =
-                    if (adapter.currentEditingInterfacePosition == adapterPos) -1 else adapterPos
+                    //The user has long-pressed a widget. Show the editing UI on that widget.
+                    //If the UI is already shown on it, hide it.
+                    val adapterPos = viewHolder?.bindingAdapterPosition ?: -1
+                    adapter.currentEditingInterfacePosition =
+                        if (adapter.currentEditingInterfacePosition == adapterPos) -1 else adapterPos
+                }
+
+                onItemSelected(actionState == ItemTouchHelper.ACTION_STATE_DRAG, adapter.currentEditingInterfacePosition != -1)
             }
-
-            onItemSelected(actionState == ItemTouchHelper.ACTION_STATE_DRAG, adapter.currentEditingInterfacePosition != -1)
 
             super.onSelectedChanged(viewHolder, actionState)
         }

@@ -54,7 +54,7 @@ fun ShortcutItemLayout(
         onClick = onClick,
     ) {
         Image(
-            bitmap = icon?.asImageBitmap() ?: ImageBitmap(0, 0),
+            bitmap = icon?.asImageBitmap() ?: ImageBitmap(1, 1),
             contentDescription = stringResource(R.string.shortcut_icon),
             modifier = Modifier.align(Alignment.CenterHorizontally)
                 .weight(1f)

@@ -82,7 +82,8 @@ abstract class ReconfigureWidgetActivity : BaseBindWidgetActivity() {
 
         val widget = createWidgetData(id, provider, oldWidget?.safeSize)
 
-        val safeIndex = if (oldWidgetIndex != -1) oldWidgetIndex else newSet.lastIndex.run { if (this == -1) 0 else this }
+        val safeIndex =
+            if (oldWidgetIndex != -1) oldWidgetIndex else newSet.lastIndex.run { if (this == -1) 0 else this }
 
         newSet.add(safeIndex, widget)
 
