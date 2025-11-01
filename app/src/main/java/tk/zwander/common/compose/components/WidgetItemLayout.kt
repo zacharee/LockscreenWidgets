@@ -37,6 +37,7 @@ import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -70,12 +71,13 @@ fun BaseDelegate.BaseViewModel<*, *>.WidgetItemLayout(
     modifier: Modifier = Modifier,
 ) {
     val context = LocalContext.current
+    val resources = LocalResources.current
     val widgetCornerRadius by rememberPreferenceState(
         key = cornerRadiusKey,
         value = {
             (context.prefManager.getInt(
                 it,
-                context.resources.getInteger(R.integer.def_corner_radius_dp_scaled_10x),
+                resources.getInteger(R.integer.def_corner_radius_dp_scaled_10x),
             ) / 10f).dp
         },
     )
@@ -292,7 +294,17 @@ fun Modifier.dragDetection(
     resizeCallback: (Boolean, Int, Int) -> Unit,
     liftCallback: () -> Unit,
     viewModel: BaseDelegate.BaseViewModel<*, *>,
-) = composed {
+) = composed(
+    inspectorInfo = {
+        name = "dragDetection"
+
+        properties["getResizeThresholdPx"] = getResizeThresholdPx
+        properties["which"] = which
+        properties["resizeCallback"] = resizeCallback
+        properties["liftCallback"] = liftCallback
+        properties["viewModel"] = viewModel
+    },
+) {
     var totalDeltaX = remember { 0f }
     var totalDeltaY = remember { 0f }
     var threshold = remember { getResizeThresholdPx(which) }

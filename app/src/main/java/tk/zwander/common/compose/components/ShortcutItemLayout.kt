@@ -16,6 +16,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -27,17 +28,18 @@ import tk.zwander.lockscreenwidgets.R
 fun ShortcutItemLayout(
     cornerRadiusKey: String,
     icon: Bitmap?,
-    name: String? = null,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
+    name: String? = null,
 ) {
     val context = LocalContext.current
+    val resources = LocalResources.current
     val widgetCornerRadius by rememberPreferenceState(
         key = cornerRadiusKey,
         value = {
             (context.prefManager.getInt(
                 it,
-                context.resources.getInteger(R.integer.def_corner_radius_dp_scaled_10x),
+                resources.getInteger(R.integer.def_corner_radius_dp_scaled_10x),
             ) / 10f).dp
         },
     )

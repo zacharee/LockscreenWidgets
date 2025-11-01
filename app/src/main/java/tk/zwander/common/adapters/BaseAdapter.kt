@@ -39,6 +39,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shadow
+import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.platform.createLifecycleAwareWindowRecomposer
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -389,6 +390,7 @@ abstract class BaseAdapter(
             widgetInfo: AppWidgetProviderInfo,
             modifier: Modifier = Modifier,
         ) {
+            val resources = LocalResources.current
             var widgetView by remember {
                 mutableStateOf<View?>(null)
             }
@@ -416,7 +418,7 @@ abstract class BaseAdapter(
                                 val height = this@BaseAdapter.display.pxToDp(itemView.height)
 
                                 val paddingValue = this@BaseAdapter.display.pxToDp(
-                                    context.resources.getDimensionPixelSize(R.dimen.app_widget_padding),
+                                    resources.getDimensionPixelSize(R.dimen.app_widget_padding),
                                 )
 
                                 // Workaround to fix the One UI 5.1 battery grid widget on some devices.
@@ -462,7 +464,7 @@ abstract class BaseAdapter(
                         if (e is SecurityException) {
                             Toast.makeText(
                                 context,
-                                context.resources.getString(
+                                resources.getString(
                                     R.string.bind_widget_error,
                                     widgetInfo.provider
                                 ),

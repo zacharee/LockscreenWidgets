@@ -15,6 +15,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -97,6 +98,7 @@ fun rememberLinks(): List<MainPageLink> {
 @Composable
 fun LinkItem(option: MainPageLink) {
     val context = LocalContext.current
+    val resources = LocalResources.current
 
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -107,7 +109,7 @@ fun LinkItem(option: MainPageLink) {
                 if (option.isEmail) {
                     context.launchEmail(
                         option.link,
-                        context.resources.getString(R.string.app_name),
+                        resources.getString(R.string.app_name),
                     )
                 } else {
                     context.launchUrl(option.link)
