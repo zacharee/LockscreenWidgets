@@ -151,9 +151,7 @@ class DrawerDelegate private constructor(context: Context, wm: WindowManager, di
             }
 
             root.addOnAttachStateChangeListener(object : View.OnAttachStateChangeListener {
-                override fun onViewAttachedToWindow(v: View) {
-                    eventManager.sendEvent(Event.DrawerAttachmentState(true))
-                }
+                override fun onViewAttachedToWindow(v: View) {}
 
                 override fun onViewDetachedFromWindow(v: View) {
                     eventManager.sendEvent(Event.DrawerAttachmentState(false))
@@ -491,6 +489,7 @@ class DrawerDelegate private constructor(context: Context, wm: WindowManager, di
                 drawer.root.alpha = 0f
                 wm.safeAddView(drawer.root, params)
                 if (hideHandle) {
+                    eventManager.sendEvent(Event.DrawerAttachmentState(true))
                     hideHandle()
                 }
             }
