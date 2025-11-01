@@ -277,7 +277,7 @@ class DrawerDelegate private constructor(context: Context, wm: WindowManager, di
                         }, 50)
                         widgetHost.startListening(this)
 
-                        drawer.root.handler?.postDelayed({
+                        mainHandler.postDelayed({
                             drawer.root.fadeIn(DrawerOrFrame.DRAWER) {
                                 eventManager.sendEvent(Event.DrawerShown)
                                 viewModel.drawerAnimationState.value = AnimationState.IDLE
@@ -484,11 +484,13 @@ class DrawerDelegate private constructor(context: Context, wm: WindowManager, di
     private fun showDrawer(wm: WindowManager = this.wm, hideHandle: Boolean = true) {
         mainHandler.post {
             if (!drawer.root.isAttachedToWindow && viewModel.drawerAnimationState.value != AnimationState.ADDING) {
+                if (hideHandle) {
+                    eventManager.sendEvent(Event.DrawerAttachmentState(true))
+                }
                 viewModel.drawerAnimationState.value = AnimationState.ADDING
                 drawer.root.alpha = 0f
                 wm.safeAddView(drawer.root, params)
                 if (hideHandle) {
-                    eventManager.sendEvent(Event.DrawerAttachmentState(true))
                     hideHandle()
                 }
             }
@@ -518,7 +520,7 @@ class DrawerDelegate private constructor(context: Context, wm: WindowManager, di
                 viewModel.currentEditingInterfacePosition.value = -1
 
                 drawer.root.fadeOut(DrawerOrFrame.DRAWER) {
-                    drawer.root.handler?.postDelayed({
+                    mainHandler.postDelayed({
                         wm.safeRemoveView(drawer.root)
                         viewModel.drawerAnimationState.value = AnimationState.IDLE
                         if (callListener) eventManager.sendEvent(Event.DrawerHidden)
