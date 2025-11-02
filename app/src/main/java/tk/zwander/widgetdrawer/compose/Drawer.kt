@@ -19,12 +19,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.zIndex
 import tk.zwander.common.compose.components.BlurView
 import tk.zwander.common.compose.components.ConfirmWidgetRemovalLayout
 import tk.zwander.common.compose.components.DrawerToolbar
+import tk.zwander.common.compose.util.rememberBooleanPreferenceState
 import tk.zwander.common.compose.util.rememberPreferenceState
 import tk.zwander.common.util.Event
 import tk.zwander.common.util.PrefManager
@@ -42,6 +44,7 @@ fun DrawerDelegate.DrawerViewModel.Drawer(
 ) {
     val context = LocalContext.current
     val density = LocalDensity.current
+    val resources = LocalResources.current
     val backgroundColor by rememberPreferenceState(
         key = PrefManager.KEY_DRAWER_BACKGROUND_COLOR,
         value = { Color(context.prefManager.drawerBackgroundColor) },
@@ -49,9 +52,13 @@ fun DrawerDelegate.DrawerViewModel.Drawer(
 
     var itemToRemove by this.itemToRemove.collectAsMutableState()
     val selectedItem by this.selectedItem.collectAsState()
-    val blurStatusBarArea by rememberPreferenceState(
+    val blurStatusBarArea by rememberBooleanPreferenceState(
         key = PrefManager.KEY_BLUR_DRAWER_STATUS_BAR_AREA,
-        value = { context.prefManager.blurDrawerStatusBarArea },
+        defaultValue = true,
+    )
+    val backgroundOverStatusBar by rememberBooleanPreferenceState(
+        key = PrefManager.KEY_DRAWER_BACKGROUND_OVER_STATUS_BAR,
+        defaultValue = true,
     )
 
     val drawerSidePadding by rememberPreferenceState(
@@ -62,6 +69,12 @@ fun DrawerDelegate.DrawerViewModel.Drawer(
             }
         },
     )
+
+    val statusBarHeight = remember(resources, density) {
+        with(density) {
+            context.statusBarHeight.toDp()
+        }
+    }
 
     LaunchedEffect(selectedItem) {
         widgetGrid.selectedItem = selectedItem
@@ -80,20 +93,27 @@ fun DrawerDelegate.DrawerViewModel.Drawer(
         modifier = modifier,
     ) {
         Box(
-            modifier = Modifier.fillMaxSize()
-                .background(backgroundColor),
+            modifier = Modifier.fillMaxSize(),
         ) {
+            Box(
+                modifier = Modifier.fillMaxSize()
+                    .padding(
+                        top = if (backgroundOverStatusBar) {
+                            0.dp
+                        } else {
+                            statusBarHeight
+                        },
+                    )
+                    .background(backgroundColor)
+            )
+
             Box(
                 modifier = Modifier.fillMaxSize()
                     .padding(
                         top = if (blurStatusBarArea) {
                             0.dp
                         } else {
-                            remember {
-                                with(density) {
-                                    context.statusBarHeight.toDp()
-                                }
-                            }
+                            statusBarHeight
                         },
                     ),
             ) {

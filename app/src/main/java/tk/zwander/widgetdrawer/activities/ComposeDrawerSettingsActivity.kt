@@ -169,6 +169,16 @@ class ComposeDrawerSettingsActivity : BaseActivity() {
                         },
                     )
 
+                    switchPreference(
+                        title = { stringResource(R.string.drawer_background_over_status_bar) },
+                        summary = { stringResource(R.string.drawer_background_over_status_bar_desc) },
+                        key = { PrefManager.KEY_DRAWER_BACKGROUND_OVER_STATUS_BAR },
+                        defaultValue = { true },
+                        icon = {
+                            painterResource(R.drawable.ic_baseline_color_lens_24)
+                        },
+                    )
+
                     seekBarPreference(
                         title = { stringResource(R.string.drawer_column_count) },
                         summary = { stringResource(R.string.drawer_column_count_desc) },

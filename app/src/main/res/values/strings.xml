@@ -315,6 +315,9 @@
     <string name="drawer_blur_status_bar_area">Blur Status Bar Area</string>
     <string name="drawer_blur_status_bar_area_desc">Show the blur effect over the status bar area.</string>
 
+    <string name="drawer_background_over_status_bar">Show Background Color Over Status Bar</string>
+    <string name="drawer_background_over_status_bar_desc">Show the drawer\'s background color on top of the status bar. If you have an opaque background color, you may want to consider turning this off.</string>
+
     <string name="show_only_when_locked">Show only when Locked</string>
     <string name="show_only_when_locked_desc">Only show the drawer handle when the device is on the lock screen.</string>
 

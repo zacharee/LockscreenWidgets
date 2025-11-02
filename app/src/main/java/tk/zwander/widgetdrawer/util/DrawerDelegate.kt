@@ -201,9 +201,6 @@ class DrawerDelegate private constructor(context: Context, wm: WindowManager, di
                 updateCommonState { it.copy(updatedForMoveOrRemove = false) }
             }
         }
-        handler(PrefManager.KEY_DRAWER_BACKGROUND_COLOR) {
-            drawer.root.setBackgroundColor(prefManager.drawerBackgroundColor)
-        }
         handler(PrefManager.KEY_DRAWER_COL_COUNT) {
             updateCounts()
         }
@@ -287,7 +284,6 @@ class DrawerDelegate private constructor(context: Context, wm: WindowManager, di
                         drawer.root.alpha = 1f
                     }
 
-                    drawer.root.setBackgroundColor(prefManager.drawerBackgroundColor)
                     if (lifecycleRegistry.currentState < Lifecycle.State.CREATED) {
                         lifecycleRegistry.currentState = Lifecycle.State.CREATED
                     }

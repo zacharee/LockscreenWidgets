@@ -94,6 +94,7 @@ class PrefManager private constructor(private val context: Context) {
         const val KEY_BLUR_BACKGROUND = "blur_background"
         const val KEY_BLUR_DRAWER_BACKGROUND = "blur_drawer_background"
         const val KEY_BLUR_DRAWER_STATUS_BAR_AREA = "blur_drawer_status_bar_area"
+        const val KEY_DRAWER_BACKGROUND_OVER_STATUS_BAR = "drawer_background_over_status_bar"
         const val KEY_BLUR_BACKGROUND_AMOUNT = "blur_background_amount"
         const val KEY_BLUR_DRAWER_BACKGROUND_AMOUNT = "blur_drawer_background_amount"
         const val KEY_MASKED_MODE_DIM_AMOUNT = "masked_mode_wallpaper_dim_amount"
@@ -488,6 +489,12 @@ class PrefManager private constructor(private val context: Context) {
         get() = getBoolean(KEY_BLUR_DRAWER_STATUS_BAR_AREA, true)
         set(value) {
             putBoolean(KEY_BLUR_DRAWER_STATUS_BAR_AREA, value)
+        }
+
+    var drawerBackgroundOverStatusBar: Boolean
+        get() = getBoolean(KEY_DRAWER_BACKGROUND_OVER_STATUS_BAR, true)
+        set(value) {
+            putBoolean(KEY_DRAWER_BACKGROUND_OVER_STATUS_BAR, value)
         }
 
     //How many columns of widgets should be shown per page.
