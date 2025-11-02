@@ -1,3 +1,6 @@
+[![Get it at IzzyOnDroid](https://img.shields.io/endpoint?url=https://apt.izzysoft.de/fdroid/api/v1/shield/tk.zwander.lockscreenwidgets&label=IzzyOnDroid)](https://apt.izzysoft.de/packages/tk.zwander.lockscreenwidgets)
+[![RB Status](https://shields.rbtlog.dev/simple/tk.zwander.lockscreenwidgets)](https://shields.rbtlog.dev/tk.zwander.lockscreenwidgets)
+
 # Lockscreen Widgets
 Lockscreen Widgets adds a frame to your lock screen where you can add home screen widgets.
 
