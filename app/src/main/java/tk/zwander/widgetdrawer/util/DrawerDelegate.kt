@@ -204,11 +204,6 @@ class DrawerDelegate private constructor(context: Context, wm: WindowManager, di
         handler(PrefManager.KEY_DRAWER_COL_COUNT) {
             updateCounts()
         }
-        handler(PrefManager.KEY_DRAWER_WIDGET_CORNER_RADIUS) {
-            if (drawer.root.isAttachedToWindow) {
-                adapter.updateViews()
-            }
-        }
         handler(PrefManager.KEY_LOCK_WIDGET_DRAWER) {
             viewModel.currentEditingInterfacePosition.value = -1
         }

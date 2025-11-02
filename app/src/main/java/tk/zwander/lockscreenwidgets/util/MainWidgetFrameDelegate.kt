@@ -256,10 +256,7 @@ open class MainWidgetFrameDelegate protected constructor(
             updateCounts()
             adapter.updateViews()
         }
-        handler(
-            framePrefs.keyFor(PrefManager.KEY_FRAME_MASKED_MODE),
-            framePrefs.keyFor(PrefManager.KEY_MASKED_MODE_DIM_AMOUNT),
-        ) {
+        handler(framePrefs.keyFor(PrefManager.KEY_FRAME_MASKED_MODE)) {
             updateWallpaperLayerIfNeeded()
         }
         handler(framePrefs.keyFor(PrefManager.KEY_SHOW_IN_NOTIFICATION_CENTER)) {
@@ -269,13 +266,6 @@ open class MainWidgetFrameDelegate protected constructor(
             PrefManager.KEY_LOCK_WIDGET_FRAME,
         ) {
             viewModel.currentEditingInterfacePosition.value = -1
-        }
-        handler(
-            PrefManager.KEY_FRAME_WIDGET_CORNER_RADIUS,
-        ) {
-            if (frame.root.isAttachedToWindow) {
-                adapter.updateViews()
-            }
         }
         handler(PrefManager.KEY_WIDGET_FRAME_ENABLED) {
             updateWindowState()
@@ -791,7 +781,6 @@ open class MainWidgetFrameDelegate protected constructor(
                         dx = dx,
                         dy = dy,
                     )
-
                 }
             } catch (e: Exception) {
                 logUtils.normalLog("Error setting wallpaper", e)
