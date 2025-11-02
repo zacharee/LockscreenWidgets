@@ -226,8 +226,12 @@
     <string name="drawer_handle_tap_to_open_desc">Al pulsar una sola vez sobre el Tirador, el Cajón se abrirá inmediatamente en lugar de tener que arrastrarlo o pulsarlo dos veces.</string>
     <string name="drawer_handle_lock_position">Bloquear posición del tirador</string>
     <string name="drawer_handle_lock_position_desc">Evita que el Tirador del Cajón de widgets se mueva.</string>
+    <string name="drawer_blur_status_bar_area">Blur Status Bar Area</string>
+    <string name="drawer_blur_status_bar_area_desc">Show the blur effect over the status bar area.</string>
     <string name="show_only_when_locked">Mostrar sólo en Pantalla de Bloqueo</string>
     <string name="show_only_when_locked_desc">Mostrar el Tirador del Cajón de widgets sólo cuando el dispositivo esté mostrando la Pantalla de Bloqueo.</string>
+    <string name="debug_enable_bugsnag">Enable Bugsnag</string>
+    <string name="debug_enable_bugsnag_desc">Lockscreen Widgets uses Bugsnag to collect anonymous crash reports. Not that to fully disable collection, you\'ll have to force stop and reopen Lockscreen Widgets.</string>
     <string name="icon_pack">Pack de iconos</string>
     <string name="icon_pack_desc">Elige un paquete de iconos para los Iconos de Acceso Directo. Se aplicarán tanto al Panel como al Cajón.</string>
     <string name="allow_show_frame">Permitir mostrar fotograma</string>
