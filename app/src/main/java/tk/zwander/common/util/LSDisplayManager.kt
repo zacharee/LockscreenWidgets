@@ -50,7 +50,10 @@ class LSDisplayManager private constructor(context: Context) : ContextWrapper(co
         override fun onDisplayAdded(displayId: Int) {
             logUtils.debugLog("Display $displayId added", null)
             availableDisplays.value = availableDisplays.value.toMutableMap().apply {
-                val display = displayManager.getDisplay(displayId)
+                val display = displayManager.getDisplay(displayId) ?: run {
+                    logUtils.debugLog("Unable to retrieve display $displayId", null)
+                    return@apply
+                }
                 this[displayId] = LSDisplay(
                     display = display,
                     fontScale = createDisplayContext(display).resources.configuration.fontScale,
