@@ -23,6 +23,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import tk.zwander.common.activities.DismissOrUnlockActivity
+import tk.zwander.common.compose.util.createComposeViewHolder
 import tk.zwander.common.data.WidgetData
 import tk.zwander.common.util.BaseDelegate
 import tk.zwander.common.util.DrawerOrFrame
@@ -44,15 +45,12 @@ import tk.zwander.common.util.prefManager
 import tk.zwander.common.util.safeAddView
 import tk.zwander.common.util.safeRemoveView
 import tk.zwander.common.util.safeUpdateViewLayout
-import tk.zwander.common.util.setThemedContent
 import tk.zwander.common.util.themedContext
-import tk.zwander.common.util.themedLayoutInflater
 import tk.zwander.common.util.wallpaperUtils
 import tk.zwander.common.views.SnappyRecyclerView
 import tk.zwander.lockscreenwidgets.adapters.WidgetFrameAdapter
 import tk.zwander.lockscreenwidgets.compose.WidgetFrameLayout
 import tk.zwander.lockscreenwidgets.data.Mode
-import tk.zwander.lockscreenwidgets.databinding.ComposeViewHolderBinding
 import tk.zwander.lockscreenwidgets.services.Accessibility
 import kotlin.math.ceil
 import kotlin.math.floor
@@ -195,20 +193,18 @@ open class MainWidgetFrameDelegate protected constructor(
     }
 
     private val frame by lazy {
-        ComposeViewHolderBinding.inflate(themedLayoutInflater).apply {
-            root.setThemedContent {
-                viewModel.WidgetFrameLayout(
-                    widgetGrid = widgetGrid,
-                    modifier = Modifier.fillMaxSize(),
-                )
-            }
+        viewModel.createComposeViewHolder {
+            WidgetFrameLayout(
+                widgetGrid = widgetGrid,
+                modifier = Modifier.fillMaxSize(),
+            )
         }
     }
 
     override val gridLayoutManager = SpannedLayoutManager()
 
     override val rootView: View
-        get() = frame.root
+        get() = frame
     override val recyclerView: RecyclerView
         get() = widgetGrid
     override var currentWidgets: List<WidgetData>
@@ -554,22 +550,22 @@ open class MainWidgetFrameDelegate protected constructor(
     private fun addWindow() {
         logUtils.debugLog("Adding overlay")
 
-        if (!frame.root.isAttachedToWindow) {
+        if (!frame.isAttachedToWindow) {
             updateWindow()
         }
 
         mainHandler.post {
             logUtils.debugLog("Trying to add overlay ${viewModel.animationState.value}", null)
 
-            if (!frame.root.isAttachedToWindow && viewModel.animationState.value != AnimationState.STATE_ADDING) {
+            if (!frame.isAttachedToWindow && viewModel.animationState.value != AnimationState.STATE_ADDING) {
                 logUtils.debugLog("Adding overlay", null)
 
                 viewModel.animationState.value = AnimationState.STATE_ADDING
 
-                if (!wm.safeAddView(frame.root, params)) {
+                if (!wm.safeAddView(frame, params)) {
                     viewModel.animationState.value = AnimationState.STATE_IDLE
                 } else {
-                    frame.root.fadeAndScaleIn(DrawerOrFrame.FRAME) {
+                    frame.fadeAndScaleIn(DrawerOrFrame.FRAME) {
                         viewModel.animationState.value = AnimationState.STATE_IDLE
                         eventManager.sendEvent(Event.FrameAttachmentState(id, true))
                     }
@@ -593,25 +589,25 @@ open class MainWidgetFrameDelegate protected constructor(
         mainHandler.post {
             logUtils.debugLog("Trying to remove overlay ${viewModel.animationState.value}", null)
 
-            if (frame.root.isAttachedToWindow && viewModel.animationState.value != AnimationState.STATE_REMOVING) {
+            if (frame.isAttachedToWindow && viewModel.animationState.value != AnimationState.STATE_REMOVING) {
                 viewModel.animationState.value = AnimationState.STATE_REMOVING
 
                 logUtils.debugLog("Pre-animation removal", null)
 
-                frame.root.fadeAndScaleOut(DrawerOrFrame.FRAME) {
+                frame.fadeAndScaleOut(DrawerOrFrame.FRAME) {
                     logUtils.debugLog("Post-animation removal", null)
 
                     mainHandler.postDelayed({
                         logUtils.debugLog("Posted removal", null)
 
-                        if (frame.root.isAttachedToWindow) {
-                            wm.safeRemoveView(frame.root)
+                        if (frame.isAttachedToWindow) {
+                            wm.safeRemoveView(frame)
                         }
                         viewModel.animationState.value = AnimationState.STATE_IDLE
                     }, 50)
                 }
-            } else if (!frame.root.isAttachedToWindow) {
-                wm.safeRemoveView(frame.root, false)
+            } else if (!frame.isAttachedToWindow) {
+                wm.safeRemoveView(frame, false)
 
                 viewModel.animationState.value = AnimationState.STATE_IDLE
             }
@@ -764,7 +760,7 @@ open class MainWidgetFrameDelegate protected constructor(
                     logUtils.debugLog("Setting wallpaper drawable.", null)
 
                     val realSize = display.realSize
-                    val loc = frame.root.locationOnScreen ?: intArrayOf(0, 0)
+                    val loc = frame.locationOnScreen ?: intArrayOf(0, 0)
 
                     val dWidth: Int = it.intrinsicWidth
                     val dHeight: Int = it.intrinsicHeight
@@ -831,7 +827,7 @@ open class MainWidgetFrameDelegate protected constructor(
     }
 
     private fun updateOverlay() {
-        wm.safeUpdateViewLayout(frame.root, params)
+        wm.safeUpdateViewLayout(frame, params)
     }
 
     /**

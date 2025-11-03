@@ -10,6 +10,8 @@ plugins {
     alias(libs.plugins.bugsnag)
 }
 
+val jdkVersion = project.properties["jdk.version"].toString()
+
 android {
     compileSdk = 36
 
@@ -47,18 +49,9 @@ android {
         }
     }
 
-    val jdkVersion = project.properties["jdk.version"].toString()
-
     compileOptions {
         sourceCompatibility = JavaVersion.toVersion(jdkVersion)
         targetCompatibility = JavaVersion.toVersion(jdkVersion)
-    }
-
-    kotlin {
-        compilerOptions {
-            jvmTarget.set(JvmTarget.fromTarget(jdkVersion))
-            freeCompilerArgs.add("-Xcontext-receivers")
-        }
     }
 
     packaging {
@@ -79,6 +72,15 @@ android {
         includeInApk = false
         // Disables dependency metadata when building Android App Bundles (for Google Play)
         includeInBundle = false
+    }
+}
+
+kotlin {
+    compilerOptions {
+        jvmTarget.set(JvmTarget.fromTarget(jdkVersion))
+        freeCompilerArgs.addAll(
+            "-Xcontext-parameters",
+        )
     }
 }
 

@@ -29,6 +29,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import tk.zwander.common.activities.DismissOrUnlockActivity
 import tk.zwander.common.compose.components.DrawerHandle
+import tk.zwander.common.compose.util.createComposeViewHolder
 import tk.zwander.common.data.WidgetData
 import tk.zwander.common.util.BaseDelegate
 import tk.zwander.common.util.DrawerOrFrame
@@ -46,11 +47,8 @@ import tk.zwander.common.util.prefManager
 import tk.zwander.common.util.safeAddView
 import tk.zwander.common.util.safeRemoveView
 import tk.zwander.common.util.safeUpdateViewLayout
-import tk.zwander.common.util.setThemedContent
 import tk.zwander.common.util.themedContext
-import tk.zwander.common.util.themedLayoutInflater
 import tk.zwander.lockscreenwidgets.R
-import tk.zwander.lockscreenwidgets.databinding.ComposeViewHolderBinding
 import tk.zwander.lockscreenwidgets.services.Accessibility
 import tk.zwander.widgetdrawer.activities.TaskerIsShowingDrawer
 import tk.zwander.widgetdrawer.adapters.DrawerAdapter
@@ -115,7 +113,7 @@ class DrawerDelegate private constructor(context: Context, wm: WindowManager, di
         }
     }
     override val rootView: View
-        get() = drawer.root
+        get() = drawer
     override val recyclerView: RecyclerView
         get() = widgetGrid
     override var currentWidgets: List<WidgetData>
@@ -141,15 +139,13 @@ class DrawerDelegate private constructor(context: Context, wm: WindowManager, di
     }
 
     private val drawer by lazy {
-        ComposeViewHolderBinding.inflate(themedLayoutInflater).apply {
-            root.setThemedContent {
-                viewModel.Drawer(
-                    widgetGrid = widgetGrid,
-                    modifier = Modifier.fillMaxSize(),
-                )
-            }
-
-            root.addOnAttachStateChangeListener(object : View.OnAttachStateChangeListener {
+        viewModel.createComposeViewHolder {
+            Drawer(
+                widgetGrid = widgetGrid,
+                modifier = Modifier.fillMaxSize(),
+            )
+        }.apply {
+            addOnAttachStateChangeListener(object : View.OnAttachStateChangeListener {
                 override fun onViewAttachedToWindow(v: View) {}
 
                 override fun onViewDetachedFromWindow(v: View) {
@@ -159,17 +155,15 @@ class DrawerDelegate private constructor(context: Context, wm: WindowManager, di
         }
     }
     private val handle by lazy {
-        ComposeViewHolderBinding.inflate(themedLayoutInflater).apply {
-            root.setThemedContent {
-                viewModel.DrawerHandle(
-                    params = handleParams,
-                    displayId = displayId,
-                    updateWindow = {
-                        wm.safeUpdateViewLayout(root, handleParams)
-                    },
-                    modifier = Modifier.fillMaxSize(),
-                )
-            }
+        viewModel.createComposeViewHolder {
+            DrawerHandle(
+                params = handleParams,
+                displayId = displayId,
+                updateWindow = {
+                    wm.safeUpdateViewLayout(it, handleParams)
+                },
+                modifier = Modifier.fillMaxSize(),
+            )
         }
     }
 
@@ -270,13 +264,13 @@ class DrawerDelegate private constructor(context: Context, wm: WindowManager, di
                         widgetHost.startListening(this)
 
                         mainHandler.postDelayed({
-                            drawer.root.fadeIn(DrawerOrFrame.DRAWER) {
+                            drawer.fadeIn(DrawerOrFrame.DRAWER) {
                                 eventManager.sendEvent(Event.DrawerShown)
                                 viewModel.drawerAnimationState.value = AnimationState.IDLE
                             }
                         }, 10)
                     } else {
-                        drawer.root.alpha = 1f
+                        drawer.alpha = 1f
                     }
 
                     if (lifecycleRegistry.currentState < Lifecycle.State.CREATED) {
@@ -290,7 +284,7 @@ class DrawerDelegate private constructor(context: Context, wm: WindowManager, di
                         //AppWidgetServiceImpl$ProviderId NPE
                     }
 
-                    if (!handle.root.isAttachedToWindow) {
+                    if (!handle.isAttachedToWindow) {
                         lifecycleRegistry.currentState = Lifecycle.State.STARTED
                     }
                 }
@@ -394,8 +388,8 @@ class DrawerDelegate private constructor(context: Context, wm: WindowManager, di
             ContextCompat.RECEIVER_EXPORTED,
         )
 
-        handle.root.setViewTreeLifecycleOwner(this)
-        handle.root.setViewTreeSavedStateRegistryOwner(this)
+        handle.setViewTreeLifecycleOwner(this)
+        handle.setViewTreeSavedStateRegistryOwner(this)
 
         tryShowHandle()
 
@@ -449,10 +443,10 @@ class DrawerDelegate private constructor(context: Context, wm: WindowManager, di
             }
             lifecycleRegistry.currentState = Lifecycle.State.RESUMED
 
-            if (!handle.root.isAttachedToWindow && viewModel.handleAnimationState.value != AnimationState.ADDING) {
-                wm.safeAddView(handle.root, handleParams)
-                handle.root.alpha = 0f
-                handle.root.fadeIn(DrawerOrFrame.DRAWER) {
+            if (!handle.isAttachedToWindow && viewModel.handleAnimationState.value != AnimationState.ADDING) {
+                wm.safeAddView(handle, handleParams)
+                handle.alpha = 0f
+                handle.fadeIn(DrawerOrFrame.DRAWER) {
                     viewModel.handleAnimationState.value = AnimationState.IDLE
                 }
             }
@@ -460,27 +454,27 @@ class DrawerDelegate private constructor(context: Context, wm: WindowManager, di
     }
 
     private fun hideHandle() {
-        if (!drawer.root.isAttachedToWindow) {
+        if (!drawer.isAttachedToWindow) {
             lifecycleRegistry.currentState = Lifecycle.State.STARTED
         }
 
-        if (handle.root.isAttachedToWindow && viewModel.handleAnimationState.value != AnimationState.REMOVING) {
-            handle.root.fadeOut(DrawerOrFrame.DRAWER) {
+        if (handle.isAttachedToWindow && viewModel.handleAnimationState.value != AnimationState.REMOVING) {
+            handle.fadeOut(DrawerOrFrame.DRAWER) {
                 viewModel.handleAnimationState.value = AnimationState.IDLE
-                wm.safeRemoveView(handle.root)
+                wm.safeRemoveView(handle)
             }
         }
     }
 
     private fun showDrawer(wm: WindowManager = this.wm, hideHandle: Boolean = true) {
         mainHandler.post {
-            if (!drawer.root.isAttachedToWindow && viewModel.drawerAnimationState.value != AnimationState.ADDING) {
+            if (!drawer.isAttachedToWindow && viewModel.drawerAnimationState.value != AnimationState.ADDING) {
                 if (hideHandle) {
                     eventManager.sendEvent(Event.DrawerAttachmentState(true))
                 }
                 viewModel.drawerAnimationState.value = AnimationState.ADDING
-                drawer.root.alpha = 0f
-                wm.safeAddView(drawer.root, params)
+                drawer.alpha = 0f
+                wm.safeAddView(drawer, params)
                 if (hideHandle) {
                     hideHandle()
                 }
@@ -497,22 +491,22 @@ class DrawerDelegate private constructor(context: Context, wm: WindowManager, di
             }
 
             if (isAttached) {
-                wm.safeUpdateViewLayout(drawer.root, params)
+                wm.safeUpdateViewLayout(drawer, params)
             }
         }
     }
 
     private fun hideDrawer(callListener: Boolean = true) {
         mainHandler.post {
-            if (drawer.root.isAttachedToWindow && viewModel.drawerAnimationState.value != AnimationState.REMOVING) {
+            if (drawer.isAttachedToWindow && viewModel.drawerAnimationState.value != AnimationState.REMOVING) {
                 viewModel.drawerAnimationState.value = AnimationState.REMOVING
                 globalState.handlingClick.value =
                     globalState.handlingClick.value.toMutableMap().also { it.remove(-2) }
                 viewModel.currentEditingInterfacePosition.value = -1
 
-                drawer.root.fadeOut(DrawerOrFrame.DRAWER) {
+                drawer.fadeOut(DrawerOrFrame.DRAWER) {
                     mainHandler.postDelayed({
-                        wm.safeRemoveView(drawer.root)
+                        wm.safeRemoveView(drawer)
                         viewModel.drawerAnimationState.value = AnimationState.IDLE
                         if (callListener) eventManager.sendEvent(Event.DrawerHidden)
                     }, 10)
