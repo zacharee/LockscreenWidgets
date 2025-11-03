@@ -31,11 +31,13 @@ import tk.zwander.lockscreenwidgets.R
 @OptIn(ExperimentalLayoutApi::class)
 @Preview
 @Composable
-fun AccessibilityCard() {
+fun AccessibilityCard(
+    modifier: Modifier = Modifier,
+) {
     val context = LocalContext.current
 
     Card(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth(),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.errorContainer

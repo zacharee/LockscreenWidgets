@@ -56,7 +56,9 @@ private fun Context.writeLog(uri: Uri?) {
 
 @Preview
 @Composable
-fun DebugCard() {
+fun DebugCard(
+    modifier: Modifier = Modifier,
+) {
     val context = LocalContext.current
 
     val debugExportLauncher = rememberCreateDocumentLauncherWithDownloadFallback(
@@ -66,7 +68,7 @@ fun DebugCard() {
     }
 
     Card(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth(),
     ) {
         Column(

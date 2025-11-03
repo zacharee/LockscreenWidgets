@@ -12,9 +12,11 @@ import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridItemSpan
+import androidx.compose.foundation.lazy.staggeredgrid.rememberLazyStaggeredGridState
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -30,9 +32,17 @@ fun MainContent() {
     val features = rememberFeatureCards()
     val links = rememberLinks()
 
+    val gridState = rememberLazyStaggeredGridState()
+
     val hasFrameDelegateInstance =
         MainWidgetFrameDelegate.readOnlyInstance.collectAsState().value != null
     val hasDrawerDelegateInstance = DrawerDelegate.readOnlyInstance.collectAsState().value != null
+
+    LaunchedEffect(hasFrameDelegateInstance, hasDrawerDelegateInstance) {
+        if (!hasFrameDelegateInstance || !hasDrawerDelegateInstance) {
+            gridState.animateScrollToItem(0)
+        }
+    }
 
     Surface(
         modifier = Modifier.fillMaxSize(),
@@ -46,24 +56,32 @@ fun MainContent() {
             ),
             verticalItemSpacing = 8.dp,
             horizontalArrangement = Arrangement.spacedBy(8.dp),
+            state = gridState,
         ) {
             if (!hasFrameDelegateInstance || !hasDrawerDelegateInstance) {
-                item {
-                    AccessibilityCard()
+                item(key = "AccessibilityCard") {
+                    AccessibilityCard(
+                        modifier = Modifier.animateItem(),
+                    )
                 }
             }
 
-            items(features.size) {
-                FeatureCard(info = features[it])
+            items(features.size, key = { features[it].title }) {
+                FeatureCard(
+                    info = features[it],
+                    modifier = Modifier.animateItem(),
+                )
             }
 
-            item {
-                DebugCard()
+            item(key = "DebugCard") {
+                DebugCard(
+                    modifier = Modifier.animateItem(),
+                )
             }
 
-            item(span = StaggeredGridItemSpan.FullLine) {
+            item(span = StaggeredGridItemSpan.FullLine, key = "LinkDivider") {
                 Box(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier.fillMaxWidth().animateItem(),
                     contentAlignment = Alignment.Center,
                 ) {
                     Box(
@@ -77,8 +95,11 @@ fun MainContent() {
                 }
             }
 
-            items(links.size) {
-                LinkItem(option = links[it])
+            items(links.size, key = { links[it].title }) {
+                LinkItem(
+                    option = links[it],
+                    modifier = Modifier.animateItem(),
+                )
             }
         }
     }

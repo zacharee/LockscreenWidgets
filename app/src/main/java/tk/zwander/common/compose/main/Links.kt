@@ -96,12 +96,15 @@ fun rememberLinks(): List<MainPageLink> {
 }
 
 @Composable
-fun LinkItem(option: MainPageLink) {
+fun LinkItem(
+    option: MainPageLink,
+    modifier: Modifier = Modifier,
+) {
     val context = LocalContext.current
     val resources = LocalResources.current
 
     Card(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = modifier.fillMaxWidth(),
         onClick = {
             if (option.onClick != null) {
                 option.onClick.invoke()

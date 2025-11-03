@@ -131,11 +131,14 @@ fun rememberFeatureCards(): List<FeatureCardInfo> {
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-fun FeatureCard(info: FeatureCardInfo) {
+fun FeatureCard(
+    info: FeatureCardInfo,
+    modifier: Modifier = Modifier,
+) {
     EventObserverEffect(info.eventObserver)
 
     Card(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth(),
     ) {
         Column(
