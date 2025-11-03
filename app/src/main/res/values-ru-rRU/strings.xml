@@ -228,6 +228,8 @@
     <string name="drawer_handle_lock_position_desc">Предотвращение смещения триггера.</string>
     <string name="drawer_blur_status_bar_area">Blur Status Bar Area</string>
     <string name="drawer_blur_status_bar_area_desc">Show the blur effect over the status bar area.</string>
+    <string name="drawer_background_over_status_bar">Show Background Color Over Status Bar</string>
+    <string name="drawer_background_over_status_bar_desc">Show the drawer\'s background color on top of the status bar. If you have an opaque background color, you may want to consider turning this off.</string>
     <string name="show_only_when_locked">Показывать только когда заблокировано</string>
     <string name="show_only_when_locked_desc">Показывать триггер панели только тогда, когда устройство находится на экране блокировки.</string>
     <string name="debug_enable_bugsnag">Enable Bugsnag</string>
