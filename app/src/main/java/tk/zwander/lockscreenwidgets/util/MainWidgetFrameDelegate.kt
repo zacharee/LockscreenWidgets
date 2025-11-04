@@ -951,7 +951,8 @@ open class MainWidgetFrameDelegate protected constructor(
         val wallpaperInfo = MutableStateFlow<WallpaperInfo?>(null)
         val debugIdItems = MutableStateFlow<Set<String>>(setOf())
         val animationState = MutableStateFlow(AnimationState.STATE_IDLE)
-        val acknowledgedTwoFingerTap = MutableStateFlow(false)
+        val acknowledgedTwoFingerTap = MutableStateFlow<Boolean?>(null)
+        val acknowledgedThreeFingerTap = MutableStateFlow(false)
 
         override val containerCornerRadiusKey: String = PrefManager.KEY_FRAME_CORNER_RADIUS
         override val widgetCornerRadiusKey: String = PrefManager.KEY_FRAME_WIDGET_CORNER_RADIUS

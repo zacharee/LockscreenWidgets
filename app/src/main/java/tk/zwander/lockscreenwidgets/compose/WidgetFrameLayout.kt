@@ -102,8 +102,9 @@ fun MainWidgetFrameDelegate.WidgetFrameViewModel.WidgetFrameLayout(
         value = { context.prefManager.firstViewing },
     )
 
-    @Suppress("VariableNeverRead")
     var acknowledgedTwoFingerTap by this.acknowledgedTwoFingerTap.collectAsMutableState()
+    @Suppress("VariableNeverRead")
+    var acknowledgedThreeFingerTap by this.acknowledgedThreeFingerTap.collectAsMutableState()
 
     val animatedBackgroundColor by animateColorAsState(backgroundColor)
 
@@ -154,13 +155,22 @@ fun MainWidgetFrameDelegate.WidgetFrameViewModel.WidgetFrameLayout(
                     2 -> {
                         isInEditingMode = !isInEditingMode
                         @Suppress("AssignedValueIsNeverRead")
-                        acknowledgedTwoFingerTap = true
+                        if (acknowledgedTwoFingerTap == null) {
+                            acknowledgedTwoFingerTap = false
+                        } else if (acknowledgedTwoFingerTap == false) {
+                            acknowledgedTwoFingerTap = true
+                        }
 
                         event.changes.forEach { it.consume() }
                     }
 
                     3 -> {
-                        context.eventManager.sendEvent(Event.TempHide(frameId = frameId))
+                        if (firstViewing) {
+                            @Suppress("AssignedValueIsNeverRead")
+                            acknowledgedThreeFingerTap = true
+                        } else {
+                            context.eventManager.sendEvent(Event.TempHide(frameId = frameId))
+                        }
 
                         event.changes.forEach { it.consume() }
                     }

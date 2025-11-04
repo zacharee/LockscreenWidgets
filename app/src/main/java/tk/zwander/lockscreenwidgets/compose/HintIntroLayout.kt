@@ -16,6 +16,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -44,6 +45,13 @@ fun MainWidgetFrameDelegate.WidgetFrameViewModel.HintIntroLayout(
         onChanged = { _, value -> context.prefManager.firstViewing = value },
     )
     var acknowledgedTwoFingerTap by this.acknowledgedTwoFingerTap.collectAsMutableState()
+    var acknowledgedThreeFingerTap by this.acknowledgedThreeFingerTap.collectAsMutableState()
+
+    LaunchedEffect(acknowledgedThreeFingerTap) {
+        if (acknowledgedThreeFingerTap) {
+            firstViewing = false
+        }
+    }
 
     AnimatedVisibility(
         visible = firstViewing,
@@ -71,7 +79,13 @@ fun MainWidgetFrameDelegate.WidgetFrameViewModel.HintIntroLayout(
                     )
 
                     Text(
-                        text = stringResource(if (!acknowledged) R.string.edit_gesture_hint else R.string.hide_gesture_hint),
+                        text = stringResource(
+                            when {
+                                acknowledged == null -> R.string.edit_gesture_hint
+                                !acknowledged -> R.string.edit_gesture_hint_2
+                                else -> R.string.hide_gesture_hint
+                            }
+                        ),
                         fontSize = 18.sp,
                         modifier = Modifier
                             .weight(1f)
@@ -83,12 +97,16 @@ fun MainWidgetFrameDelegate.WidgetFrameViewModel.HintIntroLayout(
             OutlinedButton(
                 onClick = {
                     when {
-                        !acknowledgedTwoFingerTap -> {
+                        acknowledgedTwoFingerTap == null -> {
+                            acknowledgedTwoFingerTap = false
+                        }
+
+                        acknowledgedTwoFingerTap == false -> {
                             acknowledgedTwoFingerTap = true
                         }
 
-                        firstViewing -> {
-                            firstViewing = false
+                        !acknowledgedThreeFingerTap -> {
+                            acknowledgedThreeFingerTap = true
                         }
                     }
                 },
