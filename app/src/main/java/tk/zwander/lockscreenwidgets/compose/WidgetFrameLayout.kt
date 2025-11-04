@@ -97,6 +97,10 @@ fun MainWidgetFrameDelegate.WidgetFrameViewModel.WidgetFrameLayout(
         value = { framePrefs.maskedModeDimAmount },
     )
     var itemToRemove by this.itemToRemove.collectAsMutableState()
+    val firstViewing by rememberPreferenceState(
+        key = PrefManager.KEY_FIRST_VIEWING,
+        value = { context.prefManager.firstViewing },
+    )
 
     @Suppress("VariableNeverRead")
     var acknowledgedTwoFingerTap by this.acknowledgedTwoFingerTap.collectAsMutableState()
@@ -202,30 +206,40 @@ fun MainWidgetFrameDelegate.WidgetFrameViewModel.WidgetFrameLayout(
                 }
             }
 
-            AndroidView(
-                factory = { widgetGrid },
-                update = {
-                    it.isHorizontalScrollBarEnabled =
-                        pageIndicatorBehavior != PrefManager.VALUE_PAGE_INDICATOR_BEHAVIOR_HIDDEN
-                    it.isScrollbarFadingEnabled =
-                        pageIndicatorBehavior == PrefManager.VALUE_PAGE_INDICATOR_BEHAVIOR_AUTO_HIDE
-                    it.scrollBarFadeDuration =
-                        if (pageIndicatorBehavior == PrefManager.VALUE_PAGE_INDICATOR_BEHAVIOR_AUTO_HIDE) {
-                            ViewConfiguration.getScrollBarFadeDuration()
-                        } else {
-                            0
-                        }
-                },
-                modifier = Modifier
-                    .fillMaxSize()
-                    .zIndex(1f),
-            )
+            androidx.compose.animation.AnimatedVisibility(
+                modifier = Modifier.zIndex(1f),
+                enter = fadeIn(),
+                exit = fadeOut(),
+                visible = !firstViewing,
+            ) {
+                AndroidView(
+                    factory = { widgetGrid },
+                    update = {
+                        it.isHorizontalScrollBarEnabled =
+                            pageIndicatorBehavior != PrefManager.VALUE_PAGE_INDICATOR_BEHAVIOR_HIDDEN
+                        it.isScrollbarFadingEnabled =
+                            pageIndicatorBehavior == PrefManager.VALUE_PAGE_INDICATOR_BEHAVIOR_AUTO_HIDE
+                        it.scrollBarFadeDuration =
+                            if (pageIndicatorBehavior == PrefManager.VALUE_PAGE_INDICATOR_BEHAVIOR_AUTO_HIDE) {
+                                ViewConfiguration.getScrollBarFadeDuration()
+                            } else {
+                                0
+                            }
+                    },
+                    modifier = Modifier
+                        .fillMaxSize(),
+                )
+            }
 
-            HintIntroLayout(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .zIndex(2f),
-            )
+            Box(
+                modifier = Modifier.zIndex(2f),
+            ) {
+                HintIntroLayout(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(MaterialTheme.colorScheme.surface),
+                )
+            }
 
             androidx.compose.animation.AnimatedVisibility(
                 visible = itemToRemove != null,

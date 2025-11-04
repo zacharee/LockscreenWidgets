@@ -55,7 +55,8 @@ fun MainWidgetFrameDelegate.WidgetFrameViewModel.HintIntroLayout(
                 .padding(8.dp),
         ) {
             Crossfade(
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier
+                    .fillMaxWidth()
                     .weight(1f),
                 targetState = acknowledgedTwoFingerTap,
             ) { acknowledged ->
@@ -72,7 +73,8 @@ fun MainWidgetFrameDelegate.WidgetFrameViewModel.HintIntroLayout(
                     Text(
                         text = stringResource(if (!acknowledged) R.string.edit_gesture_hint else R.string.hide_gesture_hint),
                         fontSize = 18.sp,
-                        modifier = Modifier.weight(1f)
+                        modifier = Modifier
+                            .weight(1f)
                             .verticalScroll(rememberScrollState()),
                     )
                 }
@@ -84,7 +86,8 @@ fun MainWidgetFrameDelegate.WidgetFrameViewModel.HintIntroLayout(
                         !acknowledgedTwoFingerTap -> {
                             acknowledgedTwoFingerTap = true
                         }
-                        !firstViewing -> {
+
+                        firstViewing -> {
                             firstViewing = false
                         }
                     }
