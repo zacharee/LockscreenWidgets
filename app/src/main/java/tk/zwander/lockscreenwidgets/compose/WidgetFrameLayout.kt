@@ -153,7 +153,7 @@ fun MainWidgetFrameDelegate.WidgetFrameViewModel.WidgetFrameLayout(
 
                 when (event.changes.size) {
                     2 -> {
-                        isInEditingMode = !isInEditingMode
+                        isInEditingMode = !isInEditingMode && !isLocked
                         @Suppress("AssignedValueIsNeverRead")
                         if (acknowledgedTwoFingerTap == null) {
                             acknowledgedTwoFingerTap = false

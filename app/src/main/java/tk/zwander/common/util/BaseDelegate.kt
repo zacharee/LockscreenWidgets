@@ -303,6 +303,9 @@ abstract class BaseDelegate<State : Any>(
         val state: State
             get() = delegate.state
 
+        val isLocked: Boolean
+            get() = delegate.isLocked()
+
         abstract val widgetCornerRadiusKey: String
         abstract val containerCornerRadiusKey: String?
 
