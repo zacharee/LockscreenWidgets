@@ -44,8 +44,6 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
@@ -53,7 +51,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.zIndex
-import androidx.core.content.res.ResourcesCompat
 import com.bugsnag.android.performance.compose.MeasuredComposable
 import com.google.accompanist.drawablepainter.rememberDrawablePainter
 import tk.zwander.common.compose.components.BlurView
@@ -76,9 +73,7 @@ fun MainWidgetFrameDelegate.WidgetFrameViewModel.WidgetFrameLayout(
     widgetGrid: SnappyRecyclerView,
     modifier: Modifier = Modifier,
 ) {
-    val density = LocalDensity.current
     val context = LocalContext.current
-    val resources = LocalResources.current
     val frameCornerRadius by rememberPreferenceState(
         key = PrefManager.KEY_FRAME_CORNER_RADIUS,
         value = { context.prefManager.cornerRadiusDp.dp },
@@ -208,23 +203,7 @@ fun MainWidgetFrameDelegate.WidgetFrameViewModel.WidgetFrameLayout(
             }
 
             AndroidView(
-                factory = {
-                    widgetGrid.apply {
-                        horizontalScrollbarThumbDrawable = ResourcesCompat.getDrawable(
-                            resources,
-                            R.drawable.scrollbar,
-                            context.theme
-                        )
-                        horizontalScrollbarTrackDrawable = ResourcesCompat.getDrawable(
-                            resources,
-                            R.drawable.scroll_track,
-                            context.theme
-                        )
-                        scrollBarSize = with(density) {
-                            4.dp.roundToPx()
-                        }
-                    }
-                },
+                factory = { widgetGrid },
                 update = {
                     it.isHorizontalScrollBarEnabled =
                         pageIndicatorBehavior != PrefManager.VALUE_PAGE_INDICATOR_BEHAVIOR_HIDDEN

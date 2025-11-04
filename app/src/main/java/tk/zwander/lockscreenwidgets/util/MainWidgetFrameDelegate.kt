@@ -45,12 +45,12 @@ import tk.zwander.common.util.prefManager
 import tk.zwander.common.util.safeAddView
 import tk.zwander.common.util.safeRemoveView
 import tk.zwander.common.util.safeUpdateViewLayout
-import tk.zwander.common.util.themedContext
+import tk.zwander.common.util.themedLayoutInflater
 import tk.zwander.common.util.wallpaperUtils
-import tk.zwander.common.views.SnappyRecyclerView
 import tk.zwander.lockscreenwidgets.adapters.WidgetFrameAdapter
 import tk.zwander.lockscreenwidgets.compose.WidgetFrameLayout
 import tk.zwander.lockscreenwidgets.data.Mode
+import tk.zwander.lockscreenwidgets.databinding.WidgetGridHolderBinding
 import tk.zwander.lockscreenwidgets.services.Accessibility
 import kotlin.math.ceil
 import kotlin.math.floor
@@ -189,7 +189,7 @@ open class MainWidgetFrameDelegate protected constructor(
     }
 
     private val widgetGrid by lazy {
-        SnappyRecyclerView(themedContext)
+        WidgetGridHolderBinding.inflate(themedLayoutInflater).root
     }
 
     private val frame by lazy {
