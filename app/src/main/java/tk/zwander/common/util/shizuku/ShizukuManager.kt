@@ -89,6 +89,7 @@ class ShizukuManager private constructor(private val context: Context) : Corouti
 
         @Composable
         fun rememberShizukuRunningStateAsState(): State<Boolean> {
+            val context = LocalContext.current
             val isRunning = remember {
                 mutableStateOf(isShizukuRunning)
             }
@@ -105,7 +106,24 @@ class ShizukuManager private constructor(private val context: Context) : Corouti
                 Shizuku.addBinderReceivedListenerSticky(listener)
 
                 onDispose {
-                    Shizuku.removeBinderReceivedListener(listener)
+                    try {
+                        Shizuku.removeBinderReceivedListener(listener)
+                    } catch (e: NoClassDefFoundError) {
+                        context.logUtils.normalLog("Unable to remove Shizuku listener normally", e)
+
+                        try {
+                            val listeners = Shizuku::class.java.getDeclaredField("RECEIVED_LISTENERS")
+                                .get(null) as ArrayList<*>
+
+                            listeners.removeAll {
+                                it::class.java
+                                    .getDeclaredField("listener")
+                                    .get(it) == listener
+                            }
+                        } catch (e: Exception) {
+                            context.logUtils.normalLog("Unable to remove Shizuku listener using reflection", e)
+                        }
+                    }
                 }
             }
 
