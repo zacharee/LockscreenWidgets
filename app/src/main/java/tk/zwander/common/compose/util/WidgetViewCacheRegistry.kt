@@ -27,12 +27,13 @@ class WidgetViewCacheRegistry private constructor(@Suppress("unused") private va
     private val cachedViews = HashMap<Int, AppWidgetHostView>()
 
     fun getOrCreateView(context: Context, appWidgetId: Int, appWidget: AppWidgetProviderInfo): AppWidgetHostView {
+        val widgetContext = context.createApplicationContext(appWidget.providerInfo.applicationInfo, 0)
         return cachedViews[appWidgetId]?.also {
             if (it.parent != null) {
                 (it.parent as ViewGroup).removeView(it)
             }
         } ?: context.widgetHostCompat.createView(
-            context, appWidgetId, appWidget,
+            widgetContext, appWidgetId, appWidget,
         ).also {
             cachedViews[appWidgetId] = it
         }
