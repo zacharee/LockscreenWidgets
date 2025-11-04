@@ -319,11 +319,12 @@ abstract class BaseAdapter(
                         widgetData = data,
                         widgetContents = { modifier ->
                             when (data.safeType) {
-                                WidgetType.WIDGET -> WidgetContents(data, widgetInfo!!, modifier)
+                                WidgetType.WIDGET -> widgetInfo?.let {
+                                    WidgetContents(data, widgetInfo, modifier)
+                                }
                                 WidgetType.SHORTCUT, WidgetType.LAUNCHER_SHORTCUT -> {
                                     ShortcutContent(data, modifier)
                                 }
-
                                 WidgetType.LAUNCHER_ITEM -> LauncherIconContent(data, modifier)
                                 WidgetType.HEADER -> {}
                             }
@@ -543,6 +544,20 @@ abstract class BaseAdapter(
                 cornerRadiusKey = viewModel.widgetCornerRadiusKey,
                 modifier = modifier,
             )
+        }
+
+        @Composable
+        private fun WidgetErrorContent(
+            modifier: Modifier = Modifier,
+        ) {
+            Box(
+                modifier = modifier,
+                contentAlignment = Alignment.Center,
+            ) {
+                Text(
+                    text = stringResource(R.string.bind_widget_error),
+                )
+            }
         }
 
         private fun findScrollableViewsInHierarchy(root: View): List<View> {
