@@ -539,7 +539,7 @@ class ComposeFrameSettingsActivity : BaseActivity(), EventObserver {
         eventManager.removeObserver(this)
     }
 
-    override fun onEvent(event: Event) {
+    override suspend fun onEvent(event: Event) {
         if (event is Event.FrameSelected) {
             if (event.frameId != null && event.requestCode == REQ_REMOVE_FRAME) {
                 prefManager.currentSecondaryFrames =

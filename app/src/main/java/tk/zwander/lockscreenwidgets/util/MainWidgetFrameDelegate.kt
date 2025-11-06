@@ -22,6 +22,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import tk.zwander.common.activities.DismissOrUnlockActivity
 import tk.zwander.common.compose.util.createComposeViewHolder
 import tk.zwander.common.data.WidgetData
@@ -119,27 +120,31 @@ open class MainWidgetFrameDelegate protected constructor(
             field = actualNewState
 
             if (actualNewState.isPreview != oldState.isPreview) {
-                if (actualNewState.isPreview) {
-                    if (canShow()) {
-                        addWindow()
-                    }
-                } else {
-                    if (!canShow()) {
-                        removeWindow()
+                scope.launch(Dispatchers.Main) {
+                    if (actualNewState.isPreview) {
+                        if (canShow()) {
+                            addWindow()
+                        }
+                    } else {
+                        if (!canShow()) {
+                            removeWindow()
+                        }
                     }
                 }
             }
 
             if (actualNewState.selectionPreviewRequestCode != oldState.selectionPreviewRequestCode) {
-                if (actualNewState.selectionPreviewRequestCode != null) {
-                    if (canShow()) {
-                        addWindow()
-                        viewModel.isSelectingFrame.value = true
-                    }
-                } else {
-                    if (!canShow()) {
-                        removeWindow()
-                        viewModel.isSelectingFrame.value = false
+                scope.launch(Dispatchers.Main) {
+                    if (actualNewState.selectionPreviewRequestCode != null) {
+                        if (canShow()) {
+                            addWindow()
+                            viewModel.isSelectingFrame.value = true
+                        }
+                    } else {
+                        if (!canShow()) {
+                            removeWindow()
+                            viewModel.isSelectingFrame.value = false
+                        }
                     }
                 }
             }
@@ -264,10 +269,14 @@ open class MainWidgetFrameDelegate protected constructor(
             viewModel.currentEditingInterfacePosition.value = -1
         }
         handler(PrefManager.KEY_WIDGET_FRAME_ENABLED) {
-            updateWindowState()
+            scope.launch {
+                updateWindowState()
+            }
         }
         handler(PrefManager.KEY_CAN_SHOW_FRAME_FROM_TASKER, PrefManager.KEY_FORCE_SHOW_FRAME) {
-            updateWindowState()
+            scope.launch {
+                updateWindowState()
+            }
         }
     }
 
@@ -278,7 +287,7 @@ open class MainWidgetFrameDelegate protected constructor(
                 (!globalState.notificationsPanelFullyExpanded.value || !framePrefs.showInNotificationShade) &&
                 (!globalState.showingNotificationsPanel.value || framePrefs.hideOnNotificationShade)
 
-    override fun onEvent(event: Event) {
+    override suspend fun onEvent(event: Event) {
         super.onEvent(event)
 
         when (event) {
@@ -424,17 +433,19 @@ open class MainWidgetFrameDelegate protected constructor(
                 )
             }
             is Event.PreviewFrames -> {
-                if (prefManager.currentSecondaryFrames.isEmpty() && event.show == Event.PreviewFrames.ShowMode.SHOW_FOR_SELECTION) {
+                if (event.show == Event.PreviewFrames.ShowMode.SHOW_FOR_SELECTION && prefManager.currentSecondaryFrames.isEmpty()) {
                     eventManager.sendEvent(Event.LaunchAddWidget(id))
                 } else {
                     if (event.includeMainFrame || id != -1) {
                         updateState {
+                            val isPreview = event.show == Event.PreviewFrames.ShowMode.SHOW ||
+                                    (event.show == Event.PreviewFrames.ShowMode.TOGGLE && !it.isPreview)
                             it.copy(
-                                isPreview = event.show == Event.PreviewFrames.ShowMode.SHOW ||
-                                        (event.show == Event.PreviewFrames.ShowMode.TOGGLE && !it.isPreview),
+                                isPreview = isPreview,
                                 selectionPreviewRequestCode = event.requestCode.takeIf {
                                     event.show == Event.PreviewFrames.ShowMode.SHOW_FOR_SELECTION
                                 },
+                                isTempHide = if (isPreview) false else it.isTempHide,
                             )
                         }
                     }
@@ -520,7 +531,7 @@ open class MainWidgetFrameDelegate protected constructor(
         return prefManager.lockWidgetFrame
     }
 
-    fun updateStateAndWindowState(
+    suspend fun updateStateAndWindowState(
         updateAccessibility: Boolean = false,
         transform: (State) -> State = { it },
         commonTransform: (BaseState) -> BaseState = { it },
@@ -618,7 +629,7 @@ open class MainWidgetFrameDelegate protected constructor(
         viewModel.debugIdItems.value = items.toSet()
     }
 
-    fun updateWindowState(updateAccessibility: Boolean = false) {
+    suspend fun updateWindowState(updateAccessibility: Boolean = false) {
         if (canShow()) {
             if (updateAccessibility) updateAccessibilityPass()
             addWindow()
@@ -667,9 +678,9 @@ open class MainWidgetFrameDelegate protected constructor(
      * - [PrefManager.widgetFrameEnabled] is true (i.e. the widget frame is actually enabled)
      * =======
      */
-    private fun canShow(): Boolean {
+    private suspend fun canShow(): Boolean {
         fun forPreview(): Boolean {
-            return state.isPreview || state.selectionPreviewRequestCode != null
+            return (state.isPreview || state.selectionPreviewRequestCode != null) && !state.isTempHide
         }
 
         fun forCommon(): Boolean {
@@ -706,26 +717,28 @@ open class MainWidgetFrameDelegate protected constructor(
             return prefManager.widgetFrameEnabled && prefManager.forceShowFrame
         }
 
-        return (forced() || forPreview() || forNotificationCenter() || forLockscreen()).also {
-            logUtils.debugLog(
-                "canShow $id: $it\n" +
-                        "state: $state\n " +
-                        "showOnMainLockScreen: ${framePrefs.showOnMainLockScreen}\n" +
-                        "widgetFrameEnabled: ${prefManager.widgetFrameEnabled}\n" +
-                        "hideOnSecurityPage: ${framePrefs.hideOnSecurityPage}\n" +
-                        "hideOnNotifications: ${framePrefs.hideOnNotifications}\n" +
-                        "hideOnNotificationShade: ${framePrefs.hideOnNotificationShade}\n" +
-                        "presentIds: ${prefManager.presentIds}\n" +
-                        "nonPresentIds: ${prefManager.nonPresentIds}\n" +
-                        "hideInLandscape: ${prefManager.hideInLandscape}\n" +
-                        "showInNotificationCenter: ${framePrefs.showInNotificationShade}\n" +
-                        "hideOnEdgePanel: ${framePrefs.hideOnEdgePanel}\n" +
-                        "hidingForPresentApp: ${globalState.hidingForPresentApp.value}\n" +
-                        "canShowFrameFromTasker: ${prefManager.canShowFrameFromTasker}\n" +
-                        "forceShowFrame: ${prefManager.forceShowFrame}\n" +
-                        "hideOnFaceWidgets: ${framePrefs.hideOnFaceWidgets}\n" +
-                        "hideWhenKeyboardShown: ${framePrefs.hideWhenKeyboardShown}\n",
-            )
+        return withContext(Dispatchers.IO) {
+            (forced() || forPreview() || forNotificationCenter() || forLockscreen()).also {
+                logUtils.debugLog(
+                    "canShow $id: $it\n" +
+                            "state: $state\n " +
+                            "showOnMainLockScreen: ${framePrefs.showOnMainLockScreen}\n" +
+                            "widgetFrameEnabled: ${prefManager.widgetFrameEnabled}\n" +
+                            "hideOnSecurityPage: ${framePrefs.hideOnSecurityPage}\n" +
+                            "hideOnNotifications: ${framePrefs.hideOnNotifications}\n" +
+                            "hideOnNotificationShade: ${framePrefs.hideOnNotificationShade}\n" +
+                            "presentIds: ${prefManager.presentIds}\n" +
+                            "nonPresentIds: ${prefManager.nonPresentIds}\n" +
+                            "hideInLandscape: ${prefManager.hideInLandscape}\n" +
+                            "showInNotificationCenter: ${framePrefs.showInNotificationShade}\n" +
+                            "hideOnEdgePanel: ${framePrefs.hideOnEdgePanel}\n" +
+                            "hidingForPresentApp: ${globalState.hidingForPresentApp.value}\n" +
+                            "canShowFrameFromTasker: ${prefManager.canShowFrameFromTasker}\n" +
+                            "forceShowFrame: ${prefManager.forceShowFrame}\n" +
+                            "hideOnFaceWidgets: ${framePrefs.hideOnFaceWidgets}\n" +
+                            "hideWhenKeyboardShown: ${framePrefs.hideWhenKeyboardShown}\n",
+                )
+            }
         }
     }
 

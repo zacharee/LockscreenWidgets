@@ -28,7 +28,7 @@ class IDWidgetService : RemoteViewsService(), EventObserver {
         eventManager.removeObserver(this)
     }
 
-    override fun onEvent(event: Event) {
+    override suspend fun onEvent(event: Event) {
         when (event) {
             is Event.DebugIdsUpdated -> {
                 factory.setItems(event.ids)

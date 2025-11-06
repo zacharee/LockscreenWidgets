@@ -239,7 +239,7 @@ class App : Application(), CoroutineScope by MainScope(), EventObserver {
         }
     }
 
-    override fun onEvent(event: Event) {
+    override suspend fun onEvent(event: Event) {
         when (event) {
             is Event.RemoveFrameConfirmed -> {
                 if (event.confirmed && event.frameId != null) {

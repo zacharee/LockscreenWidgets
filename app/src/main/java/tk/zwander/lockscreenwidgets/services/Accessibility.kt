@@ -161,7 +161,7 @@ class Accessibility : AccessibilityService(), EventObserver, CoroutineScope by M
         Bugsnag.leaveBreadcrumb("Accessibility service interrupted.")
     }
 
-    override fun onEvent(event: Event) {
+    override suspend fun onEvent(event: Event) {
         when (event) {
             Event.ScreenOff -> {
                 state.accessibilityJob?.cancel()

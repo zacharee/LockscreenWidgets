@@ -226,7 +226,7 @@ class DrawerDelegate private constructor(context: Context, wm: WindowManager, di
     }
 
     @SuppressLint("RtlHardcoded")
-    override fun onEvent(event: Event) {
+    override suspend fun onEvent(event: Event) {
         super.onEvent(event)
 
         when (event) {

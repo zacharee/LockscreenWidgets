@@ -92,7 +92,7 @@ fun rememberFeatureCards(): List<FeatureCardInfo> {
                 isEnabled = { context.prefManager.widgetFrameEnabled },
                 onEnabledChanged = { context.prefManager.widgetFrameEnabled = it },
                 eventObserver = object : EventObserver {
-                    override fun onEvent(event: Event) {
+                    override suspend fun onEvent(event: Event) {
                         if (event is Event.FrameSelected) {
                             if (event.frameId != null && event.requestCode == 100) {
                                 context.eventManager.sendEvent(Event.LaunchAddWidget(event.frameId))

@@ -13,8 +13,7 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.gestures.awaitEachGesture
-import androidx.compose.foundation.gestures.awaitFirstDown
+import androidx.compose.foundation.gestures.waitForUpOrCancellation
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -146,33 +145,35 @@ fun MainWidgetFrameDelegate.WidgetFrameViewModel.WidgetFrameLayout(
 
     Card(
         modifier = modifier.pointerInput(null) {
-            awaitEachGesture {
-                awaitFirstDown(pass = PointerEventPass.Initial)
+            awaitPointerEventScope {
+                while (true) {
+                    val pointerEvent = awaitPointerEvent(pass = PointerEventPass.Initial)
 
-                val event = awaitPointerEvent(PointerEventPass.Initial)
+                    if (pointerEvent.changes.size == 2) {
+                        pointerEvent.changes.forEach { it.consume() }
 
-                when (event.changes.size) {
-                    2 -> {
-                        isInEditingMode = !isInEditingMode && !isLocked
-                        @Suppress("AssignedValueIsNeverRead")
-                        if (acknowledgedTwoFingerTap == null) {
-                            acknowledgedTwoFingerTap = false
-                        } else if (acknowledgedTwoFingerTap == false) {
-                            acknowledgedTwoFingerTap = true
+                        val thirdEvent = withTimeoutOrNull(10L) {
+                            awaitPointerEvent(pass = PointerEventPass.Initial)
                         }
 
-                        event.changes.forEach { it.consume() }
-                    }
-
-                    3 -> {
-                        if (firstViewing) {
-                            @Suppress("AssignedValueIsNeverRead")
-                            acknowledgedThreeFingerTap = true
+                        if (thirdEvent == null || thirdEvent.changes.size <= 2) {
+                            isInEditingMode = !isInEditingMode && !isLocked
+                            if (acknowledgedTwoFingerTap == null) {
+                                acknowledgedTwoFingerTap = false
+                            } else if (acknowledgedTwoFingerTap == false) {
+                                acknowledgedTwoFingerTap = true
+                            }
                         } else {
-                            context.eventManager.sendEvent(Event.TempHide(frameId = frameId))
+                            if (firstViewing) {
+                                @Suppress("AssignedValueIsNeverRead")
+                                acknowledgedThreeFingerTap = true
+                            } else {
+                                context.eventManager.sendEvent(Event.TempHide(frameId = frameId))
+                            }
                         }
 
-                        event.changes.forEach { it.consume() }
+                        thirdEvent?.changes?.forEach { it.consume() }
+                        waitForUpOrCancellation(pass = PointerEventPass.Initial)
                     }
                 }
             }
@@ -241,15 +242,11 @@ fun MainWidgetFrameDelegate.WidgetFrameViewModel.WidgetFrameLayout(
                 )
             }
 
-            Box(
-                modifier = Modifier.zIndex(2f),
-            ) {
-                HintIntroLayout(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(MaterialTheme.colorScheme.surface),
-                )
-            }
+            HintIntroLayout(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .zIndex(2f),
+            )
 
             androidx.compose.animation.AnimatedVisibility(
                 visible = itemToRemove != null,

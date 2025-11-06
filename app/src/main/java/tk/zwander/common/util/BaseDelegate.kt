@@ -142,7 +142,7 @@ abstract class BaseDelegate<State : Any>(
 
     @SuppressLint("NotifyDataSetChanged")
     @CallSuper
-    override fun onEvent(event: Event) {
+    override suspend fun onEvent(event: Event) {
         when (event) {
             is Event.RemoveWidgetConfirmed -> {
                 val position = currentWidgets.indexOf(event.item)

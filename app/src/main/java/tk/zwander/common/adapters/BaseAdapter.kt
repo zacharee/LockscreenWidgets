@@ -368,7 +368,7 @@ abstract class BaseAdapter(
             context.eventManager.removeObserver(this)
         }
 
-        override fun onEvent(event: Event) {
+        override suspend fun onEvent(event: Event) {
             when (event) {
                 is Event.FrameMoveFinished -> {
                     if (event.frameId == holderId) {

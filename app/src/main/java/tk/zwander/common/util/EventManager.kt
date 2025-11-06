@@ -169,7 +169,7 @@ sealed class Event {
 }
 
 interface EventObserver {
-    fun onEvent(event: Event)
+    suspend fun onEvent(event: Event)
 }
 
 data class ListenerInfo<T : Event>(

@@ -61,7 +61,7 @@ class DismissOrUnlockActivity : AppCompatActivity(), EventObserver {
         handle()
     }
 
-    override fun onEvent(event: Event) {
+    override suspend fun onEvent(event: Event) {
         when (event) {
             Event.ScreenOff -> {
                 finish()

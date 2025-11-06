@@ -89,7 +89,7 @@ class NotificationListener : NotificationListenerService(), EventObserver, Corou
         cancel()
     }
 
-    override fun onEvent(event: Event) {
+    override suspend fun onEvent(event: Event) {
         when (event) {
             Event.RequestNotificationCount -> {
                 if (isListening.value) {
