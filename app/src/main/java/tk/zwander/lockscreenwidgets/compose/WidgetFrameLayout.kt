@@ -76,14 +76,17 @@ fun MainWidgetFrameDelegate.WidgetFrameViewModel.WidgetFrameLayout(
     val frameCornerRadius by rememberPreferenceState(
         key = PrefManager.KEY_FRAME_CORNER_RADIUS,
         value = { context.prefManager.cornerRadiusDp.dp },
+        initialValue = 2.dp,
     )
     val backgroundColor by rememberPreferenceState(
         key = framePrefs.keyFor(PrefManager.KEY_FRAME_BACKGROUND_COLOR),
         value = { Color(framePrefs.backgroundColor) },
+        initialValue = Color.Transparent,
     )
     val firstViewing by rememberPreferenceState(
         key = PrefManager.KEY_FIRST_VIEWING,
         value = { context.prefManager.firstViewing },
+        initialValue = false,
     )
 
     var acknowledgedTwoFingerTap by this.acknowledgedTwoFingerTap.collectAsMutableState()
@@ -193,6 +196,7 @@ fun MainWidgetFrameDelegate.WidgetFrameViewModel.WidgetFrameLayout(
                     val maskedModeDimAmount by rememberPreferenceState(
                         key = framePrefs.keyFor(PrefManager.KEY_MASKED_MODE_DIM_AMOUNT),
                         value = { framePrefs.maskedModeDimAmount },
+                        initialValue = 0f,
                     )
 
                     Image(
@@ -223,6 +227,7 @@ fun MainWidgetFrameDelegate.WidgetFrameViewModel.WidgetFrameLayout(
                 val pageIndicatorBehavior by rememberPreferenceState(
                     key = PrefManager.KEY_PAGE_INDICATOR_BEHAVIOR,
                     value = { context.prefManager.pageIndicatorBehavior },
+                    initialValue = PrefManager.VALUE_PAGE_INDICATOR_BEHAVIOR_AUTO_HIDE,
                 )
 
                 AndroidView(
@@ -278,6 +283,7 @@ fun MainWidgetFrameDelegate.WidgetFrameViewModel.WidgetFrameLayout(
             val debugIdVisibility by rememberPreferenceState(
                 key = PrefManager.KEY_SHOW_DEBUG_ID_VIEW,
                 value = { context.prefManager.debugLog },
+                initialValue = false,
             )
 
             androidx.compose.animation.AnimatedVisibility(

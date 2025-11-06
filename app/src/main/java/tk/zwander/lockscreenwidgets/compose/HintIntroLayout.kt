@@ -45,6 +45,7 @@ fun MainWidgetFrameDelegate.WidgetFrameViewModel.HintIntroLayout(
         key = PrefManager.KEY_FIRST_VIEWING,
         value = { context.prefManager.firstViewing },
         onChanged = { _, value -> context.prefManager.firstViewing = value },
+        initialValue = false,
     )
     var acknowledgedTwoFingerTap by this.acknowledgedTwoFingerTap.collectAsMutableState()
     var acknowledgedThreeFingerTap by this.acknowledgedThreeFingerTap.collectAsMutableState()

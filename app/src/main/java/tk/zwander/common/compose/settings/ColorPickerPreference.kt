@@ -97,6 +97,7 @@ fun ColorPickerPreference(
         key = key,
         value = { Color(context.prefManager.getInt(it, defaultValue.toArgb())) },
         onChanged = { k, v -> context.prefManager.putInt(k, v.toArgb()) },
+        initialValue = defaultValue,
     )
 
     ColorPickerPreference(

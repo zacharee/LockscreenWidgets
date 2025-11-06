@@ -64,31 +64,38 @@ fun DrawerDelegate.DrawerViewModel.DrawerHandle(
         key = PrefManager.KEY_DRAWER_HANDLE_SIDE,
         value = { context.prefManager.drawerHandleSide },
         onChanged = { _, value -> context.prefManager.drawerHandleSide = value },
+        initialValue = Gravity.RIGHT,
     )
     val savedColor by rememberPreferenceState(
         key = PrefManager.KEY_DRAWER_HANDLE_COLOR,
         value = { Color(context.prefManager.drawerHandleColor) },
         onChanged = { _, value -> context.prefManager.drawerHandleColor = value.toArgb() },
+        initialValue = Color.White,
     )
     val showShadow by rememberPreferenceState(
         key = PrefManager.KEY_SHOW_DRAWER_HANDLE_SHADOW,
         value = { context.prefManager.drawerHandleShadow },
+        initialValue = false,
     )
     val tapToOpen by rememberPreferenceState(
         key = PrefManager.KEY_DRAWER_HANDLE_TAP_TO_OPEN,
         value = { context.prefManager.drawerHandleTapToOpen },
+        initialValue = false,
     )
     val lockPosition by rememberPreferenceState(
         key = PrefManager.KEY_DRAWER_HANDLE_LOCK_POSITION,
         value = { context.prefManager.drawerHandleLockPosition },
+        initialValue = false,
     )
     val width by rememberPreferenceState(
         key = PrefManager.KEY_DRAWER_HANDLE_WIDTH,
         value = { context.prefManager.drawerHandleWidth },
+        initialValue = 6,
     )
     val height by rememberPreferenceState(
         key = PrefManager.KEY_DRAWER_HANDLE_HEIGHT,
         value = { context.prefManager.drawerHandleHeight },
+        initialValue = 140,
     )
 
     LaunchedEffect(width, height) {

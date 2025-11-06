@@ -66,6 +66,7 @@ class ComposeFrameSettingsActivity : BaseActivity(), EventObserver {
                 key = PrefManager.KEY_CURRENT_FRAMES,
                 value = { prefManager.currentSecondaryFrames },
                 onChanged = { _, v -> prefManager.currentSecondaryFrames = v },
+                initialValue = listOf(),
             )
             val frameCount by rememberUpdatedState(secondaryFrames.size + 1)
 

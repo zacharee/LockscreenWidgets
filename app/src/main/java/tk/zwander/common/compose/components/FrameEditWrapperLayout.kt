@@ -47,6 +47,7 @@ fun FrameEditWrapperLayout(
         key = PrefManager.KEY_FRAME_CORNER_RADIUS,
         value = { context.prefManager.cornerRadiusDp },
         onChanged = { _, value -> context.prefManager.cornerRadiusDp = value },
+        initialValue = 2f,
     )
 
     Surface(

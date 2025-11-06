@@ -31,12 +31,13 @@ fun HideOnAppsChooserLayout(
         mutableStateOf<String?>(null)
     }
 
-    var checked by rememberPreferenceState<Set<String>>(
+    var checked by rememberPreferenceState(
         key = PrefManager.KEY_HIDE_FRAME_ON_APPS,
         value = { context.prefManager.hideFrameOnApps.toMutableSet() },
         onChanged = { _, v ->
             context.prefManager.hideFrameOnApps = v
         },
+        initialValue = setOf(),
     )
 
     val (items, filteredItems) = items(

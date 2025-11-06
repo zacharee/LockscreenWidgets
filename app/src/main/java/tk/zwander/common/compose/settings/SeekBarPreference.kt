@@ -137,6 +137,7 @@ fun SeekBarPreference(
         key = key,
         value = { context.prefManager.getInt(key, defaultValue) },
         onChanged = { k, v -> context.prefManager.putInt(k, v) },
+        initialValue = defaultValue,
     )
 
     SeekBarPreference(

@@ -9,13 +9,15 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import tk.zwander.common.util.prefManager
 
 @Composable
 fun <T> rememberPreferenceState(
     key: String,
     value: (String) -> T,
-): State<T> {
+): State<T?> {
     return rememberPreferenceState(
         key = key,
         value = value,
@@ -26,12 +28,51 @@ fun <T> rememberPreferenceState(
 @Composable
 fun <T> rememberPreferenceState(
     key: String,
+    initialValue: T,
     value: (String) -> T,
-    onChanged: (String, T) -> Unit
+): State<T> {
+    return rememberPreferenceState(
+        key = key,
+        initialValue = initialValue,
+        value = value,
+        onChanged = { _, _ -> },
+    )
+}
+
+@Composable
+fun <T> rememberPreferenceState(
+    key: String,
+    value: (String) -> T,
+    onChanged: (String, T) -> Unit,
+): MutableState<T?> {
+    return rememberPreferenceState(
+        key = key,
+        initialValue = null,
+        value = value,
+        onChanged = { key, newValue ->
+            newValue?.let {
+                onChanged(key, newValue)
+            }
+        },
+    )
+}
+
+@Composable
+fun <T> rememberPreferenceState(
+    key: String,
+    initialValue: T,
+    value: (String) -> T,
+    onChanged: (String, T) -> Unit,
 ): MutableState<T> {
     val context = LocalContext.current
     val state = remember(key) {
-        mutableStateOf(value(key))
+        mutableStateOf(initialValue)
+    }
+
+    LaunchedEffect(key1 = key) {
+        state.value = withContext(Dispatchers.IO) {
+            value(key)
+        }
     }
 
     LaunchedEffect(key1 = state.value) {
@@ -41,7 +82,11 @@ fun <T> rememberPreferenceState(
     DisposableEffect(key1 = key) {
         val listener = SharedPreferences.OnSharedPreferenceChangeListener { _, k ->
             if (key == k) {
-                state.value = value(key)
+                val newValue = value(key)
+
+                if (newValue != state.value) {
+                    state.value = newValue
+                }
             }
         }
 
@@ -71,6 +116,7 @@ fun rememberBooleanPreferenceState(
     return rememberPreferenceState(
         key = key,
         value = enabled,
-        onChanged = onEnabledChanged
+        onChanged = onEnabledChanged,
+        initialValue = defaultValue,
     )
 }

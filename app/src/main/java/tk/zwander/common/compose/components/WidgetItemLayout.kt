@@ -80,6 +80,7 @@ fun BaseDelegate.BaseViewModel<*, *>.WidgetItemLayout(
                 resources.getInteger(R.integer.def_corner_radius_dp_scaled_10x),
             ) / 10f).dp
         },
+        initialValue = 2.dp,
     )
     val animatedCornerRadius by animateDpAsState(widgetCornerRadius)
 

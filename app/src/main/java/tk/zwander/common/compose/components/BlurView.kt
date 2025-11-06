@@ -55,12 +55,14 @@ fun BaseDelegate.BaseViewModel<*, *>.BlurView(
         key = blurAmountKey,
         value = { context.prefManager.getInt(blurAmountKey, 100) },
         onChanged = { _, _ -> },
+        initialValue = 0,
     )
     val cornerRadiusPx by if (cornerRadiusKey != null) {
         rememberPreferenceState(
             key = cornerRadiusKey,
             value = { context.prefManager.getInt(cornerRadiusKey, 20) / 10f },
             onChanged = { _, _ -> },
+            initialValue = 2f,
         )
     } else {
         remember { mutableFloatStateOf(0f) }

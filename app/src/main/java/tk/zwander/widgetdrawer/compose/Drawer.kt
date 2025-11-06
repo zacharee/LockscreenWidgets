@@ -20,6 +20,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalResources
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.zIndex
@@ -34,6 +35,7 @@ import tk.zwander.common.util.collectAsMutableState
 import tk.zwander.common.util.eventManager
 import tk.zwander.common.util.prefManager
 import tk.zwander.common.util.statusBarHeight
+import tk.zwander.lockscreenwidgets.R
 import tk.zwander.widgetdrawer.util.DrawerDelegate
 import tk.zwander.widgetdrawer.views.DrawerRecycler
 
@@ -48,6 +50,7 @@ fun DrawerDelegate.DrawerViewModel.Drawer(
     val backgroundColor by rememberPreferenceState(
         key = PrefManager.KEY_DRAWER_BACKGROUND_COLOR,
         value = { Color(context.prefManager.drawerBackgroundColor) },
+        initialValue = colorResource(R.color.drawerBackgroundDefault),
     )
 
     var itemToRemove by this.itemToRemove.collectAsMutableState()
@@ -60,6 +63,7 @@ fun DrawerDelegate.DrawerViewModel.Drawer(
                 context.prefManager.drawerSidePadding.dp.roundToPx()
             }
         },
+        initialValue = 0,
     )
 
     val statusBarHeight = remember(resources, density) {
