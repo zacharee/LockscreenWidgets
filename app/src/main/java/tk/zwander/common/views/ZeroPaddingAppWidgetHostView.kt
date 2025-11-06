@@ -64,7 +64,9 @@ class ZeroPaddingAppWidgetHostView(
         appWidgetInfo?.let { info ->
             context.packageManager.getLaunchIntentForPackage(info.provider.packageName)
                 ?.let { mainIntent ->
-                    if (onDefaultClick(PendingIntent.getActivity(context, 0, mainIntent, 0))) {
+                    if (onDefaultClick(
+                            PendingIntent.getActivity(context, 0, mainIntent, PendingIntent.FLAG_IMMUTABLE),
+                    )) {
                         context.startActivity(mainIntent)
                     }
                 }
