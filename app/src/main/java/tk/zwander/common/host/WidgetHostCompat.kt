@@ -190,22 +190,33 @@ class WidgetHostCompat(
                 set(this@WidgetHostCompat, clickHandler)
             }
 
-        return ZeroPaddingAppWidgetHostView(context) { hostView ->
-            try {
-                AppWidgetHostView::class.java
-                    .getMethod(
-                        if (INTERACTION_HANDLER_CLASS != null) {
-                            "setInteractionHandler"
-                        } else {
-                            "setOnClickHandler"
-                        },
-                        INTERACTION_HANDLER_CLASS ?: ON_CLICK_HANDLER_CLASS,
-                    )
-                    .invoke(hostView, clickHandler)
-            } catch (e: Throwable) {
-                context.logUtils.normalLog("Unable to update interaction handler on window attach for widget $appWidgetId, ${appWidget?.provider}.", e)
-            }
-        }
+        return ZeroPaddingAppWidgetHostView(
+            context = context,
+            onAttach = { hostView ->
+                try {
+                    AppWidgetHostView::class.java
+                        .getMethod(
+                            if (INTERACTION_HANDLER_CLASS != null) {
+                                "setInteractionHandler"
+                            } else {
+                                "setOnClickHandler"
+                            },
+                            INTERACTION_HANDLER_CLASS ?: ON_CLICK_HANDLER_CLASS,
+                        )
+                        .invoke(hostView, clickHandler)
+                } catch (e: Throwable) {
+                    context.logUtils.normalLog("Unable to update interaction handler on window attach for widget $appWidgetId, ${appWidget?.provider}.", e)
+                }
+            },
+            onDefaultClick = {
+                BaseInnerOnClickHandler.checkPendingIntent(
+                    context = context,
+                    pendingIntent = it,
+                    widgetId = appWidgetId,
+                    onClickCallbacks = onClickCallbacks,
+                )
+            },
+        )
     }
 
     @Suppress("MemberVisibilityCanBePrivate")
@@ -214,6 +225,43 @@ class WidgetHostCompat(
         protected val onClickCallbacks: MutableSet<OnClickCallback>,
         protected val widgetId: Int,
     ) {
+        companion object {
+            @SuppressLint("NewApi")
+            fun checkPendingIntent(
+                context: Context,
+                pendingIntent: PendingIntent?,
+                widgetId: Int,
+                onClickCallbacks: Set<OnClickCallback>,
+            ): Boolean {
+                context.logUtils.debugLog(
+                    "Intercepting PendingIntent. " +
+                            "isActivity: ${pendingIntent?.isActivity}. " +
+                            "creatorPackage: ${pendingIntent?.creatorPackage}",
+                )
+
+                val allowedByCallback = if (pendingIntent != null) {
+                    val triggerUnlockOrDismiss = pendingIntent.isActivity
+                    // This package check is so the frame/drawer doesn't dismiss itself when the
+                    // Open Drawer widget is tapped.
+                    if (pendingIntent.creatorPackage != context.packageName) {
+                        onClickCallbacks.all { callback ->
+                            if (callback.hasWidgetId(widgetId)) {
+                                callback.onWidgetClick(triggerUnlockOrDismiss)
+                            } else {
+                                true
+                            }
+                        }
+                    } else {
+                        true
+                    }
+                } else {
+                    true
+                }
+
+                return allowedByCallback && !globalState.itemIsActive.value
+            }
+        }
+
         class InnerOnClickHandlerInterface(
             context: Context,
             widgetId: Int,
@@ -238,7 +286,7 @@ class WidgetHostCompat(
                     getLaunchOptions.invoke(response, view) as? android.util.Pair<Intent, ActivityOptions>
                 }
 
-                return if (checkPendingIntent(pi, widgetId)) {
+                return if (checkPendingIntent(context, pi, widgetId, onClickCallbacks)) {
                     startPendingIntent.invoke(null, view, pi, launchOptions) as Boolean
                 } else {
                     false
@@ -260,7 +308,7 @@ class WidgetHostCompat(
                 pendingIntent: PendingIntent,
                 fillInIntent: Intent
             ): Boolean {
-                return if (checkPendingIntent(pendingIntent, widgetId)) {
+                return if (checkPendingIntent(context, pendingIntent, widgetId, onClickCallbacks)) {
                     clickHandlerClass.getMethod("onClickHandler", View::class.java, PendingIntent::class.java, Intent::class.java)
                         .invoke(defaultHandler, view, pendingIntent, fillInIntent) as Boolean
                 } else {
@@ -275,7 +323,7 @@ class WidgetHostCompat(
                 fillInIntent: Intent,
                 windowingMode: Int
             ): Boolean {
-                return if (checkPendingIntent(pendingIntent, widgetId)) {
+                return if (checkPendingIntent(context, pendingIntent, widgetId, onClickCallbacks)) {
                     clickHandlerClass.getMethod("onClickHandler", View::class.java, PendingIntent::class.java, Intent::class.java, Int::class.java)
                         .invoke(defaultHandler, view, pendingIntent, fillInIntent, windowingMode) as Boolean
                 } else {
@@ -284,35 +332,7 @@ class WidgetHostCompat(
             }
         }
 
-        @SuppressLint("NewApi")
-        fun checkPendingIntent(pendingIntent: PendingIntent?, widgetId: Int): Boolean {
-            context.logUtils.debugLog(
-                "Intercepting PendingIntent. " +
-                        "isActivity: ${pendingIntent?.isActivity}. " +
-                        "creatorPackage: ${pendingIntent?.creatorPackage}",
-            )
 
-            val allowedByCallback = if (pendingIntent != null) {
-                val triggerUnlockOrDismiss = pendingIntent.isActivity
-                // This package check is so the frame/drawer doesn't dismiss itself when the
-                // Open Drawer widget is tapped.
-                if (pendingIntent.creatorPackage != context.packageName) {
-                    onClickCallbacks.all { callback ->
-                        if (callback.hasWidgetId(widgetId)) {
-                            callback.onWidgetClick(triggerUnlockOrDismiss)
-                        } else {
-                            true
-                        }
-                    }
-                } else {
-                    true
-                }
-            } else {
-                true
-            }
-
-            return allowedByCallback && !globalState.itemIsActive.value
-        }
     }
 
     interface OnClickCallback {
