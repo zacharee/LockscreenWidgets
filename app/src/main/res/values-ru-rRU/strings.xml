@@ -232,8 +232,8 @@
     <string name="drawer_background_over_status_bar_desc">Show the drawer\'s background color on top of the status bar. If you have an opaque background color, you may want to consider turning this off.</string>
     <string name="show_only_when_locked">Показывать только когда заблокировано</string>
     <string name="show_only_when_locked_desc">Показывать триггер панели только тогда, когда устройство находится на экране блокировки.</string>
-    <string name="debug_enable_bugsnag">Включить Bugsnag</string>
-    <string name="debug_enable_bugsnag_desc">Lockscreen Widgets используют Bugsnag для сбора анонимных отчетов о сбоях. Не то, чтобы полностью отключить сбор, вам придется принудительно остановить и переоткрыть Lockscreen Widgets.</string>
+    <string name="debug_enable_bugsnag">Включить BugSnag</string>
+    <string name="debug_enable_bugsnag_desc">Lockscreen Widgets используют BugSnag для сбора анонимных отчетов о сбоях. Но чтобы полностью отключить сбор, вам придется принудительно остановить и открыть Lockscreen Widgets снова.</string>
     <string name="icon_pack">Набор значков</string>
     <string name="icon_pack_desc">Выбрать набор значков для ярлыков. Это относится как к рамке, так и к панели.</string>
     <string name="allow_show_frame">Разрешить показ рамки</string>
@@ -283,4 +283,5 @@
     <string name="unable_to_grant_storage">Не удается предоставить разрешение на хранение!</string>
     <string name="unable_to_grant_storage_desc">It looks like you\'re using a device that restricts ADB\'s ability to grant permissions. The setting to allow this should be in Developer Options and called something similar to \"Disable Permission Monitoring\", \"USB Debugging (Security Setting)\", or \"Disable Permission Monitoring\". Once you\'ve toggled that option, come back here to try again.</string>
     <string name="developer_options">Developer Options</string>
+    <string name="error_showing_widget">Unable to show widget.</string>
 </resources>
