@@ -69,7 +69,7 @@
     <string name="main_screen_social_github">GitHub</string>
     <string name="main_screen_social_github_desc">Вот тут хранится наш исходный код. Если вы - разработчик или вы хотите мне помочь (или просто интересно глянуть исходники), то жмите сюда.</string>
     <string name="main_screen_social_patreon">Patreon</string>
-    <string name="main_screen_social_patreon_desc">За примерно 85 рублей ($1) в месяц вы получите доступ ко всякому эксклюзиву. Если хотите меня поддержать, то вам сюда.</string>
+    <string name="main_screen_social_patreon_desc">За 1 доллар ($1) в месяц вы получите доступ ко всякому эксклюзиву. Если хотите меня поддержать, то вам сюда.</string>
     <string name="main_screen_accessibility_not_started">Нет доступа к Специальным Возможностям. Если хотите, чтобы система не выгружала приложение при каждом удобном случае, то разрешите приложению работать без ограничений, а затем включите заново Спец. Возможности.</string>
     <string name="intro_privacy_policy_desc">Приложение не собирает данные, кроме информации о вылетах. Подробнее ниже.</string>
     <string name="main_screen_privacy_policy_desc">Приложение не собирает данные, кроме информации о вылетах. Нажмите здесь, чтобы узнать больше.</string>
@@ -158,11 +158,11 @@
     <string name="intro_welcome_desc">Lockscreen Widgets — это простое приложение с простой целью: вернуть виджеты экрана блокировки Android KitKat. Ваши виджеты будут отображаться в простом постраничном слайдере на экране блокировки.</string>
     <string name="intro_usage_title">Основное применение</string>
     <string name="intro_usage_desc">Нажмите на страницу \"плюс\", чтобы добавить виджет. Нажмите и удерживайте, чтобы изменить порядок/размер/удалить виджеты в списке. Нажмите в любом месте рамки двумя пальцами, чтобы переместить/изменить размер рамки или добавить виджет. Вы также можете нажать тремя пальцами, чтобы скрыть рамку виджета, пока экран не выключится и не включится снова.</string>
-    <string name="intro_accessibility_title">Доступ</string>
+    <string name="intro_accessibility_title">Спец. возможности</string>
     <string name="intro_accessibility_desc">Чтобы иметь возможность отображать на экране блокировки, нужно активировать службу доступности Lockscreen Widgets. Это приложение не собирает никаких данных с вашего экрана.</string>
     <string name="intro_notification_listener_title">Слушатель уведомлений</string>
     <string name="intro_notification_listener_desc">Lockscreen Widgets может скрывать виджет при отображении уведомлений. Для этого необходимо включить прослушиватель уведомлений. Сейчас это делать не обязательно.</string>
-    <string name="intro_read_storage_title">Считывание данных из внешнего хранилища</string>
+    <string name="intro_read_storage_title">Shizuku и Данные из внешнего хранилища</string>
     <string name="intro_read_storage_desc">Lockscreen Widgets имеет режим «маскировки», в котором он будет использовать обои в качестве фона рамки виджета, делая его прозрачным, а также скрывать элементы экрана блокировки. Для этого Lockscreen Widgets требуется разрешение на чтение хранилища устройства. Вам не нужно предоставлять его прямо сейчас. Если вы используете Lollipop, это разрешение уже предоставлено. Более подробная информация доступна в политике конфиденциальности.</string>
     <string name="intro_read_external_storage_desc_13_addendum">На Android 13 и более поздних версиях вам потребуется использовать Shizuku для предоставления необходимых разрешений.</string>
     <string name="intro_battery_optimization">Оптимизация батареи</string>
@@ -232,7 +232,7 @@
     <string name="drawer_background_over_status_bar_desc">Show the drawer\'s background color on top of the status bar. If you have an opaque background color, you may want to consider turning this off.</string>
     <string name="show_only_when_locked">Показывать только когда заблокировано</string>
     <string name="show_only_when_locked_desc">Показывать триггер панели только тогда, когда устройство находится на экране блокировки.</string>
-    <string name="debug_enable_bugsnag">Enable Bugsnag</string>
+    <string name="debug_enable_bugsnag">Включить Bugsnag</string>
     <string name="debug_enable_bugsnag_desc">Lockscreen Widgets uses Bugsnag to collect anonymous crash reports. Not that to fully disable collection, you\'ll have to force stop and reopen Lockscreen Widgets.</string>
     <string name="icon_pack">Набор значков</string>
     <string name="icon_pack_desc">Выбрать набор значков для ярлыков. Это относится как к рамке, так и к панели.</string>
