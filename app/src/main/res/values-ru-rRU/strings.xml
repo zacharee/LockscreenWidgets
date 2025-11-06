@@ -233,7 +233,7 @@
     <string name="show_only_when_locked">Показывать только когда заблокировано</string>
     <string name="show_only_when_locked_desc">Показывать триггер панели только тогда, когда устройство находится на экране блокировки.</string>
     <string name="debug_enable_bugsnag">Включить Bugsnag</string>
-    <string name="debug_enable_bugsnag_desc">Lockscreen Widgets uses Bugsnag to collect anonymous crash reports. Not that to fully disable collection, you\'ll have to force stop and reopen Lockscreen Widgets.</string>
+    <string name="debug_enable_bugsnag_desc">Lockscreen Widgets используют Bugsnag для сбора анонимных отчетов о сбоях. Не то, чтобы полностью отключить сбор, вам придется принудительно остановить и переоткрыть Lockscreen Widgets.</string>
     <string name="icon_pack">Набор значков</string>
     <string name="icon_pack_desc">Выбрать набор значков для ярлыков. Это относится как к рамке, так и к панели.</string>
     <string name="allow_show_frame">Разрешить показ рамки</string>
