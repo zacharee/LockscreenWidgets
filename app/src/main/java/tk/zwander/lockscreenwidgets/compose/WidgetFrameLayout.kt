@@ -81,21 +81,6 @@ fun MainWidgetFrameDelegate.WidgetFrameViewModel.WidgetFrameLayout(
         key = framePrefs.keyFor(PrefManager.KEY_FRAME_BACKGROUND_COLOR),
         value = { Color(framePrefs.backgroundColor) },
     )
-    val wallpaper by wallpaperInfo.collectAsState()
-    val pageIndicatorBehavior by rememberPreferenceState(
-        key = PrefManager.KEY_PAGE_INDICATOR_BEHAVIOR,
-        value = { context.prefManager.pageIndicatorBehavior },
-    )
-    val debugIdVisibility by rememberPreferenceState(
-        key = PrefManager.KEY_SHOW_DEBUG_ID_VIEW,
-        value = { context.prefManager.debugLog },
-    )
-    val selectingFrame by isSelectingFrame.collectAsState()
-    val maskedModeDimAmount by rememberPreferenceState(
-        key = framePrefs.keyFor(PrefManager.KEY_MASKED_MODE_DIM_AMOUNT),
-        value = { framePrefs.maskedModeDimAmount },
-    )
-    var itemToRemove by this.itemToRemove.collectAsMutableState()
     val firstViewing by rememberPreferenceState(
         key = PrefManager.KEY_FIRST_VIEWING,
         value = { context.prefManager.firstViewing },
@@ -104,6 +89,7 @@ fun MainWidgetFrameDelegate.WidgetFrameViewModel.WidgetFrameLayout(
     var acknowledgedTwoFingerTap by this.acknowledgedTwoFingerTap.collectAsMutableState()
     @Suppress("VariableNeverRead")
     var acknowledgedThreeFingerTap by this.acknowledgedThreeFingerTap.collectAsMutableState()
+    var itemToRemove by this.itemToRemove.collectAsMutableState()
 
     val animatedBackgroundColor by animateColorAsState(backgroundColor)
 
@@ -187,17 +173,28 @@ fun MainWidgetFrameDelegate.WidgetFrameViewModel.WidgetFrameLayout(
         Box(
             modifier = Modifier.fillMaxSize(),
         ) {
+            val wallpaper by wallpaperInfo.collectAsState()
+
             BlurView(
                 modifier = Modifier
                     .fillMaxSize()
                     .zIndex(-1f),
-                blurKey = framePrefs.keyFor(PrefManager.KEY_BLUR_BACKGROUND),
-                blurAmountKey = framePrefs.keyFor(PrefManager.KEY_BLUR_BACKGROUND_AMOUNT),
+                blurKey = remember {
+                    framePrefs.keyFor(PrefManager.KEY_BLUR_BACKGROUND)
+                },
+                blurAmountKey = remember {
+                    framePrefs.keyFor(PrefManager.KEY_BLUR_BACKGROUND_AMOUNT)
+                },
                 cornerRadiusKey = PrefManager.KEY_FRAME_CORNER_RADIUS,
             )
 
             wallpaper?.let { wallpaper ->
                 wallpaper.drawable?.let { drawable ->
+                    val maskedModeDimAmount by rememberPreferenceState(
+                        key = framePrefs.keyFor(PrefManager.KEY_MASKED_MODE_DIM_AMOUNT),
+                        value = { framePrefs.maskedModeDimAmount },
+                    )
+
                     Image(
                         painter = rememberDrawablePainter(drawable),
                         contentDescription = null,
@@ -223,6 +220,11 @@ fun MainWidgetFrameDelegate.WidgetFrameViewModel.WidgetFrameLayout(
                 exit = fadeOut(),
                 visible = !firstViewing,
             ) {
+                val pageIndicatorBehavior by rememberPreferenceState(
+                    key = PrefManager.KEY_PAGE_INDICATOR_BEHAVIOR,
+                    value = { context.prefManager.pageIndicatorBehavior },
+                )
+
                 AndroidView(
                     factory = { widgetGrid },
                     update = {
@@ -272,6 +274,11 @@ fun MainWidgetFrameDelegate.WidgetFrameViewModel.WidgetFrameLayout(
                     )
                 }
             }
+
+            val debugIdVisibility by rememberPreferenceState(
+                key = PrefManager.KEY_SHOW_DEBUG_ID_VIEW,
+                value = { context.prefManager.debugLog },
+            )
 
             androidx.compose.animation.AnimatedVisibility(
                 visible = debugIdVisibility,
@@ -359,6 +366,8 @@ fun MainWidgetFrameDelegate.WidgetFrameViewModel.WidgetFrameLayout(
                     )
                 }
             }
+
+            val selectingFrame by isSelectingFrame.collectAsState()
 
             androidx.compose.animation.AnimatedVisibility(
                 visible = selectingFrame,

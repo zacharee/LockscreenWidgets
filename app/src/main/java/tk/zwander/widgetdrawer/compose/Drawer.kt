@@ -52,14 +52,6 @@ fun DrawerDelegate.DrawerViewModel.Drawer(
 
     var itemToRemove by this.itemToRemove.collectAsMutableState()
     val selectedItem by this.selectedItem.collectAsState()
-    val blurStatusBarArea by rememberBooleanPreferenceState(
-        key = PrefManager.KEY_BLUR_DRAWER_STATUS_BAR_AREA,
-        defaultValue = true,
-    )
-    val backgroundOverStatusBar by rememberBooleanPreferenceState(
-        key = PrefManager.KEY_DRAWER_BACKGROUND_OVER_STATUS_BAR,
-        defaultValue = true,
-    )
 
     val drawerSidePadding by rememberPreferenceState(
         key = PrefManager.KEY_DRAWER_SIDE_PADDING,
@@ -95,6 +87,11 @@ fun DrawerDelegate.DrawerViewModel.Drawer(
         Box(
             modifier = Modifier.fillMaxSize(),
         ) {
+            val backgroundOverStatusBar by rememberBooleanPreferenceState(
+                key = PrefManager.KEY_DRAWER_BACKGROUND_OVER_STATUS_BAR,
+                defaultValue = true,
+            )
+
             Box(
                 modifier = Modifier.fillMaxSize()
                     .padding(
@@ -105,6 +102,11 @@ fun DrawerDelegate.DrawerViewModel.Drawer(
                         },
                     )
                     .background(backgroundColor)
+            )
+
+            val blurStatusBarArea by rememberBooleanPreferenceState(
+                key = PrefManager.KEY_BLUR_DRAWER_STATUS_BAR_AREA,
+                defaultValue = true,
             )
 
             Box(
