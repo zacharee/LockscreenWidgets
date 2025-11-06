@@ -546,20 +546,6 @@ abstract class BaseAdapter(
             )
         }
 
-        @Composable
-        private fun WidgetErrorContent(
-            modifier: Modifier = Modifier,
-        ) {
-            Box(
-                modifier = modifier,
-                contentAlignment = Alignment.Center,
-            ) {
-                Text(
-                    text = stringResource(R.string.bind_widget_error),
-                )
-            }
-        }
-
         private fun findScrollableViewsInHierarchy(root: View): List<View> {
             val ret = arrayListOf<View>()
 

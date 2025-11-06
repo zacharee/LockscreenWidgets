@@ -8,7 +8,7 @@ import android.content.pm.PackageManager
 import android.graphics.Color
 import android.view.View
 import android.widget.TextView
-import com.android.internal.R
+import tk.zwander.lockscreenwidgets.R
 
 val Context.appWidgetManager: AppWidgetManager
     get() = AppWidgetManager.getInstance(safeApplicationContext)
@@ -65,7 +65,8 @@ fun Context.getAllInstalledWidgetProviders(pkg: String? = null): List<AppWidgetP
 
 fun Context.createWidgetErrorView(): View {
     val tv = TextView(this)
-    tv.setText(R.string.gadget_host_error_inflating)
+    tv.setText(R.string.error_showing_widget)
+    tv.setTextColor(Color.WHITE)
 
     tv.setBackgroundColor(Color.argb(127, 0, 0, 0))
     return tv

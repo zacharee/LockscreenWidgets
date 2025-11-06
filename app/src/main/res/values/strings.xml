@@ -389,4 +389,6 @@
     <string name="unable_to_grant_storage_desc">It looks like you\'re using a device that restricts ADB\'s ability to grant permissions. The setting to allow this should be in Developer Options and called something similar to \"Disable Permission Monitoring\", \"USB Debugging (Security Setting)\", or \"Disable Permission Monitoring\". Once you\'ve toggled that option, come back here to try again.</string>
 
     <string name="developer_options">Developer Options</string>
+
+    <string name="error_showing_widget">Unable to show widget.</string>
 </resources>
