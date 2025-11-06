@@ -4,7 +4,6 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.util.Log
 import com.bugsnag.android.BreadcrumbType
-import com.bugsnag.android.Bugsnag
 import java.io.BufferedWriter
 import java.io.File
 import java.io.FileOutputStream
@@ -75,7 +74,7 @@ class LogUtils private constructor(private val context: Context) {
 
     fun debugLog(message: String, throwable: Throwable? = DefaultException(), leaveBreadcrumb: Boolean = true) {
         if (leaveBreadcrumb) {
-            Bugsnag.leaveBreadcrumb(
+            BugsnagUtils.leaveBreadcrumb(
                 message,
                 throwable?.takeIf { it !is DefaultException }?.let { mapOf("error" to throwable.stringify()) } ?: mapOf(),
                 BreadcrumbType.LOG,
@@ -99,7 +98,7 @@ class LogUtils private constructor(private val context: Context) {
         Log.e(NORMAL_LOG_TAG, fullMessage)
 
         if (leaveBreadcrumb) {
-            Bugsnag.leaveBreadcrumb(
+            BugsnagUtils.leaveBreadcrumb(
                 message,
                 throwable?.takeIf { it !is DefaultException }?.let { mapOf("error" to throwable.stringify()) } ?: mapOf(),
                 BreadcrumbType.ERROR,
@@ -128,7 +127,7 @@ class LogUtils private constructor(private val context: Context) {
                     }
                 } catch (e: Exception) {
                     Log.e(NORMAL_LOG_TAG, "Failed to export log.", e)
-                    Bugsnag.leaveBreadcrumb("Unable to export log.", mapOf("error" to e.stringify()), BreadcrumbType.ERROR)
+                    BugsnagUtils.leaveBreadcrumb("Unable to export log.", mapOf("error" to e.stringify()), BreadcrumbType.ERROR)
                 }
             }
         }
@@ -147,7 +146,7 @@ class LogUtils private constructor(private val context: Context) {
             write(string)
             flush()
         } catch (e: Exception) {
-            Bugsnag.leaveBreadcrumb("Unable to write to log file.", mapOf("error" to e.stringify()), BreadcrumbType.ERROR)
+            BugsnagUtils.leaveBreadcrumb("Unable to write to log file.", mapOf("error" to e.stringify()), BreadcrumbType.ERROR)
         }
     }
 

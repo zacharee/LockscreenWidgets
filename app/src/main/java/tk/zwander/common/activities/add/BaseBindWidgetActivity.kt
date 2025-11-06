@@ -17,12 +17,12 @@ import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
-import com.bugsnag.android.Bugsnag
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import tk.zwander.common.activities.BaseActivity
 import tk.zwander.common.data.WidgetData
 import tk.zwander.common.data.WidgetSizeData
 import tk.zwander.common.host.widgetHostCompat
+import tk.zwander.common.util.BugsnagUtils
 import tk.zwander.common.util.ConfigureLauncher
 import tk.zwander.common.util.FrameSizeAndPosition
 import tk.zwander.common.util.LSDisplay
@@ -136,7 +136,7 @@ abstract class BaseBindWidgetActivity : BaseActivity() {
                                     "Intent: ${prefManager.gson.toJson(data)}"
 
                             logUtils.normalLog(msg)
-                            Bugsnag.notify(IllegalStateException(msg))
+                            BugsnagUtils.notify(IllegalStateException(msg))
                         }
                     }
 
@@ -186,7 +186,7 @@ abstract class BaseBindWidgetActivity : BaseActivity() {
 
                                 if (!data.hasExtra(Intent.EXTRA_SHORTCUT_INTENT)) {
                                     logUtils.normalLog(msg)
-                                    Bugsnag.notify(Exception(msg))
+                                    BugsnagUtils.notify(Exception(msg))
                                 } else {
                                     logUtils.debugLog(msg)
                                 }

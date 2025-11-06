@@ -8,7 +8,6 @@ import android.view.WindowManager
 import android.view.accessibility.AccessibilityEvent
 import android.view.accessibility.AccessibilityWindowInfo
 import android.view.inputmethod.InputMethodManager
-import com.bugsnag.android.Bugsnag
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -101,7 +100,7 @@ class Accessibility : AccessibilityService(), EventObserver, CoroutineScope by M
 
         sharedPreferencesChangeHandler.register(this)
         eventManager.addObserver(this)
-        Bugsnag.leaveBreadcrumb("Accessibility service created.")
+        logUtils.debugLog("Accessibility service created.", null)
     }
 
     override fun onServiceConnected() {
@@ -120,7 +119,7 @@ class Accessibility : AccessibilityService(), EventObserver, CoroutineScope by M
         }
 
         eventManager.sendEvent(Event.RequestNotificationCount)
-        Bugsnag.leaveBreadcrumb("Accessibility service connected.")
+        logUtils.debugLog("Accessibility service connected.", null)
 
         launch(Dispatchers.Main) {
             runWindowOperation(
@@ -158,7 +157,7 @@ class Accessibility : AccessibilityService(), EventObserver, CoroutineScope by M
     }
 
     override fun onInterrupt() {
-        Bugsnag.leaveBreadcrumb("Accessibility service interrupted.")
+        logUtils.debugLog("Accessibility service interrupted.", null)
     }
 
     override suspend fun onEvent(event: Event) {
@@ -185,7 +184,7 @@ class Accessibility : AccessibilityService(), EventObserver, CoroutineScope by M
         eventManager.removeObserver(this)
         lsDisplayManager.onDestroy()
 
-        Bugsnag.leaveBreadcrumb("Accessibility service destroyed.")
+        logUtils.debugLog("Accessibility service destroyed.", null)
     }
 
     private fun updateState(transform: (State) -> State) {

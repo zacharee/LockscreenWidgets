@@ -18,7 +18,6 @@ import android.provider.Settings
 import android.service.notification.NotificationListenerService
 import android.service.notification.StatusBarNotification
 import com.bugsnag.android.BreadcrumbType
-import com.bugsnag.android.Bugsnag
 import kotlinx.atomicfu.atomic
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -26,6 +25,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
+import tk.zwander.common.util.BugsnagUtils
 import tk.zwander.common.util.Event
 import tk.zwander.common.util.EventObserver
 import tk.zwander.common.util.eventManager
@@ -145,13 +145,13 @@ class NotificationListener : NotificationListenerService(), EventObserver, Corou
                     logUtils.normalLog("Error sending notification count update", e)
 
                     if (e.cause !is DeadObjectException) {
-                        Bugsnag.notify(e)
+                        BugsnagUtils.notify(e)
                     }
                 } catch (e: OutOfMemoryError) {
                     logUtils.normalLog("Error sending notification count update", e)
                 } catch (e: Throwable) {
                     logUtils.normalLog("Error sending notification count update", e)
-                    Bugsnag.leaveBreadcrumb(
+                    BugsnagUtils.leaveBreadcrumb(
                         "Error sending notification count update",
                         mapOf("error" to e.stringify()),
                         BreadcrumbType.ERROR
@@ -247,7 +247,7 @@ class NotificationListener : NotificationListenerService(), EventObserver, Corou
             return try {
                 super.onTransact(code, data, reply, flags)
             } catch (e: Throwable) {
-                Bugsnag.leaveBreadcrumb(
+                BugsnagUtils.leaveBreadcrumb(
                     "Unable to receive notification update",
                     mapOf("error" to e.stringify()),
                     BreadcrumbType.ERROR
