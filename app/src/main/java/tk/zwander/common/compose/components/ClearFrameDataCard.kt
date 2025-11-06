@@ -33,6 +33,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import tk.zwander.common.util.FrameSizeAndPosition
 import tk.zwander.common.util.frameSizeAndPosition
+import tk.zwander.common.util.prefManager
 import tk.zwander.lockscreenwidgets.R
 
 private data class FrameDataItem(
@@ -57,12 +58,27 @@ fun ClearFrameDataCard(
                     context.frameSizeAndPosition.removeSizeForType(
                         FrameSizeAndPosition.FrameType.LockNormal.Landscape,
                     )
-                    context.frameSizeAndPosition.removeSizeForType(
+                    context.frameSizeAndPosition.removePositionForType(
                         FrameSizeAndPosition.FrameType.LockNormal.Portrait,
                     )
-                    context.frameSizeAndPosition.removeSizeForType(
+                    context.frameSizeAndPosition.removePositionForType(
                         FrameSizeAndPosition.FrameType.LockNormal.Landscape,
                     )
+
+                    context.prefManager.currentSecondaryFrames.forEach { frameId ->
+                        context.frameSizeAndPosition.removeSizeForType(
+                            FrameSizeAndPosition.FrameType.SecondaryLockscreen.Portrait(frameId),
+                        )
+                        context.frameSizeAndPosition.removeSizeForType(
+                            FrameSizeAndPosition.FrameType.SecondaryLockscreen.Landscape(frameId),
+                        )
+                        context.frameSizeAndPosition.removePositionForType(
+                            FrameSizeAndPosition.FrameType.SecondaryLockscreen.Portrait(frameId),
+                        )
+                        context.frameSizeAndPosition.removePositionForType(
+                            FrameSizeAndPosition.FrameType.SecondaryLockscreen.Landscape(frameId),
+                        )
+                    }
                 },
             ),
             FrameDataItem(
@@ -74,10 +90,10 @@ fun ClearFrameDataCard(
                     context.frameSizeAndPosition.removeSizeForType(
                         FrameSizeAndPosition.FrameType.NotificationNormal.Landscape,
                     )
-                    context.frameSizeAndPosition.removeSizeForType(
+                    context.frameSizeAndPosition.removePositionForType(
                         FrameSizeAndPosition.FrameType.NotificationNormal.Portrait,
                     )
-                    context.frameSizeAndPosition.removeSizeForType(
+                    context.frameSizeAndPosition.removePositionForType(
                         FrameSizeAndPosition.FrameType.NotificationNormal.Landscape,
                     )
                 },
@@ -91,10 +107,10 @@ fun ClearFrameDataCard(
                     context.frameSizeAndPosition.removeSizeForType(
                         FrameSizeAndPosition.FrameType.LockNotification.Landscape,
                     )
-                    context.frameSizeAndPosition.removeSizeForType(
+                    context.frameSizeAndPosition.removePositionForType(
                         FrameSizeAndPosition.FrameType.LockNotification.Portrait,
                     )
-                    context.frameSizeAndPosition.removeSizeForType(
+                    context.frameSizeAndPosition.removePositionForType(
                         FrameSizeAndPosition.FrameType.LockNotification.Landscape,
                     )
                 },
