@@ -28,6 +28,7 @@ data class GlobalState private constructor(
     val notificationsPanelFullyExpanded: MutableStateFlow<Boolean> = MutableStateFlow(false),
     val handlingClick: MutableStateFlow<Map<Int, Unit>> = MutableStateFlow(mapOf()),
     val itemIsActive: MutableStateFlow<Boolean> = MutableStateFlow(false),
+    val proxTooClose: MutableStateFlow<Boolean> = MutableStateFlow(false),
 ) {
     companion object {
         private var instance: GlobalState? = null

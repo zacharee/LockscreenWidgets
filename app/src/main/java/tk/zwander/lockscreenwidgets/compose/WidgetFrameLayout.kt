@@ -1,12 +1,7 @@
 package tk.zwander.lockscreenwidgets.compose
 
-import android.content.Context
 import android.graphics.PorterDuff
 import android.graphics.PorterDuffColorFilter
-import android.hardware.Sensor
-import android.hardware.SensorEvent
-import android.hardware.SensorEventListener2
-import android.hardware.SensorManager
 import android.view.ViewConfiguration
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.fadeIn
@@ -29,7 +24,6 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.contentColorFor
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -62,6 +56,7 @@ import tk.zwander.common.util.Event
 import tk.zwander.common.util.PrefManager
 import tk.zwander.common.util.collectAsMutableState
 import tk.zwander.common.util.eventManager
+import tk.zwander.common.util.globalState
 import tk.zwander.common.util.prefManager
 import tk.zwander.common.views.SnappyRecyclerView
 import tk.zwander.lockscreenwidgets.R
@@ -93,40 +88,12 @@ fun MainWidgetFrameDelegate.WidgetFrameViewModel.WidgetFrameLayout(
 
     val animatedBackgroundColor by animateColorAsState(backgroundColor)
 
-    var proxTooClose by remember {
-        mutableStateOf(false)
-    }
+    val proxTooClose by globalState.proxTooClose.collectAsState()
     var isInEditingMode by remember {
         mutableStateOf(false)
     }
     var removing by remember {
         mutableStateOf(false)
-    }
-
-    DisposableEffect(null) {
-        val sensorManager by lazy { context.getSystemService(Context.SENSOR_SERVICE) as SensorManager }
-
-        val proximityListener = object : SensorEventListener2 {
-            override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {}
-
-            override fun onFlushCompleted(sensor: Sensor?) {}
-
-            override fun onSensorChanged(event: SensorEvent) {
-                val dist = event.values[0]
-
-                proxTooClose = dist < event.sensor.maximumRange
-            }
-        }
-
-        sensorManager.registerListener(
-            proximityListener,
-            sensorManager.getDefaultSensor(Sensor.TYPE_PROXIMITY),
-            1 * 200 * 1000, /* 200ms */
-        )
-
-        onDispose {
-            sensorManager.unregisterListener(proximityListener)
-        }
     }
 
     Card(

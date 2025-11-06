@@ -6,6 +6,10 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.database.ContentObserver
+import android.hardware.Sensor
+import android.hardware.SensorEvent
+import android.hardware.SensorEventListener2
+import android.hardware.SensorManager
 import android.net.Uri
 import android.os.Build
 import android.os.PowerManager
@@ -91,7 +95,20 @@ class App : Application(), CoroutineScope by MainScope(), EventObserver {
         }
     }
 
+    private val proximityListener = object : SensorEventListener2 {
+        override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {}
+
+        override fun onFlushCompleted(sensor: Sensor?) {}
+
+        override fun onSensorChanged(event: SensorEvent) {
+            val dist = event.values[0]
+
+            globalState.proxTooClose.value = dist < event.sensor.maximumRange
+        }
+    }
+
     private val power by lazy { getSystemService(POWER_SERVICE) as PowerManager }
+    private val sensorManager by lazy { getSystemService(SENSOR_SERVICE) as SensorManager }
 
     init {
         BugsnagPerformance.reportApplicationClassLoaded()
@@ -221,6 +238,14 @@ class App : Application(), CoroutineScope by MainScope(), EventObserver {
             true,
             nightModeListener
         )
+
+        if (!sensorManager.getSensorList(Sensor.TYPE_PROXIMITY).isNullOrEmpty()) {
+            sensorManager.registerListener(
+                proximityListener,
+                sensorManager.getDefaultSensor(Sensor.TYPE_PROXIMITY),
+                1 * 200 * 1000, /* 200ms */
+            )
+        }
 
         migrationManager.runMigrations()
 
