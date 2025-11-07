@@ -53,7 +53,7 @@ class LSDisplayManager private constructor(context: Context) : ContextWrapper(co
             val display = displayManager.getDisplay(displayId)
 
             if (display == null) {
-                logUtils.debugLog("Unable to retrieve display $displayId", null)
+                logUtils.debugLog("Unable to retrieve display $displayId for add", null)
                 return
             }
 
@@ -73,13 +73,21 @@ class LSDisplayManager private constructor(context: Context) : ContextWrapper(co
         }
         override fun onDisplayChanged(displayId: Int) {
             logUtils.debugLog("Display $displayId changed", null)
-            availableDisplays.value = availableDisplays.value.toMutableMap().apply {
-                val display = displayManager.getDisplay(displayId)
-                this[displayId] = LSDisplay(
-                    display = display,
-                    fontScale = createDisplayContext(display).resources.configuration.fontScale,
-                )
+
+            val display = displayManager.getDisplay(displayId)
+
+            if (display == null) {
+                logUtils.debugLog("Unable to retrieve display $displayId for change", null)
+                return
             }
+
+            val newMap = availableDisplays.value.toMutableMap()
+            newMap[displayId] = LSDisplay(
+                display = display,
+                fontScale = createDisplayContext(display).resources.configuration.fontScale,
+            )
+
+            availableDisplays.value = newMap
         }
     }
 
