@@ -66,6 +66,7 @@ class App : Application(), CoroutineScope by MainScope(), EventObserver {
                     if (!power.isInteractive) {
                         globalState.isScreenOn.value = false
                         eventManager.sendEvent(Event.ScreenOff)
+                        unregisterProxListener()
 
                         logUtils.debugLog("Sending screen off", null)
                     }
@@ -75,6 +76,7 @@ class App : Application(), CoroutineScope by MainScope(), EventObserver {
 
                     if (power.isInteractive) {
                         globalState.isScreenOn.value = true
+                        registerProxListener()
 
                         logUtils.debugLog("Sending screen on", null)
                     }
@@ -239,13 +241,7 @@ class App : Application(), CoroutineScope by MainScope(), EventObserver {
             nightModeListener
         )
 
-        if (!sensorManager.getSensorList(Sensor.TYPE_PROXIMITY).isNullOrEmpty()) {
-            sensorManager.registerListener(
-                proximityListener,
-                sensorManager.getDefaultSensor(Sensor.TYPE_PROXIMITY),
-                1 * 200 * 1000, /* 200ms */
-            )
-        }
+        registerProxListener()
 
         migrationManager.runMigrations()
 
@@ -283,5 +279,20 @@ class App : Application(), CoroutineScope by MainScope(), EventObserver {
             }
             else -> {}
         }
+    }
+
+    private fun registerProxListener() {
+        if (!sensorManager.getSensorList(Sensor.TYPE_PROXIMITY).isNullOrEmpty()) {
+            sensorManager.registerListener(
+                proximityListener,
+                sensorManager.getDefaultSensor(Sensor.TYPE_PROXIMITY),
+                1 * 200 * 1000, /* 200ms */
+                1 * 50 * 1000, /* 50ms */
+            )
+        }
+    }
+
+    private fun unregisterProxListener() {
+        sensorManager.unregisterListener(proximityListener)
     }
 }
