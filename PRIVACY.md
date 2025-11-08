@@ -1,5 +1,13 @@
 # Data
-Lockscreen Widgets collects only the data necessary to function and provide crash reports. Any data not collected by Bugsnag is kept strictly on-device. This can be confirmed by browsing the source code.
+Lockscreen Widgets collects only the data necessary to function and provide crash reports. No personally identifiable information is collected.
+
+Examples of Bugsnag data collected:
+* Basic device info including model and Android version.
+* Stacktraces leading up to the crash.
+* Breadcrumb logs indicating what actions the app has taken leading up to the crash.
+* The current widgets added to the frames and the drawer, excluding their configuration.
+
+Any data not collected by Bugsnag is kept strictly on-device. This can be confirmed by browsing the source code.
 
 # Permissions
 ## Accessibility
@@ -14,7 +22,10 @@ Lockscreen Widgets uses this permission to activate the vibration motor for hapt
 Lockscreen Widgets uses this permission to prompt the user to dismiss the lock screen when needed.
 
 ## READ_EXTERNAL_STORAGE
-Lockscreen Widgets uses this permission on Android 12 and earlier to get the user's wallpaper for Masked Frame Mode.
+Lockscreen Widgets uses this permission to get the user's wallpaper for Masked Frame Mode.
+
+## READ_MEDIA_IMAGES
+Android 13 and later requires this additional permission to get the user's wallpaper for Masked Frame Mode.
 
 <!--## MANAGE_EXTERNAL_STORAGE
 Lockscreen Widgets uses this permission on Android 13 and later to get the user's wallpaper for Masked Frame Mode.
