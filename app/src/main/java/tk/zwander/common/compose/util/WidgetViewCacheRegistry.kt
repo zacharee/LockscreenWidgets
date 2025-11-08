@@ -6,6 +6,7 @@ import android.appwidget.AppWidgetProviderInfo
 import android.content.Context
 import android.view.ViewGroup
 import tk.zwander.common.host.widgetHostCompat
+import tk.zwander.common.util.logUtils
 import tk.zwander.common.util.safeApplicationContext
 
 val Context.widgetViewCacheRegistry: WidgetViewCacheRegistry
@@ -27,13 +28,22 @@ class WidgetViewCacheRegistry private constructor(@Suppress("unused") private va
     private val cachedViews = HashMap<Int, AppWidgetHostView>()
 
     fun getOrCreateView(context: Context, appWidgetId: Int, appWidget: AppWidgetProviderInfo): AppWidgetHostView {
-        val widgetContext = context.createApplicationContext(appWidget.providerInfo.applicationInfo, 0)
+        val widgetContext = try {
+            context.createApplicationContext(
+                appWidget.providerInfo.applicationInfo,
+                Context.CONTEXT_INCLUDE_CODE,
+            )
+        } catch (e: Throwable) {
+            context.logUtils.debugLog("Unable to create application context for " +
+                    "${appWidget.providerInfo.applicationInfo.packageName}", e)
+            null
+        }
         return cachedViews[appWidgetId]?.also {
             if (it.parent != null) {
                 (it.parent as ViewGroup).removeView(it)
             }
         } ?: context.widgetHostCompat.createView(
-            widgetContext, appWidgetId, appWidget,
+            widgetContext ?: context, appWidgetId, appWidget,
         ).also {
             cachedViews[appWidgetId] = it
         }
