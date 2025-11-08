@@ -8,6 +8,7 @@ import android.view.ViewGroup
 import tk.zwander.common.host.widgetHostCompat
 import tk.zwander.common.util.logUtils
 import tk.zwander.common.util.safeApplicationContext
+import tk.zwander.common.util.themedContext
 
 val Context.widgetViewCacheRegistry: WidgetViewCacheRegistry
     get() = WidgetViewCacheRegistry.getInstance(this)
@@ -29,7 +30,7 @@ class WidgetViewCacheRegistry private constructor(@Suppress("unused") private va
 
     fun getOrCreateView(context: Context, appWidgetId: Int, appWidget: AppWidgetProviderInfo): AppWidgetHostView {
         val widgetContext = try {
-            context.createApplicationContext(
+            context.safeApplicationContext.themedContext.createApplicationContext(
                 appWidget.providerInfo.applicationInfo,
                 Context.CONTEXT_INCLUDE_CODE,
             )
