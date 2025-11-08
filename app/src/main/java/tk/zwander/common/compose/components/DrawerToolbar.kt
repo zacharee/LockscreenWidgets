@@ -31,6 +31,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
@@ -120,6 +121,16 @@ fun DrawerToolbar(
                 overscrollEffect = overscroll,
             ),
         ) {
+            Icon(
+                painter = painterResource(R.drawable.arrow_up),
+                contentDescription = null,
+                modifier = Modifier
+                    .rotate(rotation)
+                    .size(32.dp)
+                    .offset(2.dp, 2.dp)
+                    .blur(2.dp),
+                tint = Color.DarkGray,
+            )
             Icon(
                 painter = painterResource(R.drawable.arrow_up),
                 contentDescription = stringResource(R.string.open_close_toolbar),
