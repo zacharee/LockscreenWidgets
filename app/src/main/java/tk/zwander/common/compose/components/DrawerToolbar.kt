@@ -2,6 +2,7 @@ package tk.zwander.common.compose.components
 
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.SpringSpec
+import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.gestures.AnchoredDraggableDefaults
 import androidx.compose.foundation.gestures.AnchoredDraggableState
@@ -121,13 +122,15 @@ fun DrawerToolbar(
                 overscrollEffect = overscroll,
             ),
         ) {
+            val animatedOffset by animateDpAsState(if (anchorState.targetValue) (-2).dp else 2.dp)
+
             Icon(
                 painter = painterResource(R.drawable.arrow_up),
                 contentDescription = null,
                 modifier = Modifier
                     .rotate(rotation)
                     .size(32.dp)
-                    .offset(2.dp, 2.dp)
+                    .offset(animatedOffset, animatedOffset)
                     .blur(2.dp),
                 tint = Color.DarkGray,
             )
