@@ -8,6 +8,7 @@ import android.graphics.Point
 import android.graphics.PointF
 import android.graphics.drawable.Drawable
 import android.view.Gravity
+import android.view.LayoutInflater
 import android.view.Surface
 import android.view.View
 import android.view.WindowManager
@@ -46,7 +47,7 @@ import tk.zwander.common.util.prefManager
 import tk.zwander.common.util.safeAddView
 import tk.zwander.common.util.safeRemoveView
 import tk.zwander.common.util.safeUpdateViewLayout
-import tk.zwander.common.util.themedLayoutInflater
+import tk.zwander.common.util.themedContext
 import tk.zwander.common.util.wallpaperUtils
 import tk.zwander.lockscreenwidgets.adapters.WidgetFrameAdapter
 import tk.zwander.lockscreenwidgets.compose.WidgetFrameLayout
@@ -208,7 +209,9 @@ open class MainWidgetFrameDelegate protected constructor(
     }
 
     private val widgetGrid by lazy {
-        WidgetGridHolderBinding.inflate(themedLayoutInflater).root
+        WidgetGridHolderBinding.inflate(
+            LayoutInflater.from(themedContext),
+        ).root
     }
 
     private val frame by lazy {
