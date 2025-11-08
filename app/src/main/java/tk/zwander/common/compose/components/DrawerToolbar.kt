@@ -34,6 +34,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
@@ -145,7 +146,12 @@ fun DrawerToolbar(
         }
 
         Surface(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth()
+                .shadow(
+                    elevation = 8.dp,
+                    clip = false,
+                    shape = RoundedCornerShape(24.dp),
+                ),
             shape = RoundedCornerShape(24.dp),
         ) {
             Row(
