@@ -127,19 +127,17 @@ fun DebugCard(
                     ) {
                         Spacer(modifier = Modifier.size(8.dp))
 
-                        val debugEnabled = PreferenceSwitch(
+                        PreferenceSwitch(
                             key = PrefManager.KEY_DEBUG_LOG,
                             title = stringResource(id = R.string.settings_screen_debug_log),
                             summary = stringResource(id = R.string.settings_screen_debug_log_desc),
                         )
 
-                        AnimatedVisibility(visible = debugEnabled) {
-                            PreferenceSwitch(
-                                key = PrefManager.KEY_SHOW_DEBUG_ID_VIEW,
-                                title = stringResource(id = R.string.settings_screen_show_debug_id_view),
-                                summary = stringResource(id = R.string.settings_screen_show_debug_id_view_desc),
-                            )
-                        }
+                        PreferenceSwitch(
+                            key = PrefManager.KEY_SHOW_DEBUG_ID_VIEW,
+                            title = stringResource(id = R.string.settings_screen_show_debug_id_view),
+                            summary = stringResource(id = R.string.settings_screen_show_debug_id_view_desc),
+                        )
 
                         ClickableCard(
                             title = stringResource(id = R.string.settings_screen_export_debug_log),

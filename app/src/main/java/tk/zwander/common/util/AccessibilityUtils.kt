@@ -353,25 +353,33 @@ object AccessibilityUtils {
         getWindows: () -> List<AccessibilityWindowInfo>?,
         initialRun: Boolean = false,
     ) {
-        logUtils.debugLog("Trying to run window operation " +
-                "${initialRun}, " +
-                "${isScreenOn}, " +
-                "${isOnKeyguard}, " +
-                "${prefManager.widgetFrameEnabled}, " +
-                "${prefManager.drawerEnabled}, " +
-                "${drawerDelegate.isAttached}, " +
-                "${prefManager.drawerHideWhenNotificationPanelOpen}",
+        logUtils.debugLog(
+            "Trying to run window operation " +
+                    "${initialRun}, " +
+                    "${isScreenOn}, " +
+                    "${isOnKeyguard}, " +
+                    "${prefManager.widgetFrameEnabled}, " +
+                    "${prefManager.drawerEnabled}, " +
+                    "${drawerDelegate.isAttached}, " +
+                    "${prefManager.drawerHideWhenNotificationPanelOpen}",
             null,
         )
 
         //The below block can (very rarely) take over half a second to execute, so only run it
         //if we actually need to (i.e. on the lock screen and screen is on).
         if (initialRun || (isScreenOn &&
-                    (((isOnKeyguard || FrameSpecificPreferences.doAnyFramesHaveSettingEnabled(this, PrefManager.KEY_SHOW_IN_NOTIFICATION_CENTER)) &&
+                    (((isOnKeyguard || FrameSpecificPreferences.doAnyFramesHaveSettingEnabled(
+                        this,
+                        PrefManager.KEY_SHOW_IN_NOTIFICATION_CENTER,
+                    )) &&
                             prefManager.widgetFrameEnabled /* This is only needed when the frame is enabled */) ||
-                            (prefManager.drawerEnabled && drawerDelegate.isAttached && prefManager.drawerHideWhenNotificationPanelOpen)))) {
+                            (prefManager.drawerEnabled && drawerDelegate.isAttached && prefManager.drawerHideWhenNotificationPanelOpen)))
+        ) {
 
-            logUtils.debugLog("Running window operation.", if (initialRun) LogUtils.DefaultException() else null)
+            logUtils.debugLog(
+                "Running window operation.",
+                if (initialRun) LogUtils.DefaultException() else null
+            )
 
             val windowInfo = getWindows()?.let {
                 processWindows(it).also { windowInfo ->
@@ -397,11 +405,13 @@ object AccessibilityUtils {
                         null,
                     )
                 }
+            }
 
+            if (prefManager.showDebugIdView) {
                 windowInfo?.sysUiWindowViewIds?.let { sysUiWindowViewIds ->
                     coroutineScope {
-                        launch(Dispatchers.Main) {
-                            frameDelegates.forEach { (_, frameDelegate) ->
+                        frameDelegates.forEach { (_, frameDelegate) ->
+                            launch(Dispatchers.Main) {
                                 frameDelegate.setNewDebugIdItems(sysUiWindowViewIds.toList())
                             }
                         }
@@ -416,9 +426,11 @@ object AccessibilityUtils {
                 //Samsung's Screen-Off Memo is really just a normal Activity that shows over the lock screen.
                 //However, it's not an Application-type window for some reason, so it won't hide with the
                 //currentAppLayer check. Explicitly check for its existence here.
-                globalState.isOnScreenOffMemo.value = isOnKeyguard && windowInfo.hasScreenOffMemoWindow
+                globalState.isOnScreenOffMemo.value =
+                    isOnKeyguard && windowInfo.hasScreenOffMemoWindow
                 globalState.isOnEdgePanel.value = windowInfo.hasEdgePanelWindow
-                globalState.isOnFaceWidgets.value = windowInfo.hasFaceWidgetsWindow || windowInfo.nodeState.onFaceWidgets.value
+                globalState.isOnFaceWidgets.value =
+                    windowInfo.hasFaceWidgetsWindow || windowInfo.nodeState.onFaceWidgets.value
                 //Generate "layer" values for the System UI window and for the topmost app window, if
                 //it exists.
                 //currentAppLayer *should* be -1 even if there's an app open in the background,
@@ -426,18 +438,23 @@ object AccessibilityUtils {
                 //interacted with. The only time it should be anything else (usually 1) is
                 //if an app is displaying above the keyguard, such as the incoming call
                 //screen or the camera.
-                globalState.currentAppLayer.value = if (windowInfo.topAppWindowIndex != -1) windowInfo.windows.size - windowInfo.topAppWindowIndex else windowInfo.topAppWindowIndex
-                globalState.currentSysUiLayer.value = if (windowInfo.minSysUiWindowIndex != -1) windowInfo.windows.size - windowInfo.minSysUiWindowIndex else windowInfo.minSysUiWindowIndex
-                globalState.currentSystemLayer.value = if (windowInfo.topNonSysUiWindowIndex != -1) windowInfo.windows.size - windowInfo.topNonSysUiWindowIndex else windowInfo.topNonSysUiWindowIndex
+                globalState.currentAppLayer.value =
+                    if (windowInfo.topAppWindowIndex != -1) windowInfo.windows.size - windowInfo.topAppWindowIndex else windowInfo.topAppWindowIndex
+                globalState.currentSysUiLayer.value =
+                    if (windowInfo.minSysUiWindowIndex != -1) windowInfo.windows.size - windowInfo.minSysUiWindowIndex else windowInfo.minSysUiWindowIndex
+                globalState.currentSystemLayer.value =
+                    if (windowInfo.topNonSysUiWindowIndex != -1) windowInfo.windows.size - windowInfo.topNonSysUiWindowIndex else windowInfo.topNonSysUiWindowIndex
                 //This is mostly a debug value to see which app LSWidg thinks is on top.
                 globalState.currentAppPackage.value = windowInfo.topAppWindowPackageName
                 globalState.hidingForPresentApp.value = windowInfo.hasHideForPresentApp
                 globalState.onMainLockScreen.value = windowInfo.nodeState.onMainLockscreen.value
                 globalState.showingNotificationsPanel.value = notificationsAreOpen
-                globalState.notificationsPanelFullyExpanded.value = (windowInfo.nodeState.hasMoreButton.value) || (windowInfo.nodeState.hasSettingsContainerButton.value &&
-                        !windowInfo.nodeState.hasClearAllButton.value)
+                globalState.notificationsPanelFullyExpanded.value =
+                    (windowInfo.nodeState.hasMoreButton.value) || (windowInfo.nodeState.hasSettingsContainerButton.value &&
+                            !windowInfo.nodeState.hasClearAllButton.value)
                 globalState.hideForPresentIds.value = windowInfo.nodeState.hideForPresentIds.value
-                globalState.hideForNonPresentIds.value = windowInfo.nodeState.hideForNonPresentIds.value
+                globalState.hideForNonPresentIds.value =
+                    windowInfo.nodeState.hideForNonPresentIds.value
 
                 frameDelegates.forEach { (_, frameDelegate) ->
                     frameDelegate.updateWindowState(
@@ -449,16 +466,17 @@ object AccessibilityUtils {
                     notificationsWereOpen != notificationsAreOpen &&
                     notificationsAreOpen &&
                     drawerDelegate.isAttached &&
-                    prefManager.drawerHideWhenNotificationPanelOpen) {
+                    prefManager.drawerHideWhenNotificationPanelOpen
+                ) {
                     eventManager.sendEvent(Event.CloseDrawer)
                 }
             }
 
             logUtils.debugLog(
                 "NewState\n" +
-                "${frameDelegates.values.first().state}\n" +
-                "${drawerDelegate.state}\n" +
-                "$globalState",
+                        "${frameDelegates.values.first().state}\n" +
+                        "${drawerDelegate.state}\n" +
+                        "$globalState",
                 null,
             )
 
@@ -466,23 +484,27 @@ object AccessibilityUtils {
                 windowInfo.sysUiWindowNodes.forEachParallel { node ->
                     try {
                         node.isSealed = false
-                    } catch (_: Throwable) {}
+                    } catch (_: Throwable) {
+                    }
 
                     try {
                         @Suppress("DEPRECATION")
                         node.recycle()
-                    } catch (_: IllegalStateException) {}
+                    } catch (_: IllegalStateException) {
+                    }
                 }
 
                 windowInfo.windows.forEachParallel {
                     try {
                         it.root?.isSealed = false
-                    } catch (_: Throwable) {}
+                    } catch (_: Throwable) {
+                    }
 
                     try {
                         @Suppress("DEPRECATION")
                         it.root?.recycle()
-                    } catch (_: IllegalStateException) {}
+                    } catch (_: IllegalStateException) {
+                    }
                 }
             }
         }
@@ -522,7 +544,10 @@ object AccessibilityUtils {
             if (isDebug) {
                 // Nest this in the debug check so that loop doesn't have to run always.
                 try {
-                    logUtils.debugLog("Source Node ID: ${event.sourceNodeId}, Window ID: ${event.windowId}, Source ID Name: ${event.source?.viewIdResourceName}", null)
+                    logUtils.debugLog(
+                        "Source Node ID: ${event.sourceNodeId}, Window ID: ${event.windowId}, Source ID Name: ${event.source?.viewIdResourceName}",
+                        null
+                    )
 
                     if (event.recordCount > 0) {
                         logUtils.debugLog(
@@ -544,7 +569,10 @@ object AccessibilityUtils {
                 }
             }
 
-            logUtils.debugLog("Accessibility event: $event, isScreenOn: ${globalState.isScreenOn.value}, wasOnKeyguard: ${globalState.wasOnKeyguard.value}, ${drawerDelegate.state}", null)
+            logUtils.debugLog(
+                "Accessibility event: $event, isScreenOn: ${globalState.isScreenOn.value}, wasOnKeyguard: ${globalState.wasOnKeyguard.value}, ${drawerDelegate.state}",
+                null
+            )
 
             frameDelegates.forEach { (_, frameDelegate) ->
                 frameDelegate.updateStateAndWindowState(

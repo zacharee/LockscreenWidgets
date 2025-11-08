@@ -96,6 +96,21 @@ fun ClearFrameDataCard(
                     context.frameSizeAndPosition.removePositionForType(
                         FrameSizeAndPosition.FrameType.NotificationNormal.Landscape,
                     )
+
+                    context.prefManager.currentSecondaryFrames.forEach { frameId ->
+                        context.frameSizeAndPosition.removeSizeForType(
+                            FrameSizeAndPosition.FrameType.SecondaryNotification.Portrait(frameId),
+                        )
+                        context.frameSizeAndPosition.removeSizeForType(
+                            FrameSizeAndPosition.FrameType.SecondaryNotification.Landscape(frameId),
+                        )
+                        context.frameSizeAndPosition.removePositionForType(
+                            FrameSizeAndPosition.FrameType.SecondaryNotification.Portrait(frameId),
+                        )
+                        context.frameSizeAndPosition.removePositionForType(
+                            FrameSizeAndPosition.FrameType.SecondaryNotification.Landscape(frameId),
+                        )
+                    }
                 },
             ),
             FrameDataItem(
@@ -113,6 +128,21 @@ fun ClearFrameDataCard(
                     context.frameSizeAndPosition.removePositionForType(
                         FrameSizeAndPosition.FrameType.LockNotification.Landscape,
                     )
+
+                    context.prefManager.currentSecondaryFrames.forEach { frameId ->
+                        context.frameSizeAndPosition.removeSizeForType(
+                            FrameSizeAndPosition.FrameType.SecondaryLockNotification.Portrait(frameId),
+                        )
+                        context.frameSizeAndPosition.removeSizeForType(
+                            FrameSizeAndPosition.FrameType.SecondaryLockNotification.Landscape(frameId),
+                        )
+                        context.frameSizeAndPosition.removePositionForType(
+                            FrameSizeAndPosition.FrameType.SecondaryLockNotification.Portrait(frameId),
+                        )
+                        context.frameSizeAndPosition.removePositionForType(
+                            FrameSizeAndPosition.FrameType.SecondaryLockNotification.Landscape(frameId),
+                        )
+                    }
                 },
             ),
         )

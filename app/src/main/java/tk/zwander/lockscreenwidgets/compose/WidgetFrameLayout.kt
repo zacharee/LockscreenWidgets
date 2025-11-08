@@ -244,7 +244,7 @@ fun MainWidgetFrameDelegate.WidgetFrameViewModel.WidgetFrameLayout(
 
             val debugIdVisibility by rememberPreferenceState(
                 key = PrefManager.KEY_SHOW_DEBUG_ID_VIEW,
-                value = { context.prefManager.debugLog },
+                value = { context.prefManager.showDebugIdView },
             )
 
             androidx.compose.animation.AnimatedVisibility(

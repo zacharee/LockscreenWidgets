@@ -155,17 +155,31 @@ open class MainWidgetFrameDelegate protected constructor(
             val isLandscape = prefManager.separateFrameLayoutForLandscape &&
                     (state.screenOrientation == Surface.ROTATION_90 ||
                         state.screenOrientation == Surface.ROTATION_270)
+            val isMainFrame = id == -1
 
             return when {
-                id != -1 -> FrameSizeAndPosition.FrameType.SecondaryLockscreen.select(!isLandscape, id)
                 globalState.notificationsPanelFullyExpanded.value && framePrefs.showInNotificationShade -> {
                     if (kgm.isKeyguardLocked && framePrefs.separateLockNCPosition) {
-                        FrameSizeAndPosition.FrameType.LockNotification.select(!isLandscape)
+                        if (isMainFrame) {
+                            FrameSizeAndPosition.FrameType.LockNotification.select(!isLandscape)
+                        } else {
+                            FrameSizeAndPosition.FrameType.SecondaryLockNotification.select(!isLandscape, id)
+                        }
                     } else {
-                        FrameSizeAndPosition.FrameType.NotificationNormal.select(!isLandscape)
+                        if (isMainFrame) {
+                            FrameSizeAndPosition.FrameType.NotificationNormal.select(!isLandscape)
+                        } else {
+                            FrameSizeAndPosition.FrameType.SecondaryNotification.select(!isLandscape, id)
+                        }
                     }
                 }
-                else -> FrameSizeAndPosition.FrameType.LockNormal.select(!isLandscape)
+                else -> {
+                    if (isMainFrame) {
+                        FrameSizeAndPosition.FrameType.LockNormal.select(!isLandscape)
+                    } else {
+                        FrameSizeAndPosition.FrameType.SecondaryLockscreen.select(!isLandscape, id)
+                    }
+                }
             }
         }
 

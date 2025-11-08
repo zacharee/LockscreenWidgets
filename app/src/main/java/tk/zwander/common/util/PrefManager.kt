@@ -452,7 +452,7 @@ class PrefManager private constructor(private val context: Context) {
     //Whether to show the debug ID list overlay on the widget frame.
     //Only true if debugLog is true.
     var showDebugIdView: Boolean
-        get() = getBoolean(KEY_SHOW_DEBUG_ID_VIEW, false) && debugLog
+        get() = getBoolean(KEY_SHOW_DEBUG_ID_VIEW, false)
         set(value) {
             putBoolean(KEY_SHOW_DEBUG_ID_VIEW, value)
         }
