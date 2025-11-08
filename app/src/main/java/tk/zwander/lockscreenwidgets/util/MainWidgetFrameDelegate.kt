@@ -595,7 +595,7 @@ open class MainWidgetFrameDelegate protected constructor(
         globalState.handlingClick.value = globalState.handlingClick.value.toMutableMap().also {
             it.remove(id)
         }
-        forceWakelock(false)
+        forceWakelock(on = false, updateOverlay = false)
 
         mainHandler.post {
             logUtils.debugLog("Trying to remove overlay ${viewModel.animationState.value}", null)
@@ -829,14 +829,16 @@ open class MainWidgetFrameDelegate protected constructor(
      * @param wm the WindowManager to use.
      * @param on whether to add or remove the force flag.
      */
-    private fun forceWakelock(on: Boolean) {
+    private fun forceWakelock(on: Boolean, updateOverlay: Boolean = true) {
         if (on) {
             params.flags = params.flags or WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON
         } else {
             params.flags = params.flags and WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON.inv()
         }
 
-        updateOverlay()
+        if (updateOverlay) {
+            updateOverlay()
+        }
     }
 
     private fun updateOverlay() {
