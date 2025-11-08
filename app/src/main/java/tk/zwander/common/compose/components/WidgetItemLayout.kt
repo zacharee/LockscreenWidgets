@@ -319,20 +319,28 @@ fun Modifier.dragDetection(
         peekLogUtils?.debugLog("Dragging $which: dx=$deltaX, dy=$deltaY, newDx=$newDx, newDy=$newDy", null)
 
         if (which == Which.LEFT || which == Which.RIGHT) {
-            if (newDx.absoluteValue > threshold) {
+            totalDeltaX = if (newDx.absoluteValue > threshold) {
                 val reportedDx = threshold * newDx.sign
-                resizeCallback(true, newDx.sign.toInt(), reportedDx.absoluteValue.toInt())
-                totalDeltaX = newDx - threshold
+                resizeCallback(true, newDx.sign.toInt(), reportedDx.toInt())
+                if (newDx < 0) {
+                    newDx + threshold
+                } else {
+                    newDx - threshold
+                }
             } else {
-                totalDeltaX = newDx
+                newDx
             }
         } else {
-            if (newDy.absoluteValue > threshold) {
+            totalDeltaY = if (newDy.absoluteValue > threshold) {
                 val reportedDy = threshold * newDy.sign
-                resizeCallback(true, newDy.sign.toInt(), reportedDy.sign.toInt())
-                totalDeltaY = newDy - threshold
+                resizeCallback(true, newDy.sign.toInt(), reportedDy.toInt())
+                if (newDy < 0) {
+                    newDy + threshold
+                } else {
+                    newDy - threshold
+                }
             } else {
-                totalDeltaY = newDy
+                newDy
             }
         }
     }

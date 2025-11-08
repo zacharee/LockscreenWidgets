@@ -266,6 +266,9 @@ abstract class BaseAdapter(
     @SuppressLint("ClickableViewAccessibility")
     inner class WidgetVH(binding: ComposeViewHolderBinding) : BaseVH<WidgetData>(binding),
         EventObserver {
+        private val currentData: WidgetData?
+            get() = widgets.getOrNull(bindingAdapterPosition)
+
         private fun openWidgetConfig(currentData: WidgetData) {
             val provider = currentData.widgetProviderComponent
 
@@ -344,7 +347,7 @@ abstract class BaseAdapter(
                         },
                         onResize = { overThreshold, step, amount, direction, vertical ->
                             handleResize(
-                                currentData = data,
+                                currentData = currentData ?: data,
                                 overThreshold = overThreshold,
                                 step = step,
                                 amount = amount,
@@ -620,9 +623,8 @@ abstract class BaseAdapter(
                 layoutParams = layoutParams.apply {
                     onWidgetResize(data, this, amount, direction)
                 }
-
-                forceLayout()
-                invalidate()
+//                forceLayout()
+//                invalidate()
             }
         }
     }
