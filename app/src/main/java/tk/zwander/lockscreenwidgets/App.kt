@@ -243,8 +243,6 @@ class App : Application(), CoroutineScope by MainScope(), EventObserver {
 
         registerProxListener()
 
-        logUtils.normalLog("${prefManager.currentSecondaryFrames}")
-
         migrationManager.runMigrations()
 
         eventManager.addObserver(this)
