@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:tools="http://schemas.android.com/tools">
     <string name="version_template">v%s</string>
-    <string name="edit_gesture_hint">Tippen Sie auf den Widget-Rahmen mit zwei Fingern, um ihn zu bewegen und zu verändern.</string>
+    <string name="edit_gesture_hint">Tippe auf den Widget-Rahmen mit zwei Fingern, um ihn zu bewegen und zu verändern.</string>
     <string name="edit_gesture_hint_2">Super! Drücke mit zwei Fingern, um die Bearbeitungsoberfläche zu verstecken.</string>
     <string name="hide_gesture_hint">Tippe auf den Widget-Rahmen mit drei Fingern, um ihn vorübergehend auszublenden. Er bleibt versteckt, bis du das Display aus und wieder anschaltest.</string>
     <string name="accessibility_service_desc">Lockscreen Widgets braucht einen Bedienungshilfen-Dienst um Widgets auf dem Sperrbildschirm und dem Benachrichtigungs- und Schnelleinstellungsmenü anzuzeigen. Keine Daten werden gesammelt und keine Aktionen werden auf dem Bildschirm ausgeführt.</string>
@@ -229,13 +229,13 @@
     <string name="drawer_blur_status_bar_area">Trübe den Bereich der Statusleiste</string>
     <string name="drawer_blur_status_bar_area_desc">Zeige den Trübungseffekt über der Statusleiste.</string>
     <string name="drawer_background_over_status_bar">Hintergrundfarbe über der Statusleiste anzeigen</string>
-    <string name="drawer_background_over_status_bar_desc">Zeige die Hintergrundfarbe der Leiste oben in der Statusleiste. Wenn Sie eine undurchsichtige Hintergrundfarbe haben, sollten Sie diese Option ausschalten.</string>
+    <string name="drawer_background_over_status_bar_desc">Zeige die Hintergrundfarbe der Leiste oben in der Statusleiste. Wenn du eine undurchsichtige Hintergrundfarbe hast, solltest du diese Option ausschalten.</string>
     <string name="show_only_when_locked">Nur anzeigen, wenn gesperrt</string>
     <string name="show_only_when_locked_desc">Zeige den Griff der Leiste nur an, wenn sich das Gerät auf dem Sperrbildschirm befindet.</string>
     <string name="debug_enable_bugsnag">Bugsnag aktivieren</string>
-    <string name="debug_enable_bugsnag_desc">Lockscreen Widgets verwendet Bugsnag, um anonyme Absturzberichte zu sammeln. Um die Sammlung vollständig zu deaktivieren, müssen Sie das Stoppen erzwingen und Lockscreen Widgets erneut öffnen.</string>
+    <string name="debug_enable_bugsnag_desc">Lockscreen Widgets verwendet Bugsnag, um anonyme Absturzberichte zu sammeln. Um die Sammlung vollständig zu deaktivieren, musst du das Stoppen erzwingen und Lockscreen Widgets erneut öffnen.</string>
     <string name="icon_pack">Symbolpaket</string>
-    <string name="icon_pack_desc">Wählen Sie ein Symbolpaket für Verknüpfungssymbole aus. Dies gilt sowohl für den Rahmen als auch für die Leiste.</string>
+    <string name="icon_pack_desc">Wähle ein Symbolpaket für Verknüpfungssymbole aus. Dies gilt sowohl für den Rahmen als auch für die Leiste.</string>
     <string name="allow_show_frame">Zeigen des Rahmens erlauben</string>
     <string name="disallow_show_frame">Zeigen des Rahmens nicht erlauben</string>
     <string name="frame_allowed_to_show">Rahmen erlaubt zu zeigen</string>
