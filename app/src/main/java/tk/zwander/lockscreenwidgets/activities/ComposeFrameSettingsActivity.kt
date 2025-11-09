@@ -685,6 +685,11 @@ class ComposeFrameSettingsActivity : BaseActivity(), EventObserver {
                             requireLsDisplayManager
                         }
                         val displays by lsDisplayManager.availableDisplays.collectAsState()
+                        val density = LocalDensity.current
+
+                        var maxDisplayWidth by remember {
+                            mutableStateOf(0.dp)
+                        }
 
                         LazyColumn(
                             modifier = Modifier.fillMaxWidth(),
@@ -707,7 +712,7 @@ class ComposeFrameSettingsActivity : BaseActivity(), EventObserver {
                                     Box(
                                         modifier = Modifier
                                             .fillMaxWidth()
-                                            .heightIn(min = 48.dp)
+                                            .heightIn(min = 56.dp)
                                             .padding(horizontal = 8.dp),
                                         contentAlignment = Alignment.Center,
                                     ) {
@@ -718,31 +723,43 @@ class ComposeFrameSettingsActivity : BaseActivity(), EventObserver {
                                         ) {
                                             Text(text = "${display.display.name} (${displayId})")
 
-                                            val density = LocalDensity.current
                                             val (width, height) = remember(displayId) {
                                                 with (density) {
                                                     val screenSize = display.realSize
                                                     val screenWidth = screenSize.x
                                                     val screenHeight = screenSize.y
 
-                                                    val desiredHeight = 36.dp
+                                                    val desiredHeight = 48.dp
                                                     val actualHeight = screenHeight.toDp()
 
                                                     val heightRatio = desiredHeight / actualHeight
 
                                                     val scaledWidth = (screenWidth * heightRatio).toDp()
 
+                                                    if (scaledWidth > maxDisplayWidth) {
+                                                        maxDisplayWidth = scaledWidth
+                                                    }
+
                                                     scaledWidth to desiredHeight
                                                 }
                                             }
 
                                             Box(
-                                                modifier = Modifier.border(
-                                                    width = 1.dp,
-                                                    color = LocalContentColor.current,
-                                                    shape = RoundedCornerShape(2.dp),
-                                                ).width(width).height(height)
-                                            )
+                                                contentAlignment = Alignment.Center,
+                                                modifier = if (maxDisplayWidth > 0.dp) {
+                                                    Modifier.width(maxDisplayWidth)
+                                                } else {
+                                                    Modifier
+                                                },
+                                            ) {
+                                                Box(
+                                                    modifier = Modifier.border(
+                                                        width = 1.dp,
+                                                        color = LocalContentColor.current,
+                                                        shape = RoundedCornerShape(2.dp),
+                                                    ).width(width).height(height),
+                                                )
+                                            }
                                         }
                                     }
                                 }
