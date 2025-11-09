@@ -391,4 +391,6 @@
     <string name="developer_options">Developer Options</string>
 
     <string name="error_showing_widget">Unable to show widget.</string>
+
+    <string name="select_display">Select Display</string>
 </resources>

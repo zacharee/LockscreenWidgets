@@ -566,7 +566,7 @@ class ComposeFrameSettingsActivity : BaseActivity(), EventObserver {
                         pendingFrameId = null
                     },
                     title = {
-                        Text(text = "Select Display")
+                        Text(text = stringResource(R.string.select_display))
                     },
                     text = {
                         val lsDisplayManager = remember {
