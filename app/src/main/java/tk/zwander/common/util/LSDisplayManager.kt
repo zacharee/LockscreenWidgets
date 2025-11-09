@@ -50,20 +50,7 @@ class LSDisplayManager private constructor(context: Context) : ContextWrapper(co
         override fun onDisplayAdded(displayId: Int) {
             logUtils.debugLog("Display $displayId added", null)
 
-            val display = displayManager.getDisplay(displayId)
-
-            if (display == null) {
-                logUtils.debugLog("Unable to retrieve display $displayId for add", null)
-                return
-            }
-
-            val newMap = availableDisplays.value.toMutableMap()
-            newMap[displayId] = LSDisplay(
-                display = display,
-                fontScale = createDisplayContext(display).resources.configuration.fontScale,
-            )
-
-            availableDisplays.value = newMap
+            processDisplay(displayId)
         }
         override fun onDisplayRemoved(displayId: Int) {
             logUtils.debugLog("Display $displayId removed", null)
@@ -74,20 +61,7 @@ class LSDisplayManager private constructor(context: Context) : ContextWrapper(co
         override fun onDisplayChanged(displayId: Int) {
             logUtils.debugLog("Display $displayId changed", null)
 
-            val display = displayManager.getDisplay(displayId)
-
-            if (display == null) {
-                logUtils.debugLog("Unable to retrieve display $displayId for change", null)
-                return
-            }
-
-            val newMap = availableDisplays.value.toMutableMap()
-            newMap[displayId] = LSDisplay(
-                display = display,
-                fontScale = createDisplayContext(display).resources.configuration.fontScale,
-            )
-
-            availableDisplays.value = newMap
+            processDisplay(displayId)
         }
     }
 
@@ -110,6 +84,7 @@ class LSDisplayManager private constructor(context: Context) : ContextWrapper(co
     }
 
     fun getDisplay(displayId: Int): LSDisplay? {
+        processDisplay(displayId)
         return availableDisplays.value[displayId]
     }
 
@@ -120,6 +95,23 @@ class LSDisplayManager private constructor(context: Context) : ContextWrapper(co
 
     fun collectDisplay(displayId: Int): Flow<LSDisplay?> {
         return availableDisplays.map { it[displayId] }
+    }
+
+    private fun processDisplay(displayId: Int) {
+        val display = displayManager.getDisplay(displayId)
+
+        if (display == null) {
+            logUtils.debugLog("Unable to retrieve display $displayId for add", null)
+            return
+        }
+
+        val newMap = availableDisplays.value.toMutableMap()
+        newMap[displayId] = LSDisplay(
+            display = display,
+            fontScale = createDisplayContext(display).resources.configuration.fontScale,
+        )
+
+        availableDisplays.value = newMap
     }
 }
 

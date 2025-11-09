@@ -52,9 +52,9 @@ class Accessibility : AccessibilityService(), EventObserver, CoroutineScope by M
     private val lsDisplayManager by lazy { LSDisplayManager.getInstance(this) }
     private val wm by lazy { lsDisplayManager.windowManager }
     private val frameDelegate: MainWidgetFrameDelegate
-        get() = MainWidgetFrameDelegate.getInstance(this, wm, Display.DEFAULT_DISPLAY)
+        get() = MainWidgetFrameDelegate.getInstance(this, Display.DEFAULT_DISPLAY)
     private val drawerDelegate: DrawerDelegate
-        get() = DrawerDelegate.getInstance(this, wm, Display.DEFAULT_DISPLAY)
+        get() = DrawerDelegate.getInstance(this, Display.DEFAULT_DISPLAY)
     private val secondaryFrameDelegates = hashMapOf<Int, SecondaryWidgetFrameDelegate>()
 
     private val sharedPreferencesChangeHandler = HandlerRegistry {
@@ -81,7 +81,11 @@ class Accessibility : AccessibilityService(), EventObserver, CoroutineScope by M
             }
 
             addedFrameIds.forEach { (id, displayId) ->
-                val newFrame = SecondaryWidgetFrameDelegate(this@Accessibility, id, wm, displayId)
+                val newFrame = SecondaryWidgetFrameDelegate(
+                    context = this@Accessibility,
+                    id = id,
+                    displayId = displayId,
+                )
                 newFrame.onCreate()
                 currentFrames.values.firstOrNull()?.let { referenceFrame ->
                     newFrame.updateState { referenceFrame.state }
@@ -113,7 +117,7 @@ class Accessibility : AccessibilityService(), EventObserver, CoroutineScope by M
         drawerDelegate.onCreate()
 
         prefManager.currentSecondaryFramesWithDisplay.forEach { (secondaryId, secondaryDisplay) ->
-            secondaryFrameDelegates[secondaryId] = SecondaryWidgetFrameDelegate(this, secondaryId, wm, secondaryDisplay).also {
+            secondaryFrameDelegates[secondaryId] = SecondaryWidgetFrameDelegate(this, secondaryId, secondaryDisplay).also {
                 it.onCreate()
             }
         }

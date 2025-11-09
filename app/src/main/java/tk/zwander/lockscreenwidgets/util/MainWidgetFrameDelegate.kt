@@ -7,6 +7,7 @@ import android.graphics.PixelFormat
 import android.graphics.Point
 import android.graphics.PointF
 import android.graphics.drawable.Drawable
+import android.view.Display
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.Surface
@@ -63,9 +64,8 @@ import kotlin.math.floor
 open class MainWidgetFrameDelegate protected constructor(
     context: Context,
     protected val id: Int = -1,
-    wm: WindowManager,
     displayId: Int,
-) : BaseDelegate<MainWidgetFrameDelegate.State>(context, wm, displayId) {
+) : BaseDelegate<MainWidgetFrameDelegate.State>(context, displayId) {
     companion object {
         private val instance = MutableStateFlow<MainWidgetFrameDelegate?>(null)
 
@@ -83,12 +83,12 @@ open class MainWidgetFrameDelegate protected constructor(
         }
 
         @Synchronized
-        fun getInstance(context: Context, wm: WindowManager, displayId: Int): MainWidgetFrameDelegate {
+        fun getInstance(context: Context, displayId: Int): MainWidgetFrameDelegate {
             return instance.value ?: run {
                 if (context !is Accessibility) {
                     throw IllegalStateException("Delegate can only be initialized by Accessibility Service!")
                 } else {
-                    MainWidgetFrameDelegate(context, wm = wm, displayId = displayId).also {
+                    MainWidgetFrameDelegate(context, displayId = displayId).also {
                         instance.value = it
                     }
                 }
@@ -715,6 +715,10 @@ open class MainWidgetFrameDelegate protected constructor(
                     && (!framePrefs.hideWhenKeyboardShown || !globalState.showingKeyboard.value)
         }
 
+        fun forSecondaryDisplay(): Boolean {
+            return targetDisplayId != Display.DEFAULT_DISPLAY && forCommon()
+        }
+
         fun forNotificationCenter(): Boolean {
             return (globalState.notificationsPanelFullyExpanded.value && framePrefs.showInNotificationShade)
                     && forCommon()
@@ -739,7 +743,7 @@ open class MainWidgetFrameDelegate protected constructor(
         }
 
         return withContext(Dispatchers.IO) {
-            (forced() || forPreview() || forNotificationCenter() || forLockscreen()).also {
+            (forced() || forSecondaryDisplay() || forPreview() || forNotificationCenter() || forLockscreen()).also {
                 logUtils.debugLog(
                     "canShow $id: $it\n" +
                             "state: $state\n " +

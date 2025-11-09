@@ -34,7 +34,6 @@ import java.util.concurrent.ConcurrentLinkedDeque
 @Suppress("MemberVisibilityCanBePrivate")
 abstract class BaseDelegate<State : Any>(
     context: Context,
-    protected val wm: WindowManager,
     protected val targetDisplayId: Int,
 ) : SafeContextWrapper(context),
     EventObserver, WidgetHostCompat.OnClickCallback, SavedStateRegistryOwner {
@@ -44,6 +43,7 @@ abstract class BaseDelegate<State : Any>(
     protected val displayManager by lazy {
         getSystemService(DISPLAY_SERVICE) as DisplayManager
     }
+    protected val wm: WindowManager by lazy { getSystemService(WINDOW_SERVICE) as WindowManager }
     val display: LSDisplay
         get() = requireLsDisplayManager.requireDisplay(targetDisplayId)
 
