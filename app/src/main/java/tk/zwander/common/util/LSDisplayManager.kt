@@ -68,7 +68,7 @@ class LSDisplayManager private constructor(context: Context) : ContextWrapper(co
     val availableDisplays = MutableStateFlow(mapOf<Int, LSDisplay>())
 
     fun onCreate() {
-        availableDisplays.value = displayManager.displays.map {
+        availableDisplays.value = displayManager.getDisplays(DisplayManager.DISPLAY_CATEGORY_BUILT_IN_DISPLAYS).map {
             LSDisplay(
                 display = it,
                 fontScale = createDisplayContext(it).resources.configuration.fontScale,
