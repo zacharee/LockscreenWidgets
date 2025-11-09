@@ -65,7 +65,7 @@ fun ClearFrameDataCard(
                         FrameSizeAndPosition.FrameType.LockNormal.Landscape,
                     )
 
-                    context.prefManager.currentSecondaryFrames.forEach { frameId ->
+                    context.prefManager.currentSecondaryFramesWithDisplay.forEach { (frameId, _) ->
                         context.frameSizeAndPosition.removeSizeForType(
                             FrameSizeAndPosition.FrameType.SecondaryLockscreen.Portrait(frameId),
                         )
@@ -97,7 +97,7 @@ fun ClearFrameDataCard(
                         FrameSizeAndPosition.FrameType.NotificationNormal.Landscape,
                     )
 
-                    context.prefManager.currentSecondaryFrames.forEach { frameId ->
+                    context.prefManager.currentSecondaryFramesWithDisplay.forEach { (frameId, _) ->
                         context.frameSizeAndPosition.removeSizeForType(
                             FrameSizeAndPosition.FrameType.SecondaryNotification.Portrait(frameId),
                         )
@@ -129,7 +129,7 @@ fun ClearFrameDataCard(
                         FrameSizeAndPosition.FrameType.LockNotification.Landscape,
                     )
 
-                    context.prefManager.currentSecondaryFrames.forEach { frameId ->
+                    context.prefManager.currentSecondaryFramesWithDisplay.forEach { (frameId, _) ->
                         context.frameSizeAndPosition.removeSizeForType(
                             FrameSizeAndPosition.FrameType.SecondaryLockNotification.Portrait(frameId),
                         )

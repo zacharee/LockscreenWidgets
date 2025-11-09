@@ -67,12 +67,12 @@ class Accessibility : AccessibilityService(), EventObserver, CoroutineScope by M
         handler(PrefManager.KEY_DEBUG_LOG) {
             IDListProvider.sendUpdate(this@Accessibility)
         }
-        handler(PrefManager.KEY_CURRENT_FRAMES) {
-            val newFrameIds = prefManager.currentSecondaryFrames
+        handler(PrefManager.KEY_CURRENT_FRAMES_WITH_DISPLAY) {
+            val newFrameIds = prefManager.currentSecondaryFramesWithDisplay
             val currentFrames = secondaryFrameDelegates
 
             val removedFrames = currentFrames.filter { (id, _) -> !newFrameIds.contains(id) }
-            val addedFrameIds = newFrameIds.filter { !currentFrames.containsKey(it) }
+            val addedFrameIds = newFrameIds.filter { !currentFrames.containsKey(it.key) }
 
             removedFrames.forEach { (id, frame) ->
                 frame.onDestroy()
@@ -80,8 +80,8 @@ class Accessibility : AccessibilityService(), EventObserver, CoroutineScope by M
                 currentFrames.remove(id)
             }
 
-            addedFrameIds.forEach { id ->
-                val newFrame = SecondaryWidgetFrameDelegate(this@Accessibility, id, wm, Display.DEFAULT_DISPLAY)
+            addedFrameIds.forEach { (id, displayId) ->
+                val newFrame = SecondaryWidgetFrameDelegate(this@Accessibility, id, wm, displayId)
                 newFrame.onCreate()
                 currentFrames.values.firstOrNull()?.let { referenceFrame ->
                     newFrame.updateState { referenceFrame.state }
@@ -112,8 +112,8 @@ class Accessibility : AccessibilityService(), EventObserver, CoroutineScope by M
         frameDelegate.onCreate()
         drawerDelegate.onCreate()
 
-        prefManager.currentSecondaryFrames.forEach { secondaryId ->
-            secondaryFrameDelegates[secondaryId] = SecondaryWidgetFrameDelegate(this, secondaryId, wm, Display.DEFAULT_DISPLAY).also {
+        prefManager.currentSecondaryFramesWithDisplay.forEach { (secondaryId, secondaryDisplay) ->
+            secondaryFrameDelegates[secondaryId] = SecondaryWidgetFrameDelegate(this, secondaryId, wm, secondaryDisplay).also {
                 it.onCreate()
             }
         }

@@ -75,6 +75,9 @@ class FrameSizeAndPosition private constructor(private val context: Context) {
             )
         }
 
+    fun hasPositions() = positionsMap.isNotEmpty()
+    fun hasSizes() = sizesMap.isNotEmpty()
+
     fun getPositionForType(type: FrameType, display: LSDisplay): Point {
         return positionsMap[type.key] ?: getDefaultPositionForType(type, display)
     }

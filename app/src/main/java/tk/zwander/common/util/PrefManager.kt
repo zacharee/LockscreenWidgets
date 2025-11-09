@@ -23,7 +23,6 @@ import tk.zwander.common.data.WidgetData
 import tk.zwander.common.data.WidgetSizeData
 import tk.zwander.common.data.WidgetTileInfo
 import tk.zwander.common.iconpacks.IconEntry
-import tk.zwander.lockscreenwidgets.BuildConfig
 import tk.zwander.lockscreenwidgets.R
 import tk.zwander.lockscreenwidgets.activities.TaskerIsAllowedToShowFrame
 import tk.zwander.lockscreenwidgets.activities.TaskerIsForceShowingFrame
@@ -130,7 +129,9 @@ class PrefManager private constructor(private val context: Context) {
         const val KEY_DRAWER_HANDLE_TAP_TO_OPEN = "drawer_handle_tap_to_open"
         const val KEY_SELECTED_ICON_PACK_PACKAGE = "selected_icon_pack_package"
         const val KEY_SHORTCUT_OVERRIDE_ICONS = "shortcut_override_icon_entries"
+        @Deprecated("Doesn't support displays", replaceWith = ReplaceWith("PrefManager.KEY_CURRENT_FRAMES_WITH_DISPLAY"))
         const val KEY_CURRENT_FRAMES = "current_secondary_widget_frames"
+        const val KEY_CURRENT_FRAMES_WITH_DISPLAY = "current_secondary_widget_frames_with_display"
         const val KEY_DRAWER_HANDLE_LOCK_POSITION = "drawer_handle_lock_position"
 
         const val VALUE_PAGE_INDICATOR_BEHAVIOR_HIDDEN = 0
@@ -610,7 +611,7 @@ class PrefManager private constructor(private val context: Context) {
 
     //The current widget database version. Used for migrations.
     var databaseVersion: Int
-        get() = getInt(KEY_DATABASE_VERSION, BuildConfig.DATABASE_VERSION)
+        get() = getInt(KEY_DATABASE_VERSION, 0)
         set(value) {
             putInt(KEY_DATABASE_VERSION, value)
         }
@@ -753,10 +754,20 @@ class PrefManager private constructor(private val context: Context) {
             putString(KEY_SHORTCUT_OVERRIDE_ICONS, gson.toJson(value))
         }
 
+    @Deprecated("Doesn't support displays", ReplaceWith("PrefManager.currentSecondaryFramesWithDisplay"))
     var currentSecondaryFrames: List<Int>
         get() = getStringSet(KEY_CURRENT_FRAMES, setOf()).map { it.toInt() }
         set(value) {
             putStringSet(KEY_CURRENT_FRAMES, value.map { it.toString() }.toSet())
+        }
+
+    var currentSecondaryFramesWithDisplay: HashMap<Int, Int>
+        get() = gson.fromJson(
+            getString(KEY_CURRENT_FRAMES_WITH_DISPLAY, ""),
+            object : TypeToken<HashMap<Int, Int>>() {},
+        ) ?: HashMap()
+        set(value) {
+            putString(KEY_CURRENT_FRAMES_WITH_DISPLAY, gson.toJson(value))
         }
 
     var drawerHandleLockPosition: Boolean

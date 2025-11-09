@@ -159,7 +159,7 @@ class FrameSpecificPreferences(
             baseKey: String,
             def: Boolean = false,
         ): Boolean {
-            return (listOf(-1) + context.prefManager.currentSecondaryFrames).any { frameId ->
+            return (listOf(-1) + context.prefManager.currentSecondaryFramesWithDisplay.map { it.key }).any { frameId ->
                 context.prefManager.getBoolean(keyFor(frameId, baseKey), def)
             }
         }
@@ -244,7 +244,7 @@ object FramePrefs {
             return
         }
 
-        context.prefManager.currentSecondaryFrames = context.prefManager.currentSecondaryFrames.toMutableList().apply {
+        context.prefManager.currentSecondaryFramesWithDisplay = context.prefManager.currentSecondaryFramesWithDisplay.apply {
             remove(frameId)
         }
 

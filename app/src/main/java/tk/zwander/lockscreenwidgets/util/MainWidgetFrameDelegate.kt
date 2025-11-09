@@ -454,7 +454,7 @@ open class MainWidgetFrameDelegate protected constructor(
                 )
             }
             is Event.PreviewFrames -> {
-                if (event.show == Event.PreviewFrames.ShowMode.SHOW_FOR_SELECTION && prefManager.currentSecondaryFrames.isEmpty()) {
+                if (event.show == Event.PreviewFrames.ShowMode.SHOW_FOR_SELECTION && prefManager.currentSecondaryFramesWithDisplay.isEmpty()) {
                     eventManager.sendEvent(Event.LaunchAddWidget(id))
                 } else {
                     if (event.includeMainFrame || id != -1) {

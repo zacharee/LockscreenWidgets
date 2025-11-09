@@ -53,12 +53,16 @@ class FrameSizeAndPositionMigration : Migration {
         )
 
         with (context.frameSizeAndPosition) {
-            positions.forEach { (k, v) ->
-                setPositionForType(k, v)
+            if (!hasPositions()) {
+                positions.forEach { (k, v) ->
+                    setPositionForType(k, v)
+                }
             }
 
-            sizes.forEach { (k, v) ->
-                setSizeForType(k, v)
+            if (!hasSizes()) {
+                sizes.forEach { (k, v) ->
+                    setSizeForType(k, v)
+                }
             }
         }
     }

@@ -4,14 +4,31 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.os.Build
 import android.os.Bundle
+import android.view.Display
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Card
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import tk.zwander.common.activities.BaseActivity
 import tk.zwander.common.activities.HideForIDsActivity
 import tk.zwander.common.activities.HideOnAppsChooserActivity
@@ -32,7 +49,9 @@ import tk.zwander.common.util.eventManager
 import tk.zwander.common.util.isOneUI
 import tk.zwander.common.util.isPixelUI
 import tk.zwander.common.util.isTouchWiz
+import tk.zwander.common.util.lsDisplayManager
 import tk.zwander.common.util.prefManager
+import tk.zwander.common.util.requireLsDisplayManager
 import tk.zwander.common.util.setThemedContent
 import tk.zwander.lockscreenwidgets.R
 import tk.zwander.lockscreenwidgets.services.isNotificationListenerActive
@@ -63,11 +82,15 @@ class ComposeFrameSettingsActivity : BaseActivity(), EventObserver {
 
         setThemedContent {
             var secondaryFrames by rememberPreferenceState(
-                key = PrefManager.KEY_CURRENT_FRAMES,
-                value = { prefManager.currentSecondaryFrames },
-                onChanged = { _, v -> prefManager.currentSecondaryFrames = v },
+                key = PrefManager.KEY_CURRENT_FRAMES_WITH_DISPLAY,
+                value = { prefManager.currentSecondaryFramesWithDisplay },
+                onChanged = { _, v -> prefManager.currentSecondaryFramesWithDisplay = v },
             )
             val frameCount by rememberUpdatedState(secondaryFrames.size + 1)
+
+            var pendingFrameId by remember {
+                mutableStateOf<Int?>(null)
+            }
 
             val commonSection = createCommonSection(BackupRestoreManager.Which.FRAME)
             val preferenceScreen = rememberPreferenceScreen {
@@ -106,11 +129,17 @@ class ComposeFrameSettingsActivity : BaseActivity(), EventObserver {
                         },
                         key = { "add_secondary_frame" },
                         onClick = {
-                            val maxFrameId = secondaryFrames.maxOrNull() ?: 1
+                            val maxFrameId = secondaryFrames.keys.maxOrNull() ?: 1
                             val newFrameId = maxFrameId + 1
 
-                            secondaryFrames = secondaryFrames.toMutableList().apply {
-                                add(newFrameId)
+                            if (lsDisplayManager?.availableDisplays?.value?.isEmpty() != false) {
+                                secondaryFrames = HashMap(
+                                    secondaryFrames.toMutableMap().apply {
+                                        this[newFrameId] = Display.DEFAULT_DISPLAY
+                                    },
+                                )
+                            } else {
+                                pendingFrameId = newFrameId
                             }
                         },
                         icon = { painterResource(R.drawable.ic_baseline_add_24) },
@@ -530,6 +559,58 @@ class ComposeFrameSettingsActivity : BaseActivity(), EventObserver {
                 title = resources.getString(R.string.settings),
                 categories = preferenceScreen,
             )
+
+            if (pendingFrameId != null) {
+                AlertDialog(
+                    onDismissRequest = {
+                        pendingFrameId = null
+                    },
+                    title = {
+                        Text(text = "Select Display")
+                    },
+                    text = {
+                        val lsDisplayManager = remember {
+                            requireLsDisplayManager
+                        }
+                        val displays by lsDisplayManager.availableDisplays.collectAsState()
+
+                        LazyColumn(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalArrangement = Arrangement.spacedBy(8.dp),
+                        ) {
+                            items(items = displays.entries.toList(), key = { it.key }) { (displayId, display) ->
+                                Card(
+                                    onClick = {
+                                        secondaryFrames = HashMap(
+                                            secondaryFrames.toMutableMap().apply {
+                                                this[pendingFrameId!!] = displayId
+                                            },
+                                        )
+                                        pendingFrameId = null
+                                    },
+                                ) {
+                                    Box(
+                                        modifier = Modifier.fillMaxWidth()
+                                            .heightIn(min = 48.dp),
+                                        contentAlignment = Alignment.Center,
+                                    ) {
+                                        Text(text = "${display.display.name} (${displayId})")
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    confirmButton = {
+                        TextButton(
+                            onClick = {
+                                pendingFrameId = null
+                            },
+                        ) {
+                            Text(text = stringResource(android.R.string.cancel))
+                        }
+                    },
+                )
+            }
         }
     }
 
@@ -542,10 +623,9 @@ class ComposeFrameSettingsActivity : BaseActivity(), EventObserver {
     override suspend fun onEvent(event: Event) {
         if (event is Event.FrameSelected) {
             if (event.frameId != null && event.requestCode == REQ_REMOVE_FRAME) {
-                prefManager.currentSecondaryFrames =
-                    prefManager.currentSecondaryFrames.toMutableList().apply {
-                        removeAll { it == event.frameId }
-                    }
+                prefManager.currentSecondaryFramesWithDisplay = prefManager.currentSecondaryFramesWithDisplay.apply {
+                    this.remove(event.frameId)
+                }
                 if (selectedFrame == event.frameId) {
                     selectedFrame = -1
                 }

@@ -182,9 +182,9 @@ class App : Application(), CoroutineScope by MainScope(), EventObserver {
                                 "Too large to parse."
                             },
                         ).apply {
-                            prefManager.currentSecondaryFrames.forEach { frameId ->
+                            prefManager.currentSecondaryFramesWithDisplay.forEach { (frameId, frameDisplay) ->
                                 put(
-                                    "secondaryFrame${frameId}Widgets",
+                                    "secondaryFrame${frameId},${frameDisplay}Widgets",
                                     try {
                                         prefManager.gson.toJson(
                                             FramePrefs.getWidgetsForFrame(this@App, frameId).map { widget ->
@@ -238,10 +238,12 @@ class App : Application(), CoroutineScope by MainScope(), EventObserver {
         contentResolver.registerContentObserver(
             Settings.Secure.getUriFor(Settings.Secure.UI_NIGHT_MODE),
             true,
-            nightModeListener
+            nightModeListener,
         )
 
         registerProxListener()
+
+        logUtils.normalLog("${prefManager.currentSecondaryFrames}")
 
         migrationManager.runMigrations()
 

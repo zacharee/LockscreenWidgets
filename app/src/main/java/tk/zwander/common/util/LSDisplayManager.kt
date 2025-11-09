@@ -91,7 +91,7 @@ class LSDisplayManager private constructor(context: Context) : ContextWrapper(co
         }
     }
 
-    private val availableDisplays = MutableStateFlow(mapOf<Int, LSDisplay>())
+    val availableDisplays = MutableStateFlow(mapOf<Int, LSDisplay>())
 
     fun onCreate() {
         availableDisplays.value = displayManager.displays.map {

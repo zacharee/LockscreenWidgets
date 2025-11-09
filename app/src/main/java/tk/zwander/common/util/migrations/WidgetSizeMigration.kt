@@ -16,11 +16,16 @@ class WidgetSizeMigration : Migration {
 
             prefManager.currentWidgets = LinkedHashSet(
                 widgets.map { widget ->
-                    val sizeInfo = sizeInfos[widget.id] ?: WidgetSizeData(1, 1)
+                    val sizeInfo = widget.size
+                        ?: sizeInfos[widget.id]
+                        ?: WidgetSizeData(1, 1)
 
                     widget.copy(size = sizeInfo)
                 }
             )
+
+            @Suppress("DEPRECATION")
+            prefManager.widgetSizes = hashMapOf()
         }
     }
 }
