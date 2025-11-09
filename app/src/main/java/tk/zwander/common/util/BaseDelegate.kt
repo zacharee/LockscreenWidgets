@@ -134,7 +134,7 @@ abstract class BaseDelegate<State : Any>(
 
         currentWidgets = ArrayList(adapter.widgets)
         if (lifecycleRegistry.currentState.isAtLeast(Lifecycle.State.CREATED)) {
-            lifecycleRegistry.currentState = Lifecycle.State.INITIALIZED
+            lifecycleRegistry.currentState = Lifecycle.State.DESTROYED
         }
 
         scope.cancel()

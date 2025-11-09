@@ -388,6 +388,10 @@ open class MainWidgetFrameDelegate protected constructor(
             //We only really want to be listening to widget changes
             //while the frame is on-screen. Otherwise, we're wasting battery.
             is Event.FrameAttachmentState -> {
+                if (lifecycleRegistry.currentState == Lifecycle.State.DESTROYED) {
+                    return
+                }
+
                 if (event.frameId == id) {
                     try {
                         if (event.attached) {
