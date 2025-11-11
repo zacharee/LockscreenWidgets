@@ -128,6 +128,14 @@ class LSDisplayManager private constructor(context: Context) : ContextWrapper(co
             return
         }
 
+        if (display.type != Display.TYPE_INTERNAL) {
+            logUtils.debugLog("Display isn't internal, removing if exists and skipping processing", null)
+            availableDisplays.value = availableDisplays.value.toMutableMap().apply {
+                remove(displayId)
+            }
+            return
+        }
+
         val newMap = availableDisplays.value.toMutableMap()
         newMap[displayId] = LSDisplay(
             display = display,
