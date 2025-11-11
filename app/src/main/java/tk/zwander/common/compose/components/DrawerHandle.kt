@@ -49,7 +49,7 @@ import kotlin.math.absoluteValue
 @Composable
 fun DrawerDelegate.DrawerViewModel.DrawerHandle(
     params: WindowManager.LayoutParams,
-    displayId: Int,
+    displayId: String,
     updateWindow: () -> Unit,
     modifier: Modifier = Modifier,
 ) {

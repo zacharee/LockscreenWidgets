@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.ContextWrapper
 import android.graphics.Point
 import android.hardware.display.DisplayManager
+import android.os.Build
 import android.util.DisplayMetrics
 import android.view.Display
 import android.view.WindowManager
@@ -67,6 +68,10 @@ class LSDisplayManager private constructor(context: Context) : ContextWrapper(co
 
     val availableDisplays = MutableStateFlow(mapOf<Int, LSDisplay>())
 
+    val defaultDisplay: LSDisplay
+        get() = availableDisplays.value[Display.DEFAULT_DISPLAY]
+            ?: throw NullPointerException("Default display not found! Available displays: ${availableDisplays.value.keys}")
+
     fun onCreate() {
         availableDisplays.value = displayManager.getDisplays(DisplayManager.DISPLAY_CATEGORY_BUILT_IN_DISPLAYS).map {
             LSDisplay(
@@ -88,6 +93,18 @@ class LSDisplayManager private constructor(context: Context) : ContextWrapper(co
         return availableDisplays.value[displayId]
     }
 
+    fun findDisplayByStringId(displayId: String): LSDisplay? {
+        return availableDisplays.value.values.firstOrNull { display ->
+            display.uniqueIdCompat == displayId ||
+                    display.displayId.toString() == displayId
+        }
+    }
+
+    fun requireDisplayByStringId(displayId: String): LSDisplay {
+        return findDisplayByStringId(displayId)
+            ?: throw NullPointerException("Display for $displayId not found!")
+    }
+
     fun requireDisplay(displayId: Int): LSDisplay {
         return getDisplay(displayId)
             ?: throw NullPointerException("Display for $displayId not found!")
@@ -95,6 +112,14 @@ class LSDisplayManager private constructor(context: Context) : ContextWrapper(co
 
     fun collectDisplay(displayId: Int): Flow<LSDisplay?> {
         return availableDisplays.map { it[displayId] }
+    }
+
+    fun collectDisplay(displayId: String): Flow<LSDisplay?> {
+        return availableDisplays.map {
+            it.values.firstOrNull { display ->
+                display.uniqueIdCompat == displayId
+            }
+        }
     }
 
     private fun processDisplay(displayId: Int) {
@@ -138,6 +163,13 @@ class LSDisplay(val display: Display, val fontScale: Float) {
 
     val screenOrientation: Int
         get() = display.rotation
+
+    val uniqueIdCompat: String
+        get() = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            display.uniqueId ?: display.displayId.toString()
+        } else {
+            display.displayId.toString()
+        }
 
     fun dpToPx(dpValue: Number): Int {
         return with (density) {

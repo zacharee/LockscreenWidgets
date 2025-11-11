@@ -132,6 +132,8 @@ class PrefManager private constructor(private val context: Context) {
         @Deprecated("Doesn't support displays", replaceWith = ReplaceWith("PrefManager.KEY_CURRENT_FRAMES_WITH_DISPLAY"))
         const val KEY_CURRENT_FRAMES = "current_secondary_widget_frames"
         const val KEY_CURRENT_FRAMES_WITH_DISPLAY = "current_secondary_widget_frames_with_display"
+
+        const val KEY_CURRENT_FRAMES_WITH_STRING_DISPLAY = "current_seconday_widget_frames_with_string_display"
         const val KEY_DRAWER_HANDLE_LOCK_POSITION = "drawer_handle_lock_position"
 
         const val VALUE_PAGE_INDICATOR_BEHAVIOR_HIDDEN = 0
@@ -761,6 +763,7 @@ class PrefManager private constructor(private val context: Context) {
             putStringSet(KEY_CURRENT_FRAMES, value.map { it.toString() }.toSet())
         }
 
+    @Deprecated("Doesn't support unique display IDs", ReplaceWith("PrefManager.currentSecondaryFramesWithStringDisplay"))
     var currentSecondaryFramesWithDisplay: HashMap<Int, Int>
         get() = gson.fromJson(
             getString(KEY_CURRENT_FRAMES_WITH_DISPLAY, ""),
@@ -768,6 +771,15 @@ class PrefManager private constructor(private val context: Context) {
         ) ?: HashMap()
         set(value) {
             putString(KEY_CURRENT_FRAMES_WITH_DISPLAY, gson.toJson(value))
+        }
+
+    var currentSecondaryFramesWithStringDisplay: HashMap<Int, String>
+        get() = gson.fromJson(
+            getString(KEY_CURRENT_FRAMES_WITH_STRING_DISPLAY, ""),
+            object : TypeToken<HashMap<Int, String>>() {},
+        ) ?: HashMap()
+        set(value) {
+            putString(KEY_CURRENT_FRAMES_WITH_STRING_DISPLAY, gson.toJson(value))
         }
 
     var drawerHandleLockPosition: Boolean

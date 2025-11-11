@@ -8,6 +8,7 @@ import android.view.Display
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -20,6 +21,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.LocalContentColor
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.collectAsState
@@ -36,6 +38,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import tk.zwander.common.activities.BaseActivity
 import tk.zwander.common.activities.HideForIDsActivity
@@ -93,8 +96,8 @@ class ComposeFrameSettingsActivity : BaseActivity(), EventObserver {
         setThemedContent {
             var secondaryFrames by rememberPreferenceState(
                 key = PrefManager.KEY_CURRENT_FRAMES_WITH_DISPLAY,
-                value = { prefManager.currentSecondaryFramesWithDisplay },
-                onChanged = { _, v -> prefManager.currentSecondaryFramesWithDisplay = v },
+                value = { prefManager.currentSecondaryFramesWithStringDisplay },
+                onChanged = { _, v -> prefManager.currentSecondaryFramesWithStringDisplay = v },
             )
             val frameCount by rememberUpdatedState(secondaryFrames.size + 1)
 
@@ -145,7 +148,7 @@ class ComposeFrameSettingsActivity : BaseActivity(), EventObserver {
                             if (!BuildConfig.DEBUG && lsDisplayManager?.availableDisplays?.value?.let { it.size <= 1 } != false) {
                                 secondaryFrames = HashMap(
                                     secondaryFrames.toMutableMap().apply {
-                                        this[newFrameId] = Display.DEFAULT_DISPLAY
+                                        this[newFrameId] = "${Display.DEFAULT_DISPLAY}"
                                     },
                                 )
                             } else {
@@ -695,15 +698,12 @@ class ComposeFrameSettingsActivity : BaseActivity(), EventObserver {
                             modifier = Modifier.fillMaxWidth(),
                             verticalArrangement = Arrangement.spacedBy(8.dp),
                         ) {
-                            items(
-                                items = displays.entries.toList(),
-                                key = { it.key },
-                            ) { (displayId, display) ->
+                            item(key = "DEFAULT_DISPLAY") {
                                 Card(
                                     onClick = {
                                         secondaryFrames = HashMap(
                                             secondaryFrames.toMutableMap().apply {
-                                                this[pendingFrameId!!] = displayId
+                                                this[pendingFrameId!!] = "${Display.DEFAULT_DISPLAY}"
                                             },
                                         )
                                         pendingFrameId = null
@@ -713,7 +713,45 @@ class ComposeFrameSettingsActivity : BaseActivity(), EventObserver {
                                         modifier = Modifier
                                             .fillMaxWidth()
                                             .heightIn(min = 56.dp)
-                                            .padding(horizontal = 8.dp),
+                                            .padding(8.dp),
+                                        contentAlignment = Alignment.CenterStart,
+                                    ) {
+                                        Column(
+                                            verticalArrangement = Arrangement.spacedBy(4.dp),
+                                        ) {
+                                            Text(
+                                                text = "${stringResource(R.string.default_display)} (${Display.DEFAULT_DISPLAY})",
+                                                style = MaterialTheme.typography.bodyLarge,
+                                                fontWeight = FontWeight.Bold,
+                                            )
+
+                                            Text(
+                                                text = stringResource(R.string.default_display_desc),
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+
+                            items(
+                                items = displays.entries.toList(),
+                                key = { it.key },
+                            ) { (_, display) ->
+                                Card(
+                                    onClick = {
+                                        secondaryFrames = HashMap(
+                                            secondaryFrames.toMutableMap().apply {
+                                                this[pendingFrameId!!] = display.uniqueIdCompat
+                                            },
+                                        )
+                                        pendingFrameId = null
+                                    },
+                                ) {
+                                    Box(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .heightIn(min = 56.dp)
+                                            .padding(8.dp),
                                         contentAlignment = Alignment.Center,
                                     ) {
                                         Row(
@@ -721,9 +759,13 @@ class ComposeFrameSettingsActivity : BaseActivity(), EventObserver {
                                             verticalAlignment = Alignment.CenterVertically,
                                             horizontalArrangement = Arrangement.SpaceBetween,
                                         ) {
-                                            Text(text = "${display.display.name} (${displayId})")
+                                            Text(
+                                                text = "${display.display.name}",
+                                                style = MaterialTheme.typography.bodyLarge,
+                                                fontWeight = FontWeight.Bold,
+                                            )
 
-                                            val (width, height) = remember(displayId) {
+                                            val (width, height) = remember(display.uniqueIdCompat) {
                                                 with (density) {
                                                     val screenSize = display.realSize
                                                     val screenWidth = screenSize.x
@@ -789,8 +831,8 @@ class ComposeFrameSettingsActivity : BaseActivity(), EventObserver {
     override suspend fun onEvent(event: Event) {
         if (event is Event.FrameSelected) {
             if (event.frameId != null && event.requestCode == REQ_REMOVE_FRAME) {
-                prefManager.currentSecondaryFramesWithDisplay =
-                    prefManager.currentSecondaryFramesWithDisplay.apply {
+                prefManager.currentSecondaryFramesWithStringDisplay =
+                    prefManager.currentSecondaryFramesWithStringDisplay.apply {
                         this.remove(event.frameId)
                     }
                 if (selectedFrame == event.frameId) {

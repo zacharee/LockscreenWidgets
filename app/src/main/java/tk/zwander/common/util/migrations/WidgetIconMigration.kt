@@ -13,7 +13,7 @@ class WidgetIconMigration : Migration {
         context.prefManager.currentWidgets = LinkedHashSet(migrateCollection(context, context.prefManager.currentWidgets))
         context.prefManager.drawerWidgets = LinkedHashSet(migrateCollection(context, context.prefManager.drawerWidgets))
 
-        context.prefManager.currentSecondaryFramesWithDisplay.forEach { (frameId, _) ->
+        context.prefManager.currentSecondaryFramesWithStringDisplay.forEach { (frameId, _) ->
             FramePrefs.setWidgetsForFrame(context, frameId, migrateCollection(context, FramePrefs.getWidgetsForFrame(context, frameId)))
         }
     }
