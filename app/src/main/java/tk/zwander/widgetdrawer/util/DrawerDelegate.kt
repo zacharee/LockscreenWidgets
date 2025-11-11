@@ -4,10 +4,7 @@ import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
 import android.animation.ValueAnimator
 import android.annotation.SuppressLint
-import android.content.BroadcastReceiver
 import android.content.Context
-import android.content.Intent
-import android.content.IntentFilter
 import android.graphics.PixelFormat
 import android.view.Gravity
 import android.view.View
@@ -17,7 +14,6 @@ import android.view.animation.AccelerateInterpolator
 import android.view.animation.DecelerateInterpolator
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.ui.Modifier
-import androidx.core.content.ContextCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.setViewTreeLifecycleOwner
 import androidx.recyclerview.widget.RecyclerView
@@ -27,6 +23,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import tk.zwander.common.activities.DismissOrUnlockActivity
 import tk.zwander.common.compose.components.DrawerHandle
 import tk.zwander.common.compose.util.createComposeViewHolder
@@ -99,7 +96,9 @@ class DrawerDelegate private constructor(context: Context, displayId: String) :
     override var state = State()
         set(value) {
             field = value
-            updateWindow()
+            scope.launch(Dispatchers.Main) {
+                updateWindow()
+            }
         }
 
     override val params by lazy {
@@ -216,17 +215,6 @@ class DrawerDelegate private constructor(context: Context, displayId: String) :
 
     override val viewModel = DrawerViewModel(this)
 
-    @Suppress("DEPRECATION")
-    private val globalReceiver = object : BroadcastReceiver() {
-        override fun onReceive(context: Context?, intent: Intent) {
-            when (intent.action) {
-                Intent.ACTION_CLOSE_SYSTEM_DIALOGS -> {
-                    hideDrawer()
-                }
-            }
-        }
-    }
-
     @SuppressLint("RtlHardcoded")
     override suspend fun onEvent(event: Event) {
         super.onEvent(event)
@@ -254,6 +242,10 @@ class DrawerDelegate private constructor(context: Context, displayId: String) :
                 tryShowHandle()
             }
 
+            Event.CloseSystemDialogs -> {
+                hideDrawer()
+            }
+
             is Event.DrawerAttachmentState -> {
                 TaskerIsShowingDrawer::class.java.requestQuery(this)
                 if (event.attached) {
@@ -265,12 +257,9 @@ class DrawerDelegate private constructor(context: Context, displayId: String) :
                         }, 50)
                         widgetHost.startListening(this)
 
-                        mainHandler.postDelayed({
-                            drawer.fadeIn(DrawerOrFrame.DRAWER) {
-                                eventManager.sendEvent(Event.DrawerShown)
-                                viewModel.drawerAnimationState.value = AnimationState.IDLE
-                            }
-                        }, 10)
+                        drawer.fadeIn(DrawerOrFrame.DRAWER)
+                        eventManager.sendEvent(Event.DrawerShown)
+                        viewModel.drawerAnimationState.value = AnimationState.IDLE
                     } else {
                         drawer.alpha = 1f
                     }
@@ -328,7 +317,9 @@ class DrawerDelegate private constructor(context: Context, displayId: String) :
                 val animator = ValueAnimator.ofInt(params.x, if (metThreshold) 0 else -params.width)
                 animator.addUpdateListener {
                     params.x = it.animatedValue as Int
-                    updateWindow()
+                    scope.launch {
+                        updateWindow()
+                    }
                 }
                 animator.duration = with (DrawerOrFrame.DRAWER) { duration() }
                 animator.interpolator =
@@ -336,7 +327,9 @@ class DrawerDelegate private constructor(context: Context, displayId: String) :
                 animator.addListener(object : AnimatorListenerAdapter() {
                     override fun onAnimationEnd(animation: Animator) {
                         if (!metThreshold) {
-                            hideDrawer()
+                            scope.launch {
+                                hideDrawer()
+                            }
                         } else {
                             eventManager.sendEvent(Event.DrawerShown)
                             eventManager.sendEvent(Event.DrawerAttachmentState(true))
@@ -380,20 +373,12 @@ class DrawerDelegate private constructor(context: Context, displayId: String) :
     override fun onCreate() {
         super.onCreate()
 
-        ContextCompat.registerReceiver(
-            this,
-            globalReceiver,
-            IntentFilter().apply {
-                @Suppress("DEPRECATION")
-                addAction(Intent.ACTION_CLOSE_SYSTEM_DIALOGS)
-            },
-            ContextCompat.RECEIVER_EXPORTED,
-        )
-
         handle.setViewTreeLifecycleOwner(this)
         handle.setViewTreeSavedStateRegistryOwner(this)
 
-        tryShowHandle()
+        scope.launch {
+            tryShowHandle()
+        }
 
         gridLayoutManager.customHeight =
             resources.getDimensionPixelSize(R.dimen.drawer_row_height).toDouble()
@@ -409,11 +394,9 @@ class DrawerDelegate private constructor(context: Context, displayId: String) :
         }
     }
 
-    override fun onDestroy() {
+    override suspend fun onDestroy() {
         hideDrawer(false)
         hideHandle()
-
-        unregisterReceiver(globalReceiver)
 
         super.onDestroy()
 
@@ -429,12 +412,12 @@ class DrawerDelegate private constructor(context: Context, displayId: String) :
         return prefManager.lockWidgetDrawer
     }
 
-    private fun hideAll() {
+    private suspend fun hideAll() {
         hideDrawer(false)
         hideHandle()
     }
 
-    private fun tryShowHandle() {
+    private suspend fun tryShowHandle() {
         if (prefManager.drawerEnabled && prefManager.showDrawerHandle && globalState.isScreenOn.value) {
             if (prefManager.showDrawerHandleOnlyWhenLocked && !globalState.wasOnKeyguard.value) {
                 return
@@ -448,28 +431,28 @@ class DrawerDelegate private constructor(context: Context, displayId: String) :
             if (!handle.isAttachedToWindow && viewModel.handleAnimationState.value != AnimationState.ADDING) {
                 wm.safeAddView(handle, handleParams)
                 handle.alpha = 0f
-                handle.fadeIn(DrawerOrFrame.DRAWER) {
-                    viewModel.handleAnimationState.value = AnimationState.IDLE
-                }
+                handle.fadeIn(DrawerOrFrame.DRAWER)
+                viewModel.handleAnimationState.value = AnimationState.IDLE
             }
         }
     }
 
-    private fun hideHandle() {
-        if (!drawer.isAttachedToWindow) {
-            lifecycleRegistry.currentState = Lifecycle.State.STARTED
-        }
+    private suspend fun hideHandle() {
+        withContext(Dispatchers.Main) {
+            if (!drawer.isAttachedToWindow) {
+                lifecycleRegistry.currentState = Lifecycle.State.STARTED
+            }
 
-        if (handle.isAttachedToWindow && viewModel.handleAnimationState.value != AnimationState.REMOVING) {
-            handle.fadeOut(DrawerOrFrame.DRAWER) {
+            if (handle.isAttachedToWindow && viewModel.handleAnimationState.value != AnimationState.REMOVING) {
+                handle.fadeOut(DrawerOrFrame.DRAWER)
                 viewModel.handleAnimationState.value = AnimationState.IDLE
                 wm.safeRemoveView(handle)
             }
         }
     }
 
-    private fun showDrawer(wm: WindowManager = this.wm, hideHandle: Boolean = true) {
-        mainHandler.post {
+    private suspend fun showDrawer(wm: WindowManager = this.wm, hideHandle: Boolean = true) {
+        withContext(Dispatchers.Main) {
             if (!drawer.isAttachedToWindow && viewModel.drawerAnimationState.value != AnimationState.ADDING) {
                 if (hideHandle) {
                     eventManager.sendEvent(Event.DrawerAttachmentState(true))
@@ -484,8 +467,8 @@ class DrawerDelegate private constructor(context: Context, displayId: String) :
         }
     }
 
-    override fun updateWindow() {
-        mainHandler.post {
+    override suspend fun updateWindow() {
+        withContext(Dispatchers.Main) {
             params.apply {
                 val displaySize = display.realSize
                 width = displaySize.x
@@ -498,21 +481,18 @@ class DrawerDelegate private constructor(context: Context, displayId: String) :
         }
     }
 
-    private fun hideDrawer(callListener: Boolean = true) {
-        mainHandler.post {
+    private suspend fun hideDrawer(callListener: Boolean = true) {
+        withContext(Dispatchers.Main) {
             if (drawer.isAttachedToWindow && viewModel.drawerAnimationState.value != AnimationState.REMOVING) {
                 viewModel.drawerAnimationState.value = AnimationState.REMOVING
                 globalState.handlingClick.value =
                     globalState.handlingClick.value.toMutableMap().also { it.remove(-2) }
                 viewModel.currentEditingInterfacePosition.value = -1
 
-                drawer.fadeOut(DrawerOrFrame.DRAWER) {
-                    mainHandler.postDelayed({
-                        wm.safeRemoveView(drawer)
-                        viewModel.drawerAnimationState.value = AnimationState.IDLE
-                        if (callListener) eventManager.sendEvent(Event.DrawerHidden)
-                    }, 10)
-                }
+                drawer.fadeOut(DrawerOrFrame.DRAWER)
+                wm.safeRemoveView(drawer)
+                viewModel.drawerAnimationState.value = AnimationState.IDLE
+                if (callListener) eventManager.sendEvent(Event.DrawerHidden)
             }
         }
     }

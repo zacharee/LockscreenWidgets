@@ -540,7 +540,7 @@ open class MainWidgetFrameDelegate protected constructor(
         }
     }
 
-    override fun onDestroy() {
+    override suspend fun onDestroy() {
         if (lifecycleRegistry.currentState >= Lifecycle.State.INITIALIZED) {
             removeWindow()
         }
@@ -583,46 +583,45 @@ open class MainWidgetFrameDelegate protected constructor(
         }
     }
 
-    private fun addWindow() {
-        logUtils.debugLog("Adding overlay")
+    private suspend fun addWindow() {
+        logUtils.normalLog("Adding overlay", null)
 
-        if (!frame.isAttachedToWindow) {
-            updateWindow()
-        }
+        withContext(Dispatchers.Main) {
+            if (!frame.isAttachedToWindow) {
+                updateWindow()
+            }
 
-        mainHandler.post {
-            logUtils.debugLog("Trying to add overlay ${viewModel.animationState.value}", null)
+            logUtils.normalLog("Trying to add overlay ${viewModel.animationState.value}", null)
 
             if (!frame.isAttachedToWindow && viewModel.animationState.value != AnimationState.STATE_ADDING) {
-                logUtils.debugLog("Adding overlay", null)
+                logUtils.normalLog("Actually adding overlay", null)
 
                 viewModel.animationState.value = AnimationState.STATE_ADDING
 
                 if (!wm.safeAddView(frame, params)) {
                     viewModel.animationState.value = AnimationState.STATE_IDLE
                 } else {
-                    frame.fadeAndScaleIn(DrawerOrFrame.FRAME) {
-                        viewModel.animationState.value = AnimationState.STATE_IDLE
-                        eventManager.sendEvent(Event.FrameAttachmentState(id, true))
-                    }
+                    frame.fadeAndScaleIn(DrawerOrFrame.FRAME)
+                    viewModel.animationState.value = AnimationState.STATE_IDLE
+                    eventManager.sendEvent(Event.FrameAttachmentState(id, true))
                 }
             }
         }
     }
 
-    private fun removeWindow() {
+    private suspend fun removeWindow() {
         if (isAttached) {
             logUtils.debugLog("Removing overlay")
         }
 
-        viewModel.currentEditingInterfacePosition.value = -1
+        withContext(Dispatchers.Main) {
+            viewModel.currentEditingInterfacePosition.value = -1
 
-        globalState.handlingClick.value = globalState.handlingClick.value.toMutableMap().also {
-            it.remove(id)
-        }
-        forceWakelock(on = false, updateOverlay = false)
+            globalState.handlingClick.value = globalState.handlingClick.value.toMutableMap().also {
+                it.remove(id)
+            }
+            forceWakelock(on = false, updateOverlay = false)
 
-        mainHandler.post {
             logUtils.debugLog("Trying to remove overlay ${viewModel.animationState.value}", null)
 
             if (frame.isAttachedToWindow && viewModel.animationState.value != AnimationState.STATE_REMOVING) {
@@ -630,18 +629,16 @@ open class MainWidgetFrameDelegate protected constructor(
 
                 logUtils.debugLog("Pre-animation removal", null)
 
-                frame.fadeAndScaleOut(DrawerOrFrame.FRAME) {
-                    logUtils.debugLog("Post-animation removal", null)
+                frame.fadeAndScaleOut(DrawerOrFrame.FRAME)
 
-                    mainHandler.postDelayed({
-                        logUtils.debugLog("Posted removal", null)
+                logUtils.debugLog("Post-animation removal", null)
 
-                        if (frame.isAttachedToWindow) {
-                            wm.safeRemoveView(frame)
-                        }
-                        viewModel.animationState.value = AnimationState.STATE_IDLE
-                    }, 50)
+                logUtils.debugLog("Posted removal", null)
+
+                if (frame.isAttachedToWindow) {
+                    wm.safeRemoveView(frame)
                 }
+                viewModel.animationState.value = AnimationState.STATE_IDLE
             } else if (!frame.isAttachedToWindow) {
                 wm.safeRemoveView(frame, false)
 
@@ -703,7 +700,7 @@ open class MainWidgetFrameDelegate protected constructor(
      * - [PrefManager.widgetFrameEnabled] is true (i.e. the widget frame is actually enabled)
      * =======
      */
-    private suspend fun canShow(): Boolean {
+    private fun canShow(): Boolean {
         fun forPreview(): Boolean {
             return (state.isPreview || state.selectionPreviewRequestCode != null) && !state.isTempHide
         }
@@ -746,28 +743,27 @@ open class MainWidgetFrameDelegate protected constructor(
             return prefManager.widgetFrameEnabled && prefManager.forceShowFrame
         }
 
-        return withContext(Dispatchers.IO) {
-            (forced() || forSecondaryDisplay() || forPreview() || forNotificationCenter() || forLockscreen()).also {
-                logUtils.debugLog(
-                    "canShow $id: $it\n" +
-                            "state: $state\n " +
-                            "showOnMainLockScreen: ${framePrefs.showOnMainLockScreen}\n" +
-                            "widgetFrameEnabled: ${prefManager.widgetFrameEnabled}\n" +
-                            "hideOnSecurityPage: ${framePrefs.hideOnSecurityPage}\n" +
-                            "hideOnNotifications: ${framePrefs.hideOnNotifications}\n" +
-                            "hideOnNotificationShade: ${framePrefs.hideOnNotificationShade}\n" +
-                            "presentIds: ${prefManager.presentIds}\n" +
-                            "nonPresentIds: ${prefManager.nonPresentIds}\n" +
-                            "hideInLandscape: ${prefManager.hideInLandscape}\n" +
-                            "showInNotificationCenter: ${framePrefs.showInNotificationShade}\n" +
-                            "hideOnEdgePanel: ${framePrefs.hideOnEdgePanel}\n" +
-                            "hidingForPresentApp: ${globalState.hidingForPresentApp.value}\n" +
-                            "canShowFrameFromTasker: ${prefManager.canShowFrameFromTasker}\n" +
-                            "forceShowFrame: ${prefManager.forceShowFrame}\n" +
-                            "hideOnFaceWidgets: ${framePrefs.hideOnFaceWidgets}\n" +
-                            "hideWhenKeyboardShown: ${framePrefs.hideWhenKeyboardShown}\n",
-                )
-            }
+        return (forced() || forSecondaryDisplay() || forPreview() || forNotificationCenter() || forLockscreen()).also {
+            logUtils.debugLog(
+                "canShow $id: $it\n" +
+                        "state: $state\n " +
+                        "showOnMainLockScreen: ${framePrefs.showOnMainLockScreen}\n" +
+                        "widgetFrameEnabled: ${prefManager.widgetFrameEnabled}\n" +
+                        "hideOnSecurityPage: ${framePrefs.hideOnSecurityPage}\n" +
+                        "hideOnNotifications: ${framePrefs.hideOnNotifications}\n" +
+                        "hideOnNotificationShade: ${framePrefs.hideOnNotificationShade}\n" +
+                        "presentIds: ${prefManager.presentIds}\n" +
+                        "nonPresentIds: ${prefManager.nonPresentIds}\n" +
+                        "hideInLandscape: ${prefManager.hideInLandscape}\n" +
+                        "showInNotificationCenter: ${framePrefs.showInNotificationShade}\n" +
+                        "hideOnEdgePanel: ${framePrefs.hideOnEdgePanel}\n" +
+                        "hidingForPresentApp: ${globalState.hidingForPresentApp.value}\n" +
+                        "canShowFrameFromTasker: ${prefManager.canShowFrameFromTasker}\n" +
+                        "forceShowFrame: ${prefManager.forceShowFrame}\n" +
+                        "hideOnFaceWidgets: ${framePrefs.hideOnFaceWidgets}\n" +
+                        "hideWhenKeyboardShown: ${framePrefs.hideWhenKeyboardShown}\n",
+                null,
+            )
         }
     }
 
@@ -838,7 +834,7 @@ open class MainWidgetFrameDelegate protected constructor(
      * calls). Use this method for updating things that are conditional
      * upon the frame's state after an event.
      */
-    private fun updateAccessibilityPass() {
+    private suspend fun updateAccessibilityPass() {
         if (viewModel.animationState.value == AnimationState.STATE_IDLE) {
             if (state.isPendingNotificationStateChange || state.isPendingOrientationStateChange) {
                 updateWindow()
@@ -858,7 +854,7 @@ open class MainWidgetFrameDelegate protected constructor(
      * @param wm the WindowManager to use.
      * @param on whether to add or remove the force flag.
      */
-    private fun forceWakelock(on: Boolean, updateOverlay: Boolean = true) {
+    private suspend fun forceWakelock(on: Boolean, updateOverlay: Boolean = true) {
         if (on) {
             params.flags = params.flags or WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON
         } else {
@@ -870,15 +866,17 @@ open class MainWidgetFrameDelegate protected constructor(
         }
     }
 
-    private fun updateOverlay() {
-        wm.safeUpdateViewLayout(frame, params)
+    private suspend fun updateOverlay() {
+        withContext(Dispatchers.Main) {
+            wm.safeUpdateViewLayout(frame, params)
+        }
     }
 
     /**
      * Update the frame's params for its current state (normal
      * or in expanded notification center).
      */
-    override fun updateWindow() {
+    override suspend fun updateWindow() {
         logUtils.debugLog("Checking if params need to be updated")
 
         logUtils.debugLog("Possibly updating params with display size ${display.realSize}", null)
@@ -922,11 +920,9 @@ open class MainWidgetFrameDelegate protected constructor(
             logUtils.debugLog("Updating params", null)
 
             updateOverlay()
-            mainHandler.post {
-                updateWallpaperLayerIfNeeded()
-                adapter.updateViews()
-                scrollToStoredPosition(true)
-            }
+            updateWallpaperLayerIfNeeded()
+            adapter.updateViews()
+            scrollToStoredPosition(true)
         }
     }
 

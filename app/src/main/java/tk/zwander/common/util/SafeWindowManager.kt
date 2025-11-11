@@ -5,7 +5,9 @@ package tk.zwander.common.util
 import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
+import androidx.annotation.MainThread
 
+@MainThread
 fun WindowManager.safeAddView(view: View, params: ViewGroup.LayoutParams): Boolean {
     return try {
         addView(view, params)
@@ -16,6 +18,7 @@ fun WindowManager.safeAddView(view: View, params: ViewGroup.LayoutParams): Boole
     }
 }
 
+@MainThread
 fun WindowManager.safeRemoveView(view: View, logError: Boolean = true): Boolean {
     return try {
         removeView(view)
@@ -28,6 +31,7 @@ fun WindowManager.safeRemoveView(view: View, logError: Boolean = true): Boolean 
     }
 }
 
+@MainThread
 fun WindowManager.safeRemoveViewImmediate(view: View, logError: Boolean = true): Boolean {
     return try {
         removeViewImmediate(view)
@@ -40,6 +44,7 @@ fun WindowManager.safeRemoveViewImmediate(view: View, logError: Boolean = true):
     }
 }
 
+@MainThread
 fun WindowManager.safeUpdateViewLayout(view: View, params: ViewGroup.LayoutParams): Boolean {
     return try {
         updateViewLayout(view, params)

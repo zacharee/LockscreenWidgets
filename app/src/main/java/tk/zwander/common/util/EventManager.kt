@@ -111,6 +111,7 @@ sealed class Event {
     data object ScreenOff : Event()
     data object NightModeUpdate : Event()
     data object RequestNotificationCount : Event()
+    data object CloseSystemDialogs : Event()
 
     /**
      * On Android 8.0+, it's pretty easy to dismiss the lock screen with a simple API call.

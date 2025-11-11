@@ -12,7 +12,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.MainScope
-import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import tk.zwander.common.util.AccessibilityUtils.runAccessibilityJob
 import tk.zwander.common.util.AccessibilityUtils.runWindowOperation
@@ -27,6 +26,7 @@ import tk.zwander.common.util.handler
 import tk.zwander.common.util.keyguardManager
 import tk.zwander.common.util.logUtils
 import tk.zwander.common.util.prefManager
+import tk.zwander.lockscreenwidgets.App
 import tk.zwander.lockscreenwidgets.appwidget.IDListProvider
 import tk.zwander.lockscreenwidgets.util.FramePrefs
 import tk.zwander.lockscreenwidgets.util.MainWidgetFrameDelegate
@@ -178,16 +178,24 @@ class Accessibility : AccessibilityService(), EventObserver, CoroutineScope by M
     override fun onDestroy() {
         super.onDestroy()
 
-        cancel()
         sharedPreferencesChangeHandler.unregister(this)
-        frameDelegate.onDestroy()
-        drawerDelegate.onDestroy()
-        secondaryFrameDelegates.forEach { (_, delegate) ->
-            delegate.onDestroy()
-        }
-
         eventManager.removeObserver(this)
-        lsDisplayManager.onDestroy()
+
+        // This is hacky and ideally it'd stay inside Accessibility,
+        // but I can't find a way to suspend the destruction of the
+        // Accessibility class while these destroy methods run without
+        // just blocking forever.
+        App.instance.launch {
+            frameDelegate.onDestroy()
+            drawerDelegate.onDestroy()
+            secondaryFrameDelegates.forEach { (_, delegate) ->
+                delegate.onDestroy()
+            }
+
+            lsDisplayManager.onDestroy()
+
+            logUtils.debugLog("Accessibility destroy work completed", null)
+        }
 
         logUtils.debugLog("Accessibility service destroyed.", null)
     }

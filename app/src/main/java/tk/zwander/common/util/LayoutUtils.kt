@@ -23,6 +23,8 @@ import tk.zwander.common.compose.AppTheme
 import tk.zwander.common.data.WidgetType
 import tk.zwander.common.util.compat.LayoutInflaterFactory2Compat
 import tk.zwander.lockscreenwidgets.R
+import kotlin.coroutines.resume
+import kotlin.coroutines.suspendCoroutine
 import kotlin.math.roundToInt
 import kotlin.math.sign
 
@@ -58,8 +60,14 @@ fun createTouchHelperCallback(
             else super.getDragDirs(recyclerView, viewHolder)
         }
 
-        override fun getMovementFlags(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder): Int {
-            return if (viewHolder.itemViewType != WidgetType.HEADER.ordinal) super.getMovementFlags(recyclerView, viewHolder)
+        override fun getMovementFlags(
+            recyclerView: RecyclerView,
+            viewHolder: RecyclerView.ViewHolder
+        ): Int {
+            return if (viewHolder.itemViewType != WidgetType.HEADER.ordinal) super.getMovementFlags(
+                recyclerView,
+                viewHolder
+            )
             else 0
         }
 
@@ -129,7 +137,7 @@ enum class DrawerOrFrame {
 }
 
 //Fade a View to 0% alpha and 95% scale. Used when hiding the widget frame.
-fun View.fadeAndScaleOut(drawerOrFrame: DrawerOrFrame, endListener: () -> Unit) {
+suspend fun View.fadeAndScaleOut(drawerOrFrame: DrawerOrFrame) {
     clearAnimation()
 
     val animator = AnimatorSet().apply {
@@ -138,47 +146,46 @@ fun View.fadeAndScaleOut(drawerOrFrame: DrawerOrFrame, endListener: () -> Unit) 
             ObjectAnimator.ofFloat(this@fadeAndScaleOut, "scaleY", scaleY, 0.95f),
             ObjectAnimator.ofFloat(this@fadeAndScaleOut, "alpha", alpha, 0f)
         )
-        duration = with (drawerOrFrame) { context.duration() }
-        addListener(object : AnimatorListenerAdapter() {
+        duration = with(drawerOrFrame) { context.duration() }
+    }
+    suspendCoroutine { continuation ->
+        animator.addListener(object : AnimatorListenerAdapter() {
             override fun onAnimationEnd(animation: Animator) {
                 scaleX = 0.95f
                 scaleY = 0.95f
                 alpha = 0f
 
                 clearAnimation()
-
-                handler?.postDelayed({
-                    endListener()
-                }, 1)
+                continuation.resume(Unit)
             }
         })
+        animator.start()
     }
-    animator.start()
 }
 
-fun View.fadeOut(drawerOrFrame: DrawerOrFrame, endListener: () -> Unit) {
+suspend fun View.fadeOut(drawerOrFrame: DrawerOrFrame) {
     clearAnimation()
 
     val alphaAnimation = ObjectAnimator.ofFloat(this, "alpha", alpha, 0f)
-    alphaAnimation.duration = with (drawerOrFrame) { context.duration() }
-    alphaAnimation.addListener(
-        object : AnimatorListenerAdapter() {
-            override fun onAnimationEnd(animation: Animator) {
-                alpha = 0f
+    alphaAnimation.duration = with(drawerOrFrame) { context.duration() }
+    suspendCoroutine { continuation ->
+        alphaAnimation.addListener(
+            object : AnimatorListenerAdapter() {
+                override fun onAnimationEnd(animation: Animator) {
+                    alpha = 0f
 
-                clearAnimation()
+                    clearAnimation()
 
-                handler?.postDelayed({
-                    endListener()
-                }, 1)
-            }
-        },
-    )
-    alphaAnimation.start()
+                    continuation.resume(Unit)
+                }
+            },
+        )
+        alphaAnimation.start()
+    }
 }
 
 //Fade a View to 100% alpha and 100% scale. Used when showing the widget frame.
-fun View.fadeAndScaleIn(drawerOrFrame: DrawerOrFrame, endListener: () -> Unit) {
+suspend fun View.fadeAndScaleIn(drawerOrFrame: DrawerOrFrame) {
     clearAnimation()
 
     val animator = AnimatorSet().apply {
@@ -187,44 +194,55 @@ fun View.fadeAndScaleIn(drawerOrFrame: DrawerOrFrame, endListener: () -> Unit) {
             ObjectAnimator.ofFloat(this@fadeAndScaleIn, "scaleY", scaleY, 1.0f),
             ObjectAnimator.ofFloat(this@fadeAndScaleIn, "alpha", alpha, 1.0f)
         )
-        duration = with (drawerOrFrame) { context.duration() }
-        addListener(object : AnimatorListenerAdapter() {
+        duration = with(drawerOrFrame) { context.duration() }
+    }
+
+    suspendCoroutine { continuation ->
+        animator.addListener(object : AnimatorListenerAdapter() {
             override fun onAnimationEnd(animation: Animator) {
                 scaleX = 1f
                 scaleY = 1f
                 alpha = 1f
 
                 clearAnimation()
-                endListener()
+                continuation.resume(Unit)
             }
         })
+        animator.start()
     }
-    animator.start()
 }
 
-fun View.fadeIn(drawerOrFrame: DrawerOrFrame, endListener: () -> Unit) {
+suspend fun View.fadeIn(drawerOrFrame: DrawerOrFrame) {
     clearAnimation()
 
     val animator = AnimatorSet().apply {
         playTogether(
             ObjectAnimator.ofFloat(this@fadeIn, "alpha", alpha, 1f),
         )
-        duration = with (drawerOrFrame) { context.duration() }
-        addListener(object : AnimatorListenerAdapter() {
+        duration = with(drawerOrFrame) { context.duration() }
+    }
+    suspendCoroutine { continuation ->
+        animator.addListener(object : AnimatorListenerAdapter() {
             override fun onAnimationEnd(animation: Animator) {
                 alpha = 1f
 
                 clearAnimation()
-                endListener()
+                continuation.resume(Unit)
             }
         })
+        animator.start()
     }
-    animator.start()
 }
 
 val Context.statusBarHeight: Int
     @SuppressLint("InternalInsetResource", "DiscouragedApi")
-    get() = resources.getDimensionPixelSize(resources.getIdentifier("status_bar_height", "dimen", "android"))
+    get() = resources.getDimensionPixelSize(
+        resources.getIdentifier(
+            "status_bar_height",
+            "dimen",
+            "android"
+        )
+    )
 
 val Context.density: Density
     get() = Density(this)

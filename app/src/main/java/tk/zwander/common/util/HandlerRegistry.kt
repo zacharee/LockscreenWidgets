@@ -4,9 +4,17 @@ package tk.zwander.common.util
 
 import android.content.Context
 import android.content.SharedPreferences
+import kotlinx.atomicfu.atomic
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.launch
 
 class HandlerRegistry(setup: HandlerRegistry.() -> Unit) : SharedPreferences.OnSharedPreferenceChangeListener {
     private val items: HashMap<String, ItemHandler> = HashMap()
+
+    private val scope = atomic<CoroutineScope?>(null)
 
     init {
         setup.invoke(this)
@@ -29,7 +37,9 @@ class HandlerRegistry(setup: HandlerRegistry.() -> Unit) : SharedPreferences.OnS
     }
 
     fun handle(key: String) {
-        items[key]?.action?.invoke(key)
+        scope.value?.launch(Dispatchers.Main) {
+            items[key]?.action?.invoke(key)
+        }
     }
 
     override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences, key: String?) {
@@ -37,25 +47,27 @@ class HandlerRegistry(setup: HandlerRegistry.() -> Unit) : SharedPreferences.OnS
     }
 
     fun register(context: Context) {
+        scope.value = MainScope()
         context.prefManager.registerOnSharedPreferenceChangeListener(this)
     }
 
     fun unregister(context: Context) {
+        scope.getAndSet(null)?.cancel()
         context.prefManager.unregisterOnSharedPreferenceChangeListener(this)
     }
 
     data class ItemHandler(
         val keys: List<String>,
-        val action: (String) -> Unit,
+        val action: suspend (String) -> Unit,
     ) {
-        constructor(key: String, action: (String) -> Unit) : this(listOf(key), action)
+        constructor(key: String, action: suspend (String) -> Unit) : this(listOf(key), action)
     }
 }
 
-fun HandlerRegistry.handler(vararg keys: String, action: (String) -> Unit) {
+fun HandlerRegistry.handler(vararg keys: String, action: suspend (String) -> Unit) {
     putHandler(HandlerRegistry.ItemHandler(keys.toList(), action))
 }
 
-fun HandlerRegistry.handler(keys: List<String>, action: (String) -> Unit) {
+fun HandlerRegistry.handler(keys: List<String>, action: suspend (String) -> Unit) {
     putHandler(HandlerRegistry.ItemHandler(keys, action))
 }

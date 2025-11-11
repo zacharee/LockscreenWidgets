@@ -54,9 +54,14 @@ import tk.zwander.widgetdrawer.activities.add.AddDrawerWidgetActivity
  * running One UI or not.
  */
 class App : Application(), CoroutineScope by MainScope(), EventObserver {
+    companion object {
+        lateinit var instance: App
+    }
+
     //Listen for the screen turning on and off.
     //This shouldn't really be necessary, but there are some quirks in how
     //Android works that makes it helpful.
+    @Suppress("DEPRECATION")
     private val screenStateReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
             when (intent?.action) {
@@ -80,6 +85,9 @@ class App : Application(), CoroutineScope by MainScope(), EventObserver {
 
                         logUtils.debugLog("Sending screen on", null)
                     }
+                }
+                Intent.ACTION_CLOSE_SYSTEM_DIALOGS -> {
+                    eventManager.sendEvent(Event.CloseSystemDialogs)
                 }
             }
         }
@@ -125,6 +133,8 @@ class App : Application(), CoroutineScope by MainScope(), EventObserver {
 
     override fun onCreate() {
         super.onCreate()
+
+        instance = this
 
         if (prefManager.enableBugsnag) {
             ReLinker.loadLibrary(this, "bugsnag-ndk")
@@ -232,7 +242,11 @@ class App : Application(), CoroutineScope by MainScope(), EventObserver {
         ContextCompat.registerReceiver(
             this,
             screenStateReceiver,
-            IntentFilter(Intent.ACTION_SCREEN_OFF).apply { addAction(Intent.ACTION_SCREEN_ON) },
+            IntentFilter(Intent.ACTION_SCREEN_OFF).apply {
+                addAction(Intent.ACTION_SCREEN_ON)
+                @Suppress("DEPRECATION")
+                addAction(Intent.ACTION_CLOSE_SYSTEM_DIALOGS)
+            },
             ContextCompat.RECEIVER_EXPORTED,
         )
         contentResolver.registerContentObserver(

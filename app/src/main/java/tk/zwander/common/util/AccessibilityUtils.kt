@@ -49,6 +49,7 @@ object AccessibilityUtils {
             "com.android.systemui:id/left_button",
             "com.android.systemui:id/camera_button",
             "com.android.systemui:id/keyguard_indication_text_bottom",
+            "com.android.systemui:id/keyguard_carrier_text",
         )
 
         val notificationsPanelIds = unitMapOf(

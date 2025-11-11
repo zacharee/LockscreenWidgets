@@ -23,6 +23,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.launch
 import tk.zwander.common.adapters.BaseAdapter
 import tk.zwander.common.data.WidgetData
 import tk.zwander.common.data.WidgetType
@@ -71,7 +72,9 @@ abstract class BaseDelegate<State : Any>(
         override fun onDisplayRemoved(displayId: Int) {}
 
         override fun onDisplayChanged(displayId: Int) {
-            updateWindow()
+            scope.launch {
+                updateWindow()
+            }
         }
     }
 
@@ -128,7 +131,7 @@ abstract class BaseDelegate<State : Any>(
     }
 
     @CallSuper
-    open fun onDestroy() {
+    open suspend fun onDestroy() {
         eventManager.removeObserver(this)
         prefsHandler.unregister(this)
         widgetHost.removeOnClickCallback(this)
@@ -236,7 +239,7 @@ abstract class BaseDelegate<State : Any>(
 
     protected open fun widgetRemovalConfirmed(event: Event.RemoveWidgetConfirmed, position: Int) {}
 
-    protected abstract fun updateWindow()
+    protected abstract suspend fun updateWindow()
 
     data class BaseState(
         val isHoldingItem: Boolean = false,
@@ -312,7 +315,7 @@ abstract class BaseDelegate<State : Any>(
         abstract val widgetCornerRadiusKey: String
         abstract val containerCornerRadiusKey: String?
 
-        fun updateWindow() {
+        suspend fun updateWindow() {
             delegate.updateWindow()
         }
     }
