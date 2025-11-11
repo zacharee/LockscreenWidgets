@@ -27,6 +27,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import tk.zwander.common.activities.DismissOrUnlockActivity
 import tk.zwander.common.compose.util.createComposeViewHolder
+import tk.zwander.common.compose.util.findAccessibility
 import tk.zwander.common.data.WidgetData
 import tk.zwander.common.util.BaseDelegate
 import tk.zwander.common.util.DrawerOrFrame
@@ -54,7 +55,6 @@ import tk.zwander.lockscreenwidgets.adapters.WidgetFrameAdapter
 import tk.zwander.lockscreenwidgets.compose.WidgetFrameLayout
 import tk.zwander.lockscreenwidgets.data.Mode
 import tk.zwander.lockscreenwidgets.databinding.WidgetGridHolderBinding
-import tk.zwander.lockscreenwidgets.services.Accessibility
 import kotlin.math.ceil
 import kotlin.math.floor
 
@@ -85,10 +85,12 @@ open class MainWidgetFrameDelegate protected constructor(
         @Synchronized
         fun getInstance(context: Context, displayId: String): MainWidgetFrameDelegate {
             return instance.value ?: run {
-                if (context !is Accessibility) {
+                val accessibilityContext = context.findAccessibility()
+
+                if (accessibilityContext == null) {
                     throw IllegalStateException("Delegate can only be initialized by Accessibility Service!")
                 } else {
-                    MainWidgetFrameDelegate(context, displayId = displayId).also {
+                    MainWidgetFrameDelegate(accessibilityContext, displayId = displayId).also {
                         instance.value = it
                     }
                 }
@@ -539,7 +541,9 @@ open class MainWidgetFrameDelegate protected constructor(
     }
 
     override fun onDestroy() {
-        removeWindow()
+        if (lifecycleRegistry.currentState >= Lifecycle.State.INITIALIZED) {
+            removeWindow()
+        }
 
         super.onDestroy()
 

@@ -50,7 +50,6 @@ class Accessibility : AccessibilityService(), EventObserver, CoroutineScope by M
     private val power by lazy { getSystemService(POWER_SERVICE) as PowerManager }
     private val imm by lazy { getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager }
     private val lsDisplayManager by lazy { LSDisplayManager.getInstance(this) }
-    private val wm by lazy { lsDisplayManager.windowManager }
     private val frameDelegate: MainWidgetFrameDelegate
         get() = MainWidgetFrameDelegate.getInstance(this, "${Display.DEFAULT_DISPLAY}")
     private val drawerDelegate: DrawerDelegate

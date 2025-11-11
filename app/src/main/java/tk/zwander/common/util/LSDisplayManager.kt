@@ -14,7 +14,7 @@ import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.map
-import tk.zwander.lockscreenwidgets.services.Accessibility
+import tk.zwander.common.compose.util.findAccessibility
 import kotlin.math.roundToInt
 
 val Context.requireLsDisplayManager: LSDisplayManager
@@ -34,12 +34,16 @@ class LSDisplayManager private constructor(context: Context) : ContextWrapper(co
 
         @Synchronized
         fun getInstance(context: Context): LSDisplayManager {
-            if (instance == null && context !is Accessibility) {
-                throw IllegalStateException("Accessibility service isn't running!")
-            }
+            val accessibilityContext = context.findAccessibility()
 
-            return instance ?: LSDisplayManager(context).also {
-                instance = it
+            return instance ?: run {
+                if (accessibilityContext == null) {
+                    throw IllegalStateException("Accessibility service isn't running!")
+                } else {
+                    LSDisplayManager(accessibilityContext).also {
+                        instance = it
+                    }
+                }
             }
         }
     }
@@ -102,12 +106,12 @@ class LSDisplayManager private constructor(context: Context) : ContextWrapper(co
 
     fun requireDisplayByStringId(displayId: String): LSDisplay {
         return findDisplayByStringId(displayId)
-            ?: throw NullPointerException("Display for $displayId not found!")
+            ?: throw NullPointerException("Display for $displayId not found! Available displays ${availableDisplays.value.keys}")
     }
 
     fun requireDisplay(displayId: Int): LSDisplay {
         return getDisplay(displayId)
-            ?: throw NullPointerException("Display for $displayId not found!")
+            ?: throw NullPointerException("Display for $displayId not found! Available displays ${availableDisplays.value.keys}")
     }
 
     fun collectDisplay(displayId: Int): Flow<LSDisplay?> {

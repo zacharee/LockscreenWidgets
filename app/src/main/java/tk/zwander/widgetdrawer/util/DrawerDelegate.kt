@@ -30,6 +30,7 @@ import kotlinx.coroutines.launch
 import tk.zwander.common.activities.DismissOrUnlockActivity
 import tk.zwander.common.compose.components.DrawerHandle
 import tk.zwander.common.compose.util.createComposeViewHolder
+import tk.zwander.common.compose.util.findAccessibility
 import tk.zwander.common.data.WidgetData
 import tk.zwander.common.util.BaseDelegate
 import tk.zwander.common.util.DrawerOrFrame
@@ -49,7 +50,6 @@ import tk.zwander.common.util.safeRemoveView
 import tk.zwander.common.util.safeUpdateViewLayout
 import tk.zwander.common.util.themedContext
 import tk.zwander.lockscreenwidgets.R
-import tk.zwander.lockscreenwidgets.services.Accessibility
 import tk.zwander.widgetdrawer.activities.TaskerIsShowingDrawer
 import tk.zwander.widgetdrawer.adapters.DrawerAdapter
 import tk.zwander.widgetdrawer.compose.Drawer
@@ -79,10 +79,12 @@ class DrawerDelegate private constructor(context: Context, displayId: String) :
         @Synchronized
         fun getInstance(context: Context, displayId: String): DrawerDelegate {
             return instance.value ?: run {
-                if (context !is Accessibility) {
+                val accessibilityContext = context.findAccessibility()
+
+                if (accessibilityContext == null) {
                     throw IllegalStateException("Delegate can only be initialized by Accessibility Service!")
                 } else {
-                    DrawerDelegate(context, displayId).also {
+                    DrawerDelegate(accessibilityContext, displayId).also {
                         instance.value = it
                     }
                 }
