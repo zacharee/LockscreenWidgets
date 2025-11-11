@@ -64,7 +64,7 @@ import kotlin.math.floor
 open class MainWidgetFrameDelegate protected constructor(
     context: Context,
     protected val id: Int = -1,
-    displayId: Int,
+    displayId: String,
 ) : BaseDelegate<MainWidgetFrameDelegate.State>(context, displayId) {
     companion object {
         private val instance = MutableStateFlow<MainWidgetFrameDelegate?>(null)
@@ -83,7 +83,7 @@ open class MainWidgetFrameDelegate protected constructor(
         }
 
         @Synchronized
-        fun getInstance(context: Context, displayId: Int): MainWidgetFrameDelegate {
+        fun getInstance(context: Context, displayId: String): MainWidgetFrameDelegate {
             return instance.value ?: run {
                 if (context !is Accessibility) {
                     throw IllegalStateException("Delegate can only be initialized by Accessibility Service!")
@@ -454,7 +454,7 @@ open class MainWidgetFrameDelegate protected constructor(
                 )
             }
             is Event.PreviewFrames -> {
-                if (event.show == Event.PreviewFrames.ShowMode.SHOW_FOR_SELECTION && prefManager.currentSecondaryFramesWithDisplay.isEmpty()) {
+                if (event.show == Event.PreviewFrames.ShowMode.SHOW_FOR_SELECTION && prefManager.currentSecondaryFramesWithStringDisplay.isEmpty()) {
                     eventManager.sendEvent(Event.LaunchAddWidget(id))
                 } else {
                     if (event.includeMainFrame || id != -1) {
@@ -716,7 +716,7 @@ open class MainWidgetFrameDelegate protected constructor(
         }
 
         fun forSecondaryDisplay(): Boolean {
-            return targetDisplayId != Display.DEFAULT_DISPLAY && forCommon()
+            return display.displayId != Display.DEFAULT_DISPLAY && forCommon()
         }
 
         fun forNotificationCenter(): Boolean {

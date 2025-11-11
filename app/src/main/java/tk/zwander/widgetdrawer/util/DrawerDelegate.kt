@@ -57,7 +57,7 @@ import tk.zwander.widgetdrawer.views.DrawerRecycler
 import kotlin.math.absoluteValue
 import kotlin.math.sign
 
-class DrawerDelegate private constructor(context: Context, displayId: Int) :
+class DrawerDelegate private constructor(context: Context, displayId: String) :
     BaseDelegate<DrawerDelegate.State>(context, displayId) {
     companion object {
         @SuppressLint("StaticFieldLeak")
@@ -77,7 +77,7 @@ class DrawerDelegate private constructor(context: Context, displayId: Int) :
         }
 
         @Synchronized
-        fun getInstance(context: Context, displayId: Int): DrawerDelegate {
+        fun getInstance(context: Context, displayId: String): DrawerDelegate {
             return instance.value ?: run {
                 if (context !is Accessibility) {
                     throw IllegalStateException("Delegate can only be initialized by Accessibility Service!")

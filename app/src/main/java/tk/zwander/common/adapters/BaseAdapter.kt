@@ -94,7 +94,7 @@ abstract class BaseAdapter(
     protected val context: Context,
     protected val rootView: View,
     protected val onRemoveCallback: (WidgetData, Int) -> Unit,
-    protected val displayId: Int,
+    protected val displayId: String,
     protected val viewModel: BaseDelegate.BaseViewModel<*, *>,
 ) : RecyclerView.Adapter<BaseAdapter.BaseVH<*>>(), CoroutineScope by MainScope() {
     companion object {
@@ -112,7 +112,7 @@ abstract class BaseAdapter(
     protected val viewCacheRegistry = context.widgetViewCacheRegistry
 
     protected val display: LSDisplay
-        get() = context.requireLsDisplayManager.requireDisplay(displayId)
+        get() = context.requireLsDisplayManager.requireDisplayByStringId(displayId)
 
     private val baseLayoutInflater = context.themedLayoutInflater
 

@@ -182,7 +182,7 @@ class App : Application(), CoroutineScope by MainScope(), EventObserver {
                                 "Too large to parse."
                             },
                         ).apply {
-                            prefManager.currentSecondaryFramesWithDisplay.forEach { (frameId, frameDisplay) ->
+                            prefManager.currentSecondaryFramesWithStringDisplay.forEach { (frameId, frameDisplay) ->
                                 put(
                                     "secondaryFrame${frameId},${frameDisplay}Widgets",
                                     try {

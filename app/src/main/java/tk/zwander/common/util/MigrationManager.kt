@@ -6,6 +6,7 @@ import tk.zwander.common.util.migrations.AddExtraWidgetInfoMigration
 import tk.zwander.common.util.migrations.FrameDimAmountMigration
 import tk.zwander.common.util.migrations.FrameSizeAndPositionMigration
 import tk.zwander.common.util.migrations.SecondaryFrameToFrameWithDisplayMigration
+import tk.zwander.common.util.migrations.SecondaryFrameWithDisplayToStringDisplayMigration
 import tk.zwander.common.util.migrations.WidgetIconMigration
 import tk.zwander.common.util.migrations.WidgetSizeMigration
 import tk.zwander.lockscreenwidgets.BuildConfig
@@ -32,6 +33,7 @@ class MigrationManager private constructor(private val context: Context) {
         FrameDimAmountMigration(),
         FrameSizeAndPositionMigration(),
         SecondaryFrameToFrameWithDisplayMigration(),
+        SecondaryFrameWithDisplayToStringDisplayMigration(),
         WidgetIconMigration(),
     )
 

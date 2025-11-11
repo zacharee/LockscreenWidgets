@@ -1,16 +1,13 @@
 package tk.zwander.lockscreenwidgets.util
 
 import android.content.Context
-import tk.zwander.common.util.requireLsDisplayManager
 
 class SecondaryWidgetFrameDelegate(
     context: Context,
     id: Int,
-    displayId: Int,
+    displayId: String,
 ) : MainWidgetFrameDelegate(
-    context = context.createDisplayContext(
-        context.requireLsDisplayManager.requireDisplay(displayId).display,
-    ),
+    context = context,
     id = id,
     displayId = displayId,
 )

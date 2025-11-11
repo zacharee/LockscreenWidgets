@@ -47,7 +47,7 @@ class BackupRestoreManager private constructor(private val context: Context) {
             Which.DRAWER -> context.prefManager.drawerColCount
         }
 
-        val secondaryFrames = if (which == Which.FRAME) context.prefManager.currentSecondaryFramesWithDisplay else null
+        val secondaryFrames = if (which == Which.FRAME) context.prefManager.currentSecondaryFramesWithStringDisplay else null
         val frameWidgetsMap =
             secondaryFrames?.entries?.associate { it.toPair() to FramePrefs.getWidgetsForFrame(context, it.key) }
         val frameGridsMap = secondaryFrames?.entries?.associate {
@@ -60,7 +60,7 @@ class BackupRestoreManager private constructor(private val context: Context) {
         data[PrefManager.KEY_FRAME_COL_COUNT] = cols.toString()
 
         if (secondaryFrames != null) {
-            data["secondaryFramesNew"] = context.prefManager.gson.toJson(secondaryFrames)
+            data["secondaryFramesNewest"] = context.prefManager.gson.toJson(secondaryFrames)
             data["frameWidgetsMapNew"] = context.prefManager.gson.toJson(frameWidgetsMap)
             data["frameGridsMapNew"] = context.prefManager.gson.toJson(frameGridsMap)
         }
@@ -105,6 +105,9 @@ class BackupRestoreManager private constructor(private val context: Context) {
             val secondaryFramesNew = dataMap["secondaryFramesNew"]?.let {
                 context.prefManager.gson.fromJson(it, object : TypeToken<HashMap<Int, Int>>() {})
             }
+            val secondaryFramesNewest = dataMap["secondaryFramesNewest"]?.let {
+                context.prefManager.gson.fromJson(it, object : TypeToken<HashMap<Int, String>>() {})
+            }
             val frameWidgetsMap = dataMap["frameWidgetsMap"]?.let {
                 context.prefManager.gson.fromJson(it, object : TypeToken<HashMap<Int, LinkedHashSet<WidgetData>>>() {})
             }
@@ -119,10 +122,13 @@ class BackupRestoreManager private constructor(private val context: Context) {
             }
 
             secondaryFramesOld?.let {
-                context.prefManager.currentSecondaryFramesWithDisplay = HashMap(it.associateWith { Display.DEFAULT_DISPLAY })
+                context.prefManager.currentSecondaryFramesWithStringDisplay = HashMap(it.associateWith { "${Display.DEFAULT_DISPLAY}" })
             }
             secondaryFramesNew?.let {
-                context.prefManager.currentSecondaryFramesWithDisplay = it
+                context.prefManager.currentSecondaryFramesWithStringDisplay = HashMap(it.map { (key, value) -> key to "$value" }.toMap())
+            }
+            secondaryFramesNewest?.let {
+                context.prefManager.currentSecondaryFramesWithStringDisplay = it
             }
 
             frameWidgetsMap?.forEach { (id, widgets) ->
