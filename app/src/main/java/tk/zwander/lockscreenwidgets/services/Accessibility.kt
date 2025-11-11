@@ -101,8 +101,8 @@ class Accessibility : AccessibilityService(), EventObserver, CoroutineScope by M
     override fun onCreate() {
         super.onCreate()
 
-        sharedPreferencesChangeHandler.register(this)
-        eventManager.addObserver(this)
+        lsDisplayManager.onCreate()
+
         logUtils.debugLog("Accessibility service created.", null)
     }
 
@@ -111,7 +111,6 @@ class Accessibility : AccessibilityService(), EventObserver, CoroutineScope by M
             notificationTimeout = prefManager.accessibilityEventDelay.toLong()
         }
 
-        lsDisplayManager.onCreate()
         frameDelegate.onCreate()
         drawerDelegate.onCreate()
 
@@ -120,6 +119,9 @@ class Accessibility : AccessibilityService(), EventObserver, CoroutineScope by M
                 it.onCreate()
             }
         }
+
+        sharedPreferencesChangeHandler.register(this)
+        eventManager.addObserver(this)
 
         eventManager.sendEvent(Event.RequestNotificationCount)
         logUtils.debugLog("Accessibility service connected.", null)

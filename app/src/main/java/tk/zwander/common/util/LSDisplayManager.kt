@@ -8,7 +8,6 @@ import android.hardware.display.DisplayManager
 import android.os.Build
 import android.util.DisplayMetrics
 import android.view.Display
-import android.view.WindowManager
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.flow.Flow
@@ -49,7 +48,6 @@ class LSDisplayManager private constructor(context: Context) : ContextWrapper(co
     }
 
     val displayManager = getSystemService(DISPLAY_SERVICE) as DisplayManager
-    val windowManager = getSystemService(WINDOW_SERVICE) as WindowManager
 
     private val displayListener = object : DisplayManager.DisplayListener {
         override fun onDisplayAdded(displayId: Int) {
@@ -72,32 +70,35 @@ class LSDisplayManager private constructor(context: Context) : ContextWrapper(co
 
     val availableDisplays = MutableStateFlow(mapOf<Int, LSDisplay>())
 
-    val defaultDisplay: LSDisplay
-        get() = availableDisplays.value[Display.DEFAULT_DISPLAY]
-            ?: throw NullPointerException("Default display not found! Available displays: ${availableDisplays.value.keys}")
-
     fun onCreate() {
-        availableDisplays.value = displayManager.getDisplays(DisplayManager.DISPLAY_CATEGORY_BUILT_IN_DISPLAYS).map {
-            LSDisplay(
-                display = it,
-                fontScale = createDisplayContext(it).resources.configuration.fontScale,
-            )
-        }.associateBy { it.displayId }
+        val builtInDisplays = displayManager.getDisplays(DisplayManager.DISPLAY_CATEGORY_BUILT_IN_DISPLAYS)
+        val allIncludingDisabled = displayManager.getDisplays(DisplayManager.DISPLAY_CATEGORY_ALL_INCLUDING_DISABLED)
+            .filter { it.type == Display.TYPE_INTERNAL }
+        val allDisplays = displayManager.displays.filter { it.type == Display.TYPE_INTERNAL }
+        val concatenatedDisplays = (builtInDisplays + allIncludingDisabled + allDisplays).toSet()
+
+        availableDisplays.value = concatenatedDisplays.map {
+                    LSDisplay(
+                        display = it,
+                        fontScale = createDisplayContext(it).resources.configuration.fontScale,
+                    )
+                }.associateBy { it.displayId }
+
+        logUtils.debugLog("Got displays ${availableDisplays.value.values.map { it.loggingId }}", null)
 
         displayManager.registerDisplayListener(displayListener, null)
     }
 
     fun onDestroy() {
+        logUtils.debugLog("Destroying LSDisplayManager", null)
+
         displayManager.unregisterDisplayListener(displayListener)
         instance = null
     }
 
-    fun getDisplay(displayId: Int): LSDisplay? {
-        processDisplay(displayId)
-        return availableDisplays.value[displayId]
-    }
-
     fun findDisplayByStringId(displayId: String): LSDisplay? {
+        logUtils.debugLog("Looking for display with string ID $displayId", null)
+
         return availableDisplays.value.values.firstOrNull { display ->
             display.uniqueIdCompat == displayId ||
                     display.displayId.toString() == displayId
@@ -106,19 +107,12 @@ class LSDisplayManager private constructor(context: Context) : ContextWrapper(co
 
     fun requireDisplayByStringId(displayId: String): LSDisplay {
         return findDisplayByStringId(displayId)
-            ?: throw NullPointerException("Display for $displayId not found! Available displays ${availableDisplays.value.keys}")
-    }
-
-    fun requireDisplay(displayId: Int): LSDisplay {
-        return getDisplay(displayId)
-            ?: throw NullPointerException("Display for $displayId not found! Available displays ${availableDisplays.value.keys}")
-    }
-
-    fun collectDisplay(displayId: Int): Flow<LSDisplay?> {
-        return availableDisplays.map { it[displayId] }
+            ?: throw NullPointerException("Display for $displayId not found! Available displays ${availableDisplays.value.values.map { it.loggingId }}")
     }
 
     fun collectDisplay(displayId: String): Flow<LSDisplay?> {
+        logUtils.debugLog("Collecting display with ID $displayId")
+
         return availableDisplays.map {
             it.values.firstOrNull { display ->
                 display.uniqueIdCompat == displayId
@@ -174,6 +168,9 @@ class LSDisplay(val display: Display, val fontScale: Float) {
         } else {
             display.displayId.toString()
         }
+
+    val loggingId: String
+        get() = "$uniqueIdCompat,$displayId"
 
     fun dpToPx(dpValue: Number): Int {
         return with (density) {
