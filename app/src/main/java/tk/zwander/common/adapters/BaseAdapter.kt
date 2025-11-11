@@ -623,8 +623,8 @@ abstract class BaseAdapter(
                 layoutParams = layoutParams.apply {
                     onWidgetResize(data, this, amount, direction)
                 }
-//                forceLayout()
-//                invalidate()
+                forceLayout()
+                invalidate()
             }
         }
     }
