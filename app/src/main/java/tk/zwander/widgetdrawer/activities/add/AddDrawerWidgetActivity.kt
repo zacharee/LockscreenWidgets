@@ -32,9 +32,9 @@ class AddDrawerWidgetActivity : AddWidgetActivity() {
     override val rowCount: Int
         get() = 1
     override val width: Float
-        get() = display.pxToDp(display.realSize.x)
+        get() = display.pxToDp(display.rotatedRealSize.x)
     override val height: Float
-        get() = display.pxToDp(display.realSize.y)
+        get() = display.pxToDp(display.rotatedRealSize.y)
 
     override var currentWidgets: MutableSet<WidgetData>
         get() = prefManager.drawerWidgets
@@ -49,7 +49,7 @@ class AddDrawerWidgetActivity : AddWidgetActivity() {
 
         return floor(provider.minHeight.toFloat() / display.pxToDp(rowHeight)).toInt()
             .coerceAtLeast(10)
-            .coerceAtMost((display.realSize.y / rowHeight) - 10)
+            .coerceAtMost((display.rotatedRealSize.y / rowHeight) - 10)
     }
 
     override fun onDestroy() {

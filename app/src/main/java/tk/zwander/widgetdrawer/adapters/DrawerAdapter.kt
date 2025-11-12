@@ -32,7 +32,7 @@ class DrawerAdapter(
     override val colCount: Int
         get() = context.prefManager.drawerColCount
     override val rowCount: Int
-        get() = (display.realSize.y / context.resources.getDimensionPixelSize(R.dimen.drawer_row_height)) - 5
+        get() = (display.rotatedRealSize.y / context.resources.getDimensionPixelSize(R.dimen.drawer_row_height)) - 5
     override val minRowSpan: Int
         get() = 5
     override val rowSpanForAddButton: Int
@@ -65,7 +65,7 @@ class DrawerAdapter(
     override fun getThresholdPx(which: WidgetResizeListener.Which): Int {
         return context.run {
             if (which == WidgetResizeListener.Which.LEFT || which == WidgetResizeListener.Which.RIGHT) {
-                this@DrawerAdapter.display.realSize.x / colCount
+                this@DrawerAdapter.display.rotatedRealSize.x / colCount
             } else {
                 resources.getDimensionPixelSize(R.dimen.drawer_row_height)
             }

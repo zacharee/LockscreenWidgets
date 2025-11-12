@@ -8,6 +8,7 @@ import android.hardware.display.DisplayManager
 import android.os.Build
 import android.util.DisplayMetrics
 import android.view.Display
+import android.view.Surface
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.flow.Flow
@@ -154,11 +155,21 @@ class LSDisplay(val display: Display, val fontScale: Float) {
     }
 
     val realSize: Point by lazy {
-        Point().apply {
+        val size = rotatedRealSize
+        val currentRotation = display.rotation
+
+        if (currentRotation == Surface.ROTATION_270 || currentRotation == Surface.ROTATION_90) {
+            Point(size.y, size.x)
+        } else {
+            size
+        }
+    }
+
+    val rotatedRealSize: Point
+        get() = Point().apply {
             @Suppress("DEPRECATION")
             display.getRealSize(this)
         }
-    }
 
     val realMetrics: DisplayMetrics by lazy {
         DisplayMetrics().apply {

@@ -797,7 +797,7 @@ open class MainWidgetFrameDelegate protected constructor(
                 drawable?.mutate()?.let {
                     logUtils.debugLog("Setting wallpaper drawable.", null)
 
-                    val realSize = display.realSize
+                    val realSize = display.rotatedRealSize
                     val loc = frame.locationOnScreen ?: intArrayOf(0, 0)
 
                     val dWidth: Int = it.intrinsicWidth
@@ -879,7 +879,7 @@ open class MainWidgetFrameDelegate protected constructor(
     override suspend fun updateWindow() {
         logUtils.debugLog("Checking if params need to be updated")
 
-        logUtils.debugLog("Possibly updating params with display size ${display.realSize}", null)
+        logUtils.debugLog("Possibly updating params with display size ${display.rotatedRealSize}", null)
 
         val (newX, newY) = frameSizeAndPosition.getPositionForType(saveMode, display)
         val (newW, newH) = frameSizeAndPosition.getSizeForType(saveMode, display).run {

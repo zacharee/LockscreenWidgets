@@ -103,7 +103,7 @@ class DrawerDelegate private constructor(context: Context, displayId: String) :
 
     override val params by lazy {
         WindowManager.LayoutParams().apply {
-            val displaySize = display.realSize
+            val displaySize = display.rotatedRealSize
             type = WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY
             flags = WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN or
                     WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS
@@ -470,7 +470,7 @@ class DrawerDelegate private constructor(context: Context, displayId: String) :
     override suspend fun updateWindow() {
         withContext(Dispatchers.Main) {
             params.apply {
-                val displaySize = display.realSize
+                val displaySize = display.rotatedRealSize
                 width = displaySize.x
                 height = displaySize.y
             }

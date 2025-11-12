@@ -13,7 +13,7 @@ val Context.frameSizeAndPosition: FrameSizeAndPosition
 
 fun Context.calculateNCPosXFromRightDefault(type: FrameSizeAndPosition.FrameType, display: LSDisplay): Int {
     val fromRight = display.dpToPx(resources.getInteger(R.integer.def_notification_pos_x_from_right_dp))
-    val screenWidth = display.realSize.x
+    val screenWidth = display.rotatedRealSize.x
     val frameWidthPx = display.dpToPx(frameSizeAndPosition.getSizeForType(type, display).x)
 
     val frameRight = (frameWidthPx / 2f)
@@ -24,7 +24,7 @@ fun Context.calculateNCPosXFromRightDefault(type: FrameSizeAndPosition.FrameType
 
 fun Context.calculateNCPosYFromTopDefault(type: FrameSizeAndPosition.FrameType, display: LSDisplay): Int {
     val fromTop = display.dpToPx(resources.getInteger(R.integer.def_notification_pos_y_from_top_dp))
-    val screenHeight = display.realSize.y
+    val screenHeight = display.rotatedRealSize.y
     val frameHeightPx = display.dpToPx(frameSizeAndPosition.getSizeForType(type, display).y)
 
     val frameTop = (frameHeightPx / 2f)

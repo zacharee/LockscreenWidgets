@@ -5,41 +5,16 @@ import android.content.Context
 import android.os.Build
 import android.os.Bundle
 import android.view.Display
-import androidx.compose.foundation.border
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Card
-import androidx.compose.material3.LocalContentColor
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
 import tk.zwander.common.activities.BaseActivity
 import tk.zwander.common.activities.HideForIDsActivity
 import tk.zwander.common.activities.HideOnAppsChooserActivity
@@ -62,10 +37,10 @@ import tk.zwander.common.util.isPixelUI
 import tk.zwander.common.util.isTouchWiz
 import tk.zwander.common.util.lsDisplayManager
 import tk.zwander.common.util.prefManager
-import tk.zwander.common.util.requireLsDisplayManager
 import tk.zwander.common.util.setThemedContent
 import tk.zwander.lockscreenwidgets.BuildConfig
 import tk.zwander.lockscreenwidgets.R
+import tk.zwander.lockscreenwidgets.compose.SelectDisplayDialog
 import tk.zwander.lockscreenwidgets.services.isNotificationListenerActive
 import tk.zwander.lockscreenwidgets.util.FramePrefs
 import tk.zwander.lockscreenwidgets.util.FrameSpecificPreferences
@@ -675,147 +650,11 @@ class ComposeFrameSettingsActivity : BaseActivity(), EventObserver {
                 categories = preferenceScreen,
             )
 
-            if (pendingFrameId != null) {
-                AlertDialog(
-                    onDismissRequest = {
+            pendingFrameId?.let { frameId ->
+                SelectDisplayDialog(
+                    pendingFrameId = frameId,
+                    dismiss = {
                         pendingFrameId = null
-                    },
-                    title = {
-                        Text(text = stringResource(R.string.select_display))
-                    },
-                    text = {
-                        val lsDisplayManager = remember {
-                            requireLsDisplayManager
-                        }
-                        val displays by lsDisplayManager.availableDisplays.collectAsState()
-                        val density = LocalDensity.current
-
-                        var maxDisplayWidth by remember {
-                            mutableStateOf(0.dp)
-                        }
-
-                        LazyColumn(
-                            modifier = Modifier.fillMaxWidth(),
-                            verticalArrangement = Arrangement.spacedBy(8.dp),
-                        ) {
-                            item(key = "DEFAULT_DISPLAY") {
-                                Card(
-                                    onClick = {
-                                        secondaryFrames = HashMap(
-                                            secondaryFrames.toMutableMap().apply {
-                                                this[pendingFrameId!!] = "${Display.DEFAULT_DISPLAY}"
-                                            },
-                                        )
-                                        pendingFrameId = null
-                                    },
-                                ) {
-                                    Box(
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .heightIn(min = 56.dp)
-                                            .padding(8.dp),
-                                        contentAlignment = Alignment.CenterStart,
-                                    ) {
-                                        Column(
-                                            verticalArrangement = Arrangement.spacedBy(4.dp),
-                                        ) {
-                                            Text(
-                                                text = "${stringResource(R.string.default_display)} (${Display.DEFAULT_DISPLAY})",
-                                                style = MaterialTheme.typography.bodyLarge,
-                                                fontWeight = FontWeight.Bold,
-                                            )
-
-                                            Text(
-                                                text = stringResource(R.string.default_display_desc),
-                                            )
-                                        }
-                                    }
-                                }
-                            }
-
-                            items(
-                                items = displays.entries.toList(),
-                                key = { it.key },
-                            ) { (_, display) ->
-                                Card(
-                                    onClick = {
-                                        secondaryFrames = HashMap(
-                                            secondaryFrames.toMutableMap().apply {
-                                                this[pendingFrameId!!] = display.uniqueIdCompat
-                                            },
-                                        )
-                                        pendingFrameId = null
-                                    },
-                                ) {
-                                    Box(
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .heightIn(min = 56.dp)
-                                            .padding(8.dp),
-                                        contentAlignment = Alignment.Center,
-                                    ) {
-                                        Row(
-                                            modifier = Modifier.fillMaxWidth(),
-                                            verticalAlignment = Alignment.CenterVertically,
-                                            horizontalArrangement = Arrangement.SpaceBetween,
-                                        ) {
-                                            Text(
-                                                text = "${display.display.name}",
-                                                style = MaterialTheme.typography.bodyLarge,
-                                                fontWeight = FontWeight.Bold,
-                                            )
-
-                                            val (width, height) = remember(display.uniqueIdCompat) {
-                                                with (density) {
-                                                    val screenSize = display.realSize
-                                                    val screenWidth = screenSize.x
-                                                    val screenHeight = screenSize.y
-
-                                                    val desiredHeight = 48.dp
-                                                    val actualHeight = screenHeight.toDp()
-
-                                                    val heightRatio = desiredHeight / actualHeight
-
-                                                    val scaledWidth = (screenWidth * heightRatio).toDp()
-
-                                                    if (scaledWidth > maxDisplayWidth) {
-                                                        maxDisplayWidth = scaledWidth
-                                                    }
-
-                                                    scaledWidth to desiredHeight
-                                                }
-                                            }
-
-                                            Box(
-                                                contentAlignment = Alignment.Center,
-                                                modifier = if (maxDisplayWidth > 0.dp) {
-                                                    Modifier.width(maxDisplayWidth)
-                                                } else {
-                                                    Modifier
-                                                },
-                                            ) {
-                                                Box(
-                                                    modifier = Modifier.border(
-                                                        width = 1.dp,
-                                                        color = LocalContentColor.current,
-                                                        shape = RoundedCornerShape(2.dp),
-                                                    ).width(width).height(height),
-                                                )
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    },
-                    confirmButton = {
-                        TextButton(
-                            onClick = {
-                                pendingFrameId = null
-                            },
-                        ) {
-                            Text(text = stringResource(android.R.string.cancel))
-                        }
                     },
                 )
             }

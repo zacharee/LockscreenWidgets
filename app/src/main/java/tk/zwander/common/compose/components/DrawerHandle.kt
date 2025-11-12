@@ -31,6 +31,7 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.input.pointer.motionEventSpy
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import tk.zwander.common.compose.util.rememberPreferenceState
@@ -55,9 +56,10 @@ fun DrawerDelegate.DrawerViewModel.DrawerHandle(
 ) {
     val context = LocalContext.current
     val density = LocalDensity.current
+    val resources = LocalResources.current
     val currentDisplay by context.requireLsDisplayManager.collectDisplay(displayId).collectAsState(null)
-    val screenWidth = remember(currentDisplay) {
-        currentDisplay?.realSize?.x ?: 1
+    val screenWidth = remember(currentDisplay, resources.configuration.orientation) {
+        currentDisplay?.rotatedRealSize?.x ?: 1
     }
 
     var side by rememberPreferenceState(

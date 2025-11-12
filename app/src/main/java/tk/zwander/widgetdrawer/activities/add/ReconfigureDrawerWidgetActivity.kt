@@ -54,7 +54,7 @@ class ReconfigureDrawerWidgetActivity : ReconfigureWidgetActivity() {
 
                 val defaultRowSpan = floor(provider.minHeight.toFloat() / display.pxToDp(rowHeight)).toInt()
                     .coerceAtLeast(10)
-                    .coerceAtMost((display.realSize.y / rowHeight) - 10)
+                    .coerceAtMost((display.rotatedRealSize.y / rowHeight) - 10)
 
                 WidgetSizeData(defaultColSpan, defaultRowSpan)
             }
