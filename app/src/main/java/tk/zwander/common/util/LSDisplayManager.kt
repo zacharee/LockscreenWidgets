@@ -14,7 +14,6 @@ import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.map
-import tk.zwander.common.compose.util.findAccessibility
 import kotlin.math.roundToInt
 
 val Context.requireLsDisplayManager: LSDisplayManager
@@ -34,15 +33,9 @@ class LSDisplayManager private constructor(context: Context) : ContextWrapper(co
 
         @Synchronized
         fun getInstance(context: Context): LSDisplayManager {
-            val accessibilityContext = context.findAccessibility()
-
             return instance ?: run {
-                if (accessibilityContext == null) {
-                    throw IllegalStateException("Accessibility service isn't running!")
-                } else {
-                    LSDisplayManager(accessibilityContext).also {
-                        instance = it
-                    }
+                LSDisplayManager(context.safeApplicationContext).also {
+                    instance = it
                 }
             }
         }
@@ -75,8 +68,11 @@ class LSDisplayManager private constructor(context: Context) : ContextWrapper(co
         val builtInDisplays = displayManager.getDisplays(DisplayManager.DISPLAY_CATEGORY_BUILT_IN_DISPLAYS)
         val allIncludingDisabled = displayManager.getDisplays(DisplayManager.DISPLAY_CATEGORY_ALL_INCLUDING_DISABLED)
             .filter { it.type == Display.TYPE_INTERNAL }
+        // Samsung has extra filtering on DISPLAY_CATEGORY_ALL_INCLUDING_DISABLED but not this.
+        val samsung = displayManager.getDisplays("com.samsung.android.hardware.display.category.BUILTIN")
+            .filter { it.type == Display.TYPE_INTERNAL }
         val allDisplays = displayManager.displays.filter { it.type == Display.TYPE_INTERNAL }
-        val concatenatedDisplays = (builtInDisplays + allIncludingDisabled + allDisplays).toSet()
+        val concatenatedDisplays = (builtInDisplays + allIncludingDisabled + allDisplays + samsung).toSet()
 
         availableDisplays.value = concatenatedDisplays.map {
                     LSDisplay(
