@@ -9,19 +9,22 @@ import android.os.Bundle
 import android.view.WindowManager
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.IntentCompat
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import tk.zwander.common.util.Event
-import tk.zwander.common.util.EventObserver
 import tk.zwander.common.util.eventManager
 import tk.zwander.common.util.keyguardManager
 import tk.zwander.common.util.logUtils
 import tk.zwander.common.util.mainHandler
+import tk.zwander.common.util.requireLsDisplayManager
 
 /**
  * Used when the lock screen or notification center needs to be dismissed.
  * This is either started when the add widget button is tapped from the lock screen/NC
  * or when Lockscreen Widgets detects an Activity being launched from a widget.
  */
-class DismissOrUnlockActivity : AppCompatActivity(), EventObserver {
+class DismissOrUnlockActivity : AppCompatActivity() {
     companion object {
         private const val EXTRA_ACTIVITY_INTENT = "activity_intent"
 
@@ -50,8 +53,15 @@ class DismissOrUnlockActivity : AppCompatActivity(), EventObserver {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        eventManager.addObserver(this)
         handle()
+
+        lifecycleScope.launch(Dispatchers.Main) {
+            requireLsDisplayManager.isAnyDisplayOn.collect {
+                if (!it) {
+                    finish()
+                }
+            }
+        }
     }
 
     override fun onNewIntent(intent: Intent) {
@@ -59,21 +69,6 @@ class DismissOrUnlockActivity : AppCompatActivity(), EventObserver {
 
         setIntent(intent)
         handle()
-    }
-
-    override suspend fun onEvent(event: Event) {
-        when (event) {
-            Event.ScreenOff -> {
-                finish()
-            }
-            else -> {}
-        }
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-
-        eventManager.removeObserver(this)
     }
 
     private fun handle() {

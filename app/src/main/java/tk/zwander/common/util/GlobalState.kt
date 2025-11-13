@@ -10,7 +10,6 @@ val globalState: GlobalState
 @ConsistentCopyVisibility
 data class GlobalState private constructor(
     val wasOnKeyguard: MutableStateFlow<Boolean> = MutableStateFlow(false),
-    val isScreenOn: MutableStateFlow<Boolean> = MutableStateFlow(false),
     val isOnFaceWidgets: MutableStateFlow<Boolean> = MutableStateFlow(false),
     val currentAppLayer: MutableStateFlow<Int> = MutableStateFlow(0),
     val isOnScreenOffMemo: MutableStateFlow<Boolean> = MutableStateFlow(false),
@@ -40,7 +39,6 @@ data class GlobalState private constructor(
 
     fun onCreate(context: Context) {
         wasOnKeyguard.value = context.keyguardManager.isKeyguardLocked
-        isScreenOn.value = context.powerManager.isInteractive
     }
 
     override fun toString(): String {

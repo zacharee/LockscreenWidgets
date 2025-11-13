@@ -23,6 +23,7 @@ import androidx.recyclerview.widget.RecyclerView
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import tk.zwander.common.activities.DismissOrUnlockActivity
@@ -46,6 +47,7 @@ import tk.zwander.common.util.handler
 import tk.zwander.common.util.logUtils
 import tk.zwander.common.util.mainHandler
 import tk.zwander.common.util.prefManager
+import tk.zwander.common.util.requireLsDisplayManager
 import tk.zwander.common.util.safeAddView
 import tk.zwander.common.util.safeRemoveView
 import tk.zwander.common.util.safeUpdateViewLayout
@@ -115,7 +117,8 @@ open class MainWidgetFrameDelegate protected constructor(
             }
 
             if (actualNewState.screenOrientation != oldState.screenOrientation) {
-                actualNewState = actualNewState.copy(isPendingOrientationStateChange = true, isPreview = false)
+                actualNewState =
+                    actualNewState.copy(isPendingOrientationStateChange = true, isPreview = false)
             }
 
             // ------------ //
@@ -157,7 +160,7 @@ open class MainWidgetFrameDelegate protected constructor(
         get() {
             val isLandscape = prefManager.separateFrameLayoutForLandscape &&
                     (state.screenOrientation == Surface.ROTATION_90 ||
-                        state.screenOrientation == Surface.ROTATION_270)
+                            state.screenOrientation == Surface.ROTATION_270)
             val isMainFrame = id == -1
 
             return when {
@@ -166,16 +169,23 @@ open class MainWidgetFrameDelegate protected constructor(
                         if (isMainFrame) {
                             FrameSizeAndPosition.FrameType.LockNotification.select(!isLandscape)
                         } else {
-                            FrameSizeAndPosition.FrameType.SecondaryLockNotification.select(!isLandscape, id)
+                            FrameSizeAndPosition.FrameType.SecondaryLockNotification.select(
+                                !isLandscape,
+                                id
+                            )
                         }
                     } else {
                         if (isMainFrame) {
                             FrameSizeAndPosition.FrameType.NotificationNormal.select(!isLandscape)
                         } else {
-                            FrameSizeAndPosition.FrameType.SecondaryNotification.select(!isLandscape, id)
+                            FrameSizeAndPosition.FrameType.SecondaryNotification.select(
+                                !isLandscape,
+                                id
+                            )
                         }
                     }
                 }
+
                 else -> {
                     if (isMainFrame) {
                         FrameSizeAndPosition.FrameType.LockNormal.select(!isLandscape)
@@ -315,15 +325,18 @@ open class MainWidgetFrameDelegate protected constructor(
                     updateWallpaperLayerIfNeeded()
                 }
             }
+
             is Event.TempHide -> {
                 if (event.frameId == id) {
                     updateState { it.copy(isTempHide = true) }
                     updateWindowState()
                 }
             }
+
             Event.NightModeUpdate -> {
                 adapter.updateViews()
             }
+
             is Event.CenterFrameHorizontally -> {
                 if (event.frameId == id) {
                     frameSizeAndPosition.setPositionForType(
@@ -336,6 +349,7 @@ open class MainWidgetFrameDelegate protected constructor(
                     updateWindow()
                 }
             }
+
             is Event.CenterFrameVertically -> {
                 if (event.frameId == id) {
                     frameSizeAndPosition.setPositionForType(
@@ -348,6 +362,7 @@ open class MainWidgetFrameDelegate protected constructor(
                     updateWindow()
                 }
             }
+
             is Event.FrameResized -> {
                 if (event.frameId == id) {
                     when (event.which) {
@@ -355,14 +370,17 @@ open class MainWidgetFrameDelegate protected constructor(
                             params.width -= event.velocity
                             params.x += (event.velocity / 2)
                         }
+
                         Event.FrameResized.Side.TOP -> {
                             params.height -= event.velocity
                             params.y += (event.velocity / 2)
                         }
+
                         Event.FrameResized.Side.RIGHT -> {
                             params.width += event.velocity
                             params.x += (event.velocity / 2)
                         }
+
                         Event.FrameResized.Side.BOTTOM -> {
                             params.height += event.velocity
                             params.y += (event.velocity / 2)
@@ -422,6 +440,7 @@ open class MainWidgetFrameDelegate protected constructor(
                     }
                 }
             }
+
             is Event.FrameMoved -> {
                 if (event.frameId == id) {
                     params.x += event.velX.toInt()
@@ -435,26 +454,13 @@ open class MainWidgetFrameDelegate protected constructor(
                     )
                 }
             }
+
             is Event.FrameIntercept -> {
                 if (event.frameId == id) {
                     forceWakelock(event.down)
                 }
             }
-            Event.ScreenOff -> {
-                //If the device has some sort of AOD or ambient display, by the time we receive
-                //an accessibility event and see that the display is off, it's usually too late
-                //and the current screen content has "frozen," causing the widget frame to show
-                //where it shouldn't. ACTION_SCREEN_OFF is called early enough that we can remove
-                //the frame before it's frozen in place.
-                forceWakelock(false)
-                updateStateAndWindowState(
-                    transform = {
-                        it.copy(
-                            isTempHide = false,
-                        )
-                    },
-                )
-            }
+
             is Event.PreviewFrames -> {
                 if (event.show == Event.PreviewFrames.ShowMode.SHOW_FOR_SELECTION && prefManager.currentSecondaryFramesWithStringDisplay.isEmpty()) {
                     eventManager.sendEvent(Event.LaunchAddWidget(id))
@@ -474,11 +480,13 @@ open class MainWidgetFrameDelegate protected constructor(
                     }
                 }
             }
+
             is Event.FrameSelected -> {
                 if (event.frameId == null) {
                     updateState { it.copy(selectionPreviewRequestCode = null) }
                 }
             }
+
             else -> {}
         }
     }
@@ -491,9 +499,10 @@ open class MainWidgetFrameDelegate protected constructor(
                 DismissOrUnlockActivity.launch(this)
             } else {
                 if (prefManager.requestUnlock) {
-                    globalState.handlingClick.value = globalState.handlingClick.value.toMutableMap().also {
-                        it[id] = Unit
-                    }
+                    globalState.handlingClick.value =
+                        globalState.handlingClick.value.toMutableMap().also {
+                            it[id] = Unit
+                        }
                 }
             }
         }
@@ -509,17 +518,35 @@ open class MainWidgetFrameDelegate protected constructor(
         //out-of-bounds error.
         try {
             scrollToStoredPosition(false)
-        } catch (_: Exception) {}
+        } catch (_: Exception) {
+        }
 
         scope.launch(Dispatchers.Main) {
-            globalState.isScreenOn.collect { isScreenOn ->
-                if (!isScreenOn) {
-                    globalState.notificationsPanelFullyExpanded.value = false
-                    updateState { it.copy(isPreview = false, isTempHide = false) }
-                }
+            requireLsDisplayManager.displayPowerStates
+                .map { it[display.uniqueIdCompat] != false }
+                .collect { isScreenOn ->
+                    if (!isScreenOn) {
+                        globalState.notificationsPanelFullyExpanded.value = false
+                        updateState { it.copy(isPreview = false, isTempHide = false) }
 
-                updateWindowState()
-            }
+                        //If the device has some sort of AOD or ambient display, by the time we receive
+                        //an accessibility event and see that the display is off, it's usually too late
+                        //and the current screen content has "frozen," causing the widget frame to show
+                        //where it shouldn't. ACTION_SCREEN_OFF is called early enough that we can remove
+                        //the frame before it's frozen in place.
+                        forceWakelock(false)
+                        updateStateAndWindowState(
+                            transform = {
+                                it.copy(
+                                    isTempHide = false,
+                                    isPreview = false,
+                                )
+                            },
+                        )
+                    } else {
+                        updateWindowState()
+                    }
+                }
         }
 
         scope.launch(Dispatchers.Main) {
@@ -584,7 +611,7 @@ open class MainWidgetFrameDelegate protected constructor(
     }
 
     private suspend fun addWindow() {
-        logUtils.normalLog("Adding overlay", null)
+        logUtils.debugLog("Adding overlay", null)
 
         withContext(Dispatchers.Main) {
             if (!frame.isAttachedToWindow) {
@@ -594,7 +621,7 @@ open class MainWidgetFrameDelegate protected constructor(
             logUtils.debugLog("Trying to add overlay ${viewModel.animationState.value}", null)
 
             if (!frame.isAttachedToWindow && viewModel.animationState.value != AnimationState.STATE_ADDING) {
-                logUtils.normalLog("Actually adding overlay", null)
+                logUtils.debugLog("Actually adding overlay", null)
 
                 viewModel.animationState.value = AnimationState.STATE_ADDING
 
@@ -706,7 +733,7 @@ open class MainWidgetFrameDelegate protected constructor(
         }
 
         fun forCommon(): Boolean {
-            return globalState.isScreenOn.value
+            return requireLsDisplayManager.displayPowerStates.value[display.uniqueIdCompat] == true
                     && !state.isTempHide
                     && !globalState.hideForPresentIds.value
                     && !globalState.hideForNonPresentIds.value
@@ -717,7 +744,7 @@ open class MainWidgetFrameDelegate protected constructor(
         }
 
         fun forSecondaryDisplay(): Boolean {
-            return display.displayId != Display.DEFAULT_DISPLAY && forCommon()
+            return globalState.wasOnKeyguard.value && display.displayId != Display.DEFAULT_DISPLAY && forCommon()
         }
 
         fun forNotificationCenter(): Boolean {
@@ -879,7 +906,10 @@ open class MainWidgetFrameDelegate protected constructor(
     override suspend fun updateWindow() {
         logUtils.debugLog("Checking if params need to be updated")
 
-        logUtils.debugLog("Possibly updating params with display size ${display.rotatedRealSize}", null)
+        logUtils.debugLog(
+            "Possibly updating params with display size ${display.rotatedRealSize}",
+            null
+        )
 
         val (newX, newY) = frameSizeAndPosition.getPositionForType(saveMode, display)
         val (newW, newH) = frameSizeAndPosition.getSizeForType(saveMode, display).run {
@@ -949,10 +979,16 @@ open class MainWidgetFrameDelegate protected constructor(
             if (childCount == 0) return 0
 
             return if (velocityX > 0) {
-                val targetRow = (ceil(rectsHelper.getRowIndexForItemPosition(lastVisiblePosition).toDouble() / columnCount) * columnCount).toInt()
+                val targetRow = (ceil(
+                    rectsHelper.getRowIndexForItemPosition(lastVisiblePosition)
+                        .toDouble() / columnCount
+                ) * columnCount).toInt()
                 rectsHelper.rows[targetRow]?.lastOrNull() ?: lastVisiblePosition
             } else {
-                val targetRow = (floor(rectsHelper.getRowIndexForItemPosition(firstVisiblePosition).toDouble() / columnCount) * columnCount).toInt()
+                val targetRow = (floor(
+                    rectsHelper.getRowIndexForItemPosition(firstVisiblePosition)
+                        .toDouble() / columnCount
+                ) * columnCount).toInt()
                 rectsHelper.rows[targetRow]?.firstOrNull() ?: firstVisiblePosition
             }.also {
                 prefManager.currentPage = it
@@ -986,7 +1022,8 @@ open class MainWidgetFrameDelegate protected constructor(
         val screenOrientation: Int = Surface.ROTATION_0,
     )
 
-    open class WidgetFrameViewModel(delegate: MainWidgetFrameDelegate) : BaseViewModel<State, MainWidgetFrameDelegate>(delegate) {
+    open class WidgetFrameViewModel(delegate: MainWidgetFrameDelegate) :
+        BaseViewModel<State, MainWidgetFrameDelegate>(delegate) {
         val isSelectingFrame = MutableStateFlow(false)
         val wallpaperInfo = MutableStateFlow<WallpaperInfo?>(null)
         val debugIdItems = MutableStateFlow<Set<String>>(setOf())

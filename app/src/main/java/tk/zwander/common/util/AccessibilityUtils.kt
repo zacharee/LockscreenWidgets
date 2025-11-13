@@ -537,8 +537,6 @@ object AccessibilityUtils {
                 false
             }
 
-            //Check if the screen is on.
-            globalState.isScreenOn.value = power.isInteractive
             //Check if the lock screen is shown.
             globalState.wasOnKeyguard.value = kgm.isKeyguardLocked
 
@@ -571,7 +569,7 @@ object AccessibilityUtils {
             }
 
             logUtils.debugLog(
-                "Accessibility event: $event, isScreenOn: ${globalState.isScreenOn.value}, wasOnKeyguard: ${globalState.wasOnKeyguard.value}, ${drawerDelegate.state}",
+                "Accessibility event: $event, isScreenOn: ${requireLsDisplayManager.isAnyDisplayOn.value}, wasOnKeyguard: ${globalState.wasOnKeyguard.value}, ${drawerDelegate.state}",
                 null
             )
 
@@ -590,7 +588,7 @@ object AccessibilityUtils {
                 frameDelegates = frameDelegates,
                 drawerDelegate = drawerDelegate,
                 isOnKeyguard = globalState.wasOnKeyguard.value,
-                isScreenOn = globalState.isScreenOn.value,
+                isScreenOn = requireLsDisplayManager.isAnyDisplayOn.value,
                 getWindows = getWindows,
             )
 

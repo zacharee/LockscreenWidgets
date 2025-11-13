@@ -16,7 +16,6 @@ import kotlinx.coroutines.launch
 import tk.zwander.common.util.AccessibilityUtils.runAccessibilityJob
 import tk.zwander.common.util.AccessibilityUtils.runWindowOperation
 import tk.zwander.common.util.Event
-import tk.zwander.common.util.EventObserver
 import tk.zwander.common.util.HandlerRegistry
 import tk.zwander.common.util.LSDisplayManager
 import tk.zwander.common.util.PrefManager
@@ -45,7 +44,7 @@ import tk.zwander.widgetdrawer.util.DrawerDelegate
  * is shown.
  */
 @SuppressLint("AccessibilityPolicy")
-class Accessibility : AccessibilityService(), EventObserver, CoroutineScope by MainScope() {
+class Accessibility : AccessibilityService(), CoroutineScope by MainScope() {
     private val kgm by lazy { keyguardManager }
     private val power by lazy { getSystemService(POWER_SERVICE) as PowerManager }
     private val imm by lazy { getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager }
@@ -102,6 +101,14 @@ class Accessibility : AccessibilityService(), EventObserver, CoroutineScope by M
         super.onCreate()
 
         logUtils.debugLog("Accessibility service created.", null)
+
+        launch(Dispatchers.Main) {
+            lsDisplayManager.isAnyDisplayOn.collect {
+                if (!it) {
+                    state.accessibilityJob?.cancel()
+                }
+            }
+        }
     }
 
     override fun onServiceConnected() {
@@ -119,7 +126,6 @@ class Accessibility : AccessibilityService(), EventObserver, CoroutineScope by M
         }
 
         sharedPreferencesChangeHandler.register(this)
-        eventManager.addObserver(this)
 
         eventManager.sendEvent(Event.RequestNotificationCount)
         logUtils.debugLog("Accessibility service connected.", null)
@@ -163,21 +169,10 @@ class Accessibility : AccessibilityService(), EventObserver, CoroutineScope by M
         logUtils.debugLog("Accessibility service interrupted.", null)
     }
 
-    override suspend fun onEvent(event: Event) {
-        when (event) {
-            Event.ScreenOff -> {
-                state.accessibilityJob?.cancel()
-            }
-
-            else -> {}
-        }
-    }
-
     override fun onDestroy() {
         super.onDestroy()
 
         sharedPreferencesChangeHandler.unregister(this)
-        eventManager.removeObserver(this)
 
         // This is hacky and ideally it'd stay inside Accessibility,
         // but I can't find a way to suspend the destruction of the

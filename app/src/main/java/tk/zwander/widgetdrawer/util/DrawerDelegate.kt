@@ -22,6 +22,7 @@ import com.joaomgcd.taskerpluginlibrary.extensions.requestQuery
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import tk.zwander.common.activities.DismissOrUnlockActivity
@@ -42,6 +43,7 @@ import tk.zwander.common.util.handler
 import tk.zwander.common.util.logUtils
 import tk.zwander.common.util.mainHandler
 import tk.zwander.common.util.prefManager
+import tk.zwander.common.util.requireLsDisplayManager
 import tk.zwander.common.util.safeAddView
 import tk.zwander.common.util.safeRemoveView
 import tk.zwander.common.util.safeUpdateViewLayout
@@ -321,7 +323,7 @@ class DrawerDelegate private constructor(context: Context, displayId: String) :
                         updateWindow()
                     }
                 }
-                animator.duration = with (DrawerOrFrame.DRAWER) { duration() }
+                animator.duration = with(DrawerOrFrame.DRAWER) { duration() }
                 animator.interpolator =
                     if (metThreshold) DecelerateInterpolator() else AccelerateInterpolator()
                 animator.addListener(object : AnimatorListenerAdapter() {
@@ -384,13 +386,15 @@ class DrawerDelegate private constructor(context: Context, displayId: String) :
             resources.getDimensionPixelSize(R.dimen.drawer_row_height).toDouble()
 
         scope.launch(Dispatchers.Main) {
-            globalState.isScreenOn.collect { isScreenOn ->
-                if (isScreenOn) {
-                    tryShowHandle()
-                } else {
-                    hideAll()
+            requireLsDisplayManager.displayPowerStates
+                .map { it[display.uniqueIdCompat] == true }
+                .collect { isScreenOn ->
+                    if (isScreenOn) {
+                        tryShowHandle()
+                    } else {
+                        hideAll()
+                    }
                 }
-            }
         }
     }
 
@@ -418,7 +422,7 @@ class DrawerDelegate private constructor(context: Context, displayId: String) :
     }
 
     private suspend fun tryShowHandle() {
-        if (prefManager.drawerEnabled && prefManager.showDrawerHandle && globalState.isScreenOn.value) {
+        if (prefManager.drawerEnabled && prefManager.showDrawerHandle && requireLsDisplayManager.displayPowerStates.value[display.uniqueIdCompat] == true) {
             if (prefManager.showDrawerHandleOnlyWhenLocked && !globalState.wasOnKeyguard.value) {
                 return
             }

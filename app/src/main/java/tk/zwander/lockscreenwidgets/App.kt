@@ -14,7 +14,6 @@ import android.hardware.SensorManager
 import android.hardware.display.IDisplayManager
 import android.net.Uri
 import android.os.Build
-import android.os.PowerManager
 import android.os.ServiceManager
 import android.provider.Settings
 import androidx.core.content.ContextCompat
@@ -70,27 +69,6 @@ class App : Application(), CoroutineScope by MainScope(), EventObserver {
     private val screenStateReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
             when (intent?.action) {
-                Intent.ACTION_SCREEN_OFF -> {
-                    logUtils.debugLog("Received screen off: ${power.isInteractive}", null)
-
-                    if (!power.isInteractive) {
-                        globalState.isScreenOn.value = false
-                        eventManager.sendEvent(Event.ScreenOff)
-                        unregisterProxListener()
-
-                        logUtils.debugLog("Sending screen off", null)
-                    }
-                }
-                Intent.ACTION_SCREEN_ON -> {
-                    logUtils.debugLog("Received screen on: ${power.isInteractive}", null)
-
-                    if (power.isInteractive) {
-                        globalState.isScreenOn.value = true
-                        registerProxListener()
-
-                        logUtils.debugLog("Sending screen on", null)
-                    }
-                }
                 Intent.ACTION_CLOSE_SYSTEM_DIALOGS -> {
                     eventManager.sendEvent(Event.CloseSystemDialogs)
                 }
@@ -122,7 +100,6 @@ class App : Application(), CoroutineScope by MainScope(), EventObserver {
         }
     }
 
-    private val power by lazy { getSystemService(POWER_SERVICE) as PowerManager }
     private val sensorManager by lazy { getSystemService(SENSOR_SERVICE) as SensorManager }
     private val lsDisplayManager by lazy { LSDisplayManager.getInstance(this) }
 
@@ -245,14 +222,11 @@ class App : Application(), CoroutineScope by MainScope(), EventObserver {
 
         globalState.onCreate(this)
 
+        @Suppress("DEPRECATION")
         ContextCompat.registerReceiver(
             this,
             screenStateReceiver,
-            IntentFilter(Intent.ACTION_SCREEN_OFF).apply {
-                addAction(Intent.ACTION_SCREEN_ON)
-                @Suppress("DEPRECATION")
-                addAction(Intent.ACTION_CLOSE_SYSTEM_DIALOGS)
-            },
+            IntentFilter(Intent.ACTION_CLOSE_SYSTEM_DIALOGS),
             ContextCompat.RECEIVER_EXPORTED,
         )
         contentResolver.registerContentObserver(
@@ -279,6 +253,19 @@ class App : Application(), CoroutineScope by MainScope(), EventObserver {
                     //Update the keyguard dismissal Activity that the lock screen
                     //has been dismissed.
                     eventManager.sendEvent(Event.LockscreenDismissed)
+                }
+            }
+        }
+
+        launch(Dispatchers.Main) {
+            lsDisplayManager.isAnyDisplayOn.collect {
+
+                if (!it) {
+                    logUtils.debugLog("Received screen off", null)
+                    unregisterProxListener()
+                } else {
+                    logUtils.debugLog("Received screen on", null)
+                    registerProxListener()
                 }
             }
         }

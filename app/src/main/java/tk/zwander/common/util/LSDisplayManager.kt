@@ -11,9 +11,13 @@ import android.view.Display
 import android.view.Surface
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import kotlin.math.roundToInt
 
 val Context.requireLsDisplayManager: LSDisplayManager
@@ -22,7 +26,7 @@ val Context.requireLsDisplayManager: LSDisplayManager
 val lsDisplayManager: LSDisplayManager?
     get() = LSDisplayManager.peekInstance()
 
-class LSDisplayManager private constructor(context: Context) : ContextWrapper(context) {
+class LSDisplayManager private constructor(context: Context) : ContextWrapper(context), CoroutineScope by MainScope() {
     companion object {
         @SuppressLint("StaticFieldLeak")
         private var instance: LSDisplayManager? = null
@@ -63,6 +67,14 @@ class LSDisplayManager private constructor(context: Context) : ContextWrapper(co
     }
 
     val availableDisplays = MutableStateFlow(mapOf<Int, LSDisplay>())
+
+    val displayPowerStates = availableDisplays.map { currentDisplays ->
+        currentDisplays.entries.associate { (_, display) -> display.uniqueIdCompat to display.isOn }
+    }.stateIn(this, SharingStarted.Eagerly, initialValue = mapOf())
+
+    val isAnyDisplayOn = displayPowerStates.map { displayPowerStates ->
+        displayPowerStates.any { (_, value) -> value }
+    }.stateIn(this, SharingStarted.Eagerly, initialValue = false)
 
     fun onCreate() {
         val builtInDisplays = displayManager.getDisplays(DisplayManager.DISPLAY_CATEGORY_BUILT_IN_DISPLAYS)
@@ -186,6 +198,9 @@ class LSDisplay(val display: Display, val fontScale: Float) {
 
     val loggingId: String
         get() = "$uniqueIdCompat,$displayId"
+
+    val isOn: Boolean
+        get() = display.state == Display.STATE_ON
 
     fun dpToPx(dpValue: Number): Int {
         return with (density) {
