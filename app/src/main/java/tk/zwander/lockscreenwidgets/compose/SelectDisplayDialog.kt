@@ -2,6 +2,7 @@ package tk.zwander.lockscreenwidgets.compose
 
 import android.os.Build
 import android.view.Display
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -19,6 +20,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
+import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -34,9 +36,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalResources
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -55,6 +59,7 @@ fun SelectDisplayDialog(
     dismiss: () -> Unit,
     onDisplaySelected: ((id: String) -> Unit)? = null,
     onFrameSelected: ((frameId: Int) -> Unit)? = null,
+    showDefaultFrame: Boolean = true,
 ) {
     if (onDisplaySelected == null && onFrameSelected == null) {
         throw IllegalArgumentException("Either onDisplaySelected or onFrameSelected must be specified.")
@@ -82,6 +87,17 @@ fun SelectDisplayDialog(
         }
     }
     val density = LocalDensity.current
+
+    val framesForDefaultDisplay by remember {
+        derivedStateOf {
+            if (onDisplaySelected == null) {
+                (frames.filter { it.value == "${Display.DEFAULT_DISPLAY}" }
+                    .keys + (if (showDefaultFrame) listOf(-1) else listOf())).sorted()
+            } else {
+                listOf(-1)
+            }
+        }
+    }
 
     val displaysToFramesMap by remember {
         derivedStateOf {
@@ -129,44 +145,42 @@ fun SelectDisplayDialog(
                 verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                    item(key = "DEFAULT_DISPLAY") {
-                        Card(
-                            onClick = {
-                                if (onDisplaySelected != null) {
-                                    onDisplaySelected("${Display.DEFAULT_DISPLAY}")
-                                } else {
-                                    expandedMap["DEFAULT_DISPLAY"] =
-                                        !expandedMap.getOrDefault("DEFAULT_DISPLAY", false)
-                                }
-                            },
-                        ) {
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .heightIn(min = 56.dp)
-                                    .padding(8.dp),
-                                contentAlignment = Alignment.CenterStart,
-                            ) {
-                                Column(
-                                    verticalArrangement = Arrangement.spacedBy(4.dp),
-                                ) {
-                                    Text(
-                                        text = "${stringResource(R.string.default_display)} (${Display.DEFAULT_DISPLAY})",
-                                        style = MaterialTheme.typography.bodyLarge,
-                                        fontWeight = FontWeight.Bold,
-                                    )
-
-                                    Text(
-                                        text = stringResource(R.string.default_display_desc),
-                                    )
-                                }
-                            }
+                    if (framesForDefaultDisplay.isNotEmpty()) {
+                        item(key = "DEFAULT_DISPLAY") {
+                            DisplayCard(
+                                labelText = "${stringResource(R.string.default_display)} (${Display.DEFAULT_DISPLAY})",
+                                subtitleText = stringResource(R.string.default_display_desc),
+                                canExpand = onFrameSelected != null,
+                                onClick = {
+                                    if (onDisplaySelected != null) {
+                                        onDisplaySelected("${Display.DEFAULT_DISPLAY}")
+                                    } else {
+                                        expandedMap["DEFAULT_DISPLAY"] =
+                                            !expandedMap.getOrDefault("DEFAULT_DISPLAY", false)
+                                    }
+                                },
+                                isExpanded = expandedMap["DEFAULT_DISPLAY"] == true,
+                                modifier = Modifier.animateItem(),
+                            )
                         }
                     }
 
                     if (expandedMap["DEFAULT_DISPLAY"] == true) {
+                        if (showDefaultFrame) {
+                            item(key = "DEFAULT_DISPLAY_DEFAULT_FRAME") {
+                                FrameItem(
+                                    display = defaultDisplay,
+                                    frameId = -1,
+                                    onSelected = {
+                                        onFrameSelected?.invoke(-1)
+                                    },
+                                    modifier = Modifier.animateItem(),
+                                )
+                            }
+                        }
+
                         items(
-                            items = displaysToFramesMap[defaultDisplay]?.toList() ?: listOf(),
+                            items = framesForDefaultDisplay,
                             key = { "DEFAULT_DISPLAY_FRAME_$it" }) {
                             FrameItem(
                                 display = defaultDisplay,
@@ -174,6 +188,7 @@ fun SelectDisplayDialog(
                                 onSelected = {
                                     onFrameSelected?.invoke(it)
                                 },
+                                modifier = Modifier.animateItem()
                             )
                         }
                     }
@@ -181,7 +196,54 @@ fun SelectDisplayDialog(
 
                 displaysToFramesMap.forEach { (display, frameIds) ->
                     item(key = display.uniqueIdCompat) {
-                        Card(
+                        DisplayCard(
+                            labelText = "${display.display.name} (${
+                                descriptionForDisplay(
+                                    display
+                                )
+                            })",
+                            accessory = {
+                                val (width, height) = remember(display.uniqueIdCompat) {
+                                    with(density) {
+                                        val screenSize = display.realSize
+                                        val screenWidth = screenSize.x
+                                        val screenHeight = screenSize.y
+
+                                        val desiredHeight = 48.dp
+                                        val actualHeight = screenHeight.toDp()
+
+                                        val heightRatio = desiredHeight / actualHeight
+
+                                        val scaledWidth = (screenWidth * heightRatio).toDp()
+
+                                        if (scaledWidth > maxDisplayWidth) {
+                                            maxDisplayWidth = scaledWidth
+                                        }
+
+                                        scaledWidth to desiredHeight
+                                    }
+                                }
+
+                                Box(
+                                    contentAlignment = Alignment.Center,
+                                    modifier = if (maxDisplayWidth > 0.dp) {
+                                        Modifier.width(maxDisplayWidth)
+                                    } else {
+                                        Modifier
+                                    },
+                                ) {
+                                    Box(
+                                        modifier = Modifier
+                                            .border(
+                                                width = 1.dp,
+                                                color = LocalContentColor.current,
+                                                shape = RoundedCornerShape(2.dp),
+                                            )
+                                            .width(width)
+                                            .height(height),
+                                    )
+                                }
+                            },
                             onClick = {
                                 if (onDisplaySelected != null) {
                                     onDisplaySelected(display.uniqueIdCompat)
@@ -190,74 +252,10 @@ fun SelectDisplayDialog(
                                         !expandedMap.getOrDefault(display.uniqueIdCompat, false)
                                 }
                             },
-                        ) {
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .heightIn(min = 56.dp)
-                                    .padding(8.dp),
-                                contentAlignment = Alignment.Center,
-                            ) {
-                                Row(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.SpaceBetween,
-                                ) {
-                                    Text(
-                                        text = "${display.display.name} (${
-                                            descriptionForDisplay(
-                                                display
-                                            )
-                                        })",
-                                        style = MaterialTheme.typography.bodyLarge,
-                                        fontWeight = FontWeight.Bold,
-                                    )
-
-                                    Spacer(modifier = Modifier.size(8.dp))
-
-                                    val (width, height) = remember(display.uniqueIdCompat) {
-                                        with(density) {
-                                            val screenSize = display.realSize
-                                            val screenWidth = screenSize.x
-                                            val screenHeight = screenSize.y
-
-                                            val desiredHeight = 48.dp
-                                            val actualHeight = screenHeight.toDp()
-
-                                            val heightRatio = desiredHeight / actualHeight
-
-                                            val scaledWidth = (screenWidth * heightRatio).toDp()
-
-                                            if (scaledWidth > maxDisplayWidth) {
-                                                maxDisplayWidth = scaledWidth
-                                            }
-
-                                            scaledWidth to desiredHeight
-                                        }
-                                    }
-
-                                    Box(
-                                        contentAlignment = Alignment.Center,
-                                        modifier = if (maxDisplayWidth > 0.dp) {
-                                            Modifier.width(maxDisplayWidth)
-                                        } else {
-                                            Modifier
-                                        },
-                                    ) {
-                                        Box(
-                                            modifier = Modifier
-                                                .border(
-                                                    width = 1.dp,
-                                                    color = LocalContentColor.current,
-                                                    shape = RoundedCornerShape(2.dp),
-                                                )
-                                                .width(width)
-                                                .height(height),
-                                        )
-                                    }
-                                }
-                            }
-                        }
+                            canExpand = onFrameSelected != null,
+                            isExpanded = expandedMap[display.uniqueIdCompat] == true,
+                            modifier = Modifier.animateItem(),
+                        )
                     }
 
                     if (expandedMap[display.uniqueIdCompat] == true) {
@@ -268,6 +266,7 @@ fun SelectDisplayDialog(
                                 onSelected = {
                                     onFrameSelected?.invoke(it)
                                 },
+                                modifier = Modifier.animateItem(),
                             )
                         }
                     }
@@ -282,6 +281,70 @@ fun SelectDisplayDialog(
             }
         },
     )
+}
+
+@Composable
+private fun DisplayCard(
+    labelText: String,
+    canExpand: Boolean,
+    isExpanded: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    subtitleText: String? = null,
+    accessory: (@Composable () -> Unit)? = null,
+) {
+    Card(
+        onClick = onClick,
+        modifier = modifier,
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .heightIn(min = 56.dp)
+                .padding(8.dp),
+            contentAlignment = Alignment.Center,
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween,
+            ) {
+                if (canExpand) {
+                    val rotation by animateFloatAsState(if (isExpanded) 0f else 180f)
+
+                    Icon(
+                        painter = painterResource(R.drawable.arrow_up),
+                        contentDescription = stringResource(R.string.expand),
+                        modifier = Modifier.rotate(rotation),
+                    )
+
+                    Spacer(modifier = Modifier.size(8.dp))
+                }
+
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(4.dp),
+                ) {
+                    Text(
+                        text = labelText,
+                        style = MaterialTheme.typography.bodyLarge,
+                        fontWeight = FontWeight.Bold,
+                    )
+
+                    subtitleText?.let {
+                        Text(
+                            text = it,
+                        )
+                    }
+                }
+
+                accessory?.let {
+                    Spacer(modifier = Modifier.size(8.dp))
+
+                    it()
+                }
+            }
+        }
+    }
 }
 
 @Composable

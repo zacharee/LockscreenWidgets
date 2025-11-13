@@ -5,6 +5,9 @@ import android.content.Context
 import android.os.Build
 import android.os.Bundle
 import android.view.Display
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -26,12 +29,9 @@ import tk.zwander.common.compose.settings.createCommonSection
 import tk.zwander.common.compose.settings.rememberBooleanPreferenceDependency
 import tk.zwander.common.compose.settings.rememberPreferenceScreen
 import tk.zwander.common.compose.util.rememberPreferenceState
-import tk.zwander.common.util.Event
-import tk.zwander.common.util.EventObserver
 import tk.zwander.common.util.PrefManager
 import tk.zwander.common.util.backup.BackupRestoreManager
 import tk.zwander.common.util.canReadWallpaper
-import tk.zwander.common.util.eventManager
 import tk.zwander.common.util.isOneUI
 import tk.zwander.common.util.isPixelUI
 import tk.zwander.common.util.isTouchWiz
@@ -45,14 +45,7 @@ import tk.zwander.lockscreenwidgets.services.isNotificationListenerActive
 import tk.zwander.lockscreenwidgets.util.FramePrefs
 import tk.zwander.lockscreenwidgets.util.FrameSpecificPreferences
 
-class ComposeFrameSettingsActivity : BaseActivity(), EventObserver {
-    companion object {
-        private const val REQ_REMOVE_FRAME = 101
-        private const val REQ_SELECT_FRAME = 102
-    }
-
-    private var selectedFrame by mutableIntStateOf(-1)
-
+class ComposeFrameSettingsActivity : BaseActivity() {
     private val Context.shouldShowBlurOptions: Boolean
         get() {
             return (isOneUI && Build.VERSION.SDK_INT < Build.VERSION_CODES.S) ||
@@ -62,21 +55,35 @@ class ComposeFrameSettingsActivity : BaseActivity(), EventObserver {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        eventManager.addObserver(this)
-
         @SuppressLint("ObsoleteSdkInt")
         val canShowNCOptions =
             isOneUI || (isPixelUI && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S)
 
         setThemedContent {
             var secondaryFrames by rememberPreferenceState(
-                key = PrefManager.KEY_CURRENT_FRAMES_WITH_DISPLAY,
+                key = PrefManager.KEY_CURRENT_FRAMES_WITH_STRING_DISPLAY,
                 value = { prefManager.currentSecondaryFramesWithStringDisplay },
                 onChanged = { _, v -> prefManager.currentSecondaryFramesWithStringDisplay = v },
             )
             val frameCount by rememberUpdatedState(secondaryFrames.size + 1)
 
             var pendingFrameId by remember {
+                mutableStateOf<Int?>(null)
+            }
+
+            var selectedFrame by remember {
+                mutableIntStateOf(-1)
+            }
+
+            var isSelectingFrame by remember {
+                mutableStateOf(false)
+            }
+
+            var isRemovingFrame by remember {
+                mutableStateOf(false)
+            }
+
+            var pendingFrameToRemove by remember {
                 mutableStateOf<Int?>(null)
             }
 
@@ -93,13 +100,7 @@ class ComposeFrameSettingsActivity : BaseActivity(), EventObserver {
                         summary = { stringResource(R.string.selected_frame, "$selectedFrame") },
                         key = { "select_secondary_frame" },
                         onClick = {
-                            eventManager.sendEvent(
-                                Event.PreviewFrames(
-                                    Event.PreviewFrames.ShowMode.SHOW_FOR_SELECTION,
-                                    102,
-                                    true
-                                )
-                            )
+                            isSelectingFrame = true
                         },
                         icon = { painterResource(R.drawable.wall) },
                         defaultValue = {},
@@ -139,13 +140,7 @@ class ComposeFrameSettingsActivity : BaseActivity(), EventObserver {
                         summary = { null },
                         key = { "remove_secondary_frame" },
                         onClick = {
-                            eventManager.sendEvent(
-                                Event.PreviewFrames(
-                                    Event.PreviewFrames.ShowMode.SHOW_FOR_SELECTION,
-                                    101,
-                                    false
-                                )
-                            )
+                            isRemovingFrame = true
                         },
                         icon = { painterResource(R.drawable.ic_baseline_remove_circle_24) },
                         defaultValue = {},
@@ -665,30 +660,69 @@ class ComposeFrameSettingsActivity : BaseActivity(), EventObserver {
                     },
                 )
             }
-        }
-    }
 
-    override fun onDestroy() {
-        super.onDestroy()
-
-        eventManager.removeObserver(this)
-    }
-
-    override suspend fun onEvent(event: Event) {
-        if (event is Event.FrameSelected) {
-            if (event.frameId != null && event.requestCode == REQ_REMOVE_FRAME) {
-                prefManager.currentSecondaryFramesWithStringDisplay =
-                    prefManager.currentSecondaryFramesWithStringDisplay.apply {
-                        this.remove(event.frameId)
-                    }
-                if (selectedFrame == event.frameId) {
-                    selectedFrame = -1
-                }
-                eventManager.sendEvent(Event.PreviewFrames(Event.PreviewFrames.ShowMode.HIDE))
+            if (isSelectingFrame) {
+                SelectDisplayDialog(
+                    dismiss = {
+                        isSelectingFrame = false
+                    },
+                    onFrameSelected = {
+                        selectedFrame = it
+                        isSelectingFrame = false
+                    },
+                )
             }
-            if (event.frameId != null && event.requestCode == REQ_SELECT_FRAME) {
-                selectedFrame = event.frameId
-                eventManager.sendEvent(Event.PreviewFrames(Event.PreviewFrames.ShowMode.HIDE))
+
+            if (isRemovingFrame) {
+                SelectDisplayDialog(
+                    dismiss = {
+                        isRemovingFrame = false
+                    },
+                    onFrameSelected = {
+                        pendingFrameToRemove = it
+                        isRemovingFrame = false
+                    },
+                    showDefaultFrame = false,
+                )
+            }
+
+            pendingFrameToRemove?.let { pending ->
+                AlertDialog(
+                    onDismissRequest = {
+                        pendingFrameToRemove = null
+                    },
+                    title = {
+                        Text(text = stringResource(R.string.remove_frame))
+                    },
+                    text = {
+                        Text(text = stringResource(R.string.remove_frame_confirmation_message))
+                    },
+                    confirmButton = {
+                        TextButton(
+                            onClick = {
+                                prefManager.currentSecondaryFramesWithStringDisplay =
+                                    prefManager.currentSecondaryFramesWithStringDisplay.apply {
+                                        this.remove(pending)
+                                        if (selectedFrame == pending) {
+                                            selectedFrame = -1
+                                        }
+                                    }
+                                pendingFrameToRemove = null
+                            }
+                        ) {
+                            Text(text = stringResource(R.string.yes))
+                        }
+                    },
+                    dismissButton = {
+                        TextButton(
+                            onClick = {
+                                pendingFrameToRemove = null
+                            }
+                        ) {
+                            Text(text = stringResource(R.string.no))
+                        }
+                    },
+                )
             }
         }
     }
