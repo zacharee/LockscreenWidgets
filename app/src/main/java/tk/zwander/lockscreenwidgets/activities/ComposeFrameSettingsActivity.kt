@@ -652,8 +652,15 @@ class ComposeFrameSettingsActivity : BaseActivity(), EventObserver {
 
             pendingFrameId?.let { frameId ->
                 SelectDisplayDialog(
-                    pendingFrameId = frameId,
                     dismiss = {
+                        pendingFrameId = null
+                    },
+                    onDisplaySelected = { displayId ->
+                        secondaryFrames = HashMap(
+                            secondaryFrames.toMutableMap().apply {
+                                this[frameId] = displayId
+                            },
+                        )
                         pendingFrameId = null
                     },
                 )

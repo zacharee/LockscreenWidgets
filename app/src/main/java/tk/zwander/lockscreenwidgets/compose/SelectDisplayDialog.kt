@@ -1,5 +1,6 @@
 package tk.zwander.lockscreenwidgets.compose
 
+import android.os.Build
 import android.view.Display
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -25,7 +26,9 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -38,27 +41,74 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import tk.zwander.common.compose.util.rememberPreferenceState
+import tk.zwander.common.util.FrameSizeAndPosition
 import tk.zwander.common.util.LSDisplay
 import tk.zwander.common.util.PrefManager
 import tk.zwander.common.util.prefManager
 import tk.zwander.common.util.requireLsDisplayManager
 import tk.zwander.lockscreenwidgets.R
+import java.util.TreeSet
 import kotlin.math.absoluteValue
 
 @Composable
 fun SelectDisplayDialog(
-    pendingFrameId: Int,
     dismiss: () -> Unit,
+    onDisplaySelected: ((id: String) -> Unit)? = null,
+    onFrameSelected: ((frameId: Int) -> Unit)? = null,
 ) {
-    val context = LocalContext.current
-    val prefManager = remember {
-        context.prefManager
+    if (onDisplaySelected == null && onFrameSelected == null) {
+        throw IllegalArgumentException("Either onDisplaySelected or onFrameSelected must be specified.")
     }
-    var secondaryFrames by rememberPreferenceState(
-        key = PrefManager.KEY_CURRENT_FRAMES_WITH_DISPLAY,
-        value = { prefManager.currentSecondaryFramesWithStringDisplay },
-        onChanged = { _, v -> prefManager.currentSecondaryFramesWithStringDisplay = v },
+
+    if (onDisplaySelected != null && onFrameSelected != null) {
+        throw IllegalArgumentException("Only one of onDisplaySelected or onFrameSelected can be specified.")
+    }
+
+    val context = LocalContext.current
+    val frames by rememberPreferenceState(
+        key = PrefManager.KEY_CURRENT_FRAMES_WITH_STRING_DISPLAY,
+        value = { context.prefManager.currentSecondaryFramesWithStringDisplay },
     )
+
+    val lsDisplayManager = remember {
+        context.requireLsDisplayManager
+    }
+    val displays by lsDisplayManager.availableDisplays.collectAsState()
+
+    val defaultDisplay by remember {
+        derivedStateOf {
+            displays.values.firstOrNull { it.displayId == Display.DEFAULT_DISPLAY }
+                ?: displays.values.first()
+        }
+    }
+    val density = LocalDensity.current
+
+    val displaysToFramesMap by remember {
+        derivedStateOf {
+            val map = hashMapOf<LSDisplay, MutableSet<Int>>()
+
+            if (onDisplaySelected == null) {
+                frames.forEach { (frameId, displayId) ->
+                    displays.values.firstOrNull {
+                        it.uniqueIdCompat == displayId
+                    }?.let { displayForId ->
+                        if (map.containsKey(displayForId)) {
+                            map[displayForId]!!.add(frameId)
+                        } else {
+                            map[displayForId] = TreeSet<Int>().apply { add(frameId) }
+                        }
+                    }
+                }
+            } else {
+                // Dummy list to allow for selecting only displays (i.e. when adding frames).
+                map.putAll(displays.values.associateWith { mutableSetOf() })
+            }
+
+            map.toSortedMap { o1, o2 ->
+                o1.uniqueIdCompat.compareTo(o2.uniqueIdCompat)
+            }
+        }
+    }
 
     AlertDialog(
         onDismissRequest = dismiss,
@@ -66,127 +116,159 @@ fun SelectDisplayDialog(
             Text(text = stringResource(R.string.select_display))
         },
         text = {
-            val lsDisplayManager = remember {
-                context.requireLsDisplayManager
-            }
-            val displays by lsDisplayManager.availableDisplays.collectAsState()
-            val density = LocalDensity.current
-
             var maxDisplayWidth by remember {
                 mutableStateOf(0.dp)
+            }
+
+            val expandedMap = remember {
+                mutableStateMapOf<String, Boolean>()
             }
 
             LazyColumn(
                 modifier = Modifier.fillMaxWidth(),
                 verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
-                item(key = "DEFAULT_DISPLAY") {
-                    Card(
-                        onClick = {
-                            secondaryFrames = HashMap(
-                                secondaryFrames.toMutableMap().apply {
-                                    this[pendingFrameId] = "${Display.DEFAULT_DISPLAY}"
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                    item(key = "DEFAULT_DISPLAY") {
+                        Card(
+                            onClick = {
+                                if (onDisplaySelected != null) {
+                                    onDisplaySelected("${Display.DEFAULT_DISPLAY}")
+                                } else {
+                                    expandedMap["DEFAULT_DISPLAY"] =
+                                        !expandedMap.getOrDefault("DEFAULT_DISPLAY", false)
+                                }
+                            },
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .heightIn(min = 56.dp)
+                                    .padding(8.dp),
+                                contentAlignment = Alignment.CenterStart,
+                            ) {
+                                Column(
+                                    verticalArrangement = Arrangement.spacedBy(4.dp),
+                                ) {
+                                    Text(
+                                        text = "${stringResource(R.string.default_display)} (${Display.DEFAULT_DISPLAY})",
+                                        style = MaterialTheme.typography.bodyLarge,
+                                        fontWeight = FontWeight.Bold,
+                                    )
+
+                                    Text(
+                                        text = stringResource(R.string.default_display_desc),
+                                    )
+                                }
+                            }
+                        }
+                    }
+
+                    if (expandedMap["DEFAULT_DISPLAY"] == true) {
+                        items(
+                            items = displaysToFramesMap[defaultDisplay]?.toList() ?: listOf(),
+                            key = { "DEFAULT_DISPLAY_FRAME_$it" }) {
+                            FrameItem(
+                                display = defaultDisplay,
+                                frameId = it,
+                                onSelected = {
+                                    onFrameSelected?.invoke(it)
                                 },
                             )
-                            dismiss()
-                        },
-                    ) {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .heightIn(min = 56.dp)
-                                .padding(8.dp),
-                            contentAlignment = Alignment.CenterStart,
-                        ) {
-                            Column(
-                                verticalArrangement = Arrangement.spacedBy(4.dp),
-                            ) {
-                                Text(
-                                    text = "${stringResource(R.string.default_display)} (${Display.DEFAULT_DISPLAY})",
-                                    style = MaterialTheme.typography.bodyLarge,
-                                    fontWeight = FontWeight.Bold,
-                                )
-
-                                Text(
-                                    text = stringResource(R.string.default_display_desc),
-                                )
-                            }
                         }
                     }
                 }
 
-                items(
-                    items = displays.entries.toList(),
-                    key = { it.key },
-                ) { (_, display) ->
-                    Card(
-                        onClick = {
-                            secondaryFrames = HashMap(
-                                secondaryFrames.toMutableMap().apply {
-                                    this[pendingFrameId] = display.uniqueIdCompat
-                                },
-                            )
-                            dismiss()
-                        },
-                    ) {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .heightIn(min = 56.dp)
-                                .padding(8.dp),
-                            contentAlignment = Alignment.Center,
+                displaysToFramesMap.forEach { (display, frameIds) ->
+                    item(key = display.uniqueIdCompat) {
+                        Card(
+                            onClick = {
+                                if (onDisplaySelected != null) {
+                                    onDisplaySelected(display.uniqueIdCompat)
+                                } else {
+                                    expandedMap[display.uniqueIdCompat] =
+                                        !expandedMap.getOrDefault(display.uniqueIdCompat, false)
+                                }
+                            },
                         ) {
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.SpaceBetween,
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .heightIn(min = 56.dp)
+                                    .padding(8.dp),
+                                contentAlignment = Alignment.Center,
                             ) {
-                                Text(
-                                    text = "${display.display.name} (${descriptionForDisplay(display)})",
-                                    style = MaterialTheme.typography.bodyLarge,
-                                    fontWeight = FontWeight.Bold,
-                                )
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                ) {
+                                    Text(
+                                        text = "${display.display.name} (${
+                                            descriptionForDisplay(
+                                                display
+                                            )
+                                        })",
+                                        style = MaterialTheme.typography.bodyLarge,
+                                        fontWeight = FontWeight.Bold,
+                                    )
 
-                                Spacer(modifier = Modifier.size(8.dp))
+                                    Spacer(modifier = Modifier.size(8.dp))
 
-                                val (width, height) = remember(display.uniqueIdCompat) {
-                                    with (density) {
-                                        val screenSize = display.realSize
-                                        val screenWidth = screenSize.x
-                                        val screenHeight = screenSize.y
+                                    val (width, height) = remember(display.uniqueIdCompat) {
+                                        with(density) {
+                                            val screenSize = display.realSize
+                                            val screenWidth = screenSize.x
+                                            val screenHeight = screenSize.y
 
-                                        val desiredHeight = 48.dp
-                                        val actualHeight = screenHeight.toDp()
+                                            val desiredHeight = 48.dp
+                                            val actualHeight = screenHeight.toDp()
 
-                                        val heightRatio = desiredHeight / actualHeight
+                                            val heightRatio = desiredHeight / actualHeight
 
-                                        val scaledWidth = (screenWidth * heightRatio).toDp()
+                                            val scaledWidth = (screenWidth * heightRatio).toDp()
 
-                                        if (scaledWidth > maxDisplayWidth) {
-                                            maxDisplayWidth = scaledWidth
+                                            if (scaledWidth > maxDisplayWidth) {
+                                                maxDisplayWidth = scaledWidth
+                                            }
+
+                                            scaledWidth to desiredHeight
                                         }
+                                    }
 
-                                        scaledWidth to desiredHeight
+                                    Box(
+                                        contentAlignment = Alignment.Center,
+                                        modifier = if (maxDisplayWidth > 0.dp) {
+                                            Modifier.width(maxDisplayWidth)
+                                        } else {
+                                            Modifier
+                                        },
+                                    ) {
+                                        Box(
+                                            modifier = Modifier
+                                                .border(
+                                                    width = 1.dp,
+                                                    color = LocalContentColor.current,
+                                                    shape = RoundedCornerShape(2.dp),
+                                                )
+                                                .width(width)
+                                                .height(height),
+                                        )
                                     }
                                 }
-
-                                Box(
-                                    contentAlignment = Alignment.Center,
-                                    modifier = if (maxDisplayWidth > 0.dp) {
-                                        Modifier.width(maxDisplayWidth)
-                                    } else {
-                                        Modifier
-                                    },
-                                ) {
-                                    Box(
-                                        modifier = Modifier.border(
-                                            width = 1.dp,
-                                            color = LocalContentColor.current,
-                                            shape = RoundedCornerShape(2.dp),
-                                        ).width(width).height(height),
-                                    )
-                                }
                             }
+                        }
+                    }
+
+                    if (expandedMap[display.uniqueIdCompat] == true) {
+                        items(items = frameIds.toList(), key = { "DISPLAY_FRAMES_$it" }) {
+                            FrameItem(
+                                display = display,
+                                frameId = it,
+                                onSelected = {
+                                    onFrameSelected?.invoke(it)
+                                },
+                            )
                         }
                     }
                 }
@@ -200,6 +282,82 @@ fun SelectDisplayDialog(
             }
         },
     )
+}
+
+@Composable
+private fun FrameItem(
+    display: LSDisplay,
+    frameId: Int,
+    onSelected: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val context = LocalContext.current
+    val density = LocalDensity.current
+    val frameSizeAndPosition = remember {
+        FrameSizeAndPosition.getInstance(context)
+    }
+    val size = remember {
+        frameSizeAndPosition.getSizeForType(
+            type = FrameSizeAndPosition.FrameType.SecondaryLockscreen.Portrait(frameId),
+            display = display,
+        )
+    }
+
+    val (width, height) = remember(density) {
+        with(density) {
+            val screenWidth = size.x
+            val screenHeight = size.y
+
+            val desiredHeight = 48.dp
+            val actualHeight = screenHeight.toDp()
+
+            val heightRatio = desiredHeight / actualHeight
+
+            val scaledWidth = (screenWidth * heightRatio).toDp()
+
+            scaledWidth to desiredHeight
+        }
+    }
+
+    Box(
+        modifier = modifier.padding(start = 16.dp),
+    ) {
+        Card(
+            onClick = onSelected,
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .heightIn(min = 56.dp)
+                    .padding(8.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween,
+            ) {
+                Text(
+                    text = "$frameId",
+                    style = MaterialTheme.typography.bodyLarge,
+                    fontWeight = FontWeight.Bold,
+                )
+
+                Spacer(modifier = Modifier.size(8.dp))
+
+                Box(
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .border(
+                                width = 1.dp,
+                                color = LocalContentColor.current,
+                                shape = RoundedCornerShape(2.dp),
+                            )
+                            .width(width)
+                            .height(height),
+                    )
+                }
+            }
+        }
+    }
 }
 
 @Composable
