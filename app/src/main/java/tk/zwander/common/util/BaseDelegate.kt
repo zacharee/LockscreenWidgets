@@ -61,11 +61,11 @@ abstract class BaseDelegate<State : Any>(
 
     protected abstract val prefsHandler: HandlerRegistry
     protected abstract val adapter: BaseAdapter
-    protected abstract val gridLayoutManager: LayoutManager
+    abstract val gridLayoutManager: LayoutManager
     protected abstract val params: WindowManager.LayoutParams
     protected abstract val rootView: View
     protected abstract val recyclerView: RecyclerView
-    protected abstract var currentWidgets: List<WidgetData>
+    abstract var currentWidgets: List<WidgetData>
 
     protected  val displayListener = object : DisplayListener {
         override fun onDisplayAdded(displayId: Int) {}

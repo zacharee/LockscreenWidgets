@@ -8,13 +8,13 @@ import tk.zwander.common.activities.SelectIconPackActivity
 import tk.zwander.common.adapters.BaseAdapter
 import tk.zwander.common.data.WidgetData
 import tk.zwander.common.listeners.WidgetResizeListener
+import tk.zwander.common.util.BaseDelegate
 import tk.zwander.common.util.Event
 import tk.zwander.common.util.FrameSizeAndPosition
 import tk.zwander.common.util.eventManager
 import tk.zwander.common.util.frameSizeAndPosition
 import tk.zwander.lockscreenwidgets.activities.add.ReconfigureFrameWidgetActivity
 import tk.zwander.lockscreenwidgets.util.FramePrefs
-import tk.zwander.lockscreenwidgets.util.MainWidgetFrameDelegate
 
 /**
  * The adapter for the widget frame itself.
@@ -25,7 +25,7 @@ open class WidgetFrameAdapter(
     rootView: View,
     displayId: String,
     onRemoveCallback: (WidgetData, Int) -> Unit,
-    viewModel: MainWidgetFrameDelegate.WidgetFrameViewModel,
+    viewModel: BaseDelegate.BaseViewModel<*, *>,
     private val saveTypeGetter: () -> FrameSizeAndPosition.FrameType,
 ) : BaseAdapter(frameId, context, rootView, onRemoveCallback, displayId, viewModel) {
     override val colCount: Int

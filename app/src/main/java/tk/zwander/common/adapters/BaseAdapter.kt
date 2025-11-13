@@ -1,6 +1,7 @@
 package tk.zwander.common.adapters
 
 import android.annotation.SuppressLint
+import android.appwidget.AppWidgetHostView
 import android.appwidget.AppWidgetProviderInfo
 import android.content.Context
 import android.content.Intent
@@ -47,7 +48,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.core.view.children
 import androidx.core.view.forEach
+import androidx.core.view.updateLayoutParams
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.arasthel.spannedgridlayoutmanager.SpanSize
@@ -498,6 +501,12 @@ abstract class BaseAdapter(
                     factory = {
                         widgetView.apply {
                             (parent as? ViewGroup)?.removeView(this)
+                        }
+                    },
+                    update = {
+                        (it as AppWidgetHostView).children.first().updateLayoutParams {
+                            width = itemView.width
+                            height = itemView.height
                         }
                     },
                     modifier = modifier,

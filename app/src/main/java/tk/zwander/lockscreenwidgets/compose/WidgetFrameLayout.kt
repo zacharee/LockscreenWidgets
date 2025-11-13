@@ -2,13 +2,18 @@ package tk.zwander.lockscreenwidgets.compose
 
 import android.graphics.PorterDuff
 import android.graphics.PorterDuffColorFilter
+import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewConfiguration
+import android.view.WindowManager
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.waitForUpOrCancellation
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -37,6 +42,7 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
@@ -44,23 +50,189 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.zIndex
+import androidx.recyclerview.widget.RecyclerView
 import com.bugsnag.android.performance.compose.MeasuredComposable
 import com.google.accompanist.drawablepainter.rememberDrawablePainter
+import tk.zwander.common.adapters.BaseAdapter
 import tk.zwander.common.compose.components.BlurView
 import tk.zwander.common.compose.components.ConfirmFrameRemovalLayout
 import tk.zwander.common.compose.components.ConfirmWidgetRemovalLayout
 import tk.zwander.common.compose.components.ContentColoredOutlinedButton
 import tk.zwander.common.compose.components.FrameEditWrapperLayout
 import tk.zwander.common.compose.util.rememberPreferenceState
+import tk.zwander.common.data.WidgetData
+import tk.zwander.common.util.BaseDelegate
 import tk.zwander.common.util.Event
+import tk.zwander.common.util.FrameSizeAndPosition
+import tk.zwander.common.util.HandlerRegistry
+import tk.zwander.common.util.ISnappyLayoutManager
 import tk.zwander.common.util.PrefManager
 import tk.zwander.common.util.collectAsMutableState
 import tk.zwander.common.util.eventManager
 import tk.zwander.common.util.globalState
 import tk.zwander.common.util.prefManager
+import tk.zwander.common.util.themedContext
 import tk.zwander.common.views.SnappyRecyclerView
 import tk.zwander.lockscreenwidgets.R
+import tk.zwander.lockscreenwidgets.adapters.WidgetFrameAdapter
+import tk.zwander.lockscreenwidgets.databinding.WidgetGridHolderBinding
+import tk.zwander.lockscreenwidgets.util.FramePrefs
+import tk.zwander.lockscreenwidgets.util.FrameSpecificPreferences
 import tk.zwander.lockscreenwidgets.util.MainWidgetFrameDelegate
+
+@Composable
+fun WidgetFramePreviewLayout(
+    displayId: String,
+    frameId: Int,
+    modifier: Modifier = Modifier,
+) {
+    val context = LocalContext.current
+    val view = LocalView.current
+
+    val widgetGridView = remember {
+        WidgetGridHolderBinding.inflate(
+            LayoutInflater.from(context.themedContext),
+        ).root
+    }
+
+    val dummyDelegate = remember(frameId) {
+        object : BaseDelegate<BaseDelegate.BaseState>(context, displayId) {
+            val widgetGridAdapter = WidgetFrameAdapter(
+                frameId = frameId,
+                context = context,
+                rootView = view,
+                onRemoveCallback = { _, _ -> },
+                displayId = displayId,
+                saveTypeGetter = { FrameSizeAndPosition.FrameType.SecondaryLockscreen.Portrait(frameId) },
+                viewModel = viewModel,
+            )
+
+            override val viewModel: BaseViewModel<out BaseState, out BaseDelegate<BaseState>>
+                get() = object : BaseViewModel<BaseState, BaseDelegate<BaseState>>(this) {
+                    override val containerCornerRadiusKey: String = PrefManager.KEY_FRAME_CORNER_RADIUS
+                    override val widgetCornerRadiusKey: String = PrefManager.KEY_FRAME_WIDGET_CORNER_RADIUS
+
+                }
+            override var state: BaseState = BaseState()
+            override val prefsHandler: HandlerRegistry = HandlerRegistry {}
+            override val adapter: BaseAdapter = widgetGridAdapter
+            override val gridLayoutManager: LayoutManager = object : LayoutManager(
+                context,
+                RecyclerView.HORIZONTAL,
+                FramePrefs.getRowCountForFrame(context, frameId),
+                FramePrefs.getColCountForFrame(context, frameId),
+            ), ISnappyLayoutManager {
+                override fun canScrollHorizontally(): Boolean {
+                    return false
+                }
+
+                override fun getPositionForVelocity(
+                    velocityX: Int,
+                    velocityY: Int
+                ): Int {
+                    return 0
+                }
+
+                override fun getFixScrollPos(
+                    velocityX: Int,
+                    velocityY: Int
+                ): Int {
+                    return 0
+                }
+
+                override fun canSnap(): Boolean {
+                    return false
+                }
+            }
+            override val params: WindowManager.LayoutParams = WindowManager.LayoutParams()
+            override val rootView: View = view
+            override val recyclerView: RecyclerView = widgetGridView
+            override var currentWidgets: List<WidgetData>
+                get() = FramePrefs.getWidgetsForFrame(this, frameId).toList()
+                set(value) {
+                    FramePrefs.setWidgetsForFrame(this, frameId, value)
+                }
+
+            override fun isLocked(): Boolean {
+                return false
+            }
+
+            override fun retrieveCounts(): Pair<Int?, Int?> {
+                return FramePrefs.getGridSizeForFrame(this, frameId)
+            }
+
+            override suspend fun updateWindow() {}
+
+            override fun onWidgetClick(trigger: Boolean): Boolean {
+                return false
+            }
+        }
+    }
+
+    val framePrefs = remember(frameId) {
+        FrameSpecificPreferences(frameId = frameId, context = context)
+    }
+
+    val frameCornerRadius by rememberPreferenceState(
+        key = PrefManager.KEY_FRAME_CORNER_RADIUS,
+        value = { context.prefManager.cornerRadiusDp.dp },
+    )
+    val backgroundColor by rememberPreferenceState(
+        key = framePrefs.keyFor(PrefManager.KEY_FRAME_BACKGROUND_COLOR),
+        value = { Color(framePrefs.backgroundColor) },
+    )
+    val animatedBackgroundColor by animateColorAsState(backgroundColor)
+
+    Card(
+        shape = RoundedCornerShape(size = frameCornerRadius),
+        elevation = CardDefaults.outlinedCardElevation(),
+        colors = CardDefaults.cardColors().copy(
+            containerColor = animatedBackgroundColor,
+        ),
+        modifier = modifier,
+    ) {
+        Box(
+            modifier = Modifier.fillMaxSize(),
+        ) {
+            val pageIndicatorBehavior by rememberPreferenceState(
+                key = PrefManager.KEY_PAGE_INDICATOR_BEHAVIOR,
+                value = { context.prefManager.pageIndicatorBehavior },
+            )
+
+            AndroidView(
+                factory = { widgetGridView },
+                update = {
+                    it.layoutManager = dummyDelegate.gridLayoutManager
+                    it.adapter = dummyDelegate.widgetGridAdapter
+                    dummyDelegate.widgetGridAdapter.updateWidgets(dummyDelegate.currentWidgets)
+
+                    it.isHorizontalScrollBarEnabled =
+                        pageIndicatorBehavior != PrefManager.VALUE_PAGE_INDICATOR_BEHAVIOR_HIDDEN
+                    it.isScrollbarFadingEnabled =
+                        pageIndicatorBehavior == PrefManager.VALUE_PAGE_INDICATOR_BEHAVIOR_AUTO_HIDE
+                    it.scrollBarFadeDuration =
+                        if (pageIndicatorBehavior == PrefManager.VALUE_PAGE_INDICATOR_BEHAVIOR_AUTO_HIDE) {
+                            ViewConfiguration.getScrollBarFadeDuration()
+                        } else {
+                            0
+                        }
+                },
+                modifier = Modifier
+                    .fillMaxSize()
+                    .clickable(enabled = false, onClick = {}),
+            )
+
+            Box(
+                modifier = Modifier.clickable(
+                    enabled = true,
+                    interactionSource = remember { MutableInteractionSource() },
+                    indication = null,
+                    onClick = {},
+                ).fillMaxSize(),
+            )
+        }
+    }
+}
 
 @Composable
 fun MainWidgetFrameDelegate.WidgetFrameViewModel.WidgetFrameLayout(
