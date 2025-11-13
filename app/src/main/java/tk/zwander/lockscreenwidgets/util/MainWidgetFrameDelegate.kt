@@ -591,7 +591,7 @@ open class MainWidgetFrameDelegate protected constructor(
                 updateWindow()
             }
 
-            logUtils.normalLog("Trying to add overlay ${viewModel.animationState.value}", null)
+            logUtils.debugLog("Trying to add overlay ${viewModel.animationState.value}", null)
 
             if (!frame.isAttachedToWindow && viewModel.animationState.value != AnimationState.STATE_ADDING) {
                 logUtils.normalLog("Actually adding overlay", null)
