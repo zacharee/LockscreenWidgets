@@ -1,5 +1,6 @@
 package tk.zwander.lockscreenwidgets
 
+import android.annotation.SuppressLint
 import android.app.Application
 import android.content.BroadcastReceiver
 import android.content.Context
@@ -10,9 +11,11 @@ import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener2
 import android.hardware.SensorManager
+import android.hardware.display.IDisplayManager
 import android.net.Uri
 import android.os.Build
 import android.os.PowerManager
+import android.os.ServiceManager
 import android.provider.Settings
 import androidx.core.content.ContextCompat
 import com.bugsnag.android.Bugsnag
@@ -31,6 +34,7 @@ import tk.zwander.common.activities.add.BaseBindWidgetActivity
 import tk.zwander.common.util.Event
 import tk.zwander.common.util.EventObserver
 import tk.zwander.common.util.GlobalExceptionHandler
+import tk.zwander.common.util.LSDisplayManager
 import tk.zwander.common.util.LogUtils
 import tk.zwander.common.util.eventManager
 import tk.zwander.common.util.globalState
@@ -55,6 +59,7 @@ import tk.zwander.widgetdrawer.activities.add.AddDrawerWidgetActivity
  */
 class App : Application(), CoroutineScope by MainScope(), EventObserver {
     companion object {
+        @SuppressLint("StaticFieldLeak")
         lateinit var instance: App
     }
 
@@ -119,6 +124,7 @@ class App : Application(), CoroutineScope by MainScope(), EventObserver {
 
     private val power by lazy { getSystemService(POWER_SERVICE) as PowerManager }
     private val sensorManager by lazy { getSystemService(SENSOR_SERVICE) as SensorManager }
+    private val lsDisplayManager by lazy { LSDisplayManager.getInstance(this) }
 
     init {
         BugsnagPerformance.reportApplicationClassLoaded()
@@ -262,6 +268,10 @@ class App : Application(), CoroutineScope by MainScope(), EventObserver {
         eventManager.addObserver(this)
 
         shizukuManager.onCreate()
+
+        lsDisplayManager.onCreate()
+
+        logUtils.normalLog(IDisplayManager.Stub.asInterface(ServiceManager.getService("display")).getDisplayIds(true).contentToString(), null)
 
         launch(Dispatchers.Main) {
             globalState.wasOnKeyguard.collect { wasOnKeyguard ->

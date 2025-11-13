@@ -101,8 +101,6 @@ class Accessibility : AccessibilityService(), EventObserver, CoroutineScope by M
     override fun onCreate() {
         super.onCreate()
 
-        lsDisplayManager.onCreate()
-
         logUtils.debugLog("Accessibility service created.", null)
     }
 
@@ -191,8 +189,6 @@ class Accessibility : AccessibilityService(), EventObserver, CoroutineScope by M
             secondaryFrameDelegates.forEach { (_, delegate) ->
                 delegate.onDestroy()
             }
-
-            lsDisplayManager.onDestroy()
 
             logUtils.debugLog("Accessibility destroy work completed", null)
         }
