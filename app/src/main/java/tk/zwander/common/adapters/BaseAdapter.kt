@@ -50,7 +50,6 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.view.children
 import androidx.core.view.forEach
-import androidx.core.view.updateLayoutParams
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.arasthel.spannedgridlayoutmanager.SpanSize
@@ -99,6 +98,7 @@ abstract class BaseAdapter(
     protected val onRemoveCallback: (WidgetData, Int) -> Unit,
     protected val displayId: String,
     protected val viewModel: BaseDelegate.BaseViewModel<*, *>,
+    protected val applyScaling: Boolean,
 ) : RecyclerView.Adapter<BaseAdapter.BaseVH<*>>(), CoroutineScope by MainScope() {
     companion object {
         const val VIEW_TYPE_WIDGET = 0
@@ -504,9 +504,13 @@ abstract class BaseAdapter(
                         }
                     },
                     update = {
-                        (it as AppWidgetHostView).children.first().updateLayoutParams {
-                            width = itemView.width
-                            height = itemView.height
+                        val child = (it as AppWidgetHostView).children.first()
+
+                        if (child.width > itemView.width) {
+                            val scale = itemView.width.toDouble() / child.width.toDouble()
+
+                            child.scaleX = scale.toFloat()
+                            child.scaleY = scale.toFloat()
                         }
                     },
                     modifier = modifier,

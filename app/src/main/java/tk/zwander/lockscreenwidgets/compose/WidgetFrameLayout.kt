@@ -105,6 +105,7 @@ fun WidgetFramePreviewLayout(
                 displayId = displayId,
                 saveTypeGetter = { FrameSizeAndPosition.FrameType.SecondaryLockscreen.Portrait(frameId) },
                 viewModel = viewModel,
+                applyScaling = true,
             )
 
             override val viewModel: BaseViewModel<out BaseState, out BaseDelegate<BaseState>>
@@ -200,7 +201,9 @@ fun WidgetFramePreviewLayout(
             )
 
             AndroidView(
-                factory = { widgetGridView },
+                factory = {
+                    widgetGridView
+                },
                 update = {
                     it.layoutManager = dummyDelegate.gridLayoutManager
                     it.adapter = dummyDelegate.widgetGridAdapter

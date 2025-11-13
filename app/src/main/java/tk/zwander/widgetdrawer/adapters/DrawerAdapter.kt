@@ -28,6 +28,7 @@ class DrawerAdapter(
     onRemoveCallback,
     displayId,
     viewModel,
+    false,
 ) {
     override val colCount: Int
         get() = context.prefManager.drawerColCount

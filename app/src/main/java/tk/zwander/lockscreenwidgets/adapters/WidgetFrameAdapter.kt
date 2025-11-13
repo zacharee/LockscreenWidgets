@@ -26,8 +26,9 @@ open class WidgetFrameAdapter(
     displayId: String,
     onRemoveCallback: (WidgetData, Int) -> Unit,
     viewModel: BaseDelegate.BaseViewModel<*, *>,
+    applyScaling: Boolean,
     private val saveTypeGetter: () -> FrameSizeAndPosition.FrameType,
-) : BaseAdapter(frameId, context, rootView, onRemoveCallback, displayId, viewModel) {
+) : BaseAdapter(frameId, context, rootView, onRemoveCallback, displayId, viewModel, applyScaling) {
     override val colCount: Int
         get() = FramePrefs.getColCountForFrame(context, holderId)
     override val rowCount: Int
