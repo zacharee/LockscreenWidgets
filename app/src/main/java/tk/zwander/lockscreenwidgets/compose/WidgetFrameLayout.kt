@@ -46,7 +46,6 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.stringResource
@@ -98,7 +97,6 @@ fun WidgetFramePreviewLayout(
         val constraints = this
         val context = LocalContext.current
         val view = LocalView.current
-        val density = LocalDensity.current
 
         val widgetGridView = remember {
             WidgetGridHolderBinding.inflate(
@@ -115,9 +113,7 @@ fun WidgetFramePreviewLayout(
 
         val scale by remember {
             derivedStateOf {
-                with(density) {
-                    constraints.maxHeight.toPx() / frameSize.x
-                }
+                constraints.maxHeight / frameSize.x.dp
             }
         }
 
@@ -227,9 +223,7 @@ fun WidgetFramePreviewLayout(
                 )
 
                 AndroidView(
-                    factory = {
-                        widgetGridView
-                    },
+                    factory = { widgetGridView },
                     update = {
                         it.layoutManager = dummyDelegate.gridLayoutManager
                         it.adapter = dummyDelegate.widgetGridAdapter
@@ -249,17 +243,11 @@ fun WidgetFramePreviewLayout(
                                 0
                             }
                     },
-                    modifier = Modifier
-                        .graphicsLayer()
+                    modifier = Modifier.fillMaxSize()
                         .requiredSize(
-                            width = with(density) {
-                                frameSize.x.toDp()
-                            },
-                            height = with(density) {
-                                frameSize.y.toDp()
-                            },
-                        )
-                        .clickable(enabled = false, onClick = {}),
+                            width = frameSize.x.dp,
+                            height = frameSize.y.dp,
+                        ),
                 )
 
                 Box(

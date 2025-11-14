@@ -248,7 +248,7 @@ val Context.density: Density
     get() = Density(this)
 
 val Context.themedContext: ContextWrapper
-    get() = ContextThemeWrapper(this, R.style.AppTheme)
+    get() = ContextThemeWrapper(this.safeApplicationContext, R.style.AppTheme)
 
 val Context.themedLayoutInflater: LayoutInflater
     get() = LayoutInflater.from(themedContext).apply {
