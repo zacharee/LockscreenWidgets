@@ -352,7 +352,7 @@ class DrawerDelegate private constructor(context: Context, displayId: String) :
     }
 
     override fun onWidgetClick(trigger: Boolean): Boolean {
-        return if (!commonState.isItemHighlighted) {
+        return if (!commonState.isItemHighlighted && !globalState.itemIsActive.value) {
             if (trigger && prefManager.requestUnlockDrawer && prefManager.drawerDirectlyCheckForActivity) {
                 DismissOrUnlockActivity.launch(this)
                 eventManager.sendEvent(Event.CloseDrawer)
@@ -410,6 +410,9 @@ class DrawerDelegate private constructor(context: Context, displayId: String) :
     override fun onItemSelected(selected: Boolean, highlighted: Boolean) {
         super.onItemSelected(selected, highlighted)
         viewModel.selectedItem.value = selected
+        globalState.handlingClick.value = globalState.handlingClick.value.toMutableMap().apply {
+            remove(-2)
+        }
     }
 
     override fun isLocked(): Boolean {
