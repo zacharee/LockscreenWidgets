@@ -1,7 +1,6 @@
 package tk.zwander.common.adapters
 
 import android.annotation.SuppressLint
-import android.appwidget.AppWidgetHostView
 import android.appwidget.AppWidgetProviderInfo
 import android.content.Context
 import android.content.Intent
@@ -37,6 +36,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shadow
@@ -48,7 +48,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
-import androidx.core.view.children
 import androidx.core.view.forEach
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
@@ -97,7 +96,6 @@ abstract class BaseAdapter(
     protected val onRemoveCallback: (WidgetData, Int) -> Unit,
     protected val displayId: String,
     protected val viewModel: BaseDelegate.BaseViewModel<*, *>,
-    protected val applyScaling: Boolean,
 ) : RecyclerView.Adapter<BaseAdapter.BaseVH>(), CoroutineScope by MainScope() {
     companion object {
         const val VIEW_TYPE_WIDGET = 0
@@ -494,18 +492,6 @@ abstract class BaseAdapter(
                     factory = {
                         widgetView.apply {
                             (parent as? ViewGroup)?.removeView(this)
-                        }
-                    },
-                    update = {
-                        if (applyScaling) {
-                            val child = (it as AppWidgetHostView).children.first()
-
-                            if (child.width > itemView.width) {
-//                                val scale = itemView.width.toDouble() / child.width.toDouble()
-//
-//                                child.scaleX = scale.toFloat()
-//                                child.scaleY = scale.toFloat()
-                            }
                         }
                     },
                     modifier = modifier,

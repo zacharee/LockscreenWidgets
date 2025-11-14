@@ -1,5 +1,6 @@
 package tk.zwander.lockscreenwidgets.compose
 
+import android.annotation.SuppressLint
 import android.graphics.PorterDuff
 import android.graphics.PorterDuffColorFilter
 import android.view.LayoutInflater
@@ -16,12 +17,13 @@ import androidx.compose.foundation.gestures.waitForUpOrCancellation
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -31,6 +33,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.contentColorFor
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -89,176 +92,185 @@ fun WidgetFramePreviewLayout(
     frameId: Int,
     modifier: Modifier = Modifier,
 ) {
-    val context = LocalContext.current
-    val view = LocalView.current
-    val density = LocalDensity.current
+    BoxWithConstraints(
+        modifier = modifier,
+    ) {
+        val constraints = this
+        val context = LocalContext.current
+        val view = LocalView.current
+        val density = LocalDensity.current
 
-    val widgetGridView = remember {
-        WidgetGridHolderBinding.inflate(
-            LayoutInflater.from(context.themedContext),
-        ).root
-    }
+        val widgetGridView = remember {
+            WidgetGridHolderBinding.inflate(
+                LayoutInflater.from(context.themedContext),
+            ).root
+        }
 
-    val frameSize = remember(frameId) {
-        FrameSizeAndPosition.getInstance(context).getSizeForType(
-            type = FrameSizeAndPosition.FrameType.SecondaryLockscreen.Portrait(frameId),
-            display = context.requireLsDisplayManager.requireDisplayByStringId(displayId),
-        )
-    }
-
-    val dummyDelegate = remember(frameId) {
-        object : BaseDelegate<BaseDelegate.BaseState>(context.themedContext, displayId) {
-            val widgetGridAdapter = WidgetFrameAdapter(
-                frameId = frameId,
-                context = context.themedContext,
-                rootView = view,
-                onRemoveCallback = { _, _ -> },
-                displayId = displayId,
-                saveTypeGetter = { FrameSizeAndPosition.FrameType.SecondaryLockscreen.Portrait(frameId) },
-                viewModel = viewModel,
-                applyScaling = true,
+        val frameSize = remember(frameId) {
+            FrameSizeAndPosition.getInstance(context).getSizeForType(
+                type = FrameSizeAndPosition.FrameType.SecondaryLockscreen.Portrait(frameId),
+                display = context.requireLsDisplayManager.requireDisplayByStringId(displayId),
             )
+        }
 
-            override val viewModel: BaseViewModel<out BaseState, out BaseDelegate<BaseState>>
-                get() = object : BaseViewModel<BaseState, BaseDelegate<BaseState>>(this) {
-                    override val containerCornerRadiusKey: String = PrefManager.KEY_FRAME_CORNER_RADIUS
-                    override val widgetCornerRadiusKey: String = PrefManager.KEY_FRAME_WIDGET_CORNER_RADIUS
-
+        val scale by remember {
+            derivedStateOf {
+                with(density) {
+                    constraints.maxHeight.toPx() / frameSize.x
                 }
-            override var state: BaseState = BaseState()
-            override val prefsHandler: HandlerRegistry = HandlerRegistry {}
-            override val adapter: BaseAdapter = widgetGridAdapter
-            override val gridLayoutManager: LayoutManager = object : LayoutManager(
-                context.themedContext,
-                RecyclerView.HORIZONTAL,
-                FramePrefs.getRowCountForFrame(context, frameId),
-                FramePrefs.getColCountForFrame(context, frameId),
-            ), ISnappyLayoutManager {
-                override fun canScrollHorizontally(): Boolean {
-                    return false
-                }
-
-                override fun getPositionForVelocity(
-                    velocityX: Int,
-                    velocityY: Int
-                ): Int {
-                    return 0
-                }
-
-                override fun getFixScrollPos(
-                    velocityX: Int,
-                    velocityY: Int
-                ): Int {
-                    return 0
-                }
-
-                override fun canSnap(): Boolean {
-                    return false
-                }
-            }
-            override val params: WindowManager.LayoutParams = WindowManager.LayoutParams()
-            override val rootView: View = view
-            override val recyclerView: RecyclerView = widgetGridView
-            override var currentWidgets: List<WidgetData>
-                get() = FramePrefs.getWidgetsForFrame(this, frameId).toList()
-                set(value) {
-                    FramePrefs.setWidgetsForFrame(this, frameId, value)
-                }
-
-            override fun isLocked(): Boolean {
-                return false
-            }
-
-            override fun retrieveCounts(): Pair<Int?, Int?> {
-                return FramePrefs.getGridSizeForFrame(this, frameId)
-            }
-
-            override suspend fun updateWindow() {}
-
-            override fun onWidgetClick(trigger: Boolean): Boolean {
-                return false
             }
         }
-    }
 
-    val framePrefs = remember(frameId) {
-        FrameSpecificPreferences(frameId = frameId, context = context)
-    }
+        val dummyDelegate = remember(frameId) {
+            object : BaseDelegate<BaseDelegate.BaseState>(context.themedContext, displayId) {
+                val widgetGridAdapter = WidgetFrameAdapter(
+                    frameId = frameId,
+                    context = context.themedContext,
+                    rootView = view,
+                    onRemoveCallback = { _, _ -> },
+                    displayId = displayId,
+                    saveTypeGetter = { FrameSizeAndPosition.FrameType.SecondaryLockscreen.Portrait(frameId) },
+                    viewModel = viewModel,
+                )
 
-    val frameCornerRadius by rememberPreferenceState(
-        key = PrefManager.KEY_FRAME_CORNER_RADIUS,
-        value = { context.prefManager.cornerRadiusDp.dp },
-    )
-    val backgroundColor by rememberPreferenceState(
-        key = framePrefs.keyFor(PrefManager.KEY_FRAME_BACKGROUND_COLOR),
-        value = { Color(framePrefs.backgroundColor) },
-    )
-    val animatedBackgroundColor by animateColorAsState(backgroundColor)
+                override val viewModel: BaseViewModel<out BaseState, out BaseDelegate<BaseState>>
+                    get() = @SuppressLint("StaticFieldLeak")
+                    object : BaseViewModel<BaseState, BaseDelegate<BaseState>>(this) {
+                        override val containerCornerRadiusKey: String = PrefManager.KEY_FRAME_CORNER_RADIUS
+                        override val widgetCornerRadiusKey: String = PrefManager.KEY_FRAME_WIDGET_CORNER_RADIUS
 
-    Card(
-        shape = RoundedCornerShape(size = frameCornerRadius),
-        elevation = CardDefaults.outlinedCardElevation(),
-        colors = CardDefaults.cardColors().copy(
-            containerColor = animatedBackgroundColor,
-        ),
-    ) {
-        Box(
-            modifier = Modifier
-                .size(
-                    width = with(density) {
-                        frameSize.x.toDp()
-                    },
-                    height = with(density) {
-                        frameSize.y.toDp()
-                    },
-                ),
+                    }
+                override var state: BaseState = BaseState()
+                override val prefsHandler: HandlerRegistry = HandlerRegistry {}
+                override val adapter: BaseAdapter = widgetGridAdapter
+                override val gridLayoutManager: LayoutManager = object : LayoutManager(
+                    context.themedContext,
+                    RecyclerView.HORIZONTAL,
+                    FramePrefs.getRowCountForFrame(context, frameId),
+                    FramePrefs.getColCountForFrame(context, frameId),
+                ), ISnappyLayoutManager {
+                    override fun canScrollHorizontally(): Boolean {
+                        return false
+                    }
+
+                    override fun getPositionForVelocity(
+                        velocityX: Int,
+                        velocityY: Int
+                    ): Int {
+                        return 0
+                    }
+
+                    override fun getFixScrollPos(
+                        velocityX: Int,
+                        velocityY: Int
+                    ): Int {
+                        return 0
+                    }
+
+                    override fun canSnap(): Boolean {
+                        return false
+                    }
+                }
+                override val params: WindowManager.LayoutParams = WindowManager.LayoutParams()
+                override val rootView: View = view
+                override val recyclerView: RecyclerView = widgetGridView
+                override var currentWidgets: List<WidgetData>
+                    get() = FramePrefs.getWidgetsForFrame(this, frameId).toList()
+                    set(value) {
+                        FramePrefs.setWidgetsForFrame(this, frameId, value)
+                    }
+
+                override fun isLocked(): Boolean {
+                    return false
+                }
+
+                override fun retrieveCounts(): Pair<Int?, Int?> {
+                    return FramePrefs.getGridSizeForFrame(this, frameId)
+                }
+
+                override suspend fun updateWindow() {}
+
+                override fun onWidgetClick(trigger: Boolean): Boolean {
+                    return false
+                }
+            }
+        }
+
+        val framePrefs = remember(frameId) {
+            FrameSpecificPreferences(frameId = frameId, context = context)
+        }
+
+        val frameCornerRadius by rememberPreferenceState(
+            key = PrefManager.KEY_FRAME_CORNER_RADIUS,
+            value = { context.prefManager.cornerRadiusDp.dp },
+        )
+        val backgroundColor by rememberPreferenceState(
+            key = framePrefs.keyFor(PrefManager.KEY_FRAME_BACKGROUND_COLOR),
+            value = { Color(framePrefs.backgroundColor) },
+        )
+        val animatedBackgroundColor by animateColorAsState(backgroundColor)
+
+        Card(
+            shape = RoundedCornerShape(size = frameCornerRadius),
+            elevation = CardDefaults.outlinedCardElevation(),
+            colors = CardDefaults.cardColors().copy(
+                containerColor = animatedBackgroundColor,
+            ),
+            modifier = Modifier,
         ) {
-            val pageIndicatorBehavior by rememberPreferenceState(
-                key = PrefManager.KEY_PAGE_INDICATOR_BEHAVIOR,
-                value = { context.prefManager.pageIndicatorBehavior },
-            )
-
-            AndroidView(
-                factory = {
-                    widgetGridView
-                },
-                update = {
-                    it.layoutManager = dummyDelegate.gridLayoutManager
-                    it.adapter = dummyDelegate.widgetGridAdapter
-                    dummyDelegate.widgetGridAdapter.updateWidgets(dummyDelegate.currentWidgets)
-
-                    it.isHorizontalScrollBarEnabled =
-                        pageIndicatorBehavior != PrefManager.VALUE_PAGE_INDICATOR_BEHAVIOR_HIDDEN
-                    it.isScrollbarFadingEnabled =
-                        pageIndicatorBehavior == PrefManager.VALUE_PAGE_INDICATOR_BEHAVIOR_AUTO_HIDE
-                    it.scrollBarFadeDuration =
-                        if (pageIndicatorBehavior == PrefManager.VALUE_PAGE_INDICATOR_BEHAVIOR_AUTO_HIDE) {
-                            ViewConfiguration.getScrollBarFadeDuration()
-                        } else {
-                            0
-                        }
-                },
-                modifier = Modifier
-                    .graphicsLayer()
-                    .size(
-                        width = with(density) {
-                            frameSize.x.toDp()
-                        },
-                        height = with(density) {
-                            frameSize.y.toDp()
-                        },
-                    )
-                    .clickable(enabled = false, onClick = {}),
-            )
-
             Box(
-                modifier = Modifier.clickable(
-                    enabled = true,
-                    interactionSource = remember { MutableInteractionSource() },
-                    indication = null,
-                    onClick = {},
-                ).fillMaxSize(),
-            )
+                modifier = Modifier,
+            ) {
+                val pageIndicatorBehavior by rememberPreferenceState(
+                    key = PrefManager.KEY_PAGE_INDICATOR_BEHAVIOR,
+                    value = { context.prefManager.pageIndicatorBehavior },
+                )
+
+                AndroidView(
+                    factory = {
+                        widgetGridView
+                    },
+                    update = {
+                        it.layoutManager = dummyDelegate.gridLayoutManager
+                        it.adapter = dummyDelegate.widgetGridAdapter
+                        dummyDelegate.widgetGridAdapter.updateWidgets(dummyDelegate.currentWidgets)
+
+                        it.scaleX = scale
+                        it.scaleY = scale
+
+                        it.isHorizontalScrollBarEnabled =
+                            pageIndicatorBehavior != PrefManager.VALUE_PAGE_INDICATOR_BEHAVIOR_HIDDEN
+                        it.isScrollbarFadingEnabled =
+                            pageIndicatorBehavior == PrefManager.VALUE_PAGE_INDICATOR_BEHAVIOR_AUTO_HIDE
+                        it.scrollBarFadeDuration =
+                            if (pageIndicatorBehavior == PrefManager.VALUE_PAGE_INDICATOR_BEHAVIOR_AUTO_HIDE) {
+                                ViewConfiguration.getScrollBarFadeDuration()
+                            } else {
+                                0
+                            }
+                    },
+                    modifier = Modifier
+                        .graphicsLayer()
+                        .requiredSize(
+                            width = with(density) {
+                                frameSize.x.toDp()
+                            },
+                            height = with(density) {
+                                frameSize.y.toDp()
+                            },
+                        )
+                        .clickable(enabled = false, onClick = {}),
+                )
+
+                Box(
+                    modifier = Modifier.clickable(
+                        enabled = true,
+                        interactionSource = remember { MutableInteractionSource() },
+                        indication = null,
+                        onClick = {},
+                    ).fillMaxSize(),
+                )
+            }
         }
     }
 }
