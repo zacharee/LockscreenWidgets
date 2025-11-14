@@ -58,7 +58,6 @@ import com.bugsnag.android.performance.compose.MeasuredComposable
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.MainScope
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import tk.zwander.common.activities.DismissOrUnlockActivity
 import tk.zwander.common.activities.PermissionIntentLaunchActivity
@@ -99,7 +98,7 @@ abstract class BaseAdapter(
     protected val displayId: String,
     protected val viewModel: BaseDelegate.BaseViewModel<*, *>,
     protected val applyScaling: Boolean,
-) : RecyclerView.Adapter<BaseAdapter.BaseVH<*>>(), CoroutineScope by MainScope() {
+) : RecyclerView.Adapter<BaseAdapter.BaseVH>(), CoroutineScope by MainScope() {
     companion object {
         const val VIEW_TYPE_WIDGET = 0
         const val VIEW_TYPE_ADD = 1
@@ -218,7 +217,7 @@ abstract class BaseAdapter(
         }
     }
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): BaseVH<*> {
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): BaseVH {
         val inflater = baseLayoutInflater
 
         val view = ComposeViewHolderBinding.inflate(inflater, parent, false)
@@ -230,17 +229,13 @@ abstract class BaseAdapter(
         }
     }
 
-    override fun onBindViewHolder(holder: BaseVH<*>, position: Int) {
+    override fun onBindViewHolder(holder: BaseVH, position: Int) {
         holder.setCompositionContext()
 
-        if (position < widgets.size) {
-            (holder as WidgetVH).performBind(widgets[position])
-        }
-
-        (holder as? AddWidgetVH)?.performBind(Unit)
+        holder.performBind()
     }
 
-    override fun onViewRecycled(holder: BaseVH<*>) {
+    override fun onViewRecycled(holder: BaseVH) {
         holder.onDestroy()
     }
 
@@ -267,7 +262,7 @@ abstract class BaseAdapter(
      * has specified for the frame.
      */
     @SuppressLint("ClickableViewAccessibility")
-    inner class WidgetVH(binding: ComposeViewHolderBinding) : BaseVH<WidgetData>(binding),
+    inner class WidgetVH(binding: ComposeViewHolderBinding) : BaseVH(binding),
         EventObserver {
         private val currentData: WidgetData?
             get() = widgets.getOrNull(bindingAdapterPosition)
@@ -298,75 +293,73 @@ abstract class BaseAdapter(
             }
         }
 
-        override fun performBind(data: WidgetData) {
-            launch {
-                context.logUtils.debugLog("Binding ${data.copy(icon = null, iconRes = null)}", null)
-                context.eventManager.addObserver(this@WidgetVH)
+        override fun performBind() {
+            val data = currentData ?: return
 
-                onResize(data, 0, 1)
+            context.logUtils.debugLog("Binding ${data.copy(icon = null, iconRes = null)}", null)
+            context.eventManager.addObserver(this@WidgetVH)
 
-                val widgetInfo = withContext(Dispatchers.Main) {
-                    if (data.type == WidgetType.WIDGET) {
-                        try {
-                            manager.getAppWidgetInfo(data.id)
-                        } catch (_: PackageManager.NameNotFoundException) {
-                            null
-                        }
-                    } else {
-                        null
-                    }
+            onResize(data, 0, 1)
+
+            val widgetInfo = if (data.type == WidgetType.WIDGET) {
+                try {
+                    manager.getAppWidgetInfo(data.id)
+                } catch (_: PackageManager.NameNotFoundException) {
+                    null
                 }
+            } else {
+                null
+            }
 
-                binding.root.setThemedContent {
-                    val currentEditingPosition by viewModel.currentEditingInterfacePosition.collectAsState()
+            binding.root.setThemedContent {
+                val currentEditingPosition by viewModel.currentEditingInterfacePosition.collectAsState()
 
-                    viewModel.WidgetItemLayout(
-                        needsReconfigure = data.type == WidgetType.WIDGET && widgetInfo == null,
-                        widgetData = data,
-                        widgetContents = { modifier ->
-                            when (data.safeType) {
-                                WidgetType.WIDGET -> widgetInfo?.let {
-                                    WidgetContents(data, widgetInfo, modifier)
-                                }
-                                WidgetType.SHORTCUT, WidgetType.LAUNCHER_SHORTCUT -> {
-                                    ShortcutContent(data, modifier)
-                                }
-                                WidgetType.LAUNCHER_ITEM -> LauncherIconContent(data, modifier)
-                                WidgetType.HEADER -> {}
+                viewModel.WidgetItemLayout(
+                    needsReconfigure = data.type == WidgetType.WIDGET && widgetInfo == null,
+                    widgetData = data,
+                    widgetContents = { modifier ->
+                        when (data.safeType) {
+                            WidgetType.WIDGET -> widgetInfo?.let {
+                                WidgetContents(data, widgetInfo, modifier)
                             }
-                        },
-                        cornerRadiusKey = viewModel.widgetCornerRadiusKey,
-                        launchIconOverride = {
-                            launchShortcutIconOverride(data.id)
-                        },
-                        launchReconfigure = {
-                            openWidgetConfig(data)
-                        },
-                        remove = {
-                            onRemoveCallback(data, data.id)
-                        },
-                        getResizeThresholdPx = {
-                            getThresholdPx(it)
-                        },
-                        onResize = { overThreshold, step, amount, direction, vertical ->
-                            handleResize(
-                                currentData = currentData ?: data,
-                                overThreshold = overThreshold,
-                                step = step,
-                                amount = amount,
-                                direction = direction,
-                                vertical = vertical,
-                            )
-                        },
-                        liftCallback = {
-                            notifyItemChanged(bindingAdapterPosition)
-                        },
-                        rowCount = rowCount,
-                        colCount = colCount,
-                        isEditing = currentEditingPosition == bindingAdapterPosition,
-                        modifier = Modifier.fillMaxSize(),
-                    )
-                }
+                            WidgetType.SHORTCUT, WidgetType.LAUNCHER_SHORTCUT -> {
+                                ShortcutContent(data, modifier)
+                            }
+                            WidgetType.LAUNCHER_ITEM -> LauncherIconContent(data, modifier)
+                            WidgetType.HEADER -> {}
+                        }
+                    },
+                    cornerRadiusKey = viewModel.widgetCornerRadiusKey,
+                    launchIconOverride = {
+                        launchShortcutIconOverride(data.id)
+                    },
+                    launchReconfigure = {
+                        openWidgetConfig(data)
+                    },
+                    remove = {
+                        onRemoveCallback(data, data.id)
+                    },
+                    getResizeThresholdPx = {
+                        getThresholdPx(it)
+                    },
+                    onResize = { overThreshold, step, amount, direction, vertical ->
+                        handleResize(
+                            currentData = currentData ?: data,
+                            overThreshold = overThreshold,
+                            step = step,
+                            amount = amount,
+                            direction = direction,
+                            vertical = vertical,
+                        )
+                    },
+                    liftCallback = {
+                        notifyItemChanged(bindingAdapterPosition)
+                    },
+                    rowCount = rowCount,
+                    colCount = colCount,
+                    isEditing = currentEditingPosition == bindingAdapterPosition,
+                    modifier = Modifier.fillMaxSize(),
+                )
             }
         }
 
@@ -640,6 +633,9 @@ abstract class BaseAdapter(
                 }
                 forceLayout()
                 invalidate()
+
+                val index = widgets.indexOfFirst { it.id == data.id }
+                widgets[index] = data
             }
         }
     }
@@ -648,8 +644,8 @@ abstract class BaseAdapter(
      * Represents the "add button" page when no widgets are currently
      * added to the frame.
      */
-    inner class AddWidgetVH(binding: ComposeViewHolderBinding) : BaseVH<Unit>(binding) {
-        override fun performBind(data: Unit) {
+    inner class AddWidgetVH(binding: ComposeViewHolderBinding) : BaseVH(binding) {
+        override fun performBind() {
             binding.root.setThemedContent {
                 MeasuredComposable(name = "AddWidgetLayout") {
                     val resources = LocalResources.current
@@ -724,13 +720,13 @@ abstract class BaseAdapter(
         }
     }
 
-    abstract inner class BaseVH<Data : Any>(protected val binding: ComposeViewHolderBinding) :
+    abstract inner class BaseVH(protected val binding: ComposeViewHolderBinding) :
         RecyclerView.ViewHolder(binding.root) {
         fun setCompositionContext() {
             binding.root.setParentCompositionContext(rootView.createLifecycleAwareWindowRecomposer())
         }
 
-        abstract fun performBind(data: Data)
+        abstract fun performBind()
 
         open fun onDestroy() {}
     }
