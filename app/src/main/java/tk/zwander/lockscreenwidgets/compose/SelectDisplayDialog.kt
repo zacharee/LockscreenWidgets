@@ -166,19 +166,6 @@ fun SelectDisplayDialog(
                     }
 
                     if (expandedMap["DEFAULT_DISPLAY"] == true) {
-                        if (showDefaultFrame) {
-                            item(key = "DEFAULT_DISPLAY_DEFAULT_FRAME") {
-                                FrameItem(
-                                    display = defaultDisplay,
-                                    frameId = -1,
-                                    onSelected = {
-                                        onFrameSelected?.invoke(-1)
-                                    },
-                                    modifier = Modifier.animateItem(),
-                                )
-                            }
-                        }
-
                         items(
                             items = framesForDefaultDisplay,
                             key = { "DEFAULT_DISPLAY_FRAME_$it" }) {
