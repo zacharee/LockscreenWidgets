@@ -156,16 +156,16 @@ fun SelectDisplayDialog(
                                         onDisplaySelected("${Display.DEFAULT_DISPLAY}")
                                     } else {
                                         expandedMap["DEFAULT_DISPLAY"] =
-                                            !expandedMap.getOrDefault("DEFAULT_DISPLAY", false)
+                                            !expandedMap.getOrDefault("DEFAULT_DISPLAY", true)
                                     }
                                 },
-                                isExpanded = expandedMap["DEFAULT_DISPLAY"] == true,
+                                isExpanded = expandedMap["DEFAULT_DISPLAY"] != false,
                                 modifier = Modifier.animateItem(),
                             )
                         }
                     }
 
-                    if (expandedMap["DEFAULT_DISPLAY"] == true) {
+                    if (expandedMap["DEFAULT_DISPLAY"] != false && onFrameSelected != null) {
                         items(
                             items = framesForDefaultDisplay,
                             key = { "DEFAULT_DISPLAY_FRAME_$it" }) {
@@ -173,7 +173,7 @@ fun SelectDisplayDialog(
                                 display = defaultDisplay,
                                 frameId = it,
                                 onSelected = {
-                                    onFrameSelected?.invoke(it)
+                                    onFrameSelected.invoke(it)
                                 },
                                 modifier = Modifier.animateItem()
                             )
@@ -236,22 +236,22 @@ fun SelectDisplayDialog(
                                     onDisplaySelected(display.uniqueIdCompat)
                                 } else {
                                     expandedMap[display.uniqueIdCompat] =
-                                        !expandedMap.getOrDefault(display.uniqueIdCompat, false)
+                                        !expandedMap.getOrDefault(display.uniqueIdCompat, true)
                                 }
                             },
                             canExpand = onFrameSelected != null,
-                            isExpanded = expandedMap[display.uniqueIdCompat] == true,
+                            isExpanded = expandedMap[display.uniqueIdCompat] != false,
                             modifier = Modifier.animateItem(),
                         )
                     }
 
-                    if (expandedMap[display.uniqueIdCompat] == true) {
+                    if (expandedMap[display.uniqueIdCompat] != false && onFrameSelected != null) {
                         items(items = frameIds.toList(), key = { "DISPLAY_FRAMES_$it" }) {
                             FrameItem(
                                 display = display,
                                 frameId = it,
                                 onSelected = {
-                                    onFrameSelected?.invoke(it)
+                                    onFrameSelected.invoke(it)
                                 },
                                 modifier = Modifier.animateItem(),
                             )
