@@ -21,6 +21,7 @@ import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -42,6 +43,7 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.stringResource
@@ -71,6 +73,7 @@ import tk.zwander.common.util.collectAsMutableState
 import tk.zwander.common.util.eventManager
 import tk.zwander.common.util.globalState
 import tk.zwander.common.util.prefManager
+import tk.zwander.common.util.requireLsDisplayManager
 import tk.zwander.common.util.themedContext
 import tk.zwander.common.views.SnappyRecyclerView
 import tk.zwander.lockscreenwidgets.R
@@ -88,6 +91,7 @@ fun WidgetFramePreviewLayout(
 ) {
     val context = LocalContext.current
     val view = LocalView.current
+    val density = LocalDensity.current
 
     val widgetGridView = remember {
         WidgetGridHolderBinding.inflate(
@@ -95,11 +99,18 @@ fun WidgetFramePreviewLayout(
         ).root
     }
 
+    val frameSize = remember(frameId) {
+        FrameSizeAndPosition.getInstance(context).getSizeForType(
+            type = FrameSizeAndPosition.FrameType.SecondaryLockscreen.Portrait(frameId),
+            display = context.requireLsDisplayManager.requireDisplayByStringId(displayId),
+        )
+    }
+
     val dummyDelegate = remember(frameId) {
-        object : BaseDelegate<BaseDelegate.BaseState>(context, displayId) {
+        object : BaseDelegate<BaseDelegate.BaseState>(context.themedContext, displayId) {
             val widgetGridAdapter = WidgetFrameAdapter(
                 frameId = frameId,
-                context = context,
+                context = context.themedContext,
                 rootView = view,
                 onRemoveCallback = { _, _ -> },
                 displayId = displayId,
@@ -118,7 +129,7 @@ fun WidgetFramePreviewLayout(
             override val prefsHandler: HandlerRegistry = HandlerRegistry {}
             override val adapter: BaseAdapter = widgetGridAdapter
             override val gridLayoutManager: LayoutManager = object : LayoutManager(
-                context,
+                context.themedContext,
                 RecyclerView.HORIZONTAL,
                 FramePrefs.getRowCountForFrame(context, frameId),
                 FramePrefs.getColCountForFrame(context, frameId),
@@ -190,10 +201,17 @@ fun WidgetFramePreviewLayout(
         colors = CardDefaults.cardColors().copy(
             containerColor = animatedBackgroundColor,
         ),
-        modifier = modifier,
     ) {
         Box(
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier
+                .size(
+                    width = with(density) {
+                        frameSize.x.toDp()
+                    },
+                    height = with(density) {
+                        frameSize.y.toDp()
+                    },
+                ),
         ) {
             val pageIndicatorBehavior by rememberPreferenceState(
                 key = PrefManager.KEY_PAGE_INDICATOR_BEHAVIOR,
@@ -221,7 +239,15 @@ fun WidgetFramePreviewLayout(
                         }
                 },
                 modifier = Modifier
-                    .fillMaxSize()
+                    .graphicsLayer()
+                    .size(
+                        width = with(density) {
+                            frameSize.x.toDp()
+                        },
+                        height = with(density) {
+                            frameSize.y.toDp()
+                        },
+                    )
                     .clickable(enabled = false, onClick = {}),
             )
 

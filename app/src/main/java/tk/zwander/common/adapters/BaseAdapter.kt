@@ -504,13 +504,15 @@ abstract class BaseAdapter(
                         }
                     },
                     update = {
-                        val child = (it as AppWidgetHostView).children.first()
+                        if (applyScaling) {
+                            val child = (it as AppWidgetHostView).children.first()
 
-                        if (child.width > itemView.width) {
-                            val scale = itemView.width.toDouble() / child.width.toDouble()
-
-                            child.scaleX = scale.toFloat()
-                            child.scaleY = scale.toFloat()
+                            if (child.width > itemView.width) {
+//                                val scale = itemView.width.toDouble() / child.width.toDouble()
+//
+//                                child.scaleX = scale.toFloat()
+//                                child.scaleY = scale.toFloat()
+                            }
                         }
                     },
                     modifier = modifier,
