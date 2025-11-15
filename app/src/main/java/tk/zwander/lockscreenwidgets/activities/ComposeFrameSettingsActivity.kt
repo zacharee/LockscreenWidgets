@@ -8,6 +8,7 @@ import android.view.Display
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -37,6 +38,7 @@ import tk.zwander.common.util.isPixelUI
 import tk.zwander.common.util.isTouchWiz
 import tk.zwander.common.util.lsDisplayManager
 import tk.zwander.common.util.prefManager
+import tk.zwander.common.util.requireLsDisplayManager
 import tk.zwander.common.util.setThemedContent
 import tk.zwander.lockscreenwidgets.BuildConfig
 import tk.zwander.lockscreenwidgets.R
@@ -66,6 +68,10 @@ class ComposeFrameSettingsActivity : BaseActivity() {
                 onChanged = { _, v -> prefManager.currentSecondaryFramesWithStringDisplay = v },
             )
             val frameCount by rememberUpdatedState(secondaryFrames.size + 1)
+            val displayManager = remember {
+                requireLsDisplayManager
+            }
+            val displays by displayManager.availableDisplays.collectAsState()
 
             var pendingFrameId by remember {
                 mutableStateOf<Int?>(null)
@@ -84,6 +90,14 @@ class ComposeFrameSettingsActivity : BaseActivity() {
             }
 
             var pendingFrameToRemove by remember {
+                mutableStateOf<Int?>(null)
+            }
+
+            var isMovingFrameToDisplay by remember {
+                mutableStateOf(false)
+            }
+
+            var pendingMovedFrameId by remember {
                 mutableStateOf<Int?>(null)
             }
 
@@ -133,6 +147,18 @@ class ComposeFrameSettingsActivity : BaseActivity() {
                         },
                         icon = { painterResource(R.drawable.ic_baseline_add_24) },
                         defaultValue = {},
+                    )
+
+                    preference(
+                        title = { stringResource(R.string.move_frame_to_display) },
+                        summary = { null },
+                        key = { "move_frame_to_display" },
+                        onClick = {
+                            isMovingFrameToDisplay = true
+                        },
+                        icon = { painterResource(R.drawable.mobile_arrow_right_24px) },
+                        defaultValue = {},
+                        visible = { displays.size > 1 || BuildConfig.DEBUG },
                     )
 
                     preference(
@@ -681,6 +707,35 @@ class ComposeFrameSettingsActivity : BaseActivity() {
                     onFrameSelected = {
                         pendingFrameToRemove = it
                         isRemovingFrame = false
+                    },
+                    showDefaultFrame = false,
+                )
+            }
+
+            if (isMovingFrameToDisplay) {
+                SelectDisplayDialog(
+                    dismiss = {
+                        isMovingFrameToDisplay = false
+                    },
+                    onFrameSelected = {
+                        pendingMovedFrameId = it
+                        isMovingFrameToDisplay = false
+                    },
+                    showDefaultFrame = false,
+                )
+            }
+
+            pendingMovedFrameId?.let { pendingMoved ->
+                SelectDisplayDialog(
+                    dismiss = {
+                        pendingMovedFrameId = null
+                    },
+                    onDisplaySelected = {
+                        prefManager.currentSecondaryFramesWithStringDisplay =
+                            prefManager.currentSecondaryFramesWithStringDisplay.apply {
+                                this[pendingMoved] = it
+                            }
+                        pendingMovedFrameId = null
                     },
                     showDefaultFrame = false,
                 )

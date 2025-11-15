@@ -44,7 +44,6 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.DialogProperties
 import tk.zwander.common.compose.util.rememberPreferenceState
 import tk.zwander.common.util.FrameSizeAndPosition
 import tk.zwander.common.util.LSDisplay
@@ -130,7 +129,15 @@ fun SelectDisplayDialog(
     AlertDialog(
         onDismissRequest = dismiss,
         title = {
-            Text(text = stringResource(R.string.select_display))
+            Text(
+                text = stringResource(
+                    id = if (onDisplaySelected != null) {
+                        R.string.select_display
+                    } else {
+                        R.string.select_frame
+                    },
+                ),
+            )
         },
         text = {
             var maxDisplayWidth by remember {
