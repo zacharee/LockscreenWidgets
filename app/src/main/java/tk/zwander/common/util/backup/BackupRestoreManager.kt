@@ -122,13 +122,29 @@ class BackupRestoreManager private constructor(private val context: Context) {
             }
 
             secondaryFramesOld?.let {
-                context.prefManager.currentSecondaryFramesWithStringDisplay = HashMap(it.associateWith { "${Display.DEFAULT_DISPLAY}" })
+                context.prefManager.currentSecondaryFramesWithStringDisplay = HashMap(
+                    it.associateWith {
+                        "${Display.DEFAULT_DISPLAY}"
+                    },
+                )
             }
+            // We don't want to respect the backup's saved displays because they might not
+            // match the device's current displays.
             secondaryFramesNew?.let {
-                context.prefManager.currentSecondaryFramesWithStringDisplay = HashMap(it.map { (key, value) -> key to "$value" }.toMap())
+                context.prefManager.currentSecondaryFramesWithStringDisplay = HashMap(
+                    it.map { (key, _) ->
+                        key to "${Display.DEFAULT_DISPLAY}"
+                    }.toMap(),
+                )
             }
+            // We don't want to respect the backup's saved displays because they might not
+            // match the device's current displays.
             secondaryFramesNewest?.let {
-                context.prefManager.currentSecondaryFramesWithStringDisplay = it
+                context.prefManager.currentSecondaryFramesWithStringDisplay = HashMap(
+                    it.map { (key, _) ->
+                        key to "${Display.DEFAULT_DISPLAY}"
+                    }.toMap(),
+                )
             }
 
             frameWidgetsMap?.forEach { (id, widgets) ->
