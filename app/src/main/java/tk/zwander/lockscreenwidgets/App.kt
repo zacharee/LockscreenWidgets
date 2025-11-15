@@ -243,6 +243,12 @@ class App : Application(), CoroutineScope by MainScope(), EventObserver {
 
         lsDisplayManager.onCreate()
 
+        launch {
+            lsDisplayManager.availableDisplays.collect {
+                logUtils.debugLog("Updated displays ${it.keys.toList()}", null)
+            }
+        }
+
         launch(Dispatchers.Main) {
             globalState.wasOnKeyguard.collect { wasOnKeyguard ->
                 if (!wasOnKeyguard) {

@@ -12,3 +12,6 @@ val Context.isOneUI: Boolean
 
 val Context.isPixelUI: Boolean
     get() = packageManager.hasSystemFeature("com.google.android.feature.PIXEL_EXPERIENCE") || BuildConfig.DEBUG
+
+val Context.isLikelyRazr: Boolean
+    get() = packageManager.hasSystemFeature("com.motorola.hardware.cli") || BuildConfig.DEBUG

@@ -73,7 +73,8 @@ class OnboardingActivity : ComponentActivity() {
         NOTIFICATION,
         STORAGE,
         BATTERY,
-        NONE
+        MOTO_SECONDARY_DISPLAY,
+        NONE,
     }
 
     private val retroMode by lazy {

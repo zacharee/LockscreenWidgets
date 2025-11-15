@@ -49,7 +49,7 @@ class LSDisplayManager private constructor(context: Context) : ContextWrapper(co
 
     private val displayListener = object : DisplayManager.DisplayListener {
         override fun onDisplayAdded(displayId: Int) {
-            logUtils.debugLog("Display $displayId added", null)
+            logUtils.normalLog("Display $displayId added", null)
 
             processDisplay(displayId)
         }
@@ -67,6 +67,7 @@ class LSDisplayManager private constructor(context: Context) : ContextWrapper(co
     }
 
     val availableDisplays = MutableStateFlow(mapOf<Int, LSDisplay>())
+    val isLikelyRazr = context.isLikelyRazr
 
     val displayPowerStates = availableDisplays.map { currentDisplays ->
         currentDisplays.entries.associate { (_, display) -> display.uniqueIdCompat to display.isOn }
@@ -77,23 +78,7 @@ class LSDisplayManager private constructor(context: Context) : ContextWrapper(co
     }.stateIn(this, SharingStarted.Eagerly, initialValue = false)
 
     fun onCreate() {
-        val builtInDisplays = displayManager.getDisplays(DisplayManager.DISPLAY_CATEGORY_BUILT_IN_DISPLAYS)
-        val allIncludingDisabled = displayManager.getDisplays(DisplayManager.DISPLAY_CATEGORY_ALL_INCLUDING_DISABLED)
-            .filter { it.type == Display.TYPE_INTERNAL }
-        // Samsung has extra filtering on DISPLAY_CATEGORY_ALL_INCLUDING_DISABLED but not this.
-        val samsung = displayManager.getDisplays("com.samsung.android.hardware.display.category.BUILTIN")
-            .filter { it.type == Display.TYPE_INTERNAL }
-        val allDisplays = displayManager.displays.filter { it.type == Display.TYPE_INTERNAL }
-        val concatenatedDisplays = (builtInDisplays + allIncludingDisabled + allDisplays + samsung).toSet()
-
-        availableDisplays.value = concatenatedDisplays.map {
-                    LSDisplay(
-                        display = it,
-                        fontScale = createDisplayContext(it).resources.configuration.fontScale,
-                    )
-                }.associateBy { it.displayId }
-
-        logUtils.debugLog("Got displays ${availableDisplays.value.values.map { it.loggingId }}", null)
+        fetchDisplays()
 
         displayManager.registerDisplayListener(displayListener, null)
     }
@@ -137,7 +122,7 @@ class LSDisplayManager private constructor(context: Context) : ContextWrapper(co
             return
         }
 
-        if (display.type != Display.TYPE_INTERNAL) {
+        if (!display.isBuiltIn(isLikelyRazr)) {
             logUtils.debugLog("Display isn't internal, removing if exists and skipping processing", null)
             availableDisplays.value = availableDisplays.value.toMutableMap().apply {
                 remove(displayId)
@@ -149,13 +134,35 @@ class LSDisplayManager private constructor(context: Context) : ContextWrapper(co
         newMap[displayId] = LSDisplay(
             display = display,
             fontScale = createDisplayContext(display).resources.configuration.fontScale,
+            isLikelyRazr = isLikelyRazr,
         )
 
         availableDisplays.value = newMap
     }
+
+    fun fetchDisplays() {
+        val builtInDisplays = displayManager.getDisplays(DisplayManager.DISPLAY_CATEGORY_BUILT_IN_DISPLAYS)
+        val allIncludingDisabled = displayManager.getDisplays(DisplayManager.DISPLAY_CATEGORY_ALL_INCLUDING_DISABLED)
+            .filter { it.isBuiltIn(isLikelyRazr) }
+        // Samsung has extra filtering on DISPLAY_CATEGORY_ALL_INCLUDING_DISABLED but not this.
+        val samsung = displayManager.getDisplays("com.samsung.android.hardware.display.category.BUILTIN")
+            .filter { it.isBuiltIn(isLikelyRazr) }
+        val allDisplays = displayManager.displays.filter { it.isBuiltIn(isLikelyRazr) }
+        val concatenatedDisplays = (builtInDisplays + allIncludingDisabled + allDisplays + samsung).toSet()
+
+        availableDisplays.value = concatenatedDisplays.map {
+            LSDisplay(
+                display = it,
+                fontScale = createDisplayContext(it).resources.configuration.fontScale,
+                isLikelyRazr = isLikelyRazr,
+            )
+        }.associateBy { it.displayId }
+
+        logUtils.debugLog("Got displays ${availableDisplays.value.values.map { it.loggingId }}", null)
+    }
 }
 
-class LSDisplay(val display: Display, val fontScale: Float) {
+class LSDisplay(val display: Display, val fontScale: Float, private val isLikelyRazr: Boolean) {
     val displayId: Int = display.displayId
 
     val density: Density by lazy {
@@ -202,6 +209,9 @@ class LSDisplay(val display: Display, val fontScale: Float) {
     val isOn: Boolean
         get() = display.state == Display.STATE_ON
 
+    val isBuiltIn: Boolean
+        get() = display.isBuiltIn(isLikelyRazr)
+
     fun dpToPx(dpValue: Number): Int {
         return with (density) {
             dpValue.toDouble().dp.roundToPx()
@@ -213,4 +223,8 @@ class LSDisplay(val display: Display, val fontScale: Float) {
             pxValue.toDouble().roundToInt().toDp().value
         }
     }
+}
+
+private fun Display.isBuiltIn(isLikelyRazr: Boolean): Boolean {
+    return type == Display.TYPE_INTERNAL || (isLikelyRazr && displayId == 1)
 }

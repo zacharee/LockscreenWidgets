@@ -158,6 +158,7 @@ class PrefManager private constructor(private val context: Context) {
             display = (context.getSystemService(Context.DISPLAY_SERVICE) as DisplayManager)
                 .getDisplay(Display.DEFAULT_DISPLAY),
             fontScale = 1f,
+            isLikelyRazr = context.isLikelyRazr,
         )
 
     //The actual SharedPreferences implementation

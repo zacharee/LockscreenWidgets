@@ -33,6 +33,7 @@ import tk.zwander.common.compose.util.rememberPreferenceState
 import tk.zwander.common.util.PrefManager
 import tk.zwander.common.util.backup.BackupRestoreManager
 import tk.zwander.common.util.canReadWallpaper
+import tk.zwander.common.util.isLikelyRazr
 import tk.zwander.common.util.isOneUI
 import tk.zwander.common.util.isPixelUI
 import tk.zwander.common.util.isTouchWiz
@@ -62,6 +63,9 @@ class ComposeFrameSettingsActivity : BaseActivity() {
             isOneUI || (isPixelUI && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S)
 
         setThemedContent {
+            val isLikelyRazr = remember {
+                isLikelyRazr
+            }
             var secondaryFrames by rememberPreferenceState(
                 key = PrefManager.KEY_CURRENT_FRAMES_WITH_STRING_DISPLAY,
                 value = { prefManager.currentSecondaryFramesWithStringDisplay },
@@ -147,6 +151,23 @@ class ComposeFrameSettingsActivity : BaseActivity() {
                         },
                         icon = { painterResource(R.drawable.ic_baseline_add_24) },
                         defaultValue = {},
+                    )
+
+                    preference(
+                        title = { stringResource(R.string.intro_moto_razr_allow_secondary_display_access) },
+                        summary = { null },
+                        key = { "allow_secondary_frame_access" },
+                        onClick = {
+                            OnboardingActivity.start(
+                                this@ComposeFrameSettingsActivity,
+                                retroMode = OnboardingActivity.RetroMode.MOTO_SECONDARY_DISPLAY,
+                            )
+                        },
+                        icon = { painterResource(R.drawable.devices_fold_2_24px) },
+                        defaultValue = {},
+                        visible = {
+                            (displays.size <= 1 && isLikelyRazr) || BuildConfig.DEBUG
+                        },
                     )
 
                     preference(

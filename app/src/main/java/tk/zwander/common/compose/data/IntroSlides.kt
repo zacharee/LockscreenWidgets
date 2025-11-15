@@ -1,6 +1,7 @@
 package tk.zwander.common.compose.data
 
 import android.content.ActivityNotFoundException
+import android.content.ComponentName
 import android.content.Intent
 import android.database.ContentObserver
 import android.net.Uri
@@ -9,6 +10,8 @@ import android.provider.Settings
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -21,7 +24,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.Lifecycle
@@ -30,11 +32,11 @@ import dev.zwander.composeintroslider.SimpleIntroPage
 import kotlinx.coroutines.launch
 import tk.zwander.common.activities.OnboardingActivity
 import tk.zwander.common.compose.AppTheme
-import tk.zwander.common.compose.components.ContentColoredOutlinedButton
 import tk.zwander.common.util.LifecycleEffect
 import tk.zwander.common.util.canReadWallpaper
 import tk.zwander.common.util.isAccessibilityEnabled
 import tk.zwander.common.util.launchUrl
+import tk.zwander.common.util.logUtils
 import tk.zwander.common.util.openAccessibilitySettings
 import tk.zwander.common.util.shizuku.ShizukuManager
 import tk.zwander.common.util.shizuku.shizukuManager
@@ -127,8 +129,8 @@ fun rememberIntroSlides(
                 SimpleIntroPage(
                     title = { stringResource(id = R.string.intro_welcome_title) },
                     description = { stringResource(id = R.string.intro_welcome_desc) },
-                    slideColor = { colorResource(id = R.color.slide_1) },
-                    contentColor = { colorResource(id = R.color.slide_1_text) },
+                    slideColor = { MaterialTheme.colorScheme.background },
+                    contentColor = { MaterialTheme.colorScheme.onBackground },
                     icon = { painterResource(id = R.drawable.ic_baseline_right_hand_24) },
                 )
             )
@@ -136,19 +138,19 @@ fun rememberIntroSlides(
             slides.add(SimpleIntroPage(
                 title = { stringResource(id = R.string.intro_usage_title) },
                 description = { stringResource(id = R.string.intro_usage_desc) },
-                slideColor = { colorResource(id = R.color.slide_2) },
-                contentColor = { colorResource(id = R.color.slide_2_text) },
+                slideColor = { MaterialTheme.colorScheme.background },
+                contentColor = { MaterialTheme.colorScheme.onBackground },
                 icon = { painterResource(id = R.drawable.ic_baseline_gesture_two_tap) },
             ))
 
             slides.add(SimpleIntroPage(
                 title = { stringResource(id = R.string.privacy_policy) },
                 description = { stringResource(id = R.string.intro_privacy_policy_desc) },
-                slideColor = { colorResource(id = R.color.slide_3) },
-                contentColor = { colorResource(id = R.color.slide_3_text) },
+                slideColor = { MaterialTheme.colorScheme.background },
+                contentColor = { MaterialTheme.colorScheme.onBackground },
                 icon = { painterResource(id = R.drawable.info) },
                 extraContent = {
-                    ContentColoredOutlinedButton(
+                    OutlinedButton(
                         onClick = {
                             context.launchUrl("https://github.com/zacharee/LockscreenWidgets/blob/master/PRIVACY.md")
                         }
@@ -165,15 +167,15 @@ fun rememberIntroSlides(
             slides.add(SimpleIntroPage(
                 title = { stringResource(id = R.string.intro_accessibility_title) },
                 description = { stringResource(id = R.string.accessibility_service_desc) },
-                slideColor = { colorResource(id = R.color.slide_4) },
-                contentColor = { colorResource(id = R.color.slide_4_text) },
+                slideColor = { MaterialTheme.colorScheme.background },
+                contentColor = { MaterialTheme.colorScheme.onBackground },
                 icon = { painterResource(id = R.drawable.ic_baseline_accessibility_new_24) },
                 extraContent = {
                     var showingDialog by remember {
                         mutableStateOf(false)
                     }
 
-                    ContentColoredOutlinedButton(
+                    OutlinedButton(
                         onClick = { showingDialog = true },
                         enabled = !hasAccessibility,
                     ) {
@@ -212,16 +214,49 @@ fun rememberIntroSlides(
         }
 
         if (startReason == OnboardingActivity.RetroMode.NONE ||
+            startReason == OnboardingActivity.RetroMode.MOTO_SECONDARY_DISPLAY
+        ) {
+            slides.add(SimpleIntroPage(
+                title = { stringResource(R.string.intro_moto_razr_allow_secondary_display_access) },
+                description = { stringResource(R.string.intro_moto_razr_allow_secondary_display_access_desc) },
+                slideColor = { MaterialTheme.colorScheme.background },
+                contentColor = { MaterialTheme.colorScheme.onBackground },
+                icon = { painterResource(R.drawable.devices_fold_2_24px) },
+                extraContent = {
+                    OutlinedButton(
+                        onClick = {
+                            val settingsIntent = Intent(Intent.ACTION_MAIN)
+                            settingsIntent.`package` = "com.motorola.cli.settings"
+                            settingsIntent.component = ComponentName(
+                                "com.motorola.cli.settings",
+                                "com.motorola.cli.settings.search.SearchResultTrampoline",
+                            )
+                            settingsIntent.putExtra(":settings:fragment_args_key", "cli_app_settings")
+
+                            try {
+                                context.startActivity(settingsIntent)
+                            } catch (e: Throwable) {
+                                context.logUtils.normalLog("Unable to launch Moto CLI settings", e)
+                            }
+                        },
+                    ) {
+                        Text(text = stringResource(R.string.grant))
+                    }
+                }
+            ))
+        }
+
+        if (startReason == OnboardingActivity.RetroMode.NONE ||
             startReason == OnboardingActivity.RetroMode.NOTIFICATION
         ) {
             slides.add(SimpleIntroPage(
                 title = { stringResource(id = R.string.intro_notification_listener_title) },
                 description = { stringResource(id = R.string.intro_notification_listener_desc) },
-                slideColor = { colorResource(id = R.color.slide_5) },
-                contentColor = { colorResource(id = R.color.slide_5_text) },
+                slideColor = { MaterialTheme.colorScheme.background },
+                contentColor = { MaterialTheme.colorScheme.onBackground },
                 icon = { painterResource(id = R.drawable.ic_baseline_notifications_active_24) },
                 extraContent = {
-                    ContentColoredOutlinedButton(
+                    OutlinedButton(
                         onClick = {
                             val notifIntent = Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS)
                             context.startActivity(notifIntent)
@@ -247,9 +282,8 @@ fun rememberIntroSlides(
                         }
                     }
                 },
-                slideColor = { colorResource(id = R.color.slide_6) },
-                contentColor = { colorResource(id = R.color.slide_6_text) },
-                icon = { painterResource(id = R.drawable.ic_baseline_sd_storage_24) },
+                slideColor = { MaterialTheme.colorScheme.background },
+                contentColor = { MaterialTheme.colorScheme.onBackground },
                 extraContent = {
                     val shizukuInstalled by ShizukuManager.rememberShizukuInstallStateAsState()
                     val shizukuRunning by ShizukuManager.rememberShizukuRunningStateAsState()
@@ -258,7 +292,7 @@ fun rememberIntroSlides(
                         mutableStateOf(false)
                     }
 
-                    ContentColoredOutlinedButton(
+                    OutlinedButton(
                         onClick = {
                             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                                 if (shizukuRunning) {
@@ -308,7 +342,7 @@ fun rememberIntroSlides(
                         )
                     }
 
-                    ContentColoredOutlinedButton(
+                    OutlinedButton(
                         onClick = {
                             context.launchUrl("https://github.com/zacharee/LockscreenWidgets/blob/master/PRIVACY.md")
                         }
@@ -358,11 +392,11 @@ fun rememberIntroSlides(
             slides.add(SimpleIntroPage(
                 title = { stringResource(id = R.string.intro_battery_optimization) },
                 description = { stringResource(id = R.string.intro_battery_optimization_desc) },
-                slideColor = { colorResource(id = R.color.slide_7) },
-                contentColor = { colorResource(id = R.color.slide_7_text) },
+                slideColor = { MaterialTheme.colorScheme.background },
+                contentColor = { MaterialTheme.colorScheme.onBackground },
                 icon = { painterResource(id = R.drawable.ic_baseline_battery_alert_24) },
                 extraContent = {
-                    ContentColoredOutlinedButton(
+                    OutlinedButton(
                         onClick = {
                             context.launchUrl("https://dontkillmyapp.com/?app=Lockscreen%20Widgets")
                         }
@@ -377,8 +411,8 @@ fun rememberIntroSlides(
             slides.add(SimpleIntroPage(
                 title = { stringResource(id = R.string.intro_done_title) },
                 description = { stringResource(id = R.string.intro_done_desc) },
-                slideColor = { colorResource(id = R.color.slide_8) },
-                contentColor = { colorResource(id = R.color.slide_8_text) },
+                slideColor = { MaterialTheme.colorScheme.background },
+                contentColor = { MaterialTheme.colorScheme.onBackground },
                 icon = { painterResource(id = R.drawable.ic_baseline_done_24) },
             ))
         }

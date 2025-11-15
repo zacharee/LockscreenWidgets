@@ -5,6 +5,7 @@ import android.os.Build
 import android.os.Bundle
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
+import tk.zwander.common.util.requireLsDisplayManager
 
 abstract class BaseActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -16,5 +17,11 @@ abstract class BaseActivity : AppCompatActivity() {
         @Suppress("DEPRECATION")
         window.navigationBarColor = Color.TRANSPARENT
         super.onCreate(savedInstanceState)
+    }
+
+    override fun onResume() {
+        super.onResume()
+
+        requireLsDisplayManager.fetchDisplays()
     }
 }

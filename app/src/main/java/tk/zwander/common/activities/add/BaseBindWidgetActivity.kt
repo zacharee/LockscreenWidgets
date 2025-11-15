@@ -33,6 +33,7 @@ import tk.zwander.common.util.density
 import tk.zwander.common.util.frameSizeAndPosition
 import tk.zwander.common.util.getRemoteDrawable
 import tk.zwander.common.util.hasConfiguration
+import tk.zwander.common.util.isLikelyRazr
 import tk.zwander.common.util.logUtils
 import tk.zwander.common.util.prefManager
 import tk.zwander.common.util.shortcutIdManager
@@ -61,6 +62,7 @@ abstract class BaseBindWidgetActivity : BaseActivity() {
         LSDisplay(
             display = displayManager.getDisplay(Display.DEFAULT_DISPLAY),
             fontScale = resources.configuration.fontScale,
+            isLikelyRazr = isLikelyRazr,
         )
     }
 
