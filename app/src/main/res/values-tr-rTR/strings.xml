@@ -167,6 +167,8 @@
     <string name="intro_read_external_storage_desc_13_addendum">Android 13 ve üzeri sürümlerde gerekli izinleri vermek için Shizuku\'yu kullanmanız gerekecektir.</string>
     <string name="intro_battery_optimization">Pil Optimizasyonu</string>
     <string name="intro_battery_optimization_desc">MIUI ve EMUI kullananlar da dahil olmak üzere birçok cihaz inanılmaz agresif bir pil yönetimine sahiptir. Bu, istemediğiniz zaman Kilit Ekranı Widget\'larının kapatılmasına neden olabilir. Belirli cihazınızda Kilit Ekranı Widget\'larını izin listesine nasıl ekleyebileceğinizi okumak için aşağıdaki düğmeye tıklayın.</string>
+    <string name="intro_moto_razr_allow_secondary_display_access">Allow Secondary Display Access</string>
+    <string name="intro_moto_razr_allow_secondary_display_access_desc">Lockscreen Widgets supports adding frames to multiple displays, but Motorola blocks secondary display access to third party apps by default on the Razr models. Tap below to open the screen where you can grant permission to Lockscreen Widgets to use the cover display. Once there, find Lockscreen Widgets in the list, tap it, and enable \"Allow on external display\".</string>
     <string name="intro_done_title">Hepsi tamam!</string>
     <string name="intro_done_desc">İşte bu kadar! Kilit ekranınızı kontrol edin ve artık widget çerçevesini görmelisiniz!</string>
     <string name="usage_add_widget">Widget ekle</string>
