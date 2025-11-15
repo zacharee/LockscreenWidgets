@@ -14,7 +14,6 @@ byteBuddyAndroid = "1.17.8"
 composeBom = "2025.10.01"
 compose-material-icons-core = "1.7.8"
 composeintroslider = "a611e4f624"
-composeSpinkit = "1.0.4"
 constraintlayout = "2.2.1"
 coreKtx = "1.17.0"
 core-remoteviews = "1.1.0"
@@ -24,6 +23,7 @@ hiddenapibypass = "6.1"
 kotlin = "2.2.21"
 lifecycle = "2.9.4"
 material = "1.13.0"
+msz-progress-indicator = "0.8.0"
 patreonsupportersretrieval = "8436bbdbdc"
 preferenceKtx = "1.2.1"
 recyclerview = "1.4.0"
@@ -50,7 +50,6 @@ compose-bom = { module = "androidx.compose:compose-bom", version.ref = "composeB
 compose-foundation = { module = "androidx.compose.foundation:foundation" }
 compose-material3 = { module = "androidx.compose.material3:material3" }
 compose-material-icons-core = { module = "androidx.compose.material:material-icons-core", version.ref = "compose-material-icons-core" }
-compose-spinkit = { module = "com.github.OCNYang:Compose-SpinKit", version.ref = "composeSpinkit" }
 compose-ui-tooling = { module = "androidx.compose.ui:ui-tooling" }
 composeIntroSlider = { module = "com.github.zacharee:ComposeIntroSlider", version.ref = "composeintroslider" }
 constraintlayout = { module = "androidx.constraintlayout:constraintlayout", version.ref = "constraintlayout" }
@@ -66,6 +65,7 @@ lifecycle-runtime-compose = { module = "androidx.lifecycle:lifecycle-runtime-com
 lifecycle-runtime-ktx = { module = "androidx.lifecycle:lifecycle-runtime-ktx", version.ref = "lifecycle" }
 lifecycle-viewmodel-compose = { module = "androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "lifecycle" }
 material = { module = "com.google.android.material:material", version.ref = "material" }
+msz-progress-indicator = { module = "com.ehsanmsz:msz-progress-indicator", version.ref = "msz-progress-indicator" }
 patreonSupportersRetrieval = { module = "com.github.zacharee:PatreonSupportersRetrieval", version.ref = "patreonsupportersretrieval" }
 preference-ktx = { module = "androidx.preference:preference-ktx", version.ref = "preferenceKtx" }
 recyclerview = { module = "androidx.recyclerview:recyclerview", version.ref = "recyclerview" }

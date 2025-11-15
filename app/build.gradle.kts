@@ -131,7 +131,7 @@ dependencies {
     implementation(libs.taskerpluginlibrary)
 
     implementation(libs.relinker)
-    implementation(libs.compose.spinkit)
+    implementation(libs.msz.progress.indicator)
 
     implementation(libs.shizuku.api)
     implementation(libs.shizuku.provider)
