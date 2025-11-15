@@ -52,11 +52,28 @@ import tk.zwander.lockscreenwidgets.BuildConfig
 import tk.zwander.lockscreenwidgets.R
 import tk.zwander.lockscreenwidgets.activities.ComposeFrameSettingsActivity
 import tk.zwander.lockscreenwidgets.activities.UsageActivity
+import tk.zwander.lockscreenwidgets.compose.SelectDisplayDialog
 import tk.zwander.widgetdrawer.activities.ComposeDrawerSettingsActivity
 
 @Composable
 fun rememberFeatureCards(): List<FeatureCardInfo> {
     val context = LocalContext.current
+
+    var showingDisplaySelectorAddFrameWidget by remember {
+        mutableStateOf(false)
+    }
+
+    if (showingDisplaySelectorAddFrameWidget) {
+        SelectDisplayDialog(
+            dismiss = {
+                showingDisplaySelectorAddFrameWidget = false
+            },
+            onFrameSelected = {
+                context.eventManager.sendEvent(Event.LaunchAddWidget(it))
+                showingDisplaySelectorAddFrameWidget = false
+            },
+        )
+    }
 
     return remember {
         listOf(
@@ -87,7 +104,11 @@ fun rememberFeatureCards(): List<FeatureCardInfo> {
                     },
                 ),
                 onAddWidget = {
-                    context.eventManager.sendEvent(Event.PreviewFrames(Event.PreviewFrames.ShowMode.SHOW_FOR_SELECTION, 100))
+                    if (context.prefManager.currentSecondaryFramesWithStringDisplay.isEmpty()) {
+                        context.eventManager.sendEvent(Event.LaunchAddWidget(-1))
+                    } else {
+                        showingDisplaySelectorAddFrameWidget = true
+                    }
                 },
                 isEnabled = { context.prefManager.widgetFrameEnabled },
                 onEnabledChanged = { context.prefManager.widgetFrameEnabled = it },
