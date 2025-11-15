@@ -721,7 +721,6 @@ class ComposeFrameSettingsActivity : BaseActivity() {
                         pendingMovedFrameId = it
                         isMovingFrameToDisplay = false
                     },
-                    showDefaultFrame = false,
                 )
             }
 
@@ -731,10 +730,14 @@ class ComposeFrameSettingsActivity : BaseActivity() {
                         pendingMovedFrameId = null
                     },
                     onDisplaySelected = {
-                        prefManager.currentSecondaryFramesWithStringDisplay =
-                            prefManager.currentSecondaryFramesWithStringDisplay.apply {
-                                this[pendingMoved] = it
-                            }
+                        if (pendingMoved == -1) {
+                            prefManager.primaryFrameDisplay = it
+                        } else {
+                            prefManager.currentSecondaryFramesWithStringDisplay =
+                                prefManager.currentSecondaryFramesWithStringDisplay.apply {
+                                    this[pendingMoved] = it
+                                }
+                        }
                         pendingMovedFrameId = null
                     },
                     showDefaultFrame = false,

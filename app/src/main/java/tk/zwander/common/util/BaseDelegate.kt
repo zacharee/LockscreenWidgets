@@ -35,7 +35,7 @@ import java.util.concurrent.ConcurrentLinkedDeque
 @Suppress("MemberVisibilityCanBePrivate")
 abstract class BaseDelegate<State : Any>(
     context: Context,
-    protected val targetDisplayId: String,
+    protected open val targetDisplayId: String,
 ) : SafeContextWrapper(context),
     EventObserver, WidgetHostCompat.OnClickCallback, SavedStateRegistryOwner {
     protected val kgm by lazy { keyguardManager }

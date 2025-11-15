@@ -9,5 +9,5 @@ class SecondaryWidgetFrameDelegate(
 ) : MainWidgetFrameDelegate(
     context = context,
     id = id,
-    displayId = displayId,
+    targetDisplayId = displayId,
 )

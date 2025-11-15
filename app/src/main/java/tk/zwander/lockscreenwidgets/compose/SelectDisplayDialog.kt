@@ -75,6 +75,25 @@ fun SelectDisplayDialog(
         value = { context.prefManager.currentSecondaryFramesWithStringDisplay },
     )
 
+    val defaultFrameDisplay by rememberPreferenceState(
+        key = PrefManager.KEY_PRIMARY_FRAME_DISPLAY,
+        value = { context.prefManager.primaryFrameDisplay },
+    )
+    val defaultFrame by remember {
+        derivedStateOf {
+            -1 to defaultFrameDisplay
+        }
+    }
+    val allFrames by remember {
+        derivedStateOf {
+            if (showDefaultFrame) {
+                frames + defaultFrame
+            } else {
+                frames
+            }
+        }
+    }
+
     val lsDisplayManager = remember {
         context.requireLsDisplayManager
     }
@@ -91,10 +110,10 @@ fun SelectDisplayDialog(
     val framesForDefaultDisplay by remember {
         derivedStateOf {
             if (onDisplaySelected == null) {
-                (frames.filter { it.value == "${Display.DEFAULT_DISPLAY}" }
-                    .keys + (if (showDefaultFrame) listOf(-1) else listOf())).sorted()
+                allFrames.filter { it.value == "${Display.DEFAULT_DISPLAY}" }
+                    .keys.sorted()
             } else {
-                listOf(-1)
+                listOf(-2)
             }
         }
     }
@@ -104,7 +123,7 @@ fun SelectDisplayDialog(
             val map = hashMapOf<LSDisplay, MutableSet<Int>>()
 
             if (onDisplaySelected == null) {
-                frames.forEach { (frameId, displayId) ->
+                allFrames.forEach { (frameId, displayId) ->
                     displays.values.firstOrNull {
                         it.uniqueIdCompat == displayId
                     }?.let { displayForId ->

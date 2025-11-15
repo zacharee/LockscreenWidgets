@@ -124,7 +124,7 @@ fun WidgetFramePreviewLayout(
                     context = context.themedContext,
                     rootView = view,
                     onRemoveCallback = { _, _ -> },
-                    displayId = displayId,
+                    displayId = { displayId },
                     saveTypeGetter = { FrameSizeAndPosition.FrameType.SecondaryLockscreen.Portrait(frameId) },
                     viewModel = viewModel,
                 )

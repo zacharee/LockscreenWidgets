@@ -18,7 +18,7 @@ import tk.zwander.widgetdrawer.util.DrawerDelegate
 class DrawerAdapter(
     context: Context,
     rootView: View,
-    displayId: String,
+    displayId: () -> String,
     viewModel: DrawerDelegate.DrawerViewModel,
     onRemoveCallback: (WidgetData, Int) -> Unit,
 ) : BaseAdapter(

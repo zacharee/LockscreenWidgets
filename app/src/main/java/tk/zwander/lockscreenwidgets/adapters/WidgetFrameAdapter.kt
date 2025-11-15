@@ -23,7 +23,7 @@ open class WidgetFrameAdapter(
     frameId: Int,
     context: Context,
     rootView: View,
-    displayId: String,
+    displayId: () -> String,
     onRemoveCallback: (WidgetData, Int) -> Unit,
     viewModel: BaseDelegate.BaseViewModel<*, *>,
     private val saveTypeGetter: () -> FrameSizeAndPosition.FrameType,

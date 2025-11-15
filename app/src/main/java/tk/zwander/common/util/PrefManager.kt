@@ -136,6 +136,7 @@ class PrefManager private constructor(private val context: Context) {
 
         const val KEY_CURRENT_FRAMES_WITH_STRING_DISPLAY = "current_seconday_widget_frames_with_string_display"
         const val KEY_DRAWER_HANDLE_LOCK_POSITION = "drawer_handle_lock_position"
+        const val KEY_PRIMARY_FRAME_DISPLAY = "primary_frame_display"
 
         const val VALUE_PAGE_INDICATOR_BEHAVIOR_HIDDEN = 0
         const val VALUE_PAGE_INDICATOR_BEHAVIOR_AUTO_HIDE = 1
@@ -787,6 +788,12 @@ class PrefManager private constructor(private val context: Context) {
         get() = getBoolean(KEY_DRAWER_HANDLE_LOCK_POSITION, false)
         set(value) {
             putBoolean(KEY_DRAWER_HANDLE_LOCK_POSITION, value)
+        }
+
+    var primaryFrameDisplay: String
+        get() = getString(KEY_PRIMARY_FRAME_DISPLAY) ?: "${Display.DEFAULT_DISPLAY}"
+        set(value) {
+            putString(KEY_PRIMARY_FRAME_DISPLAY, value)
         }
 
     @Suppress("DEPRECATION")

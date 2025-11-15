@@ -66,8 +66,8 @@ import kotlin.math.floor
 open class MainWidgetFrameDelegate protected constructor(
     context: Context,
     protected val id: Int = -1,
-    displayId: String,
-) : BaseDelegate<MainWidgetFrameDelegate.State>(context, displayId) {
+    override var targetDisplayId: String,
+) : BaseDelegate<MainWidgetFrameDelegate.State>(context, targetDisplayId) {
     companion object {
         private val instance = MutableStateFlow<MainWidgetFrameDelegate?>(null)
 
@@ -92,7 +92,7 @@ open class MainWidgetFrameDelegate protected constructor(
                 if (accessibilityContext == null) {
                     throw IllegalStateException("Delegate can only be initialized by Accessibility Service!")
                 } else {
-                    MainWidgetFrameDelegate(accessibilityContext, displayId = displayId).also {
+                    MainWidgetFrameDelegate(accessibilityContext, targetDisplayId = displayId).also {
                         instance.value = it
                     }
                 }
@@ -257,7 +257,7 @@ open class MainWidgetFrameDelegate protected constructor(
             onRemoveCallback = { item, _ ->
                 viewModel.itemToRemove.value = item
             },
-            displayId = displayId,
+            displayId = { targetDisplayId },
             saveTypeGetter = { saveMode },
             viewModel = viewModel,
         )
@@ -305,6 +305,16 @@ open class MainWidgetFrameDelegate protected constructor(
         handler(PrefManager.KEY_CAN_SHOW_FRAME_FROM_TASKER, PrefManager.KEY_FORCE_SHOW_FRAME) {
             scope.launch {
                 updateWindowState()
+            }
+        }
+        handler(PrefManager.KEY_PRIMARY_FRAME_DISPLAY) {
+            val display = prefManager.primaryFrameDisplay
+            targetDisplayId = display
+
+            removeWindow()
+
+            if (canShow()) {
+                addWindow()
             }
         }
     }
