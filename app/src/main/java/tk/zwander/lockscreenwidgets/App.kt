@@ -11,10 +11,8 @@ import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener2
 import android.hardware.SensorManager
-import android.hardware.display.IDisplayManager
 import android.net.Uri
 import android.os.Build
-import android.os.ServiceManager
 import android.provider.Settings
 import androidx.core.content.ContextCompat
 import com.bugsnag.android.Bugsnag
@@ -244,8 +242,6 @@ class App : Application(), CoroutineScope by MainScope(), EventObserver {
         shizukuManager.onCreate()
 
         lsDisplayManager.onCreate()
-
-        logUtils.normalLog(IDisplayManager.Stub.asInterface(ServiceManager.getService("display")).getDisplayIds(true).contentToString(), null)
 
         launch(Dispatchers.Main) {
             globalState.wasOnKeyguard.collect { wasOnKeyguard ->
