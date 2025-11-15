@@ -36,7 +36,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shadow
@@ -111,7 +110,7 @@ abstract class BaseAdapter(
     protected val manager = context.appWidgetManager
     protected val viewCacheRegistry = context.widgetViewCacheRegistry
 
-    protected val display: LSDisplay
+    protected val lsDisplay: LSDisplay
         get() = context.requireLsDisplayManager.requireDisplayByStringId(displayId)
 
     private val baseLayoutInflater = context.themedLayoutInflater
@@ -411,10 +410,10 @@ abstract class BaseAdapter(
                                     }
                                 }
 
-                                val width = this@BaseAdapter.display.pxToDp(itemView.width)
-                                val height = this@BaseAdapter.display.pxToDp(itemView.height)
+                                val width = this@BaseAdapter.lsDisplay.pxToDp(itemView.width)
+                                val height = this@BaseAdapter.lsDisplay.pxToDp(itemView.height)
 
-                                val paddingValue = this@BaseAdapter.display.pxToDp(
+                                val paddingValue = this@BaseAdapter.lsDisplay.pxToDp(
                                     resources.getDimensionPixelSize(R.dimen.app_widget_padding),
                                 )
 

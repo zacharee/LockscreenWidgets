@@ -396,13 +396,13 @@ abstract class BaseBindWidgetActivity : BaseActivity() {
         ).y
 
     protected open fun calculateInitialWidgetColSpan(provider: AppWidgetProviderInfo): Int {
-        val widthRatio = provider.minWidth.toFloat() / width
+        val widthRatio = provider.minWidth.toFloat() / display.dpToPx(width)
         return floor((widthRatio * colCount)).toInt()
             .coerceAtMost(colCount).coerceAtLeast(1)
     }
 
     protected open fun calculateInitialWidgetRowSpan(provider: AppWidgetProviderInfo): Int {
-        val heightRatio = provider.minHeight.toFloat() / height
+        val heightRatio = provider.minHeight.toFloat() / display.dpToPx(height)
         return floor((heightRatio * rowCount)).toInt()
             .coerceAtMost(rowCount).coerceAtLeast(1)
     }

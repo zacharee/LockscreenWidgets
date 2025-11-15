@@ -68,11 +68,11 @@ open class WidgetFrameAdapter(
 
     override fun getThresholdPx(which: WidgetResizeListener.Which): Int {
         return context.run {
-            val frameSize = frameSizeAndPosition.getSizeForType(saveTypeGetter(), this@WidgetFrameAdapter.display)
+            val frameSize = frameSizeAndPosition.getSizeForType(saveTypeGetter(), this@WidgetFrameAdapter.lsDisplay)
             if (which == WidgetResizeListener.Which.LEFT || which == WidgetResizeListener.Which.RIGHT) {
-                frameSize.x.toInt() / colCount
+                lsDisplay.dpToPx(frameSize.x.toInt()) / colCount
             } else {
-                frameSize.y.toInt() / rowCount
+                lsDisplay.dpToPx(frameSize.y.toInt()) / rowCount
             }
         }
     }
