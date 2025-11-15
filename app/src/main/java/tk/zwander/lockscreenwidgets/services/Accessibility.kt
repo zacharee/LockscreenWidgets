@@ -65,7 +65,7 @@ class Accessibility : AccessibilityService(), CoroutineScope by MainScope() {
         handler(PrefManager.KEY_DEBUG_LOG) {
             IDListProvider.sendUpdate(this@Accessibility)
         }
-        handler(PrefManager.KEY_CURRENT_FRAMES_WITH_DISPLAY) {
+        handler(PrefManager.KEY_CURRENT_FRAMES_WITH_STRING_DISPLAY) {
             val newFrameIds = prefManager.currentSecondaryFramesWithStringDisplay
             val currentFrames = secondaryFrameDelegates
 
