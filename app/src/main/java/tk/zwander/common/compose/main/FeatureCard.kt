@@ -104,7 +104,7 @@ fun rememberFeatureCards(): List<FeatureCardInfo> {
                     },
                 ),
                 onAddWidget = {
-                    if (context.prefManager.currentSecondaryFramesWithStringDisplay.isEmpty()) {
+                    if (!BuildConfig.DEBUG && context.prefManager.currentSecondaryFramesWithStringDisplay.isEmpty()) {
                         context.eventManager.sendEvent(Event.LaunchAddWidget(-1))
                     } else {
                         showingDisplaySelectorAddFrameWidget = true

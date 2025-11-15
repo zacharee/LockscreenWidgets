@@ -44,6 +44,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.DialogProperties
 import tk.zwander.common.compose.util.rememberPreferenceState
 import tk.zwander.common.util.FrameSizeAndPosition
 import tk.zwander.common.util.LSDisplay
@@ -140,121 +141,125 @@ fun SelectDisplayDialog(
                 mutableStateMapOf<String, Boolean>()
             }
 
-            LazyColumn(
-                modifier = Modifier.fillMaxWidth(),
-                verticalArrangement = Arrangement.spacedBy(8.dp),
+            Box(
+                modifier = Modifier,
             ) {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                    if (framesForDefaultDisplay.isNotEmpty()) {
-                        item(key = "DEFAULT_DISPLAY") {
+                LazyColumn(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                        if (framesForDefaultDisplay.isNotEmpty()) {
+                            item(key = "DEFAULT_DISPLAY") {
+                                DisplayCard(
+                                    labelText = "${stringResource(R.string.default_display)} (${Display.DEFAULT_DISPLAY})",
+                                    subtitleText = stringResource(R.string.default_display_desc),
+                                    canExpand = onFrameSelected != null,
+                                    onClick = {
+                                        if (onDisplaySelected != null) {
+                                            onDisplaySelected("${Display.DEFAULT_DISPLAY}")
+                                        } else {
+                                            expandedMap["DEFAULT_DISPLAY"] =
+                                                !(expandedMap["DEFAULT_DISPLAY"] ?: true)
+                                        }
+                                    },
+                                    isExpanded = expandedMap["DEFAULT_DISPLAY"] != false,
+                                    modifier = Modifier.animateItem(),
+                                )
+                            }
+                        }
+
+                        if (expandedMap["DEFAULT_DISPLAY"] != false && onFrameSelected != null) {
+                            items(
+                                items = framesForDefaultDisplay,
+                                key = { "DEFAULT_DISPLAY_FRAME_$it" }) {
+                                FrameItem(
+                                    display = defaultDisplay,
+                                    frameId = it,
+                                    onSelected = {
+                                        onFrameSelected.invoke(it)
+                                    },
+                                    modifier = Modifier.animateItem()
+                                )
+                            }
+                        }
+                    }
+
+                    displaysToFramesMap.forEach { (display, frameIds) ->
+                        item(key = display.uniqueIdCompat) {
                             DisplayCard(
-                                labelText = "${stringResource(R.string.default_display)} (${Display.DEFAULT_DISPLAY})",
-                                subtitleText = stringResource(R.string.default_display_desc),
-                                canExpand = onFrameSelected != null,
+                                labelText = "${display.display.name} (${
+                                    descriptionForDisplay(
+                                        display
+                                    )
+                                })",
+                                accessory = {
+                                    val (width, height) = remember(display.uniqueIdCompat) {
+                                        with(density) {
+                                            val screenSize = display.realSize
+                                            val screenWidth = screenSize.x
+                                            val screenHeight = screenSize.y
+
+                                            val desiredHeight = 48.dp
+                                            val actualHeight = screenHeight.toDp()
+
+                                            val heightRatio = desiredHeight / actualHeight
+
+                                            val scaledWidth = (screenWidth * heightRatio).toDp()
+
+                                            if (scaledWidth > maxDisplayWidth) {
+                                                maxDisplayWidth = scaledWidth
+                                            }
+
+                                            scaledWidth to desiredHeight
+                                        }
+                                    }
+
+                                    Box(
+                                        contentAlignment = Alignment.Center,
+                                        modifier = if (maxDisplayWidth > 0.dp) {
+                                            Modifier.width(maxDisplayWidth)
+                                        } else {
+                                            Modifier
+                                        },
+                                    ) {
+                                        Box(
+                                            modifier = Modifier
+                                                .border(
+                                                    width = 1.dp,
+                                                    color = LocalContentColor.current,
+                                                    shape = RoundedCornerShape(2.dp),
+                                                )
+                                                .width(width)
+                                                .height(height),
+                                        )
+                                    }
+                                },
                                 onClick = {
                                     if (onDisplaySelected != null) {
-                                        onDisplaySelected("${Display.DEFAULT_DISPLAY}")
+                                        onDisplaySelected(display.uniqueIdCompat)
                                     } else {
-                                        expandedMap["DEFAULT_DISPLAY"] =
-                                            !expandedMap.getOrDefault("DEFAULT_DISPLAY", true)
+                                        expandedMap[display.uniqueIdCompat] =
+                                            !(expandedMap[display.uniqueIdCompat] ?: true)
                                     }
                                 },
-                                isExpanded = expandedMap["DEFAULT_DISPLAY"] != false,
+                                canExpand = onFrameSelected != null,
+                                isExpanded = expandedMap[display.uniqueIdCompat] != false,
                                 modifier = Modifier.animateItem(),
                             )
                         }
-                    }
 
-                    if (expandedMap["DEFAULT_DISPLAY"] != false && onFrameSelected != null) {
-                        items(
-                            items = framesForDefaultDisplay,
-                            key = { "DEFAULT_DISPLAY_FRAME_$it" }) {
-                            FrameItem(
-                                display = defaultDisplay,
-                                frameId = it,
-                                onSelected = {
-                                    onFrameSelected.invoke(it)
-                                },
-                                modifier = Modifier.animateItem()
-                            )
-                        }
-                    }
-                }
-
-                displaysToFramesMap.forEach { (display, frameIds) ->
-                    item(key = display.uniqueIdCompat) {
-                        DisplayCard(
-                            labelText = "${display.display.name} (${
-                                descriptionForDisplay(
-                                    display
-                                )
-                            })",
-                            accessory = {
-                                val (width, height) = remember(display.uniqueIdCompat) {
-                                    with(density) {
-                                        val screenSize = display.realSize
-                                        val screenWidth = screenSize.x
-                                        val screenHeight = screenSize.y
-
-                                        val desiredHeight = 48.dp
-                                        val actualHeight = screenHeight.toDp()
-
-                                        val heightRatio = desiredHeight / actualHeight
-
-                                        val scaledWidth = (screenWidth * heightRatio).toDp()
-
-                                        if (scaledWidth > maxDisplayWidth) {
-                                            maxDisplayWidth = scaledWidth
-                                        }
-
-                                        scaledWidth to desiredHeight
-                                    }
-                                }
-
-                                Box(
-                                    contentAlignment = Alignment.Center,
-                                    modifier = if (maxDisplayWidth > 0.dp) {
-                                        Modifier.width(maxDisplayWidth)
-                                    } else {
-                                        Modifier
+                        if (expandedMap[display.uniqueIdCompat] != false && onFrameSelected != null) {
+                            items(items = frameIds.toList(), key = { "DISPLAY_FRAMES_$it" }) {
+                                FrameItem(
+                                    display = display,
+                                    frameId = it,
+                                    onSelected = {
+                                        onFrameSelected.invoke(it)
                                     },
-                                ) {
-                                    Box(
-                                        modifier = Modifier
-                                            .border(
-                                                width = 1.dp,
-                                                color = LocalContentColor.current,
-                                                shape = RoundedCornerShape(2.dp),
-                                            )
-                                            .width(width)
-                                            .height(height),
-                                    )
-                                }
-                            },
-                            onClick = {
-                                if (onDisplaySelected != null) {
-                                    onDisplaySelected(display.uniqueIdCompat)
-                                } else {
-                                    expandedMap[display.uniqueIdCompat] =
-                                        !expandedMap.getOrDefault(display.uniqueIdCompat, true)
-                                }
-                            },
-                            canExpand = onFrameSelected != null,
-                            isExpanded = expandedMap[display.uniqueIdCompat] != false,
-                            modifier = Modifier.animateItem(),
-                        )
-                    }
-
-                    if (expandedMap[display.uniqueIdCompat] != false && onFrameSelected != null) {
-                        items(items = frameIds.toList(), key = { "DISPLAY_FRAMES_$it" }) {
-                            FrameItem(
-                                display = display,
-                                frameId = it,
-                                onSelected = {
-                                    onFrameSelected.invoke(it)
-                                },
-                                modifier = Modifier.animateItem(),
-                            )
+                                    modifier = Modifier.animateItem(),
+                                )
+                            }
                         }
                     }
                 }
