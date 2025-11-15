@@ -167,6 +167,8 @@
     <string name="intro_read_external_storage_desc_13_addendum">Sur Android 13 et plus, vous devrez utiliser Shizuku pour accorder les autorisations requises.</string>
     <string name="intro_battery_optimization">Optimisation de la batterie</string>
     <string name="intro_battery_optimization_desc">De nombreux appareils, y compris ceux qui exécutent MIUI et EMUI, sont particulièrement agressifs avec la batterie. Cela peut involontairement tuer Lockscreen Widgets. Cliquez sur le bouton ci-dessous pour apprendre à autoriser Lockscreen Widgets à tourner correctement malgré cette complication (sujet en anglais).</string>
+    <string name="intro_moto_razr_allow_secondary_display_access">Allow Secondary Display Access</string>
+    <string name="intro_moto_razr_allow_secondary_display_access_desc">Lockscreen Widgets supports adding frames to multiple displays, but Motorola blocks secondary display access to third party apps by default on the Razr models. Tap below to open the screen where you can grant permission to Lockscreen Widgets to use the cover display. Once there, find Lockscreen Widgets in the list, tap it, and enable \"Allow on external display\".</string>
     <string name="intro_done_title">Parfait !</string>
     <string name="intro_done_desc">C\'est tout bon ! Vérifiez votre écran de verrouillage et vous devriez maintenant voir le cadre du widget !</string>
     <string name="usage_add_widget">Ajouter un Widget</string>
