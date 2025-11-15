@@ -131,6 +131,7 @@ class PrefManager private constructor(private val context: Context) {
         const val KEY_SHORTCUT_OVERRIDE_ICONS = "shortcut_override_icon_entries"
         @Deprecated("Doesn't support displays", replaceWith = ReplaceWith("PrefManager.KEY_CURRENT_FRAMES_WITH_DISPLAY"))
         const val KEY_CURRENT_FRAMES = "current_secondary_widget_frames"
+        @Deprecated("Doesn't support unique displays", replaceWith = ReplaceWith("PrefManager.KEY_CURRENT_FRAMES_WITH_STRING_DISPLAY"))
         const val KEY_CURRENT_FRAMES_WITH_DISPLAY = "current_secondary_widget_frames_with_display"
 
         const val KEY_CURRENT_FRAMES_WITH_STRING_DISPLAY = "current_seconday_widget_frames_with_string_display"
