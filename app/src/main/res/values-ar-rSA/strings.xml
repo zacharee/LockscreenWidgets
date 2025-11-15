@@ -287,6 +287,7 @@
     <string name="developer_options">Developer Options</string>
     <string name="error_showing_widget">Unable to show widget.</string>
     <string name="select_display">Select Display</string>
+    <string name="move_frame_to_display">Move Frame to Display</string>
     <string name="default_display">Default Display</string>
     <string name="default_display_desc">On foldable devices, the default display generally switches between the internal and external display depending on whether the device is open or closed. On flip devices, it\'s generally always the internal display.</string>
     <string name="square">Square</string>
