@@ -11,6 +11,7 @@ import androidx.annotation.CallSuper
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleRegistry
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.setViewTreeLifecycleOwner
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
@@ -19,9 +20,6 @@ import androidx.savedstate.SavedStateRegistryController
 import androidx.savedstate.SavedStateRegistryOwner
 import androidx.savedstate.setViewTreeSavedStateRegistryOwner
 import com.arasthel.spannedgridlayoutmanager.SpannedGridLayoutManager
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.MainScope
-import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import tk.zwander.common.adapters.BaseAdapter
@@ -72,7 +70,7 @@ abstract class BaseDelegate<State : Any>(
         override fun onDisplayRemoved(displayId: Int) {}
 
         override fun onDisplayChanged(displayId: Int) {
-            scope.launch {
+            lifecycleScope.launch {
                 updateWindow()
             }
         }
@@ -99,15 +97,11 @@ abstract class BaseDelegate<State : Any>(
         ItemTouchHelper(touchHelperCallback)
     }
 
-    protected var scope: CoroutineScope = MainScope()
-        private set
-
     val isAttached: Boolean
         get() = rootView.isAttachedToWindow
 
     @CallSuper
     open fun onCreate() {
-        scope = MainScope()
         rootView.setViewTreeLifecycleOwner(this)
         rootView.setViewTreeSavedStateRegistryOwner(this)
 
@@ -142,8 +136,6 @@ abstract class BaseDelegate<State : Any>(
         if (lifecycleRegistry.currentState.isAtLeast(Lifecycle.State.CREATED)) {
             lifecycleRegistry.currentState = Lifecycle.State.DESTROYED
         }
-
-        scope.cancel()
     }
 
     @SuppressLint("NotifyDataSetChanged")

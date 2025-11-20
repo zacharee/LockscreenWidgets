@@ -15,6 +15,7 @@ import android.view.animation.DecelerateInterpolator
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.setViewTreeLifecycleOwner
 import androidx.recyclerview.widget.RecyclerView
 import androidx.savedstate.setViewTreeSavedStateRegistryOwner
@@ -98,7 +99,7 @@ class DrawerDelegate private constructor(context: Context, displayId: String) :
     override var state = State()
         set(value) {
             field = value
-            scope.launch(Dispatchers.Main) {
+            lifecycleScope.launch(Dispatchers.Main) {
                 updateWindow()
             }
         }
@@ -319,7 +320,7 @@ class DrawerDelegate private constructor(context: Context, displayId: String) :
                 val animator = ValueAnimator.ofInt(params.x, if (metThreshold) 0 else -params.width)
                 animator.addUpdateListener {
                     params.x = it.animatedValue as Int
-                    scope.launch {
+                    lifecycleScope.launch {
                         updateWindow()
                     }
                 }
@@ -329,7 +330,7 @@ class DrawerDelegate private constructor(context: Context, displayId: String) :
                 animator.addListener(object : AnimatorListenerAdapter() {
                     override fun onAnimationEnd(animation: Animator) {
                         if (!metThreshold) {
-                            scope.launch {
+                            lifecycleScope.launch {
                                 hideDrawer()
                             }
                         } else {
@@ -378,14 +379,14 @@ class DrawerDelegate private constructor(context: Context, displayId: String) :
         handle.setViewTreeLifecycleOwner(this)
         handle.setViewTreeSavedStateRegistryOwner(this)
 
-        scope.launch {
+        lifecycleScope.launch {
             tryShowHandle()
         }
 
         gridLayoutManager.customHeight =
             resources.getDimensionPixelSize(R.dimen.drawer_row_height).toDouble()
 
-        scope.launch(Dispatchers.Main) {
+        lifecycleScope.launch(Dispatchers.Main) {
             requireLsDisplayManager.displayPowerStates
                 .map { it[display.uniqueIdCompat] == true }
                 .collect { isScreenOn ->

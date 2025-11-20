@@ -19,6 +19,7 @@ import androidx.compose.ui.Modifier
 import androidx.core.graphics.component1
 import androidx.core.graphics.component2
 import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.RecyclerView
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -126,7 +127,7 @@ open class MainWidgetFrameDelegate protected constructor(
             field = actualNewState
 
             if (actualNewState.isPreview != oldState.isPreview) {
-                scope.launch(Dispatchers.Main) {
+                lifecycleScope.launch(Dispatchers.Main) {
                     if (actualNewState.isPreview) {
                         if (canShow()) {
                             addWindow()
@@ -140,7 +141,7 @@ open class MainWidgetFrameDelegate protected constructor(
             }
 
             if (actualNewState.selectionPreviewRequestCode != oldState.selectionPreviewRequestCode) {
-                scope.launch(Dispatchers.Main) {
+                lifecycleScope.launch(Dispatchers.Main) {
                     if (actualNewState.selectionPreviewRequestCode != null) {
                         if (canShow()) {
                             addWindow()
@@ -298,12 +299,12 @@ open class MainWidgetFrameDelegate protected constructor(
             viewModel.currentEditingInterfacePosition.value = -1
         }
         handler(PrefManager.KEY_WIDGET_FRAME_ENABLED) {
-            scope.launch {
+            lifecycleScope.launch {
                 updateWindowState()
             }
         }
         handler(PrefManager.KEY_CAN_SHOW_FRAME_FROM_TASKER, PrefManager.KEY_FORCE_SHOW_FRAME) {
-            scope.launch {
+            lifecycleScope.launch {
                 updateWindowState()
             }
         }
@@ -531,7 +532,7 @@ open class MainWidgetFrameDelegate protected constructor(
         } catch (_: Exception) {
         }
 
-        scope.launch(Dispatchers.Main) {
+        lifecycleScope.launch(Dispatchers.Main) {
             requireLsDisplayManager.displayPowerStates
                 .map { it[display.uniqueIdCompat] != false }
                 .collect { isScreenOn ->
@@ -559,13 +560,13 @@ open class MainWidgetFrameDelegate protected constructor(
                 }
         }
 
-        scope.launch(Dispatchers.Main) {
+        lifecycleScope.launch(Dispatchers.Main) {
             globalState.notificationsPanelFullyExpanded.collect {
                 updateState { it.copy(isPendingNotificationStateChange = true, isPreview = false) }
             }
         }
 
-        scope.launch(Dispatchers.Main) {
+        lifecycleScope.launch(Dispatchers.Main) {
             globalState.notificationCount.collect {
                 //Receive updates from our notification listener service on how many
                 //notifications are currently shown to the user. This count excludes
