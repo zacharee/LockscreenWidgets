@@ -34,7 +34,7 @@
     <string name="increase">Увеличение</string>
     <string name="decrease">Уменьшение</string>
     <string name="selected" tools:override="true">Выбрано</string>
-    <string name="general">General</string>
+    <string name="general">Основные</string>
     <string name="drawer_enabled">Боковая панель включена</string>
     <string name="frame_enabled">Рамка включена</string>
     <string name="add_id_hint">com.android.systemui:id/some_id_здесь</string>
@@ -167,8 +167,8 @@
     <string name="intro_read_external_storage_desc_13_addendum">На Android 13 и более поздних версиях вам потребуется использовать Shizuku для предоставления необходимых разрешений.</string>
     <string name="intro_battery_optimization">Оптимизация батареи</string>
     <string name="intro_battery_optimization_desc">Многие устройства, включая те, что работают под управлением MIUI и EMUI, имеют невероятно агрессивное управление батареей. Это может привести к отключению виджетов экрана блокировки, когда вы этого не хотите. Нажмите кнопку ниже, чтобы узнать, как можно добавить виджеты экрана блокировки в список разрешенных на вашем устройстве.</string>
-    <string name="intro_moto_razr_allow_secondary_display_access">Allow Secondary Display Access</string>
-    <string name="intro_moto_razr_allow_secondary_display_access_desc">Lockscreen Widgets supports adding frames to multiple displays, but Motorola blocks secondary display access to third party apps by default on the Razr models. Tap below to open the screen where you can grant permission to Lockscreen Widgets to use the cover display. Once there, find Lockscreen Widgets in the list, tap it, and enable \"Allow on external display\".</string>
+    <string name="intro_moto_razr_allow_secondary_display_access">Разрешить доступ ко второму экрану</string>
+    <string name="intro_moto_razr_allow_secondary_display_access_desc">Lockscreen Widgets поддерживает добавление рамок на несколько дисплеев, но Motorola по умолчанию блокирует доступ к второму экрану для сторонних приложений на моделях Razr. Нажмите ниже, чтобы открыть экран, где можно разрешить Lockscreen Widgets использовать второй дисплей. Затем найдите Lockscreen Widgets в списке, нажмите на него и включите «Allow on external display».</string>
     <string name="intro_done_title">Все сделано!</string>
     <string name="intro_done_desc">Вот и все! Проверьте экран блокировки, теперь вы должны увидеть рамку виджета!</string>
     <string name="usage_add_widget">Добавление виджета</string>
@@ -228,10 +228,10 @@
     <string name="drawer_handle_tap_to_open_desc">Однократное нажатие на триггер сразу откроет панель, вместо нужды в  перетаскивании или в двойном нажатии.</string>
     <string name="drawer_handle_lock_position">Блокировка позиции триггера</string>
     <string name="drawer_handle_lock_position_desc">Предотвращение смещения триггера.</string>
-    <string name="drawer_blur_status_bar_area">Blur Status Bar Area</string>
-    <string name="drawer_blur_status_bar_area_desc">Show the blur effect over the status bar area.</string>
-    <string name="drawer_background_over_status_bar">Show Background Color Over Status Bar</string>
-    <string name="drawer_background_over_status_bar_desc">Show the drawer\'s background color on top of the status bar. If you have an opaque background color, you may want to consider turning this off.</string>
+    <string name="drawer_blur_status_bar_area">Размывать область строки состояния</string>
+    <string name="drawer_blur_status_bar_area_desc">Показывать эффект размытия в области строки состояния.</string>
+    <string name="drawer_background_over_status_bar">Показывать цвет фона панели поверх строки состояния</string>
+    <string name="drawer_background_over_status_bar_desc">Показывать цвет фона панели поверх строки состояния. Если у вас непрозрачный цвет фона, имеет смысл отключить эту опцию.</string>
     <string name="show_only_when_locked">Показывать только когда заблокировано</string>
     <string name="show_only_when_locked_desc">Показывать триггер панели только тогда, когда устройство находится на экране блокировки.</string>
     <string name="debug_enable_bugsnag">Включить BugSnag</string>
@@ -283,13 +283,13 @@
     </plurals>
     <string name="frame_management">Управление рамками</string>
     <string name="unable_to_grant_storage">Не удается предоставить разрешение на хранение!</string>
-    <string name="unable_to_grant_storage_desc">It looks like you\'re using a device that restricts ADB\'s ability to grant permissions. The setting to allow this should be in Developer Options and called something similar to \"Disable Permission Monitoring\", \"USB Debugging (Security Setting)\", or \"Disable Permission Monitoring\". Once you\'ve toggled that option, come back here to try again.</string>
-    <string name="developer_options">Developer Options</string>
-    <string name="error_showing_widget">Unable to show widget.</string>
-    <string name="select_display">Select Display</string>
-    <string name="move_frame_to_display">Move Frame to Display</string>
-    <string name="default_display">Default Display</string>
-    <string name="default_display_desc">On foldable devices, the default display generally switches between the internal and external display depending on whether the device is open or closed. On flip devices, it\'s generally always the internal display.</string>
-    <string name="square">Square</string>
-    <string name="tall">Tall</string>
+    <string name="unable_to_grant_storage_desc">Похоже, вы используете устройство, которое ограничивает возможность ADB выдавать разрешения. Эта настройка должна находиться в «Параметрах разработчика» и иметь похожее название: «Disable Permission Monitoring», «USB Debugging (Security Setting)» или «Disable Permission Monitoring». После переключения этой опции вернитесь сюда и попробуйте снова.</string>
+    <string name="developer_options">Параметры разработчика</string>
+    <string name="error_showing_widget">Не удалось отобразить виджет.</string>
+    <string name="select_display">Выбор дисплея</string>
+    <string name="move_frame_to_display">Переместить рамку на дисплей</string>
+    <string name="default_display">Дисплей по умолчанию</string>
+    <string name="default_display_desc">На складных устройствах дисплей по умолчанию обычно переключается между внутренним и внешним дисплеями в зависимости от того, открыто устройство или закрыто. На устройствах-«flip» он, как правило, всегда внутренний.</string>
+    <string name="square">Квадрат</string>
+    <string name="tall">Плитка</string>
 </resources>
