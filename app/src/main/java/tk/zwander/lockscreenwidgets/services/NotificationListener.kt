@@ -184,7 +184,8 @@ class NotificationListener : NotificationListenerService(), EventObserver, Corou
                 val rankingResult = currentRanking.getRanking(key, ranking)
 
                 if (rankingResult && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S &&
-                    ranking.lockscreenVisibilityOverride == Notification.VISIBILITY_SECRET
+                    (ranking.lockscreenVisibilityOverride == Notification.VISIBILITY_SECRET ||
+                            ranking.channel.lockscreenVisibility == Notification.VISIBILITY_SECRET)
                 ) {
                     logUtils.debugLog("Secret ranking ${this.notification.channelId}", null)
                     return false
