@@ -6,9 +6,6 @@ import android.os.Bundle
 import android.view.MenuItem
 import androidx.compose.ui.unit.dp
 import com.bugsnag.android.performance.compose.MeasuredComposable
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.MainScope
-import kotlinx.coroutines.cancel
 import tk.zwander.common.activities.DismissOrUnlockActivity
 import tk.zwander.common.compose.add.AddWidgetLayout
 import tk.zwander.common.data.WidgetData
@@ -26,7 +23,7 @@ import tk.zwander.lockscreenwidgets.data.list.WidgetListInfo
 /**
  * Manage the widget addition flow: selection, permissions, configurations, etc.
  */
-abstract class AddWidgetActivity : BaseBindWidgetActivity(), CoroutineScope by MainScope() {
+abstract class AddWidgetActivity : BaseBindWidgetActivity() {
     protected open val showShortcuts = true
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -97,10 +94,5 @@ abstract class AddWidgetActivity : BaseBindWidgetActivity(), CoroutineScope by M
             }
             else -> super.onOptionsItemSelected(item)
         }
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        cancel()
     }
 }

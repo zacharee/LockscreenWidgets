@@ -11,15 +11,15 @@ import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
 import tk.zwander.common.data.WidgetData
+import tk.zwander.lockscreenwidgets.App
 import java.util.concurrent.ConcurrentLinkedQueue
 
 val Context.eventManager: EventManager
     get() = EventManager.getInstance(this)
 
-class EventManager private constructor(private val context: Context) : CoroutineScope by MainScope() {
+class EventManager private constructor(private val context: Context) : CoroutineScope by App.instance {
     companion object {
         @SuppressLint("StaticFieldLeak")
         private var _instance: EventManager? = null

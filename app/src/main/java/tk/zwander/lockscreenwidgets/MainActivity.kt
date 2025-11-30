@@ -6,11 +6,9 @@ import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.lifecycle.lifecycleScope
 import com.bugsnag.android.performance.compose.MeasuredComposable
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.MainScope
-import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import tk.zwander.common.activities.BaseActivity
 import tk.zwander.common.activities.OnboardingActivity
@@ -34,7 +32,7 @@ import tk.zwander.common.util.setThemedContent
  * If it's the user's first time running the app, or a required permission is missing (i.e. Accessibility),
  * this Activity will also make sure to start [OnboardingActivity] in the proper mode.
  */
-class MainActivity : BaseActivity(), CoroutineScope by MainScope() {
+class MainActivity : BaseActivity() {
     private val introRequest =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
             if (result.resultCode != RESULT_OK) {
@@ -54,7 +52,7 @@ class MainActivity : BaseActivity(), CoroutineScope by MainScope() {
         //This should only run on Nougat and above.
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             //We don't want the NC tile to show on non-One UI devices.
-            launch(Dispatchers.IO) {
+            lifecycleScope.launch(Dispatchers.IO) {
                 val components = arrayOf(
                     WidgetTileOne::class.java,
                     WidgetTileTwo::class.java,
@@ -92,10 +90,5 @@ class MainActivity : BaseActivity(), CoroutineScope by MainScope() {
         super.onStop()
 
         eventManager.sendEvent(Event.PreviewFrames(Event.PreviewFrames.ShowMode.HIDE))
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        cancel()
     }
 }

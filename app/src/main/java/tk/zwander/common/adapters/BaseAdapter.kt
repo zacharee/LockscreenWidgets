@@ -53,9 +53,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.arasthel.spannedgridlayoutmanager.SpanSize
 import com.arasthel.spannedgridlayoutmanager.SpannedGridLayoutManager
 import com.bugsnag.android.performance.compose.MeasuredComposable
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.withContext
 import tk.zwander.common.activities.DismissOrUnlockActivity
 import tk.zwander.common.activities.PermissionIntentLaunchActivity
@@ -95,7 +93,7 @@ abstract class BaseAdapter(
     protected val onRemoveCallback: (WidgetData, Int) -> Unit,
     protected val displayId: () -> String,
     protected val viewModel: BaseDelegate.BaseViewModel<*, *>,
-) : RecyclerView.Adapter<BaseAdapter.BaseVH>(), CoroutineScope by MainScope() {
+) : RecyclerView.Adapter<BaseAdapter.BaseVH>() {
     companion object {
         const val VIEW_TYPE_WIDGET = 0
         const val VIEW_TYPE_ADD = 1

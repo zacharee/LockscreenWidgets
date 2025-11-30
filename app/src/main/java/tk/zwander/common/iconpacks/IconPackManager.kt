@@ -14,7 +14,6 @@ import androidx.core.content.ContextCompat
 import androidx.core.content.res.ResourcesCompat
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -27,6 +26,7 @@ import tk.zwander.common.util.PrefManager
 import tk.zwander.common.util.handler
 import tk.zwander.common.util.prefManager
 import tk.zwander.common.util.safeApplicationContext
+import tk.zwander.lockscreenwidgets.App
 import tk.zwander.lockscreenwidgets.R
 import java.io.IOException
 import java.util.TreeSet
@@ -37,7 +37,7 @@ val Context.iconPackManager: IconPackManager
 /**
  * Parts based on https://github.com/LawnchairLauncher/lawnchair/blob/689d250d4bedc8a8c917b8d872d830ec89bc5e14/lawnchair/src/app/lawnchair/ui/preferences/PreferenceViewModel.kt
  */
-class IconPackManager private constructor(private val context: Context) : CoroutineScope by MainScope() {
+class IconPackManager private constructor(private val context: Context) : CoroutineScope by App.instance {
     companion object {
         private val iconPackIntents = listOf(
             Intent("com.novalauncher.THEME"),

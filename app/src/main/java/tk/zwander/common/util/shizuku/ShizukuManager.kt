@@ -18,7 +18,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.Lifecycle
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
@@ -28,6 +27,7 @@ import rikka.shizuku.ShizukuProvider
 import tk.zwander.common.util.LifecycleEffect
 import tk.zwander.common.util.logUtils
 import tk.zwander.common.util.safeApplicationContext
+import tk.zwander.lockscreenwidgets.App
 import tk.zwander.lockscreenwidgets.BuildConfig
 import tk.zwander.lockscreenwidgets.IShizukuService
 import kotlin.coroutines.CoroutineContext
@@ -38,7 +38,7 @@ import kotlin.coroutines.suspendCoroutine
 val Context.shizukuManager: ShizukuManager
     get() = ShizukuManager.getInstance(this)
 
-class ShizukuManager private constructor(private val context: Context) : CoroutineScope by MainScope() {
+class ShizukuManager private constructor(private val context: Context) : CoroutineScope by App.instance {
     companion object {
         val isShizukuRunning: Boolean
             get() = Shizuku.pingBinder()

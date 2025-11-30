@@ -17,13 +17,14 @@ import android.os.SystemProperties
 import android.provider.Settings
 import android.service.notification.NotificationListenerService
 import android.service.notification.StatusBarNotification
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.ServiceLifecycleDispatcher
+import androidx.lifecycle.lifecycleScope
 import com.bugsnag.android.BreadcrumbType
 import kotlinx.atomicfu.atomic
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.MainScope
-import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import tk.zwander.common.util.BugsnagUtils
 import tk.zwander.common.util.Event
@@ -48,12 +49,16 @@ val Context.isNotificationListenerActive: Boolean
  * and the user has the option enabled, the widget frame will hide.
  */
 @Suppress("unused")
-class NotificationListener : NotificationListenerService(), EventObserver, CoroutineScope by MainScope() {
+class NotificationListener : NotificationListenerService(), EventObserver, LifecycleOwner {
+    private val dispatcher = ServiceLifecycleDispatcher(this)
     private val nm by lazy { getSystemService(NOTIFICATION_SERVICE) as NotificationManager }
     private val handler by lazy { Handler(Looper.getMainLooper()) }
 
     private val isListening = atomic(false)
     private val updateJob = atomic<Job?>(null)
+
+    override val lifecycle: Lifecycle
+        get() = dispatcher.lifecycle
 
     override fun onListenerConnected() {
         logUtils.debugLog("Notification listener connected.", null)
@@ -71,8 +76,21 @@ class NotificationListener : NotificationListenerService(), EventObserver, Corou
         eventManager.removeObserver(this)
     }
 
+    override fun onCreate() {
+        dispatcher.onServicePreSuperOnCreate()
+        super.onCreate()
+    }
+
+    @Suppress("OVERRIDE_DEPRECATION")
+    override fun onStart(intent: Intent?, startId: Int) {
+        dispatcher.onServicePreSuperOnStart()
+        @Suppress("DEPRECATION")
+        super.onStart(intent, startId)
+    }
+
     @SuppressLint("PrivateApi", "DiscouragedPrivateApi")
     override fun onBind(intent: Intent?): IBinder {
+        dispatcher.onServicePreSuperOnBind()
         super.onBind(intent)
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
@@ -85,8 +103,8 @@ class NotificationListener : NotificationListenerService(), EventObserver, Corou
     }
 
     override fun onDestroy() {
+        dispatcher.onServicePreSuperOnDestroy()
         super.onDestroy()
-        cancel()
     }
 
     override suspend fun onEvent(event: Event) {
@@ -126,7 +144,7 @@ class NotificationListener : NotificationListenerService(), EventObserver, Corou
         logUtils.debugLog("Sending notification update.", null)
 
         updateJob.value?.cancel()
-        updateJob.value = launch(Dispatchers.IO) {
+        updateJob.value = lifecycleScope.launch(Dispatchers.IO) {
             if (isListening.value) {
                 //Even with the check to make sure the notification listener is connected, some devices still
                 //crash with an "unknown listener" error when trying to retrieve the notification lists.

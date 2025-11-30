@@ -12,12 +12,12 @@ import android.view.Surface
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
+import tk.zwander.lockscreenwidgets.App
 import kotlin.math.roundToInt
 
 val Context.requireLsDisplayManager: LSDisplayManager
@@ -26,7 +26,7 @@ val Context.requireLsDisplayManager: LSDisplayManager
 val lsDisplayManager: LSDisplayManager?
     get() = LSDisplayManager.peekInstance()
 
-class LSDisplayManager private constructor(context: Context) : ContextWrapper(context), CoroutineScope by MainScope() {
+class LSDisplayManager private constructor(context: Context) : ContextWrapper(context), CoroutineScope by App.instance {
     companion object {
         @SuppressLint("StaticFieldLeak")
         private var instance: LSDisplayManager? = null
@@ -81,13 +81,6 @@ class LSDisplayManager private constructor(context: Context) : ContextWrapper(co
         fetchDisplays()
 
         displayManager.registerDisplayListener(displayListener, null)
-    }
-
-    fun onDestroy() {
-        logUtils.debugLog("Destroying LSDisplayManager", null)
-
-        displayManager.unregisterDisplayListener(displayListener)
-        instance = null
     }
 
     fun findDisplayByStringId(displayId: String): LSDisplay? {
