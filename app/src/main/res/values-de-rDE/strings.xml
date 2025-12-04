@@ -167,8 +167,8 @@
     <string name="intro_read_external_storage_desc_13_addendum">Unter Android 13 und neuer brauchst du Shizuku um die erforderlichen Erlaubnisse zu erteilen.</string>
     <string name="intro_battery_optimization">Akkuoptimierung</string>
     <string name="intro_battery_optimization_desc">Viele Geräte, inklusive solcher, die auf MUI und EMUI laufen, haben sehr aggressive Akkuoptimierungen. Die kann dazu führen, das Lockscreen Widgets deaktiviert wird, auch wenn du dies nicht möchtest. Drücke den unterliegenden Knopf, um zu lesen, wie du Lockscreen Widgets auf dem Gerät von dieser Optimierung ausschließen kannst.</string>
-    <string name="intro_moto_razr_allow_secondary_display_access">Allow Secondary Display Access</string>
-    <string name="intro_moto_razr_allow_secondary_display_access_desc">Lockscreen Widgets supports adding frames to multiple displays, but Motorola blocks secondary display access to third party apps by default on the Razr models. Tap below to open the screen where you can grant permission to Lockscreen Widgets to use the cover display. Once there, find Lockscreen Widgets in the list, tap it, and enable \"Allow on external display\".</string>
+    <string name="intro_moto_razr_allow_secondary_display_access">Zugriff auf sekundäres Display erlauben</string>
+    <string name="intro_moto_razr_allow_secondary_display_access_desc">Lockscreen Widgets unterstützt das Hinzufügen von Frames zu mehreren Displays, aber Motorola blockiert standardmäßig den Zugriff von Drittanbieter-Apps auf das sekundäre Display bei den Razr-Modellen. Tippe unten, um den Bildschirm zu öffnen, auf dem du Lockscreen Widgets die Berechtigung zur Verwendung des Cover-Displays erteilen kannst. Suche dort Lockscreen Widgets in der Liste, tippe darauf und aktiviere \"Auf externem Display zulassen\".</string>
     <string name="intro_done_title">Alles Fertig!</string>
     <string name="intro_done_desc">Das war\'s! Überprüfe deinen Sperrbildschirm und du solltest nun ein Widget-Rahmen sehen!</string>
     <string name="usage_add_widget">Füge Widget hinzu</string>
