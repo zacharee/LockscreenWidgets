@@ -228,7 +228,13 @@ class NotificationListener : NotificationListenerService(), EventObserver, Lifec
                         )
                     }
 
-                    if (shouldCheckHideSilentStatusBarIcons && nm.shouldHideSilentStatusBarIcons()) {
+                    if (shouldCheckHideSilentStatusBarIcons &&
+                        Settings.Secure.getInt(
+                            context.contentResolver,
+                            Settings.Secure.LOCK_SCREEN_SHOW_SILENT_NOTIFICATIONS,
+                            0,
+                        ) == 0
+                    ) {
                         logUtils.debugLog(
                             "Low importance and silent hidden ${this.notification.channelId}",
                             null
