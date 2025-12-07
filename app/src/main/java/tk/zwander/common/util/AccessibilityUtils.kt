@@ -41,6 +41,7 @@ object AccessibilityUtils {
         val hasClearAllButton: AtomicBoolean = atomic(false),
         val hasSettingsContainerButton: AtomicBoolean = atomic(false),
         val onFaceWidgets: AtomicBoolean = atomic(false),
+        val hasNotificationsShowing: AtomicBoolean = atomic(false),
     )
 
     data object IDMaps {
@@ -59,6 +60,11 @@ object AccessibilityUtils {
             "com.android.systemui:id/header_label",
             "com.android.systemui:id/split_shade_status_bar",
             "com.android.systemui:id/quick_qs_panel".takeIf { Build.VERSION.SDK_INT > Build.VERSION_CODES.S_V2 },
+        )
+
+        val notificationIds = unitMapOf(
+            "com.android.systemui:id/notification_guts",
+            "com.android.systemui:id/expandableNotificationRow",
         )
 
         val moreButtonIds = unitMapOf(
@@ -105,6 +111,12 @@ object AccessibilityUtils {
                 //Some devices don't even have left shortcuts, so also check for keyguard_indication_area.
                 //Just like the showingSecurityInput check, this is probably unreliable for some devices.
                 nodeState.showingNotificationsPanel.value = true
+            }
+        }
+
+        if (!nodeState.hasNotificationsShowing.value) {
+            if (node.hasVisibleIds(IDMaps.notificationIds)) {
+                nodeState.hasNotificationsShowing.value = true
             }
         }
 
@@ -449,6 +461,9 @@ object AccessibilityUtils {
                 globalState.currentAppPackage.value = windowInfo.topAppWindowPackageName
                 globalState.hidingForPresentApp.value = windowInfo.hasHideForPresentApp
                 globalState.onMainLockScreen.value = windowInfo.nodeState.onMainLockscreen.value
+                globalState.accessibilitySeesNotificationsOnMainLockScreen.value =
+                    windowInfo.nodeState.onMainLockscreen.value &&
+                            windowInfo.nodeState.hasNotificationsShowing.value
                 globalState.showingNotificationsPanel.value = notificationsAreOpen
                 globalState.notificationsPanelFullyExpanded.value =
                     (windowInfo.nodeState.hasMoreButton.value) || (windowInfo.nodeState.hasSettingsContainerButton.value &&
