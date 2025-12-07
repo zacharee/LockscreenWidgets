@@ -65,6 +65,7 @@ object AccessibilityUtils {
         val notificationIds = unitMapOf(
             "com.android.systemui:id/notification_guts",
             "com.android.systemui:id/expandableNotificationRow",
+            "con.android.systemui:id/notificationShelf",
         )
 
         val moreButtonIds = unitMapOf(
