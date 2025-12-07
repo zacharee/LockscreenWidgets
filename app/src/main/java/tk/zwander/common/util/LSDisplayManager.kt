@@ -102,7 +102,9 @@ class LSDisplayManager private constructor(context: Context) : ContextWrapper(co
 
         return availableDisplays.map {
             it.values.firstOrNull { display ->
-                display.uniqueIdCompat == displayId
+                display.uniqueIdCompat == displayId ||
+                        (display.displayId == Display.DEFAULT_DISPLAY &&
+                                displayId.toIntOrNull() == Display.DEFAULT_DISPLAY)
             }
         }
     }

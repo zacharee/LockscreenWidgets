@@ -34,13 +34,13 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import tk.zwander.common.compose.LocalLSDisplayManager
 import tk.zwander.common.compose.util.rememberPreferenceState
 import tk.zwander.common.util.Event
 import tk.zwander.common.util.PrefManager
 import tk.zwander.common.util.collectAsMutableState
 import tk.zwander.common.util.eventManager
 import tk.zwander.common.util.prefManager
-import tk.zwander.common.util.requireLsDisplayManager
 import tk.zwander.common.util.vibrate
 import tk.zwander.lockscreenwidgets.R
 import tk.zwander.widgetdrawer.util.DrawerDelegate
@@ -57,7 +57,8 @@ fun DrawerDelegate.DrawerViewModel.DrawerHandle(
     val context = LocalContext.current
     val density = LocalDensity.current
     val resources = LocalResources.current
-    val currentDisplay by context.requireLsDisplayManager.collectDisplay(displayId).collectAsState(null)
+    val lsDisplayManager = LocalLSDisplayManager.current
+    val currentDisplay by lsDisplayManager.collectDisplay(displayId).collectAsState(null)
     val screenWidth = remember(currentDisplay, resources.configuration.orientation) {
         currentDisplay?.rotatedRealSize?.x ?: 1
     }

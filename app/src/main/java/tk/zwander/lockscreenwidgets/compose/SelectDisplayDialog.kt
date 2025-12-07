@@ -44,12 +44,12 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import tk.zwander.common.compose.LocalLSDisplayManager
 import tk.zwander.common.compose.util.rememberPreferenceState
 import tk.zwander.common.util.FrameSizeAndPosition
 import tk.zwander.common.util.LSDisplay
 import tk.zwander.common.util.PrefManager
 import tk.zwander.common.util.prefManager
-import tk.zwander.common.util.requireLsDisplayManager
 import tk.zwander.lockscreenwidgets.R
 import java.util.TreeSet
 import kotlin.math.absoluteValue
@@ -94,9 +94,7 @@ fun SelectDisplayDialog(
         }
     }
 
-    val lsDisplayManager = remember {
-        context.requireLsDisplayManager
-    }
+    val lsDisplayManager = LocalLSDisplayManager.current
     val displays by lsDisplayManager.availableDisplays.collectAsState()
 
     val defaultDisplay by remember {
