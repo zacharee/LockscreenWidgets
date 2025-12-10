@@ -281,13 +281,13 @@
     </plurals>
     <string name="frame_management">Çerçeve Yönetimi</string>
     <string name="unable_to_grant_storage">Depolama İzni Verilemiyor!</string>
-    <string name="unable_to_grant_storage_desc">It looks like you\'re using a device that restricts ADB\'s ability to grant permissions. The setting to allow this should be in Developer Options and called something similar to \"Disable Permission Monitoring\", \"USB Debugging (Security Setting)\", or \"Disable Permission Monitoring\". Once you\'ve toggled that option, come back here to try again.</string>
-    <string name="developer_options">Developer Options</string>
-    <string name="error_showing_widget">Unable to show widget.</string>
-    <string name="select_display">Select Display</string>
-    <string name="move_frame_to_display">Move Frame to Display</string>
-    <string name="default_display">Default Display</string>
-    <string name="default_display_desc">On foldable devices, the default display generally switches between the internal and external display depending on whether the device is open or closed. On flip devices, it\'s generally always the internal display.</string>
-    <string name="square">Square</string>
-    <string name="tall">Tall</string>
+    <string name="unable_to_grant_storage_desc">ADB\'nin izin verme yeteneğini kısıtlayan bir cihaz kullanıyorsunuz galiba. Bunu izin vermek için gerekli ayar, Geliştirici Seçenekleri\'nde bulunmalı ve \"İzin İzlemeyi Devre Dışı Bırak\", \"USB Hata Ayıklama (Güvenlik Ayarı)\" veya \"İzin İzlemeyi Devre Dışı Bırak\" gibi bir adla belirtilmelidir. Bu seçeneği değiştirdikten sonra, buraya geri dönüp tekrar deneyin.</string>
+    <string name="developer_options">Geliştirici Seçenekleri</string>
+    <string name="error_showing_widget">Widget gösterilemiyor.</string>
+    <string name="select_display">Ekranı Seç</string>
+    <string name="move_frame_to_display">Çerçeveyi Ekrana Taşı</string>
+    <string name="default_display">Varsayılan Ekran</string>
+    <string name="default_display_desc">Katlanabilir cihazlarda, varsayılan ekran genellikle cihazın açık veya kapalı olmasına bağlı olarak iç ve dış ekran arasında geçiş yapar. Kapaklı cihazlarda ise genellikle her zaman iç ekran kullanılır.</string>
+    <string name="square">Kare</string>
+    <string name="tall">Yüksek</string>
 </resources>
