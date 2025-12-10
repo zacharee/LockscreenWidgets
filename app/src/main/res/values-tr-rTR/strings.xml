@@ -34,7 +34,7 @@
     <string name="increase">Arttır</string>
     <string name="decrease">Azalt</string>
     <string name="selected" tools:override="true">Seçili</string>
-    <string name="general">General</string>
+    <string name="general">Genel</string>
     <string name="drawer_enabled">Çekmece Etkinleştirildi</string>
     <string name="frame_enabled">Çerçeve Etkinleştirildi</string>
     <string name="add_id_hint">com.android.systemui:id/some_id_here</string>
@@ -167,8 +167,8 @@
     <string name="intro_read_external_storage_desc_13_addendum">Android 13 ve üzeri sürümlerde gerekli izinleri vermek için Shizuku\'yu kullanmanız gerekecektir.</string>
     <string name="intro_battery_optimization">Pil Optimizasyonu</string>
     <string name="intro_battery_optimization_desc">MIUI ve EMUI kullananlar da dahil olmak üzere birçok cihaz inanılmaz agresif bir pil yönetimine sahiptir. Bu, istemediğiniz zaman Kilit Ekranı Widget\'larının kapatılmasına neden olabilir. Belirli cihazınızda Kilit Ekranı Widget\'larını izin listesine nasıl ekleyebileceğinizi okumak için aşağıdaki düğmeye tıklayın.</string>
-    <string name="intro_moto_razr_allow_secondary_display_access">Allow Secondary Display Access</string>
-    <string name="intro_moto_razr_allow_secondary_display_access_desc">Lockscreen Widgets supports adding frames to multiple displays, but Motorola blocks secondary display access to third party apps by default on the Razr models. Tap below to open the screen where you can grant permission to Lockscreen Widgets to use the cover display. Once there, find Lockscreen Widgets in the list, tap it, and enable \"Allow on external display\".</string>
+    <string name="intro_moto_razr_allow_secondary_display_access">İkincil Ekran Erişimine İzin Ver</string>
+    <string name="intro_moto_razr_allow_secondary_display_access_desc">Lockscreen Widgets, birden fazla ekrana çerçeve eklemeyi destekler, ancak Motorola, Razr modellerinde varsayılan olarak üçüncü taraf uygulamaların ikincil ekrana erişimini engeller. Aşağıya dokunarak, Lockscreen Widgets\'ın kapak ekranını kullanmasına izin verebileceğiniz ekranı açın. Burada, listeden Lockscreen Widgets\'ı bulun, üzerine dokunun ve \"Harici ekranda izin ver\" seçeneğini etkinleştirin.</string>
     <string name="intro_done_title">Hepsi tamam!</string>
     <string name="intro_done_desc">İşte bu kadar! Kilit ekranınızı kontrol edin ve artık widget çerçevesini görmelisiniz!</string>
     <string name="usage_add_widget">Widget ekle</string>
@@ -228,14 +228,14 @@
     <string name="drawer_handle_tap_to_open_desc">Tutamacı tek kez tıkladığınızda çekmece hemen açılıyor; sürüklemek veya çift tıklamak gerekmiyor.</string>
     <string name="drawer_handle_lock_position">Kilit Kolu Pozisyonu</string>
     <string name="drawer_handle_lock_position_desc">Çekmece tutamaçının hareket etmesini engeller.</string>
-    <string name="drawer_blur_status_bar_area">Blur Status Bar Area</string>
-    <string name="drawer_blur_status_bar_area_desc">Show the blur effect over the status bar area.</string>
-    <string name="drawer_background_over_status_bar">Show Background Color Over Status Bar</string>
-    <string name="drawer_background_over_status_bar_desc">Show the drawer\'s background color on top of the status bar. If you have an opaque background color, you may want to consider turning this off.</string>
+    <string name="drawer_blur_status_bar_area">Durum Çubuğu Alanını Bulanıklaştır</string>
+    <string name="drawer_blur_status_bar_area_desc">Durum çubuğu alanı üzerinde bulanıklık efektini göster.</string>
+    <string name="drawer_background_over_status_bar">Durum Çubuğu Üzerinde Arkaplan Rengi Göster</string>
+    <string name="drawer_background_over_status_bar_desc">Durum çubuğunun üstünde çekmecenin arka plan rengini göster. Arka plan rengin opaksa, bu özelliği kapatmayı düşünebilirsin.</string>
     <string name="show_only_when_locked">Yalnızca Kilitli olduğunda göster</string>
     <string name="show_only_when_locked_desc">Çekmece tutamaçını yalnızca cihaz kilit ekranındayken göster.</string>
-    <string name="debug_enable_bugsnag">Enable Bugsnag</string>
-    <string name="debug_enable_bugsnag_desc">Lockscreen Widgets uses Bugsnag to collect anonymous crash reports. Not that to fully disable collection, you\'ll have to force stop and reopen Lockscreen Widgets.</string>
+    <string name="debug_enable_bugsnag">Bugsnag\'ı Etkinleştir</string>
+    <string name="debug_enable_bugsnag_desc">Lockscreen Widgets Bugsnag\'ı kullanarak anonim çökme raporlarını toplar. Toplamayı tamamen devre dışı bırakmak için, Lockscreen Widget\'ı zorla durdurup yeniden açmanız gerekecektir.</string>
     <string name="icon_pack">Simge Paketi</string>
     <string name="icon_pack_desc">Kısayol simgeleri için bir simge paketi seçin. Bu hem çerçeve hem de çekmece için geçerlidir.</string>
     <string name="allow_show_frame">Çerçeveyi Göstermeye İzin Ver</string>
@@ -267,7 +267,7 @@
     <string name="blank_widget">Boş Widget</string>
     <string name="add_frame">Widget Çerçevesi Ekle</string>
     <string name="remove_frame">Widget Çerçevesini Kaldır</string>
-    <string name="unable_to_open_settings">Unable to open Settings.</string>
+    <string name="unable_to_open_settings">Ayarlar açılamıyor.</string>
     <string name="remove_frame_confirmation_message">Bu çerçeveyi kaldırmak istediğinizden emin misiniz?</string>
     <string name="select">Seçim</string>
     <string name="cancel">İptal</string>
@@ -280,7 +280,7 @@
         <item quantity="other">%s çerçeveler eklendi</item>
     </plurals>
     <string name="frame_management">Çerçeve Yönetimi</string>
-    <string name="unable_to_grant_storage">Unable to Grant Storage Permission!</string>
+    <string name="unable_to_grant_storage">Depolama İzni Verilemiyor!</string>
     <string name="unable_to_grant_storage_desc">It looks like you\'re using a device that restricts ADB\'s ability to grant permissions. The setting to allow this should be in Developer Options and called something similar to \"Disable Permission Monitoring\", \"USB Debugging (Security Setting)\", or \"Disable Permission Monitoring\". Once you\'ve toggled that option, come back here to try again.</string>
     <string name="developer_options">Developer Options</string>
     <string name="error_showing_widget">Unable to show widget.</string>
