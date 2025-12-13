@@ -12,7 +12,7 @@ import kotlinx.parcelize.Parcelize
 @Parcelize
 data class IDData(
     val id: String,
-    var type: IDType
+    val type: IDType,
 ) : Parcelable, Comparable<IDData> {
     enum class IDType {
         REMOVED,
