@@ -97,7 +97,7 @@
     <string name="settings_screen_show_debug_id_view_desc">Überlappe den Widget-Rahmen mit einer Liste von IDs, die gerade auf dem Bildschirm erkannt werden. Nützlich zum debuggen und zum Finden von IDs, mit denen man verschiedene Stadien des Sperrbildschirms erkennen kann.</string>
     <string name="settings_screen_accessibility_event_delay">Aktionsverzögerung der Bedienungshilfe</string>
     <string name="settings_screen_accessibility_event_delay_desc">Setzt die Verzögerung zwischen Events der Bedienungshilfe, auf die Lockscreen Widgets reagiert. Ein kürzerer Wert heißt, dass der Widget-Rahmen schneller reagiert, aber mit potenziellen Kosten für Leistung und Akku.</string>
-    <string name="settings_screen_non_present_ids">Verstecke, wenn IDs nicht anwesend sind</string>
+    <string name="settings_screen_non_present_ids">Heide in Von-Prozent IDs</string>
     <string name="settings_screen_non_present_ids_desc">Lockscreen Widgets wird sich selber verstecken, wenn diese IDs nicht auf dem Bildschirm erkannt werden. Du kannst bestimmte IDs finden, wenn du die Debug Option \"Zeige Debug IDs\" aktiviert hast.</string>
     <string name="settings_screen_present_ids">Verstecke, wenn IDs anwesend sind</string>
     <string name="settings_screen_present_ids_desc">Lockscreen Widgets wird sich selber verstecken, wenn diese IDs auf dem Bildschirm erkannt werden. Du kannst bestimmte IDs finden, wenn du die Debug Option \"Zeige Debug IDs\" aktiviert hast.</string>
