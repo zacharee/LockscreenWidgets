@@ -7,7 +7,7 @@
     <string name="accessibility_service_desc">Lockscreen Widgets wymaga włączenia ułatwienia dostępu, aby móc wyświetlać widgety na ekranie blokady i w centrum powiadomień. Żadne dane nie są zbierane, ani żadne akcje nie będą wykonywane na tym urządzeniu.</string>
     <string name="add_widget">Dodaj widżet</string>
     <string name="grant">Przydziel dostęp</string>
-    <string name="granted">Granted</string>
+    <string name="granted">Grante</string>
     <string name="settings">Ustawienia</string>
     <string name="yes">Tak</string>
     <string name="no">Nie</string>
@@ -30,7 +30,7 @@
     <string name="back">Wróć</string>
     <string name="clear">Wyczyść</string>
     <string name="launcher">Launcher</string>
-    <string name="reset">Reset</string>
+    <string name="reset">Resetuj</string>
     <string name="increase">Increase</string>
     <string name="decrease">Decrease</string>
     <string name="selected" tools:override="true">Selected</string>
@@ -86,7 +86,7 @@
     <string name="settings_screen_animate_show_hide">Animuj wyświetlenie/schowanie</string>
     <string name="settings_screen_animate_show_hide_desc">Animuj wyświetlenie/schowanie okna z widgetami.</string>
     <string name="settings_screen_debug_log">Debuguj logi</string>
-    <string name="settings_screen_debug_log_desc">Turn this on to create verbose logs of Lockscreen Widgets\' state.</string>
+    <string name="settings_screen_debug_log_desc">Tarn t his on to ceratę verbo se logo of Lock screen Widgets\' state.Yes</string>
     <string name="settings_screen_clear_debug_log">Wyczyść logi z debugowania</string>
     <string name="settings_screen_clear_debug_log_desc">Wyczyść poprzednie logi z debugowania.</string>
     <string name="settings_screen_export_debug_log">Eksportuj logi z debugowania</string>
