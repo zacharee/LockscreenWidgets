@@ -32,9 +32,9 @@
     <string name="launcher">Launcher</string>
     <string name="reset">Resetuj</string>
     <string name="increase">Increase</string>
-    <string name="decrease">Decrease</string>
-    <string name="selected" tools:override="true">Selected</string>
-    <string name="general">General</string>
+    <string name="decrease">Https://pl. crowdin. com/editor/lockscreen-widgets/58/en-pl? view=comfortable#3646</string>
+    <string name="selected" tools:override="true">Wybrane</string>
+    <string name="general">Ogólne</string>
     <string name="drawer_enabled">Menu z widżetami włączone</string>
     <string name="frame_enabled">Ramka włączona</string>
     <string name="add_id_hint">com.android.systemui:id/id_aplikacji</string>
@@ -57,7 +57,7 @@
     <string name="shortcut_icon">Ikona skrótu</string>
     <string name="expand">Rozwiń</string>
     <string name="alert_remove_widget_confirm">Usunąć widżet?</string>
-    <string name="alert_remove_widget_confirm_desc">Are you sure you want to remove this item?</string>
+    <string name="alert_remove_widget_confirm_desc">Czy na pewno chcesz usunąć ten element?</string>
     <string name="main_screen_social_mastodon">Mastodon</string>
     <string name="main_screen_social_mastodon_desc">Obserwuj mnie na Mastodonie, by uzyskać informacje o moich innych aplikacjach, wraz z ciekawostkami związanych z ich tworzeniem.</string>
     <string name="main_screen_social_website">Strona internetowa</string>
@@ -94,7 +94,7 @@
     <string name="settings_screen_frame_col_count">Kolumny na stronę</string>
     <string name="settings_screen_frame_row_count">Wiersze na stronę</string>
     <string name="settings_screen_show_debug_id_view">Pokaż widok id debugowania</string>
-    <string name="settings_screen_show_debug_id_view_desc">Overlay the widget frame with a list of View IDs it detects on the current screen. Useful for debugging and finding IDs that can be used to detect various lock screen states.</string>
+    <string name="settings_screen_show_debug_id_view_desc">Nakładka ramki widżetu z listą identyfikatorów widoku, którą wykrywa na bieżącym ekranie. Przydatne do debugowania i znalezienia identyfikatorów, które mogą być używane do wykrywania różnych stanów ekranu blokady.</string>
     <string name="settings_screen_accessibility_event_delay">Częstotliwość ułatwienia dostępu</string>
     <string name="settings_screen_accessibility_event_delay_desc">Ustawia częstotliwość dostępu Lockscreen Widgets do ułatwienia dostępu. Mniejsze wartości oznaczają, że ramka z widżetami, będzie szybciej reagowała na zmiany widżetów. Może to wpłynąć na wydajność i długość działania na baterii urządzenia.</string>
     <string name="settings_screen_non_present_ids">Hide on Non-Present IDs</string>
