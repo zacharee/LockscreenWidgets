@@ -201,6 +201,7 @@ class App : Application(), CoroutineScope by MainScope(), EventObserver {
                     mapOf(
                         "drawer_enabled" to prefManager.drawerEnabled,
                         "frame_enabled" to prefManager.widgetFrameEnabled,
+                        "id_list_enabled" to prefManager.showDebugIdView,
                     ),
                 )
 
