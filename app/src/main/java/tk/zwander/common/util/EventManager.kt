@@ -130,7 +130,6 @@ sealed class Event {
         }
     }
     data class RemoveWidgetConfirmed(val remove: Boolean, val item: WidgetData?) : Event()
-    data class DebugIdsUpdated(val ids: Collection<String>) : Event()
     data class FrameMoveFinished(val frameId: Int) : Event()
     data class CenterFrameHorizontally(val frameId: Int) : Event()
     data class CenterFrameVertically(val frameId: Int) : Event()

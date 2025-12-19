@@ -261,10 +261,6 @@
                 <action android:name="android.service.notification.NotificationListenerService" />
             </intent-filter>
         </service>
-        <service android:name=".services.IDWidgetService"
-            android:permission="android.permission.BIND_REMOTEVIEWS"
-            android:exported="true"
-            />
         <service
             android:name="tk.zwander.common.tiles.EnableDisableTile"
             android:label="@string/frame_enabled"

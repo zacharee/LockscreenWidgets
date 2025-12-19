@@ -1,7 +1,6 @@
 package tk.zwander.lockscreenwidgets.compose
 
 import android.content.ClipData
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -16,12 +15,9 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -33,56 +29,24 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
+import tk.zwander.common.util.DebugIDsManager
 import tk.zwander.lockscreenwidgets.R
 import tk.zwander.lockscreenwidgets.data.IDData
-import java.util.TreeSet
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun IDListLayout(
-    items: Set<String>,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     val clipboard = LocalClipboard.current
     val scope = rememberCoroutineScope()
 
-    var displayItems by remember {
-        mutableStateOf<Set<IDData>>(setOf())
-    }
-
-    LaunchedEffect(items.toList()) {
-        withContext(Dispatchers.IO) {
-            val oldIdsFull = displayItems.map { it.id }
-            val oldIdsWithoutRemoved = displayItems
-                .filter { it.type != IDData.IDType.REMOVED }
-                .map { it.id }
-            if (!oldIdsWithoutRemoved.containsAll(items) || !items.containsAll(oldIdsWithoutRemoved)) {
-                val newItems = TreeSet<IDData>()
-                newItems.addAll(
-                    (items + oldIdsFull).map { id ->
-                        IDData(
-                            id = id,
-                            type = when {
-                                !items.contains(id) -> IDData.IDType.REMOVED
-                                !oldIdsWithoutRemoved.contains(id) -> IDData.IDType.ADDED
-                                else -> IDData.IDType.SAME
-                            }
-                        )
-                    }
-                )
-
-                displayItems = newItems
-            }
-        }
-    }
+    val displayItems by DebugIDsManager.items.collectAsState()
 
     Surface(modifier = modifier) {
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
-            contentPadding = PaddingValues(8.dp)
+            contentPadding = PaddingValues(8.dp),
         ) {
             stickyHeader(key = "copy") {
                 Row(
@@ -107,14 +71,14 @@ fun IDListLayout(
                                     ),
                                 )
                             }
-                        }
+                        },
                     ) {
                         Text(text = stringResource(id = R.string.copy))
                     }
                 }
             }
 
-            items(displayItems.toList(), key = { it.id }) { id ->
+            items(items = displayItems, key = { it.id }) { id ->
                 Text(
                     text = buildAnnotatedString {
                         withStyle(
@@ -123,8 +87,8 @@ fun IDListLayout(
                                     IDData.IDType.ADDED -> Color.Green
                                     IDData.IDType.REMOVED -> Color.Red
                                     IDData.IDType.SAME -> MaterialTheme.colorScheme.onSurface
-                                }
-                            )
+                                },
+                            ),
                         ) {
                             append(id.id)
                         }

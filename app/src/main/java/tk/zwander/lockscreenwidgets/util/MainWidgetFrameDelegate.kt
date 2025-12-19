@@ -686,10 +686,6 @@ open class MainWidgetFrameDelegate protected constructor(
         }
     }
 
-    fun setNewDebugIdItems(items: List<String>) {
-        viewModel.debugIdItems.value = items.toSet()
-    }
-
     suspend fun updateWindowState(updateAccessibility: Boolean = false) {
         if (canShow()) {
             if (updateAccessibility) updateAccessibilityPass()
@@ -1038,7 +1034,6 @@ open class MainWidgetFrameDelegate protected constructor(
         BaseViewModel<State, MainWidgetFrameDelegate>(delegate) {
         val isSelectingFrame = MutableStateFlow(false)
         val wallpaperInfo = MutableStateFlow<WallpaperInfo?>(null)
-        val debugIdItems = MutableStateFlow<Set<String>>(setOf())
         val animationState = MutableStateFlow(AnimationState.STATE_IDLE)
         val acknowledgedTwoFingerTap = MutableStateFlow<Boolean?>(null)
         val acknowledgedThreeFingerTap = MutableStateFlow(false)

@@ -459,10 +459,7 @@ fun MainWidgetFrameDelegate.WidgetFrameViewModel.WidgetFrameLayout(
                     contentAlignment = Alignment.Center,
                 ) {
                     MeasuredComposable(name = "IDList") {
-                        val items by debugIdItems.collectAsState()
-
                         IDListLayout(
-                            items = items,
                             modifier = Modifier.fillMaxSize(),
                         )
                     }
