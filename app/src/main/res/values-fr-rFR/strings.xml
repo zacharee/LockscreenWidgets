@@ -97,7 +97,7 @@
     <string name="settings_screen_show_debug_id_view_desc">Superpose le cadre du widget avec une liste d\'ID détecté sur l\'écran actuel. Pratique pour déboguer et trouver des ID qui peuvent être utilisés pour détecter différents états de l\'écran de verrouillage.</string>
     <string name="settings_screen_accessibility_event_delay">Délai d\'accès aux évènements</string>
     <string name="settings_screen_accessibility_event_delay_desc">Définit le délai entre les évènements auxquels Lockscreen Widgets réagit. Une valeur plus courte signifie que le cadre répondra plus rapidement aux changements, au coût potentiel des performances de l\'appareil et de la durée de vie de la batterie.</string>
-    <string name="settings_screen_non_present_ids">Settings_screen_non_present_ids</string>
+    <string name="settings_screen_non_present_ids">Masquer si ID absent</string>
     <string name="settings_screen_non_present_ids_desc">Lockscreen Widgets se masquera lorsque ces IDs ne seront pas affichés à l’écran. Vous pouvez déterminer quels IDs doivent être ajoutés ici en activant les deux options de Débogage et en observant les IDs qui sont mis en évidence en rouge lorsque vous souhaitez que le cadre soit masqué.</string>
     <string name="settings_screen_present_ids">Masquer si ID présent</string>
     <string name="settings_screen_present_ids_desc">Lockscreen Widgets se masquera lorsque ces IDs seront affichés à l’écran. Vous pouvez déterminer quels IDs doivent être ajoutés ici en activant les deux options de Débogage et en observant les IDs qui sont mis en évidence en vert lorsque vous souhaitez que le cadre soit masqué.</string>
