@@ -10,6 +10,7 @@ import tk.zwander.common.activities.DismissOrUnlockActivity
 import tk.zwander.common.compose.add.AddWidgetLayout
 import tk.zwander.common.data.WidgetData
 import tk.zwander.common.data.WidgetSizeData
+import tk.zwander.common.util.componentInfoCompat
 import tk.zwander.common.util.componentNameCompat
 import tk.zwander.common.util.density
 import tk.zwander.common.util.setThemedContent
@@ -52,7 +53,7 @@ abstract class AddWidgetActivity : BaseBindWidgetActivity() {
                             val item = WidgetData.launcherItem(
                                 shortcutIdManager.allocateShortcutId(),
                                 it.appInfo.appInfo.packageName,
-                                it.itemInfo.componentInfo.componentNameCompat,
+                                it.itemInfo.componentInfoCompat.componentNameCompat,
                                 WidgetSizeData(1, 1),
                             )
 

@@ -18,6 +18,7 @@ import tk.zwander.common.compose.util.matchesFilter
 import tk.zwander.common.data.AppInfo
 import tk.zwander.common.iconpacks.iconPackManager
 import tk.zwander.common.util.BrokenAppsRegistry
+import tk.zwander.common.util.componentInfoCompat
 import tk.zwander.common.util.componentNameCompat
 import tk.zwander.common.util.density
 import tk.zwander.common.util.getAllInstalledWidgetProviders
@@ -160,7 +161,7 @@ internal fun items(
                                 icon = context.iconPackManager.currentIconPack.value
                                     ?.resolveIcon(
                                         context,
-                                        launcherItem.componentInfo.componentNameCompat,
+                                        launcherItem.componentInfoCompat.componentNameCompat,
                                     )
                                     ?.toSafeBitmap(context.density, maxSize = 128.dp)
                                     ?.let { IconCompat.createWithBitmap(it) } ?: (
