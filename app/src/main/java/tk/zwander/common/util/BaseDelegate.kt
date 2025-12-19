@@ -120,7 +120,7 @@ abstract class BaseDelegate<State : Any>(
         if (lifecycleRegistry.currentState == Lifecycle.State.INITIALIZED) {
             savedStateRegistryController.performAttach()
             savedStateRegistryController.performRestore(null)
-            lifecycleRegistry.currentState = Lifecycle.State.CREATED
+            lifecycleRegistry.safeCurrentState = Lifecycle.State.CREATED
         }
     }
 
@@ -134,7 +134,7 @@ abstract class BaseDelegate<State : Any>(
 
         currentWidgets = ArrayList(adapter.widgets)
         if (lifecycleRegistry.currentState.isAtLeast(Lifecycle.State.CREATED)) {
-            lifecycleRegistry.currentState = Lifecycle.State.DESTROYED
+            lifecycleRegistry.safeCurrentState = Lifecycle.State.DESTROYED
         }
     }
 

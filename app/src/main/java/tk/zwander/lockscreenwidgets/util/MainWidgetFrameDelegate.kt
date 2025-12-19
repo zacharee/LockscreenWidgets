@@ -50,6 +50,7 @@ import tk.zwander.common.util.mainHandler
 import tk.zwander.common.util.prefManager
 import tk.zwander.common.util.requireLsDisplayManager
 import tk.zwander.common.util.safeAddView
+import tk.zwander.common.util.safeCurrentState
 import tk.zwander.common.util.safeRemoveView
 import tk.zwander.common.util.safeUpdateViewLayout
 import tk.zwander.common.util.themedContext
@@ -427,9 +428,9 @@ open class MainWidgetFrameDelegate protected constructor(
                     try {
                         if (event.attached) {
                             if (lifecycleRegistry.currentState < Lifecycle.State.CREATED) {
-                                lifecycleRegistry.currentState = Lifecycle.State.CREATED
+                                lifecycleRegistry.safeCurrentState = Lifecycle.State.CREATED
                             }
-                            lifecycleRegistry.currentState = Lifecycle.State.RESUMED
+                            lifecycleRegistry.safeCurrentState = Lifecycle.State.RESUMED
                             widgetHost.startListening(this)
                             updateWallpaperLayerIfNeeded()
                             //Even with the startListening() call above,
@@ -442,7 +443,7 @@ open class MainWidgetFrameDelegate protected constructor(
                             scrollToStoredPosition(false)
                         } else {
                             widgetHost.stopListening(this)
-                            lifecycleRegistry.currentState = Lifecycle.State.STARTED
+                            lifecycleRegistry.safeCurrentState = Lifecycle.State.STARTED
                         }
                     } catch (_: NullPointerException) {
                         //The stupid "Attempt to read from field 'com.android.server.appwidget.AppWidgetServiceImpl$ProviderId

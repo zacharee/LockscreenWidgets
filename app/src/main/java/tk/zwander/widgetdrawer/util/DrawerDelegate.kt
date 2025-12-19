@@ -46,6 +46,7 @@ import tk.zwander.common.util.mainHandler
 import tk.zwander.common.util.prefManager
 import tk.zwander.common.util.requireLsDisplayManager
 import tk.zwander.common.util.safeAddView
+import tk.zwander.common.util.safeCurrentState
 import tk.zwander.common.util.safeRemoveView
 import tk.zwander.common.util.safeUpdateViewLayout
 import tk.zwander.common.util.themedContext
@@ -268,9 +269,9 @@ class DrawerDelegate private constructor(context: Context, displayId: String) :
                     }
 
                     if (lifecycleRegistry.currentState < Lifecycle.State.CREATED) {
-                        lifecycleRegistry.currentState = Lifecycle.State.CREATED
+                        lifecycleRegistry.safeCurrentState = Lifecycle.State.CREATED
                     }
-                    lifecycleRegistry.currentState = Lifecycle.State.RESUMED
+                    lifecycleRegistry.safeCurrentState = Lifecycle.State.RESUMED
                 } else {
                     try {
                         widgetHost.stopListening(this)
@@ -279,7 +280,7 @@ class DrawerDelegate private constructor(context: Context, displayId: String) :
                     }
 
                     if (!handle.isAttachedToWindow) {
-                        lifecycleRegistry.currentState = Lifecycle.State.STARTED
+                        lifecycleRegistry.safeCurrentState = Lifecycle.State.STARTED
                     }
                 }
             }
@@ -432,9 +433,9 @@ class DrawerDelegate private constructor(context: Context, displayId: String) :
             }
 
             if (lifecycleRegistry.currentState < Lifecycle.State.CREATED) {
-                lifecycleRegistry.currentState = Lifecycle.State.CREATED
+                lifecycleRegistry.safeCurrentState = Lifecycle.State.CREATED
             }
-            lifecycleRegistry.currentState = Lifecycle.State.RESUMED
+            lifecycleRegistry.safeCurrentState = Lifecycle.State.RESUMED
 
             if (!handle.isAttachedToWindow && viewModel.handleAnimationState.value != AnimationState.ADDING) {
                 wm.safeAddView(handle, handleParams)
@@ -448,7 +449,7 @@ class DrawerDelegate private constructor(context: Context, displayId: String) :
     private suspend fun hideHandle() {
         withContext(Dispatchers.Main) {
             if (!drawer.isAttachedToWindow) {
-                lifecycleRegistry.currentState = Lifecycle.State.STARTED
+                lifecycleRegistry.safeCurrentState = Lifecycle.State.STARTED
             }
 
             if (handle.isAttachedToWindow && viewModel.handleAnimationState.value != AnimationState.REMOVING) {
