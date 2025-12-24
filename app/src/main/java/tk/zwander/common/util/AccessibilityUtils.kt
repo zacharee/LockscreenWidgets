@@ -575,7 +575,7 @@ object AccessibilityUtils {
             }
 
             logUtils.debugLog(
-                "Accessibility event: $event, isScreenOn: ${requireLsDisplayManager.isAnyDisplayOn.value}, wasOnKeyguard: ${globalState.wasOnKeyguard.value}, ${drawerDelegate.state}",
+                "Accessibility event: $event, isScreenOn: ${lsDisplayManager.isAnyDisplayOn.value}, wasOnKeyguard: ${globalState.wasOnKeyguard.value}, ${drawerDelegate.state}",
                 null
             )
 
@@ -594,7 +594,7 @@ object AccessibilityUtils {
                 frameDelegates = frameDelegates,
                 drawerDelegate = drawerDelegate,
                 isOnKeyguard = globalState.wasOnKeyguard.value,
-                isScreenOn = requireLsDisplayManager.isAnyDisplayOn.value,
+                isScreenOn = lsDisplayManager.isAnyDisplayOn.value,
                 getWindows = getWindows,
             )
 

@@ -39,7 +39,6 @@ import tk.zwander.common.util.isPixelUI
 import tk.zwander.common.util.isTouchWiz
 import tk.zwander.common.util.lsDisplayManager
 import tk.zwander.common.util.prefManager
-import tk.zwander.common.util.requireLsDisplayManager
 import tk.zwander.common.util.setThemedContent
 import tk.zwander.lockscreenwidgets.BuildConfig
 import tk.zwander.lockscreenwidgets.R
@@ -73,7 +72,7 @@ class ComposeFrameSettingsActivity : BaseActivity() {
             )
             val frameCount by rememberUpdatedState(secondaryFrames.size + 1)
             val displayManager = remember {
-                requireLsDisplayManager
+                lsDisplayManager
             }
             val displays by displayManager.availableDisplays.collectAsState()
 
@@ -139,7 +138,7 @@ class ComposeFrameSettingsActivity : BaseActivity() {
                             val maxFrameId = secondaryFrames.keys.maxOrNull() ?: 1
                             val newFrameId = maxFrameId + 1
 
-                            if (!BuildConfig.DEBUG && lsDisplayManager?.availableDisplays?.value?.let { it.size <= 1 } != false) {
+                            if (!BuildConfig.DEBUG && lsDisplayManager.availableDisplays.value.size <= 1) {
                                 secondaryFrames = HashMap(
                                     secondaryFrames.toMutableMap().apply {
                                         this[newFrameId] = "${Display.DEFAULT_DISPLAY}"

@@ -44,7 +44,7 @@ import tk.zwander.common.util.handler
 import tk.zwander.common.util.logUtils
 import tk.zwander.common.util.mainHandler
 import tk.zwander.common.util.prefManager
-import tk.zwander.common.util.requireLsDisplayManager
+import tk.zwander.common.util.lsDisplayManager
 import tk.zwander.common.util.safeAddView
 import tk.zwander.common.util.safeCurrentState
 import tk.zwander.common.util.safeRemoveView
@@ -388,7 +388,7 @@ class DrawerDelegate private constructor(context: Context, displayId: String) :
             resources.getDimensionPixelSize(R.dimen.drawer_row_height).toDouble()
 
         lifecycleScope.launch(Dispatchers.Main) {
-            requireLsDisplayManager.displayPowerStates
+            lsDisplayManager.displayPowerStates
                 .map { it[display.uniqueIdCompat] == true }
                 .collect { isScreenOn ->
                     if (isScreenOn) {
@@ -427,7 +427,7 @@ class DrawerDelegate private constructor(context: Context, displayId: String) :
     }
 
     private suspend fun tryShowHandle() {
-        if (prefManager.drawerEnabled && prefManager.showDrawerHandle && requireLsDisplayManager.displayPowerStates.value[display.uniqueIdCompat] == true) {
+        if (prefManager.drawerEnabled && prefManager.showDrawerHandle && lsDisplayManager.displayPowerStates.value[display.uniqueIdCompat] == true) {
             if (prefManager.showDrawerHandleOnlyWhenLocked && !globalState.wasOnKeyguard.value) {
                 return
             }

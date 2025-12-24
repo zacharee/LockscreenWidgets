@@ -14,7 +14,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import tk.zwander.common.util.LSDisplayManager
-import tk.zwander.common.util.requireLsDisplayManager
+import tk.zwander.common.util.lsDisplayManager
 import tk.zwander.lockscreenwidgets.R
 
 val LocalLSDisplayManager = compositionLocalOf<LSDisplayManager> { error("LSDisplayManager not provided!") }
@@ -25,7 +25,7 @@ fun AppTheme(
 ) {
     val context = LocalContext.current
     val lsDisplayManager = remember {
-        context.requireLsDisplayManager
+        context.lsDisplayManager
     }
 
     CompositionLocalProvider(

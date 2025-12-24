@@ -5,7 +5,7 @@ import android.os.Build
 import android.os.Bundle
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
-import tk.zwander.common.util.requireLsDisplayManager
+import tk.zwander.common.util.lsDisplayManager
 
 abstract class BaseActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -22,6 +22,6 @@ abstract class BaseActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
 
-        requireLsDisplayManager.fetchDisplays()
+        lsDisplayManager.fetchDisplays()
     }
 }

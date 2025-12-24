@@ -17,7 +17,7 @@ import tk.zwander.common.util.eventManager
 import tk.zwander.common.util.keyguardManager
 import tk.zwander.common.util.logUtils
 import tk.zwander.common.util.mainHandler
-import tk.zwander.common.util.requireLsDisplayManager
+import tk.zwander.common.util.lsDisplayManager
 
 /**
  * Used when the lock screen or notification center needs to be dismissed.
@@ -56,7 +56,7 @@ class DismissOrUnlockActivity : AppCompatActivity() {
         handle()
 
         lifecycleScope.launch(Dispatchers.Main) {
-            requireLsDisplayManager.isAnyDisplayOn.collect {
+            lsDisplayManager.isAnyDisplayOn.collect {
                 if (!it) {
                     finish()
                 }

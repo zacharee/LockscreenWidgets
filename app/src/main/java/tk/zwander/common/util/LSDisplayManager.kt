@@ -20,20 +20,13 @@ import kotlinx.coroutines.flow.stateIn
 import tk.zwander.lockscreenwidgets.App
 import kotlin.math.roundToInt
 
-val Context.requireLsDisplayManager: LSDisplayManager
+val Context.lsDisplayManager: LSDisplayManager
     get() = LSDisplayManager.getInstance(this)
-
-val lsDisplayManager: LSDisplayManager?
-    get() = LSDisplayManager.peekInstance()
 
 class LSDisplayManager private constructor(context: Context) : ContextWrapper(context), CoroutineScope by App.instance {
     companion object {
         @SuppressLint("StaticFieldLeak")
         private var instance: LSDisplayManager? = null
-
-        fun peekInstance(): LSDisplayManager? {
-            return instance
-        }
 
         @Synchronized
         fun getInstance(context: Context): LSDisplayManager {
@@ -130,7 +123,9 @@ class LSDisplayManager private constructor(context: Context) : ContextWrapper(co
             display = display,
             fontScale = createDisplayContext(display).resources.configuration.fontScale,
             isLikelyRazr = isLikelyRazr,
-        )
+        ).also {
+            logUtils.debugLog("Processed display ${it.loggingId}", null)
+        }
 
         availableDisplays.value = newMap
     }
@@ -157,11 +152,18 @@ class LSDisplayManager private constructor(context: Context) : ContextWrapper(co
     }
 }
 
-class LSDisplay(val display: Display, val fontScale: Float, private val isLikelyRazr: Boolean) {
+class LSDisplay(
+    val display: Display,
+    val fontScale: Float,
+    private val isLikelyRazr: Boolean,
+) {
     val displayId: Int = display.displayId
 
     val density: Density by lazy {
-        Density(density = realMetrics.density, fontScale = fontScale)
+        Density(
+            density = realMetrics.density,
+            fontScale = fontScale,
+        )
     }
 
     val realSize: Point by lazy {

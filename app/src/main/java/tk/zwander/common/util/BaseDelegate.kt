@@ -3,8 +3,6 @@ package tk.zwander.common.util
 import android.annotation.SuppressLint
 import android.app.WallpaperManager
 import android.content.Context
-import android.hardware.display.DisplayManager
-import android.hardware.display.DisplayManager.DisplayListener
 import android.view.View
 import android.view.WindowManager
 import androidx.annotation.CallSuper
@@ -39,15 +37,12 @@ abstract class BaseDelegate<State : Any>(
     protected val kgm by lazy { keyguardManager }
     protected val wallpaper by lazy { getSystemService(WALLPAPER_SERVICE) as WallpaperManager }
     protected val widgetHost by lazy { widgetHostCompat }
-    protected val displayManager by lazy {
-        getSystemService(DISPLAY_SERVICE) as DisplayManager
-    }
     protected val displayContext: Context
         get() = createDisplayContext(display.display)
     protected val wm: WindowManager
         get() = displayContext.getSystemService(WINDOW_SERVICE) as WindowManager
     val display: LSDisplay
-        get() = requireLsDisplayManager.requireDisplayByStringId(targetDisplayId)
+        get() = lsDisplayManager.requireDisplayByStringId(targetDisplayId)
 
     open var commonState: BaseState = BaseState()
         protected set
@@ -64,17 +59,6 @@ abstract class BaseDelegate<State : Any>(
     protected abstract val rootView: View
     protected abstract val recyclerView: RecyclerView
     abstract var currentWidgets: List<WidgetData>
-
-    protected  val displayListener = object : DisplayListener {
-        override fun onDisplayAdded(displayId: Int) {}
-        override fun onDisplayRemoved(displayId: Int) {}
-
-        override fun onDisplayChanged(displayId: Int) {
-            lifecycleScope.launch {
-                updateWindow()
-            }
-        }
-    }
 
     protected val lifecycleRegistry by lazy { LifecycleRegistry(this) }
     protected val savedStateRegistryController by lazy { SavedStateRegistryController.create(this) }
@@ -114,13 +98,20 @@ abstract class BaseDelegate<State : Any>(
         recyclerView.layoutManager = gridLayoutManager
         itemTouchHelper.attachToRecyclerView(recyclerView)
         adapter.updateWidgets(currentWidgets)
-        displayManager.registerDisplayListener(displayListener, null)
 
         updateCounts()
         if (lifecycleRegistry.currentState == Lifecycle.State.INITIALIZED) {
             savedStateRegistryController.performAttach()
             savedStateRegistryController.performRestore(null)
             lifecycleRegistry.safeCurrentState = Lifecycle.State.CREATED
+        }
+
+        lifecycleScope.launch {
+            lsDisplayManager.availableDisplays.collect { displays ->
+                if (displays.values.any { it.uniqueIdCompat == targetDisplayId }) {
+                    updateWindow()
+                }
+            }
         }
     }
 
@@ -130,7 +121,6 @@ abstract class BaseDelegate<State : Any>(
         prefsHandler.unregister(this)
         widgetHost.removeOnClickCallback(this)
         itemTouchHelper.attachToRecyclerView(null)
-        displayManager.unregisterDisplayListener(displayListener)
 
         currentWidgets = ArrayList(adapter.widgets)
         if (lifecycleRegistry.currentState.isAtLeast(Lifecycle.State.CREATED)) {

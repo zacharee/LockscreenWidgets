@@ -77,7 +77,7 @@ import tk.zwander.common.util.getAllInstalledWidgetProviders
 import tk.zwander.common.util.logUtils
 import tk.zwander.common.util.mitigations.SafeContextWrapper
 import tk.zwander.common.util.prefManager
-import tk.zwander.common.util.requireLsDisplayManager
+import tk.zwander.common.util.lsDisplayManager
 import tk.zwander.common.util.setThemedContent
 import tk.zwander.common.util.themedLayoutInflater
 import tk.zwander.lockscreenwidgets.R
@@ -109,7 +109,7 @@ abstract class BaseAdapter(
     protected val viewCacheRegistry = context.widgetViewCacheRegistry
 
     protected val lsDisplay: LSDisplay
-        get() = context.requireLsDisplayManager.requireDisplayByStringId(displayId())
+        get() = context.lsDisplayManager.requireDisplayByStringId(displayId())
 
     private val baseLayoutInflater = context.themedLayoutInflater
 

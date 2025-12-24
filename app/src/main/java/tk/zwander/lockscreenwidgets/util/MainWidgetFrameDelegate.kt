@@ -46,9 +46,9 @@ import tk.zwander.common.util.frameSizeAndPosition
 import tk.zwander.common.util.globalState
 import tk.zwander.common.util.handler
 import tk.zwander.common.util.logUtils
+import tk.zwander.common.util.lsDisplayManager
 import tk.zwander.common.util.mainHandler
 import tk.zwander.common.util.prefManager
-import tk.zwander.common.util.requireLsDisplayManager
 import tk.zwander.common.util.safeAddView
 import tk.zwander.common.util.safeCurrentState
 import tk.zwander.common.util.safeRemoveView
@@ -534,7 +534,7 @@ open class MainWidgetFrameDelegate protected constructor(
         }
 
         lifecycleScope.launch(Dispatchers.Main) {
-            requireLsDisplayManager.displayPowerStates
+            lsDisplayManager.displayPowerStates
                 .map { it[display.uniqueIdCompat] != false }
                 .collect { isScreenOn ->
                     if (!isScreenOn) {
@@ -741,7 +741,7 @@ open class MainWidgetFrameDelegate protected constructor(
         }
 
         fun forCommon(): Boolean {
-            return requireLsDisplayManager.displayPowerStates.value[display.uniqueIdCompat] == true
+            return lsDisplayManager.displayPowerStates.value[display.uniqueIdCompat] == true
                     && !state.isTempHide
                     && !globalState.hideForPresentIds.value
                     && !globalState.hideForNonPresentIds.value

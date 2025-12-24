@@ -74,8 +74,8 @@ import tk.zwander.common.util.PrefManager
 import tk.zwander.common.util.collectAsMutableState
 import tk.zwander.common.util.eventManager
 import tk.zwander.common.util.globalState
+import tk.zwander.common.util.lsDisplayManager
 import tk.zwander.common.util.prefManager
-import tk.zwander.common.util.requireLsDisplayManager
 import tk.zwander.common.util.themedContext
 import tk.zwander.common.views.SnappyRecyclerView
 import tk.zwander.lockscreenwidgets.R
@@ -107,7 +107,7 @@ fun WidgetFramePreviewLayout(
         val frameSize = remember(frameId) {
             FrameSizeAndPosition.getInstance(context).getSizeForType(
                 type = FrameSizeAndPosition.FrameType.SecondaryLockscreen.Portrait(frameId),
-                display = context.requireLsDisplayManager.requireDisplayByStringId(displayId),
+                display = context.lsDisplayManager.requireDisplayByStringId(displayId),
             )
         }
 
