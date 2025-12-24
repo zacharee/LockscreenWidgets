@@ -282,6 +282,9 @@ abstract class BaseDelegate<State : Any>(
         val params: WindowManager.LayoutParams
             get() = delegate.params
 
+        val lifecycle: Lifecycle
+            get() = delegate.lifecycle
+
         val wm: WindowManager
             get() = delegate.wm
 

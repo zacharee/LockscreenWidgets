@@ -75,9 +75,9 @@ import tk.zwander.common.util.createWidgetErrorView
 import tk.zwander.common.util.eventManager
 import tk.zwander.common.util.getAllInstalledWidgetProviders
 import tk.zwander.common.util.logUtils
+import tk.zwander.common.util.lsDisplayManager
 import tk.zwander.common.util.mitigations.SafeContextWrapper
 import tk.zwander.common.util.prefManager
-import tk.zwander.common.util.lsDisplayManager
 import tk.zwander.common.util.setThemedContent
 import tk.zwander.common.util.themedLayoutInflater
 import tk.zwander.lockscreenwidgets.R
@@ -226,6 +226,14 @@ abstract class BaseAdapter(
 
     override fun onBindViewHolder(holder: BaseVH, position: Int) {
         holder.setCompositionContext()
+        holder.itemView.addOnAttachStateChangeListener(
+            object : View.OnAttachStateChangeListener {
+                override fun onViewAttachedToWindow(v: View) {
+                    holder.setCompositionContext()
+                }
+                override fun onViewDetachedFromWindow(v: View) {}
+            }
+        )
 
         holder.performBind()
     }
@@ -706,7 +714,11 @@ abstract class BaseAdapter(
     abstract inner class BaseVH(protected val binding: ComposeViewHolderBinding) :
         RecyclerView.ViewHolder(binding.root) {
         fun setCompositionContext() {
-            binding.root.setParentCompositionContext(rootView.createLifecycleAwareWindowRecomposer())
+            binding.root.setParentCompositionContext(
+                rootView.createLifecycleAwareWindowRecomposer(
+                    lifecycle = viewModel.lifecycle,
+                ),
+            )
         }
 
         abstract fun performBind()
