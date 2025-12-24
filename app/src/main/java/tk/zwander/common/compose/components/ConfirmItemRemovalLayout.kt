@@ -8,8 +8,8 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.TextAutoSize
@@ -82,18 +82,17 @@ fun <T> ConfirmItemRemovalLayout(
     modifier: Modifier = Modifier,
 ) {
     Surface(
-        modifier = modifier.padding(16.dp),
+        modifier = modifier.sizeIn(maxHeight = 300.dp),
         shape = MaterialTheme.shapes.medium,
     ) {
         Box(
-            modifier = Modifier.width(IntrinsicSize.Max)
-                .heightIn(max = 300.dp)
-                .padding(16.dp),
+            modifier = Modifier.width(IntrinsicSize.Max),
         ) {
             Column(
                 modifier = Modifier
                     .width(IntrinsicSize.Max)
-                    .verticalScroll(rememberScrollState()),
+                    .verticalScroll(rememberScrollState())
+                    .padding(8.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 Text(
