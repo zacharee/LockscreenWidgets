@@ -232,7 +232,7 @@ abstract class BaseAdapter(
                     holder.setCompositionContext()
                 }
                 override fun onViewDetachedFromWindow(v: View) {}
-            }
+            },
         )
 
         holder.performBind()
