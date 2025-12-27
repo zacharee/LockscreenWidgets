@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.graphics.PorterDuff
 import android.graphics.PorterDuffColorFilter
 import android.view.LayoutInflater
+import android.view.MotionEvent
 import android.view.View
 import android.view.ViewConfiguration
 import android.view.WindowManager
@@ -44,6 +45,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asComposeColorFilter
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.PointerEventPass
+import androidx.compose.ui.input.pointer.motionEventSpy
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
@@ -329,6 +331,15 @@ fun MainWidgetFrameDelegate.WidgetFrameViewModel.WidgetFrameLayout(
                         thirdEvent?.changes?.forEach { it.consume() }
                         waitForUpOrCancellation(pass = PointerEventPass.Initial)
                     }
+                }
+            }
+        }.motionEventSpy { event ->
+            when (event.action) {
+                MotionEvent.ACTION_DOWN -> {
+                    context.eventManager.sendEvent(Event.FrameIntercept(frameId, true))
+                }
+                MotionEvent.ACTION_UP -> {
+                    context.eventManager.sendEvent(Event.FrameIntercept(frameId, false))
                 }
             }
         },
