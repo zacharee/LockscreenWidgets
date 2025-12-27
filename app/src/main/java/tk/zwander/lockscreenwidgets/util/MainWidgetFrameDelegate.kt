@@ -707,7 +707,7 @@ open class MainWidgetFrameDelegate protected constructor(
      * =======
      * OR
      * =======
-     * - [GlobalState.isScreenOn] is true
+     * - The display this frame is hosted on is fully on.
      * - [State.isTempHide] is false
      * - [GlobalState.notificationsPanelFullyExpanded] is true AND [FrameSpecificPreferences.showInNotificationShade] is true
      * - [GlobalState.hideForPresentIds] is false
@@ -718,7 +718,7 @@ open class MainWidgetFrameDelegate protected constructor(
      * OR
      * =======
      * - [GlobalState.wasOnKeyguard] is true
-     * - [GlobalState.isScreenOn] is true (i.e. the display is properly on: not in Doze or on the AOD)
+     * - The display this frame is hosted on is fully on (i.e. the display is properly on: not in Doze or on the AOD)
      * - [State.isTempHide] is false
      * - [FrameSpecificPreferences.showOnMainLockScreen] is true OR [FrameSpecificPreferences.showInNotificationShade] is false
      * - [FrameSpecificPreferences.hideOnFaceWidgets] is false OR [GlobalState.isOnFaceWidgets] is false
