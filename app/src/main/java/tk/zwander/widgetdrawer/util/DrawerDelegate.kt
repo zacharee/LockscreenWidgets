@@ -42,9 +42,9 @@ import tk.zwander.common.util.fadeOut
 import tk.zwander.common.util.globalState
 import tk.zwander.common.util.handler
 import tk.zwander.common.util.logUtils
+import tk.zwander.common.util.lsDisplayManager
 import tk.zwander.common.util.mainHandler
 import tk.zwander.common.util.prefManager
-import tk.zwander.common.util.lsDisplayManager
 import tk.zwander.common.util.safeAddView
 import tk.zwander.common.util.safeCurrentState
 import tk.zwander.common.util.safeRemoveView
@@ -248,6 +248,10 @@ class DrawerDelegate private constructor(context: Context, displayId: String) :
 
             Event.CloseSystemDialogs -> {
                 hideDrawer()
+            }
+
+            is Event.DrawerIntercept -> {
+                forceWakelock(event.down)
             }
 
             is Event.DrawerAttachmentState -> {

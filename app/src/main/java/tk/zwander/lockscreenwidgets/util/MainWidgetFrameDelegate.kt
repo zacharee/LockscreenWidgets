@@ -52,7 +52,6 @@ import tk.zwander.common.util.prefManager
 import tk.zwander.common.util.safeAddView
 import tk.zwander.common.util.safeCurrentState
 import tk.zwander.common.util.safeRemoveView
-import tk.zwander.common.util.safeUpdateViewLayout
 import tk.zwander.common.util.themedContext
 import tk.zwander.common.util.wallpaperUtils
 import tk.zwander.lockscreenwidgets.adapters.WidgetFrameAdapter
@@ -880,30 +879,6 @@ open class MainWidgetFrameDelegate protected constructor(
                     )
                 }
             }
-        }
-    }
-
-    /**
-     * Force the display to remain on, or remove that force.
-     *
-     * @param wm the WindowManager to use.
-     * @param on whether to add or remove the force flag.
-     */
-    private suspend fun forceWakelock(on: Boolean, updateOverlay: Boolean = true) {
-        if (on) {
-            params.flags = params.flags or WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON
-        } else {
-            params.flags = params.flags and WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON.inv()
-        }
-
-        if (updateOverlay) {
-            updateOverlay()
-        }
-    }
-
-    private suspend fun updateOverlay() {
-        withContext(Dispatchers.Main) {
-            wm.safeUpdateViewLayout(frame, params)
         }
     }
 

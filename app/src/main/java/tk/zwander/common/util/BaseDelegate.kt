@@ -18,8 +18,10 @@ import androidx.savedstate.SavedStateRegistryController
 import androidx.savedstate.SavedStateRegistryOwner
 import androidx.savedstate.setViewTreeSavedStateRegistryOwner
 import com.arasthel.spannedgridlayoutmanager.SpannedGridLayoutManager
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import tk.zwander.common.adapters.BaseAdapter
 import tk.zwander.common.data.WidgetData
 import tk.zwander.common.data.WidgetType
@@ -212,6 +214,24 @@ abstract class BaseDelegate<State : Any>(
         }
     }
 
+    /**
+     * Force the display to remain on, or remove that force.
+     *
+     * @param wm the WindowManager to use.
+     * @param on whether to add or remove the force flag.
+     */
+    protected suspend fun forceWakelock(on: Boolean, updateOverlay: Boolean = true) {
+        if (on) {
+            params.flags = params.flags or WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON
+        } else {
+            params.flags = params.flags and WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON.inv()
+        }
+
+        if (updateOverlay) {
+            updateOverlay()
+        }
+    }
+
     protected open fun onItemSelected(selected: Boolean, highlighted: Boolean) {
         updateCommonState { it.copy(isHoldingItem = selected, isItemHighlighted = highlighted) }
     }
@@ -222,6 +242,12 @@ abstract class BaseDelegate<State : Any>(
     protected open fun widgetRemovalConfirmed(event: Event.RemoveWidgetConfirmed, position: Int) {}
 
     protected abstract suspend fun updateWindow()
+
+    protected suspend fun updateOverlay() {
+        withContext(Dispatchers.Main) {
+            wm.safeUpdateViewLayout(rootView, params)
+        }
+    }
 
     data class BaseState(
         val isHoldingItem: Boolean = false,

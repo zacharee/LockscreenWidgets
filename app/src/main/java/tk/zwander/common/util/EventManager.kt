@@ -165,6 +165,7 @@ sealed class Event {
         val velocity: Float,
     ) : Event()
     data class ScrollOpenFinish(val from: Int) : Event()
+    data class DrawerIntercept(val down: Boolean) : Event()
 }
 
 interface EventObserver {

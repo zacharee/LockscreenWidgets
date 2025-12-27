@@ -1,5 +1,6 @@
 package tk.zwander.widgetdrawer.compose
 
+import android.view.MotionEvent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -17,6 +18,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.motionEventSpy
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalResources
@@ -82,7 +84,16 @@ fun DrawerDelegate.DrawerViewModel.Drawer(
     }
 
     Box(
-        modifier = modifier,
+        modifier = modifier.motionEventSpy { event ->
+            when (event.action) {
+                MotionEvent.ACTION_DOWN -> {
+                    context.eventManager.sendEvent(Event.DrawerIntercept(true))
+                }
+                MotionEvent.ACTION_UP -> {
+                    context.eventManager.sendEvent(Event.DrawerIntercept(false))
+                }
+            }
+        },
     ) {
         Box(
             modifier = Modifier.fillMaxSize(),
