@@ -159,14 +159,14 @@ fun WidgetFramePreviewLayout(
 
                     override fun getPositionForVelocity(
                         velocityX: Int,
-                        velocityY: Int
+                        velocityY: Int,
                     ): Int {
                         return 0
                     }
 
                     override fun getFixScrollPos(
                         velocityX: Int,
-                        velocityY: Int
+                        velocityY: Int,
                     ): Int {
                         return 0
                     }
