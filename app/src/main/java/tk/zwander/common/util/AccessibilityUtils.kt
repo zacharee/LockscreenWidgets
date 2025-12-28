@@ -5,7 +5,6 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.os.Build
-import android.os.PowerManager
 import android.provider.Settings
 import android.view.accessibility.AccessibilityEvent
 import android.view.accessibility.AccessibilityNodeInfo
@@ -522,7 +521,6 @@ object AccessibilityUtils {
         event: AccessibilityEvent,
         frameDelegates: Map<Int, MainWidgetFrameDelegate>,
         drawerDelegate: DrawerDelegate,
-        power: PowerManager,
         kgm: KeyguardManager,
         imm: InputMethodManager,
         getWindows: () -> List<AccessibilityWindowInfo>?,
@@ -584,7 +582,7 @@ object AccessibilityUtils {
                     updateAccessibility = true,
                     transform = {
                         it.copy(
-                            screenOrientation = frameDelegate.display.screenOrientation,
+                            screenOrientation = frameDelegate.display?.screenOrientation ?: it.screenOrientation,
                         )
                     },
                 )

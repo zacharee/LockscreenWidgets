@@ -2,7 +2,6 @@ package tk.zwander.lockscreenwidgets.services
 
 import android.accessibilityservice.AccessibilityService
 import android.annotation.SuppressLint
-import android.os.PowerManager
 import android.view.Display
 import android.view.WindowManager
 import android.view.accessibility.AccessibilityEvent
@@ -46,7 +45,6 @@ import tk.zwander.widgetdrawer.util.DrawerDelegate
 @SuppressLint("AccessibilityPolicy")
 class Accessibility : AccessibilityService(), CoroutineScope by MainScope() {
     private val kgm by lazy { keyguardManager }
-    private val power by lazy { getSystemService(POWER_SERVICE) as PowerManager }
     private val imm by lazy { getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager }
     private val lsDisplayManager by lazy { LSDisplayManager.getInstance(this) }
     private val frameDelegate: MainWidgetFrameDelegate
@@ -134,7 +132,7 @@ class Accessibility : AccessibilityService(), CoroutineScope by MainScope() {
             runWindowOperation(
                 frameDelegates = secondaryFrameDelegates + (-1 to frameDelegate),
                 drawerDelegate = drawerDelegate,
-                isScreenOn = power.isInteractive,
+                isScreenOn = lsDisplayManager.isAnyDisplayOn.value,
                 isOnKeyguard = kgm.isKeyguardLocked,
                 getWindows = ::getWindowsSafely,
                 initialRun = true,
@@ -156,7 +154,6 @@ class Accessibility : AccessibilityService(), CoroutineScope by MainScope() {
                     event = eventCopy,
                     frameDelegates = secondaryFrameDelegates + (-1 to frameDelegate),
                     drawerDelegate = drawerDelegate,
-                    power = power,
                     kgm = kgm,
                     imm = imm,
                     getWindows = ::getWindowsSafely,

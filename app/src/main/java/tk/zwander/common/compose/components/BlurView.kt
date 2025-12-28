@@ -41,7 +41,7 @@ fun BaseDelegate.BaseViewModel<*, *>.BlurView(
     var crossBlurEnabled by remember {
         mutableStateOf(
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                wm.isCrossWindowBlurEnabled
+                wm?.isCrossWindowBlurEnabled == true
             } else {
                 false
             },
@@ -79,12 +79,12 @@ fun BaseDelegate.BaseViewModel<*, *>.BlurView(
         }
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            crossBlurEnabledListener?.let { wm.addCrossWindowBlurEnabledListener(it) }
+            crossBlurEnabledListener?.let { wm?.addCrossWindowBlurEnabledListener(it) }
         }
 
         onDispose {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                crossBlurEnabledListener?.let { wm.removeCrossWindowBlurEnabledListener(it) }
+                crossBlurEnabledListener?.let { wm?.removeCrossWindowBlurEnabledListener(it) }
             }
             currentDrawable = null
         }

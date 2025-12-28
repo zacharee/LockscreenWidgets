@@ -75,7 +75,6 @@ import tk.zwander.common.util.createWidgetErrorView
 import tk.zwander.common.util.eventManager
 import tk.zwander.common.util.getAllInstalledWidgetProviders
 import tk.zwander.common.util.logUtils
-import tk.zwander.common.util.lsDisplayManager
 import tk.zwander.common.util.mitigations.SafeContextWrapper
 import tk.zwander.common.util.prefManager
 import tk.zwander.common.util.setThemedContent
@@ -91,7 +90,7 @@ abstract class BaseAdapter(
     protected val context: Context,
     protected val rootView: View,
     protected val onRemoveCallback: (WidgetData, Int) -> Unit,
-    protected val displayId: () -> String,
+    protected val lsDisplay: () -> LSDisplay?,
     protected val viewModel: BaseDelegate.BaseViewModel<*, *>,
 ) : RecyclerView.Adapter<BaseAdapter.BaseVH>() {
     companion object {
@@ -107,9 +106,6 @@ abstract class BaseAdapter(
     protected val host = context.widgetHostCompat
     protected val manager = context.appWidgetManager
     protected val viewCacheRegistry = context.widgetViewCacheRegistry
-
-    protected val lsDisplay: LSDisplay
-        get() = context.lsDisplayManager.requireDisplayByStringId(displayId())
 
     private val baseLayoutInflater = context.themedLayoutInflater
 
@@ -416,44 +412,46 @@ abstract class BaseAdapter(
                                     }
                                 }
 
-                                val width = this@BaseAdapter.lsDisplay.pxToDp(itemView.width)
-                                val height = this@BaseAdapter.lsDisplay.pxToDp(itemView.height)
+                                this@BaseAdapter.lsDisplay()?.let { display ->
+                                    val width = display.pxToDp(itemView.width)
+                                    val height = display.pxToDp(itemView.height)
 
-                                val paddingValue = this@BaseAdapter.lsDisplay.pxToDp(
-                                    resources.getDimensionPixelSize(R.dimen.app_widget_padding),
-                                )
+                                    val paddingValue = display.pxToDp(
+                                        resources.getDimensionPixelSize(R.dimen.app_widget_padding),
+                                    )
 
-                                // Workaround to fix the One UI 5.1 battery grid widget on some devices.
-                                if (widgetInfo.provider.packageName == "com.android.settings.intelligence") {
-                                    updateAppWidgetOptions(
-                                        manager.getAppWidgetOptions(appWidgetId).apply {
-                                            putBoolean("hsIsHorizontalIcon", false)
-                                            putInt("semAppWidgetRowSpan", 1)
-                                        })
-                                }
+                                    // Workaround to fix the One UI 5.1 battery grid widget on some devices.
+                                    if (widgetInfo.provider.packageName == "com.android.settings.intelligence") {
+                                        updateAppWidgetOptions(
+                                            manager.getAppWidgetOptions(appWidgetId).apply {
+                                                putBoolean("hsIsHorizontalIcon", false)
+                                                putInt("semAppWidgetRowSpan", 1)
+                                            })
+                                    }
 
-                                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                                    updateAppWidgetSize(
-                                        manager.getAppWidgetOptions(appWidgetId),
-                                        listOf(
-                                            SizeF(
-                                                width + 2 * paddingValue,
-                                                height + 2 * paddingValue,
+                                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                                        updateAppWidgetSize(
+                                            manager.getAppWidgetOptions(appWidgetId),
+                                            listOf(
+                                                SizeF(
+                                                    width + 2 * paddingValue,
+                                                    height + 2 * paddingValue,
+                                                ),
                                             ),
-                                        ),
-                                    )
-                                } else {
-                                    val adjustedWidth = width + 2 * paddingValue
-                                    val adjustedHeight = height + 2 * paddingValue
+                                        )
+                                    } else {
+                                        val adjustedWidth = width + 2 * paddingValue
+                                        val adjustedHeight = height + 2 * paddingValue
 
-                                    @Suppress("DEPRECATION")
-                                    updateAppWidgetSize(
-                                        manager.getAppWidgetOptions(appWidgetId),
-                                        adjustedWidth.toInt(),
-                                        adjustedHeight.toInt(),
-                                        adjustedWidth.toInt(),
-                                        adjustedHeight.toInt(),
-                                    )
+                                        @Suppress("DEPRECATION")
+                                        updateAppWidgetSize(
+                                            manager.getAppWidgetOptions(appWidgetId),
+                                            adjustedWidth.toInt(),
+                                            adjustedHeight.toInt(),
+                                            adjustedWidth.toInt(),
+                                            adjustedHeight.toInt(),
+                                        )
+                                    }
                                 }
                             }
                         }

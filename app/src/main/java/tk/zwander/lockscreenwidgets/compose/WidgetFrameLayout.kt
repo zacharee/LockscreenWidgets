@@ -33,6 +33,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.contentColorFor
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -56,6 +57,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.zIndex
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.recyclerview.widget.RecyclerView
 import com.bugsnag.android.performance.compose.MeasuredComposable
 import com.google.accompanist.drawablepainter.rememberDrawablePainter
@@ -67,16 +70,17 @@ import tk.zwander.common.compose.components.ContentColoredOutlinedButton
 import tk.zwander.common.compose.components.FrameEditWrapperLayout
 import tk.zwander.common.compose.util.rememberPreferenceState
 import tk.zwander.common.data.WidgetData
+import tk.zwander.common.host.widgetHostCompat
 import tk.zwander.common.util.BaseDelegate
 import tk.zwander.common.util.Event
 import tk.zwander.common.util.FrameSizeAndPosition
 import tk.zwander.common.util.HandlerRegistry
 import tk.zwander.common.util.ISnappyLayoutManager
+import tk.zwander.common.util.LSDisplay
 import tk.zwander.common.util.PrefManager
 import tk.zwander.common.util.collectAsMutableState
 import tk.zwander.common.util.eventManager
 import tk.zwander.common.util.globalState
-import tk.zwander.common.util.lsDisplayManager
 import tk.zwander.common.util.prefManager
 import tk.zwander.common.util.themedContext
 import tk.zwander.common.views.SnappyRecyclerView
@@ -89,7 +93,7 @@ import tk.zwander.lockscreenwidgets.util.MainWidgetFrameDelegate
 
 @Composable
 fun WidgetFramePreviewLayout(
-    displayId: String,
+    display: LSDisplay,
     frameId: Int,
     modifier: Modifier = Modifier,
 ) {
@@ -99,6 +103,7 @@ fun WidgetFramePreviewLayout(
         val constraints = this
         val context = LocalContext.current
         val view = LocalView.current
+        val lifecycleOwner = LocalLifecycleOwner.current
 
         val widgetGridView = remember {
             WidgetGridHolderBinding.inflate(
@@ -109,7 +114,7 @@ fun WidgetFramePreviewLayout(
         val frameSize = remember(frameId) {
             FrameSizeAndPosition.getInstance(context).getSizeForType(
                 type = FrameSizeAndPosition.FrameType.SecondaryLockscreen.Portrait(frameId),
-                display = context.lsDisplayManager.requireDisplayByStringId(displayId),
+                display = display,
             )
         }
 
@@ -120,13 +125,15 @@ fun WidgetFramePreviewLayout(
         }
 
         val dummyDelegate = remember(frameId) {
-            object : BaseDelegate<BaseDelegate.BaseState>(context.themedContext, displayId) {
+            object : BaseDelegate<BaseDelegate.BaseState>(context.themedContext, display.uniqueIdCompat) {
+                override val lifecycle: Lifecycle
+                    get() = lifecycleOwner.lifecycle
                 val widgetGridAdapter = WidgetFrameAdapter(
                     frameId = frameId,
                     context = context.themedContext,
                     rootView = view,
                     onRemoveCallback = { _, _ -> },
-                    displayId = { displayId },
+                    lsDisplay = { display },
                     saveTypeGetter = { FrameSizeAndPosition.FrameType.SecondaryLockscreen.Portrait(frameId) },
                     viewModel = viewModel,
                 )
@@ -136,7 +143,6 @@ fun WidgetFramePreviewLayout(
                     object : BaseViewModel<BaseState, BaseDelegate<BaseState>>(this) {
                         override val containerCornerRadiusKey: String = PrefManager.KEY_FRAME_CORNER_RADIUS
                         override val widgetCornerRadiusKey: String = PrefManager.KEY_FRAME_WIDGET_CORNER_RADIUS
-
                     }
                 override var state: BaseState = BaseState()
                 override val prefsHandler: HandlerRegistry = HandlerRegistry {}
@@ -207,6 +213,16 @@ fun WidgetFramePreviewLayout(
             value = { Color(framePrefs.backgroundColor) },
         )
         val animatedBackgroundColor by animateColorAsState(backgroundColor)
+
+        DisposableEffect(frameId) {
+            val listener = "$frameId-preview-layout"
+
+            context.widgetHostCompat.startListening(listener)
+
+            onDispose {
+                context.widgetHostCompat.stopListening(listener)
+            }
+        }
 
         Card(
             shape = RoundedCornerShape(size = frameCornerRadius),

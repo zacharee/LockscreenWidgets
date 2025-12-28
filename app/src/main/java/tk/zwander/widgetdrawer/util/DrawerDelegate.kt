@@ -107,12 +107,15 @@ class DrawerDelegate private constructor(context: Context, displayId: String) :
 
     override val params by lazy {
         WindowManager.LayoutParams().apply {
-            val displaySize = display.rotatedRealSize
             type = WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY
             flags = WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN or
                     WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS
-            width = displaySize.x
-            height = displaySize.y
+
+            display?.rotatedRealSize?.let { displaySize ->
+                width = displaySize.x
+                height = displaySize.y
+            }
+
             format = PixelFormat.RGBA_8888
             gravity = Gravity.TOP or Gravity.CENTER
         }
@@ -131,8 +134,12 @@ class DrawerDelegate private constructor(context: Context, displayId: String) :
         WindowManager.LayoutParams().apply {
             type = WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY
             flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
-            width = display.dpToPx(context.prefManager.drawerHandleWidth)
-            height = display.dpToPx(context.prefManager.drawerHandleHeight)
+
+            display?.let { display ->
+                width = display.dpToPx(context.prefManager.drawerHandleWidth)
+                height = display.dpToPx(context.prefManager.drawerHandleHeight)
+            }
+
             gravity = Gravity.TOP or context.prefManager.drawerHandleSide
             y = context.prefManager.drawerHandleYPosition
             format = PixelFormat.RGBA_8888
@@ -165,7 +172,7 @@ class DrawerDelegate private constructor(context: Context, displayId: String) :
                 params = handleParams,
                 displayId = displayId,
                 updateWindow = {
-                    wm.safeUpdateViewLayout(it, handleParams)
+                    wm?.safeUpdateViewLayout(it, handleParams)
                 },
                 modifier = Modifier.fillMaxSize(),
             )
@@ -173,7 +180,7 @@ class DrawerDelegate private constructor(context: Context, displayId: String) :
     }
 
     override val adapter by lazy {
-        DrawerAdapter(context, rootView, { displayId }, viewModel) { widget, _ ->
+        DrawerAdapter(context, rootView, { display }, viewModel) { widget, _ ->
             viewModel.itemToRemove.value = widget
         }
     }
@@ -320,7 +327,9 @@ class DrawerDelegate private constructor(context: Context, displayId: String) :
                     event.from == Gravity.LEFT -> viewModel.latestScrollInVelocity.value > 0
                     else -> viewModel.latestScrollInVelocity.value < 0
                 }
-                val metThreshold = distanceFromEdge > display.dpToPx(100f) && velocityMatches
+                val metThreshold = display?.let { display ->
+                    distanceFromEdge > display.dpToPx(100f) && velocityMatches
+                } ?: false
 
                 val animator = ValueAnimator.ofInt(params.x, if (metThreshold) 0 else -params.width)
                 animator.addUpdateListener {
@@ -393,7 +402,7 @@ class DrawerDelegate private constructor(context: Context, displayId: String) :
 
         lifecycleScope.launch(Dispatchers.Main) {
             lsDisplayManager.displayPowerStates
-                .map { it[display.uniqueIdCompat] == true }
+                .map { it[display?.uniqueIdCompat] == true }
                 .collect { isScreenOn ->
                     if (isScreenOn) {
                         tryShowHandle()
@@ -431,7 +440,7 @@ class DrawerDelegate private constructor(context: Context, displayId: String) :
     }
 
     private suspend fun tryShowHandle() {
-        if (prefManager.drawerEnabled && prefManager.showDrawerHandle && lsDisplayManager.displayPowerStates.value[display.uniqueIdCompat] == true) {
+        if (prefManager.drawerEnabled && prefManager.showDrawerHandle && lsDisplayManager.displayPowerStates.value[display?.uniqueIdCompat] == true) {
             if (prefManager.showDrawerHandleOnlyWhenLocked && !globalState.wasOnKeyguard.value) {
                 return
             }
@@ -442,7 +451,7 @@ class DrawerDelegate private constructor(context: Context, displayId: String) :
             lifecycleRegistry.safeCurrentState = Lifecycle.State.RESUMED
 
             if (!handle.isAttachedToWindow && viewModel.handleAnimationState.value != AnimationState.ADDING) {
-                wm.safeAddView(handle, handleParams)
+                wm?.safeAddView(handle, handleParams)
                 handle.alpha = 0f
                 handle.fadeIn(DrawerOrFrame.DRAWER)
                 viewModel.handleAnimationState.value = AnimationState.IDLE
@@ -459,12 +468,12 @@ class DrawerDelegate private constructor(context: Context, displayId: String) :
             if (handle.isAttachedToWindow && viewModel.handleAnimationState.value != AnimationState.REMOVING) {
                 handle.fadeOut(DrawerOrFrame.DRAWER)
                 viewModel.handleAnimationState.value = AnimationState.IDLE
-                wm.safeRemoveView(handle)
+                wm?.safeRemoveView(handle)
             }
         }
     }
 
-    private suspend fun showDrawer(wm: WindowManager = this.wm, hideHandle: Boolean = true) {
+    private suspend fun showDrawer(hideHandle: Boolean = true) {
         withContext(Dispatchers.Main) {
             if (!drawer.isAttachedToWindow && viewModel.drawerAnimationState.value != AnimationState.ADDING) {
                 if (hideHandle) {
@@ -472,7 +481,7 @@ class DrawerDelegate private constructor(context: Context, displayId: String) :
                 }
                 viewModel.drawerAnimationState.value = AnimationState.ADDING
                 drawer.alpha = 0f
-                wm.safeAddView(drawer, params)
+                wm?.safeAddView(drawer, params)
                 if (hideHandle) {
                     hideHandle()
                 }
@@ -483,13 +492,14 @@ class DrawerDelegate private constructor(context: Context, displayId: String) :
     override suspend fun updateWindow() {
         withContext(Dispatchers.Main) {
             params.apply {
-                val displaySize = display.rotatedRealSize
-                width = displaySize.x
-                height = displaySize.y
+                display?.rotatedRealSize?.let { displaySize ->
+                    width = displaySize.x
+                    height = displaySize.y
+                }
             }
 
             if (isAttached) {
-                wm.safeUpdateViewLayout(drawer, params)
+                wm?.safeUpdateViewLayout(drawer, params)
             }
         }
     }
@@ -503,7 +513,7 @@ class DrawerDelegate private constructor(context: Context, displayId: String) :
                 viewModel.currentEditingInterfacePosition.value = -1
 
                 drawer.fadeOut(DrawerOrFrame.DRAWER)
-                wm.safeRemoveView(drawer)
+                wm?.safeRemoveView(drawer)
                 viewModel.drawerAnimationState.value = AnimationState.IDLE
                 if (callListener) eventManager.sendEvent(Event.DrawerHidden)
             }

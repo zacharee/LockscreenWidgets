@@ -20,6 +20,10 @@ import androidx.savedstate.setViewTreeSavedStateRegistryOwner
 import com.arasthel.spannedgridlayoutmanager.SpannedGridLayoutManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import tk.zwander.common.adapters.BaseAdapter
@@ -39,12 +43,36 @@ abstract class BaseDelegate<State : Any>(
     protected val kgm by lazy { keyguardManager }
     protected val wallpaper by lazy { getSystemService(WALLPAPER_SERVICE) as WallpaperManager }
     protected val widgetHost by lazy { widgetHostCompat }
-    protected val displayContext: Context
-        get() = createDisplayContext(display.display)
-    protected val wm: WindowManager
-        get() = displayContext.getSystemService(WINDOW_SERVICE) as WindowManager
-    val display: LSDisplay
-        get() = lsDisplayManager.requireDisplayByStringId(targetDisplayId)
+    protected val wm: WindowManager?
+        get() = windowManagerFlow.value
+    val display: LSDisplay?
+        get() = displayFlow.value
+
+    protected val displayFlow: StateFlow<LSDisplay?> by lazy {
+        lsDisplayManager.collectDisplay(targetDisplayId)
+            .stateIn(
+                scope = lifecycleScope,
+                started = SharingStarted.Eagerly,
+                initialValue = null,
+            )
+    }
+    protected val displayContextFlow: StateFlow<Context?> by lazy {
+        displayFlow.map { it?.let { createDisplayContext(it.display) } }
+            .stateIn(
+                scope = lifecycleScope,
+                started = SharingStarted.Eagerly,
+                initialValue = null,
+            )
+    }
+    protected val windowManagerFlow: StateFlow<WindowManager?> by lazy {
+        displayContextFlow.map {
+            it?.getSystemService(WINDOW_SERVICE) as? WindowManager?
+        }.stateIn(
+            scope = lifecycleScope,
+            started = SharingStarted.Eagerly,
+            initialValue = null,
+        )
+    }
 
     open var commonState: BaseState = BaseState()
         protected set
@@ -245,7 +273,7 @@ abstract class BaseDelegate<State : Any>(
 
     protected suspend fun updateOverlay() {
         withContext(Dispatchers.Main) {
-            wm.safeUpdateViewLayout(rootView, params)
+            wm?.safeUpdateViewLayout(rootView, params)
         }
     }
 
@@ -311,7 +339,7 @@ abstract class BaseDelegate<State : Any>(
         val lifecycle: Lifecycle
             get() = delegate.lifecycle
 
-        val wm: WindowManager
+        val wm: WindowManager?
             get() = delegate.wm
 
         val itemTouchHelper: ItemTouchHelper

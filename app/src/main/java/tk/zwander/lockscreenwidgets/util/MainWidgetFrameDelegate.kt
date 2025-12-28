@@ -202,13 +202,15 @@ open class MainWidgetFrameDelegate protected constructor(
         WindowManager.LayoutParams().apply {
             type = WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY
 
-            frameSizeAndPosition.getSizeForType(saveMode, display).let { size ->
-                width = display.dpToPx(size.x)
-                height = display.dpToPx(size.y)
-            }
-            frameSizeAndPosition.getPositionForType(saveMode, display).let { pos ->
-                x = pos.x
-                y = pos.y
+            display?.let { display ->
+                frameSizeAndPosition.getSizeForType(saveMode, display).let { size ->
+                    width = display.dpToPx(size.x)
+                    height = display.dpToPx(size.y)
+                }
+                frameSizeAndPosition.getPositionForType(saveMode, display).let { pos ->
+                    x = pos.x
+                    y = pos.y
+                }
             }
 
             gravity = Gravity.CENTER
@@ -258,7 +260,7 @@ open class MainWidgetFrameDelegate protected constructor(
             onRemoveCallback = { item, _ ->
                 viewModel.itemToRemove.value = item
             },
-            displayId = { targetDisplayId },
+            lsDisplay = { display },
             saveTypeGetter = { saveMode },
             viewModel = viewModel,
         )
@@ -350,26 +352,30 @@ open class MainWidgetFrameDelegate protected constructor(
 
             is Event.CenterFrameHorizontally -> {
                 if (event.frameId == id) {
-                    frameSizeAndPosition.setPositionForType(
-                        saveMode,
-                        Point(
-                            0,
-                            frameSizeAndPosition.getPositionForType(saveMode, display).y
+                    display?.let { display ->
+                        frameSizeAndPosition.setPositionForType(
+                            saveMode,
+                            Point(
+                                0,
+                                frameSizeAndPosition.getPositionForType(saveMode, display).y
+                            )
                         )
-                    )
+                    }
                     updateWindow()
                 }
             }
 
             is Event.CenterFrameVertically -> {
                 if (event.frameId == id) {
-                    frameSizeAndPosition.setPositionForType(
-                        saveMode,
-                        Point(
-                            frameSizeAndPosition.getPositionForType(saveMode, display).x,
-                            0
+                    display?.let { display ->
+                        frameSizeAndPosition.setPositionForType(
+                            saveMode,
+                            Point(
+                                frameSizeAndPosition.getPositionForType(saveMode, display).x,
+                                0
+                            )
                         )
-                    )
+                    }
                     updateWindow()
                 }
             }
@@ -404,10 +410,12 @@ open class MainWidgetFrameDelegate protected constructor(
                         saveMode,
                         Point(params.x, params.y)
                     )
-                    frameSizeAndPosition.setSizeForType(
-                        saveMode,
-                        PointF(display.pxToDp(params.width), display.pxToDp(params.height))
-                    )
+                    display?.let { display ->
+                        frameSizeAndPosition.setSizeForType(
+                            saveMode,
+                            PointF(display.pxToDp(params.width), display.pxToDp(params.height))
+                        )
+                    }
 
                     if (event.isUp) {
                         eventManager.sendEvent(Event.FrameResizeFinished(id))
@@ -534,7 +542,7 @@ open class MainWidgetFrameDelegate protected constructor(
 
         lifecycleScope.launch(Dispatchers.Main) {
             lsDisplayManager.displayPowerStates
-                .map { it[display.uniqueIdCompat] != false }
+                .map { it[display?.uniqueIdCompat] != false }
                 .collect { isScreenOn ->
                     if (!isScreenOn) {
                         globalState.notificationsPanelFullyExpanded.value = false
@@ -636,7 +644,7 @@ open class MainWidgetFrameDelegate protected constructor(
 
                 viewModel.animationState.value = AnimationState.STATE_ADDING
 
-                if (!wm.safeAddView(frame, params)) {
+                if (wm?.safeAddView(frame, params) != true) {
                     viewModel.animationState.value = AnimationState.STATE_IDLE
                 } else {
                     frame.fadeAndScaleIn(DrawerOrFrame.FRAME)
@@ -674,11 +682,11 @@ open class MainWidgetFrameDelegate protected constructor(
                 logUtils.debugLog("Posted removal", null)
 
                 if (frame.isAttachedToWindow) {
-                    wm.safeRemoveView(frame)
+                    wm?.safeRemoveView(frame)
                 }
                 viewModel.animationState.value = AnimationState.STATE_IDLE
             } else if (!frame.isAttachedToWindow) {
-                wm.safeRemoveView(frame, false)
+                wm?.safeRemoveView(frame, false)
 
                 viewModel.animationState.value = AnimationState.STATE_IDLE
             }
@@ -740,7 +748,7 @@ open class MainWidgetFrameDelegate protected constructor(
         }
 
         fun forCommon(): Boolean {
-            return lsDisplayManager.displayPowerStates.value[display.uniqueIdCompat] == true
+            return lsDisplayManager.displayPowerStates.value[display?.uniqueIdCompat] == true
                     && !state.isTempHide
                     && !globalState.hideForPresentIds.value
                     && !globalState.hideForNonPresentIds.value
@@ -751,7 +759,7 @@ open class MainWidgetFrameDelegate protected constructor(
         }
 
         fun forSecondaryDisplay(): Boolean {
-            return globalState.wasOnKeyguard.value && display.displayId != Display.DEFAULT_DISPLAY && forCommon()
+            return globalState.wasOnKeyguard.value && display?.displayId != Display.DEFAULT_DISPLAY && forCommon()
         }
 
         fun forNotificationCenter(): Boolean {
@@ -816,6 +824,11 @@ open class MainWidgetFrameDelegate protected constructor(
      * TODO: You can only specifically retrieve the lock screen wallpaper on Nougat and up.
      */
     private fun updateWallpaperLayerIfNeeded() {
+        val display = display ?: run {
+            logUtils.debugLog("Couldn't find display for $targetDisplayId to update wallpaper", null)
+            return
+        }
+
         val showWallpaperLayer = showWallpaperLayerCondition
 
         logUtils.debugLog("updateWallpaperLayerIfNeeded() called $showWallpaperLayer")
@@ -887,6 +900,11 @@ open class MainWidgetFrameDelegate protected constructor(
      * or in expanded notification center).
      */
     override suspend fun updateWindow() {
+        val display = display ?: run {
+            logUtils.debugLog("Couldn't find display for $targetDisplayId to update window", null)
+            return
+        }
+
         logUtils.debugLog("Checking if params need to be updated")
 
         logUtils.debugLog(

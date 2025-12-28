@@ -437,7 +437,7 @@ private fun FrameItem(
                         WidgetFramePreviewLayout(
                             modifier = Modifier,
                             frameId = frameId,
-                            displayId = display.uniqueIdCompat,
+                            display = display,
                         )
                     }
                 }

@@ -11,8 +11,10 @@ import tk.zwander.common.listeners.WidgetResizeListener
 import tk.zwander.common.util.BaseDelegate
 import tk.zwander.common.util.Event
 import tk.zwander.common.util.FrameSizeAndPosition
+import tk.zwander.common.util.LSDisplay
 import tk.zwander.common.util.eventManager
 import tk.zwander.common.util.frameSizeAndPosition
+import tk.zwander.common.util.orDefault
 import tk.zwander.lockscreenwidgets.activities.add.ReconfigureFrameWidgetActivity
 import tk.zwander.lockscreenwidgets.util.FramePrefs
 
@@ -23,11 +25,11 @@ open class WidgetFrameAdapter(
     frameId: Int,
     context: Context,
     rootView: View,
-    displayId: () -> String,
+    lsDisplay: () -> LSDisplay?,
     onRemoveCallback: (WidgetData, Int) -> Unit,
     viewModel: BaseDelegate.BaseViewModel<*, *>,
     private val saveTypeGetter: () -> FrameSizeAndPosition.FrameType,
-) : BaseAdapter(frameId, context, rootView, onRemoveCallback, displayId, viewModel) {
+) : BaseAdapter(frameId, context, rootView, onRemoveCallback, lsDisplay, viewModel) {
     override val colCount: Int
         get() = FramePrefs.getColCountForFrame(context, holderId)
     override val rowCount: Int
@@ -68,11 +70,12 @@ open class WidgetFrameAdapter(
 
     override fun getThresholdPx(which: WidgetResizeListener.Which): Int {
         return context.run {
-            val frameSize = frameSizeAndPosition.getSizeForType(saveTypeGetter(), this@WidgetFrameAdapter.lsDisplay)
+            val display = lsDisplay().orDefault
+            val frameSize = frameSizeAndPosition.getSizeForType(saveTypeGetter(), display)
             if (which == WidgetResizeListener.Which.LEFT || which == WidgetResizeListener.Which.RIGHT) {
-                lsDisplay.dpToPx(frameSize.x.toInt()) / colCount
+                display.dpToPx(frameSize.x.toInt()) / colCount
             } else {
-                lsDisplay.dpToPx(frameSize.y.toInt()) / rowCount
+                display.dpToPx(frameSize.y.toInt()) / rowCount
             }
         }
     }
