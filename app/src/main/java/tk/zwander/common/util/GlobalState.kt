@@ -2,6 +2,7 @@ package tk.zwander.common.util
 
 import android.content.Context
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlin.reflect.full.declaredMemberProperties
 
 val globalState: GlobalState
@@ -45,7 +46,7 @@ data class GlobalState private constructor(
     override fun toString(): String {
         return "GlobalState(\n" +
                 GlobalState::class.declaredMemberProperties
-                    .joinToString("\n", postfix = "\n") { "${it.name}=${it.get(this)}" } +
+                    .joinToString("\n", postfix = "\n") { "${it.name}=${(it.get(this) as StateFlow<*>).value}" } +
                 ")"
     }
 }
