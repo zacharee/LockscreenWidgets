@@ -9,6 +9,7 @@ import android.graphics.drawable.AdaptiveIconDrawable
 import android.graphics.drawable.Drawable
 import android.os.Build
 import androidx.core.content.res.ResourcesCompat
+import tk.zwander.common.util.logUtils
 import java.util.Calendar
 
 data class IconPack(
@@ -59,7 +60,8 @@ data class IconPack(
     private fun getIconDrawable(context: Context, entry: IconEntry): Drawable? {
         val packResources = try {
             context.packageManager.getResourcesForApplication(entry.packPackageName)
-        } catch (_: PackageManager.NameNotFoundException) {
+        } catch (e: PackageManager.NameNotFoundException) {
+            context.logUtils.debugLog("Error getting icon pack resources for ${entry.packPackageName}", e)
             return null
         }
 
@@ -69,7 +71,8 @@ data class IconPack(
 
         return try {
             ResourcesCompat.getDrawable(packResources, drawableId, context.theme)
-        } catch (_: Resources.NotFoundException) {
+        } catch (e: Resources.NotFoundException) {
+            context.logUtils.debugLog("Error getting icon pack drawable ${entry.packPackageName}/${entry.name}", e)
             null
         }
     }

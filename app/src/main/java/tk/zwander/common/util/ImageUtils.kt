@@ -54,7 +54,8 @@ fun Context.getRemoteDrawable(
             try {
                 ResourcesCompat.getDrawable(remRes, resourceId, remRes.newTheme())
                     ?: defaultGetter()
-            } catch (_: Resources.NotFoundException) {
+            } catch (e: Resources.NotFoundException) {
+                logUtils.debugLog("Error getting drawable $packageName/$resourceId", e)
                 defaultGetter()
             }
         }

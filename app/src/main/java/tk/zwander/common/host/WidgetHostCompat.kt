@@ -10,9 +10,7 @@ import android.appwidget.AppWidgetHostView
 import android.appwidget.AppWidgetProviderInfo
 import android.content.Context
 import android.content.Intent
-import android.os.BadParcelableException
 import android.os.Build
-import android.os.DeadObjectException
 import android.view.View
 import android.widget.RemoteViews
 import net.bytebuddy.ByteBuddy
@@ -146,25 +144,26 @@ class WidgetHostCompat(
         listeners.add(listener)
         try {
             startListening()
-        } catch (_: BadParcelableException) {
-            // It's possible for retrieving pending updates to fail, causing
-            // a crash. There doesn't seem to be a way to fix this, but catching
-            // the error here should at least allow future updates to be received.
-        } catch (_: DeadObjectException) {
-            // Same as above.
-        } catch (_: RuntimeException) {
-            // Same as above.
+        } catch (e: Throwable) {
+            context.logUtils.debugLog("Error calling startListening()", e)
         }
     }
 
     fun stopListening(listener: Any) {
+        context.logUtils.debugLog("stopListening($listener)", null)
         listeners.remove(listener)
         stopListening()
     }
 
     override fun stopListening() {
         if (listeners.isEmpty()) {
-            super.stopListening()
+            context.logUtils.debugLog("Calling super.stopListening()", null)
+
+            try {
+                super.stopListening()
+            } catch (e: Throwable) {
+                context.logUtils.debugLog("Error calling super.stopListening()", e)
+            }
         }
     }
 

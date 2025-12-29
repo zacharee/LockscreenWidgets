@@ -193,8 +193,6 @@ object AccessibilityUtils {
         val processed = windows.mapIndexedParallel { index, rawWindow ->
             val safeRoot = try {
                 rawWindow.root
-            } catch (_: NullPointerException) {
-                null
             } catch (e: Exception) {
                 logUtils.normalLog("Error getting window root", e)
                 null
@@ -324,15 +322,17 @@ object AccessibilityUtils {
             awaits.add(async {
                 val child = try {
                     parentNode.getChild(i)
-                } catch (_: SecurityException) {
+                } catch (e: SecurityException) {
                     //Sometimes a SecurityException gets thrown here (on Huawei devices)
                     //so just return null if it happens
+                    peekLogUtils?.debugLog("Error getting child node", e)
                     null
-                } catch (_: NullPointerException) {
+                } catch (e: NullPointerException) {
                     //Sometimes a NullPointerException is thrown here with this error:
                     //"Attempt to read from field 'com.android.server.appwidget.AppWidgetServiceImpl$ProviderId
                     //com.android.server.appwidget.AppWidgetServiceImpl$Provider.id' on a null object reference"
                     //so just return null if that happens.
+                    peekLogUtils?.debugLog("Error getting child node", e)
                     null
                 } catch (_: IllegalStateException) {
                     try {
@@ -340,7 +340,8 @@ object AccessibilityUtils {
                         parentNode.getChild(i).also {
                             parentNode.isSealed = false
                         }
-                    } catch (_: Exception) {
+                    } catch (e: Exception) {
+                        peekLogUtils?.debugLog("Error getting child node", e)
                         null
                     }
                 }

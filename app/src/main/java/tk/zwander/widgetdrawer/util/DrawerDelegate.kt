@@ -284,11 +284,7 @@ class DrawerDelegate private constructor(context: Context, displayId: String) :
                     }
                     lifecycleRegistry.safeCurrentState = Lifecycle.State.RESUMED
                 } else {
-                    try {
-                        widgetHost.stopListening(this)
-                    } catch (_: NullPointerException) {
-                        //AppWidgetServiceImpl$ProviderId NPE
-                    }
+                    widgetHost.stopListening(this)
 
                     if (!handle.isAttachedToWindow) {
                         lifecycleRegistry.safeCurrentState = Lifecycle.State.STARTED
@@ -440,6 +436,7 @@ class DrawerDelegate private constructor(context: Context, displayId: String) :
     }
 
     private suspend fun tryShowHandle() {
+        logUtils.debugLog("Trying to show handle", null)
         if (prefManager.drawerEnabled && prefManager.showDrawerHandle && lsDisplayManager.displayPowerStates.value[display?.uniqueIdCompat] == true) {
             if (prefManager.showDrawerHandleOnlyWhenLocked && !globalState.wasOnKeyguard.value) {
                 return
@@ -461,6 +458,7 @@ class DrawerDelegate private constructor(context: Context, displayId: String) :
 
     private suspend fun hideHandle() {
         withContext(Dispatchers.Main) {
+            logUtils.debugLog("Trying to hide handle", null)
             if (!drawer.isAttachedToWindow) {
                 lifecycleRegistry.safeCurrentState = Lifecycle.State.STARTED
             }
@@ -475,6 +473,7 @@ class DrawerDelegate private constructor(context: Context, displayId: String) :
 
     private suspend fun showDrawer(hideHandle: Boolean = true) {
         withContext(Dispatchers.Main) {
+            logUtils.debugLog("Trying to show drawer", null)
             if (!drawer.isAttachedToWindow && viewModel.drawerAnimationState.value != AnimationState.ADDING) {
                 if (hideHandle) {
                     eventManager.sendEvent(Event.DrawerAttachmentState(true))
@@ -491,6 +490,7 @@ class DrawerDelegate private constructor(context: Context, displayId: String) :
 
     override suspend fun updateWindow() {
         withContext(Dispatchers.Main) {
+            logUtils.debugLog("Updating drawer window", null)
             params.apply {
                 display?.rotatedRealSize?.let { displaySize ->
                     width = displaySize.x
@@ -506,6 +506,7 @@ class DrawerDelegate private constructor(context: Context, displayId: String) :
 
     private suspend fun hideDrawer(callListener: Boolean = true) {
         withContext(Dispatchers.Main) {
+            logUtils.debugLog("Trying to hide drawer, $callListener", null)
             if (drawer.isAttachedToWindow && viewModel.drawerAnimationState.value != AnimationState.REMOVING) {
                 viewModel.drawerAnimationState.value = AnimationState.REMOVING
                 globalState.handlingClick.value =

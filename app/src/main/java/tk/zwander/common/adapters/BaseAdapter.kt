@@ -303,7 +303,11 @@ abstract class BaseAdapter(
             val widgetInfo = if (data.type == WidgetType.WIDGET) {
                 try {
                     manager.getAppWidgetInfo(data.id)
-                } catch (_: PackageManager.NameNotFoundException) {
+                } catch (e: PackageManager.NameNotFoundException) {
+                    context.logUtils.debugLog(
+                        "Unable to retrieve widget info for ${data.id} ${data.widgetProviderComponent}",
+                        e,
+                    )
                     null
                 }
             } else {

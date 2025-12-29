@@ -427,11 +427,12 @@ open class MainWidgetFrameDelegate protected constructor(
             //We only really want to be listening to widget changes
             //while the frame is on-screen. Otherwise, we're wasting battery.
             is Event.FrameAttachmentState -> {
-                if (lifecycleRegistry.currentState == Lifecycle.State.DESTROYED) {
-                    return
-                }
-
                 if (event.frameId == id) {
+                    if (lifecycleRegistry.currentState == Lifecycle.State.DESTROYED) {
+                        logUtils.debugLog("Already destroyed, not handling attachment state", null)
+                        return
+                    }
+
                     try {
                         if (event.attached) {
                             if (lifecycleRegistry.currentState < Lifecycle.State.CREATED) {
@@ -452,10 +453,11 @@ open class MainWidgetFrameDelegate protected constructor(
                             widgetHost.stopListening(this)
                             lifecycleRegistry.safeCurrentState = Lifecycle.State.STARTED
                         }
-                    } catch (_: NullPointerException) {
+                    } catch (e: NullPointerException) {
                         //The stupid "Attempt to read from field 'com.android.server.appwidget.AppWidgetServiceImpl$ProviderId
                         //com.android.server.appwidget.AppWidgetServiceImpl$Provider.id' on a null object reference"
                         //Exception is thrown on stopListening() as well for some reason.
+                        logUtils.debugLog("Error handling attachment state", e)
                     }
                 }
             }
@@ -533,12 +535,7 @@ open class MainWidgetFrameDelegate protected constructor(
     override fun onCreate() {
         super.onCreate()
 
-        //Scroll to the stored page, making sure to catch a potential
-        //out-of-bounds error.
-        try {
-            scrollToStoredPosition(false)
-        } catch (_: Exception) {
-        }
+        scrollToStoredPosition(false)
 
         lifecycleScope.launch(Dispatchers.Main) {
             lsDisplayManager.displayPowerStates
@@ -958,7 +955,13 @@ open class MainWidgetFrameDelegate protected constructor(
     }
 
     private fun scrollToStoredPosition(override: Boolean = false) {
-        gridLayoutManager.scrollToPosition(if (override || prefManager.rememberFramePosition) prefManager.currentPage else 0)
+        try {
+            gridLayoutManager.scrollToPosition(if (override || prefManager.rememberFramePosition) prefManager.currentPage else 0)
+        } catch (e: Throwable) {
+            logUtils.debugLog("Error scrolling to stored position ${prefManager.currentPage}, " +
+                    "override=$override, " +
+                    "remember=${prefManager.rememberFramePosition}", e)
+        }
     }
 
     //Parts based on https://stackoverflow.com/a/26445064/5496177

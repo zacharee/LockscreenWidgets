@@ -135,7 +135,8 @@ class ShizukuManager private constructor(private val context: Context) : Corouti
         get() = try {
             context.packageManager.getPackageInfo(ShizukuProvider.MANAGER_APPLICATION_ID, 0)
             true
-        } catch (_: Throwable) {
+        } catch (e: Throwable) {
+            context.logUtils.debugLog("Error checking if Shizuku is installed", e)
             false
         }
 
@@ -227,7 +228,9 @@ class ShizukuManager private constructor(private val context: Context) : Corouti
                                     Shizuku.removeRequestPermissionResultListener(this)
                                     try {
                                         cont.resume(grantResult == PackageManager.PERMISSION_GRANTED)
-                                    } catch (_: IllegalStateException) {}
+                                    } catch (e: IllegalStateException) {
+                                        context.logUtils.normalLog("Error resuming Shizuku request continuation", e)
+                                    }
                                 }
                             }
                             Shizuku.addRequestPermissionResultListener(listener)

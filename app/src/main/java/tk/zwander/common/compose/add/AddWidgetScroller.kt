@@ -266,7 +266,11 @@ private fun icon(
                     e,
                 )
                 null
-            } catch (_: Resources.NotFoundException) {
+            } catch (e: Resources.NotFoundException) {
+                context.logUtils.normalLog(
+                    "Unable to load icon for ${info.appInfo.appInfo.packageName}, ${key}.",
+                    e,
+                )
                 info.appInfo.appInfo.loadIcon(context.packageManager)
             } ?: info.appInfo.appInfo.loadIcon(context.packageManager)
         }

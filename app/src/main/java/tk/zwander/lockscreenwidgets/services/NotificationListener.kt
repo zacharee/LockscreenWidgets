@@ -153,7 +153,8 @@ class NotificationListener : NotificationListenerService(), EventObserver, Lifec
                     // This seems to cause ANRs on a bunch of devices, so run on a background thread.
                     val activeNotifications = try {
                         getActiveNotifications(null, TRIM_LIGHT)
-                    } catch (_: Throwable) {
+                    } catch (e: Throwable) {
+                        logUtils.debugLog("Error getting notifications with TRIM_LIGHT", e)
                         activeNotifications
                     } ?: arrayOf()
                     logUtils.debugLog("Filtering notifications ${activeNotifications.size}", null)

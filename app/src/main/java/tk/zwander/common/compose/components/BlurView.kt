@@ -125,7 +125,8 @@ fun BaseDelegate.BaseViewModel<*, *>.BlurView(
         } else {
             val f = try {
                 params::class.java.getDeclaredField("samsungFlags")
-            } catch (_: Exception) {
+            } catch (e: Exception) {
+                context.logUtils.debugLog("Error getting Samsung flags field", e)
                 return@LaunchedEffect
             }
 

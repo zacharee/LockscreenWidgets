@@ -77,9 +77,10 @@ internal fun items(
                                         IconCompat.createWithResource(
                                             appResources,
                                             appInfo.packageName,
-                                            iconResource
+                                            iconResource,
                                         )
-                                    } catch (_: IllegalArgumentException) {
+                                    } catch (e: IllegalArgumentException) {
+                                        context.logUtils.debugLog("Error creating icon", e)
                                         null
                                     }
                                 },
@@ -123,7 +124,8 @@ internal fun items(
                                                 appInfo.packageName,
                                                 iconResource
                                             )
-                                        } catch (_: IllegalArgumentException) {
+                                        } catch (e: IllegalArgumentException) {
+                                            context.logUtils.debugLog("Error creating icon", e)
                                             null
                                         }
                                     },
@@ -173,7 +175,8 @@ internal fun items(
                                                         appInfo.packageName,
                                                         iconResource
                                                     )
-                                                } catch (_: IllegalArgumentException) {
+                                                } catch (e: IllegalArgumentException) {
+                                                    context.logUtils.debugLog("Error creating icon", e)
                                                     null
                                                 }
                                             }

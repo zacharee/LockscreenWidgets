@@ -13,6 +13,7 @@ import tk.zwander.common.iconpacks.iconPackManager
 import tk.zwander.common.util.base64ToBitmap
 import tk.zwander.common.util.density
 import tk.zwander.common.util.getRemoteDrawable
+import tk.zwander.common.util.logUtils
 import tk.zwander.common.util.prefManager
 import tk.zwander.common.util.toSafeBitmap
 import tk.zwander.lockscreenwidgets.util.IconPrefs
@@ -154,11 +155,13 @@ data class WidgetData(
                 widgetProviderComponent
             ) ?: (try {
                 context.packageManager.getActivityIcon(widgetProviderComponent)
-            } catch (_: Exception) {
+            } catch (e: Exception) {
+                context.logUtils.debugLog("Error getting Activity icon for $widgetProviderComponent", e)
                 null
             }) ?: (try {
                 context.packageManager.getApplicationIcon(widgetProviderComponent.packageName)
-            } catch (_: Exception) {
+            } catch (e: Exception) {
+                context.logUtils.debugLog("Error getting Activity icon for $widgetProviderComponent", e)
                 null
             }))?.toSafeBitmap(context.density, maxSize = 128.dp)
         }
@@ -205,7 +208,8 @@ data class WidgetData(
             try {
                 context.getRemoteDrawable(this.packageName, this)
                     .toSafeBitmap(context.density, maxSize = 128.dp)
-            } catch (_: PackageManager.NameNotFoundException) {
+            } catch (e: PackageManager.NameNotFoundException) {
+                context.logUtils.debugLog("Error getting non overridden icon res ${this.packageName}/${this.resourceName}", e)
                 null
             }
         }

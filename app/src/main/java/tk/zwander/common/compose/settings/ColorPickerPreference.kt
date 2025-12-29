@@ -110,7 +110,7 @@ fun ColorPickerPreference(
     )
 }
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalStdlibApi::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ColorPickerPreference(
     title: String,

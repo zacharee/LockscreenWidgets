@@ -146,8 +146,8 @@ class WallpaperUtils private constructor(private val context: Context) {
                         flag, bundle, context.userId,
                     ) as? ParcelFileDescriptor
                 }
-            } catch (_: NoSuchMethodError) {
-                context.logUtils.debugLog("Missing getWallpaperWithFeature, using getWallpaper instead.", null)
+            } catch (e: NoSuchMethodError) {
+                context.logUtils.debugLog("Missing getWallpaperWithFeature, using getWallpaper instead.", e)
                 old()
             }
         }

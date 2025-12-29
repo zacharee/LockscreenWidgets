@@ -23,6 +23,7 @@ import tk.zwander.common.util.eventManager
 import tk.zwander.common.util.handler
 import tk.zwander.common.util.keyguardManager
 import tk.zwander.common.util.logUtils
+import tk.zwander.common.util.peekLogUtils
 import tk.zwander.common.util.prefManager
 import tk.zwander.lockscreenwidgets.App
 import tk.zwander.lockscreenwidgets.appwidget.IDListProvider
@@ -197,10 +198,11 @@ class Accessibility : AccessibilityService(), CoroutineScope by MainScope() {
     private fun getWindowsSafely(): List<AccessibilityWindowInfo>? {
         return try {
             ArrayList(windows)
-        } catch (_: SecurityException) {
+        } catch (e: SecurityException) {
             // Sometimes throws a SecurityException talking about mismatching
             // user IDs. In that case, return null and don't update any window-based
             // state items.
+            peekLogUtils?.debugLog("Error getting windows", e)
             null
         }
     }

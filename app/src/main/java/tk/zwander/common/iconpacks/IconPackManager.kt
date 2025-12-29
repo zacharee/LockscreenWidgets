@@ -24,6 +24,7 @@ import org.xmlpull.v1.XmlPullParserFactory
 import tk.zwander.common.util.HandlerRegistry
 import tk.zwander.common.util.PrefManager
 import tk.zwander.common.util.handler
+import tk.zwander.common.util.logUtils
 import tk.zwander.common.util.prefManager
 import tk.zwander.common.util.safeApplicationContext
 import tk.zwander.lockscreenwidgets.App
@@ -220,9 +221,8 @@ class IconPackManager private constructor(private val context: Context) : Corout
                 parser.setInput(res.assets.open("$name.xml"), Xml.Encoding.UTF_8.toString())
                 parser
             }
-        } catch (_: PackageManager.NameNotFoundException) {
-        } catch (_: IOException) {
-        } catch (_: XmlPullParserException) {
+        } catch (e: Throwable) {
+            context.logUtils.debugLog("Error getting icon pack XML", e)
         }
         return null
     }

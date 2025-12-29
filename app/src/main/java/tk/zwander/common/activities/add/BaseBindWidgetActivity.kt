@@ -117,7 +117,8 @@ abstract class BaseBindWidgetActivity : BaseActivity() {
                             val iconBmp =
                                 data.getParcelableExtra(Intent.EXTRA_SHORTCUT_ICON) ?: try {
                                     iconRes?.let { getRemoteDrawable(iconRes.packageName, iconRes) }?.toSafeBitmap(density, maxSize = 128.dp)
-                                } catch (_: PackageManager.NameNotFoundException) {
+                                } catch (e: PackageManager.NameNotFoundException) {
+                                    logUtils.debugLog("Error getting shortcut icon bitmap", e)
                                     null
                                 }
 

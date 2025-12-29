@@ -116,6 +116,8 @@ abstract class BaseDelegate<State : Any>(
 
     @CallSuper
     open fun onCreate() {
+        logUtils.debugLog("Creating ${this::class.java}", null)
+
         rootView.setViewTreeLifecycleOwner(this)
         rootView.setViewTreeSavedStateRegistryOwner(this)
 
@@ -147,6 +149,8 @@ abstract class BaseDelegate<State : Any>(
 
     @CallSuper
     open suspend fun onDestroy() {
+        logUtils.debugLog("Destroying ${this::class.java}", null)
+
         eventManager.removeObserver(this)
         prefsHandler.unregister(this)
         widgetHost.removeOnClickCallback(this)

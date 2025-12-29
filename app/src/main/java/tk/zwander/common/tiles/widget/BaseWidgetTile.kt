@@ -74,7 +74,8 @@ abstract class BaseWidgetTile : TileService(), SharedPreferences.OnSharedPrefere
                 val packageName = widgetPackage ?: return null
                 val appInfo = packageManager.getApplicationInfoInAnyState(packageName)
                 packageManager.getResourcesForApplication(appInfo)
-            } catch (_: Exception) {
+            } catch (e: Exception) {
+                logUtils.debugLog("Error getting remote resources for $widgetPackage", e)
                 null
             }
         }
@@ -98,7 +99,8 @@ abstract class BaseWidgetTile : TileService(), SharedPreferences.OnSharedPrefere
                     notifySystemUIOfChanges()
                 }
             }
-        } catch (_: Throwable) {
+        } catch (e: Throwable) {
+            logUtils.debugLog("Error creating AppWidgetHostListener", e)
             null
         }
     }
@@ -114,7 +116,9 @@ abstract class BaseWidgetTile : TileService(), SharedPreferences.OnSharedPrefere
                 appWidgetHostListener?.let {
                     widgetHostCompat.setListener(widgetId, it)
                 }
-            } catch (_: Throwable) {}
+            } catch (e: Throwable) {
+                logUtils.debugLog("Error setting AppWidgetHostListener for $widgetId", e)
+            }
         }
         widgetHostCompat.startListening(this)
     }

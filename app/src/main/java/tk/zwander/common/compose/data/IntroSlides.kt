@@ -300,7 +300,8 @@ fun rememberIntroSlides(
                                         context.shizukuManager.runShizukuCommand {
                                             try {
                                                 grantReadExternalStorage()
-                                            } catch (_: SecurityException) {
+                                            } catch (e: SecurityException) {
+                                                context.logUtils.debugLog("Error granting read external storage", e)
                                                 showingGrantFailureDialog = true
                                             }
                                             canReadWallpaper = context.canReadWallpaper
@@ -365,7 +366,9 @@ fun rememberIntroSlides(
                                                     context.startActivity(
                                                         Intent(Settings.ACTION_APPLICATION_DEVELOPMENT_SETTINGS),
                                                     )
-                                                } catch (_: ActivityNotFoundException) {}
+                                                } catch (e: ActivityNotFoundException) {
+                                                    context.logUtils.debugLog("Error launching developer options", e)
+                                                }
                                             },
                                         ) {
                                             Text(text = stringResource(R.string.developer_options))

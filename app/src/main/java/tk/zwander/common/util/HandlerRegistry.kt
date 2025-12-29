@@ -38,7 +38,10 @@ class HandlerRegistry(setup: HandlerRegistry.() -> Unit) : SharedPreferences.OnS
 
     fun handle(key: String) {
         scope.value?.launch(Dispatchers.Main) {
-            items[key]?.action?.invoke(key)
+            items[key]?.action?.let { action ->
+                peekLogUtils?.debugLog("Handling shared pref change for $key", null)
+                action.invoke(key)
+            }
         }
     }
 
