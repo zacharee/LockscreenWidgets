@@ -139,22 +139,6 @@ open class MainWidgetFrameDelegate protected constructor(
                     }
                 }
             }
-
-            if (actualNewState.selectionPreviewRequestCode != oldState.selectionPreviewRequestCode) {
-                lifecycleScope.launch(Dispatchers.Main) {
-                    if (actualNewState.selectionPreviewRequestCode != null) {
-                        if (canShow()) {
-                            addWindow()
-                            viewModel.isSelectingFrame.value = true
-                        }
-                    } else {
-                        if (!canShow()) {
-                            removeWindow()
-                            viewModel.isSelectingFrame.value = false
-                        }
-                    }
-                }
-            }
         }
 
     private val saveMode: FrameSizeAndPosition.FrameType
@@ -317,7 +301,6 @@ open class MainWidgetFrameDelegate protected constructor(
 
     private val showWallpaperLayerCondition: Boolean
         get() = !state.isPreview &&
-                state.selectionPreviewRequestCode == null &&
                 framePrefs.maskedMode &&
                 (!globalState.notificationsPanelFullyExpanded.value || !framePrefs.showInNotificationShade) &&
                 (!globalState.showingNotificationsPanel.value || framePrefs.hideOnNotificationShade)
@@ -476,28 +459,13 @@ open class MainWidgetFrameDelegate protected constructor(
             }
 
             is Event.PreviewFrames -> {
-                if (event.show == Event.PreviewFrames.ShowMode.SHOW_FOR_SELECTION && prefManager.currentSecondaryFramesWithStringDisplay.isEmpty()) {
-                    eventManager.sendEvent(Event.LaunchAddWidget(id))
-                } else {
-                    if (event.includeMainFrame || id != -1) {
-                        updateState {
-                            val isPreview = event.show == Event.PreviewFrames.ShowMode.SHOW ||
-                                    (event.show == Event.PreviewFrames.ShowMode.TOGGLE && !it.isPreview)
-                            it.copy(
-                                isPreview = isPreview,
-                                selectionPreviewRequestCode = event.requestCode.takeIf {
-                                    event.show == Event.PreviewFrames.ShowMode.SHOW_FOR_SELECTION
-                                },
-                                isTempHide = if (isPreview) false else it.isTempHide,
-                            )
-                        }
-                    }
-                }
-            }
-
-            is Event.FrameSelected -> {
-                if (event.frameId == null) {
-                    updateState { it.copy(selectionPreviewRequestCode = null) }
+                updateState {
+                    val isPreview = event.show == Event.PreviewFrames.ShowMode.SHOW ||
+                            (event.show == Event.PreviewFrames.ShowMode.TOGGLE && !it.isPreview)
+                    it.copy(
+                        isPreview = isPreview,
+                        isTempHide = if (isPreview) false else it.isTempHide,
+                    )
                 }
             }
 
@@ -734,7 +702,7 @@ open class MainWidgetFrameDelegate protected constructor(
      */
     private fun canShow(): Boolean {
         fun forPreview(): Boolean {
-            return (state.isPreview || state.selectionPreviewRequestCode != null) && !state.isTempHide
+            return state.isPreview && !state.isTempHide
         }
 
         fun forCommon(): Boolean {
@@ -999,7 +967,6 @@ open class MainWidgetFrameDelegate protected constructor(
 
     data class State(
         val isPreview: Boolean = false,
-        val selectionPreviewRequestCode: Int? = null,
         //This is used to track when the notification shade has
         //been expanded/collapsed or when the "show in NC" setting
         //has been changed. Since the params are different for the
@@ -1021,7 +988,6 @@ open class MainWidgetFrameDelegate protected constructor(
 
     open class WidgetFrameViewModel(delegate: MainWidgetFrameDelegate) :
         IWidgetFrameViewModel<State, MainWidgetFrameDelegate>(delegate) {
-        val isSelectingFrame = MutableStateFlow(false)
         val wallpaperInfo = MutableStateFlow<WallpaperInfo?>(null)
         val animationState = MutableStateFlow(AnimationState.STATE_IDLE)
         val acknowledgedTwoFingerTap = MutableStateFlow<Boolean?>(null)

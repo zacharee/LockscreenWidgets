@@ -10,20 +10,13 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.waitForUpOrCancellation
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.contentColorFor
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -51,7 +44,6 @@ import com.google.accompanist.drawablepainter.rememberDrawablePainter
 import tk.zwander.common.compose.components.BlurView
 import tk.zwander.common.compose.components.ConfirmFrameRemovalLayout
 import tk.zwander.common.compose.components.ConfirmWidgetRemovalLayout
-import tk.zwander.common.compose.components.ContentColoredOutlinedButton
 import tk.zwander.common.compose.components.FrameEditWrapperLayout
 import tk.zwander.common.compose.util.rememberPreferenceState
 import tk.zwander.common.util.Event
@@ -339,67 +331,6 @@ fun MainWidgetFrameDelegate.WidgetFrameViewModel.WidgetFrameLayout(
                         textAlign = TextAlign.Center,
                         fontSize = 18.sp,
                     )
-                }
-            }
-
-            val selectingFrame by isSelectingFrame.collectAsState()
-
-            androidx.compose.animation.AnimatedVisibility(
-                visible = selectingFrame,
-                enter = fadeIn(),
-                exit = fadeOut(),
-                modifier = Modifier.zIndex(8f),
-            ) {
-                MeasuredComposable(name = "SelectFrameLayoutContent") {
-                    Surface(
-                        modifier = Modifier.fillMaxSize(),
-                        color = MaterialTheme.colorScheme.surface.copy(alpha = 0.75f),
-                        contentColor = MaterialTheme.colorScheme.contentColorFor(MaterialTheme.colorScheme.surface),
-                    ) {
-                        Box(
-                            modifier = Modifier.fillMaxSize(),
-                            contentAlignment = Alignment.Center,
-                        ) {
-                            Column(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalAlignment = Alignment.CenterHorizontally,
-                                verticalArrangement = Arrangement.spacedBy(8.dp),
-                            ) {
-                                Text(text = "$frameId")
-
-                                FlowRow(
-                                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                                    verticalArrangement = Arrangement.spacedBy(8.dp),
-                                ) {
-                                    ContentColoredOutlinedButton(
-                                        onClick = {
-                                            context.eventManager.sendEvent(
-                                                Event.FrameSelected(
-                                                    null,
-                                                    state.selectionPreviewRequestCode
-                                                )
-                                            )
-                                        },
-                                    ) {
-                                        Text(text = stringResource(R.string.cancel))
-                                    }
-
-                                    ContentColoredOutlinedButton(
-                                        onClick = {
-                                            context.eventManager.sendEvent(
-                                                Event.FrameSelected(
-                                                    frameId,
-                                                    state.selectionPreviewRequestCode
-                                                )
-                                            )
-                                        },
-                                    ) {
-                                        Text(text = stringResource(R.string.select))
-                                    }
-                                }
-                            }
-                        }
-                    }
                 }
             }
         }
