@@ -30,7 +30,7 @@ import kotlin.math.sign
 
 
 fun createTouchHelperCallback(
-    adapter: BaseAdapter,
+    adapter: BaseAdapter<*>,
     widgetMoved: (moved: Boolean) -> Unit,
     onItemSelected: (selected: Boolean, highlighted: Boolean) -> Unit,
     onItemActive: (Boolean) -> Unit,
@@ -56,7 +56,7 @@ fun createTouchHelperCallback(
             recyclerView: RecyclerView,
             viewHolder: RecyclerView.ViewHolder,
         ): Int {
-            return if (viewHolder is BaseAdapter.AddWidgetVH || frameLocked() || viewModel.isResizingItem.value) 0
+            return if (viewHolder is BaseAdapter<*>.AddWidgetVH || frameLocked() || viewModel.isResizingItem.value) 0
             else super.getDragDirs(recyclerView, viewHolder)
         }
 

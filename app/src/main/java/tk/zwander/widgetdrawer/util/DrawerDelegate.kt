@@ -180,9 +180,7 @@ class DrawerDelegate private constructor(context: Context, displayId: String) :
     }
 
     override val adapter by lazy {
-        DrawerAdapter(context, rootView, { display }, viewModel) { widget, _ ->
-            viewModel.itemToRemove.value = widget
-        }
+        DrawerAdapter(context, viewModel)
     }
     override val prefsHandler = HandlerRegistry {
         handler(PrefManager.KEY_DRAWER_ENABLED) {

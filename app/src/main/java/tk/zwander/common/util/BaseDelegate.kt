@@ -6,6 +6,8 @@ import android.content.Context
 import android.view.View
 import android.view.WindowManager
 import androidx.annotation.CallSuper
+import androidx.compose.runtime.Recomposer
+import androidx.compose.ui.platform.createLifecycleAwareWindowRecomposer
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleRegistry
 import androidx.lifecycle.ViewModel
@@ -83,7 +85,7 @@ abstract class BaseDelegate<State : Any>(
         protected set
 
     protected abstract val prefsHandler: HandlerRegistry
-    protected abstract val adapter: BaseAdapter
+    protected abstract val adapter: BaseAdapter<*>
     abstract val gridLayoutManager: LayoutManager
     protected abstract val params: WindowManager.LayoutParams
     protected abstract val rootView: View
@@ -340,9 +342,6 @@ abstract class BaseDelegate<State : Any>(
         val params: WindowManager.LayoutParams
             get() = delegate.params
 
-        val lifecycle: Lifecycle
-            get() = delegate.lifecycle
-
         val wm: WindowManager?
             get() = delegate.wm
 
@@ -355,8 +354,17 @@ abstract class BaseDelegate<State : Any>(
         val isLocked: Boolean
             get() = delegate.isLocked()
 
+        val lsDisplay: LSDisplay?
+            get() = delegate.display
+
         abstract val widgetCornerRadiusKey: String
         abstract val containerCornerRadiusKey: String?
+
+        fun createLifecycleAwareWindowRecomposer(): Recomposer {
+            return delegate.rootView.createLifecycleAwareWindowRecomposer(
+                lifecycle = delegate.lifecycle,
+            )
+        }
 
         suspend fun updateWindow() {
             delegate.updateWindow()

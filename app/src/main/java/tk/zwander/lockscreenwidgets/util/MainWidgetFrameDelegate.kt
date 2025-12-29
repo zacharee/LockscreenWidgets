@@ -254,14 +254,7 @@ open class MainWidgetFrameDelegate protected constructor(
 
     override val adapter by lazy {
         WidgetFrameAdapter(
-            frameId = id,
             context = context,
-            rootView = rootView,
-            onRemoveCallback = { item, _ ->
-                viewModel.itemToRemove.value = item
-            },
-            lsDisplay = { display },
-            saveTypeGetter = { saveMode },
             viewModel = viewModel,
         )
     }
@@ -1027,7 +1020,7 @@ open class MainWidgetFrameDelegate protected constructor(
     )
 
     open class WidgetFrameViewModel(delegate: MainWidgetFrameDelegate) :
-        BaseViewModel<State, MainWidgetFrameDelegate>(delegate) {
+        IWidgetFrameViewModel<State, MainWidgetFrameDelegate>(delegate) {
         val isSelectingFrame = MutableStateFlow(false)
         val wallpaperInfo = MutableStateFlow<WallpaperInfo?>(null)
         val animationState = MutableStateFlow(AnimationState.STATE_IDLE)
@@ -1040,8 +1033,22 @@ open class MainWidgetFrameDelegate protected constructor(
         val framePrefs: FrameSpecificPreferences
             get() = delegate.framePrefs
 
-        val frameId: Int
+        override val frameId: Int
             get() = delegate.id
+
+        override val saveMode: FrameSizeAndPosition.FrameType
+            get() = delegate.saveMode
+    }
+
+    abstract class IWidgetFrameViewModel<
+            State : Any,
+            Delegate : BaseDelegate<State>
+            >(delegate: Delegate) : BaseViewModel<State, Delegate>(delegate) {
+        abstract val frameId: Int
+        abstract val saveMode: FrameSizeAndPosition.FrameType
+
+        override val containerCornerRadiusKey: String = PrefManager.KEY_FRAME_CORNER_RADIUS
+        override val widgetCornerRadiusKey: String = PrefManager.KEY_FRAME_WIDGET_CORNER_RADIUS
     }
 
     data class WallpaperInfo(

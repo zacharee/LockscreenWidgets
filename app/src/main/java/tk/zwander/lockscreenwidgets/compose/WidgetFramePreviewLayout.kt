@@ -29,7 +29,6 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.recyclerview.widget.RecyclerView
-import tk.zwander.common.adapters.BaseAdapter
 import tk.zwander.common.compose.util.rememberPreferenceState
 import tk.zwander.common.data.WidgetData
 import tk.zwander.common.host.widgetHostCompat
@@ -45,6 +44,7 @@ import tk.zwander.lockscreenwidgets.adapters.WidgetFrameAdapter
 import tk.zwander.lockscreenwidgets.databinding.WidgetGridHolderBinding
 import tk.zwander.lockscreenwidgets.util.FramePrefs
 import tk.zwander.lockscreenwidgets.util.FrameSpecificPreferences
+import tk.zwander.lockscreenwidgets.util.MainWidgetFrameDelegate
 
 @Composable
 fun WidgetFramePreviewLayout(
@@ -87,30 +87,26 @@ fun WidgetFramePreviewLayout(
                 override val lifecycle: Lifecycle
                     get() = lifecycleOwner.lifecycle
                 val widgetGridAdapter = WidgetFrameAdapter(
-                    frameId = frameId,
                     context = context.themedContext,
-                    rootView = view,
-                    onRemoveCallback = { _, _ -> },
-                    lsDisplay = { display },
-                    saveTypeGetter = {
-                        FrameSizeAndPosition.FrameType.SecondaryLockscreen.Portrait(
-                            frameId
-                        )
-                    },
                     viewModel = viewModel,
                 )
 
-                override val viewModel: BaseViewModel<out BaseState, out BaseDelegate<BaseState>>
+                override val viewModel
                     get() = @SuppressLint("StaticFieldLeak")
-                    object : BaseViewModel<BaseState, BaseDelegate<BaseState>>(this) {
+                    object : MainWidgetFrameDelegate.IWidgetFrameViewModel<BaseState, BaseDelegate<BaseState>>(this) {
                         override val containerCornerRadiusKey: String =
                             PrefManager.KEY_FRAME_CORNER_RADIUS
                         override val widgetCornerRadiusKey: String =
                             PrefManager.KEY_FRAME_WIDGET_CORNER_RADIUS
+
+                        override val frameId: Int
+                            get() = frameId
+                        override val saveMode: FrameSizeAndPosition.FrameType
+                            get() = FrameSizeAndPosition.FrameType.SecondaryLockscreen.Portrait(frameId)
                     }
                 override var state: BaseState = BaseState()
                 override val prefsHandler: HandlerRegistry = HandlerRegistry {}
-                override val adapter: BaseAdapter = widgetGridAdapter
+                override val adapter = widgetGridAdapter
                 override val gridLayoutManager: LayoutManager = object : LayoutManager(
                     context.themedContext,
                     RecyclerView.HORIZONTAL,

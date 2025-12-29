@@ -8,48 +8,45 @@ import tk.zwander.common.activities.SelectIconPackActivity
 import tk.zwander.common.adapters.BaseAdapter
 import tk.zwander.common.data.WidgetData
 import tk.zwander.common.listeners.WidgetResizeListener
-import tk.zwander.common.util.BaseDelegate
 import tk.zwander.common.util.Event
-import tk.zwander.common.util.FrameSizeAndPosition
-import tk.zwander.common.util.LSDisplay
 import tk.zwander.common.util.eventManager
 import tk.zwander.common.util.frameSizeAndPosition
 import tk.zwander.common.util.orDefault
 import tk.zwander.lockscreenwidgets.activities.add.ReconfigureFrameWidgetActivity
+import tk.zwander.lockscreenwidgets.databinding.ComposeViewHolderBinding
 import tk.zwander.lockscreenwidgets.util.FramePrefs
+import tk.zwander.lockscreenwidgets.util.MainWidgetFrameDelegate
 
 /**
  * The adapter for the widget frame itself.
  */
 open class WidgetFrameAdapter(
-    frameId: Int,
     context: Context,
-    rootView: View,
-    lsDisplay: () -> LSDisplay?,
-    onRemoveCallback: (WidgetData, Int) -> Unit,
-    viewModel: BaseDelegate.BaseViewModel<*, *>,
-    private val saveTypeGetter: () -> FrameSizeAndPosition.FrameType,
-) : BaseAdapter(frameId, context, rootView, onRemoveCallback, lsDisplay, viewModel) {
+    viewModel: MainWidgetFrameDelegate.IWidgetFrameViewModel<*, *>,
+) : BaseAdapter<MainWidgetFrameDelegate.IWidgetFrameViewModel<*, *>>(
+    context,
+    viewModel,
+) {
     override val colCount: Int
-        get() = FramePrefs.getColCountForFrame(context, holderId)
+        get() = FramePrefs.getColCountForFrame(context, viewModel.frameId)
     override val rowCount: Int
-        get() = FramePrefs.getRowCountForFrame(context, holderId)
+        get() = FramePrefs.getRowCountForFrame(context, viewModel.frameId)
     override val minRowSpan: Int
         get() = 1
     override val rowSpanForAddButton: Int
         get() = rowCount
     override var currentWidgets: Collection<WidgetData>
-        get() = FramePrefs.getWidgetsForFrame(context, holderId)
+        get() = FramePrefs.getWidgetsForFrame(context, viewModel.frameId)
         set(value) {
-            FramePrefs.setWidgetsForFrame(context, holderId, value)
+            FramePrefs.setWidgetsForFrame(context, viewModel.frameId, value)
         }
 
     override fun launchAddActivity() {
-        context.eventManager.sendEvent(Event.LaunchAddWidget(holderId))
+        context.eventManager.sendEvent(Event.LaunchAddWidget(viewModel.frameId))
     }
 
     override fun launchReconfigure(id: Int, providerInfo: AppWidgetProviderInfo) {
-        ReconfigureFrameWidgetActivity.launch(context, id, holderId, providerInfo)
+        ReconfigureFrameWidgetActivity.launch(context, id, viewModel.frameId, providerInfo)
     }
 
     override fun View.onWidgetResize(
@@ -70,12 +67,36 @@ open class WidgetFrameAdapter(
 
     override fun getThresholdPx(which: WidgetResizeListener.Which): Int {
         return context.run {
-            val display = lsDisplay().orDefault
-            val frameSize = frameSizeAndPosition.getSizeForType(saveTypeGetter(), display)
+            val display = viewModel.lsDisplay.orDefault
+            val frameSize = frameSizeAndPosition.getSizeForType(viewModel.saveMode, display)
             if (which == WidgetResizeListener.Which.LEFT || which == WidgetResizeListener.Which.RIGHT) {
                 display.dpToPx(frameSize.x.toInt()) / colCount
             } else {
                 display.dpToPx(frameSize.y.toInt()) / rowCount
+            }
+        }
+    }
+
+    override fun createWidgetViewHolder(view: ComposeViewHolderBinding): WidgetVH {
+        return WidgetFrameWidgetVH(view)
+    }
+
+    inner class WidgetFrameWidgetVH(view: ComposeViewHolderBinding) : WidgetVH(view) {
+        override suspend fun onEvent(event: Event) {
+            super.onEvent(event)
+
+            when (event) {
+                is Event.FrameMoveFinished -> {
+                    if (event.frameId == viewModel.frameId) {
+                        val pos = bindingAdapterPosition
+
+                        if (pos != -1 && pos < widgets.size) {
+                            onResize(widgets[pos], 0, 1)
+                        }
+                    }
+                }
+
+                else -> {}
             }
         }
     }

@@ -40,7 +40,6 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.platform.LocalResources
-import androidx.compose.ui.platform.createLifecycleAwareWindowRecomposer
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -69,7 +68,6 @@ import tk.zwander.common.util.BaseDelegate
 import tk.zwander.common.util.BrokenAppsRegistry
 import tk.zwander.common.util.Event
 import tk.zwander.common.util.EventObserver
-import tk.zwander.common.util.LSDisplay
 import tk.zwander.common.util.appWidgetManager
 import tk.zwander.common.util.createWidgetErrorView
 import tk.zwander.common.util.eventManager
@@ -85,14 +83,10 @@ import java.util.Collections
 import kotlin.math.min
 
 @Suppress("LeakingThis")
-abstract class BaseAdapter(
-    protected val holderId: Int,
+abstract class BaseAdapter<VM : BaseDelegate.BaseViewModel<*, *>>(
     protected val context: Context,
-    protected val rootView: View,
-    protected val onRemoveCallback: (WidgetData, Int) -> Unit,
-    protected val lsDisplay: () -> LSDisplay?,
-    protected val viewModel: BaseDelegate.BaseViewModel<*, *>,
-) : RecyclerView.Adapter<BaseAdapter.BaseVH>() {
+    protected val viewModel: VM,
+) : RecyclerView.Adapter<BaseAdapter<VM>.BaseVH>() {
     companion object {
         const val VIEW_TYPE_WIDGET = 0
         const val VIEW_TYPE_ADD = 1
@@ -216,8 +210,12 @@ abstract class BaseAdapter(
         return if (viewType == VIEW_TYPE_ADD) {
             AddWidgetVH(view)
         } else {
-            WidgetVH(view)
+            createWidgetViewHolder(view)
         }
+    }
+
+    protected open fun createWidgetViewHolder(view: ComposeViewHolderBinding): WidgetVH {
+        return WidgetVH(view)
     }
 
     override fun onBindViewHolder(holder: BaseVH, position: Int) {
@@ -261,7 +259,7 @@ abstract class BaseAdapter(
      * has specified for the frame.
      */
     @SuppressLint("ClickableViewAccessibility")
-    inner class WidgetVH(binding: ComposeViewHolderBinding) : BaseVH(binding),
+    open inner class WidgetVH(binding: ComposeViewHolderBinding) : BaseVH(binding),
         EventObserver {
         private val currentData: WidgetData?
             get() = widgets.getOrNull(bindingAdapterPosition)
@@ -340,7 +338,7 @@ abstract class BaseAdapter(
                         openWidgetConfig(data)
                     },
                     remove = {
-                        onRemoveCallback(data, data.id)
+                        viewModel.itemToRemove.value = data
                     },
                     getResizeThresholdPx = {
                         getThresholdPx(it)
@@ -370,21 +368,7 @@ abstract class BaseAdapter(
             context.eventManager.removeObserver(this)
         }
 
-        override suspend fun onEvent(event: Event) {
-            when (event) {
-                is Event.FrameMoveFinished -> {
-                    if (event.frameId == holderId) {
-                        val pos = bindingAdapterPosition
-
-                        if (pos != -1 && pos < widgets.size) {
-                            onResize(widgets[pos], 0, 1)
-                        }
-                    }
-                }
-
-                else -> {}
-            }
-        }
+        override suspend fun onEvent(event: Event) {}
 
         @Composable
         private fun WidgetContents(
@@ -416,7 +400,7 @@ abstract class BaseAdapter(
                                     }
                                 }
 
-                                this@BaseAdapter.lsDisplay()?.let { display ->
+                                viewModel.lsDisplay?.let { display ->
                                     val width = display.pxToDp(itemView.width)
                                     val height = display.pxToDp(itemView.height)
 
@@ -619,7 +603,7 @@ abstract class BaseAdapter(
         }
 
         //Make sure the item's size is properly updated on a frame resize, or on initial bind
-        private fun onResize(data: WidgetData, amount: Int, direction: Int) {
+        protected fun onResize(data: WidgetData, amount: Int, direction: Int) {
             itemView.apply {
                 layoutParams = layoutParams.apply {
                     onWidgetResize(data, this, amount, direction)
@@ -717,9 +701,7 @@ abstract class BaseAdapter(
         RecyclerView.ViewHolder(binding.root) {
         fun setCompositionContext() {
             binding.root.setParentCompositionContext(
-                rootView.createLifecycleAwareWindowRecomposer(
-                    lifecycle = viewModel.lifecycle,
-                ),
+                viewModel.createLifecycleAwareWindowRecomposer(),
             )
         }
 
