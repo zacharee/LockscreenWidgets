@@ -267,6 +267,9 @@
     <string name="blank_widget">Widget vide</string>
     <string name="add_frame">Ajouter une trame de widget</string>
     <string name="remove_frame">Supprimer le cadre du widget</string>
+    <string name="adjust_wallpaper_mask">Adjust Wallpaper Mask</string>
+    <string name="reset_mask_scale">Reset Mask Scale</string>
+    <string name="reset_mask_alignment">Reset Mask Alignment</string>
     <string name="unable_to_open_settings">Impossible d\'ouvrir les paramètres</string>
     <string name="remove_frame_confirmation_message">Êtes-vous sûr(e) de vouloir supprimer ce cadre?</string>
     <string name="select">Sélectionner</string>
