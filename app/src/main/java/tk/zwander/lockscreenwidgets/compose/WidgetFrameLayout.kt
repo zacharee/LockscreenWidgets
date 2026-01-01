@@ -1,13 +1,15 @@
 package tk.zwander.lockscreenwidgets.compose
 
+import android.graphics.Matrix
 import android.graphics.PorterDuff
 import android.graphics.PorterDuffColorFilter
 import android.view.MotionEvent
 import android.view.ViewConfiguration
+import android.widget.ImageView
+import androidx.appcompat.widget.AppCompatImageView
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.waitForUpOrCancellation
 import androidx.compose.foundation.layout.Box
@@ -26,8 +28,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.asComposeColorFilter
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.motionEventSpy
 import androidx.compose.ui.input.pointer.pointerInput
@@ -40,7 +40,6 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.zIndex
 import com.bugsnag.android.performance.compose.MeasuredComposable
-import com.google.accompanist.drawablepainter.rememberDrawablePainter
 import tk.zwander.common.compose.components.BlurView
 import tk.zwander.common.compose.components.ConfirmFrameRemovalLayout
 import tk.zwander.common.compose.components.ConfirmWidgetRemovalLayout
@@ -91,49 +90,52 @@ fun MainWidgetFrameDelegate.WidgetFrameViewModel.WidgetFrameLayout(
     }
 
     Card(
-        modifier = modifier.pointerInput(null) {
-            awaitPointerEventScope {
-                while (true) {
-                    val pointerEvent = awaitPointerEvent(pass = PointerEventPass.Initial)
+        modifier = modifier
+            .pointerInput(null) {
+                awaitPointerEventScope {
+                    while (true) {
+                        val pointerEvent = awaitPointerEvent(pass = PointerEventPass.Initial)
 
-                    if (pointerEvent.changes.size == 2) {
-                        pointerEvent.changes.forEach { it.consume() }
+                        if (pointerEvent.changes.size == 2) {
+                            pointerEvent.changes.forEach { it.consume() }
 
-                        val thirdEvent = withTimeoutOrNull(10L) {
-                            awaitPointerEvent(pass = PointerEventPass.Initial)
-                        }
-
-                        if (thirdEvent == null || thirdEvent.changes.size <= 2) {
-                            isInEditingMode = !isInEditingMode && !isLocked
-                            if (acknowledgedTwoFingerTap == null) {
-                                acknowledgedTwoFingerTap = false
-                            } else if (acknowledgedTwoFingerTap == false) {
-                                acknowledgedTwoFingerTap = true
+                            val thirdEvent = withTimeoutOrNull(10L) {
+                                awaitPointerEvent(pass = PointerEventPass.Initial)
                             }
-                        } else {
-                            if (firstViewing) {
-                                @Suppress("AssignedValueIsNeverRead")
-                                acknowledgedThreeFingerTap = true
+
+                            if (thirdEvent == null || thirdEvent.changes.size <= 2) {
+                                isInEditingMode = !isInEditingMode && !isLocked
+                                if (acknowledgedTwoFingerTap == null) {
+                                    acknowledgedTwoFingerTap = false
+                                } else if (acknowledgedTwoFingerTap == false) {
+                                    acknowledgedTwoFingerTap = true
+                                }
                             } else {
-                                context.eventManager.sendEvent(Event.TempHide(frameId = frameId))
+                                if (firstViewing) {
+                                    @Suppress("AssignedValueIsNeverRead")
+                                    acknowledgedThreeFingerTap = true
+                                } else {
+                                    context.eventManager.sendEvent(Event.TempHide(frameId = frameId))
+                                }
                             }
-                        }
 
-                        thirdEvent?.changes?.forEach { it.consume() }
-                        waitForUpOrCancellation(pass = PointerEventPass.Initial)
+                            thirdEvent?.changes?.forEach { it.consume() }
+                            waitForUpOrCancellation(pass = PointerEventPass.Initial)
+                        }
                     }
                 }
             }
-        }.motionEventSpy { event ->
-            when (event.action) {
-                MotionEvent.ACTION_DOWN -> {
-                    context.eventManager.sendEvent(Event.FrameIntercept(frameId, true))
+            .motionEventSpy { event ->
+                when (event.action) {
+                    MotionEvent.ACTION_DOWN -> {
+                        context.eventManager.sendEvent(Event.FrameIntercept(frameId, true))
+                    }
+
+                    MotionEvent.ACTION_UP -> {
+                        context.eventManager.sendEvent(Event.FrameIntercept(frameId, false))
+                    }
                 }
-                MotionEvent.ACTION_UP -> {
-                    context.eventManager.sendEvent(Event.FrameIntercept(frameId, false))
-                }
-            }
-        },
+            },
         shape = RoundedCornerShape(size = frameCornerRadius),
         elevation = CardDefaults.outlinedCardElevation(),
         colors = CardDefaults.cardColors().copy(
@@ -141,7 +143,8 @@ fun MainWidgetFrameDelegate.WidgetFrameViewModel.WidgetFrameLayout(
         ),
     ) {
         Box(
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier
+                .fillMaxSize(),
         ) {
             val wallpaper by wallpaperInfo.collectAsState()
 
@@ -165,21 +168,25 @@ fun MainWidgetFrameDelegate.WidgetFrameViewModel.WidgetFrameLayout(
                         value = { framePrefs.maskedModeDimAmount },
                     )
 
-                    Image(
-                        painter = rememberDrawablePainter(drawable),
-                        contentDescription = null,
-                        modifier = Modifier
-                            .graphicsLayer {
-                                translationX = wallpaper.dx
-                                translationY = wallpaper.dy
+                    AndroidView(
+                        factory = {
+                            AppCompatImageView(it).apply {
+                                scaleType = ImageView.ScaleType.MATRIX
                             }
-                            .zIndex(0f),
-                        colorFilter = PorterDuffColorFilter(
-                            android.graphics.Color.argb(
-                                ((maskedModeDimAmount / 100f) * 255).toInt(),
-                                0, 0, 0,
-                            ), PorterDuff.Mode.SRC_ATOP
-                        ).asComposeColorFilter(),
+                        },
+                        update = {
+                            it.setImageDrawable(drawable)
+                            it.imageMatrix = Matrix().apply {
+                                setTranslate(wallpaper.dx, wallpaper.dy)
+                            }
+                            it.colorFilter = PorterDuffColorFilter(
+                                android.graphics.Color.argb(
+                                    ((maskedModeDimAmount / 100f) * 255).toInt(),
+                                    0, 0, 0,
+                                ), PorterDuff.Mode.SRC_ATOP,
+                            )
+                        },
+                        modifier = Modifier.zIndex(0f),
                     )
                 }
             }
