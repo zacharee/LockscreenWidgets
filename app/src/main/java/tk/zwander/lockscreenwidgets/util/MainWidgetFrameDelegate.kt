@@ -748,6 +748,7 @@ open class MainWidgetFrameDelegate protected constructor(
             logUtils.debugLog(
                 "canShow $id: $it\n" +
                         "state: $state\n " +
+                        "globalState: $globalState\n " +
                         "showOnMainLockScreen: ${framePrefs.showOnMainLockScreen}\n" +
                         "widgetFrameEnabled: ${prefManager.widgetFrameEnabled}\n" +
                         "hideOnSecurityPage: ${framePrefs.hideOnSecurityPage}\n" +
@@ -758,7 +759,6 @@ open class MainWidgetFrameDelegate protected constructor(
                         "hideInLandscape: ${prefManager.hideInLandscape}\n" +
                         "showInNotificationCenter: ${framePrefs.showInNotificationShade}\n" +
                         "hideOnEdgePanel: ${framePrefs.hideOnEdgePanel}\n" +
-                        "hidingForPresentApp: ${globalState.hidingForPresentApp.value}\n" +
                         "canShowFrameFromTasker: ${prefManager.canShowFrameFromTasker}\n" +
                         "forceShowFrame: ${prefManager.forceShowFrame}\n" +
                         "hideOnFaceWidgets: ${framePrefs.hideOnFaceWidgets}\n" +
