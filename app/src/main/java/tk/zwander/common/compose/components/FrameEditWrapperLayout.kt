@@ -168,7 +168,7 @@ fun FrameEditWrapperLayout(
                             },
                             orientation = Orientation.Horizontal,
                             onDragStopped = {
-                                context.eventManager.sendEvent(Event.FrameResized(frameId, Event.FrameResized.Side.LEFT, it.toInt(), true))
+                                context.eventManager.sendEvent(Event.FrameResized(frameId, Event.FrameResized.Side.LEFT, 0, true))
                             },
                         ),
                     tint = Color.White,
@@ -184,7 +184,7 @@ fun FrameEditWrapperLayout(
                             },
                             orientation = Orientation.Vertical,
                             onDragStopped = {
-                                context.eventManager.sendEvent(Event.FrameResized(frameId, Event.FrameResized.Side.TOP, it.toInt(), true))
+                                context.eventManager.sendEvent(Event.FrameResized(frameId, Event.FrameResized.Side.TOP, 0, true))
                             },
                         ),
                     tint = Color.White,
@@ -200,7 +200,7 @@ fun FrameEditWrapperLayout(
                             },
                             orientation = Orientation.Vertical,
                             onDragStopped = {
-                                context.eventManager.sendEvent(Event.FrameResized(frameId, Event.FrameResized.Side.BOTTOM, it.toInt(), true))
+                                context.eventManager.sendEvent(Event.FrameResized(frameId, Event.FrameResized.Side.BOTTOM, 0, true))
                             },
                         ),
                     tint = Color.White,
@@ -216,7 +216,7 @@ fun FrameEditWrapperLayout(
                             },
                             orientation = Orientation.Horizontal,
                             onDragStopped = {
-                                context.eventManager.sendEvent(Event.FrameResized(frameId, Event.FrameResized.Side.RIGHT, it.toInt(), true))
+                                context.eventManager.sendEvent(Event.FrameResized(frameId, Event.FrameResized.Side.RIGHT, 0, true))
                             },
                         ),
                     tint = Color.White,
