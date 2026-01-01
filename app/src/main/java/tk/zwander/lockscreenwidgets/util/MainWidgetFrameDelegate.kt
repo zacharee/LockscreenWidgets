@@ -202,7 +202,8 @@ open class MainWidgetFrameDelegate protected constructor(
             flags =
                 WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or
                         WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN or
-                        WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS
+                        WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS or
+                        WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED
             format = PixelFormat.RGBA_8888
         }
     }
@@ -992,6 +993,7 @@ open class MainWidgetFrameDelegate protected constructor(
         val animationState = MutableStateFlow(AnimationState.STATE_IDLE)
         val acknowledgedTwoFingerTap = MutableStateFlow<Boolean?>(null)
         val acknowledgedThreeFingerTap = MutableStateFlow(false)
+        val isAdjustingMask = MutableStateFlow(false)
 
         override val containerCornerRadiusKey: String = PrefManager.KEY_FRAME_CORNER_RADIUS
         override val widgetCornerRadiusKey: String = PrefManager.KEY_FRAME_WIDGET_CORNER_RADIUS

@@ -29,15 +29,17 @@ import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import tk.zwander.common.compose.util.rememberBooleanPreferenceState
 import tk.zwander.common.compose.util.rememberPreferenceState
 import tk.zwander.common.util.Event
 import tk.zwander.common.util.PrefManager
 import tk.zwander.common.util.eventManager
 import tk.zwander.common.util.prefManager
 import tk.zwander.lockscreenwidgets.R
+import tk.zwander.lockscreenwidgets.util.MainWidgetFrameDelegate
 
 @Composable
-fun FrameEditWrapperLayout(
+fun MainWidgetFrameDelegate.WidgetFrameViewModel.FrameEditWrapperLayout(
     frameId: Int,
     onRemovePressed: () -> Unit,
     modifier: Modifier = Modifier,
@@ -47,6 +49,9 @@ fun FrameEditWrapperLayout(
         key = PrefManager.KEY_FRAME_CORNER_RADIUS,
         value = { context.prefManager.cornerRadiusDp },
         onChanged = { _, value -> context.prefManager.cornerRadiusDp = value },
+    )
+    val maskedModeEnabled by rememberBooleanPreferenceState(
+        key = framePrefs.keyFor(PrefManager.KEY_FRAME_MASKED_MODE),
     )
 
     Surface(
@@ -123,6 +128,21 @@ fun FrameEditWrapperLayout(
                                 contentDescription = stringResource(R.string.remove_frame),
                                 tint = MaterialTheme.colorScheme.error,
                                 modifier = Modifier.size(32.dp),
+                            )
+                        }
+                    }
+
+                    if (maskedModeEnabled) {
+                        IconButton(
+                            onClick = {
+                                isAdjustingMask.value = true
+                            },
+                        ) {
+                            Icon(
+                                painter = painterResource(R.drawable.join_right_24px),
+                                contentDescription = stringResource(R.string.adjust_wallpaper_mask),
+                                modifier = Modifier.size(32.dp),
+                                tint = Color.White,
                             )
                         }
                     }

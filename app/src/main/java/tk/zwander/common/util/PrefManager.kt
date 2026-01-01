@@ -11,6 +11,7 @@ import android.hardware.display.DisplayManager
 import android.net.Uri
 import android.view.Display
 import android.view.Gravity
+import androidx.compose.ui.geometry.Offset
 import androidx.core.content.edit
 import androidx.core.content.res.ResourcesCompat
 import androidx.preference.PreferenceManager
@@ -137,6 +138,8 @@ class PrefManager private constructor(private val context: Context) {
         const val KEY_CURRENT_FRAMES_WITH_STRING_DISPLAY = "current_seconday_widget_frames_with_string_display"
         const val KEY_DRAWER_HANDLE_LOCK_POSITION = "drawer_handle_lock_position"
         const val KEY_PRIMARY_FRAME_DISPLAY = "primary_frame_display"
+        const val KEY_MASKED_MODE_ADJUSTMENT_FOR_DISPLAY = "masked_mode_adjustment_for_display"
+        const val KEY_MASKED_MODE_SCALE_FOR_DISPLAY = "masked_mode_scale_for_display"
 
         const val VALUE_PAGE_INDICATOR_BEHAVIOR_HIDDEN = 0
         const val VALUE_PAGE_INDICATOR_BEHAVIOR_AUTO_HIDE = 1
@@ -795,6 +798,25 @@ class PrefManager private constructor(private val context: Context) {
         get() = getString(KEY_PRIMARY_FRAME_DISPLAY) ?: "${Display.DEFAULT_DISPLAY}"
         set(value) {
             putString(KEY_PRIMARY_FRAME_DISPLAY, value)
+        }
+
+    // DisplayID: Offset<Dp, Dp>
+    var maskedModeAdjustment: HashMap<String, Offset>
+        get() = gson.fromJson(
+            getString(KEY_MASKED_MODE_ADJUSTMENT_FOR_DISPLAY, ""),
+            object : TypeToken<HashMap<String, Offset>>() {},
+        ) ?: HashMap()
+        set(value) {
+            putString(KEY_MASKED_MODE_ADJUSTMENT_FOR_DISPLAY, gson.toJson(value))
+        }
+
+    var maskedModeScaleForDisplay: HashMap<String, Float>
+        get() = gson.fromJson(
+            getString(KEY_MASKED_MODE_SCALE_FOR_DISPLAY, ""),
+            object : TypeToken<HashMap<String, Float>>() {},
+        ) ?: HashMap()
+        set(value) {
+            putString(KEY_MASKED_MODE_SCALE_FOR_DISPLAY, gson.toJson(value))
         }
 
     @Suppress("DEPRECATION")

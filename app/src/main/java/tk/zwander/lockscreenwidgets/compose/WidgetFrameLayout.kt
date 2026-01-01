@@ -11,13 +11,21 @@ import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.draggable2D
+import androidx.compose.foundation.gestures.rememberDraggable2DState
+import androidx.compose.foundation.gestures.rememberTransformableState
+import androidx.compose.foundation.gestures.transformable
 import androidx.compose.foundation.gestures.waitForUpOrCancellation
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -27,12 +35,15 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.motionEventSpy
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -61,6 +72,7 @@ fun MainWidgetFrameDelegate.WidgetFrameViewModel.WidgetFrameLayout(
     modifier: Modifier = Modifier,
 ) {
     val context = LocalContext.current
+    val density = LocalDensity.current
     val frameCornerRadius by rememberPreferenceState(
         key = PrefManager.KEY_FRAME_CORNER_RADIUS,
         value = { context.prefManager.cornerRadiusDp.dp },
@@ -88,6 +100,30 @@ fun MainWidgetFrameDelegate.WidgetFrameViewModel.WidgetFrameLayout(
     var removing by remember {
         mutableStateOf(false)
     }
+    var isAdjustingMask by this.isAdjustingMask.collectAsMutableState()
+
+    var maskAdjustment by rememberPreferenceState(
+        key = PrefManager.KEY_MASKED_MODE_ADJUSTMENT_FOR_DISPLAY,
+        value = {
+            context.prefManager.maskedModeAdjustment[lsDisplay?.uniqueIdCompat] ?: Offset(0f, 0f)
+        },
+        onChanged = { _, value ->
+            val mutatedValue = HashMap(context.prefManager.maskedModeAdjustment.toMutableMap())
+            mutatedValue[lsDisplay?.uniqueIdCompat] = value
+            context.prefManager.maskedModeAdjustment = mutatedValue
+        },
+    )
+    var maskScale by rememberPreferenceState(
+        key = PrefManager.KEY_MASKED_MODE_SCALE_FOR_DISPLAY,
+        value = {
+            context.prefManager.maskedModeScaleForDisplay[lsDisplay?.uniqueIdCompat] ?: 1.0f
+        },
+        onChanged = { _, value ->
+            val mutatedValue = HashMap(context.prefManager.maskedModeScaleForDisplay.toMutableMap())
+            mutatedValue[lsDisplay?.uniqueIdCompat] = value
+            context.prefManager.maskedModeScaleForDisplay = mutatedValue
+        },
+    )
 
     Card(
         modifier = modifier
@@ -96,7 +132,7 @@ fun MainWidgetFrameDelegate.WidgetFrameViewModel.WidgetFrameLayout(
                     while (true) {
                         val pointerEvent = awaitPointerEvent(pass = PointerEventPass.Initial)
 
-                        if (pointerEvent.changes.size == 2) {
+                        if (pointerEvent.changes.size == 2 && !isAdjustingMask) {
                             pointerEvent.changes.forEach { it.consume() }
 
                             val thirdEvent = withTimeoutOrNull(10L) {
@@ -177,13 +213,18 @@ fun MainWidgetFrameDelegate.WidgetFrameViewModel.WidgetFrameLayout(
                         update = {
                             it.setImageDrawable(drawable)
                             it.imageMatrix = Matrix().apply {
-                                setTranslate(wallpaper.dx, wallpaper.dy)
+                                setScale(maskScale, maskScale)
+                                postTranslate(
+                                    wallpaper.dx + with(density) { maskAdjustment.x.dp.toPx() },
+                                    wallpaper.dy + with(density) { maskAdjustment.y.dp.toPx() },
+                                )
                             }
                             it.colorFilter = PorterDuffColorFilter(
                                 android.graphics.Color.argb(
                                     ((maskedModeDimAmount / 100f) * 255).toInt(),
                                     0, 0, 0,
-                                ), PorterDuff.Mode.SRC_ATOP,
+                                ),
+                                PorterDuff.Mode.SRC_ATOP,
                             )
                         },
                         modifier = Modifier.zIndex(0f),
@@ -276,7 +317,7 @@ fun MainWidgetFrameDelegate.WidgetFrameViewModel.WidgetFrameLayout(
             }
 
             androidx.compose.animation.AnimatedVisibility(
-                visible = isInEditingMode,
+                visible = isInEditingMode && !isAdjustingMask,
                 enter = fadeIn(),
                 exit = fadeOut(),
                 modifier = Modifier.zIndex(5f),
@@ -320,10 +361,85 @@ fun MainWidgetFrameDelegate.WidgetFrameViewModel.WidgetFrameLayout(
             }
 
             androidx.compose.animation.AnimatedVisibility(
-                visible = proxTooClose,
+                visible = isAdjustingMask,
                 enter = fadeIn(),
                 exit = fadeOut(),
                 modifier = Modifier.zIndex(7f),
+            ) {
+                Box(
+                    modifier = Modifier.fillMaxSize()
+                        .draggable2D(
+                            state = rememberDraggable2DState { offset ->
+                                with(density) {
+                                    maskAdjustment = Offset(
+                                        maskAdjustment.x + offset.x.toDp().value,
+                                        maskAdjustment.y + offset.y.toDp().value,
+                                    )
+                                }
+                            },
+                        )
+                        .transformable(
+                            state = rememberTransformableState { zoomChange, panChange, _ ->
+                                with(density) {
+                                    maskAdjustment = Offset(
+                                        maskAdjustment.x + panChange.x.toDp().value,
+                                        maskAdjustment.y + panChange.y.toDp().value,
+                                    )
+                                }
+                                maskScale *= zoomChange
+                            }
+                        ),
+                ) {
+                    Row(
+                        modifier = Modifier.align(Alignment.BottomEnd),
+                    ) {
+                        IconButton(
+                            onClick = {
+                                maskScale = 1f
+                            },
+                        ) {
+                            Icon(
+                                painter = painterResource(R.drawable.recenter_24px),
+                                contentDescription = stringResource(R.string.reset_mask_alignment),
+                                modifier = Modifier.size(32.dp),
+                                tint = Color.White,
+                            )
+                        }
+
+                        IconButton(
+                            onClick = {
+                                maskScale = 1f
+                            },
+                        ) {
+                            Icon(
+                                painter = painterResource(R.drawable.outline_1x_mobiledata_24),
+                                contentDescription = stringResource(R.string.reset_mask_scale),
+                                modifier = Modifier.size(32.dp),
+                                tint = Color.White,
+                            )
+                        }
+
+                        IconButton(
+                            onClick = {
+                                isAdjustingMask = false
+                            },
+                        ) {
+                            Icon(
+                                painter = painterResource(R.drawable.baseline_check_24),
+                                contentDescription = stringResource(R.string.done),
+                                modifier = Modifier.size(32.dp),
+                                tint = Color.White,
+                            )
+                        }
+                    }
+                }
+            }
+
+            androidx.compose.animation.AnimatedVisibility(
+                visible = proxTooClose,
+                enter = fadeIn(),
+                exit = fadeOut(),
+                modifier = Modifier.zIndex(8f),
             ) {
                 Box(
                     modifier = Modifier
