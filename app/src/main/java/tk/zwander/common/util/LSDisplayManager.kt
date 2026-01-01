@@ -43,6 +43,8 @@ class LSDisplayManager private constructor(context: Context) : ContextWrapper(co
         }
     }
 
+    val multiDisplaySupported = Build.VERSION.SDK_INT >= Build.VERSION_CODES.R
+
     val displayManager = getSystemService(DISPLAY_SERVICE) as DisplayManager
 
     private val displayListener = object : DisplayManager.DisplayListener {
@@ -123,6 +125,14 @@ class LSDisplayManager private constructor(context: Context) : ContextWrapper(co
             return
         }
 
+        if (!multiDisplaySupported && displayId != Display.DEFAULT_DISPLAY) {
+            logUtils.debugLog("Multi-display isn't supported and display $displayId isn't default display", null)
+            availableDisplays.value = availableDisplays.value.toMutableMap().apply {
+                remove(displayId)
+            }
+            return
+        }
+
         val newMap = availableDisplays.value.toMutableMap()
         newMap[displayId] = LSDisplay(
             display = display,
@@ -142,8 +152,14 @@ class LSDisplayManager private constructor(context: Context) : ContextWrapper(co
         // Samsung has extra filtering on DISPLAY_CATEGORY_ALL_INCLUDING_DISABLED but not this.
         val samsung = displayManager.getDisplays("com.samsung.android.hardware.display.category.BUILTIN")
             .filter { it.isBuiltIn(isLikelyRazr) }
-        val allDisplays = displayManager.displays.filter { it.isBuiltIn(isLikelyRazr) }
-        val concatenatedDisplays = (builtInDisplays + allIncludingDisabled + allDisplays + samsung).toSet()
+        val allDisplays = displayManager.displays.filter {
+            it.isBuiltIn(isLikelyRazr)
+        }
+        val concatenatedDisplays = (builtInDisplays + allIncludingDisabled + allDisplays + samsung)
+            .filter {
+                (multiDisplaySupported || it.displayId == Display.DEFAULT_DISPLAY)
+            }
+            .toSet()
 
         availableDisplays.value = concatenatedDisplays.map {
             LSDisplay(

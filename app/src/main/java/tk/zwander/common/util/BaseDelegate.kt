@@ -59,7 +59,7 @@ abstract class BaseDelegate<State : Any>(
             )
     }
     protected val displayContextFlow: StateFlow<Context?> by lazy {
-        displayFlow.map { it?.let { createDisplayContext(it.display) } }
+        displayFlow.map { it?.let { createDisplayContextCompat(it.display) } }
             .stateIn(
                 scope = lifecycleScope,
                 started = SharingStarted.Eagerly,
