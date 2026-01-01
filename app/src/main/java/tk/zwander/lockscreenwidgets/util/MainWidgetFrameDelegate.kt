@@ -747,8 +747,8 @@ open class MainWidgetFrameDelegate protected constructor(
         return (forced() || forSecondaryDisplay() || forPreview() || forNotificationCenter() || forLockscreen()).also {
             logUtils.debugLog(
                 "canShow $id: $it\n" +
-                        "state: $state\n " +
-                        "globalState: $globalState\n " +
+                        "state: $state\n" +
+                        "globalState: $globalState\n" +
                         "showOnMainLockScreen: ${framePrefs.showOnMainLockScreen}\n" +
                         "widgetFrameEnabled: ${prefManager.widgetFrameEnabled}\n" +
                         "hideOnSecurityPage: ${framePrefs.hideOnSecurityPage}\n" +
@@ -762,7 +762,8 @@ open class MainWidgetFrameDelegate protected constructor(
                         "canShowFrameFromTasker: ${prefManager.canShowFrameFromTasker}\n" +
                         "forceShowFrame: ${prefManager.forceShowFrame}\n" +
                         "hideOnFaceWidgets: ${framePrefs.hideOnFaceWidgets}\n" +
-                        "hideWhenKeyboardShown: ${framePrefs.hideWhenKeyboardShown}\n",
+                        "hideWhenKeyboardShown: ${framePrefs.hideWhenKeyboardShown}\n" +
+                        "displayPower: ${lsDisplayManager.displayPowerStates.value[display?.uniqueIdCompat]}\n",
                 null,
             )
         }
