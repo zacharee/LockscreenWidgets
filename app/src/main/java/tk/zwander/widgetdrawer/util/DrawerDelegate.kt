@@ -396,7 +396,7 @@ class DrawerDelegate private constructor(context: Context, displayId: String) :
 
         lifecycleScope.launch(Dispatchers.Main) {
             lsDisplayManager.displayPowerStates
-                .map { it[display?.uniqueIdCompat] == true }
+                .map { it.displayStates[display?.uniqueIdCompat] == true }
                 .collect { isScreenOn ->
                     if (isScreenOn) {
                         tryShowHandle()
@@ -435,7 +435,8 @@ class DrawerDelegate private constructor(context: Context, displayId: String) :
 
     private suspend fun tryShowHandle() {
         logUtils.debugLog("Trying to show handle", null)
-        if (prefManager.drawerEnabled && prefManager.showDrawerHandle && lsDisplayManager.displayPowerStates.value[display?.uniqueIdCompat] == true) {
+        if (prefManager.drawerEnabled && prefManager.showDrawerHandle &&
+            lsDisplayManager.displayPowerStates.value.displayStates[display?.uniqueIdCompat] == true) {
             if (prefManager.showDrawerHandleOnlyWhenLocked && !globalState.wasOnKeyguard.value) {
                 return
             }

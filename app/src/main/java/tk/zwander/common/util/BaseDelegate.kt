@@ -44,35 +44,28 @@ abstract class BaseDelegate<State : Any>(
     protected val kgm by lazy { keyguardManager }
     protected val widgetHost by lazy { widgetHostCompat }
     protected val wm: WindowManager?
-        get() = windowManagerFlow.value
-    val display: LSDisplay?
-        get() = displayFlow.value
+        get() = displayAndWindowManagerFlow.value.windowManager
+    protected val display: LSDisplay?
+        get() = displayAndWindowManagerFlow.value.display
 
-    protected val displayFlow: StateFlow<LSDisplay?> by lazy {
-        lsDisplayManager.collectDisplay(targetDisplayId)
-            .stateIn(
-                scope = lifecycleScope,
-                started = SharingStarted.Eagerly,
-                initialValue = null,
+    protected val displayAndWindowManagerFlow: StateFlow<DisplayAndWindowManager> by lazy {
+        lsDisplayManager.collectDisplay(targetDisplayId).map { lsDisplay ->
+            val displayContext = lsDisplay?.let { createDisplayContextCompat(it.display) }
+            val windowManager = displayContext?.getSystemService(WINDOW_SERVICE) as? WindowManager?
+
+            DisplayAndWindowManager(
+                display = lsDisplay,
+                windowManager = windowManager,
             )
-    }
-    protected val displayContextFlow: StateFlow<Context?> by lazy {
-        displayFlow.map { it?.let { createDisplayContextCompat(it.display) } }
-            .stateIn(
-                scope = lifecycleScope,
-                started = SharingStarted.Eagerly,
-                initialValue = null,
-            )
-    }
-    protected val windowManagerFlow: StateFlow<WindowManager?> by lazy {
-        displayContextFlow.map {
-            it?.getSystemService(WINDOW_SERVICE) as? WindowManager?
         }.stateIn(
             scope = lifecycleScope,
             started = SharingStarted.Eagerly,
-            initialValue = null,
+            initialValue = DisplayAndWindowManager(),
         )
     }
+
+    val screenOrientation: Int?
+        get() = display?.screenOrientation
 
     open var commonState: BaseState = BaseState()
         protected set
@@ -285,6 +278,11 @@ abstract class BaseDelegate<State : Any>(
         val isHoldingItem: Boolean = false,
         val isItemHighlighted: Boolean = false,
         val updatedForMoveOrRemove: Boolean = false,
+    )
+
+    data class DisplayAndWindowManager(
+        val display: LSDisplay? = null,
+        val windowManager: WindowManager? = null,
     )
 
     abstract class LayoutManager(

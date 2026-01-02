@@ -261,9 +261,8 @@ class App : Application(), CoroutineScope by MainScope(), EventObserver {
         }
 
         launch(Dispatchers.Main) {
-            lsDisplayManager.isAnyDisplayOn.collect {
-
-                if (!it) {
+            lsDisplayManager.displayPowerStates.collect {
+                if (!it.anyOn) {
                     logUtils.debugLog("Received screen off", null)
                     unregisterProxListener()
                 } else {

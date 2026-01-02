@@ -574,7 +574,7 @@ object AccessibilityUtils {
             }
 
             logUtils.debugLog(
-                "Accessibility event: $event, isScreenOn: ${lsDisplayManager.isAnyDisplayOn.value}, wasOnKeyguard: ${globalState.wasOnKeyguard.value}, ${drawerDelegate.state}",
+                "Accessibility event: $event, isScreenOn: ${lsDisplayManager.isAnyDisplayOn}, wasOnKeyguard: ${globalState.wasOnKeyguard.value}, ${drawerDelegate.state}",
                 null
             )
 
@@ -583,7 +583,7 @@ object AccessibilityUtils {
                     updateAccessibility = true,
                     transform = {
                         it.copy(
-                            screenOrientation = frameDelegate.display?.screenOrientation ?: it.screenOrientation,
+                            screenOrientation = frameDelegate.screenOrientation ?: it.screenOrientation,
                         )
                     },
                 )
@@ -593,7 +593,7 @@ object AccessibilityUtils {
                 frameDelegates = frameDelegates,
                 drawerDelegate = drawerDelegate,
                 isOnKeyguard = globalState.wasOnKeyguard.value,
-                isScreenOn = lsDisplayManager.isAnyDisplayOn.value,
+                isScreenOn = lsDisplayManager.isAnyDisplayOn,
                 getWindows = getWindows,
             )
 

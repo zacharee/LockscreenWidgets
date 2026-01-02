@@ -501,7 +501,7 @@ open class MainWidgetFrameDelegate protected constructor(
 
         lifecycleScope.launch(Dispatchers.Main) {
             lsDisplayManager.displayPowerStates
-                .map { it[display?.uniqueIdCompat] != false }
+                .map { it.displayStates[display?.uniqueIdCompat] != false }
                 .collect { isScreenOn ->
                     if (!isScreenOn) {
                         globalState.notificationsPanelFullyExpanded.value = false
@@ -707,7 +707,7 @@ open class MainWidgetFrameDelegate protected constructor(
         }
 
         fun forCommon(): Boolean {
-            return lsDisplayManager.displayPowerStates.value[display?.uniqueIdCompat] == true
+            return lsDisplayManager.displayPowerStates.value.displayStates[display?.uniqueIdCompat] == true
                     && !state.isTempHide
                     && !globalState.hideForPresentIds.value
                     && !globalState.hideForNonPresentIds.value
@@ -763,7 +763,7 @@ open class MainWidgetFrameDelegate protected constructor(
                         "forceShowFrame: ${prefManager.forceShowFrame}\n" +
                         "hideOnFaceWidgets: ${framePrefs.hideOnFaceWidgets}\n" +
                         "hideWhenKeyboardShown: ${framePrefs.hideWhenKeyboardShown}\n" +
-                        "displayPower: ${lsDisplayManager.displayPowerStates.value[display?.uniqueIdCompat]}\n",
+                        "displayPower: ${lsDisplayManager.displayPowerStates.value.displayStates[display?.uniqueIdCompat]}\n",
                 null,
             )
         }

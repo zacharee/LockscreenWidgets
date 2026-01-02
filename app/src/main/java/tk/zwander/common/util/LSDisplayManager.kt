@@ -15,6 +15,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import tk.zwander.lockscreenwidgets.App
@@ -69,13 +70,18 @@ class LSDisplayManager private constructor(context: Context) : ContextWrapper(co
     val availableDisplays = MutableStateFlow(mapOf<Int, LSDisplay>())
     val isLikelyRazr = context.isLikelyRazr
 
-    val displayPowerStates = availableDisplays.map { currentDisplays ->
-        currentDisplays.entries.associate { (_, display) -> display.uniqueIdCompat to display.isOn }
-    }.stateIn(this, SharingStarted.Eagerly, initialValue = mapOf())
+    val displayPowerStates: StateFlow<DisplayPowerStates> = availableDisplays.map { currentDisplays ->
+        val states = currentDisplays.entries.associate { (_, display) -> display.uniqueIdCompat to display.isOn }
+        val anyOn = states.any { (_, value) -> value }
 
-    val isAnyDisplayOn = displayPowerStates.map { displayPowerStates ->
-        displayPowerStates.any { (_, value) -> value }
-    }.stateIn(this, SharingStarted.Eagerly, initialValue = false)
+        DisplayPowerStates(
+            displayStates = states,
+            anyOn = anyOn,
+        )
+    }.stateIn(scope = this, started = SharingStarted.Eagerly, initialValue = DisplayPowerStates())
+
+    val isAnyDisplayOn: Boolean
+        get() = displayPowerStates.value.anyOn
 
     fun onCreate() {
         fetchDisplays()
@@ -90,11 +96,6 @@ class LSDisplayManager private constructor(context: Context) : ContextWrapper(co
             display.uniqueIdCompat == displayId ||
                     display.displayId.toString() == displayId
         }
-    }
-
-    fun requireDisplayByStringId(displayId: String): LSDisplay {
-        return findDisplayByStringId(displayId)
-            ?: throw NullPointerException("Display for $displayId not found! Available displays ${availableDisplays.value.values.map { it.loggingId }}")
     }
 
     fun collectDisplay(displayId: String): Flow<LSDisplay?> {
@@ -242,6 +243,11 @@ class LSDisplay(
         }
     }
 }
+
+data class DisplayPowerStates(
+    val displayStates: Map<String, Boolean> = mapOf(),
+    val anyOn: Boolean = false,
+)
 
 private fun Display.isBuiltIn(isLikelyRazr: Boolean): Boolean {
     return type == Display.TYPE_INTERNAL || (isLikelyRazr && displayId == 1)

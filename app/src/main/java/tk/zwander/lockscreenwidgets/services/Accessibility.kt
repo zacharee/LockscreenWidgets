@@ -102,8 +102,8 @@ class Accessibility : AccessibilityService(), CoroutineScope by MainScope() {
         logUtils.debugLog("Accessibility service created.", null)
 
         launch(Dispatchers.Main) {
-            lsDisplayManager.isAnyDisplayOn.collect {
-                if (!it) {
+            lsDisplayManager.displayPowerStates.collect {
+                if (!it.anyOn) {
                     state.accessibilityJob?.cancel()
                 }
             }
@@ -133,7 +133,7 @@ class Accessibility : AccessibilityService(), CoroutineScope by MainScope() {
             runWindowOperation(
                 frameDelegates = secondaryFrameDelegates + (-1 to frameDelegate),
                 drawerDelegate = drawerDelegate,
-                isScreenOn = lsDisplayManager.isAnyDisplayOn.value,
+                isScreenOn = lsDisplayManager.isAnyDisplayOn,
                 isOnKeyguard = kgm.isKeyguardLocked,
                 getWindows = ::getWindowsSafely,
                 initialRun = true,
