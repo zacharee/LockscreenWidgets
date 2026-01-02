@@ -1,7 +1,6 @@
 package tk.zwander.common.util
 
 import android.annotation.SuppressLint
-import android.app.WallpaperManager
 import android.content.Context
 import android.view.View
 import android.view.WindowManager
@@ -43,7 +42,6 @@ abstract class BaseDelegate<State : Any>(
 ) : SafeContextWrapper(context),
     EventObserver, WidgetHostCompat.OnClickCallback, SavedStateRegistryOwner {
     protected val kgm by lazy { keyguardManager }
-    protected val wallpaper by lazy { getSystemService(WALLPAPER_SERVICE) as WallpaperManager }
     protected val widgetHost by lazy { widgetHostCompat }
     protected val wm: WindowManager?
         get() = windowManagerFlow.value
