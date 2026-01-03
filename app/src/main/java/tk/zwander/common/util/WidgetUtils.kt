@@ -6,9 +6,11 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.pm.PackageManager
 import android.graphics.Color
+import android.os.Build
 import android.view.View
 import android.widget.TextView
 import tk.zwander.lockscreenwidgets.R
+import kotlin.math.floor
 
 val Context.appWidgetManager: AppWidgetManager
     get() = AppWidgetManager.getInstance(safeApplicationContext)
@@ -71,4 +73,40 @@ fun Context.createWidgetErrorView(): View {
 
     tv.setBackgroundColor(Color.argb(127, 0, 0, 0))
     return tv
+}
+
+fun AppWidgetProviderInfo.getCellWidthCompat(totalWidthPx: Int, colCount: Int): Int {
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+        val targetCells = this.targetCellWidth
+
+        if (targetCells > 0) {
+            return targetCells
+        }
+    }
+
+    val actualMinWidth = this.minWidth
+
+    if (actualMinWidth <= 0) return 1
+
+    return (floor(actualMinWidth.toFloat() / totalWidthPx.toFloat()) * colCount)
+        .toInt()
+        .coerceAtLeast(1)
+}
+
+fun AppWidgetProviderInfo.getCellHeightCompat(totalHeightPx: Int, rowCount: Int): Int {
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+        val targetCells = this.targetCellHeight
+
+        if (targetCells > 0) {
+            return targetCells
+        }
+    }
+
+    val actualMinHeight = this.minHeight
+
+    if (actualMinHeight <= 0) return 1
+
+    return (floor(actualMinHeight.toFloat() / totalHeightPx.toFloat()) * rowCount)
+        .toInt()
+        .coerceAtLeast(1)
 }

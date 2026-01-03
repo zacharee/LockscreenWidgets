@@ -9,9 +9,10 @@ import tk.zwander.common.data.WidgetSizeData
 import tk.zwander.common.util.Event
 import tk.zwander.common.util.createPersistablePreviewBitmap
 import tk.zwander.common.util.eventManager
+import tk.zwander.common.util.getCellHeightCompat
+import tk.zwander.common.util.getCellWidthCompat
 import tk.zwander.common.util.prefManager
 import tk.zwander.lockscreenwidgets.R
-import kotlin.math.floor
 
 class ReconfigureDrawerWidgetActivity : ReconfigureWidgetActivity() {
     companion object {
@@ -46,13 +47,12 @@ class ReconfigureDrawerWidgetActivity : ReconfigureWidgetActivity() {
             provider.loadLabel(packageManager),
             provider.createPersistablePreviewBitmap(this),
             overrideSize ?: run {
-                val widthRatio = provider.minWidth.toFloat() / display.dpToPx(width)
-                val defaultColSpan = floor((widthRatio * colCount)).toInt()
-                    .coerceAtMost(colCount).coerceAtLeast(1)
+                val defaultColSpan = provider.getCellWidthCompat(display.dpToPx(width), colCount)
+                    .coerceAtMost(colCount)
 
                 val rowHeight = resources.getDimensionPixelSize(R.dimen.drawer_row_height)
 
-                val defaultRowSpan = floor(provider.minHeight.toFloat() / display.pxToDp(rowHeight)).toInt()
+                val defaultRowSpan = provider.getCellHeightCompat(rowHeight, (display.rotatedRealSize.y / rowHeight) - 10)
                     .coerceAtLeast(10)
                     .coerceAtMost((display.rotatedRealSize.y / rowHeight) - 10)
 

@@ -16,6 +16,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import tk.zwander.common.compose.components.Loader
 import tk.zwander.lockscreenwidgets.data.list.BaseListInfo
@@ -23,6 +24,8 @@ import tk.zwander.lockscreenwidgets.data.list.BaseListInfo
 @Composable
 fun AddWidgetLayout(
     showShortcuts: Boolean,
+    fullSize: IntSize,
+    gridSize: IntSize,
     onBack: () -> Unit,
     onSelected: (BaseListInfo<*>) -> Unit,
 ) {
@@ -61,6 +64,8 @@ fun AddWidgetLayout(
                         searchBarHeight = searchBarHeight,
                         modifier = Modifier
                             .fillMaxSize(),
+                        fullSize = fullSize,
+                        gridSize = gridSize,
                     )
 
                     Box(

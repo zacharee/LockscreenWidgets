@@ -52,7 +52,7 @@ class WidgetListInfo(
             itemInfo.provider,
             itemInfo.configure,
             itemInfo.minWidth,
-            itemInfo.minHeight
+            itemInfo.minHeight,
         )
     }
 }

@@ -4,6 +4,7 @@ import android.appwidget.AppWidgetProviderInfo
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import androidx.compose.ui.unit.IntSize
 import tk.zwander.common.data.WidgetData
 import tk.zwander.common.data.WidgetTileInfo
 import tk.zwander.common.util.prefManager
@@ -22,6 +23,9 @@ class AddTileWidgetActivity : AddWidgetActivity() {
             }
         }
     }
+
+    override val fullSize: IntSize = IntSize(300, 300)
+    override val gridSize: IntSize = IntSize(1, 1)
 
     override val showShortcuts: Boolean
         get() = false

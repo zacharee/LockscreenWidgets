@@ -280,7 +280,7 @@ abstract class BaseAdapter<VM : BaseDelegate.BaseViewModel<*, *>>(
                 if (providerInfo == null) {
                     Toast.makeText(context, R.string.error_reconfiguring_widget, Toast.LENGTH_SHORT)
                         .show()
-                    context.logUtils.normalLog("Unable to reconfigure widget $provider: provider info is null.")
+                    context.logUtils.normalLog("Unable to reconfigure widget $provider: provider info is null.", null)
                 } else {
                     launchReconfigure(
                         id = currentData.id,

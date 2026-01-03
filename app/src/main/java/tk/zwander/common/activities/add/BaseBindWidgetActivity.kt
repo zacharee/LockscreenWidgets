@@ -31,6 +31,8 @@ import tk.zwander.common.util.componentNameCompat
 import tk.zwander.common.util.createPersistablePreviewBitmap
 import tk.zwander.common.util.density
 import tk.zwander.common.util.frameSizeAndPosition
+import tk.zwander.common.util.getCellHeightCompat
+import tk.zwander.common.util.getCellWidthCompat
 import tk.zwander.common.util.getRemoteDrawable
 import tk.zwander.common.util.hasConfiguration
 import tk.zwander.common.util.isLikelyRazr
@@ -41,7 +43,6 @@ import tk.zwander.common.util.toSafeBitmap
 import tk.zwander.lockscreenwidgets.R
 import tk.zwander.lockscreenwidgets.data.list.ShortcutListInfo
 import tk.zwander.lockscreenwidgets.util.FramePrefs
-import kotlin.math.floor
 
 abstract class BaseBindWidgetActivity : BaseActivity() {
     companion object {
@@ -399,15 +400,13 @@ abstract class BaseBindWidgetActivity : BaseActivity() {
         ).y
 
     protected open fun calculateInitialWidgetColSpan(provider: AppWidgetProviderInfo): Int {
-        val widthRatio = provider.minWidth.toFloat() / display.dpToPx(width)
-        return floor((widthRatio * colCount)).toInt()
-            .coerceAtMost(colCount).coerceAtLeast(1)
+        return provider.getCellWidthCompat(display.dpToPx(width), colCount)
+            .coerceAtMost(colCount)
     }
 
     protected open fun calculateInitialWidgetRowSpan(provider: AppWidgetProviderInfo): Int {
-        val heightRatio = provider.minHeight.toFloat() / display.dpToPx(height)
-        return floor((heightRatio * rowCount)).toInt()
-            .coerceAtMost(rowCount).coerceAtLeast(1)
+        return provider.getCellHeightCompat(display.dpToPx(height), rowCount)
+            .coerceAtMost(rowCount)
     }
 
     protected open fun calculateInitialWidgetSize(provider: AppWidgetProviderInfo): WidgetSizeData {
@@ -428,7 +427,7 @@ abstract class BaseBindWidgetActivity : BaseActivity() {
             provider.provider,
             provider.loadLabel(packageManager),
             provider.createPersistablePreviewBitmap(this),
-            overrideSize ?: calculateInitialWidgetSize(provider)
+            overrideSize ?: calculateInitialWidgetSize(provider),
         )
     }
 

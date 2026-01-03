@@ -4,6 +4,7 @@ import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import android.view.MenuItem
+import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import com.bugsnag.android.performance.compose.MeasuredComposable
 import tk.zwander.common.activities.DismissOrUnlockActivity
@@ -27,6 +28,13 @@ import tk.zwander.lockscreenwidgets.data.list.WidgetListInfo
 abstract class AddWidgetActivity : BaseBindWidgetActivity() {
     protected open val showShortcuts = true
 
+    protected open val fullSize: IntSize
+        get() = IntSize(
+            display.dpToPx(width),
+            display.dpToPx(height),
+        )
+    protected abstract val gridSize: IntSize
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -40,6 +48,8 @@ abstract class AddWidgetActivity : BaseBindWidgetActivity() {
             MeasuredComposable(name = "AddWidgetLayout") {
                 AddWidgetLayout(
                     showShortcuts = showShortcuts,
+                    fullSize = fullSize,
+                    gridSize = gridSize,
                     onBack = onBackPressedDispatcher::onBackPressed,
                 ) {
                     when (it) {
