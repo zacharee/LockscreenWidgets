@@ -267,6 +267,9 @@
     <string name="blank_widget">Blank Widget</string>
     <string name="add_frame">Add Widget Frame</string>
     <string name="remove_frame">Remove Widget Frame</string>
+    <string name="adjust_wallpaper_mask">Adjust Wallpaper Mask</string>
+    <string name="reset_mask_scale">Reset Mask Scale</string>
+    <string name="reset_mask_alignment">Reset Mask Alignment</string>
     <string name="unable_to_open_settings">Unable to open Settings.</string>
     <string name="remove_frame_confirmation_message">Are you sure you want to remove this frame?</string>
     <string name="select">Select</string>

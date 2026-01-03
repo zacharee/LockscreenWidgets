@@ -267,6 +267,9 @@
     <string name="blank_widget">Leeres Widget</string>
     <string name="add_frame">Widget-Rahmen hinzufügen</string>
     <string name="remove_frame">Widget-Rahmen entfernen</string>
+    <string name="adjust_wallpaper_mask">Adjust Wallpaper Mask</string>
+    <string name="reset_mask_scale">Reset Mask Scale</string>
+    <string name="reset_mask_alignment">Reset Mask Alignment</string>
     <string name="unable_to_open_settings">Einstellungen können nicht geöffnet werden.</string>
     <string name="remove_frame_confirmation_message">Bist du dir sicher, dass du diesen Rahmen entfernen möchtest?</string>
     <string name="select">Auswahl</string>
