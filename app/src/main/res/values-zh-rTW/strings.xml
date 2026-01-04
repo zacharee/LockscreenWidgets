@@ -29,12 +29,12 @@
     <string name="battery_whitelist">電池白名單</string>
     <string name="back">返回</string>
     <string name="clear">清除</string>
-    <string name="launcher">Launcher</string>
+    <string name="launcher">啟動器</string>
     <string name="reset">重置</string>
-    <string name="increase">Increase</string>
-    <string name="decrease">Decrease</string>
-    <string name="selected" tools:override="true">Selected</string>
-    <string name="general">General</string>
+    <string name="increase">增強</string>
+    <string name="decrease">減弱</string>
+    <string name="selected" tools:override="true">已選</string>
+    <string name="general">一般</string>
     <string name="drawer_enabled">啟用抽屜</string>
     <string name="frame_enabled">Frame Enabled</string>
     <string name="add_id_hint">com.android.systemui:id/some_id_here</string>
