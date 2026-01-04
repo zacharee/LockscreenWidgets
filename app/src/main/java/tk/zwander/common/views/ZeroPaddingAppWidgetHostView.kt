@@ -7,6 +7,7 @@ import android.appwidget.AppWidgetProviderInfo
 import android.content.Context
 import android.graphics.Canvas
 import android.view.View
+import tk.zwander.common.util.RemoteViewsLayoutInflaterContext
 import tk.zwander.common.util.appWidgetManager
 import tk.zwander.common.util.logUtils
 
@@ -19,7 +20,7 @@ class ZeroPaddingAppWidgetHostView(
     context: Context,
     private val onAttach: (AppWidgetHostView) -> Unit,
     private val onDefaultClick: (PendingIntent) -> Boolean,
-) : AppWidgetHostView(context) {
+) : AppWidgetHostView(RemoteViewsLayoutInflaterContext(context)) {
     override fun setAppWidget(appWidgetId: Int, info: AppWidgetProviderInfo?) {
         super.setAppWidget(appWidgetId, info)
 
