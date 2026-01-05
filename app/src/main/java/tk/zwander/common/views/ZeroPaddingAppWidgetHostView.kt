@@ -6,6 +6,7 @@ import android.appwidget.AppWidgetHostView
 import android.appwidget.AppWidgetProviderInfo
 import android.content.Context
 import android.graphics.Canvas
+import android.util.AttributeSet
 import android.view.View
 import tk.zwander.common.util.RemoteViewsLayoutInflaterContext
 import tk.zwander.common.util.appWidgetManager
@@ -57,6 +58,15 @@ class ZeroPaddingAppWidgetHostView(
     override fun canHaveDisplayList(): Boolean {
         context.logUtils.debugLog("canHaveDisplayList() ${this::class.java.name}")
         return super.canHaveDisplayList()
+    }
+
+    override fun generateLayoutParams(attrs: AttributeSet?): LayoutParams? {
+        return try {
+            super.generateLayoutParams(attrs)
+        } catch (e: UnsupportedOperationException) {
+            context.logUtils.debugLog("Error generating layout params for ${appWidgetInfo?.provider}", e)
+            generateDefaultLayoutParams()
+        }
     }
 
     override fun onDefaultViewClicked(view: View) {
