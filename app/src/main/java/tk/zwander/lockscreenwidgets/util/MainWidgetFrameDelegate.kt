@@ -733,7 +733,7 @@ open class MainWidgetFrameDelegate protected constructor(
                     && (globalState.currentAppLayer.value < 0 && globalState.currentAppPackage.value == null)
                     && (!globalState.isOnEdgePanel.value || !framePrefs.hideOnEdgePanel)
                     && !globalState.isOnScreenOffMemo.value
-                    && (globalState.onMainLockScreen.value || globalState.showingNotificationsPanel.value || !framePrefs.hideOnSecurityPage)
+                    && (globalState.onMainLockScreen.value || !framePrefs.hideOnSecurityPage)
                     && (!globalState.showingNotificationsPanel.value || !framePrefs.hideOnNotificationShade)
                     && (globalState.notificationCount.value == 0 || !framePrefs.hideOnNotifications)
                     && !globalState.hidingForPresentApp.value
