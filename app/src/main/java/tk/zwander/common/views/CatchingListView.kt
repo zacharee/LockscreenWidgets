@@ -40,7 +40,9 @@ class CatchingListView(context: Context, attrs: AttributeSet) : ListView(context
                             "${
                                 try {
                                     context.packageManager
-                                        .getResourcesForApplication(remoteViews.mApplication)
+                                        .getResourcesForApplication(
+                                            context.packageManager.getApplicationInfo(remoteViews.`package`, 0),
+                                        )
                                         .getResourceName(remoteViews.viewId)
                                 } catch (_: Throwable) {
                                     null
