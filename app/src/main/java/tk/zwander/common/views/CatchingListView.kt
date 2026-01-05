@@ -11,15 +11,16 @@ import tk.zwander.common.util.logUtils
 
 class CatchingListView(context: Context, attrs: AttributeSet) : ListView(context, attrs) {
     override fun layoutChildren() {
-        context.logUtils.normalLog("LAYING OUT", null)
-        if (count != adapter.count) {
-            context.logUtils.debugLog(
-                message = "Mismatch in listview count ($count) and adapter count (${adapter.count}) " +
-                        "for ListView with ID name ${context.resources.getResourceName(id)}.\n" +
-                        "Widget info: ${widgetInfo()}\n" +
-                        "Widget provider: ${findAppWidgetProvider()}",
-                throwable = null,
-            )
+        adapter?.let { adapter ->
+            if (count != adapter.count) {
+                context.logUtils.debugLog(
+                    message = "Mismatch in listview count ($count) and adapter count (${adapter.count}) " +
+                            "for ListView with ID name ${context.resources.getResourceName(id)}.\n" +
+                            "Widget info: ${widgetInfo()}\n" +
+                            "Widget provider: ${findAppWidgetProvider()}",
+                    throwable = null,
+                )
+            }
         }
 
         try {
