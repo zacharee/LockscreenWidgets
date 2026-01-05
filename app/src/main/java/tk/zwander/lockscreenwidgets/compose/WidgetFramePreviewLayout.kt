@@ -98,6 +98,7 @@ fun WidgetFramePreviewLayout(
                             PrefManager.KEY_FRAME_CORNER_RADIUS
                         override val widgetCornerRadiusKey: String =
                             PrefManager.KEY_FRAME_WIDGET_CORNER_RADIUS
+                        override val ignoreWidgetTouchesKey: String? = null
 
                         override val frameId: Int
                             get() = frameId

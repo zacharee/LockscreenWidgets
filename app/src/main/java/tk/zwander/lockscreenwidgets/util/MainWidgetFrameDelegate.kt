@@ -998,6 +998,8 @@ open class MainWidgetFrameDelegate protected constructor(
 
         override val containerCornerRadiusKey: String = PrefManager.KEY_FRAME_CORNER_RADIUS
         override val widgetCornerRadiusKey: String = PrefManager.KEY_FRAME_WIDGET_CORNER_RADIUS
+        override val ignoreWidgetTouchesKey: String?
+            get() = framePrefs.keyFor(PrefManager.KEY_FRAME_IGNORE_WIDGET_TOUCHES)
 
         val framePrefs: FrameSpecificPreferences
             get() = delegate.framePrefs

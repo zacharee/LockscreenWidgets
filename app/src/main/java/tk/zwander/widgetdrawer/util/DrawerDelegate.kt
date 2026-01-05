@@ -547,6 +547,7 @@ class DrawerDelegate private constructor(context: Context, displayId: String) :
 
         override val containerCornerRadiusKey: String? = null
         override val widgetCornerRadiusKey: String = PrefManager.KEY_DRAWER_WIDGET_CORNER_RADIUS
+        override val ignoreWidgetTouchesKey: String? = null
     }
 }
 

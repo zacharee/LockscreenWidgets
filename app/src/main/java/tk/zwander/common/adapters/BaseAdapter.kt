@@ -360,6 +360,7 @@ abstract class BaseAdapter<VM : BaseDelegate.BaseViewModel<*, *>>(
                     colCount = colCount,
                     isEditing = currentEditingPosition == bindingAdapterPosition,
                     modifier = Modifier.fillMaxSize(),
+                    ignoreTouchesKey = viewModel.ignoreWidgetTouchesKey,
                 )
             }
         }

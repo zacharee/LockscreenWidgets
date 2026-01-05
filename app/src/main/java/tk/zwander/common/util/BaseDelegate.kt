@@ -356,6 +356,8 @@ abstract class BaseDelegate<State : Any>(
         abstract val widgetCornerRadiusKey: String
         abstract val containerCornerRadiusKey: String?
 
+        abstract val ignoreWidgetTouchesKey: String?
+
         fun createLifecycleAwareWindowRecomposer(): Recomposer {
             return delegate.rootView.createLifecycleAwareWindowRecomposer(
                 lifecycle = delegate.lifecycle,

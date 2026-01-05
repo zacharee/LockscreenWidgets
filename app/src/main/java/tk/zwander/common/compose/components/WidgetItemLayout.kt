@@ -9,6 +9,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.draggable2D
 import androidx.compose.foundation.gestures.rememberDraggable2DState
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -27,6 +28,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.AbsoluteAlignment
 import androidx.compose.ui.Alignment
@@ -42,6 +44,7 @@ import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import tk.zwander.common.compose.util.rememberBooleanPreferenceState
 import tk.zwander.common.compose.util.rememberPreferenceState
 import tk.zwander.common.data.WidgetData
 import tk.zwander.common.data.WidgetType
@@ -59,6 +62,7 @@ fun BaseDelegate.BaseViewModel<*, *>.WidgetItemLayout(
     widgetData: WidgetData,
     widgetContents: @Composable (Modifier) -> Unit,
     cornerRadiusKey: String,
+    ignoreTouchesKey: String?,
     launchIconOverride: () -> Unit,
     launchReconfigure: () -> Unit,
     remove: () -> Unit,
@@ -82,6 +86,8 @@ fun BaseDelegate.BaseViewModel<*, *>.WidgetItemLayout(
         },
     )
     val animatedCornerRadius by animateDpAsState(widgetCornerRadius)
+    val ignoreTouches by ignoreTouchesKey?.let { rememberBooleanPreferenceState(ignoreTouchesKey) }
+        ?: remember { mutableStateOf(false) }
 
     Card(
         modifier = modifier,
@@ -100,6 +106,17 @@ fun BaseDelegate.BaseViewModel<*, *>.WidgetItemLayout(
                 contentAlignment = Alignment.Center,
             ) {
                 widgetContents(Modifier.fillMaxSize())
+
+                if (ignoreTouches) {
+                    Box(
+                        modifier = Modifier.fillMaxSize()
+                            .clickable(
+                                interactionSource = remember { MutableInteractionSource() },
+                                indication = null,
+                                onClick = {},
+                            ),
+                    )
+                }
 
                 androidx.compose.animation.AnimatedVisibility(
                     visible = needsReconfigure,
