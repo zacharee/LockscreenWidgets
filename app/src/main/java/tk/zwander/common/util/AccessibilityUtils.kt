@@ -46,6 +46,7 @@ object AccessibilityUtils {
 
     data object IDMaps {
         val mainLockScreenIds = unitMapOf(
+            "com.android.systemui:id/notification_panel",
             "com.android.systemui:id/left_button",
             "com.android.systemui:id/camera_button",
             "com.android.systemui:id/keyguard_indication_text_bottom",
