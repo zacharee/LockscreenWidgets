@@ -53,6 +53,11 @@ class DismissOrUnlockActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        @Suppress("DEPRECATION")
+        window.addFlags(
+            WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD,
+        )
+
         handle()
 
         lifecycleScope.launch(Dispatchers.Main) {
@@ -72,7 +77,7 @@ class DismissOrUnlockActivity : AppCompatActivity() {
     }
 
     private fun handle() {
-        logUtils.debugLog("Handling dismiss/unlock? ${kgm.isKeyguardLocked}")
+        logUtils.debugLog("Handling dismiss/unlock? ${kgm.isKeyguardLocked}", null)
 
         if (kgm.isKeyguardLocked) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -108,8 +113,7 @@ class DismissOrUnlockActivity : AppCompatActivity() {
                 }
                 @Suppress("DEPRECATION")
                 window.addFlags(
-                    WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD or
-                            WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED,
+                    WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED,
                 )
             }
         } else {
