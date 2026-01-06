@@ -267,9 +267,9 @@
     <string name="blank_widget">Boş Widget</string>
     <string name="add_frame">Widget Çerçevesi Ekle</string>
     <string name="remove_frame">Widget Çerçevesini Kaldır</string>
-    <string name="adjust_wallpaper_mask">Adjust Wallpaper Mask</string>
-    <string name="reset_mask_scale">Reset Mask Scale</string>
-    <string name="reset_mask_alignment">Reset Mask Alignment</string>
+    <string name="adjust_wallpaper_mask">Duvar Kağıdı Maskesini Ayarla</string>
+    <string name="reset_mask_scale">Maske Ölçeğini Sıfırla</string>
+    <string name="reset_mask_alignment">Maske Hizalamasını Sıfırla</string>
     <string name="unable_to_open_settings">Ayarlar açılamıyor.</string>
     <string name="remove_frame_confirmation_message">Bu çerçeveyi kaldırmak istediğinizden emin misiniz?</string>
     <string name="select">Seçim</string>
