@@ -5,11 +5,11 @@
     <string name="edit_gesture_hint_2">1</string>
     <string name="hide_gesture_hint">三指轻点小部件边框即可暂时隐藏它。它会一直隐藏，直到您关闭并重新打开屏幕。</string>
     <string name="accessibility_service_desc">锁屏小部件需要启用辅助功能服务才能在锁屏界面和通知中心显示。不会收集任何数据，也不会对设备执行任何操作。</string>
-    <string name="add_widget">Add Widget</string>
-    <string name="grant">Grant</string>
-    <string name="granted">Granted</string>
-    <string name="settings">Settings</string>
-    <string name="yes">Yes</string>
+    <string name="add_widget">添加小组件</string>
+    <string name="grant">授予权限</string>
+    <string name="granted">已授予权限</string>
+    <string name="settings">设置</string>
+    <string name="yes">是</string>
     <string name="no">取消</string>
     <string name="add">添加</string>
     <string name="add_id">添加ID</string>
