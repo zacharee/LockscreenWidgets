@@ -16,6 +16,7 @@ data class GlobalState private constructor(
     val isOnScreenOffMemo: MutableStateFlow<Boolean> = MutableStateFlow(false),
     val onMainLockScreen: MutableStateFlow<Boolean> = MutableStateFlow(false),
     val showingNotificationsPanel: MutableStateFlow<Boolean> = MutableStateFlow(false),
+    val showingSecurityInput: MutableStateFlow<Boolean> = MutableStateFlow(false),
     val notificationCount: MutableStateFlow<Int> = MutableStateFlow(0),
     val hideForPresentIds: MutableStateFlow<Boolean> = MutableStateFlow(false),
     val hideForNonPresentIds: MutableStateFlow<Boolean> = MutableStateFlow(false),

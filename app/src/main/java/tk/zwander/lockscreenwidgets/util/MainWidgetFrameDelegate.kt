@@ -692,7 +692,8 @@ open class MainWidgetFrameDelegate protected constructor(
      * - [GlobalState.currentAppLayer] is less than 0 (i.e. doesn't exist)
      * - [GlobalState.isOnEdgePanel] is false OR [FrameSpecificPreferences.hideOnEdgePanel] is false
      * - [GlobalState.isOnScreenOffMemo] is false
-     * - [GlobalState.onMainLockScreen] is true OR [FrameSpecificPreferences.hideOnSecurityPage] is false
+     * - [GlobalState.onMainLockScreen] is true
+     * - [GlobalState.showingSecurityInput] is false OR [FrameSpecificPreferences.hideOnSecurityPage] is false
      * - [GlobalState.showingNotificationsPanel] is false OR [FrameSpecificPreferences.hideOnNotificationShade] is false (OR [GlobalState.notificationsPanelFullyExpanded] is true AND [FrameSpecificPreferences.showInNotificationShade] is true
      * - [GlobalState.notificationCount] is 0 (i.e. no notifications shown on lock screen, not necessarily no notifications at all) OR [FrameSpecificPreferences.hideOnNotifications] is false
      * - [GlobalState.hideForPresentIds] is false OR [PrefManager.presentIds] is empty
@@ -733,8 +734,8 @@ open class MainWidgetFrameDelegate protected constructor(
                     && (globalState.currentAppLayer.value < 0 && globalState.currentAppPackage.value == null)
                     && (!globalState.isOnEdgePanel.value || !framePrefs.hideOnEdgePanel)
                     && !globalState.isOnScreenOffMemo.value
-                    && (globalState.onMainLockScreen.value || !framePrefs.hideOnSecurityPage)
                     && (!globalState.showingNotificationsPanel.value || !framePrefs.hideOnNotificationShade)
+                    && (!globalState.showingSecurityInput.value || !framePrefs.hideOnSecurityPage)
                     && (globalState.notificationCount.value == 0 || !framePrefs.hideOnNotifications)
                     && !globalState.hidingForPresentApp.value
                     && forCommon()

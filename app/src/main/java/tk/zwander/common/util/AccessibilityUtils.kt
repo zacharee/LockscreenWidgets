@@ -35,6 +35,7 @@ object AccessibilityUtils {
     data class NodeState(
         val onMainLockscreen: AtomicBoolean = atomic(false),
         val showingNotificationsPanel: AtomicBoolean = atomic(false),
+        val showingSecurityInput: AtomicBoolean = atomic(false),
         val hasMoreButton: AtomicBoolean = atomic(false),
         val hideForPresentIds: AtomicBoolean = atomic(false),
         val hideForNonPresentIds: AtomicBoolean = atomic(false),
@@ -55,13 +56,21 @@ object AccessibilityUtils {
             "com.android.systemui:id/footer_views",
         )
 
+        val securityInputIds = unitMapOf(
+            "com.android.systemui:id/keyguard_host_view",
+            "com.android.systemui:id/keyguard_security_container",
+        )
+
         val notificationsPanelIds = unitMapOf(
             "com.android.systemui:id/quick_settings_panel",
             "com.android.systemui:id/settings_button",
             "com.android.systemui:id/tile_label",
             "com.android.systemui:id/header_label",
             "com.android.systemui:id/split_shade_status_bar",
+            "com.android.systemui:id/notification_shade_shortcut",
             "com.android.systemui:id/quick_qs_panel".takeIf { Build.VERSION.SDK_INT > Build.VERSION_CODES.S_V2 },
+            // HyperOS Control Center
+            "miui.systemui.plugin:id/main_panel_container",
         )
 
         val notificationIds = unitMapOf(
@@ -114,6 +123,12 @@ object AccessibilityUtils {
                 //Some devices don't even have left shortcuts, so also check for keyguard_indication_area.
                 //Just like the showingSecurityInput check, this is probably unreliable for some devices.
                 nodeState.showingNotificationsPanel.value = true
+            }
+        }
+
+        if (!nodeState.showingSecurityInput.value) {
+            if (node.hasVisibleIds(IDMaps.securityInputIds)) {
+                nodeState.showingSecurityInput.value = true
             }
         }
 
@@ -454,6 +469,7 @@ object AccessibilityUtils {
                 globalState.currentAppPackage.value = windowInfo.topAppWindowPackageName
                 globalState.hidingForPresentApp.value = windowInfo.hasHideForPresentApp
                 globalState.onMainLockScreen.value = windowInfo.nodeState.onMainLockscreen.value
+                globalState.showingSecurityInput.value = windowInfo.nodeState.showingSecurityInput.value
                 globalState.accessibilitySeesNotificationsOnMainLockScreen.value =
                     windowInfo.nodeState.onMainLockscreen.value &&
                             windowInfo.nodeState.hasNotificationsShowing.value
