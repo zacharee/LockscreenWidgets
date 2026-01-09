@@ -286,6 +286,8 @@ class ShizukuManager private constructor(private val context: Context) : Corouti
             )
         } catch (e: IllegalStateException) {
             context.logUtils.normalLog("Unable to bind Shizuku service", e)
+        } catch (e: SecurityException) {
+            context.logUtils.normalLog("Unable to bind Shizuku service", e)
         }
     }
 }
