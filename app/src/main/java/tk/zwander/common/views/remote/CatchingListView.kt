@@ -13,13 +13,21 @@ class CatchingListView(
     private val widgetId: Int,
 ) : ListView(context, attrs) {
     override fun layoutChildren() {
+        if (!isAttachedToWindow) {
+            context.logUtils.debugLog(
+                message = "ListView ${safeViewIdName()} not attached to window so not laying out.\n" +
+                        "Widget ID: $widgetId.\n" +
+                        "Widget provider: ${findAppWidgetProvider()}.",
+            )
+        }
+
         adapter?.let { adapter ->
             if (count != adapter.count) {
                 context.logUtils.debugLog(
                     message = "Mismatch in listview count ($count) and adapter count (${adapter.count}) " +
                             "for ListView with ID name ${safeViewIdName()}.\n" +
                             "Widget ID: $widgetId.\n" +
-                            "Widget provider: ${findAppWidgetProvider()}",
+                            "Widget provider: ${findAppWidgetProvider()}.",
                     throwable = null,
                 )
             }
@@ -36,7 +44,7 @@ class CatchingListView(
         return try {
             context.resources.getResourceName(id)
         } catch (_: Throwable) {
-            null
+            id.toString()
         }
     }
 
