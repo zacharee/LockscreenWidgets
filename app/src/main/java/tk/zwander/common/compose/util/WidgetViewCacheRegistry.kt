@@ -39,14 +39,13 @@ class WidgetViewCacheRegistry private constructor(@Suppress("unused") private va
                     "${appWidget.providerInfo.applicationInfo.packageName}", e)
             null
         }
-        return cachedViews[appWidgetId]?.also {
-            if (it.parent != null) {
-                (it.parent as ViewGroup).removeView(it)
-            }
-        } ?: context.widgetHostCompat.createView(
-            widgetContext ?: context, appWidgetId, appWidget,
-        ).also {
-            cachedViews[appWidgetId] = it
+
+        return cachedViews.getOrPut(appWidgetId) {
+            context.widgetHostCompat.createView(
+                widgetContext ?: context, appWidgetId, appWidget,
+            )
+        }.also {
+            (it.parent as? ViewGroup?)?.removeView(it)
         }
     }
 

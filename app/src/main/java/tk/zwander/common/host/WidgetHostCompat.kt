@@ -215,6 +215,7 @@ class WidgetHostCompat(
                     onClickCallbacks = onClickCallbacks,
                 )
             },
+            widgetId = appWidgetId,
         )
     }
 

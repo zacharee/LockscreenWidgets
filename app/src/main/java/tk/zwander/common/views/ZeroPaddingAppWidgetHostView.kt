@@ -19,9 +19,10 @@ import tk.zwander.common.util.logUtils
 @SuppressLint("ViewConstructor")
 class ZeroPaddingAppWidgetHostView(
     context: Context,
+    widgetId: Int,
     private val onAttach: (AppWidgetHostView) -> Unit,
     private val onDefaultClick: (PendingIntent) -> Boolean,
-) : AppWidgetHostView(RemoteViewsLayoutInflaterContext(context)) {
+) : AppWidgetHostView(RemoteViewsLayoutInflaterContext(context, widgetId)) {
     override fun setAppWidget(appWidgetId: Int, info: AppWidgetProviderInfo?) {
         super.setAppWidget(appWidgetId, info)
 

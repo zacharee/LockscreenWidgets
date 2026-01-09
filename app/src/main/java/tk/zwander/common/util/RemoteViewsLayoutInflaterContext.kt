@@ -5,9 +5,13 @@ import android.content.ContextWrapper
 import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.view.View
-import tk.zwander.common.views.CatchingListView
+import tk.zwander.common.views.remote.CatchingListView
+import tk.zwander.common.views.remote.CatchingTextClock
 
-class RemoteViewsLayoutInflaterContext(context: Context) : ContextWrapper(context) {
+class RemoteViewsLayoutInflaterContext(
+    context: Context,
+    private val widgetId: Int,
+) : ContextWrapper(context) {
     private var inflater: LayoutInflater? = null
 
     override fun getSystemService(name: String): Any? {
@@ -20,11 +24,11 @@ class RemoteViewsLayoutInflaterContext(context: Context) : ContextWrapper(contex
                         context: Context,
                         attrs: AttributeSet,
                     ): View? {
-                        if (name == "ListView") {
-                            return CatchingListView(context, attrs)
+                        return when (name) {
+                            "ListView" -> CatchingListView(context, attrs, widgetId)
+                            "TextClock" -> CatchingTextClock(context, attrs)
+                            else -> null
                         }
-
-                        return null
                     }
 
                     override fun onCreateView(
