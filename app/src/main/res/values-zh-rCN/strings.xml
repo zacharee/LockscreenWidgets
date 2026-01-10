@@ -23,8 +23,8 @@
     <string name="close_app">关闭应用</string>
     <string name="privacy_policy">隐私政策</string>
     <string name="shortcut">快捷方式</string>
-    <string name="enabled">Enabled</string>
-    <string name="disabled">Disabled</string>
+    <string name="enabled">授权</string>
+    <string name="disabled">使不能运转</string>
     <string name="accessibility_settings">辅助功能设置</string>
     <string name="battery_whitelist">Battery Allowlist</string>
     <string name="back">Back</string>
