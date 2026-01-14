@@ -5,7 +5,9 @@ import android.content.Context
 import android.view.View
 import android.view.WindowManager
 import androidx.annotation.CallSuper
+import androidx.compose.runtime.CompositionContext
 import androidx.compose.runtime.Recomposer
+import androidx.compose.ui.platform.compositionContext
 import androidx.compose.ui.platform.createLifecycleAwareWindowRecomposer
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleRegistry
@@ -38,7 +40,7 @@ import java.util.concurrent.ConcurrentLinkedDeque
 @Suppress("MemberVisibilityCanBePrivate")
 abstract class BaseDelegate<State : Any>(
     context: Context,
-    protected open val targetDisplayId: String,
+    open val targetDisplayId: String,
 ) : SafeContextWrapper(context),
     EventObserver, WidgetHostCompat.OnClickCallback, SavedStateRegistryOwner {
     protected val kgm by lazy { keyguardManager }
@@ -363,6 +365,9 @@ abstract class BaseDelegate<State : Any>(
                 lifecycle = delegate.lifecycle,
             )
         }
+
+        val compositionContext: CompositionContext?
+            get() = delegate.rootView.compositionContext
 
         suspend fun updateWindow() {
             delegate.updateWindow()

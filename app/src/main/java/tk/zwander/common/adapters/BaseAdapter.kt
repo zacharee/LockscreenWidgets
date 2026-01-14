@@ -702,7 +702,7 @@ abstract class BaseAdapter<VM : BaseDelegate.BaseViewModel<*, *>>(
         RecyclerView.ViewHolder(binding.root) {
         fun setCompositionContext() {
             binding.root.setParentCompositionContext(
-                viewModel.createLifecycleAwareWindowRecomposer(),
+                viewModel.compositionContext,
             )
         }
 
