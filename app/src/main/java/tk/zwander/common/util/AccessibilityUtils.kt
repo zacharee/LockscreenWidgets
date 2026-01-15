@@ -70,7 +70,10 @@ object AccessibilityUtils {
             "com.android.systemui:id/header_label",
             "com.android.systemui:id/split_shade_status_bar",
             "com.android.systemui:id/notification_shade_shortcut",
-            "com.android.systemui:id/quick_qs_panel".takeIf { Build.VERSION.SDK_INT > Build.VERSION_CODES.S_V2 },
+            "com.android.systemui:id/quick_qs_panel".takeIf {
+                Build.VERSION.SDK_INT > Build.VERSION_CODES.S_V2 &&
+                        Build.VERSION.SDK_INT < Build.VERSION_CODES.BAKLAVA
+            },
             // HyperOS Control Center
             "miui.systemui.plugin:id/main_panel_container",
         )
