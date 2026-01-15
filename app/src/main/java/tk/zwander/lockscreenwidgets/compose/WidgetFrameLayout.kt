@@ -311,6 +311,7 @@ fun MainWidgetFrameDelegate.WidgetFrameViewModel.WidgetFrameLayout(
                     MeasuredComposable(name = "IDList") {
                         IDListLayout(
                             modifier = Modifier.fillMaxSize(),
+                            displayId = lsDisplay?.displayId,
                         )
                     }
                 }

@@ -5,6 +5,7 @@ import android.appwidget.AppWidgetProvider
 import android.content.ComponentName
 import android.content.Context
 import android.graphics.Color
+import android.view.Display
 import android.widget.RemoteViews
 import androidx.core.widget.RemoteViewsCompat
 import tk.zwander.common.util.DebugIDsManager
@@ -38,6 +39,9 @@ class IDListProvider : AppWidgetProvider() {
             val view = RemoteViews(context.packageName, R.layout.id_list_widget_layout)
 
             appWidgetIds.forEach { appWidgetId ->
+                val displayId = appWidgetManager.getAppWidgetOptions(appWidgetId)
+                    .getInt("displayId", Display.DEFAULT_DISPLAY)
+
                 RemoteViewsCompat.setRemoteAdapter(
                     context,
                     view,
@@ -47,7 +51,7 @@ class IDListProvider : AppWidgetProvider() {
                         .setHasStableIds(false)
                         .setViewTypeCount(1)
                         .apply {
-                            DebugIDsManager.items.value.forEach { debugId ->
+                            DebugIDsManager.items.value[displayId]?.forEach { debugId ->
                                 val itemView = RemoteViews(context.packageName, R.layout.id_list_widget_item).apply {
                                     setTextViewText(R.id.id_list_item, debugId.id)
                                     setTextColor(R.id.id_list_item, when (debugId.type) {

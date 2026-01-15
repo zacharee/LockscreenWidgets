@@ -415,6 +415,7 @@ abstract class BaseAdapter<VM : BaseDelegate.BaseViewModel<*, *>>(
                                             manager.getAppWidgetOptions(appWidgetId).apply {
                                                 putBoolean("hsIsHorizontalIcon", false)
                                                 putInt("semAppWidgetRowSpan", 1)
+                                                putInt("displayId", display.displayId)
                                             })
                                     }
 

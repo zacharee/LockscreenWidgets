@@ -6,11 +6,13 @@ import android.content.Context
 import android.content.Intent
 import android.os.Build
 import android.provider.Settings
+import android.util.SparseArray
 import android.view.accessibility.AccessibilityEvent
 import android.view.accessibility.AccessibilityNodeInfo
 import android.view.accessibility.AccessibilityWindowInfo
 import android.view.inputmethod.InputMethodManager
 import android.widget.Toast
+import androidx.core.util.forEach
 import kotlinx.atomicfu.AtomicBoolean
 import kotlinx.atomicfu.atomic
 import kotlinx.coroutines.CoroutineScope
@@ -382,7 +384,7 @@ object AccessibilityUtils {
         drawerDelegate: DrawerDelegate,
         isScreenOn: Boolean,
         isOnKeyguard: Boolean,
-        getWindows: () -> List<AccessibilityWindowInfo>?,
+        getWindows: () -> SparseArray<List<AccessibilityWindowInfo>>?,
         initialRun: Boolean = false,
     ) {
         logUtils.debugLog(
@@ -407,51 +409,56 @@ object AccessibilityUtils {
                             prefManager.widgetFrameEnabled /* This is only needed when the frame is enabled */) ||
                             (prefManager.drawerEnabled && drawerDelegate.isAttached && prefManager.drawerHideWhenNotificationPanelOpen)))
         ) {
-
             logUtils.debugLog(
                 "Running window operation.",
-                if (initialRun) LogUtils.DefaultException() else null
+                if (initialRun) LogUtils.DefaultException() else null,
             )
 
-            val windowInfo = getWindows()?.let {
-                processWindows(it).also { windowInfo ->
-                    logUtils.debugLog("Got windows $windowInfo", null)
+            getWindows()?.forEach { displayId, windows ->
+                val windowInfo = processWindows(windows).also { windowInfo ->
+                    logUtils.debugLog("Got windows for display $displayId: $windowInfo", null)
                 }
-            }
 
-            windowInfo?.sysUiWindowViewIds?.let { sysUiWindowViewIds ->
-                logUtils.debugLog("Found IDs\n${sysUiWindowViewIds.joinToString("\n")}", null)
-                //Update any ID list widgets on the new IDs
-                coroutineScope {
-                    DebugIDsManager.setItems(sysUiWindowViewIds)
-                    launch(Dispatchers.Main) {
-                        IDListProvider.sendUpdate(this@runWindowOperation)
+                val relevantFrameDelegates = frameDelegates.filter { (_, frame) -> frame.display?.displayId == displayId }
+
+                windowInfo.sysUiWindowViewIds.let { sysUiWindowViewIds ->
+                    logUtils.debugLog("Found IDs on display $displayId\n${sysUiWindowViewIds.joinToString("\n")}", null)
+                    //Update any ID list widgets on the new IDs
+                    coroutineScope {
+                        DebugIDsManager.setItems(displayId, sysUiWindowViewIds)
+                        launch(Dispatchers.Main) {
+                            IDListProvider.sendUpdate(this@runWindowOperation)
+                        }
                     }
                 }
-            }
 
-            if (isDebug) {
-                windowInfo?.sysUiWindowNodes?.let { sysUiWindowNodes ->
-                    logUtils.debugLog(
-                        sysUiWindowNodes.filter { it.isVisibleToUser }.map { it.viewIdResourceName }
-                            .toString(),
-                        null,
-                    )
+                if (isDebug) {
+                    windowInfo.sysUiWindowNodes.let { sysUiWindowNodes ->
+                        logUtils.debugLog(
+                            "$displayId: ${sysUiWindowNodes.filter { it.isVisibleToUser }.map { it.viewIdResourceName }}",
+                            null,
+                        )
+                    }
                 }
-            }
 
-            windowInfo?.let {
-                val notificationsWereOpen = globalState.showingNotificationsPanel.value
+                val notificationsWereOpen = globalState.showingNotificationsPanel.value[displayId]
                 val notificationsAreOpen = windowInfo.nodeState.showingNotificationsPanel.value
 
                 //Samsung's Screen-Off Memo is really just a normal Activity that shows over the lock screen.
                 //However, it's not an Application-type window for some reason, so it won't hide with the
                 //currentAppLayer check. Explicitly check for its existence here.
                 globalState.isOnScreenOffMemo.value =
-                    isOnKeyguard && windowInfo.hasScreenOffMemoWindow
-                globalState.isOnEdgePanel.value = windowInfo.hasEdgePanelWindow
+                    globalState.isOnScreenOffMemo.value.toMutableMap().apply {
+                        this[displayId] = isOnKeyguard && windowInfo.hasScreenOffMemoWindow
+                    }
+                globalState.isOnEdgePanel.value = globalState.isOnEdgePanel.value.toMutableMap().apply {
+                    this[displayId] = windowInfo.hasEdgePanelWindow
+                }
                 globalState.isOnFaceWidgets.value =
-                    windowInfo.hasFaceWidgetsWindow || windowInfo.nodeState.onFaceWidgets.value
+                    globalState.isOnFaceWidgets.value.toMutableMap().apply {
+                        this[displayId] = windowInfo.hasFaceWidgetsWindow
+                                || windowInfo.nodeState.onFaceWidgets.value
+                    }
                 //Generate "layer" values for the System UI window and for the topmost app window, if
                 //it exists.
                 //currentAppLayer *should* be -1 even if there's an app open in the background,
@@ -459,29 +466,53 @@ object AccessibilityUtils {
                 //interacted with. The only time it should be anything else (usually 1) is
                 //if an app is displaying above the keyguard, such as the incoming call
                 //screen or the camera.
-                globalState.currentAppLayer.value =
-                    if (windowInfo.topAppWindowIndex != -1) windowInfo.windows.size - windowInfo.topAppWindowIndex else windowInfo.topAppWindowIndex
-                globalState.currentSysUiLayer.value =
-                    if (windowInfo.minSysUiWindowIndex != -1) windowInfo.windows.size - windowInfo.minSysUiWindowIndex else windowInfo.minSysUiWindowIndex
-                globalState.currentSystemLayer.value =
-                    if (windowInfo.topNonSysUiWindowIndex != -1) windowInfo.windows.size - windowInfo.topNonSysUiWindowIndex else windowInfo.topNonSysUiWindowIndex
+                globalState.currentAppLayer.value = globalState.currentAppLayer.value.toMutableMap().apply {
+                    this[displayId] =
+                        if (windowInfo.topAppWindowIndex != -1) windowInfo.windows.size - windowInfo.topAppWindowIndex else windowInfo.topAppWindowIndex
+                }
+                globalState.currentSysUiLayer.value = globalState.currentSysUiLayer.value.toMutableMap().apply {
+                    this[displayId] =
+                        if (windowInfo.minSysUiWindowIndex != -1) windowInfo.windows.size - windowInfo.minSysUiWindowIndex else windowInfo.minSysUiWindowIndex
+                }
+                globalState.currentSystemLayer.value = globalState.currentSystemLayer.value.toMutableMap().apply {
+                    this[displayId] =
+                        if (windowInfo.topNonSysUiWindowIndex != -1) windowInfo.windows.size - windowInfo.topNonSysUiWindowIndex else windowInfo.topNonSysUiWindowIndex
+                }
                 //This is mostly a debug value to see which app LSWidg thinks is on top.
-                globalState.currentAppPackage.value = windowInfo.topAppWindowPackageName
-                globalState.hidingForPresentApp.value = windowInfo.hasHideForPresentApp
-                globalState.onMainLockScreen.value = windowInfo.nodeState.onMainLockscreen.value
-                globalState.showingSecurityInput.value = windowInfo.nodeState.showingSecurityInput.value
+                globalState.currentAppPackage.value = globalState.currentAppPackage.value.toMutableMap().apply {
+                    this[displayId] = windowInfo.topAppWindowPackageName
+                }
+                globalState.hidingForPresentApp.value = globalState.hidingForPresentApp.value.toMutableMap().apply {
+                    this[displayId] = windowInfo.hasHideForPresentApp
+                }
+                globalState.onMainLockScreen.value = globalState.onMainLockScreen.value.toMutableMap().apply {
+                    this[displayId] = windowInfo.nodeState.onMainLockscreen.value
+                }
+                globalState.showingSecurityInput.value = globalState.showingSecurityInput.value.toMutableMap().apply {
+                    this[displayId] = windowInfo.nodeState.showingSecurityInput.value
+                }
                 globalState.accessibilitySeesNotificationsOnMainLockScreen.value =
-                    windowInfo.nodeState.onMainLockscreen.value &&
-                            windowInfo.nodeState.hasNotificationsShowing.value
-                globalState.showingNotificationsPanel.value = notificationsAreOpen
+                    globalState.accessibilitySeesNotificationsOnMainLockScreen.value.toMutableMap().apply {
+                        this[displayId] = windowInfo.nodeState.onMainLockscreen.value &&
+                                windowInfo.nodeState.hasNotificationsShowing.value
+                    }
+                globalState.showingNotificationsPanel.value = globalState.showingNotificationsPanel.value.toMutableMap().apply {
+                    this[displayId] = notificationsAreOpen
+                }
                 globalState.notificationsPanelFullyExpanded.value =
-                    (windowInfo.nodeState.hasMoreButton.value) || (windowInfo.nodeState.hasSettingsContainerButton.value &&
-                            !windowInfo.nodeState.hasClearAllButton.value)
-                globalState.hideForPresentIds.value = windowInfo.nodeState.hideForPresentIds.value
+                    globalState.notificationsPanelFullyExpanded.value.toMutableMap().apply {
+                        this[displayId] = (windowInfo.nodeState.hasMoreButton.value) || (windowInfo.nodeState.hasSettingsContainerButton.value &&
+                                !windowInfo.nodeState.hasClearAllButton.value)
+                    }
+                globalState.hideForPresentIds.value = globalState.hideForPresentIds.value.toMutableMap().apply {
+                    this[displayId] = windowInfo.nodeState.hideForPresentIds.value
+                }
                 globalState.hideForNonPresentIds.value =
-                    windowInfo.nodeState.hideForNonPresentIds.value
+                    globalState.hideForNonPresentIds.value.toMutableMap().apply {
+                        this[displayId] = windowInfo.nodeState.hideForNonPresentIds.value
+                    }
 
-                frameDelegates.forEach { (_, frameDelegate) ->
+                relevantFrameDelegates.forEach { (_, frameDelegate) ->
                     frameDelegate.updateWindowState(
                         updateAccessibility = true,
                     )
@@ -495,17 +526,15 @@ object AccessibilityUtils {
                 ) {
                     eventManager.sendEvent(Event.CloseDrawer)
                 }
-            }
 
-            logUtils.debugLog(
-                "NewState\n" +
-                        "${frameDelegates.values.first().state}\n" +
-                        "${drawerDelegate.state}\n" +
-                        "$globalState",
-                null,
-            )
+                logUtils.debugLog(
+                    "NewState for display $displayId\n" +
+                            "${relevantFrameDelegates.values.first().state}\n" +
+                            "${drawerDelegate.state}\n" +
+                            "$globalState",
+                    null,
+                )
 
-            windowInfo?.let {
                 windowInfo.sysUiWindowNodes.forEachParallel { node ->
                     try {
                         node.isSealed = false
@@ -542,7 +571,7 @@ object AccessibilityUtils {
         drawerDelegate: DrawerDelegate,
         kgm: KeyguardManager,
         imm: InputMethodManager,
-        getWindows: () -> List<AccessibilityWindowInfo>?,
+        getWindows: () -> SparseArray<List<AccessibilityWindowInfo>>?,
     ) = async(Dispatchers.Main) {
         with(context) {
             logUtils.debugLog("Running accessibility job")

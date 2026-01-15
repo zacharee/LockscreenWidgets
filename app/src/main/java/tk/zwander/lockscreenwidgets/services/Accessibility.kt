@@ -2,6 +2,8 @@ package tk.zwander.lockscreenwidgets.services
 
 import android.accessibilityservice.AccessibilityService
 import android.annotation.SuppressLint
+import android.os.Build
+import android.util.SparseArray
 import android.view.Display
 import android.view.WindowManager
 import android.view.accessibility.AccessibilityEvent
@@ -195,9 +197,15 @@ class Accessibility : AccessibilityService(), CoroutineScope by MainScope() {
         state = newState
     }
 
-    private fun getWindowsSafely(): List<AccessibilityWindowInfo>? {
+    private fun getWindowsSafely(): SparseArray<List<AccessibilityWindowInfo>>? {
         return try {
-            ArrayList(windows)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                windowsOnAllDisplays
+            } else {
+                SparseArray<List<AccessibilityWindowInfo>>(1).apply {
+                    this[Display.DEFAULT_DISPLAY] = ArrayList(windows)
+                }
+            }
         } catch (e: SecurityException) {
             // Sometimes throws a SecurityException talking about mismatching
             // user IDs. In that case, return null and don't update any window-based

@@ -47,7 +47,7 @@ abstract class BaseDelegate<State : Any>(
     protected val widgetHost by lazy { widgetHostCompat }
     protected val wm: WindowManager?
         get() = displayAndWindowManagerFlow.value.windowManager
-    protected val display: LSDisplay?
+    val display: LSDisplay?
         get() = displayAndWindowManagerFlow.value.display
 
     protected val displayAndWindowManagerFlow: StateFlow<DisplayAndWindowManager> by lazy {

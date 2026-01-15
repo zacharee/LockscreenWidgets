@@ -16,7 +16,9 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -36,12 +38,18 @@ import tk.zwander.lockscreenwidgets.data.IDData
 
 @Composable
 fun IDListLayout(
+    displayId: Int?,
     modifier: Modifier = Modifier,
 ) {
     val clipboard = LocalClipboard.current
     val scope = rememberCoroutineScope()
 
-    val displayItems by DebugIDsManager.items.collectAsState()
+    val items by DebugIDsManager.items.collectAsState()
+    val displayItems by remember {
+        derivedStateOf {
+            items[displayId] ?: listOf()
+        }
+    }
 
     Surface(modifier = modifier) {
         LazyColumn(

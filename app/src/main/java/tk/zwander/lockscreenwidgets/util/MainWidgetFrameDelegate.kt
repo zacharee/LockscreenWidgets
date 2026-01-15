@@ -149,7 +149,8 @@ open class MainWidgetFrameDelegate protected constructor(
             val isMainFrame = id == -1
 
             return when {
-                globalState.notificationsPanelFullyExpanded.value && framePrefs.showInNotificationShade -> {
+                globalState.notificationsPanelFullyExpanded.value[display?.displayId] == true &&
+                        framePrefs.showInNotificationShade -> {
                     if (kgm.isKeyguardLocked && framePrefs.separateLockNCPosition) {
                         if (isMainFrame) {
                             FrameSizeAndPosition.FrameType.LockNotification.select(!isLandscape)
@@ -303,8 +304,10 @@ open class MainWidgetFrameDelegate protected constructor(
     private val showWallpaperLayerCondition: Boolean
         get() = !state.isPreview &&
                 framePrefs.maskedMode &&
-                (!globalState.notificationsPanelFullyExpanded.value || !framePrefs.showInNotificationShade) &&
-                (!globalState.showingNotificationsPanel.value || framePrefs.hideOnNotificationShade)
+                (globalState.notificationsPanelFullyExpanded.value[display?.displayId] == false ||
+                        !framePrefs.showInNotificationShade) &&
+                (globalState.showingNotificationsPanel.value[display?.displayId] == false ||
+                        framePrefs.hideOnNotificationShade)
 
     override suspend fun onEvent(event: Event) {
         super.onEvent(event)
@@ -504,7 +507,12 @@ open class MainWidgetFrameDelegate protected constructor(
                 .map { it.displayStates[display?.uniqueIdCompat] != false }
                 .collect { isScreenOn ->
                     if (!isScreenOn) {
-                        globalState.notificationsPanelFullyExpanded.value = false
+                        globalState.notificationsPanelFullyExpanded.value =
+                            globalState.notificationsPanelFullyExpanded.value.toMutableMap().apply {
+                                display?.displayId?.let {
+                                    this[it] = false
+                                }
+                            }
                         updateState { it.copy(isPreview = false, isTempHide = false) }
 
                         //If the device has some sort of AOD or ambient display, by the time we receive
@@ -710,8 +718,8 @@ open class MainWidgetFrameDelegate protected constructor(
         fun forCommon(): Boolean {
             return lsDisplayManager.displayPowerStates.value.displayStates[display?.uniqueIdCompat] == true
                     && !state.isTempHide
-                    && !globalState.hideForPresentIds.value
-                    && !globalState.hideForNonPresentIds.value
+                    && globalState.hideForPresentIds.value[display?.displayId] == false
+                    && globalState.hideForNonPresentIds.value[display?.displayId] == false
                     && prefManager.widgetFrameEnabled
                     && (!prefManager.hideInLandscape || state.screenOrientation == Surface.ROTATION_0 || state.screenOrientation == Surface.ROTATION_180)
                     && prefManager.canShowFrameFromTasker
@@ -723,21 +731,25 @@ open class MainWidgetFrameDelegate protected constructor(
         }
 
         fun forNotificationCenter(): Boolean {
-            return (globalState.notificationsPanelFullyExpanded.value && framePrefs.showInNotificationShade)
+            return (globalState.notificationsPanelFullyExpanded.value[display?.displayId] == true
+                    && framePrefs.showInNotificationShade)
                     && forCommon()
         }
 
         fun forLockscreen(): Boolean {
             return globalState.wasOnKeyguard.value
                     && (framePrefs.showOnMainLockScreen || !framePrefs.showInNotificationShade)
-                    && (!framePrefs.hideOnFaceWidgets || !globalState.isOnFaceWidgets.value)
-                    && (globalState.currentAppLayer.value < 0 && globalState.currentAppPackage.value == null)
-                    && (!globalState.isOnEdgePanel.value || !framePrefs.hideOnEdgePanel)
-                    && !globalState.isOnScreenOffMemo.value
-                    && (!globalState.showingNotificationsPanel.value || !framePrefs.hideOnNotificationShade)
-                    && (!globalState.showingSecurityInput.value || !framePrefs.hideOnSecurityPage)
+                    && (!framePrefs.hideOnFaceWidgets || globalState.isOnFaceWidgets.value[display?.displayId] == false)
+                    && ((globalState.currentAppLayer.value[display?.displayId] ?: 0) < 0 &&
+                            globalState.currentAppPackage.value[display?.displayId] == null)
+                    && (globalState.isOnEdgePanel.value[display?.displayId] == false || !framePrefs.hideOnEdgePanel)
+                    && globalState.isOnScreenOffMemo.value[display?.displayId] == false
+                    && (globalState.showingNotificationsPanel.value[display?.displayId] == false ||
+                            !framePrefs.hideOnNotificationShade)
+                    && (globalState.showingSecurityInput.value[display?.displayId] == false ||
+                            !framePrefs.hideOnSecurityPage)
                     && (globalState.notificationCount.value == 0 || !framePrefs.hideOnNotifications)
-                    && !globalState.hidingForPresentApp.value
+                    && globalState.hidingForPresentApp.value[display?.displayId] == false
                     && forCommon()
         }
 
