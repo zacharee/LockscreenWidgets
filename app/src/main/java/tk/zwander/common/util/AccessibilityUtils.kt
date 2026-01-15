@@ -7,6 +7,7 @@ import android.content.Intent
 import android.os.Build
 import android.provider.Settings
 import android.util.SparseArray
+import android.view.Display
 import android.view.accessibility.AccessibilityEvent
 import android.view.accessibility.AccessibilityNodeInfo
 import android.view.accessibility.AccessibilityWindowInfo
@@ -521,7 +522,9 @@ object AccessibilityUtils {
                     )
                 }
 
-                if (!drawerDelegate.viewModel.scrollingOpen.value &&
+                // Drawer only supports default display right now.
+                if (displayId == Display.DEFAULT_DISPLAY &&
+                    !drawerDelegate.viewModel.scrollingOpen.value &&
                     notificationsWereOpen != notificationsAreOpen &&
                     notificationsAreOpen &&
                     drawerDelegate.isAttached &&
@@ -624,7 +627,10 @@ object AccessibilityUtils {
             }
 
             logUtils.debugLog(
-                "Accessibility event: $event, isScreenOn: ${lsDisplayManager.isAnyDisplayOn}, wasOnKeyguard: ${globalState.wasOnKeyguard.value}, ${drawerDelegate.state}",
+                "Accessibility event: $event, " +
+                        "isScreenOn: ${lsDisplayManager.isAnyDisplayOn}, " +
+                        "wasOnKeyguard: ${globalState.wasOnKeyguard.value}, " +
+                        "${drawerDelegate.state}",
                 null
             )
 
