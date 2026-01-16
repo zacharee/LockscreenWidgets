@@ -64,8 +64,6 @@
     <string name="main_screen_social_website_desc">Check out my website if you\'re that bored.</string>
     <string name="main_screen_social_email">Email</string>
     <string name="main_screen_social_email_desc">Send me an email if you have a question or problem. Please include as much detail as possible. Just telling me \"it doesn\'t work\" just wastes everyone\'s time.</string>
-    <string name="main_screen_social_telegram">Telegram</string>
-    <string name="main_screen_social_telegram_desc">電子メールが苦手な方は、私のTelegramサーバーで尋ねることができます。 こちらでは私が開発したすべてのアプリに対応しているので、どのアプリを使用しているかをお知らせください。</string>
     <string name="main_screen_social_github">GitHub</string>
     <string name="main_screen_social_github_desc">ロックスクリーン・ウィジェットはオープンソースで開発されています！プロジェクトへの協力や改善に興味がある(またはソースを確認したい) 場合は、こちらからどうぞ。</string>
     <string name="main_screen_social_patreon">Patreonで支援する</string>

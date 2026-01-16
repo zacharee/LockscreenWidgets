@@ -64,8 +64,6 @@
     <string name="main_screen_social_website_desc">Échale un vistazo a mi sitio web si de verdad estás tan aburrido.</string>
     <string name="main_screen_social_email">Email</string>
     <string name="main_screen_social_email_desc">Envíame un email si tienes alguna pregunta o problema. Por favor, incluye tantos detalles como te sea posible. Decirme simplemente \"no funciona\" nos hace perder el tiempo a todos.</string>
-    <string name="main_screen_social_telegram">Telegram</string>
-    <string name="main_screen_social_telegram_desc">Si enviar emails no es lo tuyo, puedes hacerme preguntas en mi grupo de Telegram. Pero por favor, dime qué aplicación estás usando en concreto, ya que este grupo es para todas las apps que he desarrollado.</string>
     <string name="main_screen_social_github">GitHub</string>
     <string name="main_screen_social_github_desc">¡Lockscreen Widgets es de código abierto! Si eres un desarrollador o te gusta trastear con código, y estás interesado en ayudar a mejorar el proyecto (o solo quieres echar un vistazo a la fuente), pulsa aquí.</string>
     <string name="main_screen_social_patreon">Patreon</string>

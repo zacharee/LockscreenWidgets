@@ -64,8 +64,6 @@
     <string name="main_screen_social_website_desc">בדקו את האתר שלי אם אתם עד כדי כך משועממים.</string>
     <string name="main_screen_social_email">אימייל</string>
     <string name="main_screen_social_email_desc">שלחו לי אימייל אם יש לכם שאלה או בעיה. בבקשה כללו כמה שיותר פרטים - פשוט להגיד לי \"זה לא עובד\" יבזבז את הזמן של כולם.</string>
-    <string name="main_screen_social_telegram">טלגרם</string>
-    <string name="main_screen_social_telegram_desc">אם אימייל הוא לא הקטע שלך, תוכל לשאול את שאלתך בשרת הטלגרם שלי. אנא ציין באיזו אפליקציה אתה משתמש, מכיוון שהשרת הזה מיועד לכל האפליקציות שפיתחתי.</string>
     <string name="main_screen_social_github">GitHub</string>
     <string name="main_screen_social_github_desc">אפליקציית \"ווידג\'טים של מסך נעילה\" היא קוד פתוח! אם אתם מפתחים או מתכננים שינויים שמעוניינים לעזור בשיפור הפרויקט (או שאתם פשוט רוצים לבדוק את המקור), לחצו כאן.</string>
     <string name="main_screen_social_patreon">פטראון</string>
