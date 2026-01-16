@@ -538,7 +538,7 @@ object AccessibilityUtils {
 
                 logUtils.debugLog(
                     "NewState for display $displayId\n" +
-                            "${relevantFrameDelegates.values.first().state}\n" +
+                            "${relevantFrameDelegates.values.firstOrNull()?.state}\n" +
                             "${drawerDelegate.state}\n" +
                             "$globalState",
                     null,
