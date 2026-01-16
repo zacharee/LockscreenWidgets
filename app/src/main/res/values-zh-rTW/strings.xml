@@ -64,8 +64,6 @@
     <string name="main_screen_social_website_desc">如果你覺得無聊的話可以看看我的網站。</string>
     <string name="main_screen_social_email">電子信箱</string>
     <string name="main_screen_social_email_desc">如果您有疑問或問題，請給我發送電子郵件。請提供盡可能詳細的資訊。如果只是告訴我「這功能沒有作用」只是浪費大家的時間。</string>
-    <string name="main_screen_social_telegram">Telegram</string>
-    <string name="main_screen_social_telegram_desc">如果您不喜歡使用電子郵件，您可以在我的 Telegram 頻道中提問。請提及您正在使用哪個app，因為該頻道專門於我開發的所有app。</string>
     <string name="main_screen_social_github">GitHub</string>
     <string name="main_screen_social_github_desc">鎖定螢幕小工具是開源的！如果您是有興趣幫助改善專案的開發人員（或者您只是想查看原始程式碼），請點擊此處。</string>
     <string name="main_screen_social_patreon">Patreon</string>
