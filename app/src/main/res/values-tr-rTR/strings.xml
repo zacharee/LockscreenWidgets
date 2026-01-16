@@ -64,8 +64,6 @@
     <string name="main_screen_social_website_desc">Eğer bu kadar sıkılıyorsanız websitemize bir göz atın.</string>
     <string name="main_screen_social_email">Eposta</string>
     <string name="main_screen_social_email_desc">Bir sorunuz veya probleminiz varsa bana bir e-posta gönderin. Lütfen mümkün olduğunca fazla ayrıntı ekleyin. Bana sadece \"işe yaramıyor\" demek herkesin zamanını boşa harcar.</string>
-    <string name="main_screen_social_telegram">Telegram</string>
-    <string name="main_screen_social_telegram_desc">E-posta sizin için uygun değilse, sorunuzu Telegram sunucumda sorabilirsiniz. Lütfen hangi uygulamayı kullandığınızı belirtin, çünkü bu sunucu geliştirdiğim tüm uygulamalar için.</string>
     <string name="main_screen_social_github">GitHub</string>
     <string name="main_screen_social_github_desc">Lockscreen Widgets açık kaynaklıdır! Projeyi iyileştirmeye yardımcı olmak isteyen bir geliştirici veya kurcalayıcıysanız (veya sadece kaynağı kontrol etmek istiyorsanız), buraya dokunun.</string>
     <string name="main_screen_social_patreon">Patreon</string>
