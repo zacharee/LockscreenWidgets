@@ -64,8 +64,6 @@
     <string name="main_screen_social_website_desc">Podívejte se na mé webové stránky, pokud jste tak znudění.</string>
     <string name="main_screen_social_email">Email</string>
     <string name="main_screen_social_email_desc">Pokud máte dotaz nebo problém, pošlete mi e-mail. Uveďte prosím co nejvíce podrobností. Když mi řeknete, že \"to nefunguje\" je to jen ztráta času všech.</string>
-    <string name="main_screen_social_telegram">Telegram</string>
-    <string name="main_screen_social_telegram_desc">Pokud není e-mail váš styl, můžete se zeptat na serveru Telegram. Uveďte prosím aplikaci, kterou používáte, protože tento server je pro všechny z těch, které jsem vyvinul.</string>
     <string name="main_screen_social_github">Github</string>
     <string name="main_screen_social_github_desc">Widgety na zamykací obrazovce jsou open source! Pokud jste vývojář nebo geek, který má zájem pomoci vylepšit projekt (nebo chcete jen ověřit zdroj), klepněte zde.</string>
     <string name="main_screen_social_patreon">Patreon</string>
