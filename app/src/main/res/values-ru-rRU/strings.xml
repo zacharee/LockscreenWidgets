@@ -64,8 +64,6 @@
     <string name="main_screen_social_website_desc">Будет желание - гляньте вебсайт.</string>
     <string name="main_screen_social_email">Email</string>
     <string name="main_screen_social_email_desc">Напишите мне на почту, если у вас случилась проблема или есть вопросы. Только делайте это как можно детальнее. Простое \"Ничего не работает\" просто отнимет ваше и наше время.</string>
-    <string name="main_screen_social_telegram">Telegram</string>
-    <string name="main_screen_social_telegram_desc">Если вы не любите почту, то можете задать вопрос в Telegram канале. Но обязательно уточните, какое именно приложение вы используете, потому что там много других моих разработок.</string>
     <string name="main_screen_social_github">GitHub</string>
     <string name="main_screen_social_github_desc">Вот тут хранится наш исходный код. Если вы - разработчик или вы хотите мне помочь (или просто интересно глянуть исходники), то жмите сюда.</string>
     <string name="main_screen_social_patreon">Patreon</string>
