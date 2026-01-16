@@ -64,12 +64,6 @@ fun rememberLinks(): List<MainPageLink> {
                 "mailto:zachary@zwander.dev",
             ),
             MainPageLink(
-                R.drawable.ic_baseline_telegram_24,
-                R.string.main_screen_social_telegram,
-                R.string.main_screen_social_telegram_desc,
-                "https://bit.ly/ZachareeTG",
-            ),
-            MainPageLink(
                 R.drawable.ic_baseline_github_24,
                 R.string.main_screen_social_github,
                 R.string.main_screen_social_github_desc,
