@@ -5,10 +5,7 @@ import android.content.Context
 import android.view.View
 import android.view.WindowManager
 import androidx.annotation.CallSuper
-import androidx.compose.runtime.CompositionContext
 import androidx.compose.runtime.Recomposer
-import androidx.compose.ui.platform.compositionContext
-import androidx.compose.ui.platform.createLifecycleAwareWindowRecomposer
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleRegistry
 import androidx.lifecycle.ViewModel
@@ -361,13 +358,10 @@ abstract class BaseDelegate<State : Any>(
         abstract val ignoreWidgetTouchesKey: String?
 
         fun createLifecycleAwareWindowRecomposer(): Recomposer {
-            return delegate.rootView.createLifecycleAwareWindowRecomposer(
+            return delegate.rootView.createLifecycleAwareWindowRecomposerWithoutDetachCancel(
                 lifecycle = delegate.lifecycle,
             )
         }
-
-        val compositionContext: CompositionContext?
-            get() = delegate.rootView.compositionContext
 
         suspend fun updateWindow() {
             delegate.updateWindow()

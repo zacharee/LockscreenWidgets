@@ -11,6 +11,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ListView
 import android.widget.Toast
+import androidx.annotation.CallSuper
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -39,6 +40,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shadow
+import androidx.compose.ui.layout.layoutId
 import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -219,16 +221,7 @@ abstract class BaseAdapter<VM : BaseDelegate.BaseViewModel<*, *>>(
     }
 
     override fun onBindViewHolder(holder: BaseVH, position: Int) {
-        holder.setCompositionContext()
-        holder.itemView.addOnAttachStateChangeListener(
-            object : View.OnAttachStateChangeListener {
-                override fun onViewAttachedToWindow(v: View) {
-                    holder.setCompositionContext()
-                }
-                override fun onViewDetachedFromWindow(v: View) {}
-            },
-        )
-
+        holder.updateCompositionContext()
         holder.performBind()
     }
 
@@ -312,6 +305,7 @@ abstract class BaseAdapter<VM : BaseDelegate.BaseViewModel<*, *>>(
                 null
             }
 
+            binding.root.id = data.id
             binding.root.setThemedContent {
                 val currentEditingPosition by viewModel.currentEditingInterfacePosition.collectAsState()
 
@@ -359,13 +353,14 @@ abstract class BaseAdapter<VM : BaseDelegate.BaseViewModel<*, *>>(
                     rowCount = rowCount,
                     colCount = colCount,
                     isEditing = currentEditingPosition == bindingAdapterPosition,
-                    modifier = Modifier.fillMaxSize(),
+                    modifier = Modifier.fillMaxSize().layoutId("widget_${data.id}"),
                     ignoreTouchesKey = viewModel.ignoreWidgetTouchesKey,
                 )
             }
         }
 
         override fun onDestroy() {
+            super.onDestroy()
             context.eventManager.removeObserver(this)
         }
 
@@ -606,7 +601,7 @@ abstract class BaseAdapter<VM : BaseDelegate.BaseViewModel<*, *>>(
 
         //Make sure the item's size is properly updated on a frame resize, or on initial bind
         protected fun onResize(data: WidgetData, amount: Int, direction: Int) {
-            itemView.apply {
+            binding.root.apply {
                 layoutParams = layoutParams.apply {
                     onWidgetResize(data, this, amount, direction)
                 }
@@ -701,14 +696,15 @@ abstract class BaseAdapter<VM : BaseDelegate.BaseViewModel<*, *>>(
 
     abstract inner class BaseVH(protected val binding: ComposeViewHolderBinding) :
         RecyclerView.ViewHolder(binding.root) {
-        fun setCompositionContext() {
+        fun updateCompositionContext() {
             binding.root.setParentCompositionContext(
-                viewModel.compositionContext,
+                parent = viewModel.createLifecycleAwareWindowRecomposer()
             )
         }
 
         abstract fun performBind()
 
+        @CallSuper
         open fun onDestroy() {}
     }
 
