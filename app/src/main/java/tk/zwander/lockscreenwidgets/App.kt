@@ -146,6 +146,14 @@ class App : Application(), CoroutineScope by MainScope(), EventObserver {
                     return@addOnError false
                 }
 
+                if (error?.stackTraceToString()?.contains("ììììï") == true) {
+                    // Someone's doing some sort of stability or penetration testing, spoofing
+                    // a bunch of device models, and causing constant crashes. This is a constant
+                    // in the stacktrace among them.
+                    // java.lang.IllegalArgumentException: View=DecorView@9b8761f[MainActivity] not attached to window manager
+                    return@addOnError false
+                }
+
                 if (error?.isOrHasDeadObject == true) {
                     return@addOnError false
                 }
