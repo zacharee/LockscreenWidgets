@@ -45,10 +45,12 @@ import tk.zwander.common.util.logUtils
 import tk.zwander.common.util.lsDisplayManager
 import tk.zwander.common.util.mainHandler
 import tk.zwander.common.util.prefManager
+import tk.zwander.common.util.remove
 import tk.zwander.common.util.safeAddView
 import tk.zwander.common.util.safeCurrentState
 import tk.zwander.common.util.safeRemoveView
 import tk.zwander.common.util.safeUpdateViewLayout
+import tk.zwander.common.util.set
 import tk.zwander.common.util.themedContext
 import tk.zwander.lockscreenwidgets.R
 import tk.zwander.widgetdrawer.activities.TaskerIsShowingDrawer
@@ -367,10 +369,7 @@ class DrawerDelegate private constructor(context: Context, displayId: String) :
                 eventManager.sendEvent(Event.CloseDrawer)
             } else {
                 if (prefManager.requestUnlockDrawer) {
-                    globalState.handlingClick.value =
-                        globalState.handlingClick.value.toMutableMap().also {
-                            it[-2] = Unit
-                        }
+                    globalState.handlingClick[-2] = Unit
                 }
             }
 
@@ -419,9 +418,7 @@ class DrawerDelegate private constructor(context: Context, displayId: String) :
     override fun onItemSelected(selected: Boolean, highlighted: Boolean) {
         super.onItemSelected(selected, highlighted)
         viewModel.selectedItem.value = selected
-        globalState.handlingClick.value = globalState.handlingClick.value.toMutableMap().apply {
-            remove(-2)
-        }
+        globalState.handlingClick.remove(-2)
     }
 
     override fun isLocked(): Boolean {
@@ -508,8 +505,7 @@ class DrawerDelegate private constructor(context: Context, displayId: String) :
             logUtils.debugLog("Trying to hide drawer, $callListener", null)
             if (drawer.isAttachedToWindow && viewModel.drawerAnimationState.value != AnimationState.REMOVING) {
                 viewModel.drawerAnimationState.value = AnimationState.REMOVING
-                globalState.handlingClick.value =
-                    globalState.handlingClick.value.toMutableMap().also { it.remove(-2) }
+                globalState.handlingClick.remove(-2)
                 viewModel.currentEditingInterfacePosition.value = -1
 
                 drawer.fadeOut(DrawerOrFrame.DRAWER)

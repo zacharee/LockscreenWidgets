@@ -49,9 +49,11 @@ import tk.zwander.common.util.logUtils
 import tk.zwander.common.util.lsDisplayManager
 import tk.zwander.common.util.mainHandler
 import tk.zwander.common.util.prefManager
+import tk.zwander.common.util.remove
 import tk.zwander.common.util.safeAddView
 import tk.zwander.common.util.safeCurrentState
 import tk.zwander.common.util.safeRemoveView
+import tk.zwander.common.util.set
 import tk.zwander.common.util.themedContext
 import tk.zwander.common.util.wallpaperUtils
 import tk.zwander.lockscreenwidgets.adapters.WidgetFrameAdapter
@@ -485,10 +487,7 @@ open class MainWidgetFrameDelegate protected constructor(
                 DismissOrUnlockActivity.launch(this)
             } else {
                 if (prefManager.requestUnlock) {
-                    globalState.handlingClick.value =
-                        globalState.handlingClick.value.toMutableMap().also {
-                            it[id] = Unit
-                        }
+                    globalState.handlingClick[id] = Unit
                 }
             }
         }
@@ -507,12 +506,9 @@ open class MainWidgetFrameDelegate protected constructor(
                 .map { it.displayStates[display?.uniqueIdCompat] != false }
                 .collect { isScreenOn ->
                     if (!isScreenOn) {
-                        globalState.notificationsPanelFullyExpanded.value =
-                            globalState.notificationsPanelFullyExpanded.value.toMutableMap().apply {
-                                display?.displayId?.let {
-                                    this[it] = false
-                                }
-                            }
+                        display?.displayId?.let {
+                            globalState.notificationsPanelFullyExpanded[it] = false
+                        }
                         updateState { it.copy(isPreview = false, isTempHide = false) }
 
                         //If the device has some sort of AOD or ambient display, by the time we receive
@@ -630,9 +626,7 @@ open class MainWidgetFrameDelegate protected constructor(
         withContext(Dispatchers.Main) {
             viewModel.currentEditingInterfacePosition.value = -1
 
-            globalState.handlingClick.value = globalState.handlingClick.value.toMutableMap().also {
-                it.remove(id)
-            }
+            globalState.handlingClick.remove(id)
             forceWakelock(on = false, updateOverlay = false)
 
             logUtils.debugLog("Trying to remove overlay ${viewModel.animationState.value}", null)

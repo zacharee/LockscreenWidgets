@@ -56,9 +56,7 @@ class LSDisplayManager private constructor(context: Context) : ContextWrapper(co
         }
         override fun onDisplayRemoved(displayId: Int) {
             logUtils.debugLog("Display $displayId removed", null)
-            availableDisplays.value = availableDisplays.value.toMutableMap().apply {
-                remove(displayId)
-            }
+            availableDisplays.remove(displayId)
         }
         override fun onDisplayChanged(displayId: Int) {
             logUtils.debugLog("Display $displayId changed", null)
@@ -120,30 +118,23 @@ class LSDisplayManager private constructor(context: Context) : ContextWrapper(co
 
         if (!display.isBuiltIn(isLikelyRazr)) {
             logUtils.debugLog("Display isn't internal, removing if exists and skipping processing", null)
-            availableDisplays.value = availableDisplays.value.toMutableMap().apply {
-                remove(displayId)
-            }
+            availableDisplays.remove(displayId)
             return
         }
 
         if (!multiDisplaySupported && displayId != Display.DEFAULT_DISPLAY) {
             logUtils.debugLog("Multi-display isn't supported and display $displayId isn't default display", null)
-            availableDisplays.value = availableDisplays.value.toMutableMap().apply {
-                remove(displayId)
-            }
+            availableDisplays.remove(displayId)
             return
         }
 
-        val newMap = availableDisplays.value.toMutableMap()
-        newMap[displayId] = LSDisplay(
+        availableDisplays[displayId] = LSDisplay(
             display = display,
             fontScale = createDisplayContext(display).resources.configuration.fontScale,
             isLikelyRazr = isLikelyRazr,
         ).also {
             logUtils.debugLog("Processed display ${it.loggingId}", null)
         }
-
-        availableDisplays.value = newMap
     }
 
     fun fetchDisplays() {

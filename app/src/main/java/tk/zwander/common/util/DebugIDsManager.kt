@@ -39,12 +39,7 @@ object DebugIDsManager {
             newList.add(IDData(it, IDData.IDType.SAME))
         }
 
-        oldItems.value = oldItems.value.toMutableMap().apply {
-            this[displayId] = listOf()
-        }
-        oldItems.value = oldItems.value.toMutableMap().apply {
-            this[displayId] = tempItems
-        }
+        oldItems[displayId] = tempItems
 
         sortedItems[displayId] = createTreeSet().also { it.addAll(newList) }
 

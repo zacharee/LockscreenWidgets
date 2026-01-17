@@ -454,18 +454,10 @@ object AccessibilityUtils {
                 //Samsung's Screen-Off Memo is really just a normal Activity that shows over the lock screen.
                 //However, it's not an Application-type window for some reason, so it won't hide with the
                 //currentAppLayer check. Explicitly check for its existence here.
-                globalState.isOnScreenOffMemo.value =
-                    globalState.isOnScreenOffMemo.value.toMutableMap().apply {
-                        this[displayId] = isOnKeyguard && windowInfo.hasScreenOffMemoWindow
-                    }
-                globalState.isOnEdgePanel.value = globalState.isOnEdgePanel.value.toMutableMap().apply {
-                    this[displayId] = windowInfo.hasEdgePanelWindow
-                }
-                globalState.isOnFaceWidgets.value =
-                    globalState.isOnFaceWidgets.value.toMutableMap().apply {
-                        this[displayId] = windowInfo.hasFaceWidgetsWindow
-                                || windowInfo.nodeState.onFaceWidgets.value
-                    }
+                globalState.isOnScreenOffMemo[displayId] = isOnKeyguard && windowInfo.hasScreenOffMemoWindow
+                globalState.isOnEdgePanel[displayId] = windowInfo.hasEdgePanelWindow
+                globalState.isOnFaceWidgets[displayId] = windowInfo.hasFaceWidgetsWindow
+                        || windowInfo.nodeState.onFaceWidgets.value
                 //Generate "layer" values for the System UI window and for the topmost app window, if
                 //it exists.
                 //currentAppLayer *should* be -1 even if there's an app open in the background,
@@ -473,51 +465,24 @@ object AccessibilityUtils {
                 //interacted with. The only time it should be anything else (usually 1) is
                 //if an app is displaying above the keyguard, such as the incoming call
                 //screen or the camera.
-                globalState.currentAppLayer.value = globalState.currentAppLayer.value.toMutableMap().apply {
-                    this[displayId] =
-                        if (windowInfo.topAppWindowIndex != -1) windowInfo.windows.size - windowInfo.topAppWindowIndex else windowInfo.topAppWindowIndex
-                }
-                globalState.currentSysUiLayer.value = globalState.currentSysUiLayer.value.toMutableMap().apply {
-                    this[displayId] =
-                        if (windowInfo.minSysUiWindowIndex != -1) windowInfo.windows.size - windowInfo.minSysUiWindowIndex else windowInfo.minSysUiWindowIndex
-                }
-                globalState.currentSystemLayer.value = globalState.currentSystemLayer.value.toMutableMap().apply {
-                    this[displayId] =
-                        if (windowInfo.topNonSysUiWindowIndex != -1) windowInfo.windows.size - windowInfo.topNonSysUiWindowIndex else windowInfo.topNonSysUiWindowIndex
-                }
+                globalState.currentAppLayer[displayId] =
+                    if (windowInfo.topAppWindowIndex != -1) windowInfo.windows.size - windowInfo.topAppWindowIndex else windowInfo.topAppWindowIndex
+                globalState.currentSysUiLayer[displayId] =
+                    if (windowInfo.minSysUiWindowIndex != -1) windowInfo.windows.size - windowInfo.minSysUiWindowIndex else windowInfo.minSysUiWindowIndex
+                globalState.currentSystemLayer[displayId] =
+                    if (windowInfo.topNonSysUiWindowIndex != -1) windowInfo.windows.size - windowInfo.topNonSysUiWindowIndex else windowInfo.topNonSysUiWindowIndex
                 //This is mostly a debug value to see which app LSWidg thinks is on top.
-                globalState.currentAppPackage.value = globalState.currentAppPackage.value.toMutableMap().apply {
-                    this[displayId] = windowInfo.topAppWindowPackageName
-                }
-                globalState.hidingForPresentApp.value = globalState.hidingForPresentApp.value.toMutableMap().apply {
-                    this[displayId] = windowInfo.hasHideForPresentApp
-                }
-                globalState.onMainLockScreen.value = globalState.onMainLockScreen.value.toMutableMap().apply {
-                    this[displayId] = windowInfo.nodeState.onMainLockscreen.value
-                }
-                globalState.showingSecurityInput.value = globalState.showingSecurityInput.value.toMutableMap().apply {
-                    this[displayId] = windowInfo.nodeState.showingSecurityInput.value
-                }
-                globalState.accessibilitySeesNotificationsOnMainLockScreen.value =
-                    globalState.accessibilitySeesNotificationsOnMainLockScreen.value.toMutableMap().apply {
-                        this[displayId] = windowInfo.nodeState.onMainLockscreen.value &&
-                                windowInfo.nodeState.hasNotificationsShowing.value
-                    }
-                globalState.showingNotificationsPanel.value = globalState.showingNotificationsPanel.value.toMutableMap().apply {
-                    this[displayId] = notificationsAreOpen
-                }
-                globalState.notificationsPanelFullyExpanded.value =
-                    globalState.notificationsPanelFullyExpanded.value.toMutableMap().apply {
-                        this[displayId] = (windowInfo.nodeState.hasMoreButton.value) || (windowInfo.nodeState.hasSettingsContainerButton.value &&
-                                !windowInfo.nodeState.hasClearAllButton.value)
-                    }
-                globalState.hideForPresentIds.value = globalState.hideForPresentIds.value.toMutableMap().apply {
-                    this[displayId] = windowInfo.nodeState.hideForPresentIds.value
-                }
-                globalState.hideForNonPresentIds.value =
-                    globalState.hideForNonPresentIds.value.toMutableMap().apply {
-                        this[displayId] = windowInfo.nodeState.hideForNonPresentIds.value
-                    }
+                globalState.currentAppPackage[displayId] = windowInfo.topAppWindowPackageName
+                globalState.hidingForPresentApp[displayId] = windowInfo.hasHideForPresentApp
+                globalState.onMainLockScreen[displayId] = windowInfo.nodeState.onMainLockscreen.value
+                globalState.showingSecurityInput[displayId] = windowInfo.nodeState.showingSecurityInput.value
+                globalState.accessibilitySeesNotificationsOnMainLockScreen[displayId] = windowInfo.nodeState.onMainLockscreen.value &&
+                        windowInfo.nodeState.hasNotificationsShowing.value
+                globalState.showingNotificationsPanel[displayId] = notificationsAreOpen
+                globalState.notificationsPanelFullyExpanded[displayId] = (windowInfo.nodeState.hasMoreButton.value) || (windowInfo.nodeState.hasSettingsContainerButton.value &&
+                        !windowInfo.nodeState.hasClearAllButton.value)
+                globalState.hideForPresentIds[displayId] = windowInfo.nodeState.hideForPresentIds.value
+                globalState.hideForNonPresentIds[displayId] = windowInfo.nodeState.hideForNonPresentIds.value
 
                 relevantFrameDelegates.forEach { (_, frameDelegate) ->
                     frameDelegate.updateWindowState(
