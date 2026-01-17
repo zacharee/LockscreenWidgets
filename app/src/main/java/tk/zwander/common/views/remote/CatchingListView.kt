@@ -19,6 +19,7 @@ class CatchingListView(
                         "Widget ID: $widgetId.\n" +
                         "Widget provider: ${findAppWidgetProvider()}.",
             )
+            return
         }
 
         adapter?.let { adapter ->
