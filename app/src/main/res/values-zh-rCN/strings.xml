@@ -10,7 +10,7 @@
     <string name="granted">已授予权限</string>
     <string name="settings">设置</string>
     <string name="yes">是</string>
-    <string name="no">取消</string>
+    <string name="no">否</string>
     <string name="add">添加</string>
     <string name="add_id">添加ID</string>
     <string name="usage">使用情况</string>
@@ -23,7 +23,7 @@
     <string name="close_app">关闭应用</string>
     <string name="privacy_policy">隐私政策</string>
     <string name="shortcut">快捷方式</string>
-    <string name="enabled">授权</string>
+    <string name="enabled">已启用</string>
     <string name="disabled">已禁用</string>
     <string name="accessibility_settings">辅助功能设置</string>
     <string name="battery_whitelist">电池允许列表</string>
@@ -37,7 +37,7 @@
     <string name="general">通用</string>
     <string name="drawer_enabled">抽屉已启用</string>
     <string name="frame_enabled">抽屉已启用</string>
-    <string name="add_id_hint">com.android.systemui:id/some_id_here</string>
+    <string name="add_id_hint">com.android.systemui:id/这里任何id</string>
     <string name="category_appearance">外观</string>
     <string name="category_behavior">行为</string>
     <string name="category_visibility">可见性</string>
