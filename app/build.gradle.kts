@@ -1,9 +1,9 @@
+
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import java.util.UUID
 
 plugins {
     alias(libs.plugins.android.application)
-    alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.atomicfu)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.kotlin.parcelize)
@@ -23,7 +23,6 @@ android {
         versionCode = 171
         versionName = "3.1.3"
 
-        extensions.getByType(BasePluginExtension::class.java).archivesName.set("LockscreenWidgets_${versionName}")
         manifestPlaceholders["build_uuid"] = UUID.nameUUIDFromBytes("InstallWithOptions_${versionCode}".toByteArray()).toString()
 
         @Suppress("UnstableApiUsage")
@@ -58,6 +57,7 @@ android {
         resources.excludes.add("META-INF/library_release.kotlin_module")
         jniLibs.pickFirsts += "**/libbugsnag-ndk.so"
     }
+
     externalNativeBuild {
         cmake {
             path = file("CMakeLists.txt")
@@ -72,6 +72,12 @@ android {
         includeInApk = false
         // Disables dependency metadata when building Android App Bundles (for Google Play)
         includeInBundle = false
+    }
+}
+
+afterEvaluate {
+    base {
+        archivesName.set("LockscreenWidgets_${android.defaultConfig.versionName}")
     }
 }
 

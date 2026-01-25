@@ -1,14 +1,14 @@
 [versions]
 accompanist = "0.37.3"
 activityCompose = "1.12.2"
-androidGradlePlugin = "8.13.2"
+androidGradlePlugin = "9.0.0"
 bugsnagAndroidPerformance = "2.2.0"
 colorpickerCompose = "1.1.3"
 desugar_jdk_libs = "2.1.5"
 shizuku = "13.1.5"
 appcompat = "1.7.1"
-atomicfu = "0.29.0"
-bugsnagAndroid = "6.21.0"
+atomicfu = "0.31.0"
+bugsnagAndroid = "6.22.0"
 bugsnagGradlePlugin = "1.0.0"
 byteBuddyAndroid = "1.18.4"
 composeBom = "2026.01.00"
@@ -81,7 +81,6 @@ taskerpluginlibrary = { module = "com.joaomgcd:taskerpluginlibrary", version.ref
 [plugins]
 android-application = { id = "com.android.application", version.ref = "androidGradlePlugin" }
 bugsnag = { id = "com.bugsnag.gradle", version.ref = "bugsnagGradlePlugin" }
-kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlin-atomicfu = { id = "org.jetbrains.kotlin.plugin.atomicfu", version.ref = "kotlin" }
 kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 kotlin-parcelize = { id = "org.jetbrains.kotlin.plugin.parcelize", version.ref = "kotlin" }
