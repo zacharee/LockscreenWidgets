@@ -55,6 +55,7 @@ import tk.zwander.common.compose.components.BlurView
 import tk.zwander.common.compose.components.ConfirmFrameRemovalLayout
 import tk.zwander.common.compose.components.ConfirmWidgetRemovalLayout
 import tk.zwander.common.compose.components.FrameEditWrapperLayout
+import tk.zwander.common.compose.util.rememberBooleanPreferenceState
 import tk.zwander.common.compose.util.rememberPreferenceState
 import tk.zwander.common.util.Event
 import tk.zwander.common.util.PrefManager
@@ -93,6 +94,9 @@ fun MainWidgetFrameDelegate.WidgetFrameViewModel.WidgetFrameLayout(
 
     val animatedBackgroundColor by animateColorAsState(backgroundColor)
 
+    val touchProtectionEnabled by rememberBooleanPreferenceState(
+        key = PrefManager.KEY_TOUCH_PROTECTION,
+    )
     val proxTooClose by globalState.proxTooClose.collectAsState()
     var isInEditingMode by remember {
         mutableStateOf(false)
@@ -437,7 +441,7 @@ fun MainWidgetFrameDelegate.WidgetFrameViewModel.WidgetFrameLayout(
             }
 
             androidx.compose.animation.AnimatedVisibility(
-                visible = proxTooClose,
+                visible = proxTooClose && touchProtectionEnabled,
                 enter = fadeIn(),
                 exit = fadeOut(),
                 modifier = Modifier.zIndex(8f),

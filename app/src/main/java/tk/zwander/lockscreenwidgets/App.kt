@@ -31,10 +31,13 @@ import tk.zwander.common.activities.add.BaseBindWidgetActivity
 import tk.zwander.common.util.Event
 import tk.zwander.common.util.EventObserver
 import tk.zwander.common.util.GlobalExceptionHandler
+import tk.zwander.common.util.HandlerRegistry
 import tk.zwander.common.util.LSDisplayManager
 import tk.zwander.common.util.LogUtils
+import tk.zwander.common.util.PrefManager
 import tk.zwander.common.util.eventManager
 import tk.zwander.common.util.globalState
+import tk.zwander.common.util.handler
 import tk.zwander.common.util.isOrHasDeadObject
 import tk.zwander.common.util.logUtils
 import tk.zwander.common.util.migrationManager
@@ -100,6 +103,14 @@ class App : Application(), CoroutineScope by MainScope(), EventObserver {
 
     private val sensorManager by lazy { getSystemService(SENSOR_SERVICE) as SensorManager }
     private val lsDisplayManager by lazy { LSDisplayManager.getInstance(this) }
+
+    private val prefsHandler by lazy {
+        HandlerRegistry {
+            handler(PrefManager.KEY_TOUCH_PROTECTION) {
+                updateProxListener()
+            }
+        }
+    }
 
     init {
         BugsnagPerformance.reportApplicationClassLoaded()
@@ -242,14 +253,12 @@ class App : Application(), CoroutineScope by MainScope(), EventObserver {
             nightModeListener,
         )
 
-        registerProxListener()
+        updateProxListener()
 
+        prefsHandler.register(this)
         migrationManager.runMigrations()
-
         eventManager.addObserver(this)
-
         shizukuManager.onCreate()
-
         lsDisplayManager.onCreate()
 
         launch {
@@ -272,11 +281,11 @@ class App : Application(), CoroutineScope by MainScope(), EventObserver {
             lsDisplayManager.displayPowerStates.collect {
                 if (!it.anyOn) {
                     logUtils.debugLog("Received screen off", null)
-                    unregisterProxListener()
                 } else {
                     logUtils.debugLog("Received screen on", null)
-                    registerProxListener()
                 }
+
+                updateProxListener()
             }
         }
     }
@@ -302,18 +311,30 @@ class App : Application(), CoroutineScope by MainScope(), EventObserver {
         }
     }
 
-    private fun registerProxListener() {
-        if (!sensorManager.getSensorList(Sensor.TYPE_PROXIMITY).isNullOrEmpty()) {
-            sensorManager.registerListener(
-                proximityListener,
-                sensorManager.getDefaultSensor(Sensor.TYPE_PROXIMITY),
-                1 * 200 * 1000, /* 200ms */
-                1 * 50 * 1000, /* 50ms */
-            )
+    private fun updateProxListener() {
+        if (prefManager.touchProtection) {
+            registerProxListener()
+        } else {
+            unregisterProxListener()
         }
     }
 
+    private fun registerProxListener() {
+        try {
+            if (!sensorManager.getSensorList(Sensor.TYPE_PROXIMITY).isNullOrEmpty()) {
+                sensorManager.registerListener(
+                    proximityListener,
+                    sensorManager.getDefaultSensor(Sensor.TYPE_PROXIMITY),
+                    1 * 200 * 1000, /* 200ms */
+                    1 * 50 * 1000, /* 50ms */
+                )
+            }
+        } catch (_: Throwable) {}
+    }
+
     private fun unregisterProxListener() {
-        sensorManager.unregisterListener(proximityListener)
+        try {
+            sensorManager.unregisterListener(proximityListener)
+        } catch (_: Throwable) {}
     }
 }
