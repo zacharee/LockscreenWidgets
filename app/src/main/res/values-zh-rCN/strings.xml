@@ -152,9 +152,9 @@
     <string name="settings_screen_force_widget_update_desc">当小部件显示在屏幕上时，待处理的小部件并不总是被发送。 要做到这一点，Lockscreen 小部件会强制所有小部件默认重新加载，这可能会造成短闪烁。 禁用此选项以避免刷新，可能需要花费最新小部件的费用。</string>
     <string name="settings_screen_hide_when_keyboard_shown">显示键盘时隐藏</string>
     <string name="settings_screen_hide_when_keyboard_shown_desc">当软件键盘在屏幕上显示时，隐藏小部件框架。</string>
-    <string name="settings_screen_double_tap_turn_off_screen">Double-Tap to Turn Off Screen</string>
-    <string name="settings_screen_double_tap_turn_off_screen_desc_frame">Double-tap an empty space (outside of a widget) to turn off the screen. This applies to the whole frame when \"Ignore Widget Touches\" is enabled.</string>
-    <string name="settings_screen_double_tap_turn_off_screen_drawer">Double-tap an empty space (outside of a widget) to turn off the screen.</string>
+    <string name="settings_screen_double_tap_turn_off_screen">双击关闭屏幕</string>
+    <string name="settings_screen_double_tap_turn_off_screen_desc_frame">双击空格(小部件外面)关闭屏幕。当启用\"忽略小部件触摸\"时，这适用于整个框架。</string>
+    <string name="settings_screen_double_tap_turn_off_screen_drawer">双击空格(小部件外面)关闭屏幕。</string>
     <string name="intro_welcome_title">欢迎！</string>
     <string name="intro_welcome_desc">锁屏界面小部件是一个简单的应用，其目的很简单：请将 Android KitKat的锁屏小部件带回到锁屏界面。 您的小部件将出现在锁屏界面的简单分页滑块中。</string>
     <string name="intro_usage_title">基本用法</string>
