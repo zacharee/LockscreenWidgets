@@ -152,6 +152,9 @@
     <string name="settings_screen_force_widget_update_desc">Wenn Widgets auf dem Bildschirm zu sehen sind, dann werden anstehende Widget-Aktualisierungen nicht immer angewendet. Um dagegenzuwirken, erzwingt Lockscreen Widgets standardmäßig die Aktualisierung aller Widgets, was zu kurzem aufblitzen führen kann. Deaktiviere diese Option, um aufblitzen zu verhindern, aber unter den potentiellen Kosten von nicht aktualisierten Widgets.</string>
     <string name="settings_screen_hide_when_keyboard_shown">Verstecke, wenn die Tastatur angezeigt wird</string>
     <string name="settings_screen_hide_when_keyboard_shown_desc">Verstecke den Widget-Rahmen, wenn die Tastatur auf dem Bildschirm sichtbar ist.</string>
+    <string name="settings_screen_double_tap_turn_off_screen">Double-Tap to Turn Off Screen</string>
+    <string name="settings_screen_double_tap_turn_off_screen_desc_frame">Double-tap an empty space (outside of a widget) to turn off the screen. This applies to the whole frame when \"Ignore Widget Touches\" is enabled.</string>
+    <string name="settings_screen_double_tap_turn_off_screen_drawer">Double-tap an empty space (outside of a widget) to turn off the screen.</string>
     <string name="intro_welcome_title">Willkommen!</string>
     <string name="intro_welcome_desc">Lockscreen Widgets ist eine simple App mit einem simplen Grund: die Sperrbildschirm-Widgets von Android KitKat zu reimplementieren. Deine Widgets werden in einem simplen Rahmen mit Seiten auf dem Sperrbildschirm erscheinen.</string>
     <string name="intro_usage_title">Grundlegende Verwendung</string>
