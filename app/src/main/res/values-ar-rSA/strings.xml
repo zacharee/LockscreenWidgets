@@ -152,6 +152,9 @@
     <string name="settings_screen_force_widget_update_desc">عندما تظهر التطبيقات المصغره على الشاشة، لا يتم دائما إرسال تحديثات التطبيقات المصغره المعلقة. للعمل حول هذا، التطبيقات المصغره قفل الشاشة تجبر جميع التطبيقات المصغره على إعادة التحميل بشكل افتراضي، الأمر الذي يمكن أن يسبب وميض قصير. قم بتعطيل هذا الخيار لتجنب الوميض، على حساب التطبيقات المصغرة المحدثة.</string>
     <string name="settings_screen_hide_when_keyboard_shown">إخفاء عند عرض لوحة المفاتيح</string>
     <string name="settings_screen_hide_when_keyboard_shown_desc">إخفاء إطار التطبيق المصغر عندما تكون لوحة مفاتيح مرئية حاليا على الشاشة.</string>
+    <string name="settings_screen_double_tap_turn_off_screen">Double-Tap to Turn Off Screen</string>
+    <string name="settings_screen_double_tap_turn_off_screen_desc_frame">Double-tap an empty space (outside of a widget) to turn off the screen. This applies to the whole frame when \"Ignore Widget Touches\" is enabled.</string>
+    <string name="settings_screen_double_tap_turn_off_screen_drawer">Double-tap an empty space (outside of a widget) to turn off the screen.</string>
     <string name="intro_welcome_title">Welcome!</string>
     <string name="intro_welcome_desc">Lockscreen Widgets is a simple app with a simple purpose: to bring back Android KitKat\'s lock screen widgets. Your widgets will show up in a simple paged slider on the lockscreen.</string>
     <string name="intro_usage_title">Basic Usage</string>
