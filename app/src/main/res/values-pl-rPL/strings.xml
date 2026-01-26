@@ -152,6 +152,9 @@
     <string name="settings_screen_force_widget_update_desc">Gdy widżety są wyświetlane na ekranie, aktualizacje widżetów nie zawsze są wysyłane. Aby to obejść, Lockscreen Widgets wymusza przeładowywanie widżetów, co może spowodować chwilowe mryganie widżetów. Wyłącz tę opcję, aby uniknąć tego efektu. Wyłączenie opcji może skutkować rzadszymi aktualizacjami widżetów.</string>
     <string name="settings_screen_hide_when_keyboard_shown">Ukryj, gdy wyświetlana jest klawiatura</string>
     <string name="settings_screen_hide_when_keyboard_shown_desc">Ukryj ramkę z widżetami, gdy na ekranie pokaże się klawiatura ekranowa.</string>
+    <string name="settings_screen_double_tap_turn_off_screen">Double-Tap to Turn Off Screen</string>
+    <string name="settings_screen_double_tap_turn_off_screen_desc_frame">Double-tap an empty space (outside of a widget) to turn off the screen. This applies to the whole frame when \"Ignore Widget Touches\" is enabled.</string>
+    <string name="settings_screen_double_tap_turn_off_screen_drawer">Double-tap an empty space (outside of a widget) to turn off the screen.</string>
     <string name="intro_welcome_title">Witamy!</string>
     <string name="intro_welcome_desc">Lockscreen Widgets jest aplikacją, która ma za zadanie przywrócić widżety na ekranie blokady znane z Android KitKat\'s.</string>
     <string name="intro_usage_title">Podstawowe użycie</string>
