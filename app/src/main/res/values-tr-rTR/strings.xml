@@ -152,6 +152,9 @@
     <string name="settings_screen_force_widget_update_desc">Widget\'lar ekranda gösterildiğinde, bekleyen widget güncellemeleri her zaman gönderilmez. Bunu aşmak için, Lockscreen Widget\'ları tüm widget\'ların varsayılan olarak yeniden yüklenmesini zorlar ve bu da kısa süreli yanıp sönmeye neden olabilir. Güncel widget\'ların olası gereksiz yere güncellenmesini önlemek için bu seçeneği devre dışı bırakın.</string>
     <string name="settings_screen_hide_when_keyboard_shown">Klavye Gösterildiğinde Gizle</string>
     <string name="settings_screen_hide_when_keyboard_shown_desc">Sanal klavye ekranda görünür durumdayken widget çerçevesini gizleyin.</string>
+    <string name="settings_screen_double_tap_turn_off_screen">Double-Tap to Turn Off Screen</string>
+    <string name="settings_screen_double_tap_turn_off_screen_desc_frame">Double-tap an empty space (outside of a widget) to turn off the screen. This applies to the whole frame when \"Ignore Widget Touches\" is enabled.</string>
+    <string name="settings_screen_double_tap_turn_off_screen_drawer">Double-tap an empty space (outside of a widget) to turn off the screen.</string>
     <string name="intro_welcome_title">Hoşgeldiniz!</string>
     <string name="intro_welcome_desc">Lockscreen Widgets, basit bir amacı olan basit bir uygulamadır: Android KitKat\'ın kilit ekranı widget\'larını geri getirmek. Widget\'larınız kilit ekranında basit bir sayfa kaydırıcıda gösterilecektir.</string>
     <string name="intro_usage_title">Temel Kullanım</string>
