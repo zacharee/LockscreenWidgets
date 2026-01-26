@@ -24,6 +24,9 @@ class SnappyRecyclerView(context: Context, attrs: AttributeSet? = null) : Recycl
             val layoutManager = layoutManager
             if (layoutManager is ISnappyLayoutManager && layoutManager.canSnap()) {
                 smoothScrollToPosition(layoutManager.getPositionForVelocity(velocityX, velocityY))
+
+                latestVX = 0
+                latestVY = 0
                 return true
             }
         }
