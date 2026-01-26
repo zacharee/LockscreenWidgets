@@ -71,6 +71,15 @@ class ComposeDrawerSettingsActivity : BaseActivity() {
                     )
 
                     switchPreference(
+                        title = { stringResource(R.string.settings_screen_double_tap_turn_off_screen) },
+                        summary = { stringResource(R.string.settings_screen_double_tap_turn_off_screen_drawer) },
+                        key = { PrefManager.KEY_DOUBLE_TAP_EMPTY_DRAWER_SPACE_TURN_OFF_DISPLAY },
+                        defaultValue = { false },
+                        icon = { painterResource(R.drawable.touch_double_24px) },
+                        visible = { Build.VERSION.SDK_INT >= Build.VERSION_CODES.P },
+                    )
+
+                    switchPreference(
                         title = { stringResource(R.string.settings_screen_lock_widget_drawer) },
                         summary = { stringResource(R.string.settings_screen_lock_widget_drawer_desc) },
                         key = { PrefManager.KEY_LOCK_WIDGET_DRAWER },

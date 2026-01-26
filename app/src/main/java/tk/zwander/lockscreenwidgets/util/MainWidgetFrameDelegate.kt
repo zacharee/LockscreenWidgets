@@ -204,6 +204,7 @@ open class MainWidgetFrameDelegate protected constructor(
 
             gravity = Gravity.CENTER
 
+            @Suppress("DEPRECATION")
             flags =
                 WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or
                         WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN or
@@ -1015,6 +1016,8 @@ open class MainWidgetFrameDelegate protected constructor(
         override val widgetCornerRadiusKey: String = PrefManager.KEY_FRAME_WIDGET_CORNER_RADIUS
         override val ignoreWidgetTouchesKey: String?
             get() = framePrefs.keyFor(PrefManager.KEY_FRAME_IGNORE_WIDGET_TOUCHES)
+        override val doubleTapTurnOffDisplayKey: String =
+            PrefManager.KEY_DOUBLE_TAP_EMPTY_FRAME_SPACE_TURN_OFF_DISPLAY
 
         val framePrefs: FrameSpecificPreferences
             get() = delegate.framePrefs

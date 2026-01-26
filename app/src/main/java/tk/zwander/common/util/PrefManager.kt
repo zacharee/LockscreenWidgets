@@ -140,6 +140,8 @@ class PrefManager private constructor(private val context: Context) {
         const val KEY_PRIMARY_FRAME_DISPLAY = "primary_frame_display"
         const val KEY_MASKED_MODE_ADJUSTMENT_FOR_DISPLAY = "masked_mode_adjustment_for_display"
         const val KEY_MASKED_MODE_SCALE_FOR_DISPLAY = "masked_mode_scale_for_display"
+        const val KEY_DOUBLE_TAP_EMPTY_FRAME_SPACE_TURN_OFF_DISPLAY = "double_tap_empty_frame_space_turn_off_display"
+        const val KEY_DOUBLE_TAP_EMPTY_DRAWER_SPACE_TURN_OFF_DISPLAY = "double_tap_empty_drawer_space_turn_off_display"
 
         const val VALUE_PAGE_INDICATOR_BEHAVIOR_HIDDEN = 0
         const val VALUE_PAGE_INDICATOR_BEHAVIOR_AUTO_HIDE = 1

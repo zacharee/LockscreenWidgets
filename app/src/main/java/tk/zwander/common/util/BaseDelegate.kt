@@ -2,6 +2,9 @@ package tk.zwander.common.util
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.os.Build
+import android.view.GestureDetector
+import android.view.MotionEvent
 import android.view.View
 import android.view.WindowManager
 import androidx.annotation.CallSuper
@@ -135,6 +138,29 @@ abstract class BaseDelegate<State : Any>(
                 if (displays.values.any { it.uniqueIdCompat == targetDisplayId }) {
                     updateWindow()
                 }
+            }
+        }
+
+        val gestureDetector = GestureDetector(
+            this,
+            object : GestureDetector.SimpleOnGestureListener() {
+                override fun onDoubleTap(e: MotionEvent): Boolean {
+                    logUtils.debugLog("Got double tap on RecyclerView ${this::class.java}", null)
+                    viewModel.doubleTapTurnOffDisplayKey?.let {
+                        if (prefManager.getBoolean(it, false)) {
+                            eventManager.sendEvent(Event.TurnOffDisplay)
+                        }
+                    }
+                    return false
+                }
+            },
+        )
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            @SuppressLint("ClickableViewAccessibility")
+            recyclerView.setOnTouchListener { _, event ->
+                gestureDetector.onTouchEvent(event)
+                false
             }
         }
     }
@@ -356,6 +382,7 @@ abstract class BaseDelegate<State : Any>(
         abstract val containerCornerRadiusKey: String?
 
         abstract val ignoreWidgetTouchesKey: String?
+        abstract val doubleTapTurnOffDisplayKey: String?
 
         fun createLifecycleAwareWindowRecomposer(): Recomposer {
             return delegate.rootView.createLifecycleAwareWindowRecomposerWithoutDetachCancel(

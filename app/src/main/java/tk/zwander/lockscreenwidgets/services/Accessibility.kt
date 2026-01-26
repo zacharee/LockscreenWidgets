@@ -17,6 +17,7 @@ import kotlinx.coroutines.launch
 import tk.zwander.common.util.AccessibilityUtils.runAccessibilityJob
 import tk.zwander.common.util.AccessibilityUtils.runWindowOperation
 import tk.zwander.common.util.Event
+import tk.zwander.common.util.EventObserver
 import tk.zwander.common.util.HandlerRegistry
 import tk.zwander.common.util.LSDisplayManager
 import tk.zwander.common.util.PrefManager
@@ -46,7 +47,7 @@ import tk.zwander.widgetdrawer.util.DrawerDelegate
  * is shown.
  */
 @SuppressLint("AccessibilityPolicy")
-class Accessibility : AccessibilityService(), CoroutineScope by MainScope() {
+class Accessibility : AccessibilityService(), CoroutineScope by MainScope(), EventObserver {
     private val kgm by lazy { keyguardManager }
     private val imm by lazy { getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager }
     private val lsDisplayManager by lazy { LSDisplayManager.getInstance(this) }
@@ -129,6 +130,7 @@ class Accessibility : AccessibilityService(), CoroutineScope by MainScope() {
         sharedPreferencesChangeHandler.register(this)
 
         eventManager.sendEvent(Event.RequestNotificationCount)
+        eventManager.addObserver(this)
         logUtils.debugLog("Accessibility service connected.", null)
 
         launch(Dispatchers.Main) {
@@ -169,10 +171,24 @@ class Accessibility : AccessibilityService(), CoroutineScope by MainScope() {
         logUtils.debugLog("Accessibility service interrupted.", null)
     }
 
+    override suspend fun onEvent(event: Event) {
+        when (event) {
+            Event.TurnOffDisplay -> {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                    logUtils.debugLog("Sending display off global action", null)
+                    performGlobalAction(GLOBAL_ACTION_LOCK_SCREEN)
+                }
+            }
+
+            else -> {}
+        }
+    }
+
     override fun onDestroy() {
         super.onDestroy()
 
         sharedPreferencesChangeHandler.unregister(this)
+        eventManager.removeObserver(this)
 
         // This is hacky and ideally it'd stay inside Accessibility,
         // but I can't find a way to suspend the destruction of the

@@ -11,6 +11,7 @@ import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.gestures.draggable2D
 import androidx.compose.foundation.gestures.rememberDraggable2DState
 import androidx.compose.foundation.gestures.rememberTransformableState
@@ -62,6 +63,7 @@ import tk.zwander.common.util.PrefManager
 import tk.zwander.common.util.collectAsMutableState
 import tk.zwander.common.util.eventManager
 import tk.zwander.common.util.globalState
+import tk.zwander.common.util.logUtils
 import tk.zwander.common.util.prefManager
 import tk.zwander.common.views.SnappyRecyclerView
 import tk.zwander.lockscreenwidgets.R
@@ -94,6 +96,9 @@ fun MainWidgetFrameDelegate.WidgetFrameViewModel.WidgetFrameLayout(
 
     val animatedBackgroundColor by animateColorAsState(backgroundColor)
 
+    val doubleTapTurnOffDisplay by rememberBooleanPreferenceState(
+        key = PrefManager.KEY_DOUBLE_TAP_EMPTY_FRAME_SPACE_TURN_OFF_DISPLAY,
+    )
     val touchProtectionEnabled by rememberBooleanPreferenceState(
         key = PrefManager.KEY_TOUCH_PROTECTION,
     )
@@ -131,6 +136,19 @@ fun MainWidgetFrameDelegate.WidgetFrameViewModel.WidgetFrameLayout(
 
     Card(
         modifier = modifier
+            .pointerInput(
+                doubleTapTurnOffDisplay,
+                firstViewing,
+            ) {
+                if (doubleTapTurnOffDisplay && !firstViewing) {
+                    detectTapGestures(
+                        onDoubleTap = {
+                            context.logUtils.debugLog("Sending display off from base frame layer", null)
+                            context.eventManager.sendEvent(Event.TurnOffDisplay)
+                        },
+                    )
+                }
+            }
             .pointerInput(null) {
                 awaitPointerEventScope {
                     while (true) {
@@ -247,6 +265,7 @@ fun MainWidgetFrameDelegate.WidgetFrameViewModel.WidgetFrameLayout(
                     value = { context.prefManager.pageIndicatorBehavior },
                 )
 
+                @Suppress("COMPOSE_APPLIER_CALL_MISMATCH")
                 AndroidView(
                     factory = { widgetGrid },
                     update = {

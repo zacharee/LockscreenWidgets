@@ -28,7 +28,6 @@ import kotlin.coroutines.suspendCoroutine
 import kotlin.math.roundToInt
 import kotlin.math.sign
 
-
 fun createTouchHelperCallback(
     adapter: BaseAdapter<*>,
     widgetMoved: (moved: Boolean) -> Unit,

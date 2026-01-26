@@ -7,6 +7,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.gestures.draggable2D
 import androidx.compose.foundation.gestures.rememberDraggable2DState
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -50,6 +51,9 @@ import tk.zwander.common.data.WidgetData
 import tk.zwander.common.data.WidgetType
 import tk.zwander.common.listeners.WidgetResizeListener.Which
 import tk.zwander.common.util.BaseDelegate
+import tk.zwander.common.util.Event
+import tk.zwander.common.util.eventManager
+import tk.zwander.common.util.logUtils
 import tk.zwander.common.util.peekLogUtils
 import tk.zwander.common.util.prefManager
 import tk.zwander.lockscreenwidgets.R
@@ -63,6 +67,7 @@ fun BaseDelegate.BaseViewModel<*, *>.WidgetItemLayout(
     widgetContents: @Composable (Modifier) -> Unit,
     cornerRadiusKey: String,
     ignoreTouchesKey: String?,
+    doubleTapTurnOffKey: String?,
     launchIconOverride: () -> Unit,
     launchReconfigure: () -> Unit,
     remove: () -> Unit,
@@ -88,6 +93,8 @@ fun BaseDelegate.BaseViewModel<*, *>.WidgetItemLayout(
     val animatedCornerRadius by animateDpAsState(widgetCornerRadius)
     val ignoreTouches by ignoreTouchesKey?.let { rememberBooleanPreferenceState(ignoreTouchesKey) }
         ?: remember { mutableStateOf(false) }
+    val doubleTapTurnOffDisplay by doubleTapTurnOffKey?.let { rememberBooleanPreferenceState(doubleTapTurnOffKey) }
+        ?: remember { mutableStateOf(false) }
 
     Card(
         modifier = modifier,
@@ -110,10 +117,18 @@ fun BaseDelegate.BaseViewModel<*, *>.WidgetItemLayout(
                 if (ignoreTouches) {
                     Box(
                         modifier = Modifier.fillMaxSize()
-                            .clickable(
+                            .combinedClickable(
                                 interactionSource = remember { MutableInteractionSource() },
                                 indication = null,
                                 onClick = {},
+                                onDoubleClick = if (doubleTapTurnOffDisplay) {
+                                    {
+                                        context.logUtils.debugLog("Sending display off action from touch ignore overlay", null)
+                                        context.eventManager.sendEvent(Event.TurnOffDisplay)
+                                    }
+                                } else{
+                                    null
+                                },
                             ),
                     )
                 }

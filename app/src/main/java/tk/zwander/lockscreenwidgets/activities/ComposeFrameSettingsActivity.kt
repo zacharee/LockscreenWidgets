@@ -647,6 +647,15 @@ class ComposeFrameSettingsActivity : BaseActivity() {
                     key = "settings_interaction_category",
                 ) {
                     switchPreference(
+                        title = { stringResource(R.string.settings_screen_double_tap_turn_off_screen) },
+                        summary = { stringResource(R.string.settings_screen_double_tap_turn_off_screen_desc_frame) },
+                        icon = { painterResource(R.drawable.touch_double_24px) },
+                        key = { PrefManager.KEY_DOUBLE_TAP_EMPTY_FRAME_SPACE_TURN_OFF_DISPLAY },
+                        defaultValue = { false },
+                        visible = { Build.VERSION.SDK_INT >= Build.VERSION_CODES.P },
+                    )
+
+                    switchPreference(
                         title = { stringResource(R.string.settings_screen_touch_protection) },
                         summary = { stringResource(R.string.settings_screen_touch_protection_desc) },
                         icon = { painterResource(R.drawable.ic_baseline_block_24) },

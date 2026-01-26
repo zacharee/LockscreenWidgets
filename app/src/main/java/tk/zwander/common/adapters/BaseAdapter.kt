@@ -355,6 +355,7 @@ abstract class BaseAdapter<VM : BaseDelegate.BaseViewModel<*, *>>(
                     isEditing = currentEditingPosition == bindingAdapterPosition,
                     modifier = Modifier.fillMaxSize().layoutId("widget_${data.id}"),
                     ignoreTouchesKey = viewModel.ignoreWidgetTouchesKey,
+                    doubleTapTurnOffKey = viewModel.doubleTapTurnOffDisplayKey,
                 )
             }
         }
