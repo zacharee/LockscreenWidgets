@@ -152,6 +152,9 @@
     <string name="settings_screen_force_widget_update_desc">Lorsque les widgets sont à l\'écran, les mises à jour en attente ne sont pas toujours faites. Pour contourner ce problème, Lockscreen Widgets force tous les widgets à se recharger par défaut, ce qui peut causer un flash. Désactivez cette option pour éviter ce flash, attention dès lors à leur mise à jour.</string>
     <string name="settings_screen_hide_when_keyboard_shown">Masquer lorsque le clavier est affiché</string>
     <string name="settings_screen_hide_when_keyboard_shown_desc">Masquer le cadre du widget lorsque le clavier est visible à l\'écran.</string>
+    <string name="settings_screen_double_tap_turn_off_screen">Double-Tap to Turn Off Screen</string>
+    <string name="settings_screen_double_tap_turn_off_screen_desc_frame">Double-tap an empty space (outside of a widget) to turn off the screen. This applies to the whole frame when \"Ignore Widget Touches\" is enabled.</string>
+    <string name="settings_screen_double_tap_turn_off_screen_drawer">Double-tap an empty space (outside of a widget) to turn off the screen.</string>
     <string name="intro_welcome_title">Bienvenue !</string>
     <string name="intro_welcome_desc">Lockscreen Widgets est une application simple avec un but simple : récupérer les widgets d\'écran de verrouillage d\'Android KitKat. Vos widgets s\'afficheront dans un slider paginé sur l\'écran de verrouillage.</string>
     <string name="intro_usage_title">Utilisation basique</string>

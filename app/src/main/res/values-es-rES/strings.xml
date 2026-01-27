@@ -152,6 +152,9 @@
     <string name="settings_screen_force_widget_update_desc">Cuando se muestran widgets en la pantalla, las actualizaciones de widget pendientes no siempre se envían. Para solucionar esto, Lockscreen Widgets fuerza a todos los widgets a volver a cargarse de forma predeterminada, lo que puede causar un parpadeo corto. Desactiva esta opción si quieres evitar el parpadeo, aun con el riesgo de que los widgets no estén siempre actualizados.</string>
     <string name="settings_screen_hide_when_keyboard_shown">Ocultar cuando se muestra el teclado</string>
     <string name="settings_screen_hide_when_keyboard_shown_desc">Ocultar el Panel de widgets cuando la app de teclado esté visible en la pantalla.</string>
+    <string name="settings_screen_double_tap_turn_off_screen">Double-Tap to Turn Off Screen</string>
+    <string name="settings_screen_double_tap_turn_off_screen_desc_frame">Double-tap an empty space (outside of a widget) to turn off the screen. This applies to the whole frame when \"Ignore Widget Touches\" is enabled.</string>
+    <string name="settings_screen_double_tap_turn_off_screen_drawer">Double-tap an empty space (outside of a widget) to turn off the screen.</string>
     <string name="intro_welcome_title">¡Te damos la bienvenida!</string>
     <string name="intro_welcome_desc">Lockscreen Widgets es una aplicación simple con un propósito también simple: traer de vuelta los widgets de la Pantalla de Bloqueo de Android KitKat. Tus widgets se mostrarán en un sencillo panel de páginas deslizables en la Pantalla de Bloqueo.</string>
     <string name="intro_usage_title">Uso básico</string>
