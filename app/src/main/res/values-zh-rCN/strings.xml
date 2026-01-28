@@ -58,10 +58,10 @@
     <string name="expand">展开</string>
     <string name="alert_remove_widget_confirm">移除小组件？</string>
     <string name="alert_remove_widget_confirm_desc">您确定要删除这个项目吗？</string>
-    <string name="main_screen_social_mastodon">乳齿象</string>
+    <string name="main_screen_social_mastodon">Mastodon</string>
     <string name="main_screen_social_mastodon_desc">在 Mastodon 上关注我的应用和随机发展相关的神话的最新信息。</string>
     <string name="main_screen_social_website">网站</string>
-    <string name="main_screen_social_website_desc">如果您是这么加密的，请查看我的网站。</string>
+    <string name="main_screen_social_website_desc">如果你实在无聊的话，可以看看我的网站。</string>
     <string name="main_screen_social_email">电子邮箱</string>
     <string name="main_screen_social_email_desc">如果您有疑问或问题，请给我发一封电子邮件。请尽可能多的详细信息。 只需告诉我“它不起作用”就会浪费每个人的时间。</string>
     <string name="main_screen_social_github">GitHub</string>
@@ -125,7 +125,7 @@
     <string name="settings_screen_separate_position_for_lock_nc_desc">在一个 UI 3 中，当锁定和解锁时，通知中心布局略有不同。 启用此选项可以在这两种模式中使用小部件框架的单独位置。</string>
     <string name="settings_screen_lock_widget_frame">锁定小部件帧</string>
     <string name="settings_screen_lock_widget_frame_desc">启用时，部件框架将忽略所有直接触摸。 您将无法从帧中移动或修改部件， 但三指的隐藏手势仍然可以正常工作，您仍然能够与小部件进行交互。</string>
-    <string name="settings_screen_ignore_widget_touches">忽略小部件Touches</string>
+    <string name="settings_screen_ignore_widget_touches">忽略小部件触摸</string>
     <string name="settings_screen_ignore_widget_touches_desc">如果启用，小部件触摸将被忽略。这将防止意外启动应用程序，但也将防止与小部件的交互。</string>
     <string name="settings_screen_lock_widget_drawer">锁定小部件抽取</string>
     <string name="settings_screen_lock_widget_drawer_desc">如果启用此项，小部件抽屉将被锁定。 您将无法移除、调整大小或重新排序小部件，但您仍然能够与它们进行交互。</string>
@@ -136,7 +136,7 @@
     <string name="settings_screen_restore_widgets">恢复</string>
     <string name="settings_screen_restore_widgets_desc">从备份中还原小部件和快捷方式。这将替换现有的小部件和快捷方式。这不包括小部件倾斜。</string>
     <string name="settings_screen_blur_background">模糊背景</string>
-    <string name="settings_screen_blur_background_desc">在 Samsung 设备和 Android 12 及更高版本上，可以模糊框架的背景。 这将不适用于应用Mask模式的地方，可能无法在所有设备或节电模式下工作。</string>
+    <string name="settings_screen_blur_background_desc">在三星设备和 Android 12 及更高版本上，可以模糊框架的背景。 这将不适用于应用Mask模式的地方，可能无法在所有设备或节电模式下工作。</string>
     <string name="settings_screen_blur_drawer_background_desc">在三星设备和安卓12及以后的设备上，可以模糊抽屉的背景。 这可能无法在所有设备上或在节电模式下使用。</string>
     <string name="settings_screen_blur_background_amount">模糊程度</string>
     <string name="settings_screen_blur_background_amount_desc">设置背景多么模糊。</string>
@@ -209,7 +209,7 @@
     <string name="close_on_empty_tap_desc">启用此选项后，在窗口小部件区域外点击将导致抽屉关闭。</string>
     <string name="show_drawer_handle">显示抽屉手势</string>
     <string name="show_drawer_handle_desc">添加一个句柄到屏幕的侧面，可以滑动打开抽屉。</string>
-    <string name="show_drawer_handle_shadow">显示抽屉Shadow</string>
+    <string name="show_drawer_handle_shadow">显示抽屉阴影</string>
     <string name="show_drawer_handle_shadow_desc">在抽屉背后显示阴影。</string>
     <string name="drawer_handle_height">抽屉处理高度</string>
     <string name="drawer_handle_height_desc">设置抽屉句句柄应该是多少。</string>
@@ -248,7 +248,7 @@
     <string name="unforce_show_frame">撤消强制显示帧</string>
     <string name="frame_forced_to_show">强制显示帧</string>
     <string name="reset_frame_position_size">重置帧位置和大小</string>
-    <string name="on_lock_screen">锁屏时</string>
+    <string name="on_lock_screen">锁屏界面</string>
     <string name="in_notification_center">在通知中心</string>
     <string name="in_locked_notification_center">在锁定的通知中心</string>
     <string name="reset_frame_position_size_confirm_message">您确定要重置位置和大小吗？</string>
