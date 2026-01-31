@@ -23,10 +23,6 @@ import androidx.savedstate.setViewTreeSavedStateRegistryOwner
 import com.arasthel.spannedgridlayoutmanager.SpannedGridLayoutManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import tk.zwander.common.adapters.BaseAdapter
@@ -46,25 +42,9 @@ abstract class BaseDelegate<State : Any>(
     protected val kgm by lazy { keyguardManager }
     protected val widgetHost by lazy { widgetHostCompat }
     protected val wm: WindowManager?
-        get() = displayAndWindowManagerFlow.value.windowManager
+        get() = DisplayCache.displayAndWmCache.value[display?.uniqueIdCompat]?.windowManager
     val display: LSDisplay?
-        get() = displayAndWindowManagerFlow.value.display
-
-    protected val displayAndWindowManagerFlow: StateFlow<DisplayAndWindowManager> by lazy {
-        lsDisplayManager.collectDisplay(targetDisplayId).map { lsDisplay ->
-            val displayContext = lsDisplay?.let { createDisplayContextCompat(it.display) }
-            val windowManager = displayContext?.getSystemService(WINDOW_SERVICE) as? WindowManager?
-
-            DisplayAndWindowManager(
-                display = lsDisplay,
-                windowManager = windowManager,
-            )
-        }.stateIn(
-            scope = lifecycleScope,
-            started = SharingStarted.Eagerly,
-            initialValue = DisplayAndWindowManager(),
-        )
-    }
+        get() = lsDisplayManager.findDisplayByStringId(targetDisplayId)
 
     val screenOrientation: Int?
         get() = display?.screenOrientation
@@ -135,7 +115,7 @@ abstract class BaseDelegate<State : Any>(
 
         lifecycleScope.launch {
             lsDisplayManager.availableDisplays.collect { displays ->
-                if (displays.values.any { it.uniqueIdCompat == targetDisplayId }) {
+                if (displays.values.any { it.uniqueIdCompat == display?.uniqueIdCompat }) {
                     updateWindow()
                 }
             }
@@ -303,11 +283,6 @@ abstract class BaseDelegate<State : Any>(
         val isHoldingItem: Boolean = false,
         val isItemHighlighted: Boolean = false,
         val updatedForMoveOrRemove: Boolean = false,
-    )
-
-    data class DisplayAndWindowManager(
-        val display: LSDisplay? = null,
-        val windowManager: WindowManager? = null,
     )
 
     abstract class LayoutManager(

@@ -8,6 +8,7 @@ import android.os.Build
 import android.provider.Settings
 import android.util.SparseArray
 import android.view.Display
+import android.view.WindowInsets
 import android.view.accessibility.AccessibilityEvent
 import android.view.accessibility.AccessibilityNodeInfo
 import android.view.accessibility.AccessibilityWindowInfo
@@ -550,17 +551,25 @@ object AccessibilityUtils {
         with(context) {
             logUtils.debugLog("Running accessibility job")
 
-            //This block here runs even when unlocked, but it only takes a millisecond at most,
-            //so it shouldn't be noticeable to the user. We use this to check the current keyguard
-            //state and, if applicable, send the keyguard dismissal broadcast.
-            globalState.showingKeyboard.value = try {
-                imm.inputMethodWindowVisibleHeight > 0
-            } catch (e: Throwable) {
-                logUtils.debugLog("Unable to check if keyboard is showing, assuming it's not", e)
-                // Fetching the IME height can cause the system to throw an NPE:
-                // "Attempt to read from field 'com.android.server.wm.DisplayFrames com.android.server.wm.DisplayContent.mDisplayFrames' on a null object reference".
-                // If this happens, assume the keyboard isn't showing.
-                false
+            if (lsDisplayManager.multiDisplaySupported) {
+                DisplayCache.displayAndWmCache.value.values.forEach { (dis, wm) ->
+                    globalState.showingKeyboard[dis?.displayId ?: Display.DEFAULT_DISPLAY] =
+                        wm?.currentWindowMetrics
+                        ?.windowInsets?.getInsets(WindowInsets.Type.ime())
+                        ?.toRect()
+                        ?.isEmpty
+                        .let { it == false }
+                }
+            } else {
+                globalState.showingKeyboard[Display.DEFAULT_DISPLAY] = try {
+                    imm.inputMethodWindowVisibleHeight > 0
+                } catch (e: Throwable) {
+                    logUtils.debugLog("Unable to check if keyboard is showing, assuming it's not", e)
+                    // Fetching the IME height can cause the system to throw an NPE:
+                    // "Attempt to read from field 'com.android.server.wm.DisplayFrames com.android.server.wm.DisplayContent.mDisplayFrames' on a null object reference".
+                    // If this happens, assume the keyboard isn't showing.
+                    false
+                }
             }
 
             //Check if the lock screen is shown.

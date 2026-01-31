@@ -9,6 +9,7 @@ import android.os.Build
 import android.util.DisplayMetrics
 import android.view.Display
 import android.view.Surface
+import android.view.WindowManager
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.CoroutineScope
@@ -19,6 +20,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import tk.zwander.lockscreenwidgets.App
+import tk.zwander.lockscreenwidgets.services.Accessibility
 import kotlin.math.roundToInt
 
 val Context.lsDisplayManager: LSDisplayManager
@@ -242,4 +244,30 @@ data class DisplayPowerStates(
 
 private fun Display.isBuiltIn(isLikelyRazr: Boolean): Boolean {
     return type == Display.TYPE_INTERNAL || (isLikelyRazr && displayId == 1)
+}
+
+object DisplayCache {
+    val displayAndWmCache = MutableStateFlow<Map<String, DisplayAndWindowManager>>(mapOf())
+
+    suspend fun handleDisplayUpdates(
+        accessibility: Accessibility,
+    ) {
+        accessibility.lsDisplayManager.availableDisplays.collect { displays ->
+            // Not super efficient since any time the available displays change
+            // every cached display will be wiped and recreated, but there
+            // isn't a great way to check for stale Display objects.
+            displayAndWmCache.value = displays.values.associate { display ->
+                val displayContext = accessibility.createDisplayContextCompat(display.display)
+                val windowManager =
+                    displayContext.getSystemService(Context.WINDOW_SERVICE) as WindowManager
+
+                display.uniqueIdCompat to DisplayAndWindowManager(display, windowManager)
+            }
+        }
+    }
+
+    data class DisplayAndWindowManager(
+        val display: LSDisplay? = null,
+        val windowManager: WindowManager? = null,
+    )
 }

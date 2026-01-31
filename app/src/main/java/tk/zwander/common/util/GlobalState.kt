@@ -25,7 +25,7 @@ data class GlobalState private constructor(
     val currentAppPackage: MutableStateFlow<Map<Int, String?>> = MutableStateFlow(mapOf()),
     val isOnEdgePanel: MutableStateFlow<Map<Int, Boolean>> = MutableStateFlow(mapOf()),
     val hidingForPresentApp: MutableStateFlow<Map<Int, Boolean>> = MutableStateFlow(mapOf()),
-    val showingKeyboard: MutableStateFlow<Boolean> = MutableStateFlow(false),
+    val showingKeyboard: MutableStateFlow<Map<Int, Boolean>> = MutableStateFlow(mapOf()),
     val notificationsPanelFullyExpanded: MutableStateFlow<Map<Int, Boolean>> = MutableStateFlow(mapOf()),
     val handlingClick: MutableStateFlow<Map<Int, Unit>> = MutableStateFlow(mapOf()),
     val itemIsActive: MutableStateFlow<Boolean> = MutableStateFlow(false),

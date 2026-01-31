@@ -7,13 +7,11 @@ import android.graphics.PixelFormat
 import android.graphics.Point
 import android.graphics.PointF
 import android.graphics.drawable.Drawable
-import android.os.Build
 import android.view.Display
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.Surface
 import android.view.View
-import android.view.WindowInsets
 import android.view.WindowManager
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.fillMaxSize
@@ -573,11 +571,6 @@ open class MainWidgetFrameDelegate protected constructor(
         transform: (State) -> State = { it },
         commonTransform: (BaseState) -> BaseState = { it },
     ) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            val imeInsets = wm?.currentWindowMetrics?.windowInsets?.getInsets(WindowInsets.Type.ime())
-            viewModel.isShowingIme.value = imeInsets?.toRect()?.isEmpty?.let { !it }
-        }
-
         updateState(transform)
         updateCommonState(commonTransform)
         updateWindowState(updateAccessibility)
@@ -725,7 +718,7 @@ open class MainWidgetFrameDelegate protected constructor(
                     && prefManager.widgetFrameEnabled
                     && (!prefManager.hideInLandscape || state.screenOrientation == Surface.ROTATION_0 || state.screenOrientation == Surface.ROTATION_180)
                     && prefManager.canShowFrameFromTasker
-                    && (!framePrefs.hideWhenKeyboardShown || !(viewModel.isShowingIme.value ?: globalState.showingKeyboard.value))
+                    && (!framePrefs.hideWhenKeyboardShown || globalState.showingKeyboard.value[display?.displayId] != true)
         }
 
         fun forSecondaryDisplay(): Boolean {
