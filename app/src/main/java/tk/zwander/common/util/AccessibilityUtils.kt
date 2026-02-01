@@ -552,7 +552,7 @@ object AccessibilityUtils {
             logUtils.debugLog("Running accessibility job")
 
             if (lsDisplayManager.multiDisplaySupported) {
-                DisplayCache.displayAndWmCache.value.values.forEach { (dis, wm) ->
+                lsDisplayManager.displayAndWmCache.value.values.forEach { (dis, wm) ->
                     globalState.showingKeyboard[dis?.displayId ?: Display.DEFAULT_DISPLAY] =
                         wm?.currentWindowMetrics
                         ?.windowInsets?.getInsets(WindowInsets.Type.ime())

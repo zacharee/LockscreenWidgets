@@ -70,6 +70,7 @@ class LSDisplayManager private constructor(context: Context) : ContextWrapper(co
 
     val availableDisplays = MutableStateFlow(mapOf<Int, LSDisplay>())
     val isLikelyRazr = context.isLikelyRazr
+    val displayAndWmCache = MutableStateFlow<Map<String, DisplayAndWindowManager>>(mapOf())
 
     val displayPowerStates: StateFlow<DisplayPowerStates> = availableDisplays.map { currentDisplays ->
         val states = currentDisplays.entries.associate { (_, display) -> display.uniqueIdCompat to display.isOn }
@@ -166,6 +167,23 @@ class LSDisplayManager private constructor(context: Context) : ContextWrapper(co
 
         logUtils.debugLog("Got displays ${availableDisplays.value.values.map { it.loggingId }}", null)
     }
+
+    suspend fun handleDisplayUpdates(
+        accessibility: Accessibility,
+    ) {
+        availableDisplays.collect { displays ->
+            // Not super efficient since any time the available displays change
+            // every cached display will be wiped and recreated, but there
+            // isn't a great way to check for stale Display objects.
+            displayAndWmCache.value = displays.values.associate { display ->
+                val displayContext = accessibility.createDisplayContextCompat(display.display)
+                val windowManager =
+                    displayContext.getSystemService(WINDOW_SERVICE) as WindowManager
+
+                display.uniqueIdCompat to DisplayAndWindowManager(display, windowManager)
+            }
+        }
+    }
 }
 
 class LSDisplay(
@@ -247,28 +265,7 @@ private fun Display.isBuiltIn(isLikelyRazr: Boolean): Boolean {
     return type == Display.TYPE_INTERNAL || (isLikelyRazr && displayId == 1)
 }
 
-object DisplayCache {
-    val displayAndWmCache = MutableStateFlow<Map<String, DisplayAndWindowManager>>(mapOf())
-
-    suspend fun handleDisplayUpdates(
-        accessibility: Accessibility,
-    ) {
-        accessibility.lsDisplayManager.availableDisplays.collect { displays ->
-            // Not super efficient since any time the available displays change
-            // every cached display will be wiped and recreated, but there
-            // isn't a great way to check for stale Display objects.
-            displayAndWmCache.value = displays.values.associate { display ->
-                val displayContext = accessibility.createDisplayContextCompat(display.display)
-                val windowManager =
-                    displayContext.getSystemService(Context.WINDOW_SERVICE) as WindowManager
-
-                display.uniqueIdCompat to DisplayAndWindowManager(display, windowManager)
-            }
-        }
-    }
-
-    data class DisplayAndWindowManager(
-        val display: LSDisplay? = null,
-        val windowManager: WindowManager? = null,
-    )
-}
+data class DisplayAndWindowManager(
+    val display: LSDisplay? = null,
+    val windowManager: WindowManager? = null,
+)

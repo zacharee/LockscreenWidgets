@@ -16,7 +16,6 @@ import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
 import tk.zwander.common.util.AccessibilityUtils.runAccessibilityJob
 import tk.zwander.common.util.AccessibilityUtils.runWindowOperation
-import tk.zwander.common.util.DisplayCache
 import tk.zwander.common.util.Event
 import tk.zwander.common.util.EventObserver
 import tk.zwander.common.util.HandlerRegistry
@@ -135,7 +134,7 @@ class Accessibility : AccessibilityService(), CoroutineScope by MainScope(), Eve
         logUtils.debugLog("Accessibility service connected.", null)
 
         launch(Dispatchers.Main) {
-            DisplayCache.handleDisplayUpdates(this@Accessibility)
+            lsDisplayManager.handleDisplayUpdates(this@Accessibility)
         }
 
         launch(Dispatchers.Main) {

@@ -23,6 +23,9 @@ import androidx.savedstate.setViewTreeSavedStateRegistryOwner
 import com.arasthel.spannedgridlayoutmanager.SpannedGridLayoutManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import tk.zwander.common.adapters.BaseAdapter
@@ -42,9 +45,17 @@ abstract class BaseDelegate<State : Any>(
     protected val kgm by lazy { keyguardManager }
     protected val widgetHost by lazy { widgetHostCompat }
     protected val wm: WindowManager?
-        get() = DisplayCache.displayAndWmCache.value[display?.uniqueIdCompat]?.windowManager
+        get() = lsDisplayManager.displayAndWmCache.value[display?.uniqueIdCompat]?.windowManager
     val display: LSDisplay?
-        get() = lsDisplayManager.findDisplayByStringId(targetDisplayId)
+        get() = displayFlow.value
+
+    protected val displayFlow: StateFlow<LSDisplay?> by lazy {
+        lsDisplayManager.collectDisplay(targetDisplayId).stateIn(
+            scope = lifecycleScope,
+            started = SharingStarted.Eagerly,
+            initialValue = lsDisplayManager.findDisplayByStringId(targetDisplayId),
+        )
+    }
 
     val screenOrientation: Int?
         get() = display?.screenOrientation
@@ -114,8 +125,8 @@ abstract class BaseDelegate<State : Any>(
         }
 
         lifecycleScope.launch {
-            lsDisplayManager.availableDisplays.collect { displays ->
-                if (displays.values.any { it.uniqueIdCompat == display?.uniqueIdCompat }) {
+            displayFlow.collect {
+                if (it != null) {
                     updateWindow()
                 }
             }
