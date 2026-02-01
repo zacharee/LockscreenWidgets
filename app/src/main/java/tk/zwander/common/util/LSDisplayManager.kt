@@ -26,10 +26,11 @@ import kotlin.math.roundToInt
 val Context.lsDisplayManager: LSDisplayManager
     get() = LSDisplayManager.getInstance(this)
 
-val LSDisplay?.orDefault: LSDisplay
-    get() = this ?: App.instance.lsDisplayManager.availableDisplays
+fun LSDisplay?.orDefault(context: Context): LSDisplay {
+    return this ?: context.lsDisplayManager.availableDisplays
         .value.values.find { it.display.displayId == Display.DEFAULT_DISPLAY } ?:
-        App.instance.lsDisplayManager.availableDisplays.value.values.first()
+        context.lsDisplayManager.availableDisplays.value.values.first()
+}
 
 class LSDisplayManager private constructor(context: Context) : ContextWrapper(context), CoroutineScope by App.instance {
     companion object {

@@ -67,7 +67,7 @@ open class WidgetFrameAdapter(
 
     override fun getThresholdPx(which: WidgetResizeListener.Which): Int {
         return context.run {
-            val display = viewModel.lsDisplay.orDefault
+            val display = viewModel.lsDisplay.orDefault(this)
             val frameSize = frameSizeAndPosition.getSizeForType(viewModel.saveMode, display)
             if (which == WidgetResizeListener.Which.LEFT || which == WidgetResizeListener.Which.RIGHT) {
                 display.dpToPx(frameSize.x.toInt()) / colCount

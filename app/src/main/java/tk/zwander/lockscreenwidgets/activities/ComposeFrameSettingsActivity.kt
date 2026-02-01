@@ -23,6 +23,7 @@ import tk.zwander.common.activities.BaseActivity
 import tk.zwander.common.activities.HideForIDsActivity
 import tk.zwander.common.activities.HideOnAppsChooserActivity
 import tk.zwander.common.activities.OnboardingActivity
+import tk.zwander.common.compose.LocalLSDisplayManager
 import tk.zwander.common.compose.settings.ListPreferenceEntry
 import tk.zwander.common.compose.settings.PreferenceScreen
 import tk.zwander.common.compose.settings.booleanPreferenceDependency
@@ -37,7 +38,6 @@ import tk.zwander.common.util.isLikelyRazr
 import tk.zwander.common.util.isOneUI
 import tk.zwander.common.util.isPixelUI
 import tk.zwander.common.util.isTouchWiz
-import tk.zwander.common.util.lsDisplayManager
 import tk.zwander.common.util.prefManager
 import tk.zwander.common.util.setThemedContent
 import tk.zwander.lockscreenwidgets.BuildConfig
@@ -71,9 +71,7 @@ class ComposeFrameSettingsActivity : BaseActivity() {
                 onChanged = { _, v -> prefManager.currentSecondaryFramesWithStringDisplay = v },
             )
             val frameCount by rememberUpdatedState(secondaryFrames.size + 1)
-            val displayManager = remember {
-                lsDisplayManager
-            }
+            val displayManager = LocalLSDisplayManager.current
             val displays by displayManager.availableDisplays.collectAsState()
 
             var pendingFrameId by remember {
@@ -138,7 +136,7 @@ class ComposeFrameSettingsActivity : BaseActivity() {
                             val maxFrameId = secondaryFrames.keys.maxOrNull() ?: 1
                             val newFrameId = maxFrameId + 1
 
-                            if (!BuildConfig.DEBUG && lsDisplayManager.availableDisplays.value.size <= 1) {
+                            if (!BuildConfig.DEBUG && displayManager.availableDisplays.value.size <= 1) {
                                 secondaryFrames = HashMap(
                                     secondaryFrames.toMutableMap().apply {
                                         this[newFrameId] = "${Display.DEFAULT_DISPLAY}"
