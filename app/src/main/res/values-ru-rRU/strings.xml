@@ -152,9 +152,9 @@
     <string name="settings_screen_force_widget_update_desc">Когда виджеты отображаемые на экране, не обновляются. Чтобы обойти это, Lockscreen Widgets принудительно перезагружает все виджеты по умолчанию, что может вызвать кратковременное мигание. Отключите эту опцию, чтобы избежать мигания, за счет потенциальной потери обновления виджетов.</string>
     <string name="settings_screen_hide_when_keyboard_shown">Скрывать при показе клавиатуры</string>
     <string name="settings_screen_hide_when_keyboard_shown_desc">Скрыть виджет, когда программная клавиатура в данный момент видна на экране.</string>
-    <string name="settings_screen_double_tap_turn_off_screen">Double-Tap to Turn Off Screen</string>
-    <string name="settings_screen_double_tap_turn_off_screen_desc_frame">Double-tap an empty space (outside of a widget) to turn off the screen. This applies to the whole frame when \"Ignore Widget Touches\" is enabled.</string>
-    <string name="settings_screen_double_tap_turn_off_screen_drawer">Double-tap an empty space (outside of a widget) to turn off the screen.</string>
+    <string name="settings_screen_double_tap_turn_off_screen">Двойное нажатие для выключения экрана</string>
+    <string name="settings_screen_double_tap_turn_off_screen_desc_frame">Дважды коснуться пустого места (за пределами виджета), чтобы выключить экран. Это относится ко всему кадру, когда включена функция \"Игнорировать виджет\".</string>
+    <string name="settings_screen_double_tap_turn_off_screen_drawer">Дважды коснуться пустого места (за пределами виджета), чтобы отключить экран.</string>
     <string name="intro_welcome_title">Добро пожаловать!</string>
     <string name="intro_welcome_desc">Lockscreen Widgets — это простое приложение с простой целью: вернуть виджеты экрана блокировки Android KitKat. Ваши виджеты будут отображаться в простом постраничном слайдере на экране блокировки.</string>
     <string name="intro_usage_title">Основное применение</string>
@@ -268,9 +268,9 @@
     <string name="blank_widget">Пустой виджет</string>
     <string name="add_frame">Добавить рамку виджета</string>
     <string name="remove_frame">Удалить рамку виджета</string>
-    <string name="adjust_wallpaper_mask">Adjust Wallpaper Mask</string>
-    <string name="reset_mask_scale">Reset Mask Scale</string>
-    <string name="reset_mask_alignment">Reset Mask Alignment</string>
+    <string name="adjust_wallpaper_mask">Настройка видимости маскировочных обоев</string>
+    <string name="reset_mask_scale">Сбросить масштаб маскировки</string>
+    <string name="reset_mask_alignment">Сбросить выравнивание маскировки</string>
     <string name="unable_to_open_settings">Невозможно открыть настройки.</string>
     <string name="remove_frame_confirmation_message">Вы уверены, что хотите удалить эту рамку?</string>
     <string name="select">Выбрать</string>
@@ -293,7 +293,7 @@
     <string name="select_display">Выбор дисплея</string>
     <string name="move_frame_to_display">Переместить рамку на дисплей</string>
     <string name="default_display">Дисплей по умолчанию</string>
-    <string name="default_display_desc">На складных устройствах дисплей по умолчанию обычно переключается между внутренним и внешним дисплеями в зависимости от того, открыто устройство или закрыто. На устройствах-«flip» он, как правило, всегда внутренний.</string>
+    <string name="default_display_desc">На складных устройствах дисплей по умолчанию обычно переключается между внутренним и внешним дисплеем в зависимости от того, открыто или закрыто устройство. На раскладушках это, как правило, всегда внутренний дисплей.</string>
     <string name="square">Квадрат</string>
     <string name="tall">Плитка</string>
 </resources>
