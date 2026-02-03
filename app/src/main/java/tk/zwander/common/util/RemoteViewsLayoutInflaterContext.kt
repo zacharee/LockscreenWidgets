@@ -12,37 +12,57 @@ class RemoteViewsLayoutInflaterContext(
     context: Context,
     private val widgetId: Int,
 ) : ContextWrapper(context) {
-    private var inflater: LayoutInflater? = null
+    private val factory by lazy {
+        object : LayoutInflater.Factory2 {
+            override fun onCreateView(
+                parent: View?,
+                name: String,
+                context: Context,
+                attrs: AttributeSet,
+            ): View? {
+                logUtils.debugLog("onCreateView(${name}) for widget ${getWidgetData()}", null)
+                return when (name) {
+                    "ListView" -> CatchingListView(context, attrs, widgetId)
+                    "TextClock" -> CatchingTextClock(context, attrs)
+                    else -> null
+                }
+            }
+
+            override fun onCreateView(
+                name: String,
+                context: Context,
+                attrs: AttributeSet,
+            ): View? {
+                return onCreateView(null, name, context, attrs)
+            }
+        }
+    }
+
+    private val inflater: LayoutInflater by lazy {
+        LayoutInflater.from(context)
+            .cloneInContext(this)
+            .also { layoutInflater ->
+                layoutInflater.factory2 = factory
+            }
+    }
 
     override fun getSystemService(name: String): Any? {
         if (LAYOUT_INFLATER_SERVICE == name) {
-            return inflater ?: LayoutInflater.from(baseContext).cloneInContext(this).also { layoutInflater ->
-                layoutInflater.factory2 = object : LayoutInflater.Factory2 {
-                    override fun onCreateView(
-                        parent: View?,
-                        name: String,
-                        context: Context,
-                        attrs: AttributeSet,
-                    ): View? {
-                        return when (name) {
-                            "ListView" -> CatchingListView(context, attrs, widgetId)
-                            "TextClock" -> CatchingTextClock(context, attrs)
-                            else -> null
-                        }
-                    }
-
-                    override fun onCreateView(
-                        name: String,
-                        context: Context,
-                        attrs: AttributeSet,
-                    ): View? {
-                        return onCreateView(null, name, context, attrs)
-                    }
-                }
-                inflater = layoutInflater
-            }
+            return inflater
         }
 
         return super.getSystemService(name)
+    }
+
+    private fun getWidgetData(): String {
+        return try {
+            appWidgetManager.getAppWidgetInfo(widgetId)
+                ?.provider
+                ?.flattenToString()
+                ?: "$widgetId"
+        } catch (e: Throwable) {
+            logUtils.debugLog("Error getting widget data in inflater", e)
+            "$widgetId"
+        }
     }
 }
