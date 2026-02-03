@@ -65,7 +65,7 @@
     <string name="main_screen_social_email">E-Mail (Englisch)</string>
     <string name="main_screen_social_email_desc">Schicke mir eine E-Mail, wenn du eine Frage oder ein Problem gefunden hast. Bitte füge so viele Informationen wie möglich hinzu, denn mir nur zu sagen, \"Es funktioniert nicht\" verschwendet nur jedermanns Zeit. (Englisch)</string>
     <string name="main_screen_social_github">GitHub (Englisch)</string>
-    <string name="main_screen_social_github_desc">Lockscreen Widgets ist Open Source! Wenn du ein Entwickler oder Bastler bist, der interessiert daran ist, dieses Projekt zu verbessern (oder du einfach nur den Quellcode ansehen möchtest), dann klicke hier. (Englisch)</string>
+    <string name="main_screen_social_github_desc">Lockscreen Widgets ist Open Source (Quelloffen)! Wenn du ein Entwickler oder Bastler bist, der interessiert daran ist, dieses Projekt zu verbessern (oder du einfach nur den Quellcode ansehen möchtest), dann klicke hier. (Englisch)</string>
     <string name="main_screen_social_patreon">Patreon</string>
     <string name="main_screen_social_patreon_desc">Für 1 € im Monat erhältst du Zugang zu allen meiner Apps, für die du eigentlich bezahlen müsstest, und sogar noch exklusiven Inhalt.</string>
     <string name="main_screen_accessibility_not_started">Die Bedienungshilfe ist im Moment nicht aktiv. Dies könnte sein, da du Lockscreen Widgets erlauben musst, den Akku deines Gerätes uneingeschränkt im Hintergrund zu benutzen, oder du musst einfach die Bedienungshilfe in den Einstellungen aus und wieder anschalten.</string>
@@ -152,9 +152,9 @@
     <string name="settings_screen_force_widget_update_desc">Wenn Widgets auf dem Bildschirm zu sehen sind, dann werden anstehende Widget-Aktualisierungen nicht immer angewendet. Um dagegenzuwirken, erzwingt Lockscreen Widgets standardmäßig die Aktualisierung aller Widgets, was zu kurzem aufblitzen führen kann. Deaktiviere diese Option, um aufblitzen zu verhindern, aber unter den potentiellen Kosten von nicht aktualisierten Widgets.</string>
     <string name="settings_screen_hide_when_keyboard_shown">Verstecke, wenn die Tastatur angezeigt wird</string>
     <string name="settings_screen_hide_when_keyboard_shown_desc">Verstecke den Widget-Rahmen, wenn die Tastatur auf dem Bildschirm sichtbar ist.</string>
-    <string name="settings_screen_double_tap_turn_off_screen">Double-Tap to Turn Off Screen</string>
-    <string name="settings_screen_double_tap_turn_off_screen_desc_frame">Double-tap an empty space (outside of a widget) to turn off the screen. This applies to the whole frame when \"Ignore Widget Touches\" is enabled.</string>
-    <string name="settings_screen_double_tap_turn_off_screen_drawer">Double-tap an empty space (outside of a widget) to turn off the screen.</string>
+    <string name="settings_screen_double_tap_turn_off_screen">Doppeltippen zum Ausschalten des Bildschirms</string>
+    <string name="settings_screen_double_tap_turn_off_screen_desc_frame">Doppeltippen Sie auf einen leeren Bereich (außerhalb eines Widgets), um den Bildschirm auszuschalten. Dies gilt für den gesamten Rahmen, wenn \"Widget-Berührungen ignorieren\" aktiviert ist.</string>
+    <string name="settings_screen_double_tap_turn_off_screen_drawer">Doppeltippen Sie auf einen leeren Platz (außerhalb eines Widgets), um den Bildschirm auszuschalten.</string>
     <string name="intro_welcome_title">Willkommen!</string>
     <string name="intro_welcome_desc">Lockscreen Widgets ist eine simple App mit einem simplen Grund: die Sperrbildschirm-Widgets von Android KitKat zu reimplementieren. Deine Widgets werden in einem simplen Rahmen mit Seiten auf dem Sperrbildschirm erscheinen.</string>
     <string name="intro_usage_title">Grundlegende Verwendung</string>
@@ -268,9 +268,9 @@
     <string name="blank_widget">Leeres Widget</string>
     <string name="add_frame">Widget-Rahmen hinzufügen</string>
     <string name="remove_frame">Widget-Rahmen entfernen</string>
-    <string name="adjust_wallpaper_mask">Adjust Wallpaper Mask</string>
-    <string name="reset_mask_scale">Reset Mask Scale</string>
-    <string name="reset_mask_alignment">Reset Mask Alignment</string>
+    <string name="adjust_wallpaper_mask">Hintergrund-Maske anpassen</string>
+    <string name="reset_mask_scale">Maskenskala zurücksetzen</string>
+    <string name="reset_mask_alignment">Maskenausrichtung zurücksetzen</string>
     <string name="unable_to_open_settings">Einstellungen können nicht geöffnet werden.</string>
     <string name="remove_frame_confirmation_message">Bist du dir sicher, dass du diesen Rahmen entfernen möchtest?</string>
     <string name="select">Auswahl</string>
@@ -289,9 +289,9 @@
     <string name="developer_options">Entwickleroptionen</string>
     <string name="error_showing_widget">Nicht möglich das Widget anzuzeigen</string>
     <string name="select_display">Wähle Bildschirm</string>
-    <string name="move_frame_to_display">Move Frame to Display</string>
-    <string name="default_display">Default Display</string>
-    <string name="default_display_desc">On foldable devices, the default display generally switches between the internal and external display depending on whether the device is open or closed. On flip devices, it\'s generally always the internal display.</string>
-    <string name="square">Square</string>
-    <string name="tall">Tall</string>
+    <string name="move_frame_to_display">Frame zum Bildschirm verschieben</string>
+    <string name="default_display">Standardbildschirm</string>
+    <string name="default_display_desc">Bei faltbaren Geräten schaltet der Standardbildschirm in der Regel zwischen dem internen und externen Bildschirm um, je nachdem, ob das Gerät geöffnet oder geschlossen ist. Auf Flip-Geräten ist es in der Regel immer der interne Bildschirm.</string>
+    <string name="square">Quadrat</string>
+    <string name="tall">Hoch</string>
 </resources>
