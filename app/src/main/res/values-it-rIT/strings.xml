@@ -169,8 +169,8 @@
     <string name="intro_battery_optimization">Ottimizzazione batteria</string>
     <string name="intro_battery_optimization_desc">Molti dispositivi, fra cui quelli con MIUI ed EMUI, possiedono una gestione della batteria estremamente aggressiva e possono causare la chiusura non richiesta di Lockscreen Widgets. Tocca il tasto qui sotto per leggere come escludere l\'app dall\'ottimizzazione della batteria sul tuo dispositivo.</string>
     <string name="intro_moto_razr_allow_secondary_display_access">Autorizza accesso allo schermo secondario</string>
-    <string name="intro_moto_razr_allow_secondary_display_access_desc">Lockscreen Widgets supports adding frames to multiple displays, but Motorola blocks secondary display access to third party apps by default on the Razr models. Tap below to open the screen where you can grant permission to Lockscreen Widgets to use the cover display. Once there, find Lockscreen Widgets in the list, tap it, and enable \"Allow on external display\".</string>
-    <string name="intro_done_title">All Done!</string>
+    <string name="intro_moto_razr_allow_secondary_display_access_desc">Lockscreen Widgets supporta l\'aggiunta di riquadri su schermi multipli, ma Motorola ne blocca l\'accesso per impostazione predefinita ad app di terze parti sui modelli Razr. Tocca qui sotto per aprire la schermata dove autorizzare Lockscreen Widgets a usare lo schermo esterno, cerca l\'app nella lista, toccala, ed attiva \"Autorizza su schermo esterno\".</string>
+    <string name="intro_done_title">Fatto!</string>
     <string name="intro_done_desc">That\'s it! Check your lock screen and you should now see the widget frame!</string>
     <string name="usage_add_widget">Add Widget</string>
     <string name="usage_add_widget_desc">Adding a widget can be done in one of three ways. If the widget pager doesn\'t have any widgets added, simply press the \"plus\" button that appears inside it. Otherwise, you can tap the frame with two fingers and then tap the \"plus\" button on the top right of the frame. You can also add a widget from the app itself, by tapping the \"plus\" button at the top right of the main screen.</string>
