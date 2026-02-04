@@ -4,7 +4,6 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Point
 import android.graphics.PointF
-import com.google.gson.reflect.TypeToken
 import tk.zwander.common.data.SafePointF
 import tk.zwander.lockscreenwidgets.R
 
@@ -52,10 +51,9 @@ class FrameSizeAndPosition private constructor(private val context: Context) {
     private val prefManager = context.prefManager
 
     private var positionsMap: Map<String, Point>
-        get() = prefManager.gson.fromJson(
+        get() = prefManager.gson.mapFromJson(
             prefManager.getString(KEY_POSITIONS_MAP),
-            object : TypeToken<HashMap<String, Point>>() {}.type
-        ) ?: mapOf()
+        )
         set(value) {
             prefManager.putString(
                 KEY_POSITIONS_MAP,
@@ -64,10 +62,9 @@ class FrameSizeAndPosition private constructor(private val context: Context) {
         }
 
     private var sizesMap: Map<String, PointF>
-        get() = prefManager.gson.fromJson(
+        get() = prefManager.gson.mapFromJson(
             prefManager.getString(KEY_SIZES_MAP),
-            object : TypeToken<HashMap<String, PointF>>() {}.type
-        ) ?: mapOf()
+        )
         set(value) {
             prefManager.putString(
                 KEY_SIZES_MAP,

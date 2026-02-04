@@ -12,11 +12,11 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import com.bugsnag.android.performance.compose.MeasuredComposable
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import com.google.gson.reflect.TypeToken
 import kotlinx.coroutines.flow.MutableStateFlow
 import tk.zwander.common.util.contracts.rememberCreateDocumentLauncherWithDownloadFallback
 import tk.zwander.common.util.logUtils
 import tk.zwander.common.util.prefManager
+import tk.zwander.common.util.safeFromJson
 import tk.zwander.common.util.setThemedContent
 import tk.zwander.lockscreenwidgets.R
 import tk.zwander.lockscreenwidgets.compose.HideForIDsLayout
@@ -84,9 +84,8 @@ class HideForIDsActivity : BaseActivity() {
                         }
                     }
 
-                    gson.fromJson<HashSet<String>>(
+                    gson.safeFromJson<HashSet<String>>(
                         builder.toString(),
-                        object : TypeToken<HashSet<String>>() {}.type,
                     )
                 } catch (e: OutOfMemoryError) {
                     logUtils.debugLog("OOM thrown when trying to restore ID list", e)

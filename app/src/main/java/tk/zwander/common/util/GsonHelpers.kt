@@ -2,8 +2,10 @@ package tk.zwander.common.util
 
 import android.content.Intent
 import android.net.Uri
+import androidx.core.net.toUri
 import com.google.gson.ExclusionStrategy
 import com.google.gson.FieldAttributes
+import com.google.gson.Gson
 import com.google.gson.JsonDeserializationContext
 import com.google.gson.JsonDeserializer
 import com.google.gson.JsonElement
@@ -11,9 +13,10 @@ import com.google.gson.JsonObject
 import com.google.gson.JsonPrimitive
 import com.google.gson.JsonSerializationContext
 import com.google.gson.JsonSerializer
+import com.google.gson.JsonSyntaxException
+import com.google.gson.reflect.TypeToken
 import tk.zwander.common.data.SafePointF
 import java.lang.reflect.Type
-import androidx.core.net.toUri
 
 class CrashFixExclusionStrategy : ExclusionStrategy {
     private val fieldsToAvoid = setOf(
@@ -89,4 +92,28 @@ class GsonSafePointFHandler : JsonSerializer<SafePointF?>, JsonDeserializer<Safe
 
         return SafePointF(obj.get("x").asFloat, obj.get("y").asFloat)
     }
+}
+
+// https://stackoverflow.com/a/56388957
+inline fun <reified T> Gson.safeFromJson(value: String?): T? {
+    val typeToken = object : TypeToken<T>() {}
+
+    return try {
+        fromJson(value, typeToken)
+    } catch (e: JsonSyntaxException) {
+        if (e.message?.contains("duplicate key") == true) {
+            // Reserialize object if it has duplicate keys, keeping only the last
+            // instance of the key.
+            fromJson(
+                toJson(fromJson(value, object : TypeToken<Any>() {})),
+                typeToken,
+            )
+        } else {
+            throw e
+        }
+    }
+}
+
+inline fun <reified K, reified V> Gson.mapFromJson(value: String?): HashMap<K, V> {
+    return safeFromJson(value) ?: HashMap()
 }

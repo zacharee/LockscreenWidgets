@@ -3,13 +3,14 @@ package tk.zwander.common.util.backup
 import android.annotation.SuppressLint
 import android.content.Context
 import android.view.Display
-import com.google.gson.reflect.TypeToken
 import tk.zwander.common.data.WidgetData
 import tk.zwander.common.host.widgetHostCompat
 import tk.zwander.common.util.PrefManager
 import tk.zwander.common.util.logUtils
+import tk.zwander.common.util.mapFromJson
 import tk.zwander.common.util.prefManager
 import tk.zwander.common.util.safeApplicationContext
+import tk.zwander.common.util.safeFromJson
 import tk.zwander.lockscreenwidgets.util.FramePrefs
 
 val Context.backupRestoreManager: BackupRestoreManager
@@ -75,9 +76,8 @@ class BackupRestoreManager private constructor(private val context: Context) {
         }
 
         return try {
-            val dataMap = context.prefManager.gson.fromJson<HashMap<String, String?>>(
+            val dataMap = context.prefManager.gson.mapFromJson<String, String?>(
                 string,
-                object : TypeToken<HashMap<String, String?>>(){}.type,
             )
 
             handleDataMap(dataMap, which)
@@ -100,25 +100,25 @@ class BackupRestoreManager private constructor(private val context: Context) {
 
         if (which == Which.FRAME) {
             val secondaryFramesOld = dataMap["secondaryFrames"]?.let {
-                context.prefManager.gson.fromJson(it, object : TypeToken<ArrayList<Int>>() {})
+                context.prefManager.gson.safeFromJson<ArrayList<Int>>(it)
             }
             val secondaryFramesNew = dataMap["secondaryFramesNew"]?.let {
-                context.prefManager.gson.fromJson(it, object : TypeToken<HashMap<Int, Int>>() {})
+                context.prefManager.gson.mapFromJson<Int, Int>(it)
             }
             val secondaryFramesNewest = dataMap["secondaryFramesNewest"]?.let {
-                context.prefManager.gson.fromJson(it, object : TypeToken<HashMap<Int, String>>() {})
+                context.prefManager.gson.mapFromJson<Int, String>(it)
             }
             val frameWidgetsMap = dataMap["frameWidgetsMap"]?.let {
-                context.prefManager.gson.fromJson(it, object : TypeToken<HashMap<Int, LinkedHashSet<WidgetData>>>() {})
+                context.prefManager.gson.mapFromJson<Int, LinkedHashSet<WidgetData>>(it)
             }
             val frameWidgetsMapNew = dataMap["frameWidgetsMapNew"]?.let {
-                context.prefManager.gson.fromJson(it, object : TypeToken<HashMap<Pair<Int, Int>, HashSet<WidgetData>>>() {})
+                context.prefManager.gson.mapFromJson<Pair<Int, Int>, HashSet<WidgetData>>(it)
             }
             val frameGridsMap = dataMap["frameGridsMap"]?.let {
-                context.prefManager.gson.fromJson(it, object : TypeToken<HashMap<Int, Pair<Int, Int>>>() {})
+                context.prefManager.gson.mapFromJson<Int, Pair<Int, Int>>(it)
             }
             val frameGridsMapNew = dataMap["frameGridsMapNew"]?.let {
-                context.prefManager.gson.fromJson(it, object : TypeToken<HashMap<Pair<Int, Int>, Pair<Int, Int>>>() {})
+                context.prefManager.gson.mapFromJson<Pair<Int, Int>, Pair<Int, Int>>(it)
             }
 
             secondaryFramesOld?.let {
@@ -213,9 +213,8 @@ class BackupRestoreManager private constructor(private val context: Context) {
 
     private fun isValidWidgetsString(string: String?): Boolean {
         return try {
-            context.prefManager.gson.fromJson<LinkedHashSet<WidgetData>>(
+            context.prefManager.gson.safeFromJson<LinkedHashSet<WidgetData>>(
                 string,
-                object : TypeToken<LinkedHashSet<WidgetData>>() {}.type,
             ) != null
         } catch (e: Exception) {
             try {

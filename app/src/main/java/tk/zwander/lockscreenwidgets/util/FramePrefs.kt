@@ -4,13 +4,13 @@ package tk.zwander.lockscreenwidgets.util
 
 import android.content.Context
 import android.graphics.Color
-import com.google.gson.reflect.TypeToken
 import tk.zwander.common.data.WidgetData
 import tk.zwander.common.host.widgetHostCompat
 import tk.zwander.common.util.FrameSizeAndPosition
 import tk.zwander.common.util.PrefManager
 import tk.zwander.common.util.frameSizeAndPosition
 import tk.zwander.common.util.prefManager
+import tk.zwander.common.util.safeFromJson
 
 class FrameSpecificPreferences(
     val frameId: Int,
@@ -181,9 +181,8 @@ object FramePrefs {
             null,
         )
 
-        return context.prefManager.gson.fromJson(
+        return context.prefManager.gson.safeFromJson<LinkedHashSet<WidgetData>>(
             stringVal,
-            object : TypeToken<LinkedHashSet<WidgetData>>() {}.type,
         ) ?: LinkedHashSet()
     }
 

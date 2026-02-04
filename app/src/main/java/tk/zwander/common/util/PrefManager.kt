@@ -17,7 +17,6 @@ import androidx.core.content.res.ResourcesCompat
 import androidx.preference.PreferenceManager
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
-import com.google.gson.reflect.TypeToken
 import com.joaomgcd.taskerpluginlibrary.extensions.requestQuery
 import tk.zwander.common.data.SafePointF
 import tk.zwander.common.data.WidgetData
@@ -177,9 +176,8 @@ class PrefManager private constructor(private val context: Context) {
 
     //The widgets currently added to the widget frame
     var currentWidgets: LinkedHashSet<WidgetData>
-        get() = gson.fromJson(
+        get() = gson.safeFromJson(
             currentWidgetsString,
-            object : TypeToken<LinkedHashSet<WidgetData>>() {}.type,
         ) ?: LinkedHashSet()
         set(value) {
             currentWidgetsString = gson.toJson(value)
@@ -193,9 +191,8 @@ class PrefManager private constructor(private val context: Context) {
 
     //The widgets currently added to the widget drawer
     var drawerWidgets: LinkedHashSet<WidgetData>
-        get() = gson.fromJson(
+        get() = gson.safeFromJson(
             drawerWidgetsString,
-            object : TypeToken<LinkedHashSet<WidgetData>>() {}.type,
         ) ?: LinkedHashSet()
         set(value) {
             drawerWidgetsString = gson.toJson(value)
@@ -209,9 +206,8 @@ class PrefManager private constructor(private val context: Context) {
 
     //The shortcuts currently added to the widget frame
     var shortcutIds: LinkedHashSet<String>
-        get() = gson.fromJson(
+        get() = gson.safeFromJson(
             getString(KEY_SHORTCUT_IDS),
-            object : TypeToken<LinkedHashSet<String>>() {}.type,
         ) ?: LinkedHashSet()
         set(value) {
             putString(
@@ -242,10 +238,9 @@ class PrefManager private constructor(private val context: Context) {
     //If any widgets have custom sizes, those sizes are stored here.
     @Deprecated("Widget sizes are stored inline with the widget info.")
     var widgetSizes: HashMap<Int, WidgetSizeData>
-        get() = gson.fromJson(
+        get() = gson.mapFromJson(
             getString(KEY_WIDGET_SIZES),
-            object : TypeToken<HashMap<Int, WidgetSizeData>>() {}.type,
-        ) ?: HashMap()
+        )
         set(value) {
             putString(
                 KEY_WIDGET_SIZES,
@@ -394,10 +389,9 @@ class PrefManager private constructor(private val context: Context) {
 
     //The widgets assigned to custom QS tiles.
     var customTiles: HashMap<Int, WidgetTileInfo>
-        get() = gson.fromJson(
+        get() = gson.mapFromJson(
             getString(KEY_CUSTOM_TILES, null),
-            object : TypeToken<HashMap<Int, WidgetTileInfo>>(){}.type,
-        ) ?: HashMap()
+        )
         set(value) {
             putString(
                 KEY_CUSTOM_TILES,
@@ -756,10 +750,9 @@ class PrefManager private constructor(private val context: Context) {
         }
 
     var shortcutOverrideIcons: HashMap<Int, IconEntry>
-        get() = gson.fromJson(
+        get() = gson.mapFromJson(
             getString(KEY_SHORTCUT_OVERRIDE_ICONS, ""),
-            object : TypeToken<HashMap<Int, IconEntry>>() {},
-        ) ?: HashMap()
+        )
         set(value) {
             putString(KEY_SHORTCUT_OVERRIDE_ICONS, gson.toJson(value))
         }
@@ -773,19 +766,17 @@ class PrefManager private constructor(private val context: Context) {
 
     @Deprecated("Doesn't support unique display IDs", ReplaceWith("PrefManager.currentSecondaryFramesWithStringDisplay"))
     var currentSecondaryFramesWithDisplay: HashMap<Int, Int>
-        get() = gson.fromJson(
+        get() = gson.mapFromJson(
             getString(KEY_CURRENT_FRAMES_WITH_DISPLAY, ""),
-            object : TypeToken<HashMap<Int, Int>>() {},
-        ) ?: HashMap()
+        )
         set(value) {
             putString(KEY_CURRENT_FRAMES_WITH_DISPLAY, gson.toJson(value))
         }
 
     var currentSecondaryFramesWithStringDisplay: HashMap<Int, String>
-        get() = gson.fromJson(
+        get() = gson.mapFromJson(
             getString(KEY_CURRENT_FRAMES_WITH_STRING_DISPLAY, ""),
-            object : TypeToken<HashMap<Int, String>>() {},
-        ) ?: HashMap()
+        )
         set(value) {
             putString(KEY_CURRENT_FRAMES_WITH_STRING_DISPLAY, gson.toJson(value))
         }
@@ -804,19 +795,17 @@ class PrefManager private constructor(private val context: Context) {
 
     // DisplayID: Offset<Dp, Dp>
     var maskedModeAdjustment: HashMap<String, Offset>
-        get() = gson.fromJson(
+        get() = gson.mapFromJson(
             getString(KEY_MASKED_MODE_ADJUSTMENT_FOR_DISPLAY, ""),
-            object : TypeToken<HashMap<String, Offset>>() {},
-        ) ?: HashMap()
+        )
         set(value) {
             putString(KEY_MASKED_MODE_ADJUSTMENT_FOR_DISPLAY, gson.toJson(value))
         }
 
     var maskedModeScaleForDisplay: HashMap<String, Float>
-        get() = gson.fromJson(
+        get() = gson.mapFromJson(
             getString(KEY_MASKED_MODE_SCALE_FOR_DISPLAY, ""),
-            object : TypeToken<HashMap<String, Float>>() {},
-        ) ?: HashMap()
+        )
         set(value) {
             putString(KEY_MASKED_MODE_SCALE_FOR_DISPLAY, gson.toJson(value))
         }
