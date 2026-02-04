@@ -114,11 +114,15 @@ fun MainWidgetFrameDelegate.WidgetFrameViewModel.WidgetFrameLayout(
     var maskAdjustment by rememberPreferenceState(
         key = PrefManager.KEY_MASKED_MODE_ADJUSTMENT_FOR_DISPLAY,
         value = {
-            context.prefManager.maskedModeAdjustment[lsDisplay?.uniqueIdCompat] ?: Offset(0f, 0f)
+            lsDisplay?.uniqueIdCompat?.let {
+                context.prefManager.maskedModeAdjustment[it]
+            } ?: Offset(0f, 0f)
         },
         onChanged = { _, value ->
             val mutatedValue = HashMap(context.prefManager.maskedModeAdjustment.toMutableMap())
-            mutatedValue[lsDisplay?.uniqueIdCompat] = value
+            lsDisplay?.uniqueIdCompat?.let {
+                mutatedValue[it] = value
+            }
             context.prefManager.maskedModeAdjustment = mutatedValue
         },
     )
