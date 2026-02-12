@@ -371,7 +371,11 @@ object AccessibilityUtils {
                         peekLogUtils?.debugLog("Error getting child node", e)
                         null
                     }
+                } catch (e: IndexOutOfBoundsException) {
+                    peekLogUtils?.debugLog("Error getting child node", e)
+                    null
                 }
+
                 if (child != null) {
                     if (child.childCount > 0) {
                         addAllNodesToList(child, list, ids, awaits, nodeAddedCallback)
