@@ -141,6 +141,8 @@ class PrefManager private constructor(private val context: Context) {
         const val KEY_MASKED_MODE_SCALE_FOR_DISPLAY = "masked_mode_scale_for_display"
         const val KEY_DOUBLE_TAP_EMPTY_FRAME_SPACE_TURN_OFF_DISPLAY = "double_tap_empty_frame_space_turn_off_display"
         const val KEY_DOUBLE_TAP_EMPTY_DRAWER_SPACE_TURN_OFF_DISPLAY = "double_tap_empty_drawer_space_turn_off_display"
+        const val KEY_WIDGET_STACK_WIDGETS = "widget_stack_widgets"
+        const val KEY_WIDGET_STACK_INDICES = "widget_stack_indices"
 
         const val VALUE_PAGE_INDICATOR_BEHAVIOR_HIDDEN = 0
         const val VALUE_PAGE_INDICATOR_BEHAVIOR_AUTO_HIDE = 1
@@ -808,6 +810,22 @@ class PrefManager private constructor(private val context: Context) {
         )
         set(value) {
             putString(KEY_MASKED_MODE_SCALE_FOR_DISPLAY, gson.toJson(value))
+        }
+
+    var widgetStackWidgets: HashMap<Int, LinkedHashSet<WidgetData>>
+        get() = gson.mapFromJson(
+            getString(KEY_WIDGET_STACK_WIDGETS, ""),
+        )
+        set(value) {
+            putString(KEY_WIDGET_STACK_WIDGETS, gson.toJson(value))
+        }
+
+    var widgetStackIndices: HashMap<Int, Int>
+        get() = gson.mapFromJson(
+            getString(KEY_WIDGET_STACK_INDICES, "")
+        )
+        set(value) {
+            putString(KEY_WIDGET_STACK_INDICES, gson.toJson(value))
         }
 
     @Suppress("DEPRECATION")

@@ -28,6 +28,7 @@ import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
 import org.lsposed.hiddenapibypass.HiddenApiBypass
 import tk.zwander.common.activities.add.BaseBindWidgetActivity
+import tk.zwander.common.host.widgetHostCompat
 import tk.zwander.common.util.Event
 import tk.zwander.common.util.EventObserver
 import tk.zwander.common.util.GlobalExceptionHandler
@@ -108,6 +109,9 @@ class App : Application(), CoroutineScope by MainScope(), EventObserver {
         HandlerRegistry {
             handler(PrefManager.KEY_TOUCH_PROTECTION) {
                 updateProxListener()
+            }
+            handler(PrefManager.KEY_WIDGET_STACK_WIDGETS) {
+                updateHostListener()
             }
         }
     }
@@ -254,6 +258,7 @@ class App : Application(), CoroutineScope by MainScope(), EventObserver {
         )
 
         updateProxListener()
+        updateHostListener()
 
         prefsHandler.register(this)
         migrationManager.runMigrations()
@@ -316,6 +321,14 @@ class App : Application(), CoroutineScope by MainScope(), EventObserver {
             registerProxListener()
         } else {
             unregisterProxListener()
+        }
+    }
+
+    private fun updateHostListener() {
+        if (prefManager.widgetStackWidgets.isNotEmpty()) {
+            widgetHostCompat.startListening(this)
+        } else {
+            widgetHostCompat.stopListening(this)
         }
     }
 

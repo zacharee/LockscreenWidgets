@@ -98,7 +98,14 @@ class ConfigureLauncher(
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
                     ActivityOptions
                         .makeBasic()
-                        .setPendingIntentBackgroundActivityStartMode(ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOW_ALWAYS)
+                        .setPendingIntentBackgroundActivityStartMode(
+                            if (Build.VERSION.SDK_INT > Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+                                ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOW_ALWAYS
+                            } else {
+                                @Suppress("DEPRECATION")
+                                ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOWED
+                            },
+                        )
                         .toBundle()
                 } else null,
             )

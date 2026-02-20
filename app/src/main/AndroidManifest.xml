@@ -59,6 +59,13 @@
             android:launchMode="singleTop"
             android:theme="@style/AppTheme.NoActionBar"
             />
+        <activity android:name="tk.zwander.lockscreenwidgets.activities.add.AddWidgetStackWidgetActivity"
+            android:exported="true"
+            android:label="@string/add_widget"
+            android:excludeFromRecents="true"
+            android:launchMode="singleTop"
+            android:theme="@style/AppTheme.NoActionBar"
+            />
         <activity android:name="tk.zwander.common.activities.add.AddTileWidgetActivity"
             android:exported="true"
             android:label="@string/add_widget"
@@ -86,6 +93,11 @@
             android:theme="@style/AppTheme.NoActionBar"
             />
         <activity android:name="tk.zwander.lockscreenwidgets.activities.add.ReconfigureFrameWidgetActivity"
+            android:exported="false"
+            android:theme="@style/AppTheme.Null"
+            android:excludeFromRecents="true"
+            />
+        <activity android:name="tk.zwander.lockscreenwidgets.activities.add.WidgetStackReconfigureActivity"
             android:exported="false"
             android:theme="@style/AppTheme.Null"
             android:excludeFromRecents="true"
@@ -219,6 +231,14 @@
             android:theme="@style/AppTheme.Null">
             <intent-filter>
                 <action android:name="com.twofortyfouram.locale.intent.action.EDIT_CONDITION" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".activities.WidgetStackConfigure"
+            android:theme="@style/AppTheme.NoActionBar"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_CONFIGURE"/>
             </intent-filter>
         </activity>
         <activity android:name="tk.zwander.common.activities.SelectIconPackActivity"
@@ -376,6 +396,15 @@
             </intent-filter>
             <meta-data android:name="android.appwidget.provider"
                 android:resource="@xml/blank_widget_provider_info" />
+        </receiver>
+        <receiver android:name=".appwidget.WidgetStackProvider"
+            android:label="@string/widget_stack"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data android:name="android.appwidget.provider"
+                android:resource="@xml/widget_stack_provider" />
         </receiver>
 
         <receiver android:name="tk.zwander.common.appwidget.OpenDrawerProvider"

@@ -7,6 +7,7 @@ import android.app.ActivityOptions
 import android.app.PendingIntent
 import android.appwidget.AppWidgetHost
 import android.appwidget.AppWidgetHostView
+import android.appwidget.AppWidgetManager
 import android.appwidget.AppWidgetProviderInfo
 import android.content.Context
 import android.content.Intent
@@ -17,9 +18,15 @@ import net.bytebuddy.ByteBuddy
 import net.bytebuddy.android.AndroidClassLoadingStrategy
 import net.bytebuddy.implementation.MethodDelegation
 import tk.zwander.common.compose.util.widgetViewCacheRegistry
+import tk.zwander.common.util.HandlerRegistry
+import tk.zwander.common.util.PrefManager
+import tk.zwander.common.util.appWidgetManager
 import tk.zwander.common.util.globalState
+import tk.zwander.common.util.handler
 import tk.zwander.common.util.logUtils
+import tk.zwander.common.util.prefManager
 import tk.zwander.common.views.ZeroPaddingAppWidgetHostView
+import tk.zwander.lockscreenwidgets.appwidget.WidgetStackProvider
 import tk.zwander.lockscreenwidgets.util.IconPrefs
 import java.lang.reflect.InvocationHandler
 import java.lang.reflect.Method
@@ -93,6 +100,44 @@ class WidgetHostCompat(
     private val onClickCallbacks = mutableSetOf<OnClickCallback>()
     private val listeners = ConcurrentLinkedQueue<Any>()
 
+    private val prefsHandler = HandlerRegistry {
+        handler(PrefManager.KEY_WIDGET_STACK_WIDGETS) {
+            context.prefManager.widgetStackWidgets.forEach { (stackId, widgets) ->
+                widgets.forEach { widget ->
+                    val view = createView(context, widget.id, context.appWidgetManager.getAppWidgetInfo(widget.id))
+                    setListener(
+                        widget.id,
+                        object : AppWidgetHostListener {
+                            override fun onUpdateProviderInfo(appWidget: AppWidgetProviderInfo?) {
+                                val intent = Intent(context, WidgetStackProvider::class.java)
+                                intent.action = AppWidgetManager.ACTION_APPWIDGET_UPDATE
+                                intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, intArrayOf(stackId))
+                                context.sendBroadcast(intent)
+                                view.onUpdateProviderInfo(appWidget)
+                            }
+
+                            override fun updateAppWidget(views: RemoteViews?) {
+                                val intent = Intent(context, WidgetStackProvider::class.java)
+                                intent.action = AppWidgetManager.ACTION_APPWIDGET_UPDATE
+                                intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, intArrayOf(stackId))
+                                context.sendBroadcast(intent)
+                                view.updateAppWidget(views)
+                            }
+
+                            override fun onViewDataChanged(viewId: Int) {
+                                val intent = Intent(context, WidgetStackProvider::class.java)
+                                intent.action = AppWidgetManager.ACTION_APPWIDGET_UPDATE
+                                intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, intArrayOf(stackId))
+                                context.sendBroadcast(intent)
+                                view.onViewDataChanged(viewId)
+                            }
+                        },
+                    )
+                }
+            }
+        }
+    }
+
     private fun createOnClickHandlerForWidget(widgetId: Int): Any {
         return when (mode) {
             is Mode.Class -> {
@@ -142,6 +187,8 @@ class WidgetHostCompat(
 
     fun startListening(listener: Any) {
         listeners.add(listener)
+        prefsHandler.register(context)
+        prefsHandler.handle(PrefManager.KEY_WIDGET_STACK_WIDGETS)
         try {
             startListening()
         } catch (e: Throwable) {
@@ -159,6 +206,7 @@ class WidgetHostCompat(
         if (listeners.isEmpty()) {
             context.logUtils.debugLog("Calling super.stopListening()", null)
 
+            prefsHandler.unregister(context)
             try {
                 super.stopListening()
             } catch (e: Throwable) {

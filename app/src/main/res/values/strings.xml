@@ -367,6 +367,7 @@
     <string name="selected_pack">Currently selected icon pack</string>
 
     <string name="blank_widget">Blank Widget</string>
+    <string name="widget_stack">Widget Stack</string>
     <string name="add_frame">Add Widget Frame</string>
     <string name="remove_frame">Remove Widget Frame</string>
     <string name="adjust_wallpaper_mask">Adjust Wallpaper Mask</string>
