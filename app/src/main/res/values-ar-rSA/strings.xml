@@ -92,8 +92,8 @@
     <string name="settings_screen_frame_col_count">Columns per Page</string>
     <string name="settings_screen_frame_row_count">Rows per Page</string>
     <string name="settings_screen_show_debug_id_view">Show Debug ID View</string>
-    <string name="settings_screen_show_debug_id_view_desc">قم بتدوين إطار الويدجت مع قائمة من معرفات العرض التي يكتشفها على الشاشة الحالية. مفيد لتصحيح الأخطاء وإيجاد المعرفات التي يمكن استخدامها للكشف عن مختلف حالات قفل الشاشة.</string>
-    <string name="settings_screen_accessibility_event_delay">تأخير حدث إمكانية الوصول</string>
+    <string name="settings_screen_show_debug_id_view_desc">Overlay the widget frame with a list of View IDs it detects on the current screen. Useful for debugging and finding IDs that can be used to detect various lock screen states.</string>
+    <string name="settings_screen_accessibility_event_delay">Accessibility Event Delay</string>
     <string name="settings_screen_accessibility_event_delay_desc">Sets the delay between Accessibility Events that Lockscreen Widgets responds to. Shorter values mean the frame will respond faster to changes, at the potential cost of device performance and battery life.</string>
     <string name="settings_screen_non_present_ids">Hide on Non-Present IDs</string>
     <string name="settings_screen_non_present_ids_desc">Lockscreen Widgets will hide itself when these IDs are not on-screen. You can find which IDs should go here by enabling both Debug switches and looking at the IDs that are highlighted in red when you want the frame to be hidden.</string>
