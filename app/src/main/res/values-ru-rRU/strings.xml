@@ -266,6 +266,7 @@
     <string name="choose_icon_override">Выбрать значок для замены</string>
     <string name="selected_pack">Сейчас выбран набор значков</string>
     <string name="blank_widget">Пустой виджет</string>
+    <string name="widget_stack">Widget Stack</string>
     <string name="add_frame">Добавить рамку виджета</string>
     <string name="remove_frame">Удалить рамку виджета</string>
     <string name="adjust_wallpaper_mask">Настройка видимости маскировочных обоев</string>
