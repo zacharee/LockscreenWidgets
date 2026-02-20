@@ -266,6 +266,7 @@
     <string name="choose_icon_override">Simge Geçersiz Kılmayı Seçin</string>
     <string name="selected_pack">Şu anda seçili simge paketi</string>
     <string name="blank_widget">Boş Widget</string>
+    <string name="widget_stack">Widget Stack</string>
     <string name="add_frame">Widget Çerçevesi Ekle</string>
     <string name="remove_frame">Widget Çerçevesini Kaldır</string>
     <string name="adjust_wallpaper_mask">Duvar Kağıdı Maskesini Ayarla</string>
