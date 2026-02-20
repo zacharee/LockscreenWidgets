@@ -266,6 +266,7 @@
     <string name="choose_icon_override">选择图标覆盖</string>
     <string name="selected_pack">当前选择的图标包</string>
     <string name="blank_widget">空白部件</string>
+    <string name="widget_stack">Widget Stack</string>
     <string name="add_frame">添加小部件帧</string>
     <string name="remove_frame">删除小部件帧</string>
     <string name="adjust_wallpaper_mask">调整壁纸蒙版</string>
