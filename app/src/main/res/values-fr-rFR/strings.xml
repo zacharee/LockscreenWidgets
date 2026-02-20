@@ -266,6 +266,7 @@
     <string name="choose_icon_override">Choisir l’icône personnalisée</string>
     <string name="selected_pack">Pack d\'icônes actuellement sélectionné</string>
     <string name="blank_widget">Widget vide</string>
+    <string name="widget_stack">Widget Stack</string>
     <string name="add_frame">Ajouter une trame de widget</string>
     <string name="remove_frame">Supprimer le cadre du widget</string>
     <string name="adjust_wallpaper_mask">Adjust Wallpaper Mask</string>
