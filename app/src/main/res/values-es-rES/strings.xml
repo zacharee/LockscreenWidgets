@@ -266,6 +266,7 @@
     <string name="choose_icon_override">Elegir anulación de icono</string>
     <string name="selected_pack">Paquete de iconos seleccionado actualmente</string>
     <string name="blank_widget">Widget en blanco</string>
+    <string name="widget_stack">Widget Stack</string>
     <string name="add_frame">Añadir Panel de widgets</string>
     <string name="remove_frame">Eliminar Panel de widgets</string>
     <string name="adjust_wallpaper_mask">Adjust Wallpaper Mask</string>
