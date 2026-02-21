@@ -3,6 +3,7 @@ package tk.zwander.common.activities
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
+import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -88,6 +89,8 @@ class OnboardingActivity : ComponentActivity() {
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             window.isNavigationBarContrastEnforced = false
+            @Suppress("DEPRECATION")
+            window.navigationBarColor = Color.TRANSPARENT
         }
         super.onCreate(savedInstanceState)
 

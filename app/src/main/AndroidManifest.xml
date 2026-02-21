@@ -45,6 +45,7 @@
         android:name="tk.zwander.lockscreenwidgets.App">
         <activity android:name="tk.zwander.lockscreenwidgets.MainActivity"
             android:exported="true"
+            android:windowSoftInputMode="adjustResize"
             android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -58,6 +59,7 @@
             android:excludeFromRecents="true"
             android:launchMode="singleTop"
             android:theme="@style/AppTheme.NoActionBar"
+            android:windowSoftInputMode="adjustResize"
             />
         <activity android:name="tk.zwander.lockscreenwidgets.activities.add.AddWidgetStackWidgetActivity"
             android:exported="true"
@@ -65,6 +67,7 @@
             android:excludeFromRecents="true"
             android:launchMode="singleTop"
             android:theme="@style/AppTheme.NoActionBar"
+            android:windowSoftInputMode="adjustResize"
             />
         <activity android:name="tk.zwander.common.activities.add.AddTileWidgetActivity"
             android:exported="true"
@@ -72,10 +75,12 @@
             android:excludeFromRecents="true"
             android:launchMode="singleTop"
             android:theme="@style/AppTheme.NoActionBar"
+            android:windowSoftInputMode="adjustResize"
             />
         <activity android:name="tk.zwander.common.activities.OnboardingActivity"
             android:exported="false"
             android:theme="@style/AppTheme"
+            android:windowSoftInputMode="adjustResize"
             />
         <activity android:name="tk.zwander.common.activities.DismissOrUnlockActivity"
             android:exported="false"
@@ -86,11 +91,13 @@
         <activity android:name="tk.zwander.common.activities.HideForIDsActivity"
             android:exported="false"
             android:theme="@style/AppTheme.NoActionBar"
+            android:windowSoftInputMode="adjustResize"
             />
         <activity android:name=".activities.UsageActivity"
             android:exported="false"
             android:label="@string/usage"
             android:theme="@style/AppTheme.NoActionBar"
+            android:windowSoftInputMode="adjustResize"
             />
         <activity android:name="tk.zwander.lockscreenwidgets.activities.add.ReconfigureFrameWidgetActivity"
             android:exported="false"
@@ -113,6 +120,7 @@
             android:excludeFromRecents="true"
             android:launchMode="singleTop"
             android:theme="@style/AppTheme.NoActionBar"
+            android:windowSoftInputMode="adjustResize"
             />
         <activity android:name="tk.zwander.widgetdrawer.activities.TriggerActivity"
             android:label="@string/open_drawer"
@@ -146,6 +154,7 @@
             android:label="@string/settings_screen_hide_on_present_apps"
             android:exported="false"
             android:theme="@style/AppTheme.NoActionBar"
+            android:windowSoftInputMode="adjustResize"
             />
         <activity android:name="tk.zwander.common.activities.PermissionIntentLaunchActivity"
             android:exported="false"
@@ -236,6 +245,7 @@
         <activity
             android:name=".activities.WidgetStackConfigure"
             android:theme="@style/AppTheme.NoActionBar"
+            android:windowSoftInputMode="adjustResize"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_CONFIGURE"/>
@@ -244,19 +254,23 @@
         <activity android:name="tk.zwander.common.activities.SelectIconPackActivity"
             android:exported="false"
             android:label="@string/choose_icon_pack"
+            android:windowSoftInputMode="adjustResize"
             android:theme="@style/AppTheme.NoActionBar"
             />
         <activity android:name="tk.zwander.common.activities.SelectIconFromPackActivity"
             android:exported="false"
             android:label="@string/choose_icon_override"
+            android:windowSoftInputMode="adjustResize"
             android:theme="@style/AppTheme.NoActionBar"
             />
         <activity android:name="tk.zwander.widgetdrawer.activities.ComposeDrawerSettingsActivity"
             android:exported="false"
+            android:windowSoftInputMode="adjustResize"
             android:theme="@style/AppTheme.NoActionBar"
             />
         <activity android:name="tk.zwander.lockscreenwidgets.activities.ComposeFrameSettingsActivity"
             android:exported="false"
+            android:windowSoftInputMode="adjustResize"
             android:theme="@style/AppTheme.NoActionBar"
             />
 
