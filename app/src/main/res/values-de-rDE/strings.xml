@@ -35,6 +35,8 @@
     <string name="decrease">Abnehmen</string>
     <string name="selected" tools:override="true">Ausgewählt</string>
     <string name="general">Allgemein</string>
+    <string name="configure_widget">Configure Widget</string>
+    <string name="reorder_widget">Reorder Widget</string>
     <string name="drawer_enabled">Leiste aktiviert</string>
     <string name="frame_enabled">Rahmen aktiviert</string>
     <string name="add_id_hint">com.android.systemui:id/irgendeine_id_hier</string>
