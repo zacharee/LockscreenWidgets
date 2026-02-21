@@ -20,6 +20,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.withContext
 import rikka.shizuku.Shizuku
@@ -33,7 +34,6 @@ import tk.zwander.lockscreenwidgets.IShizukuService
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
 import kotlin.coroutines.resume
-import kotlin.coroutines.suspendCoroutine
 
 val Context.shizukuManager: ShizukuManager
     get() = ShizukuManager.getInstance(this)
@@ -220,7 +220,7 @@ class ShizukuManager private constructor(private val context: Context) : Corouti
                     ShizukuCommandResult.POSTED
                 } else {
                     withContext(Dispatchers.IO) {
-                        val granted = suspendCoroutine { cont ->
+                        val granted = suspendCancellableCoroutine { cont ->
                             val listener = object : Shizuku.OnRequestPermissionResultListener {
                                 override fun onRequestPermissionResult(
                                     requestCode: Int,
@@ -230,7 +230,10 @@ class ShizukuManager private constructor(private val context: Context) : Corouti
                                     try {
                                         cont.resume(grantResult == PackageManager.PERMISSION_GRANTED)
                                     } catch (e: IllegalStateException) {
-                                        context.logUtils.normalLog("Error resuming Shizuku request continuation", e)
+                                        context.logUtils.normalLog(
+                                            "Error resuming Shizuku request continuation",
+                                            e
+                                        )
                                     }
                                 }
                             }
