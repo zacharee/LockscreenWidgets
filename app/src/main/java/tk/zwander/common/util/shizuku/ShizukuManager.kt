@@ -113,6 +113,7 @@ class ShizukuManager private constructor(private val context: Context) : Corouti
 
                         try {
                             val listeners = Shizuku::class.java.getDeclaredField("RECEIVED_LISTENERS")
+                                .apply { isAccessible = true }
                                 .get(null) as ArrayList<*>
 
                             listeners.removeAll {
