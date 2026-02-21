@@ -2,6 +2,7 @@ package tk.zwander.lockscreenwidgets
 
 import android.annotation.SuppressLint
 import android.app.Application
+import android.appwidget.AppWidgetManager
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
@@ -45,6 +46,7 @@ import tk.zwander.common.util.migrationManager
 import tk.zwander.common.util.prefManager
 import tk.zwander.common.util.shizuku.shizukuManager
 import tk.zwander.lockscreenwidgets.activities.add.AddFrameWidgetActivity
+import tk.zwander.lockscreenwidgets.appwidget.WidgetStackProvider
 import tk.zwander.lockscreenwidgets.util.FramePrefs
 import tk.zwander.widgetdrawer.activities.add.AddDrawerWidgetActivity
 
@@ -259,6 +261,14 @@ class App : Application(), CoroutineScope by MainScope(), EventObserver {
 
         updateProxListener()
         updateHostListener()
+
+        prefManager.widgetStackWidgets.takeIf { it.isNotEmpty() }?.let {
+            sendBroadcast(
+                Intent(this, WidgetStackProvider::class.java)
+                    .putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, it.keys.toIntArray())
+                    .setAction(AppWidgetManager.ACTION_APPWIDGET_UPDATE),
+            )
+        }
 
         prefsHandler.register(this)
         migrationManager.runMigrations()

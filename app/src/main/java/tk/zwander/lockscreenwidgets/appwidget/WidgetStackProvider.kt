@@ -69,6 +69,7 @@ class WidgetStackProvider : AppWidgetProvider() {
             val view = RemoteViews(context.packageName, R.layout.stack_widget)
             val stackedWidgets = (context.prefManager.widgetStackWidgets[appWidgetId] ?: LinkedHashSet()).toList()
             val stackSwap = RemoteViews(context.packageName, R.layout.stack_swap)
+            val stackConfigure = RemoteViews(context.packageName, R.layout.stack_configure)
 
             stackSwap.setOnClickPendingIntent(
                 R.id.stack_swap,
@@ -81,6 +82,18 @@ class WidgetStackProvider : AppWidgetProvider() {
                     0,
                     false,
                 )
+            )
+
+            stackConfigure.setOnClickPendingIntent(
+                R.id.stack_configure,
+                PendingIntentCompat.getActivity(
+                    context,
+                    appWidgetId + 10000,
+                    Intent(context, WidgetStackConfigure::class.java)
+                        .putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId),
+                    0,
+                    false,
+                ),
             )
 
             val index = (context.prefManager.widgetStackIndices[appWidgetId] ?: 0)
@@ -103,6 +116,7 @@ class WidgetStackProvider : AppWidgetProvider() {
 
                 view.addView(R.id.widget_content, viewsToApply)
                 view.addView(R.id.widget_root, stackSwap)
+                view.addView(R.id.widget_root, stackConfigure)
 
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.VANILLA_ICE_CREAM && widgetView.hasLegacyLists()) {
                     val collectionCacheSource = viewsToApply::class.java.getDeclaredField("mCollectionCache")
