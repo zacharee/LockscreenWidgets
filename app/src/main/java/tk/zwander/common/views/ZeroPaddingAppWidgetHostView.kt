@@ -92,16 +92,22 @@ class ZeroPaddingAppWidgetHostView(
     override fun updateAppWidget(remoteViews: RemoteViews?) {
         super.updateAppWidget(remoteViews)
 
-        context.prefManager.widgetStackWidgets[appWidgetId]?.let {
-            WidgetStackProvider.update(context, intArrayOf(appWidgetId))
+        findWidgetStackId()?.let {
+            WidgetStackProvider.update(context, intArrayOf(it), true)
         }
     }
 
     override fun updateAppWidgetOptions(options: Bundle?) {
         super.updateAppWidgetOptions(options)
 
-        context.prefManager.widgetStackWidgets[appWidgetId]?.let {
-            WidgetStackProvider.updateOptions(context, intArrayOf(appWidgetId), options)
+        findWidgetStackId()?.let {
+            WidgetStackProvider.updateOptions(context, intArrayOf(it), options)
         }
+    }
+
+    private fun findWidgetStackId(): Int? {
+        return context.prefManager.widgetStackWidgets.entries.firstOrNull { stack ->
+            stack.value.any { it.id == appWidgetId }
+        }?.key
     }
 }
