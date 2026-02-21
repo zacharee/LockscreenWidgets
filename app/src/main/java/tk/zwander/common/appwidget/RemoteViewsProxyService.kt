@@ -70,7 +70,7 @@ class RemoteViewsProxyService : RemoteViewsService() {
                     getServiceDispatcher(
                         connection,
                         mainHandler,
-                        (BIND_AUTO_CREATE or BIND_FOREGROUND_SERVICE_WHILE_AWAKE).toLong(),
+                        0,
                     )
                 } catch (_: NoSuchMethodError) {
                     Context::class.java.getMethod(
@@ -82,10 +82,10 @@ class RemoteViewsProxyService : RemoteViewsService() {
                         this@RemoteViewsProxyService,
                         connection,
                         mainHandler,
-                        BIND_AUTO_CREATE or BIND_FOREGROUND_SERVICE_WHILE_AWAKE,
+                        0,
                     ) as IServiceConnection
                 },
-                0,
+                BIND_AUTO_CREATE or BIND_FOREGROUND_SERVICE_WHILE_AWAKE,
             )
             created = true
         }
