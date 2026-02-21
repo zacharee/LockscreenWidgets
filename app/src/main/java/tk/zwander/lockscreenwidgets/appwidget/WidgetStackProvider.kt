@@ -14,6 +14,7 @@ import androidx.core.app.PendingIntentCompat
 import androidx.core.util.forEach
 import androidx.core.util.plus
 import com.android.internal.appwidget.IAppWidgetService
+import tk.zwander.common.appwidget.RemoteViewsProxyService
 import tk.zwander.common.host.widgetHostCompat
 import tk.zwander.common.util.getRemoteViewsToApplyCompat
 import tk.zwander.common.util.prefManager
@@ -160,10 +161,27 @@ class WidgetStackProvider : AppWidgetProvider() {
                     }
                 }
 
-                val collectionActions = sourceActions?.filter { action ->
+                val collectionActions = (sourceActions?.filter { action ->
                     action::class.java.name.contains("SetRemoteCollectionItemListAdapterAction")
                             || action::class.java.name.contains("SetRemoteViewsAdapterIntent")
-                } ?: listOf()
+                } ?: listOf()).map { action ->
+                    if (action::class.java.name.contains("SetRemoteViewsAdapterIntent")) {
+                        val wrappedIntentField = try {
+                            action::class.java.getDeclaredField("mIntent")
+                        } catch (_: NoSuchFieldException) {
+                            action::class.java.getDeclaredField("intent")
+                        }.apply { isAccessible = true }
+                        val wrappedIntent = wrappedIntentField.get(action) as? Intent
+                        val newIntent = RemoteViewsProxyService.createProxyIntent(
+                            context = context,
+                            widgetId = widget.id,
+                            widgetIntent = wrappedIntent,
+                        )
+                        wrappedIntentField.set(action, newIntent)
+                    }
+
+                    action
+                }
 
                 val destActionsField =  view::class.java.getDeclaredField("mActions")
                     .apply { isAccessible = true }

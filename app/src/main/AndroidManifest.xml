@@ -392,6 +392,8 @@
             <meta-data android:name="android.service.quicksettings.SEM_ACTIVE_TILE_SUPPORT_SEM_PLATFORM_VER" android:value="28" />
             <meta-data android:name="android.service.quicksettings.SEM_DEFAULT_TILE_NAME" android:resource="@string/app_name" />
         </service>
+        <service android:name="tk.zwander.common.appwidget.RemoteViewsProxyService"
+            android:permission="android.permission.BIND_REMOTEVIEWS" />
 
         <receiver android:name=".appwidget.IDListProvider"
             android:label="@string/id_list"
