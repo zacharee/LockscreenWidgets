@@ -4,8 +4,10 @@ import android.annotation.SuppressLint
 import android.appwidget.AppWidgetHostView
 import android.appwidget.AppWidgetProviderInfo
 import android.content.Context
+import android.content.Context.CONTEXT_INCLUDE_CODE
 import android.view.ViewGroup
 import tk.zwander.common.host.widgetHostCompat
+import tk.zwander.common.util.RemoteViewsLayoutInflaterContext
 import tk.zwander.common.util.logUtils
 import tk.zwander.common.util.safeApplicationContext
 import tk.zwander.common.util.themedContext
@@ -30,9 +32,12 @@ class WidgetViewCacheRegistry private constructor(@Suppress("unused") private va
 
     fun getOrCreateView(context: Context, appWidgetId: Int, appWidget: AppWidgetProviderInfo): AppWidgetHostView {
         val widgetContext = try {
-            context.safeApplicationContext.themedContext.createApplicationContext(
-                appWidget.providerInfo.applicationInfo,
-                Context.CONTEXT_INCLUDE_CODE,
+            RemoteViewsLayoutInflaterContext(
+                context.safeApplicationContext.themedContext.createApplicationContext(
+                    appWidget.providerInfo.applicationInfo,
+                    CONTEXT_INCLUDE_CODE,
+                ),
+                appWidgetId,
             )
         } catch (e: Throwable) {
             context.logUtils.debugLog("Unable to create application context for " +

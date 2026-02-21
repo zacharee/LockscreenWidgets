@@ -1,17 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/widget_root"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
-    <FrameLayout
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:id="@+id/widget_root" />
-
-    <ImageView
-        android:id="@+id/stack_swap"
-        android:layout_width="32dp"
-        android:layout_height="32dp"
-        android:layout_gravity="end|bottom"
-        android:src="@drawable/signal_cellular_4_bar_24px"
-        />
+        android:gravity="center"
+        android:orientation="vertical"
+        android:id="@+id/widget_content" />
 </FrameLayout>

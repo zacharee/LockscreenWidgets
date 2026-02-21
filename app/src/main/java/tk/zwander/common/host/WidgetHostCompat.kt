@@ -25,6 +25,7 @@ import tk.zwander.common.util.globalState
 import tk.zwander.common.util.handler
 import tk.zwander.common.util.logUtils
 import tk.zwander.common.util.prefManager
+import tk.zwander.common.util.themedContext
 import tk.zwander.common.views.ZeroPaddingAppWidgetHostView
 import tk.zwander.lockscreenwidgets.appwidget.WidgetStackProvider
 import tk.zwander.lockscreenwidgets.util.IconPrefs
@@ -37,9 +38,8 @@ val Context.widgetHostCompat: WidgetHostCompat
     get() = WidgetHostCompat.getInstance(this)
 
 /**
- * Base widget host class. [WidgetHostClass] and [WidgetHostInterface] extend this class and
- * are used conditionally, depending on whether [RemoteViews.OnClickHandler] is a class or interface
- * or [RemoteViews.InteractionHandler] is used on the device.
+ * Base widget host class. Wraps Android's widget host to intercept
+ * widget clicks and provide other custom behavior.
  *
  * @param context a Context object
  * @param id the ID of this widget host
@@ -104,32 +104,47 @@ class WidgetHostCompat(
         handler(PrefManager.KEY_WIDGET_STACK_WIDGETS) {
             context.prefManager.widgetStackWidgets.forEach { (stackId, widgets) ->
                 widgets.forEach { widget ->
-                    val view = createView(context, widget.id, context.appWidgetManager.getAppWidgetInfo(widget.id))
+                    val view = context.widgetViewCacheRegistry.getOrCreateView(
+                        context = context.themedContext,
+                        appWidget = context.appWidgetManager.getAppWidgetInfo(widget.id) ?: run {
+                            context.prefManager.widgetStackWidgets = context.prefManager.widgetStackWidgets.apply {
+                                this[stackId] = widgets.apply {
+                                    remove(widget)
+                                }
+                            }
+                            return@forEach
+                        },
+                        appWidgetId = widget.id,
+                    )
                     setListener(
                         widget.id,
                         object : AppWidgetHostListener {
                             override fun onUpdateProviderInfo(appWidget: AppWidgetProviderInfo?) {
+//                                view.onUpdateProviderInfo(appWidget)
+
                                 val intent = Intent(context, WidgetStackProvider::class.java)
                                 intent.action = AppWidgetManager.ACTION_APPWIDGET_UPDATE
                                 intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, intArrayOf(stackId))
                                 context.sendBroadcast(intent)
-                                view.onUpdateProviderInfo(appWidget)
                             }
 
                             override fun updateAppWidget(views: RemoteViews?) {
+//                                view.updateAppWidget(views)
+
                                 val intent = Intent(context, WidgetStackProvider::class.java)
                                 intent.action = AppWidgetManager.ACTION_APPWIDGET_UPDATE
                                 intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, intArrayOf(stackId))
+                                intent.putExtra("from", true)
                                 context.sendBroadcast(intent)
-                                view.updateAppWidget(views)
                             }
 
                             override fun onViewDataChanged(viewId: Int) {
+//                                view.onViewDataChanged(viewId)
+
                                 val intent = Intent(context, WidgetStackProvider::class.java)
                                 intent.action = AppWidgetManager.ACTION_APPWIDGET_UPDATE
                                 intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, intArrayOf(stackId))
                                 context.sendBroadcast(intent)
-                                view.onViewDataChanged(viewId)
                             }
                         },
                     )

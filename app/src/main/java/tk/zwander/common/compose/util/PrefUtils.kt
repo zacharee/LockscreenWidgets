@@ -8,7 +8,10 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.platform.LocalContext
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import tk.zwander.common.util.prefManager
 
 @Composable
@@ -27,21 +30,26 @@ fun <T> rememberPreferenceState(
 fun <T> rememberPreferenceState(
     key: String,
     value: (String) -> T,
-    onChanged: (String, T) -> Unit
+    onChanged: suspend (String, T) -> Unit
 ): MutableState<T> {
     val context = LocalContext.current
     val state = remember(key) {
         mutableStateOf(value(key))
     }
+    val scope = rememberCoroutineScope()
 
     LaunchedEffect(key1 = state.value) {
-        onChanged(key, state.value)
+        launch(Dispatchers.IO) {
+            onChanged(key, state.value)
+        }
     }
 
     DisposableEffect(key1 = key) {
         val listener = SharedPreferences.OnSharedPreferenceChangeListener { _, k ->
             if (key == k) {
-                state.value = value(key)
+                scope.launch(Dispatchers.IO) {
+                    state.value = value(key)
+                }
             }
         }
 

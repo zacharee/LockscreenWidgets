@@ -146,6 +146,7 @@ dependencies {
     implementation(libs.storage)
 
     implementation(libs.colorpicker.compose)
+    implementation(libs.reorderable)
 
     coreLibraryDesugaring(libs.desugar.jdk.libs)
 }

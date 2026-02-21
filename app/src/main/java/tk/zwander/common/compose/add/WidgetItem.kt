@@ -4,6 +4,7 @@ import android.graphics.drawable.Drawable
 import android.view.View
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -12,7 +13,9 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Text
+import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
@@ -24,33 +27,41 @@ import com.google.accompanist.drawablepainter.rememberDrawablePainter
 @Composable
 fun WidgetItem(
     image: Drawable?,
-    previewLayout: View? = null,
     label: String?,
     subLabel: String?,
-    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    itemModifier: Modifier = Modifier.size(200.dp)
+        .padding(8.dp),
+    previewLayout: View? = null,
+    onClick: (() -> Unit)? = null,
 ) {
     OutlinedCard(
         border = CardDefaults.outlinedCardBorder(true),
+        modifier = modifier,
     ) {
         Box {
             Column(
-                modifier = Modifier
-                    .size(200.dp)
-                    .padding(8.dp),
+                modifier = itemModifier,
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
-                Text(
-                    text = label ?: "",
-                    textAlign = TextAlign.Center,
-                )
+                label?.let {
+                    Text(
+                        text = label,
+                        textAlign = TextAlign.Center,
+                    )
+                }
 
-                Text(
-                    text = subLabel ?: "",
-                    fontSize = 12.sp,
-                    textAlign = TextAlign.Center,
-                )
+                subLabel?.let {
+                    Text(
+                        text = subLabel,
+                        fontSize = 12.sp,
+                        textAlign = TextAlign.Center,
+                    )
+                }
 
-                Spacer(Modifier.size(8.dp))
+                if (label != null || subLabel != null) {
+                    Spacer(Modifier.size(8.dp))
+                }
 
                 when {
                     previewLayout != null -> {
@@ -83,7 +94,11 @@ fun WidgetItem(
                 modifier = Modifier
                     .matchParentSize()
                     .clickable(
-                        onClick = onClick,
+                        onClick = {
+                            onClick?.invoke()
+                        },
+                        indication = onClick?.let { ripple() },
+                        interactionSource = remember { MutableInteractionSource() },
                     ),
             )
         }

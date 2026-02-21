@@ -28,6 +28,7 @@ patreonsupportersretrieval = "8436bbdbdc"
 preferenceKtx = "1.2.1"
 recyclerview = "1.4.0"
 relinker = "1.4.5"
+reorderable = "3.0.0"
 seekbarpreference = "963c47439b"
 spannedgridlayoutmanager = "999c2fc9f8"
 storage = "2.2.0"
@@ -70,6 +71,7 @@ msz-progress-indicator = { module = "com.ehsanmsz:msz-progress-indicator", versi
 patreonSupportersRetrieval = { module = "com.github.zacharee:PatreonSupportersRetrieval", version.ref = "patreonsupportersretrieval" }
 preference-ktx = { module = "androidx.preference:preference-ktx", version.ref = "preferenceKtx" }
 recyclerview = { module = "androidx.recyclerview:recyclerview", version.ref = "recyclerview" }
+reorderable = { module = "sh.calvin.reorderable:reorderable", version.ref = "reorderable" }
 relinker = { module = "com.getkeepsafe.relinker:relinker", version.ref = "relinker" }
 seekBarPreference = { module = "com.github.zacharee:SeekBarPreference", version.ref = "seekbarpreference" }
 shizuku-api = { module = "dev.rikka.shizuku:api", version.ref = "shizuku" }
