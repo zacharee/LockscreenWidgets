@@ -15,6 +15,7 @@ class AddWidgetStackWidgetActivity : AddWidgetActivity() {
     }
 
     override val showShortcuts: Boolean = false
+    override val showWidgetStackWidget: Boolean = false
     override val gridSize: IntSize = IntSize(1, 1)
     override val colCount: Int = 1
     override val rowCount: Int = 1

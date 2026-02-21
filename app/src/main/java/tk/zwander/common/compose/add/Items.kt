@@ -1,6 +1,7 @@
 package tk.zwander.common.compose.add
 
 import android.annotation.SuppressLint
+import android.content.ComponentName
 import android.content.Intent
 import android.content.pm.PackageManager
 import androidx.compose.runtime.Composable
@@ -26,6 +27,7 @@ import tk.zwander.common.util.getApplicationInfoCompat
 import tk.zwander.common.util.logUtils
 import tk.zwander.common.util.queryIntentActivitiesCompat
 import tk.zwander.common.util.toSafeBitmap
+import tk.zwander.lockscreenwidgets.appwidget.WidgetStackProvider
 import tk.zwander.lockscreenwidgets.data.list.LauncherItemListInfo
 import tk.zwander.lockscreenwidgets.data.list.ShortcutListInfo
 import tk.zwander.lockscreenwidgets.data.list.WidgetListInfo
@@ -35,7 +37,8 @@ import java.util.TreeSet
 @Composable
 internal fun items(
     filter: String?,
-    showShortcuts: Boolean
+    showShortcuts: Boolean,
+    showWidgetStackWidget: Boolean,
 ): Pair<List<AppInfo>, List<AppInfo>> {
     val context = LocalContext.current
 
@@ -51,6 +54,11 @@ internal fun items(
             context.getAllInstalledWidgetProviders().forEach {
                 if (BrokenAppsRegistry.isBroken(it)) {
                     context.logUtils.debugLog("Hiding broken widget ${it.provider}.")
+                    return@forEach
+                }
+
+                if (it.provider == ComponentName(context, WidgetStackProvider::class.java)) {
+                    context.logUtils.debugLog("Excluding widget stack widget.")
                     return@forEach
                 }
 

@@ -24,6 +24,7 @@ import tk.zwander.lockscreenwidgets.data.list.BaseListInfo
 @Composable
 fun AddWidgetLayout(
     showShortcuts: Boolean,
+    showWidgetStackWidget: Boolean,
     fullSize: IntSize,
     gridSize: IntSize,
     onBack: () -> Unit,
@@ -36,6 +37,7 @@ fun AddWidgetLayout(
     val (items, filteredItems) = items(
         filter = filter,
         showShortcuts = showShortcuts,
+        showWidgetStackWidget = showWidgetStackWidget,
     )
 
     Surface(

@@ -27,6 +27,7 @@ import tk.zwander.lockscreenwidgets.data.list.WidgetListInfo
  */
 abstract class AddWidgetActivity : BaseBindWidgetActivity() {
     protected open val showShortcuts = true
+    protected open val showWidgetStackWidget = true
 
     protected open val fullSize: IntSize
         get() = IntSize(
@@ -48,6 +49,7 @@ abstract class AddWidgetActivity : BaseBindWidgetActivity() {
             MeasuredComposable(name = "AddWidgetLayout") {
                 AddWidgetLayout(
                     showShortcuts = showShortcuts,
+                    showWidgetStackWidget = showWidgetStackWidget,
                     fullSize = fullSize,
                     gridSize = gridSize,
                     onBack = onBackPressedDispatcher::onBackPressed,
