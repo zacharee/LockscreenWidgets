@@ -3,10 +3,8 @@ package tk.zwander.common.views
 import android.annotation.SuppressLint
 import android.app.PendingIntent
 import android.appwidget.AppWidgetHostView
-import android.appwidget.AppWidgetManager
 import android.appwidget.AppWidgetProviderInfo
 import android.content.Context
-import android.content.Intent
 import android.graphics.Canvas
 import android.os.Bundle
 import android.util.AttributeSet
@@ -95,9 +93,7 @@ class ZeroPaddingAppWidgetHostView(
         super.updateAppWidget(remoteViews)
 
         context.prefManager.widgetStackWidgets[appWidgetId]?.let {
-            Intent(context, WidgetStackProvider::class.java)
-                .setAction(AppWidgetManager.ACTION_APPWIDGET_UPDATE)
-                .putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, intArrayOf(appWidgetId))
+            WidgetStackProvider.update(context, intArrayOf(appWidgetId))
         }
     }
 
@@ -105,10 +101,7 @@ class ZeroPaddingAppWidgetHostView(
         super.updateAppWidgetOptions(options)
 
         context.prefManager.widgetStackWidgets[appWidgetId]?.let {
-            Intent(context, WidgetStackProvider::class.java)
-                .setAction(AppWidgetManager.ACTION_APPWIDGET_OPTIONS_CHANGED)
-                .putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, intArrayOf(appWidgetId))
-                .putExtra(AppWidgetManager.EXTRA_APPWIDGET_OPTIONS, options)
+            WidgetStackProvider.updateOptions(context, intArrayOf(appWidgetId), options)
         }
     }
 }

@@ -28,11 +28,7 @@ class WidgetStackProvider : AppWidgetProvider() {
         )
     }
 
-    private var from = false
-
     override fun onReceive(context: Context, intent: Intent) {
-        from = intent.getBooleanExtra("from", false)
-
         if (intent.action == ACTION_SWAP_INDEX) {
             val widgetIds = intent.getIntArrayExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS)
 
@@ -60,6 +56,7 @@ class WidgetStackProvider : AppWidgetProvider() {
         super.onReceive(context, intent)
     }
 
+    @Suppress("UNCHECKED_CAST")
     override fun onUpdate(
         context: Context,
         appWidgetManager: AppWidgetManager,
@@ -76,9 +73,7 @@ class WidgetStackProvider : AppWidgetProvider() {
                 PendingIntentCompat.getBroadcast(
                     context,
                     appWidgetId,
-                    Intent(context, WidgetStackProvider::class.java)
-                        .setAction(ACTION_SWAP_INDEX)
-                        .putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, intArrayOf(appWidgetId)),
+                    createSwapIntent(context, intArrayOf(appWidgetId)),
                     0,
                     false,
                 )
@@ -228,5 +223,30 @@ class WidgetStackProvider : AppWidgetProvider() {
 
     companion object {
         const val ACTION_SWAP_INDEX = "${BuildConfig.APPLICATION_ID}.intent.action.SWAP_INDEX"
+
+        fun update(context: Context, ids: IntArray) {
+            context.sendBroadcast(
+                createBaseIntent(context, ids)
+                    .setAction(AppWidgetManager.ACTION_APPWIDGET_UPDATE),
+            )
+        }
+
+        fun updateOptions(context: Context, ids: IntArray, options: Bundle?) {
+            context.sendBroadcast(
+                createBaseIntent(context, ids)
+                    .setAction(AppWidgetManager.ACTION_APPWIDGET_OPTIONS_CHANGED)
+                    .putExtra(AppWidgetManager.EXTRA_APPWIDGET_OPTIONS, options),
+            )
+        }
+
+        private fun createSwapIntent(context: Context, ids: IntArray): Intent {
+            return createBaseIntent(context, ids)
+                .setAction(ACTION_SWAP_INDEX)
+        }
+
+        private fun createBaseIntent(context: Context, ids: IntArray): Intent {
+            return Intent(context, WidgetStackProvider::class.java)
+                .putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, ids)
+        }
     }
 }

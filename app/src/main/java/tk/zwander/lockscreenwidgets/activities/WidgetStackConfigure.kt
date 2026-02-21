@@ -127,11 +127,7 @@ class WidgetStackConfigure : BaseActivity() {
                             putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, widgetId)
                         },
                     )
-                    sendBroadcast(
-                        Intent(this, WidgetStackProvider::class.java)
-                            .setAction(AppWidgetManager.ACTION_APPWIDGET_UPDATE)
-                            .putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, intArrayOf(widgetId)),
-                    )
+                    WidgetStackProvider.update(this, intArrayOf(widgetId))
                     finish()
                 },
                 widgets = widgetStackWidgets,

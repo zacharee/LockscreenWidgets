@@ -7,7 +7,6 @@ import android.app.ActivityOptions
 import android.app.PendingIntent
 import android.appwidget.AppWidgetHost
 import android.appwidget.AppWidgetHostView
-import android.appwidget.AppWidgetManager
 import android.appwidget.AppWidgetProviderInfo
 import android.content.Context
 import android.content.Intent
@@ -104,7 +103,9 @@ class WidgetHostCompat(
         handler(PrefManager.KEY_WIDGET_STACK_WIDGETS) {
             context.prefManager.widgetStackWidgets.forEach { (stackId, widgets) ->
                 widgets.forEach { widget ->
-                    val view = context.widgetViewCacheRegistry.getOrCreateView(
+                    // Allows listening to events from original/wrapped widget providers on older
+                    // Android versions.
+                    context.widgetViewCacheRegistry.getOrCreateView(
                         context = context.themedContext,
                         appWidget = context.appWidgetManager.getAppWidgetInfo(widget.id) ?: run {
                             context.prefManager.widgetStackWidgets = context.prefManager.widgetStackWidgets.apply {
@@ -122,31 +123,15 @@ class WidgetHostCompat(
                             widget.id,
                             object : AppWidgetHostListener {
                                 override fun onUpdateProviderInfo(appWidget: AppWidgetProviderInfo?) {
-//                                view.onUpdateProviderInfo(appWidget)
-
-                                    val intent = Intent(context, WidgetStackProvider::class.java)
-                                    intent.action = AppWidgetManager.ACTION_APPWIDGET_UPDATE
-                                    intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, intArrayOf(stackId))
-                                    context.sendBroadcast(intent)
+                                    WidgetStackProvider.update(context, intArrayOf(widget.id))
                                 }
 
                                 override fun updateAppWidget(views: RemoteViews?) {
-//                                view.updateAppWidget(views)
-
-                                    val intent = Intent(context, WidgetStackProvider::class.java)
-                                    intent.action = AppWidgetManager.ACTION_APPWIDGET_UPDATE
-                                    intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, intArrayOf(stackId))
-                                    intent.putExtra("from", true)
-                                    context.sendBroadcast(intent)
+                                    WidgetStackProvider.update(context, intArrayOf(widget.id))
                                 }
 
                                 override fun onViewDataChanged(viewId: Int) {
-//                                view.onViewDataChanged(viewId)
-
-                                    val intent = Intent(context, WidgetStackProvider::class.java)
-                                    intent.action = AppWidgetManager.ACTION_APPWIDGET_UPDATE
-                                    intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, intArrayOf(stackId))
-                                    context.sendBroadcast(intent)
+                                    WidgetStackProvider.update(context, intArrayOf(widget.id))
                                 }
                             },
                         )

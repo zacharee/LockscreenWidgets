@@ -2,7 +2,6 @@ package tk.zwander.lockscreenwidgets
 
 import android.annotation.SuppressLint
 import android.app.Application
-import android.appwidget.AppWidgetManager
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
@@ -263,11 +262,7 @@ class App : Application(), CoroutineScope by MainScope(), EventObserver {
         updateHostListener()
 
         prefManager.widgetStackWidgets.takeIf { it.isNotEmpty() }?.let {
-            sendBroadcast(
-                Intent(this, WidgetStackProvider::class.java)
-                    .putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, it.keys.toIntArray())
-                    .setAction(AppWidgetManager.ACTION_APPWIDGET_UPDATE),
-            )
+            WidgetStackProvider.update(this, it.keys.toIntArray())
         }
 
         prefsHandler.register(this)
