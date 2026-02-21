@@ -35,6 +35,8 @@
     <string name="decrease">减少</string>
     <string name="selected" tools:override="true">已选择</string>
     <string name="general">通用</string>
+    <string name="configure_widget">Configure Widget</string>
+    <string name="reorder_widget">Reorder Widget</string>
     <string name="drawer_enabled">抽屉已启用</string>
     <string name="frame_enabled">抽屉已启用</string>
     <string name="add_id_hint">com.android.systemui:id/这里任何id</string>
@@ -266,6 +268,7 @@
     <string name="choose_icon_override">选择图标覆盖</string>
     <string name="selected_pack">当前选择的图标包</string>
     <string name="blank_widget">空白部件</string>
+    <string name="widget_stack">部件栈</string>
     <string name="add_frame">添加小部件帧</string>
     <string name="remove_frame">删除小部件帧</string>
     <string name="adjust_wallpaper_mask">调整壁纸蒙版</string>

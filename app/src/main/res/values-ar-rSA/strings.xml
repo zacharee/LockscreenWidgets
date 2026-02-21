@@ -35,6 +35,8 @@
     <string name="decrease">Decrease</string>
     <string name="selected" tools:override="true">Selected</string>
     <string name="general">General</string>
+    <string name="configure_widget">Configure Widget</string>
+    <string name="reorder_widget">Reorder Widget</string>
     <string name="drawer_enabled">الدرج مفعل</string>
     <string name="frame_enabled">الاطار مفعل</string>
     <string name="add_id_hint">com.android.systemui:id/some_id_here</string>
@@ -266,6 +268,7 @@
     <string name="choose_icon_override">Choose Icon Override</string>
     <string name="selected_pack">Currently selected icon pack</string>
     <string name="blank_widget">Blank Widget</string>
+    <string name="widget_stack">Widget Stack</string>
     <string name="add_frame">Add Widget Frame</string>
     <string name="remove_frame">Remove Widget Frame</string>
     <string name="adjust_wallpaper_mask">Adjust Wallpaper Mask</string>
