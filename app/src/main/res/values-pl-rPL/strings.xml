@@ -35,6 +35,8 @@
     <string name="decrease">Decrease</string>
     <string name="selected" tools:override="true">Selected</string>
     <string name="general">General</string>
+    <string name="configure_widget">Configure Widget</string>
+    <string name="reorder_widget">Reorder Widget</string>
     <string name="drawer_enabled">Menu z widżetami włączone</string>
     <string name="frame_enabled">Ramka włączona</string>
     <string name="add_id_hint">com.android.systemui:id/id_aplikacji</string>
