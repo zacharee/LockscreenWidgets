@@ -36,6 +36,7 @@ import tk.zwander.common.util.HandlerRegistry
 import tk.zwander.common.util.LSDisplayManager
 import tk.zwander.common.util.LogUtils
 import tk.zwander.common.util.PrefManager
+import tk.zwander.common.util.appWidgetManager
 import tk.zwander.common.util.eventManager
 import tk.zwander.common.util.globalState
 import tk.zwander.common.util.handler
@@ -262,7 +263,16 @@ class App : Application(), CoroutineScope by MainScope(), EventObserver {
         updateHostListener()
 
         prefManager.widgetStackWidgets.takeIf { it.isNotEmpty() }?.let {
-            WidgetStackProvider.update(this, it.keys.toIntArray())
+            val correctMap = it.filter { (stackId, _) ->
+                if (appWidgetManager.getAppWidgetInfo(stackId) == null) {
+                    widgetHostCompat.deleteAppWidgetId(stackId)
+                    false
+                } else {
+                    true
+                }
+            }
+
+            WidgetStackProvider.update(this, correctMap.keys.toIntArray())
         }
 
         prefsHandler.register(this)

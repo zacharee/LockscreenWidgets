@@ -28,7 +28,11 @@ class WidgetStackProvider : AppWidgetProvider() {
         )
     }
 
+    private var fromHost = false
+
     override fun onReceive(context: Context, intent: Intent) {
+        fromHost = intent.getBooleanExtra(EXTRA_FROM_HOST, false)
+
         if (intent.action == ACTION_SWAP_INDEX) {
             val widgetIds = intent.getIntArrayExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS)
 
@@ -187,7 +191,9 @@ class WidgetStackProvider : AppWidgetProvider() {
                 view.addView(R.id.widget_content, addWidgetView)
             }
 
-            appWidgetManager.updateAppWidget(appWidgetId, view)
+            if (!fromHost) {
+                appWidgetManager.updateAppWidget(appWidgetId, view)
+            }
         }
     }
 
@@ -213,21 +219,20 @@ class WidgetStackProvider : AppWidgetProvider() {
     override fun onDeleted(context: Context, appWidgetIds: IntArray) {
         super.onDeleted(context, appWidgetIds)
 
-        val newWidgets = context.prefManager.widgetStackWidgets
         appWidgetIds.forEach { appWidgetId ->
             context.widgetHostCompat.deleteAppWidgetId(appWidgetId)
-            newWidgets.remove(appWidgetId)
         }
-        context.prefManager.widgetStackWidgets = newWidgets
     }
 
     companion object {
         const val ACTION_SWAP_INDEX = "${BuildConfig.APPLICATION_ID}.intent.action.SWAP_INDEX"
+        const val EXTRA_FROM_HOST = "from_host"
 
-        fun update(context: Context, ids: IntArray) {
+        fun update(context: Context, ids: IntArray, fromHost: Boolean = false) {
             context.sendBroadcast(
                 createBaseIntent(context, ids)
-                    .setAction(AppWidgetManager.ACTION_APPWIDGET_UPDATE),
+                    .setAction(AppWidgetManager.ACTION_APPWIDGET_UPDATE)
+                    .putExtra(EXTRA_FROM_HOST, fromHost),
             )
         }
 

@@ -123,15 +123,15 @@ class WidgetHostCompat(
                             widget.id,
                             object : AppWidgetHostListener {
                                 override fun onUpdateProviderInfo(appWidget: AppWidgetProviderInfo?) {
-                                    WidgetStackProvider.update(context, intArrayOf(widget.id))
+                                    WidgetStackProvider.update(context, intArrayOf(stackId), true)
                                 }
 
                                 override fun updateAppWidget(views: RemoteViews?) {
-                                    WidgetStackProvider.update(context, intArrayOf(widget.id))
+                                    WidgetStackProvider.update(context, intArrayOf(stackId), true)
                                 }
 
                                 override fun onViewDataChanged(viewId: Int) {
-                                    WidgetStackProvider.update(context, intArrayOf(widget.id))
+                                    WidgetStackProvider.update(context, intArrayOf(stackId), true)
                                 }
                             },
                         )
@@ -223,6 +223,12 @@ class WidgetHostCompat(
 
         IconPrefs.removeIcon(context, appWidgetId)
         context.widgetViewCacheRegistry.removeView(appWidgetId)
+
+        val newWidgets = context.prefManager.widgetStackWidgets
+        newWidgets.remove(appWidgetId)?.forEach { widget ->
+            context.widgetViewCacheRegistry.removeView(widget.id)
+        }
+        context.prefManager.widgetStackWidgets = newWidgets
     }
 
     @SuppressLint("PrivateApi")
