@@ -13,6 +13,7 @@ import android.os.IBinder
 import android.os.IInterface
 import android.widget.RemoteViews
 import android.widget.RemoteViewsService
+import androidx.annotation.Keep
 import androidx.core.content.IntentCompat
 import com.android.internal.widget.IRemoteViewsFactory
 import net.bytebuddy.ByteBuddy
@@ -61,10 +62,17 @@ class RemoteViewsProxyService : RemoteViewsService() {
             override fun onServiceDisconnected(name: ComponentName?) {
                 wrapped = null
                 created = false
+                try {
+                    unbindService(this)
+                } catch (_: IllegalArgumentException) {}
             }
 
             override fun onNullBinding(name: ComponentName?) {
-                unbindService(this)
+                wrapped = null
+                created = false
+                try {
+                    unbindService(this)
+                } catch (_: IllegalArgumentException) {}
             }
         }
 
@@ -101,6 +109,7 @@ class RemoteViewsProxyService : RemoteViewsService() {
                     $$"com.android.internal.widget.IRemoteViewsAdapterConnection$Stub",
                 )
                 val handler = object {
+                    @Keep
                     fun onServiceConnected(service: IBinder?) {
                         connection.onServiceConnected(
                             ComponentName(this@RemoteViewsProxyService, Factory::class.java),
@@ -108,6 +117,7 @@ class RemoteViewsProxyService : RemoteViewsService() {
                         )
                     }
 
+                    @Keep
                     fun onServiceDisconnected() {
                         connection.onServiceDisconnected(
                             ComponentName(this@RemoteViewsProxyService, Factory::class.java),
@@ -187,6 +197,9 @@ class RemoteViewsProxyService : RemoteViewsService() {
         }
 
         override fun onDestroy(intent: Intent?) {
+            try {
+                unbindService(connection)
+            } catch (_: IllegalArgumentException) {}
             sFactories.remove(widgetId)
         }
 
@@ -196,6 +209,11 @@ class RemoteViewsProxyService : RemoteViewsService() {
     }
 
     override fun onDestroy() {
+        sFactories.forEach { (_, factory) ->
+            try {
+                unbindService(factory.connection)
+            } catch (_: IllegalArgumentException) {}
+        }
         super.onDestroy()
     }
 
