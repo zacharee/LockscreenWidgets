@@ -1,5 +1,6 @@
 package tk.zwander.common.util
 
+import android.annotation.SuppressLint
 import android.appwidget.AppWidgetManager
 import android.appwidget.AppWidgetProviderInfo
 import android.content.ComponentName
@@ -7,7 +8,9 @@ import android.content.Context
 import android.content.pm.PackageManager
 import android.graphics.Color
 import android.os.Build
+import android.util.SizeF
 import android.view.View
+import android.widget.RemoteViews
 import android.widget.TextView
 import tk.zwander.lockscreenwidgets.R
 import kotlin.math.floor
@@ -109,4 +112,16 @@ fun AppWidgetProviderInfo.getCellHeightCompat(totalHeightPx: Int, rowCount: Int)
     return (floor(actualMinHeight.toFloat() / totalHeightPx.toFloat()) * rowCount)
         .toInt()
         .coerceAtLeast(1)
+}
+
+@SuppressLint("DiscouragedPrivateApi")
+fun RemoteViews.getRemoteViewsToApplyCompat(context: Context, size: SizeF? = null): RemoteViews {
+    return try {
+        getRemoteViewsToApply(context, size)
+    } catch (_: NoSuchMethodError) {
+        RemoteViews::class.java
+            .getDeclaredMethod("getRemoteViewsToApply", Context::class.java)
+            .apply { isAccessible = true }
+            .invoke(this, context) as RemoteViews
+    }
 }

@@ -3,14 +3,20 @@ package tk.zwander.common.views
 import android.annotation.SuppressLint
 import android.app.PendingIntent
 import android.appwidget.AppWidgetHostView
+import android.appwidget.AppWidgetManager
 import android.appwidget.AppWidgetProviderInfo
 import android.content.Context
+import android.content.Intent
 import android.graphics.Canvas
+import android.os.Bundle
 import android.util.AttributeSet
 import android.view.View
+import android.widget.RemoteViews
 import tk.zwander.common.util.RemoteViewsLayoutInflaterContext
 import tk.zwander.common.util.appWidgetManager
 import tk.zwander.common.util.logUtils
+import tk.zwander.common.util.prefManager
+import tk.zwander.lockscreenwidgets.appwidget.WidgetStackProvider
 
 /**
  * An implementation of [AppWidgetHostView] that decreases the default widget padding
@@ -82,6 +88,27 @@ class ZeroPaddingAppWidgetHostView(
                         context.startActivity(mainIntent)
                     }
                 }
+        }
+    }
+
+    override fun updateAppWidget(remoteViews: RemoteViews?) {
+        super.updateAppWidget(remoteViews)
+
+        context.prefManager.widgetStackWidgets[appWidgetId]?.let {
+            Intent(context, WidgetStackProvider::class.java)
+                .setAction(AppWidgetManager.ACTION_APPWIDGET_UPDATE)
+                .putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, intArrayOf(appWidgetId))
+        }
+    }
+
+    override fun updateAppWidgetOptions(options: Bundle?) {
+        super.updateAppWidgetOptions(options)
+
+        context.prefManager.widgetStackWidgets[appWidgetId]?.let {
+            Intent(context, WidgetStackProvider::class.java)
+                .setAction(AppWidgetManager.ACTION_APPWIDGET_OPTIONS_CHANGED)
+                .putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, intArrayOf(appWidgetId))
+                .putExtra(AppWidgetManager.EXTRA_APPWIDGET_OPTIONS, options)
         }
     }
 }

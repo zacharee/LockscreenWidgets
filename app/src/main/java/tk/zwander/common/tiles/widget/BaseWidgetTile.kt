@@ -1,10 +1,8 @@
 package tk.zwander.common.tiles.widget
 
-import android.annotation.SuppressLint
 import android.app.PendingIntent
 import android.appwidget.AppWidgetHost.AppWidgetHostListener
 import android.appwidget.AppWidgetProviderInfo
-import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
 import android.content.res.Resources
@@ -28,6 +26,7 @@ import tk.zwander.common.util.appWidgetManager
 import tk.zwander.common.util.cropBitmapTransparency
 import tk.zwander.common.util.density
 import tk.zwander.common.util.getApplicationInfoInAnyState
+import tk.zwander.common.util.getRemoteViewsToApplyCompat
 import tk.zwander.common.util.logUtils
 import tk.zwander.common.util.prefManager
 import tk.zwander.common.util.textAsBitmap
@@ -283,17 +282,5 @@ abstract class BaseWidgetTile : TileService(), SharedPreferences.OnSharedPrefere
 
         qsTile?.state = if (widgetInfo != null) Tile.STATE_ACTIVE else Tile.STATE_INACTIVE
         qsTile?.updateTile()
-    }
-}
-
-@SuppressLint("DiscouragedPrivateApi")
-private fun RemoteViews.getRemoteViewsToApplyCompat(context: Context): RemoteViews {
-    return try {
-        getRemoteViewsToApply(context, null)
-    } catch (_: NoSuchMethodError) {
-        RemoteViews::class.java
-            .getDeclaredMethod("getRemoteViewsToApply", Context::class.java)
-            .apply { isAccessible = true }
-            .invoke(this, context) as RemoteViews
     }
 }

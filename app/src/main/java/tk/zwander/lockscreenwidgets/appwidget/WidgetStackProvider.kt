@@ -15,6 +15,7 @@ import androidx.core.util.forEach
 import androidx.core.util.plus
 import com.android.internal.appwidget.IAppWidgetService
 import tk.zwander.common.host.widgetHostCompat
+import tk.zwander.common.util.getRemoteViewsToApplyCompat
 import tk.zwander.common.util.prefManager
 import tk.zwander.lockscreenwidgets.BuildConfig
 import tk.zwander.lockscreenwidgets.R
@@ -95,24 +96,15 @@ class WidgetStackProvider : AppWidgetProvider() {
                 val maxWidth = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MAX_WIDTH).toFloat()
                 val maxHeight = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT).toFloat()
 
-                val viewsToApply = widgetView.getRemoteViewsToApply(context, SizeF(maxWidth, maxHeight))
+                val viewsToApply = widgetView.getRemoteViewsToApplyCompat(context, SizeF(maxWidth, maxHeight))
+                val sourceActions = viewsToApply::class.java.getDeclaredField("mActions")
+                    .apply { isAccessible = true }
+                    .get(viewsToApply) as? MutableList<Any>
 
-                if (widgetView.hasLegacyLists() && Build.VERSION.SDK_INT >= Build.VERSION_CODES.VANILLA_ICE_CREAM) {
-                    view.addView(R.id.widget_content, viewsToApply)
-                    view.addView(R.id.widget_root, stackSwap)
+                view.addView(R.id.widget_content, viewsToApply)
+                view.addView(R.id.widget_root, stackSwap)
 
-                    val sourceActions = viewsToApply::class.java.getDeclaredField("mActions")
-                        .apply { isAccessible = true }
-                        .get(viewsToApply) as? MutableList<Any>
-                    val destActionsField =  view::class.java.getDeclaredField("mActions")
-                        .apply { isAccessible = true }
-
-                    if (destActionsField.get(view) == null) {
-                        destActionsField.set(view, sourceActions)
-                    } else if (sourceActions != null) {
-                        (destActionsField.get(view) as? MutableList<Any>)?.addAll(sourceActions)
-                    }
-
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.VANILLA_ICE_CREAM && widgetView.hasLegacyLists()) {
                     val collectionCacheSource = viewsToApply::class.java.getDeclaredField("mCollectionCache")
                         .apply { isAccessible = true }
                         .get(viewsToApply)
@@ -136,8 +128,6 @@ class WidgetStackProvider : AppWidgetProvider() {
                         .apply { isAccessible = true }
                         .get(rootCollectionCacheSource) as Map<String, *>
 
-                    sourceActions?.clear()
-
                     (sourceIdToUriMapping + rootSourceIdToUriMapping).forEach { intentId, uri ->
                         val items = sourceUriToCollectionMapping[uri] ?: rootSourceUriToCollectionMapping[uri]!!
 
@@ -155,10 +145,23 @@ class WidgetStackProvider : AppWidgetProvider() {
                             items,
                         )
                     }
-                } else {
-                    view.addView(R.id.widget_content, viewsToApply)
-                    view.addView(R.id.widget_root, stackSwap)
                 }
+
+                val collectionActions = sourceActions?.filter { action ->
+                    action::class.java.name.contains("SetRemoteCollectionItemListAdapterAction")
+                            || action::class.java.name.contains("SetRemoteViewsAdapterIntent")
+                } ?: listOf()
+
+                val destActionsField =  view::class.java.getDeclaredField("mActions")
+                    .apply { isAccessible = true }
+
+                if (destActionsField.get(view) == null) {
+                    destActionsField.set(view, collectionActions)
+                } else {
+                    (destActionsField.get(view) as? MutableList<Any>)?.addAll(collectionActions)
+                }
+
+                sourceActions?.removeAll { collectionActions.contains(it) }
             } ?: run {
                 val addWidgetView = RemoteViews(context.packageName, R.layout.add_widget)
                 addWidgetView.setOnClickPendingIntent(

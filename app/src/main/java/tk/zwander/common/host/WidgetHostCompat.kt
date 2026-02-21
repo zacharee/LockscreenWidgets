@@ -116,38 +116,41 @@ class WidgetHostCompat(
                         },
                         appWidgetId = widget.id,
                     )
-                    setListener(
-                        widget.id,
-                        object : AppWidgetHostListener {
-                            override fun onUpdateProviderInfo(appWidget: AppWidgetProviderInfo?) {
+
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                        setListener(
+                            widget.id,
+                            object : AppWidgetHostListener {
+                                override fun onUpdateProviderInfo(appWidget: AppWidgetProviderInfo?) {
 //                                view.onUpdateProviderInfo(appWidget)
 
-                                val intent = Intent(context, WidgetStackProvider::class.java)
-                                intent.action = AppWidgetManager.ACTION_APPWIDGET_UPDATE
-                                intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, intArrayOf(stackId))
-                                context.sendBroadcast(intent)
-                            }
+                                    val intent = Intent(context, WidgetStackProvider::class.java)
+                                    intent.action = AppWidgetManager.ACTION_APPWIDGET_UPDATE
+                                    intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, intArrayOf(stackId))
+                                    context.sendBroadcast(intent)
+                                }
 
-                            override fun updateAppWidget(views: RemoteViews?) {
+                                override fun updateAppWidget(views: RemoteViews?) {
 //                                view.updateAppWidget(views)
 
-                                val intent = Intent(context, WidgetStackProvider::class.java)
-                                intent.action = AppWidgetManager.ACTION_APPWIDGET_UPDATE
-                                intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, intArrayOf(stackId))
-                                intent.putExtra("from", true)
-                                context.sendBroadcast(intent)
-                            }
+                                    val intent = Intent(context, WidgetStackProvider::class.java)
+                                    intent.action = AppWidgetManager.ACTION_APPWIDGET_UPDATE
+                                    intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, intArrayOf(stackId))
+                                    intent.putExtra("from", true)
+                                    context.sendBroadcast(intent)
+                                }
 
-                            override fun onViewDataChanged(viewId: Int) {
+                                override fun onViewDataChanged(viewId: Int) {
 //                                view.onViewDataChanged(viewId)
 
-                                val intent = Intent(context, WidgetStackProvider::class.java)
-                                intent.action = AppWidgetManager.ACTION_APPWIDGET_UPDATE
-                                intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, intArrayOf(stackId))
-                                context.sendBroadcast(intent)
-                            }
-                        },
-                    )
+                                    val intent = Intent(context, WidgetStackProvider::class.java)
+                                    intent.action = AppWidgetManager.ACTION_APPWIDGET_UPDATE
+                                    intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, intArrayOf(stackId))
+                                    context.sendBroadcast(intent)
+                                }
+                            },
+                        )
+                    }
                 }
             }
         }
