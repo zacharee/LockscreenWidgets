@@ -35,6 +35,8 @@
     <string name="decrease">减少</string>
     <string name="selected" tools:override="true">已选择</string>
     <string name="general">通用</string>
+    <string name="configure_widget">Configure Widget</string>
+    <string name="reorder_widget">Reorder Widget</string>
     <string name="drawer_enabled">抽屉已启用</string>
     <string name="frame_enabled">抽屉已启用</string>
     <string name="add_id_hint">com.android.systemui:id/这里任何id</string>
