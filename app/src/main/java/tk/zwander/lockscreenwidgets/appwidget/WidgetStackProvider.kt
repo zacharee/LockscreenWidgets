@@ -191,9 +191,7 @@ class WidgetStackProvider : AppWidgetProvider() {
                 view.addView(R.id.widget_content, addWidgetView)
             }
 
-            if (!fromHost) {
-                appWidgetManager.updateAppWidget(appWidgetId, view)
-            }
+            appWidgetManager.updateAppWidget(appWidgetId, view)
         }
     }
 
