@@ -35,6 +35,8 @@
     <string name="decrease">Riduci</string>
     <string name="selected" tools:override="true">Selezionato</string>
     <string name="general">Generali</string>
+    <string name="configure_widget">Configure Widget</string>
+    <string name="reorder_widget">Reorder Widget</string>
     <string name="drawer_enabled">Cassetto attivato</string>
     <string name="frame_enabled">Riquadro attivato</string>
     <string name="add_id_hint">com.android.systemui:id/qualsiasi_id_qui</string>
