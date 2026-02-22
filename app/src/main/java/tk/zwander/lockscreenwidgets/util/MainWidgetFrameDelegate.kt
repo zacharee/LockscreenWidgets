@@ -422,7 +422,6 @@ open class MainWidgetFrameDelegate protected constructor(
                                 lifecycleRegistry.safeCurrentState = Lifecycle.State.CREATED
                             }
                             lifecycleRegistry.safeCurrentState = Lifecycle.State.RESUMED
-                            widgetHost.startListening(this)
                             updateWallpaperLayerIfNeeded()
                             //Even with the startListening() call above,
                             //it doesn't seem like pending updates always get
@@ -433,7 +432,6 @@ open class MainWidgetFrameDelegate protected constructor(
                             }
                             scrollToStoredPosition(false)
                         } else {
-                            widgetHost.stopListening(this)
                             lifecycleRegistry.safeCurrentState = Lifecycle.State.STARTED
                         }
                     } catch (e: NullPointerException) {

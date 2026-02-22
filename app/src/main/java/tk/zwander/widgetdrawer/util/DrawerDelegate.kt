@@ -270,7 +270,6 @@ class DrawerDelegate private constructor(context: Context, displayId: String) :
                                 adapter.updateViews()
                             }
                         }, 50)
-                        widgetHost.startListening(this)
 
                         drawer.fadeIn(DrawerOrFrame.DRAWER)
                         eventManager.sendEvent(Event.DrawerShown)
@@ -284,8 +283,6 @@ class DrawerDelegate private constructor(context: Context, displayId: String) :
                     }
                     lifecycleRegistry.safeCurrentState = Lifecycle.State.RESUMED
                 } else {
-                    widgetHost.stopListening(this)
-
                     if (!handle.isAttachedToWindow) {
                         lifecycleRegistry.safeCurrentState = Lifecycle.State.STARTED
                     }

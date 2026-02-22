@@ -112,9 +112,6 @@ class App : Application(), CoroutineScope by MainScope(), EventObserver {
             handler(PrefManager.KEY_TOUCH_PROTECTION) {
                 updateProxListener()
             }
-            handler(PrefManager.KEY_WIDGET_STACK_WIDGETS) {
-                updateHostListener()
-            }
         }
     }
 
@@ -260,7 +257,8 @@ class App : Application(), CoroutineScope by MainScope(), EventObserver {
         )
 
         updateProxListener()
-        updateHostListener()
+
+        widgetHostCompat.startListening(this)
 
         prefManager.widgetStackWidgets.takeIf { it.isNotEmpty() }?.let {
             val correctMap = it.filter { (stackId, _) ->
@@ -336,14 +334,6 @@ class App : Application(), CoroutineScope by MainScope(), EventObserver {
             registerProxListener()
         } else {
             unregisterProxListener()
-        }
-    }
-
-    private fun updateHostListener() {
-        if (prefManager.widgetStackWidgets.isNotEmpty()) {
-            widgetHostCompat.startListening(this)
-        } else {
-            widgetHostCompat.stopListening(this)
         }
     }
 

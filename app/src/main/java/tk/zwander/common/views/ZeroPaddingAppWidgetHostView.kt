@@ -10,6 +10,7 @@ import android.os.Bundle
 import android.util.AttributeSet
 import android.view.View
 import android.widget.RemoteViews
+import tk.zwander.common.host.widgetHostCompat
 import tk.zwander.common.util.RemoteViewsLayoutInflaterContext
 import tk.zwander.common.util.appWidgetManager
 import tk.zwander.common.util.logUtils
