@@ -28,12 +28,15 @@ fun SubduedOutlinedButton(
     content: @Composable RowScope.() -> Unit
 ) {
     ContentColoredOutlinedButton(
-        onClick, modifier,
-        enabled, shape, colors,
-        elevation,
-        border,
-        contentPadding,
-        interactionSource,
-        content
+        onClick = onClick,
+        modifier = modifier,
+        enabled = enabled,
+        shape = shape,
+        colors = colors,
+        elevation = elevation,
+        border = border,
+        contentPadding = contentPadding,
+        interactionSource = interactionSource,
+        content = content
     )
 }

@@ -143,6 +143,7 @@ class PrefManager private constructor(private val context: Context) {
         const val KEY_DOUBLE_TAP_EMPTY_DRAWER_SPACE_TURN_OFF_DISPLAY = "double_tap_empty_drawer_space_turn_off_display"
         const val KEY_WIDGET_STACK_WIDGETS = "widget_stack_widgets"
         const val KEY_WIDGET_STACK_INDICES = "widget_stack_indices"
+        const val KEY_WIDGET_STACK_AUTO_CHANGE = "widget_stack_auto_change"
 
         const val VALUE_PAGE_INDICATOR_BEHAVIOR_HIDDEN = 0
         const val VALUE_PAGE_INDICATOR_BEHAVIOR_AUTO_HIDE = 1
@@ -826,6 +827,14 @@ class PrefManager private constructor(private val context: Context) {
         )
         set(value) {
             putString(KEY_WIDGET_STACK_INDICES, gson.toJson(value))
+        }
+
+    var widgetStackAutoChange: HashMap<Int, Pair<Boolean, Long>>
+        get() = gson.mapFromJson(
+            getString(KEY_WIDGET_STACK_AUTO_CHANGE, ""),
+        )
+        set(value) {
+            putString(KEY_WIDGET_STACK_AUTO_CHANGE, gson.toJson(value))
         }
 
     @Suppress("DEPRECATION")

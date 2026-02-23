@@ -20,17 +20,22 @@ import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.add
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBars
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -39,6 +44,8 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
@@ -48,9 +55,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.graphics.drawable.IconCompat
@@ -61,6 +71,7 @@ import sh.calvin.reorderable.rememberReorderableLazyListState
 import tk.zwander.common.activities.BaseActivity
 import tk.zwander.common.compose.AppTheme
 import tk.zwander.common.compose.add.WidgetItem
+import tk.zwander.common.compose.components.CardSwitch
 import tk.zwander.common.compose.util.rememberPreferenceState
 import tk.zwander.common.compose.util.widgetViewCacheRegistry
 import tk.zwander.common.data.WidgetData
@@ -77,6 +88,9 @@ import tk.zwander.lockscreenwidgets.R
 import tk.zwander.lockscreenwidgets.activities.add.AddWidgetStackWidgetActivity
 import tk.zwander.lockscreenwidgets.activities.add.WidgetStackReconfigureActivity
 import tk.zwander.lockscreenwidgets.appwidget.WidgetStackProvider
+
+private const val DEFAULT_CHANGE_DELAY_MS = 5000L
+private const val MIN_CHANGE_DELAY_MS = 2000L
 
 class WidgetStackConfigure : BaseActivity() {
     private val widgetId by lazy {
@@ -118,6 +132,16 @@ class WidgetStackConfigure : BaseActivity() {
                 },
             )
 
+            var autoChange by rememberPreferenceState(
+                key = PrefManager.KEY_WIDGET_STACK_AUTO_CHANGE,
+                value = { prefManager.widgetStackAutoChange[widgetId] ?: (false to DEFAULT_CHANGE_DELAY_MS) },
+                onChanged = { _, value ->
+                    val newAutoChange = prefManager.widgetStackAutoChange
+                    newAutoChange[widgetId] = value
+                    prefManager.widgetStackAutoChange = newAutoChange
+                },
+            )
+
             Content(
                 widgetId = widgetId,
                 onFinish = {
@@ -134,6 +158,10 @@ class WidgetStackConfigure : BaseActivity() {
                 onWidgetsChange = {
                     widgetStackWidgets = it.toMutableList()
                 },
+                autoChange = autoChange,
+                onNewAutoChange = {
+                    autoChange = it
+                },
             )
         }
     }
@@ -144,10 +172,13 @@ class WidgetStackConfigure : BaseActivity() {
 fun Content(
     widgetId: Int,
     widgets: List<WidgetData>,
+    autoChange: Pair<Boolean, Long>,
     onWidgetsChange: (List<WidgetData>) -> Unit,
+    onNewAutoChange: (Pair<Boolean, Long>) -> Unit,
     onFinish: (success: Boolean) -> Unit,
 ) {
     val context = LocalContext.current
+    val density = LocalDensity.current
 
     var widgetPendingRemoval by remember {
         mutableStateOf<WidgetData?>(null)
@@ -157,18 +188,25 @@ fun Content(
         mutableStateOf(widgets)
     }
 
+    var localAutoChange by remember {
+        mutableStateOf(autoChange)
+    }
+
     LaunchedEffect(widgets) {
         localWidgetList = widgets
     }
+
+    val systemBarsBottomPadding = WindowInsets.systemBars.only(WindowInsetsSides.Bottom)
+    val imeBottomPadding = WindowInsets.ime.only(WindowInsetsSides.Bottom)
+        .takeIf { it.getBottom(density) > systemBarsBottomPadding.getBottom(density) }
 
     Surface(
         modifier = Modifier.fillMaxSize()
             .windowInsetsPadding(
                 insets = WindowInsets.systemBars.only(
-                    WindowInsetsSides.Bottom +
-                            WindowInsetsSides.Start +
+                        WindowInsetsSides.Start +
                             WindowInsetsSides.End,
-                ),
+                ).add(imeBottomPadding ?: systemBarsBottomPadding),
             ),
     ) {
         Column(
@@ -297,44 +335,100 @@ fun Content(
                 }
             }
 
-            FlowRow(
-                modifier = Modifier.align(Alignment.End)
+            Column(
+                modifier = Modifier
                     .padding(
                         horizontal = 16.dp,
                         vertical = 8.dp,
                     )
-                    .fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
+                    .wrapContentHeight(),
                 verticalArrangement = Arrangement.spacedBy(4.dp),
             ) {
-                OutlinedButton(
-                    onClick = {
-                        onFinish(false)
+                CardSwitch(
+                    enabled = localAutoChange.first,
+                    onEnabledChanged = {
+                        localAutoChange = localAutoChange.copy(first = it)
                     },
-                ) {
-                    Text(text = stringResource(R.string.cancel))
-                }
+                    title = stringResource(R.string.auto_cycle),
+                    modifier = Modifier
+                        .wrapContentHeight(),
+                    titleTextStyle = MaterialTheme.typography.titleMedium,
+                    accessory = {
+                        var temporaryTextState by remember(autoChange.second) {
+                            mutableStateOf(autoChange.second.toString())
+                        }
 
-                OutlinedButton(
-                    onClick = {
-                        AddWidgetStackWidgetActivity.start(context, widgetId)
+                        TextField(
+                            value = temporaryTextState,
+                            onValueChange = { newValue ->
+                                temporaryTextState = newValue.filter { it.isDigit() }
+                                localAutoChange = localAutoChange
+                                    .copy(
+                                        second = temporaryTextState.toLongOrNull()
+                                            ?.takeIf { it >= MIN_CHANGE_DELAY_MS }
+                                            ?: localAutoChange.second,
+                                    )
+                            },
+                            label = {
+                                Text(text = stringResource(R.string.delay))
+                            },
+                            suffix = {
+                                Text(text = stringResource(R.string.unit_milliseconds))
+                            },
+                            keyboardOptions = KeyboardOptions.Default.copy(
+                                keyboardType = KeyboardType.Number,
+                            ),
+                            modifier = Modifier
+                                .widthIn(min = 0.dp)
+                                .wrapContentHeight()
+                                .weight(1f),
+                            isError = temporaryTextState.toLongOrNull()
+                                ?.takeIf { it >= MIN_CHANGE_DELAY_MS } == null,
+                            colors = TextFieldDefaults.colors(
+                                errorContainerColor = Color.Transparent,
+                                focusedContainerColor = Color.Transparent,
+                                disabledContainerColor = Color.Transparent,
+                                unfocusedContainerColor = Color.Transparent,
+                            ),
+                        )
                     },
-                ) {
-                    Text(text = stringResource(R.string.add_widget))
-                }
+                )
 
-                OutlinedButton(
-                    onClick = {
-                        val intent = Intent(context, WidgetStackProvider::class.java)
-                        intent.action = AppWidgetManager.ACTION_APPWIDGET_UPDATE
-                        intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, widgetId)
-                        context.sendBroadcast(intent)
-
-                        onWidgetsChange(localWidgetList)
-                        onFinish(true)
-                    },
+                FlowRow(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
+                    verticalArrangement = Arrangement.spacedBy(4.dp),
                 ) {
-                    Text(text = stringResource(R.string.apply))
+                    OutlinedButton(
+                        onClick = {
+                            onFinish(false)
+                        },
+                    ) {
+                        Text(text = stringResource(R.string.cancel))
+                    }
+
+                    OutlinedButton(
+                        onClick = {
+                            AddWidgetStackWidgetActivity.start(context, widgetId)
+                        },
+                    ) {
+                        Text(text = stringResource(R.string.add_widget))
+                    }
+
+                    OutlinedButton(
+                        onClick = {
+                            val intent = Intent(context, WidgetStackProvider::class.java)
+                            intent.action = AppWidgetManager.ACTION_APPWIDGET_UPDATE
+                            intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, widgetId)
+                            context.sendBroadcast(intent)
+
+                            onWidgetsChange(localWidgetList)
+                            onNewAutoChange(localAutoChange)
+                            onFinish(true)
+                        },
+                    ) {
+                        Text(text = stringResource(R.string.apply))
+                    }
                 }
             }
         }
@@ -483,7 +577,9 @@ fun ConfigurePreview() {
         Content(
             widgetId = 0,
             onWidgetsChange = {},
+            onNewAutoChange = {},
             onFinish = {},
+            autoChange = false to DEFAULT_CHANGE_DELAY_MS,
             widgets = listOf(
                 WidgetData.widget(
                     context = context,

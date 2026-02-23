@@ -1,6 +1,7 @@
 package tk.zwander.lockscreenwidgets
 
 import android.annotation.SuppressLint
+import android.app.AlarmManager
 import android.app.Application
 import android.content.BroadcastReceiver
 import android.content.Context
@@ -14,6 +15,7 @@ import android.hardware.SensorManager
 import android.net.Uri
 import android.os.Build
 import android.provider.Settings
+import androidx.core.app.PendingIntentCompat
 import androidx.core.content.ContextCompat
 import com.bugsnag.android.Bugsnag
 import com.bugsnag.android.BugsnagExitInfoPlugin
@@ -105,6 +107,7 @@ class App : Application(), CoroutineScope by MainScope(), EventObserver {
     }
 
     private val sensorManager by lazy { getSystemService(SENSOR_SERVICE) as SensorManager }
+    private val alarmManager by lazy { getSystemService(ALARM_SERVICE) as AlarmManager }
     private val lsDisplayManager by lazy { LSDisplayManager.getInstance(this) }
 
     private val prefsHandler by lazy {
@@ -334,6 +337,32 @@ class App : Application(), CoroutineScope by MainScope(), EventObserver {
             registerProxListener()
         } else {
             unregisterProxListener()
+        }
+    }
+
+    fun updateAutoChangeForStack(stackId: Int) {
+        val changeInfo = prefManager.widgetStackAutoChange[stackId]
+
+        val pi = PendingIntentCompat.getBroadcast(
+            this,
+            stackId + 50000,
+            WidgetStackProvider.createSwapIntent(
+                this,
+                intArrayOf(stackId),
+                false,
+            ),
+            0,
+            true,
+        )!!
+
+        if (changeInfo?.first == true) {
+            alarmManager.set(
+                AlarmManager.RTC,
+                System.currentTimeMillis() + changeInfo.second,
+                pi,
+            )
+        } else {
+            alarmManager.cancel(pi)
         }
     }
 

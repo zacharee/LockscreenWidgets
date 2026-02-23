@@ -3,11 +3,12 @@ package tk.zwander.common.compose.components
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Switch
@@ -33,55 +34,66 @@ fun CardSwitch(
     titleTextStyle: TextStyle = MaterialTheme.typography.headlineSmall,
     summaryTextStyle: TextStyle = MaterialTheme.typography.bodyMedium,
     backgroundColor: Color = Color.Transparent,
+    accessory: (@Composable RowScope.() -> Unit)? = null,
 ) {
-    Row(modifier = modifier) {
-        SubduedOutlinedButton(
-            onClick = {
-                onEnabledChanged(!enabled)
-            },
-            modifier = Modifier
-                .fillMaxWidth()
-                .heightIn(min = 64.dp)
-                .animateContentSize(),
-            colors = ButtonDefaults.outlinedButtonColors(
-                contentColor = MaterialTheme.colorScheme.onSurface,
-                containerColor = backgroundColor,
+    SubduedOutlinedButton(
+        onClick = {
+            onEnabledChanged(!enabled)
+        },
+        modifier = modifier
+            .then(
+                if (modifier == Modifier) {
+                    Modifier.fillMaxWidth()
+                } else {
+                    Modifier
+                },
             )
-        ) {
-            icon?.let {
-                Image(
-                    painter = icon,
-                    contentDescription = contentDescription,
-                    modifier = Modifier.size(48.dp)
-                )
-                Spacer(Modifier.size(8.dp))
-            }
-
-            Column(
-                modifier = Modifier.weight(1f)
-            ) {
-                Text(
-                    text = title,
-                    style = titleTextStyle
-                )
-
-                if (!summary.isNullOrBlank()) {
-                    Spacer(Modifier.size(4.dp))
-
-                    Text(
-                        text = summary,
-                        style = summaryTextStyle
-                    )
-                }
-            }
+            .wrapContentHeight()
+            .heightIn(min = 64.dp)
+            .animateContentSize(),
+        colors = ButtonDefaults.outlinedButtonColors(
+            contentColor = MaterialTheme.colorScheme.onSurface,
+            containerColor = backgroundColor,
+        ),
+    ) {
+        icon?.let {
+            Image(
+                painter = icon,
+                contentDescription = contentDescription,
+                modifier = Modifier.size(48.dp)
+            )
             Spacer(Modifier.size(8.dp))
-            Switch(
-                checked = enabled,
-                onCheckedChange = onEnabledChanged,
-                colors = SwitchDefaults.colors(
-                    uncheckedThumbColor = MaterialTheme.colorScheme.onSurface
-                )
-            )
         }
+
+        accessory?.let {
+            it()
+            Spacer(Modifier.size(8.dp))
+        }
+
+        Column(
+            modifier = Modifier.weight(1f),
+        ) {
+            Text(
+                text = title,
+                style = titleTextStyle
+            )
+
+            if (!summary.isNullOrBlank()) {
+                Spacer(Modifier.size(4.dp))
+
+                Text(
+                    text = summary,
+                    style = summaryTextStyle
+                )
+            }
+        }
+        Spacer(Modifier.size(8.dp))
+        Switch(
+            checked = enabled,
+            onCheckedChange = onEnabledChanged,
+            colors = SwitchDefaults.colors(
+                uncheckedThumbColor = MaterialTheme.colorScheme.onSurface
+            ),
+        )
     }
 }

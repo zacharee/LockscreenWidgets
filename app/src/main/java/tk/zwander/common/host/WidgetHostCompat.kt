@@ -229,6 +229,14 @@ class WidgetHostCompat(
             context.widgetViewCacheRegistry.removeView(widget.id)
         }
         context.prefManager.widgetStackWidgets = newWidgets
+
+        val newIndices = context.prefManager.widgetStackIndices
+        newIndices.remove(appWidgetId)
+        context.prefManager.widgetStackIndices = newIndices
+
+        val newAutoChange = context.prefManager.widgetStackAutoChange
+        newAutoChange.remove(appWidgetId)
+        context.prefManager.widgetStackAutoChange = newAutoChange
     }
 
     @SuppressLint("PrivateApi")

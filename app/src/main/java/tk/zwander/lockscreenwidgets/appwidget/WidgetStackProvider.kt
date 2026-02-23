@@ -18,6 +18,7 @@ import tk.zwander.common.appwidget.RemoteViewsProxyService
 import tk.zwander.common.host.widgetHostCompat
 import tk.zwander.common.util.getRemoteViewsToApplyCompat
 import tk.zwander.common.util.prefManager
+import tk.zwander.lockscreenwidgets.App
 import tk.zwander.lockscreenwidgets.BuildConfig
 import tk.zwander.lockscreenwidgets.R
 import tk.zwander.lockscreenwidgets.activities.WidgetStackConfigure
@@ -271,6 +272,7 @@ class WidgetStackProvider : AppWidgetProvider() {
                 view.removeFromParent(R.id.stack_configure)
             }
 
+            App.instance.updateAutoChangeForStack(appWidgetId)
             appWidgetManager.updateAppWidget(appWidgetId, view)
         }
     }
@@ -323,7 +325,7 @@ class WidgetStackProvider : AppWidgetProvider() {
             )
         }
 
-        private fun createSwapIntent(context: Context, ids: IntArray, backward: Boolean): Intent {
+        fun createSwapIntent(context: Context, ids: IntArray, backward: Boolean): Intent {
             return createBaseIntent(context, ids)
                 .setAction(ACTION_SWAP_INDEX)
                 .putExtra(EXTRA_BACKWARD, backward)
