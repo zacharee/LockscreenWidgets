@@ -297,4 +297,7 @@
     <string name="default_display_desc">Katlanabilir cihazlarda, varsayılan ekran genellikle cihazın açık veya kapalı olmasına bağlı olarak iç ve dış ekran arasında geçiş yapar. Kapaklı cihazlarda ise genellikle her zaman iç ekran kullanılır.</string>
     <string name="square">Kare</string>
     <string name="tall">Yüksek</string>
+    <string name="auto_cycle">Automatically Cycle</string>
+    <string name="delay">Delay</string>
+    <string name="unit_milliseconds">ms</string>
 </resources>
