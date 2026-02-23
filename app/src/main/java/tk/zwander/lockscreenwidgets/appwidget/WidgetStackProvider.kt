@@ -35,6 +35,7 @@ class WidgetStackProvider : AppWidgetProvider() {
         fromHost = intent.getBooleanExtra(EXTRA_FROM_HOST, false)
 
         if (intent.action == ACTION_SWAP_INDEX) {
+            val backward = intent.getBooleanExtra(EXTRA_BACKWARD, false)
             val widgetIds = intent.getIntArrayExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS)
 
             widgetIds?.forEach { widgetId ->
@@ -44,10 +45,18 @@ class WidgetStackProvider : AppWidgetProvider() {
                 val index = (context.prefManager.widgetStackIndices[widgetId] ?: 0)
                     .coerceAtMost(stackedWidgets.lastIndex)
 
-                val newIndex = if (index + 1 <= stackedWidgets.lastIndex) {
-                    index + 1
+                val newIndex = if (backward) {
+                    if (index - 1 >= 0) {
+                        index - 1
+                    } else {
+                        stackedWidgets.lastIndex
+                    }
                 } else {
-                    0
+                    if (index + 1 <= stackedWidgets.lastIndex) {
+                        index + 1
+                    } else {
+                        0
+                    }
                 }
 
                 context.prefManager.widgetStackIndices = context.prefManager.widgetStackIndices.apply {
@@ -70,18 +79,29 @@ class WidgetStackProvider : AppWidgetProvider() {
         appWidgetIds.forEach { appWidgetId ->
             val view = RemoteViews(context.packageName, R.layout.stack_widget)
             val stackedWidgets = (context.prefManager.widgetStackWidgets[appWidgetId] ?: LinkedHashSet()).toList()
-            val stackSwap = RemoteViews(context.packageName, R.layout.stack_swap)
+            val stackForward = RemoteViews(context.packageName, R.layout.stack_forward)
+            val stackBackward = RemoteViews(context.packageName, R.layout.stack_backward)
             val stackConfigure = RemoteViews(context.packageName, R.layout.stack_configure)
 
-            stackSwap.setOnClickPendingIntent(
-                R.id.stack_swap,
+            stackForward.setOnClickPendingIntent(
+                R.id.stack_forward,
                 PendingIntentCompat.getBroadcast(
                     context,
                     appWidgetId,
-                    createSwapIntent(context, intArrayOf(appWidgetId)),
+                    createSwapIntent(context, intArrayOf(appWidgetId), false),
                     0,
                     false,
                 )
+            )
+            stackBackward.setOnClickPendingIntent(
+                R.id.stack_backward,
+                PendingIntentCompat.getBroadcast(
+                    context,
+                    appWidgetId + 100000,
+                    createSwapIntent(context, intArrayOf(appWidgetId), true),
+                    0,
+                    false,
+                ),
             )
 
             stackConfigure.setOnClickPendingIntent(
@@ -102,6 +122,9 @@ class WidgetStackProvider : AppWidgetProvider() {
 
             view.removeAllViews(R.id.widget_content)
             view.removeAllViews(R.id.stack_dot_row)
+            view.removeFromParent(R.id.stack_backward)
+            view.removeFromParent(R.id.stack_forward)
+            view.removeFromParent(R.id.stack_configure)
 
             if (stackedWidgets.isNotEmpty()) {
                 repeat(stackedWidgets.size) {
@@ -131,7 +154,8 @@ class WidgetStackProvider : AppWidgetProvider() {
                     .get(viewsToApply) as? MutableList<Any>
 
                 view.addView(R.id.widget_content, viewsToApply)
-                view.addView(R.id.widget_root, stackSwap)
+                view.addView(R.id.widget_root, stackForward)
+                view.addView(R.id.widget_root, stackBackward)
                 view.addView(R.id.widget_root, stackConfigure)
 
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.VANILLA_ICE_CREAM && widgetView.hasLegacyLists()) {
@@ -259,6 +283,7 @@ class WidgetStackProvider : AppWidgetProvider() {
     companion object {
         const val ACTION_SWAP_INDEX = "${BuildConfig.APPLICATION_ID}.intent.action.SWAP_INDEX"
         const val EXTRA_FROM_HOST = "from_host"
+        const val EXTRA_BACKWARD = "backward"
 
         fun update(context: Context, ids: IntArray, fromHost: Boolean = false) {
             context.sendBroadcast(
@@ -276,9 +301,10 @@ class WidgetStackProvider : AppWidgetProvider() {
             )
         }
 
-        private fun createSwapIntent(context: Context, ids: IntArray): Intent {
+        private fun createSwapIntent(context: Context, ids: IntArray, backward: Boolean): Intent {
             return createBaseIntent(context, ids)
                 .setAction(ACTION_SWAP_INDEX)
+                .putExtra(EXTRA_BACKWARD, backward)
         }
 
         private fun createBaseIntent(context: Context, ids: IntArray): Intent {
