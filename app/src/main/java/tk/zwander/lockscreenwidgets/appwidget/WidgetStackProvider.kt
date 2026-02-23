@@ -101,6 +101,22 @@ class WidgetStackProvider : AppWidgetProvider() {
                 .coerceAtLeast(0)
 
             view.removeAllViews(R.id.widget_content)
+            view.removeAllViews(R.id.stack_dot_row)
+
+            if (stackedWidgets.isNotEmpty()) {
+                repeat(stackedWidgets.size) {
+                    val dot = RemoteViews(context.packageName, R.layout.widget_stack_page_dot)
+                    dot.setImageViewResource(
+                        R.id.page_dot,
+                        if (index == it) {
+                            R.drawable.circle
+                        } else {
+                            R.drawable.circle_inactive
+                        },
+                    )
+                    view.addView(R.id.stack_dot_row, dot)
+                }
+            }
 
             stackedWidgets.getOrNull(index)?.let { widget ->
                 val widgetView = appWidgetService.getAppWidgetViews(context.packageName, widget.id) ?: return@forEach

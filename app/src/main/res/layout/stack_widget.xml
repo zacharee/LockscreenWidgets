@@ -9,4 +9,12 @@
         android:gravity="center"
         android:orientation="vertical"
         android:id="@+id/widget_content" />
+
+    <LinearLayout
+        android:id="@+id/stack_dot_row"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_gravity="center|bottom"
+        />
 </FrameLayout>
