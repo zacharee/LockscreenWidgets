@@ -297,4 +297,7 @@
     <string name="default_display_desc">Bei faltbaren Geräten schaltet der Standardbildschirm in der Regel zwischen dem internen und externen Bildschirm um, je nachdem, ob das Gerät geöffnet oder geschlossen ist. Auf Flip-Geräten ist es in der Regel immer der interne Bildschirm.</string>
     <string name="square">Quadrat</string>
     <string name="tall">Hoch</string>
+    <string name="auto_cycle">Automatically Cycle</string>
+    <string name="delay">Delay</string>
+    <string name="unit_milliseconds">ms</string>
 </resources>
