@@ -120,11 +120,7 @@ class WidgetStackProvider : AppWidgetProvider() {
                 .coerceAtMost(stackedWidgets.lastIndex)
                 .coerceAtLeast(0)
 
-            view.removeAllViews(R.id.widget_content)
             view.removeAllViews(R.id.stack_dot_row)
-            view.removeFromParent(R.id.stack_backward)
-            view.removeFromParent(R.id.stack_forward)
-            view.removeFromParent(R.id.stack_configure)
 
             if (stackedWidgets.isNotEmpty()) {
                 repeat(stackedWidgets.size) {
@@ -153,7 +149,27 @@ class WidgetStackProvider : AppWidgetProvider() {
                     .apply { isAccessible = true }
                     .get(viewsToApply) as? MutableList<Any>
 
-                view.addView(R.id.widget_content, viewsToApply)
+                val rem = index % 3
+
+                when (rem) {
+                    0 -> {
+                        view.removeAllViews(R.id.widget_content_even)
+                        view.addView(R.id.widget_content_even, viewsToApply)
+                    }
+
+                    1 -> {
+                        view.removeAllViews(R.id.widget_content_odd)
+                        view.addView(R.id.widget_content_odd, viewsToApply)
+                    }
+
+                    2 -> {
+                        view.removeAllViews(R.id.widget_content_third)
+                        view.addView(R.id.widget_content_third, viewsToApply)
+                    }
+                }
+
+                view.setDisplayedChild(R.id.widget_content, rem)
+
                 view.addView(R.id.widget_root, stackForward)
                 view.addView(R.id.widget_root, stackBackward)
                 view.addView(R.id.widget_root, stackConfigure)
@@ -246,7 +262,13 @@ class WidgetStackProvider : AppWidgetProvider() {
                         false,
                     ),
                 )
-                view.addView(R.id.widget_content, addWidgetView)
+                view.removeAllViews(R.id.widget_content_even)
+                view.removeAllViews(R.id.widget_content_odd)
+                view.addView(R.id.widget_content_even, addWidgetView)
+
+                view.removeFromParent(R.id.stack_backward)
+                view.removeFromParent(R.id.stack_forward)
+                view.removeFromParent(R.id.stack_configure)
             }
 
             appWidgetManager.updateAppWidget(appWidgetId, view)
