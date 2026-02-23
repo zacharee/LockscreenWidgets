@@ -299,4 +299,7 @@
     <string name="default_display_desc">На складных устройствах дисплей по умолчанию обычно переключается между внутренним и внешним дисплеем в зависимости от того, открыто или закрыто устройство. На раскладушках это, как правило, всегда внутренний дисплей.</string>
     <string name="square">Квадрат</string>
     <string name="tall">Плитка</string>
+    <string name="auto_cycle">Automatically Cycle</string>
+    <string name="delay">Delay</string>
+    <string name="unit_milliseconds">ms</string>
 </resources>
