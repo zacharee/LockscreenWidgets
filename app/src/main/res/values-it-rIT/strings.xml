@@ -297,4 +297,7 @@
     <string name="default_display_desc">Su dispositivi pieghevoli, lo schermo predefinito solitamente si alterna fra quello interno e quello esterno a seconda che il dispositivo sia aperto o chiuso. Nei dispositivi a conchiglia si tratta quasi sempre di quello interno.</string>
     <string name="square">Quadrato</string>
     <string name="tall">Verticale</string>
+    <string name="auto_cycle">Automatically Cycle</string>
+    <string name="delay">Delay</string>
+    <string name="unit_milliseconds">ms</string>
 </resources>
