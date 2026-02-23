@@ -1,3 +1,5 @@
+@file:Suppress("SuspendCoroutineLacksCancellationGuarantees")
+
 package tk.zwander.common.util
 
 import android.animation.Animator
@@ -18,13 +20,13 @@ import androidx.compose.ui.unit.Density
 import androidx.core.view.LayoutInflaterCompat
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
-import kotlinx.coroutines.suspendCancellableCoroutine
 import tk.zwander.common.adapters.BaseAdapter
 import tk.zwander.common.compose.AppTheme
 import tk.zwander.common.data.WidgetType
 import tk.zwander.common.util.compat.LayoutInflaterFactory2Compat
 import tk.zwander.lockscreenwidgets.R
 import kotlin.coroutines.resume
+import kotlin.coroutines.suspendCoroutine
 import kotlin.math.roundToInt
 import kotlin.math.sign
 
@@ -147,7 +149,7 @@ suspend fun View.fadeAndScaleOut(drawerOrFrame: DrawerOrFrame) {
         )
         duration = with(drawerOrFrame) { context.duration() }
     }
-    suspendCancellableCoroutine { continuation ->
+    suspendCoroutine { continuation ->
         animator.addListener(object : AnimatorListenerAdapter() {
             override fun onAnimationEnd(animation: Animator) {
                 scaleX = 0.95f
@@ -167,7 +169,7 @@ suspend fun View.fadeOut(drawerOrFrame: DrawerOrFrame) {
 
     val alphaAnimation = ObjectAnimator.ofFloat(this, "alpha", alpha, 0f)
     alphaAnimation.duration = with(drawerOrFrame) { context.duration() }
-    suspendCancellableCoroutine { continuation ->
+    suspendCoroutine { continuation ->
         alphaAnimation.addListener(
             object : AnimatorListenerAdapter() {
                 override fun onAnimationEnd(animation: Animator) {
@@ -196,7 +198,7 @@ suspend fun View.fadeAndScaleIn(drawerOrFrame: DrawerOrFrame) {
         duration = with(drawerOrFrame) { context.duration() }
     }
 
-    suspendCancellableCoroutine { continuation ->
+    suspendCoroutine { continuation ->
         animator.addListener(object : AnimatorListenerAdapter() {
             override fun onAnimationEnd(animation: Animator) {
                 scaleX = 1f
@@ -220,7 +222,7 @@ suspend fun View.fadeIn(drawerOrFrame: DrawerOrFrame) {
         )
         duration = with(drawerOrFrame) { context.duration() }
     }
-    suspendCancellableCoroutine { continuation ->
+    suspendCoroutine { continuation ->
         animator.addListener(object : AnimatorListenerAdapter() {
             override fun onAnimationEnd(animation: Animator) {
                 alpha = 1f

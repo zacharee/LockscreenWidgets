@@ -606,13 +606,12 @@ open class MainWidgetFrameDelegate protected constructor(
 
                 viewModel.animationState.value = AnimationState.STATE_ADDING
 
-                if (wm?.safeAddView(frame, params) != true) {
-                    viewModel.animationState.value = AnimationState.STATE_IDLE
-                } else {
+                if (wm?.safeAddView(frame, params) == true) {
                     frame.fadeAndScaleIn(DrawerOrFrame.FRAME)
-                    viewModel.animationState.value = AnimationState.STATE_IDLE
                     eventManager.sendEvent(Event.FrameAttachmentState(id, true))
                 }
+
+                viewModel.animationState.value = AnimationState.STATE_IDLE
             }
         }
     }
@@ -644,23 +643,25 @@ open class MainWidgetFrameDelegate protected constructor(
                 if (frame.isAttachedToWindow) {
                     wm?.safeRemoveView(frame)
                 }
-                viewModel.animationState.value = AnimationState.STATE_IDLE
             } else if (!frame.isAttachedToWindow) {
                 wm?.safeRemoveView(frame, false)
-
-                viewModel.animationState.value = AnimationState.STATE_IDLE
             }
+
+            viewModel.animationState.value = AnimationState.STATE_IDLE
+            eventManager.sendEvent(Event.FrameAttachmentState(id, false))
         }
     }
 
     suspend fun updateWindowState(updateAccessibility: Boolean = false) {
-        if (canShow()) {
-            if (updateAccessibility) updateAccessibilityPass()
-            addWindow()
-        } else {
-            removeWindow()
-            if (updateAccessibility) updateAccessibilityPass()
-        }
+        lifecycleScope.launch {
+            if (canShow()) {
+                if (updateAccessibility) updateAccessibilityPass()
+                addWindow()
+            } else {
+                removeWindow()
+                if (updateAccessibility) updateAccessibilityPass()
+            }
+        }.join()
     }
 
     /**
