@@ -296,4 +296,7 @@
     <string name="default_display_desc">在可折叠设备上，默认显示通常在内部和外部显示之间切换，取决于设备是打开还是关闭。 翻转设备时，它通常总是内部显示。</string>
     <string name="square">正方形</string>
     <string name="tall">高</string>
+    <string name="auto_cycle">Automatically Cycle</string>
+    <string name="delay">Delay</string>
+    <string name="unit_milliseconds">ms</string>
 </resources>
