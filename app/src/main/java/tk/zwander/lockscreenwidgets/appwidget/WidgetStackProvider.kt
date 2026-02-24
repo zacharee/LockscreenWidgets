@@ -74,7 +74,6 @@ class WidgetStackProvider : AppWidgetProvider() {
         super.onReceive(context, intent)
     }
 
-    @Suppress("UNCHECKED_CAST")
     override fun onUpdate(
         context: Context,
         appWidgetManager: AppWidgetManager,
@@ -168,7 +167,6 @@ class WidgetStackProvider : AppWidgetProvider() {
         }
     }
 
-    @Suppress("UNCHECKED_CAST")
     private fun createViewsForSize(
         context: Context,
         appWidgetManager: AppWidgetManager,
