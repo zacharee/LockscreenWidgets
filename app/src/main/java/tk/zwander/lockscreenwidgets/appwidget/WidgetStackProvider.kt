@@ -7,7 +7,6 @@ import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import android.os.ServiceManager
-import android.util.Log
 import android.util.SizeF
 import android.util.SparseArray
 import android.widget.RemoteViews
@@ -244,8 +243,6 @@ class WidgetStackProvider : AppWidgetProvider() {
         } else {
             rem
         }
-
-        Log.e("LSW", "$realRem")
 
         when (realRem) {
             0 -> {
