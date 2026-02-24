@@ -100,9 +100,9 @@ class ZeroPaddingAppWidgetHostView(
     override fun updateAppWidgetOptions(options: Bundle?) {
         super.updateAppWidgetOptions(options)
 
-//        findWidgetStackId()?.let {
-//            WidgetStackProvider.updateOptions(context, intArrayOf(it), options)
-//        }
+        findWidgetStackId()?.let {
+            WidgetStackProvider.updateOptions(context, intArrayOf(it), options)
+        }
     }
 
     private fun findWidgetStackId(): Int? {
