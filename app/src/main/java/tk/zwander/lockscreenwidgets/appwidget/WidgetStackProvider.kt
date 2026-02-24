@@ -7,6 +7,7 @@ import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import android.os.ServiceManager
+import android.util.Log
 import android.util.SizeF
 import android.util.SparseArray
 import android.widget.RemoteViews
@@ -227,9 +228,26 @@ class WidgetStackProvider : AppWidgetProvider() {
 
         val viewsToApply = rootWidgetViews.getRemoteViewsToApplyCompat(context, realSize?.let { SizeF(it.first, it.second) })
 
-        val rem = (index / 2 + index % 2) % 3
+        val rem = index % 3
+        val prevIndex = if (index > 0) {
+            index - 1
+        } else {
+            stackSize - 1
+        }
+        val prevRem = prevIndex % 3
+        val realRem = if (rem == prevRem) {
+            if (rem > 0) {
+                rem - 1
+            } else {
+                2
+            }
+        } else {
+            rem
+        }
 
-        when (rem) {
+        Log.e("LSW", "$realRem")
+
+        when (realRem) {
             0 -> {
                 view.removeAllViews(R.id.widget_content_even)
                 view.addView(R.id.widget_content_even, viewsToApply)
@@ -246,7 +264,7 @@ class WidgetStackProvider : AppWidgetProvider() {
             }
         }
 
-        view.setDisplayedChild(R.id.widget_content, rem)
+        view.setDisplayedChild(R.id.widget_content, realRem)
 
         view.addView(R.id.widget_root, stackForward)
         view.addView(R.id.widget_root, stackBackward)
