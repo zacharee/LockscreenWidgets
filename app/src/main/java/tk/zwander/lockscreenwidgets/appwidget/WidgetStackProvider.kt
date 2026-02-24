@@ -13,6 +13,7 @@ import android.widget.RemoteViews
 import androidx.core.app.PendingIntentCompat
 import androidx.core.os.BundleCompat
 import androidx.core.util.forEach
+import androidx.core.util.plus
 import com.android.internal.appwidget.IAppWidgetService
 import tk.zwander.common.appwidget.RemoteViewsProxyService
 import tk.zwander.common.data.WidgetData
@@ -92,50 +93,16 @@ class WidgetStackProvider : AppWidgetProvider() {
                 }
 
             val allViews = widgetView?.let {
-                val outerView = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                    val sizes = BundleCompat.getParcelableArrayList(
-                        options,
-                        AppWidgetManager.OPTION_APPWIDGET_SIZES,
-                        SizeF::class.java
-                    ) ?: listOf(
-                        SizeF(
-                            options.getInt(AppWidgetManager.OPTION_APPWIDGET_MAX_WIDTH).toFloat(),
-                            options.getInt(AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT).toFloat(),
-                        ),
-                    )
-
-                    sizes.associateWith { size ->
-                        createViewsForSize(
-                            context = context,
-                            appWidgetManager = appWidgetManager,
-                            stackId = appWidgetId,
-                            size = size,
-                            options = options,
-                            widgetData = widgetData,
-                            index = index,
-                            stackSize = stackedWidgets.size,
-                            rootWidgetViews = widgetView,
-                        )
-                    }.takeIf { it.isNotEmpty() }?.let {
-                        RemoteViews(it)
-                    }
-                } else {
-                    createViewsForSize(
-                        context = context,
-                        appWidgetManager = appWidgetManager,
-                        stackId = appWidgetId,
-                        size = null,
-                        options = options,
-                        widgetData = widgetData,
-                        index = index,
-                        stackSize = stackedWidgets.size,
-                        rootWidgetViews = widgetView,
-                    )
-                } ?: return@forEach
-
-                hoistWidgetData(context, widgetView, outerView, widgetData.id)
-
-                outerView
+                createViewsForSize(
+                    context = context,
+                    appWidgetManager = appWidgetManager,
+                    stackId = appWidgetId,
+                    options = options,
+                    widgetData = widgetData,
+                    index = index,
+                    stackSize = stackedWidgets.size,
+                    rootWidgetViews = widgetView,
+                )
             } ?: run {
                 val view = RemoteViews(context.packageName, R.layout.stack_widget)
                 val addWidgetView = RemoteViews(context.packageName, R.layout.add_widget)
@@ -171,7 +138,6 @@ class WidgetStackProvider : AppWidgetProvider() {
         context: Context,
         appWidgetManager: AppWidgetManager,
         stackId: Int,
-        size: SizeF?,
         options: Bundle?,
         widgetData: WidgetData,
         index: Int,
@@ -231,9 +197,37 @@ class WidgetStackProvider : AppWidgetProvider() {
             view.addView(R.id.stack_dot_row, dot)
         }
 
-        val viewsToApply = rootWidgetViews.getRemoteViewsToApplyCompat(context, size)
+        val realSize = options?.let {
+            val optionsWidth = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MAX_WIDTH).toFloat()
+            val optionsHeight = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT).toFloat()
 
-        val rem = index % 3
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                val allSizes = BundleCompat.getParcelableArrayList(
+                    options,
+                    AppWidgetManager.OPTION_APPWIDGET_SIZES,
+                    SizeF::class.java,
+                )
+
+                (allSizes?.minOf { it.width } ?: optionsWidth) to (allSizes?.maxOf { it.height } ?: optionsHeight)
+            } else {
+                optionsWidth to optionsHeight
+            }
+        }
+
+        realSize?.apply {
+            options.putInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH, realSize.first.roundToInt())
+            options.putInt(AppWidgetManager.OPTION_APPWIDGET_MAX_WIDTH, realSize.first.roundToInt())
+            options.putInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT, realSize.second.roundToInt())
+            options.putInt(AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT, realSize.second.roundToInt())
+        }
+
+        if (options?.matches(appWidgetManager.getAppWidgetOptions(widgetData.id)) != true) {
+            appWidgetManager.updateAppWidgetOptions(widgetData.id, options)
+        }
+
+        val viewsToApply = rootWidgetViews.getRemoteViewsToApplyCompat(context, realSize?.let { SizeF(it.first, it.second) })
+
+        val rem = (index / 2 + index % 2) % 3
 
         when (rem) {
             0 -> {
@@ -254,37 +248,17 @@ class WidgetStackProvider : AppWidgetProvider() {
 
         view.setDisplayedChild(R.id.widget_content, rem)
 
-        val optionsToApply = options?.apply {
-            val optionsWidth = getInt(AppWidgetManager.OPTION_APPWIDGET_MAX_WIDTH).toFloat()
-            val optionsHeight = getInt(AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT).toFloat()
-
-            val (realMaxWidth, realMaxHeight) = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                val allSizes = BundleCompat.getParcelableArrayList(
-                    this,
-                    AppWidgetManager.OPTION_APPWIDGET_SIZES,
-                    SizeF::class.java,
-                )
-
-                (allSizes?.minOf { it.width } ?: optionsWidth) to (allSizes?.maxOf { it.height } ?: optionsHeight)
-            } else {
-                optionsWidth to optionsHeight
-            }
-
-            putInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH, realMaxWidth.roundToInt())
-            putInt(AppWidgetManager.OPTION_APPWIDGET_MAX_WIDTH, realMaxWidth.roundToInt())
-            putInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT, realMaxHeight.roundToInt())
-            putInt(AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT, realMaxHeight.roundToInt())
-        }
-
-        if (optionsToApply?.matches(appWidgetManager.getAppWidgetOptions(widgetData.id)) != true) {
-            appWidgetManager.updateAppWidgetOptions(widgetData.id, optionsToApply)
-        }
-
         view.addView(R.id.widget_root, stackForward)
         view.addView(R.id.widget_root, stackBackward)
         view.addView(R.id.widget_root, stackConfigure)
 
-        hoistWidgetData(context, viewsToApply, view, widgetData.id)
+        hoistWidgetData(
+            context = context,
+            innerView = viewsToApply,
+            outerView = view,
+            rootWidgetViews = rootWidgetViews,
+            innerWidgetId = widgetData.id
+        )
 
         return view
     }
@@ -347,6 +321,7 @@ class WidgetStackProvider : AppWidgetProvider() {
             context: Context,
             innerView: RemoteViews,
             outerView: RemoteViews,
+            rootWidgetViews: RemoteViews,
             innerWidgetId: Int,
         ) {
             val sourceActions = innerView::class.java.getDeclaredField("mActions")
@@ -357,6 +332,10 @@ class WidgetStackProvider : AppWidgetProvider() {
                 val collectionCacheSource = innerView::class.java.getDeclaredField("mCollectionCache")
                     .apply { isAccessible = true }
                     .get(innerView)
+                val rootCollectionCacheSource = rootWidgetViews::class.java.getDeclaredField("mCollectionCache")
+                    .apply { isAccessible = true }
+                    .get(rootWidgetViews)
+
                 val collectionCacheDest = outerView::class.java.getDeclaredField("mCollectionCache")
                     .apply { isAccessible = true }
                     .get(outerView)
@@ -368,8 +347,15 @@ class WidgetStackProvider : AppWidgetProvider() {
                     .apply { isAccessible = true }
                     .get(collectionCacheSource) as Map<String, *>
 
-                sourceIdToUriMapping.forEach { intentId, uri ->
-                    val items = sourceUriToCollectionMapping[uri]!!
+                val rootSourceIdToUriMapping = rootCollectionCacheSource::class.java.getDeclaredField("mIdToUriMapping")
+                    .apply { isAccessible = true }
+                    .get(rootCollectionCacheSource) as SparseArray<String>
+                val rootSourceUriToCollectionMapping = rootCollectionCacheSource::class.java.getDeclaredField("mUriToCollectionMapping")
+                    .apply { isAccessible = true }
+                    .get(rootCollectionCacheSource) as Map<String, *>
+
+                (sourceIdToUriMapping + rootSourceIdToUriMapping).forEach { intentId, uri ->
+                    val items = sourceUriToCollectionMapping[uri] ?: rootSourceUriToCollectionMapping[uri]!!
 
                     collectionCacheDest::class.java.getDeclaredMethod(
                         "addMapping",
