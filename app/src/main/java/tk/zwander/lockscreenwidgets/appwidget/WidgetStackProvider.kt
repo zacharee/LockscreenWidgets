@@ -11,6 +11,7 @@ import android.util.SizeF
 import android.util.SparseArray
 import android.widget.RemoteViews
 import androidx.core.app.PendingIntentCompat
+import androidx.core.net.toUri
 import androidx.core.os.BundleCompat
 import androidx.core.util.forEach
 import androidx.core.util.plus
@@ -324,6 +325,7 @@ class WidgetStackProvider : AppWidgetProvider() {
             return createBaseIntent(context, ids)
                 .setAction(ACTION_SWAP_INDEX)
                 .putExtra(EXTRA_BACKWARD, backward)
+                .setData("widget://${ids.joinToString(",")}".toUri())
         }
 
         private fun createBaseIntent(context: Context, ids: IntArray): Intent {
