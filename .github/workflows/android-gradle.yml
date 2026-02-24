@@ -20,12 +20,6 @@ jobs:
       with:
         distribution: 'corretto'
         java-version: '21'
-    - name: Get Latest Release
-      id: release
-      uses: pozetroninc/github-action-get-latest-release@master
-      with:
-        token: ${{ secrets.GITHUB_TOKEN }}
-        repository: ${{ github.repository }}
     - name: Grant execute permission for gradlew
       run: chmod +x gradlew
     - name: Download Android SDK
@@ -36,6 +30,12 @@ jobs:
       run: |
         ./gradlew :app:packageRelease
         ./gradlew --stop
+    - name: Get Latest Release
+      id: release
+      uses: pozetroninc/github-action-get-latest-release@master
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        repository: ${{ github.repository }}
     - name: Upload Logs
       if: ${{ always() }}
       uses: actions/upload-artifact@v4
