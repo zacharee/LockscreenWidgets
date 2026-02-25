@@ -38,6 +38,7 @@ class WidgetStackProvider : AppWidgetProvider() {
     }
 
     private var fromHost = false
+    private var forPageChange = false
 
     override fun onReceive(context: Context, intent: Intent) {
         fromHost = intent.getBooleanExtra(EXTRA_FROM_HOST, false)
@@ -45,6 +46,8 @@ class WidgetStackProvider : AppWidgetProvider() {
         if (intent.action == ACTION_SWAP_INDEX) {
             val backward = intent.getBooleanExtra(EXTRA_BACKWARD, false)
             val widgetIds = intent.getIntArrayExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS)
+
+            forPageChange = true
 
             widgetIds?.forEach { widgetId ->
                 val allStacks = context.prefManager.widgetStackWidgets
@@ -252,7 +255,9 @@ class WidgetStackProvider : AppWidgetProvider() {
             }
         }
 
-        view.setDisplayedChild(R.id.widget_content, realRem)
+        if (forPageChange) {
+            view.setDisplayedChild(R.id.widget_content, realRem)
+        }
 
         view.addView(R.id.widget_root, stackForward)
         view.addView(R.id.widget_root, stackBackward)
