@@ -110,36 +110,25 @@ class WidgetStackConfigure : BaseActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        setResult(
+            RESULT_CANCELED,
+            Intent().apply {
+                putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, widgetId)
+            },
+        )
+
         if (widgetId == -1) {
-            setResult(
-                RESULT_CANCELED,
-                Intent().apply {
-                    putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, widgetId)
-                },
-            )
             finish()
             return
-        } else {
-            setResult(
-                RESULT_OK,
-                Intent().apply {
-                    putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, widgetId)
-                },
-            )
         }
 
         setThemedContent {
-            var widgetStackWidgets by rememberPreferenceState(
+            val widgetStackWidgets by rememberPreferenceState(
                 key = PrefManager.KEY_WIDGET_STACK_WIDGETS,
                 value = {
                     (prefManager.widgetStackWidgets[widgetId] ?: LinkedHashSet()).toMutableList()
                 },
-                onChanged = { _, value ->
-                    val newWidgets = HashMap(prefManager.widgetStackWidgets)
-                    newWidgets[widgetId] = LinkedHashSet(value)
-
-                    prefManager.widgetStackWidgets = newWidgets
-                },
+                onChanged = { _, _ -> },
             )
 
             var autoChange by rememberPreferenceState(
@@ -161,12 +150,26 @@ class WidgetStackConfigure : BaseActivity() {
                             putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, widgetId)
                         },
                     )
-                    WidgetStackProvider.update(this, intArrayOf(widgetId))
+                    WidgetStackProvider.update(
+                        context = this,
+                        ids = intArrayOf(widgetId),
+                        fromConfig = it,
+                    )
                     finish()
                 },
                 widgets = widgetStackWidgets,
                 onWidgetsChange = {
-                    widgetStackWidgets = it.toMutableList()
+                    it.forEach { widget ->
+                        appWidgetManager.updateAppWidgetOptions(
+                            widget.id,
+                            appWidgetManager.getAppWidgetOptions(widgetId),
+                        )
+                    }
+
+                    val newWidgets = HashMap(prefManager.widgetStackWidgets)
+                    newWidgets[widgetId] = LinkedHashSet(it)
+
+                    prefManager.widgetStackWidgets = newWidgets
                 },
                 autoChange = autoChange,
                 onNewAutoChange = {
@@ -489,11 +492,6 @@ fun Content(
 
                     OutlinedButton(
                         onClick = {
-                            val intent = Intent(context, WidgetStackProvider::class.java)
-                            intent.action = AppWidgetManager.ACTION_APPWIDGET_UPDATE
-                            intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, widgetId)
-                            context.sendBroadcast(intent)
-
                             onWidgetsChange(localWidgetList)
                             onNewAutoChange(localAutoChange)
 

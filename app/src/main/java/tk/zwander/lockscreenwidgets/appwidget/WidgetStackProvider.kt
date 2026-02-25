@@ -37,11 +37,11 @@ class WidgetStackProvider : AppWidgetProvider() {
         )
     }
 
-    private var fromHost = false
+    private var fromConfig = false
     private var forPageChange = false
 
     override fun onReceive(context: Context, intent: Intent) {
-        fromHost = intent.getBooleanExtra(EXTRA_FROM_HOST, false)
+        fromConfig = intent.getBooleanExtra(EXTRA_FROM_CONFIG, false)
 
         if (intent.action == ACTION_SWAP_INDEX) {
             val backward = intent.getBooleanExtra(EXTRA_BACKWARD, false)
@@ -125,7 +125,9 @@ class WidgetStackProvider : AppWidgetProvider() {
                 )
                 view.removeAllViews(R.id.widget_content_even)
                 view.removeAllViews(R.id.widget_content_odd)
+                view.removeAllViews(R.id.widget_content_third)
                 view.addView(R.id.widget_content_even, addWidgetView)
+                view.setDisplayedChild(R.id.widget_content, 0)
 
                 view.removeAllViews(R.id.stack_dot_row)
                 view.removeFromParent(R.id.stack_backward)
@@ -255,7 +257,7 @@ class WidgetStackProvider : AppWidgetProvider() {
             }
         }
 
-        if (forPageChange) {
+        if (forPageChange || fromConfig) {
             view.setDisplayedChild(R.id.widget_content, realRem)
         }
 
@@ -297,14 +299,14 @@ class WidgetStackProvider : AppWidgetProvider() {
 
     companion object {
         const val ACTION_SWAP_INDEX = "${BuildConfig.APPLICATION_ID}.intent.action.SWAP_INDEX"
-        const val EXTRA_FROM_HOST = "from_host"
+        const val EXTRA_FROM_CONFIG = "from_host"
         const val EXTRA_BACKWARD = "backward"
 
-        fun update(context: Context, ids: IntArray, fromHost: Boolean = false) {
+        fun update(context: Context, ids: IntArray, fromConfig: Boolean = false) {
             context.sendBroadcast(
                 createBaseIntent(context, ids)
                     .setAction(AppWidgetManager.ACTION_APPWIDGET_UPDATE)
-                    .putExtra(EXTRA_FROM_HOST, fromHost),
+                    .putExtra(EXTRA_FROM_CONFIG, fromConfig),
             )
         }
 

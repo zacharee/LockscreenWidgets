@@ -94,7 +94,7 @@ class ZeroPaddingAppWidgetHostView(
         super.updateAppWidget(remoteViews)
 
         findWidgetStackId()?.let {
-            WidgetStackProvider.update(App.instance, intArrayOf(it), true)
+            WidgetStackProvider.update(App.instance, intArrayOf(it))
         }
     }
 
