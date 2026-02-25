@@ -12,7 +12,6 @@ import android.content.res.Resources
 import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.os.ServiceManager
-import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -343,8 +342,6 @@ fun Content(
                                         )
                                     }
                                 }
-
-                                Log.e("LSW", "Rendering ${widget.id} ${widgetView}")
 
                                 Row(
                                     verticalAlignment = Alignment.CenterVertically,
