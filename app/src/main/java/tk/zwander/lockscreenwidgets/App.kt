@@ -263,13 +263,41 @@ class App : Application(), CoroutineScope by MainScope(), EventObserver {
 
         widgetHostCompat.startListening(this)
 
+        val widgetsToDelete = mutableListOf<Int>()
+        prefManager.widgetStackWidgets = HashMap(
+            prefManager.widgetStackWidgets.mapNotNull { (stackId, widgets) ->
+                val hasStackInfo = appWidgetManager.getAppWidgetInfo(stackId) != null
+
+                if (!hasStackInfo) {
+                    widgetsToDelete.add(stackId)
+                    null
+                } else {
+                    widgets.removeAll { widget ->
+                        (appWidgetManager.getAppWidgetInfo(widget.id) == null).also {
+                            if (it) {
+                                widgetsToDelete.add(widget.id)
+                            }
+                        }
+                    }
+
+                    stackId to widgets
+                }
+            }.toMap(),
+        )
+
+        widgetsToDelete.forEach {
+            widgetHostCompat.deleteAppWidgetId(it)
+        }
+
         prefManager.widgetStackWidgets.takeIf { it.isNotEmpty() }?.let {
-            val correctMap = it.filter { (stackId, _) ->
+            val correctMap = it.filter { (stackId, widgets) ->
+
+
                 if (appWidgetManager.getAppWidgetInfo(stackId) == null) {
                     widgetHostCompat.deleteAppWidgetId(stackId)
                     false
                 } else {
-                    true
+                    widgets.isNotEmpty()
                 }
             }
 

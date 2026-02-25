@@ -99,22 +99,18 @@ class WidgetHostCompat(
 
     private val prefsHandler = HandlerRegistry {
         handler(PrefManager.KEY_WIDGET_STACK_WIDGETS) {
-            context.prefManager.widgetStackWidgets = HashMap(
-                context.prefManager.widgetStackWidgets.map { (stackId, widgets) ->
-                    widgets.mapNotNull { widget ->
-                        // Allows listening to events from original/wrapped widget providers on older
-                        // Android versions.
-                        context.widgetViewCacheRegistry.getOrCreateView(
-                            context = context,
-                            appWidget = context.appWidgetManager.getAppWidgetInfo(widget.id) ?:
-                            return@mapNotNull null,
-                            appWidgetId = widget.id,
-                        )
-                    }
-
-                    stackId to widgets
-                }.toMap(),
-            )
+            context.prefManager.widgetStackWidgets.forEach { (stackId, widgets) ->
+                widgets.forEach { widget ->
+                    // Allows listening to events from original/wrapped widget providers on older
+                    // Android versions.
+                    context.widgetViewCacheRegistry.getOrCreateView(
+                        context = context,
+                        appWidget = context.appWidgetManager.getAppWidgetInfo(widget.id)
+                            ?: return@forEach,
+                        appWidgetId = widget.id,
+                    )
+                }
+            }
         }
     }
 
@@ -204,6 +200,7 @@ class WidgetHostCompat(
         val newWidgets = context.prefManager.widgetStackWidgets
         newWidgets.remove(appWidgetId)?.forEach { widget ->
             context.widgetViewCacheRegistry.removeView(widget.id)
+            deleteAppWidgetId(widget.id)
         }
         context.prefManager.widgetStackWidgets = newWidgets
 
