@@ -184,6 +184,10 @@ fun Content(
         mutableStateOf<WidgetData?>(null)
     }
 
+    var localRemovedWidgets by remember {
+        mutableStateOf<List<WidgetData>>(listOf())
+    }
+
     var localWidgetList by remember {
         mutableStateOf(widgets)
     }
@@ -193,7 +197,7 @@ fun Content(
     }
 
     LaunchedEffect(widgets) {
-        localWidgetList = widgets
+        localWidgetList = widgets.filterNot { localRemovedWidgets.contains(it) }
     }
 
     val systemBarsBottomPadding = WindowInsets.systemBars.only(WindowInsetsSides.Bottom)
@@ -459,6 +463,7 @@ fun Content(
                     onClick = {
                         val newWidgets = localWidgetList.toMutableList()
                         newWidgets.remove(pendingRemoval)
+                        localRemovedWidgets = localRemovedWidgets + pendingRemoval
 
                         localWidgetList = newWidgets
 
