@@ -382,7 +382,7 @@ abstract class BaseBindWidgetActivity : BaseActivity() {
         currentWidgets = currentWidgets.apply {
             add(data)
         }
-        if (pendingErrors == 1) {
+        if (pendingErrors == 0) {
             onItemSuccessfullyAdded(data)
         }
         finishIfNoErrors()
