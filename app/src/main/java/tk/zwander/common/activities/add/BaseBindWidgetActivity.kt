@@ -378,11 +378,17 @@ abstract class BaseBindWidgetActivity : BaseActivity() {
      * @param id the ID of the widget to be added
      */
     protected open fun addNewWidget(id: Int, provider: AppWidgetProviderInfo) {
+        val data = createWidgetData(id, provider)
         currentWidgets = currentWidgets.apply {
-            add(createWidgetData(id, provider))
+            add(data)
+        }
+        if (pendingErrors == 1) {
+            onItemSuccessfullyAdded(data)
         }
         finishIfNoErrors()
     }
+
+    protected open fun onItemSuccessfullyAdded(data: WidgetData) {}
 
     protected open val colCount: Int
         get() = FramePrefs.getColCountForFrame(this, holderId)
@@ -440,6 +446,9 @@ abstract class BaseBindWidgetActivity : BaseActivity() {
     protected open fun addNewShortcut(shortcut: WidgetData) {
         currentWidgets = currentWidgets.apply {
             add(shortcut)
+        }
+        if (pendingErrors == 0) {
+            onItemSuccessfullyAdded(shortcut)
         }
         finishIfNoErrors()
     }

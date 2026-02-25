@@ -19,6 +19,8 @@ import com.android.internal.appwidget.IAppWidgetService
 import tk.zwander.common.appwidget.RemoteViewsProxyService
 import tk.zwander.common.data.WidgetData
 import tk.zwander.common.host.widgetHostCompat
+import tk.zwander.common.util.Event
+import tk.zwander.common.util.eventManager
 import tk.zwander.common.util.getRemoteViewsToApplyCompat
 import tk.zwander.common.util.matches
 import tk.zwander.common.util.prefManager
@@ -132,6 +134,7 @@ class WidgetStackProvider : AppWidgetProvider() {
 
             App.instance.updateAutoChangeForStack(appWidgetId)
             appWidgetManager.updateAppWidget(appWidgetId, allViews)
+            context.eventManager.sendEvent(Event.StackUpdateComplete(appWidgetId))
         }
     }
 
@@ -199,20 +202,7 @@ class WidgetStackProvider : AppWidgetProvider() {
         }
 
         val realSize = options?.let {
-            val optionsWidth = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MAX_WIDTH).toFloat()
-            val optionsHeight = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT).toFloat()
-
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                val allSizes = BundleCompat.getParcelableArrayList(
-                    options,
-                    AppWidgetManager.OPTION_APPWIDGET_SIZES,
-                    SizeF::class.java,
-                )
-
-                (allSizes?.minOf { it.width } ?: optionsWidth) to (allSizes?.maxOf { it.height } ?: optionsHeight)
-            } else {
-                optionsWidth to optionsHeight
-            }
+            extractSizeFromOptions(it)
         }
 
         realSize?.apply {
@@ -326,6 +316,23 @@ class WidgetStackProvider : AppWidgetProvider() {
                 .setAction(ACTION_SWAP_INDEX)
                 .putExtra(EXTRA_BACKWARD, backward)
                 .setData("widget://${ids.joinToString(",")}".toUri())
+        }
+
+        fun extractSizeFromOptions(options: Bundle): Pair<Float, Float> {
+            val optionsWidth = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MAX_WIDTH).toFloat()
+            val optionsHeight = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT).toFloat()
+
+            return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                val allSizes = BundleCompat.getParcelableArrayList(
+                    options,
+                    AppWidgetManager.OPTION_APPWIDGET_SIZES,
+                    SizeF::class.java,
+                )
+
+                (allSizes?.minOf { it.width } ?: optionsWidth) to (allSizes?.maxOf { it.height } ?: optionsHeight)
+            } else {
+                optionsWidth to optionsHeight
+            }
         }
 
         private fun createBaseIntent(context: Context, ids: IntArray): Intent {

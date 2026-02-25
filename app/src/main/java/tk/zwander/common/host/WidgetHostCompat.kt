@@ -24,9 +24,7 @@ import tk.zwander.common.util.globalState
 import tk.zwander.common.util.handler
 import tk.zwander.common.util.logUtils
 import tk.zwander.common.util.prefManager
-import tk.zwander.common.util.themedContext
 import tk.zwander.common.views.ZeroPaddingAppWidgetHostView
-import tk.zwander.lockscreenwidgets.appwidget.WidgetStackProvider
 import tk.zwander.lockscreenwidgets.util.IconPrefs
 import java.lang.reflect.InvocationHandler
 import java.lang.reflect.Method
@@ -106,7 +104,7 @@ class WidgetHostCompat(
                     // Allows listening to events from original/wrapped widget providers on older
                     // Android versions.
                     context.widgetViewCacheRegistry.getOrCreateView(
-                        context = context.themedContext,
+                        context = context,
                         appWidget = context.appWidgetManager.getAppWidgetInfo(widget.id) ?: run {
                             context.prefManager.widgetStackWidgets = context.prefManager.widgetStackWidgets.apply {
                                 this[stackId] = widgets.apply {
@@ -117,25 +115,6 @@ class WidgetHostCompat(
                         },
                         appWidgetId = widget.id,
                     )
-
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                        setListener(
-                            widget.id,
-                            object : AppWidgetHostListener {
-                                override fun onUpdateProviderInfo(appWidget: AppWidgetProviderInfo?) {
-                                    WidgetStackProvider.update(context, intArrayOf(stackId), true)
-                                }
-
-                                override fun updateAppWidget(views: RemoteViews?) {
-                                    WidgetStackProvider.update(context, intArrayOf(stackId), true)
-                                }
-
-                                override fun onViewDataChanged(viewId: Int) {
-                                    WidgetStackProvider.update(context, intArrayOf(stackId), true)
-                                }
-                            },
-                        )
-                    }
                 }
             }
         }

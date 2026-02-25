@@ -35,7 +35,7 @@ class WidgetViewCacheRegistry private constructor(@Suppress("unused") private va
             RemoteViewsLayoutInflaterContext(
                 context.safeApplicationContext.themedContext.createApplicationContext(
                     appWidget.providerInfo.applicationInfo,
-                    CONTEXT_INCLUDE_CODE,
+                    CONTEXT_INCLUDE_CODE or Context.CONTEXT_IGNORE_SECURITY,
                 ),
                 appWidgetId,
             )

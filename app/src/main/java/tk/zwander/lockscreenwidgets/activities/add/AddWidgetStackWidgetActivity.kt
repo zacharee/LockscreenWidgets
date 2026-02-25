@@ -21,12 +21,8 @@ class AddWidgetStackWidgetActivity : AddWidgetActivity() {
     override val rowCount: Int = 1
     override var currentWidgets: MutableSet<WidgetData>
         get() = prefManager.widgetStackWidgets[widgetId] ?: LinkedHashSet()
-        set(value) {
-            val newWidgets = prefManager.widgetStackWidgets
-            newWidgets[widgetId] = LinkedHashSet(value)
-
-            prefManager.widgetStackWidgets = newWidgets
-        }
+        // Saving happens in the configuration Activity when hitting Apply.
+        set(_) {}
 
     override fun onCreate(savedInstanceState: Bundle?) {
         if (widgetId == -1) {
@@ -36,7 +32,19 @@ class AddWidgetStackWidgetActivity : AddWidgetActivity() {
         super.onCreate(savedInstanceState)
     }
 
+    override fun onItemSuccessfullyAdded(data: WidgetData) {
+        setResult(
+            RESULT_OK,
+            Intent().putExtra(
+                EXTRA_ADDED_WIDGET,
+                data,
+            ),
+        )
+    }
+
     companion object {
+        const val EXTRA_ADDED_WIDGET = "added_widget"
+
         fun start(context: Context, widgetId: Int) {
             val intent = Intent(context, AddWidgetStackWidgetActivity::class.java)
             intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, widgetId)

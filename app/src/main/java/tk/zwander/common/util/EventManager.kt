@@ -146,6 +146,7 @@ sealed class Event {
         }
     }
     data class TrimMemory(val level: Int) : Event()
+    data class StackUpdateComplete(val stackId: Int) : Event()
 
     //*** Widget Drawer
     data object CloseDrawer : Event()

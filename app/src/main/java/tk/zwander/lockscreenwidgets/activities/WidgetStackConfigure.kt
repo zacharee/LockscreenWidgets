@@ -1,6 +1,7 @@
 package tk.zwander.lockscreenwidgets.activities
 
 import android.annotation.SuppressLint
+import android.appwidget.AppWidgetHostView
 import android.appwidget.AppWidgetManager
 import android.appwidget.AppWidgetProviderInfo
 import android.content.ComponentName
@@ -10,8 +11,11 @@ import android.content.pm.PackageManager
 import android.content.res.Resources
 import android.graphics.drawable.Drawable
 import android.os.Bundle
-import android.view.View
+import android.os.ServiceManager
+import android.util.Log
 import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -47,9 +51,11 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -63,8 +69,11 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.core.content.IntentCompat
 import androidx.core.graphics.drawable.IconCompat
+import com.android.internal.appwidget.IAppWidgetService
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import sh.calvin.reorderable.ReorderableItem
 import sh.calvin.reorderable.rememberReorderableLazyListState
@@ -76,14 +85,16 @@ import tk.zwander.common.compose.util.rememberPreferenceState
 import tk.zwander.common.compose.util.widgetViewCacheRegistry
 import tk.zwander.common.data.WidgetData
 import tk.zwander.common.data.WidgetSizeData
+import tk.zwander.common.host.widgetHostCompat
+import tk.zwander.common.util.Event
 import tk.zwander.common.util.PrefManager
 import tk.zwander.common.util.appWidgetManager
+import tk.zwander.common.util.eventManager
 import tk.zwander.common.util.getAllInstalledWidgetProviders
 import tk.zwander.common.util.loadPreviewOrIconDrawable
 import tk.zwander.common.util.logUtils
 import tk.zwander.common.util.prefManager
 import tk.zwander.common.util.setThemedContent
-import tk.zwander.common.util.themedContext
 import tk.zwander.lockscreenwidgets.R
 import tk.zwander.lockscreenwidgets.activities.add.AddWidgetStackWidgetActivity
 import tk.zwander.lockscreenwidgets.activities.add.WidgetStackReconfigureActivity
@@ -179,12 +190,23 @@ fun Content(
 ) {
     val context = LocalContext.current
     val density = LocalDensity.current
+    val iAppWidgetService = remember {
+        IAppWidgetService.Stub.asInterface(ServiceManager.getService(Context.APPWIDGET_SERVICE))
+    }
+
+    var eventCount by remember {
+        mutableIntStateOf(0)
+    }
 
     var widgetPendingRemoval by remember {
         mutableStateOf<WidgetData?>(null)
     }
 
     var localRemovedWidgets by remember {
+        mutableStateOf<List<WidgetData>>(listOf())
+    }
+
+    var localAddedWidgets by remember {
         mutableStateOf<List<WidgetData>>(listOf())
     }
 
@@ -196,8 +218,37 @@ fun Content(
         mutableStateOf(autoChange)
     }
 
+    val addWidgetLauncher = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+        val addedWidget = it.data?.let { intent ->
+            IntentCompat.getParcelableExtra(
+                intent,
+                AddWidgetStackWidgetActivity.EXTRA_ADDED_WIDGET,
+                WidgetData::class.java,
+            )
+        }
+
+        if (addedWidget != null) {
+            localAddedWidgets = localAddedWidgets + addedWidget
+            localWidgetList = localWidgetList + addedWidget
+        }
+    }
+
     LaunchedEffect(widgets) {
         localWidgetList = widgets.filterNot { localRemovedWidgets.contains(it) }
+    }
+
+    DisposableEffect(widgetId) {
+        val listener = { event: Event.StackUpdateComplete ->
+            if (event.stackId == widgetId) {
+                eventCount++
+            }
+        }
+
+        context.eventManager.addListener(listener)
+
+        onDispose {
+            context.eventManager.removeListener(listener)
+        }
     }
 
     val systemBarsBottomPadding = WindowInsets.systemBars.only(WindowInsetsSides.Bottom)
@@ -270,17 +321,30 @@ fun Content(
                                     }
                                 }
 
-                                var widgetView by remember(widget.id) {
-                                    mutableStateOf<View?>(null)
+                                var widgetView by remember {
+                                    mutableStateOf<AppWidgetHostView?>(null)
+                                }
+
+                                LaunchedEffect(eventCount) {
+                                    widgetView?.updateAppWidget(
+                                        iAppWidgetService.getAppWidgetViews(
+                                            context.packageName,
+                                            widget.id,
+                                        ),
+                                    )
                                 }
 
                                 LaunchedEffect(widget.id) {
-                                    widgetView = context.widgetViewCacheRegistry.getOrCreateView(
-                                        context = context.themedContext,
-                                        appWidget = providerInfo,
-                                        appWidgetId = widget.id,
-                                    )
+                                    launch(Dispatchers.IO) {
+                                        widgetView = context.widgetViewCacheRegistry.getOrCreateView(
+                                            context = context,
+                                            appWidget = providerInfo,
+                                            appWidgetId = widget.id,
+                                        )
+                                    }
                                 }
+
+                                Log.e("LSW", "Rendering ${widget.id} ${widgetView}")
 
                                 Row(
                                     verticalAlignment = Alignment.CenterVertically,
@@ -295,7 +359,8 @@ fun Content(
                                         label = null,
                                         subLabel = null,
                                         modifier = Modifier.weight(1f),
-                                        itemModifier = Modifier.heightIn(min = 150.dp)
+                                        itemModifier = Modifier
+                                            .heightIn(min = 150.dp)
                                             .padding(8.dp)
                                             .fillMaxWidth(),
                                     )
@@ -405,6 +470,9 @@ fun Content(
                 ) {
                     OutlinedButton(
                         onClick = {
+                            localAddedWidgets.forEach {
+                                context.widgetHostCompat.deleteAppWidgetId(it.id)
+                            }
                             onFinish(false)
                         },
                     ) {
@@ -413,7 +481,10 @@ fun Content(
 
                     OutlinedButton(
                         onClick = {
-                            AddWidgetStackWidgetActivity.start(context, widgetId)
+                            addWidgetLauncher.launch(
+                                Intent(context, AddWidgetStackWidgetActivity::class.java)
+                                    .putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, widgetId),
+                            )
                         },
                     ) {
                         Text(text = stringResource(R.string.add_widget))
@@ -428,6 +499,10 @@ fun Content(
 
                             onWidgetsChange(localWidgetList)
                             onNewAutoChange(localAutoChange)
+
+                            localRemovedWidgets.forEach {
+                                context.widgetHostCompat.deleteAppWidgetId(it.id)
+                            }
                             onFinish(true)
                         },
                     ) {

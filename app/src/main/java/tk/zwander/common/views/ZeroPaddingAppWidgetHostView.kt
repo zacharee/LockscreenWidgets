@@ -14,6 +14,7 @@ import tk.zwander.common.util.RemoteViewsLayoutInflaterContext
 import tk.zwander.common.util.appWidgetManager
 import tk.zwander.common.util.logUtils
 import tk.zwander.common.util.prefManager
+import tk.zwander.lockscreenwidgets.App
 import tk.zwander.lockscreenwidgets.appwidget.WidgetStackProvider
 
 /**
@@ -93,7 +94,7 @@ class ZeroPaddingAppWidgetHostView(
         super.updateAppWidget(remoteViews)
 
         findWidgetStackId()?.let {
-            WidgetStackProvider.update(context, intArrayOf(it), true)
+            WidgetStackProvider.update(App.instance, intArrayOf(it), true)
         }
     }
 
@@ -101,12 +102,12 @@ class ZeroPaddingAppWidgetHostView(
         super.updateAppWidgetOptions(options)
 
         findWidgetStackId()?.let {
-            WidgetStackProvider.updateOptions(context, intArrayOf(it), options)
+            WidgetStackProvider.updateOptions(App.instance, intArrayOf(it), options)
         }
     }
 
     private fun findWidgetStackId(): Int? {
-        return context.prefManager.widgetStackWidgets.entries.firstOrNull { stack ->
+        return App.instance.prefManager.widgetStackWidgets.entries.firstOrNull { stack ->
             stack.value.any { it.id == appWidgetId }
         }?.key
     }
