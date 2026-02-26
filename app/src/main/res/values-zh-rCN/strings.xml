@@ -35,8 +35,8 @@
     <string name="decrease">减少</string>
     <string name="selected" tools:override="true">已选择</string>
     <string name="general">通用</string>
-    <string name="configure_widget">Configure Widget</string>
-    <string name="reorder_widget">Reorder Widget</string>
+    <string name="configure_widget">设置小部件</string>
+    <string name="reorder_widget">重新排序小部件</string>
     <string name="drawer_enabled">抽屉已启用</string>
     <string name="frame_enabled">抽屉已启用</string>
     <string name="add_id_hint">com.android.systemui:id/这里任何id</string>
@@ -296,10 +296,10 @@
     <string name="default_display_desc">在可折叠设备上，默认显示通常在内部和外部显示之间切换，取决于设备是打开还是关闭。 翻转设备时，它通常总是内部显示。</string>
     <string name="square">正方形</string>
     <string name="tall">高</string>
-    <string name="auto_cycle">Automatically Cycle</string>
-    <string name="delay">Delay</string>
-    <string name="unit_milliseconds">ms</string>
-    <string name="widget_stack_monitor">Widget Stack Monitor</string>
-    <string name="widget_stack_monitor_desc">Used to keep widgets in widget stacks up to date.</string>
-    <string name="tap_to_hide">Tap to hide</string>
+    <string name="auto_cycle">自动循环</string>
+    <string name="delay">延迟</string>
+    <string name="unit_milliseconds">毫秒</string>
+    <string name="widget_stack_monitor">小部件堆栈监视器</string>
+    <string name="widget_stack_monitor_desc">用来保持小部件堆栈中最新的部件。</string>
+    <string name="tap_to_hide">点击可隐藏</string>
 </resources>
