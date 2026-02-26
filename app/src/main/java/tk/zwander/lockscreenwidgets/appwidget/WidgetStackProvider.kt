@@ -46,6 +46,7 @@ class WidgetStackProvider : AppWidgetProvider() {
 
         if (intent.action == ACTION_SWAP_INDEX) {
             val autoSwap = intent.getBooleanExtra(EXTRA_AUTO_SWAP, false)
+            val targetIndex = intent.getIntExtra(EXTRA_SWAP_INDEX, -1)
 
             val backward = intent.getBooleanExtra(EXTRA_BACKWARD, false)
             val widgetIds = intent.getIntArrayExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS)
@@ -61,17 +62,21 @@ class WidgetStackProvider : AppWidgetProvider() {
                 val index = (context.prefManager.widgetStackIndices[widgetId] ?: 0)
                     .coerceAtMost(stackedWidgets.lastIndex)
 
-                val newIndex = if (backward) {
-                    if (index - 1 >= 0) {
-                        index - 1
-                    } else {
-                        stackedWidgets.lastIndex
-                    }
+                val newIndex = if (targetIndex != -1) {
+                    targetIndex
                 } else {
-                    if (index + 1 <= stackedWidgets.lastIndex) {
-                        index + 1
+                    if (backward) {
+                        if (index - 1 >= 0) {
+                            index - 1
+                        } else {
+                            stackedWidgets.lastIndex
+                        }
                     } else {
-                        0
+                        if (index + 1 <= stackedWidgets.lastIndex) {
+                            index + 1
+                        } else {
+                            0
+                        }
                     }
                 }
 
@@ -214,6 +219,22 @@ class WidgetStackProvider : AppWidgetProvider() {
                     R.drawable.circle_inactive
                 },
             )
+            dot.setOnClickPendingIntent(
+                R.id.page_dot_root,
+                PendingIntentCompat.getBroadcast(
+                    context,
+                    80000 + stackId + it,
+                    createSwapIntent(
+                        context = context,
+                        ids = intArrayOf(stackId),
+                        backward = false,
+                        autoSwap = false,
+                        swapIndex = it,
+                    ),
+                    0,
+                    false,
+                ),
+            )
             root.addView(R.id.stack_dot_row, dot)
         }
 
@@ -307,6 +328,7 @@ class WidgetStackProvider : AppWidgetProvider() {
         const val FROM_CHILD = "from_child"
         const val EXTRA_BACKWARD = "backward"
         const val EXTRA_AUTO_SWAP = "auto_swap"
+        const val EXTRA_SWAP_INDEX = "swap_index"
 
         fun update(context: Context, ids: IntArray, fromChild: Boolean = false) {
             context.sendBroadcast(
@@ -324,11 +346,22 @@ class WidgetStackProvider : AppWidgetProvider() {
             )
         }
 
-        fun createSwapIntent(context: Context, ids: IntArray, backward: Boolean, autoSwap: Boolean = false): Intent {
+        fun createSwapIntent(
+            context: Context,
+            ids: IntArray,
+            backward: Boolean,
+            autoSwap: Boolean = false,
+            swapIndex: Int? = null,
+        ): Intent {
             return createBaseIntent(context, ids)
                 .setAction(ACTION_SWAP_INDEX)
                 .putExtra(EXTRA_BACKWARD, backward)
                 .putExtra(EXTRA_AUTO_SWAP, autoSwap)
+                .apply {
+                    swapIndex?.let {
+                        putExtra(EXTRA_SWAP_INDEX, it)
+                    }
+                }
                 .setData("widget://${ids.joinToString(",")}".toUri())
         }
 

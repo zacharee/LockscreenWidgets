@@ -3,14 +3,15 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/page_dot_root"
     android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
+    android:layout_height="match_parent"
     android:paddingHorizontal="2dp">
 
     <ImageView
         android:id="@+id/page_dot"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="12dp"
+        android:layout_height="12dp"
         android:src="@drawable/circle"
+        android:layout_gravity="center"
         />
 
 </FrameLayout>
