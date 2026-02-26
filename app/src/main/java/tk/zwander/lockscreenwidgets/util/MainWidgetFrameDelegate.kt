@@ -284,6 +284,9 @@ open class MainWidgetFrameDelegate protected constructor(
         }
         handler(PrefManager.KEY_WIDGET_FRAME_ENABLED) {
             lifecycleScope.launch {
+                updateState {
+                    it.copy(isPreview = false)
+                }
                 updateWindowState()
             }
         }
@@ -706,7 +709,7 @@ open class MainWidgetFrameDelegate protected constructor(
      */
     private fun canShow(): Boolean {
         fun forPreview(): Boolean {
-            return state.isPreview && !state.isTempHide
+            return state.isPreview && !state.isTempHide && prefManager.widgetFrameEnabled
         }
 
         fun forCommon(): Boolean {
