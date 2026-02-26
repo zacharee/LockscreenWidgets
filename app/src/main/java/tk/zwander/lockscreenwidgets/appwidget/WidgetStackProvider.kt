@@ -195,6 +195,7 @@ class WidgetStackProvider : AppWidgetProvider() {
                 context,
                 stackId + 10000,
                 Intent(context, WidgetStackConfigure::class.java)
+                    .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
                     .putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, stackId),
                 0,
                 false,

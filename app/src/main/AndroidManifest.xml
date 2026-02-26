@@ -246,6 +246,8 @@
             android:name=".activities.WidgetStackConfigure"
             android:theme="@style/AppTheme.NoActionBar"
             android:windowSoftInputMode="adjustResize"
+            android:taskAffinity="@string/configure_task_affinity"
+            android:excludeFromRecents="true"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_CONFIGURE"/>

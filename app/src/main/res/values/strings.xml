@@ -414,4 +414,6 @@
     <string name="auto_cycle">Automatically Cycle</string>
     <string name="delay">Delay</string>
     <string name="unit_milliseconds">ms</string>
+
+    <string name="configure_task_affinity" translatable="false">configure_task</string>
 </resources>
