@@ -364,9 +364,10 @@ class App : Application(), CoroutineScope by MainScope(), EventObserver {
             this,
             stackId + 50000,
             WidgetStackProvider.createSwapIntent(
-                this,
-                intArrayOf(stackId),
-                false,
+                context = this,
+                ids = intArrayOf(stackId),
+                backward = false,
+                autoSwap = true,
             ),
             0,
             true,

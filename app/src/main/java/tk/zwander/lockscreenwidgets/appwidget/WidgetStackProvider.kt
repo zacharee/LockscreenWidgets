@@ -45,10 +45,16 @@ class WidgetStackProvider : AppWidgetProvider() {
         fromChild = intent.getBooleanExtra(FROM_CHILD, false)
 
         if (intent.action == ACTION_SWAP_INDEX) {
+            val autoSwap = intent.getBooleanExtra(EXTRA_AUTO_SWAP, false)
+
             val backward = intent.getBooleanExtra(EXTRA_BACKWARD, false)
             val widgetIds = intent.getIntArrayExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS)
 
             widgetIds?.forEach { widgetId ->
+                if (autoSwap && context.prefManager.widgetStackAutoChange[widgetId]?.first != true) {
+                    return@forEach
+                }
+
                 val allStacks = context.prefManager.widgetStackWidgets
                 val stackedWidgets = (allStacks[widgetId] ?: LinkedHashSet()).toList()
 
@@ -105,6 +111,18 @@ class WidgetStackProvider : AppWidgetProvider() {
             root.setViewVisibility(
                 R.id.widget_content_wrapper,
                 if (widgetView == null) View.GONE else View.VISIBLE,
+            )
+
+            // Dummy click listener to prevent default click behavior opening the main app.
+            root.setOnClickPendingIntent(
+                R.id.widget_root,
+                PendingIntentCompat.getBroadcast(
+                    context,
+                    Int.MAX_VALUE,
+                    Intent(context, WidgetStackProvider::class.java),
+                    0,
+                    false,
+                ),
             )
 
             if (widgetView != null) {
@@ -287,6 +305,7 @@ class WidgetStackProvider : AppWidgetProvider() {
         const val ACTION_SWAP_INDEX = "${BuildConfig.APPLICATION_ID}.intent.action.SWAP_INDEX"
         const val FROM_CHILD = "from_child"
         const val EXTRA_BACKWARD = "backward"
+        const val EXTRA_AUTO_SWAP = "auto_swap"
 
         fun update(context: Context, ids: IntArray, fromChild: Boolean = false) {
             context.sendBroadcast(
@@ -304,10 +323,11 @@ class WidgetStackProvider : AppWidgetProvider() {
             )
         }
 
-        fun createSwapIntent(context: Context, ids: IntArray, backward: Boolean): Intent {
+        fun createSwapIntent(context: Context, ids: IntArray, backward: Boolean, autoSwap: Boolean = false): Intent {
             return createBaseIntent(context, ids)
                 .setAction(ACTION_SWAP_INDEX)
                 .putExtra(EXTRA_BACKWARD, backward)
+                .putExtra(EXTRA_AUTO_SWAP, autoSwap)
                 .setData("widget://${ids.joinToString(",")}".toUri())
         }
 
@@ -315,7 +335,7 @@ class WidgetStackProvider : AppWidgetProvider() {
             val optionsWidth = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MAX_WIDTH).toFloat()
             val optionsHeight = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT).toFloat()
 
-            return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            val baseSize = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                 val allSizes = BundleCompat.getParcelableArrayList(
                     options,
                     AppWidgetManager.OPTION_APPWIDGET_SIZES,
@@ -326,6 +346,9 @@ class WidgetStackProvider : AppWidgetProvider() {
             } else {
                 optionsWidth to optionsHeight
             }
+
+            // Subtract bottom bar dp height.
+            return baseSize.first to (baseSize.second - 36)
         }
 
         private fun createBaseIntent(context: Context, ids: IntArray): Intent {
