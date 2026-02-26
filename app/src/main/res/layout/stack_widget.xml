@@ -3,40 +3,47 @@
     android:id="@+id/widget_root"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:animateLayoutChanges="true">
+    android:animateLayoutChanges="true"
+    android:theme="@style/Theme.Material3.DayNight">
 
     <LinearLayout
         android:id="@+id/add_widget"
         android:orientation="vertical"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="?android:selectableItemBackground"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@drawable/pill"
+        android:backgroundTint="?attr/colorPrimary"
+        android:layout_gravity="center"
+        android:padding="16dp"
         android:gravity="center">
 
         <ImageView
             android:layout_width="48dp"
             android:layout_height="48dp"
             android:src="@drawable/ic_baseline_add_24"
-            android:tint="?android:textColorPrimary"
+            android:tint="?attr/colorOnPrimary"
             />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/add_widget"
+            android:textColor="?attr/colorOnPrimary"
             />
 
     </LinearLayout>
 
-    <FrameLayout
+    <LinearLayout
         android:id="@+id/widget_content_wrapper"
+        android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
         <ViewFlipper
             android:id="@+id/widget_content"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
             android:animateFirstView="false"
             android:inAnimation="@android:anim/fade_in"
             android:outAnimation="@android:anim/fade_out">
@@ -68,87 +75,107 @@
         </ViewFlipper>
 
         <LinearLayout
-            android:id="@+id/stack_dot_row"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:id="@+id/bottom_bar"
+            android:baselineAligned="false"
             android:orientation="horizontal"
-            android:layout_gravity="center|bottom"
-            />
+            android:layout_marginTop="4dp"
+            android:paddingHorizontal="8dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
 
-        <FrameLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="start|bottom"
-            android:id="@+id/stack_backward"
-            android:elevation="100dp">
-
-            <ImageView
+            <FrameLayout
                 android:layout_width="32dp"
                 android:layout_height="32dp"
-                android:rotationY="-180"
-                android:src="@drawable/signal_cellular_4_bar_24px"
-                />
-
-            <ImageView
-                android:layout_width="16dp"
-                android:layout_height="16dp"
-                android:layout_gravity="start|bottom"
-                android:src="@drawable/arrow_left_24px"
-                android:tint="?android:attr/colorControlHighlight"
-                />
-
-        </FrameLayout>
-
-        <FrameLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="start|top"
-            android:id="@+id/stack_configure"
-            android:elevation="100dp">
-
-            <ImageView
-                android:layout_width="32dp"
-                android:layout_height="32dp"
-                android:rotationY="-180"
-                android:rotationX="-180"
-                android:src="@drawable/signal_cellular_4_bar_24px"
-                android:tint="?android:attr/colorAccent"
-                />
-
-            <ImageView
-                android:layout_width="16dp"
-                android:layout_height="16dp"
                 android:layout_gravity="start|top"
-                android:src="@drawable/ic_baseline_settings_24"
-                android:tint="?android:attr/colorControlHighlight"
-                />
+                android:background="@drawable/pill"
+                android:backgroundTint="?attr/colorPrimary"
+                android:id="@+id/stack_configure">
 
-        </FrameLayout>
+                <ImageView
+                    android:layout_width="16dp"
+                    android:layout_height="16dp"
+                    android:layout_gravity="center"
+                    android:src="@drawable/ic_baseline_settings_24"
+                    android:tint="?attr/colorOnPrimary"
+                    />
 
-        <FrameLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="end|bottom"
-            android:id="@+id/stack_forward"
-            android:elevation="100dp">
+            </FrameLayout>
 
-            <ImageView
+            <FrameLayout
+                android:id="@+id/padding"
                 android:layout_width="32dp"
                 android:layout_height="32dp"
-                android:src="@drawable/signal_cellular_4_bar_24px"
                 />
 
-            <ImageView
-                android:layout_width="16dp"
-                android:layout_height="16dp"
-                android:layout_gravity="end|bottom"
-                android:src="@drawable/arrow_left_24px"
-                android:rotationY="-180"
-                android:tint="?android:attr/colorControlHighlight"
-                />
+            <FrameLayout
+                android:layout_weight="1"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content">
 
-        </FrameLayout>
+                <LinearLayout
+                    android:id="@+id/stack_dot_row"
+                    android:layout_width="wrap_content"
+                    android:layout_height="32dp"
+                    android:paddingHorizontal="8dp"
+                    android:orientation="horizontal"
+                    android:layout_gravity="center"
+                    android:gravity="center"
+                    android:background="@drawable/pill"
+                    android:backgroundTint="?attr/colorPrimary"
+                    />
 
-    </FrameLayout>
+            </FrameLayout>
+
+            <LinearLayout
+                android:background="@drawable/pill"
+                android:backgroundTint="?attr/colorPrimary"
+                android:orientation="horizontal"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content">
+
+                <FrameLayout
+                    android:layout_width="32dp"
+                    android:layout_height="32dp"
+                    android:layout_gravity="start|bottom"
+                    android:id="@+id/stack_backward">
+
+                    <ImageView
+                        android:layout_width="16dp"
+                        android:layout_height="16dp"
+                        android:layout_gravity="center"
+                        android:src="@drawable/arrow_left_24px"
+                        android:tint="?attr/colorOnPrimary"
+                        />
+
+                </FrameLayout>
+
+                <FrameLayout
+                    android:layout_width="1dp"
+                    android:layout_height="match_parent"
+                    android:background="?attr/colorOnPrimary"
+                    />
+
+                <FrameLayout
+                    android:layout_width="32dp"
+                    android:layout_height="32dp"
+                    android:layout_gravity="end|bottom"
+                    android:id="@+id/stack_forward">
+
+                    <ImageView
+                        android:layout_width="16dp"
+                        android:layout_height="16dp"
+                        android:layout_gravity="center"
+                        android:src="@drawable/arrow_left_24px"
+                        android:rotationY="-180"
+                        android:tint="?attr/colorOnPrimary"
+                        />
+
+                </FrameLayout>
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+    </LinearLayout>
 
 </FrameLayout>

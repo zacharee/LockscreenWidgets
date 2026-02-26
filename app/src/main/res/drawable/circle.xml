@@ -5,6 +5,6 @@
         android:height="8dp"
         />
 
-    <solid android:color="?android:attr/textColorPrimary"
+    <solid android:color="?attr/colorOnPrimary"
         />
 </shape>
