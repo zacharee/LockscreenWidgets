@@ -153,7 +153,6 @@ class WidgetStackConfigure : BaseActivity() {
                     WidgetStackProvider.update(
                         context = this,
                         ids = intArrayOf(widgetId),
-                        fromConfig = it,
                     )
                     finish()
                 },

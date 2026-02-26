@@ -4,40 +4,157 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:animateLayoutChanges="true">
-    <ViewFlipper
-        android:id="@+id/widget_content"
+
+    <ListView
+        android:id="@+id/dummy_list"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:animateFirstView="false"
-        android:inAnimation="@android:anim/fade_in"
-        android:outAnimation="@android:anim/fade_out">
-        <LinearLayout
-            android:id="@+id/widget_content_even"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:gravity="center"
-            android:orientation="vertical" />
-
-        <LinearLayout
-            android:id="@+id/widget_content_odd"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:gravity="center"
-            android:orientation="vertical" />
-
-        <LinearLayout
-            android:id="@+id/widget_content_third"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:gravity="center"
-            android:orientation="vertical" />
-    </ViewFlipper>
+        />
 
     <LinearLayout
-        android:id="@+id/stack_dot_row"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:layout_gravity="center|bottom"
-        />
+        android:id="@+id/add_widget"
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="?android:selectableItemBackground"
+        android:gravity="center">
+
+        <ImageView
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:src="@drawable/ic_baseline_add_24"
+            android:tint="?android:textColorPrimary"
+            />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/add_widget"
+            />
+
+    </LinearLayout>
+
+    <FrameLayout
+        android:id="@+id/widget_content_wrapper"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <ViewFlipper
+            android:id="@+id/widget_content"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:animateFirstView="false"
+            android:inAnimation="@android:anim/fade_in"
+            android:outAnimation="@android:anim/fade_out">
+
+            <LinearLayout
+                android:id="@+id/widget_content_even"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:orientation="vertical"
+                />
+
+            <LinearLayout
+                android:id="@+id/widget_content_odd"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:orientation="vertical"
+                />
+
+            <LinearLayout
+                android:id="@+id/widget_content_third"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:orientation="vertical"
+                />
+
+        </ViewFlipper>
+
+        <LinearLayout
+            android:id="@+id/stack_dot_row"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_gravity="center|bottom"
+            />
+
+        <FrameLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="start|bottom"
+            android:id="@+id/stack_backward"
+            android:elevation="100dp">
+
+            <ImageView
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:rotationY="-180"
+                android:src="@drawable/signal_cellular_4_bar_24px"
+                />
+
+            <ImageView
+                android:layout_width="16dp"
+                android:layout_height="16dp"
+                android:layout_gravity="start|bottom"
+                android:src="@drawable/arrow_left_24px"
+                android:tint="?android:attr/colorControlHighlight"
+                />
+
+        </FrameLayout>
+
+        <FrameLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="start|top"
+            android:id="@+id/stack_configure"
+            android:elevation="100dp">
+
+            <ImageView
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:rotationY="-180"
+                android:rotationX="-180"
+                android:src="@drawable/signal_cellular_4_bar_24px"
+                android:tint="?android:attr/colorAccent"
+                />
+
+            <ImageView
+                android:layout_width="16dp"
+                android:layout_height="16dp"
+                android:layout_gravity="start|top"
+                android:src="@drawable/ic_baseline_settings_24"
+                android:tint="?android:attr/colorControlHighlight"
+                />
+
+        </FrameLayout>
+
+        <FrameLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="end|bottom"
+            android:id="@+id/stack_forward"
+            android:elevation="100dp">
+
+            <ImageView
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:src="@drawable/signal_cellular_4_bar_24px"
+                />
+
+            <ImageView
+                android:layout_width="16dp"
+                android:layout_height="16dp"
+                android:layout_gravity="end|bottom"
+                android:src="@drawable/arrow_left_24px"
+                android:rotationY="-180"
+                android:tint="?android:attr/colorControlHighlight"
+                />
+
+        </FrameLayout>
+
+    </FrameLayout>
+
 </FrameLayout>

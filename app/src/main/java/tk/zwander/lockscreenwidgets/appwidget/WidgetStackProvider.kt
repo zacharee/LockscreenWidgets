@@ -1,5 +1,6 @@
 package tk.zwander.lockscreenwidgets.appwidget
 
+import android.annotation.SuppressLint
 import android.appwidget.AppWidgetManager
 import android.appwidget.AppWidgetProvider
 import android.content.Context
@@ -9,6 +10,7 @@ import android.os.Bundle
 import android.os.ServiceManager
 import android.util.SizeF
 import android.util.SparseArray
+import android.view.View
 import android.widget.RemoteViews
 import androidx.core.app.PendingIntentCompat
 import androidx.core.net.toUri
@@ -37,17 +39,14 @@ class WidgetStackProvider : AppWidgetProvider() {
         )
     }
 
-    private var fromConfig = false
-    private var forPageChange = false
+    private var fromChild = false
 
     override fun onReceive(context: Context, intent: Intent) {
-        fromConfig = intent.getBooleanExtra(EXTRA_FROM_CONFIG, false)
+        fromChild = intent.getBooleanExtra(FROM_CHILD, false)
 
         if (intent.action == ACTION_SWAP_INDEX) {
             val backward = intent.getBooleanExtra(EXTRA_BACKWARD, false)
             val widgetIds = intent.getIntArrayExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS)
-
-            forPageChange = true
 
             widgetIds?.forEach { widgetId ->
                 val allStacks = context.prefManager.widgetStackWidgets
@@ -87,6 +86,7 @@ class WidgetStackProvider : AppWidgetProvider() {
         appWidgetIds: IntArray,
     ) {
         appWidgetIds.forEach { appWidgetId ->
+            val root = RemoteViews(context.packageName, R.layout.stack_widget)
             val options = appWidgetManager.getAppWidgetOptions(appWidgetId)
             val stackedWidgets = (context.prefManager.widgetStackWidgets[appWidgetId] ?: LinkedHashSet()).toList()
             val index = (context.prefManager.widgetStackIndices[appWidgetId] ?: 0)
@@ -98,21 +98,29 @@ class WidgetStackProvider : AppWidgetProvider() {
                     appWidgetService.getAppWidgetViews(context.packageName, it.id)
                 }
 
-            val allViews = widgetView?.let {
-                createViewsForSize(
+            root.setViewVisibility(
+                R.id.add_widget,
+                if (widgetView == null) View.VISIBLE else View.GONE,
+            )
+            root.setViewVisibility(
+                R.id.widget_content_wrapper,
+                if (widgetView == null) View.GONE else View.VISIBLE,
+            )
+
+            if (widgetView != null) {
+                fillInWidgetViews(
                     context = context,
                     appWidgetManager = appWidgetManager,
                     stackId = appWidgetId,
                     options = options,
                     widgetData = widgetData,
                     index = index,
-                    stackSize = stackedWidgets.size,
                     rootWidgetViews = widgetView,
+                    root = root,
+                    stackedWidgets = stackedWidgets,
                 )
-            } ?: run {
-                val view = RemoteViews(context.packageName, R.layout.stack_widget)
-                val addWidgetView = RemoteViews(context.packageName, R.layout.add_widget)
-                addWidgetView.setOnClickPendingIntent(
+            } else {
+                root.setOnClickPendingIntent(
                     R.id.add_widget,
                     PendingIntentCompat.getActivity(
                         context,
@@ -123,42 +131,27 @@ class WidgetStackProvider : AppWidgetProvider() {
                         false,
                     ),
                 )
-                view.removeAllViews(R.id.widget_content_even)
-                view.removeAllViews(R.id.widget_content_odd)
-                view.removeAllViews(R.id.widget_content_third)
-                view.addView(R.id.widget_content_even, addWidgetView)
-                view.setDisplayedChild(R.id.widget_content, 0)
-
-                view.removeAllViews(R.id.stack_dot_row)
-                view.removeFromParent(R.id.stack_backward)
-                view.removeFromParent(R.id.stack_forward)
-                view.removeFromParent(R.id.stack_configure)
-
-                view
             }
 
             App.instance.updateAutoChangeForStack(appWidgetId)
-            appWidgetManager.updateAppWidget(appWidgetId, allViews)
+            appWidgetManager.updateAppWidget(appWidgetId, root)
             context.eventManager.sendEvent(Event.StackUpdateComplete(appWidgetId))
         }
     }
 
-    private fun createViewsForSize(
+    @SuppressLint("RestrictedApi")
+    private fun fillInWidgetViews(
         context: Context,
         appWidgetManager: AppWidgetManager,
         stackId: Int,
         options: Bundle?,
         widgetData: WidgetData,
         index: Int,
-        stackSize: Int,
         rootWidgetViews: RemoteViews,
-    ): RemoteViews {
-        val view = RemoteViews(context.packageName, R.layout.stack_widget)
-        val stackForward = RemoteViews(context.packageName, R.layout.stack_forward)
-        val stackBackward = RemoteViews(context.packageName, R.layout.stack_backward)
-        val stackConfigure = RemoteViews(context.packageName, R.layout.stack_configure)
-
-        stackForward.setOnClickPendingIntent(
+        root: RemoteViews,
+        stackedWidgets: List<WidgetData>,
+    ) {
+        root.setOnClickPendingIntent(
             R.id.stack_forward,
             PendingIntentCompat.getBroadcast(
                 context,
@@ -168,7 +161,7 @@ class WidgetStackProvider : AppWidgetProvider() {
                 false,
             )
         )
-        stackBackward.setOnClickPendingIntent(
+        root.setOnClickPendingIntent(
             R.id.stack_backward,
             PendingIntentCompat.getBroadcast(
                 context,
@@ -178,8 +171,7 @@ class WidgetStackProvider : AppWidgetProvider() {
                 false,
             ),
         )
-
-        stackConfigure.setOnClickPendingIntent(
+        root.setOnClickPendingIntent(
             R.id.stack_configure,
             PendingIntentCompat.getActivity(
                 context,
@@ -191,9 +183,9 @@ class WidgetStackProvider : AppWidgetProvider() {
             ),
         )
 
-        view.removeAllViews(R.id.stack_dot_row)
+        root.removeAllViews(R.id.stack_dot_row)
 
-        repeat(stackSize) {
+        repeat(stackedWidgets.size) {
             val dot = RemoteViews(context.packageName, R.layout.widget_stack_page_dot)
             dot.setImageViewResource(
                 R.id.page_dot,
@@ -203,7 +195,7 @@ class WidgetStackProvider : AppWidgetProvider() {
                     R.drawable.circle_inactive
                 },
             )
-            view.addView(R.id.stack_dot_row, dot)
+            root.addView(R.id.stack_dot_row, dot)
         }
 
         val realSize = options?.let {
@@ -227,7 +219,7 @@ class WidgetStackProvider : AppWidgetProvider() {
         val prevIndex = if (index > 0) {
             index - 1
         } else {
-            stackSize - 1
+            stackedWidgets.lastIndex
         }
         val prevRem = prevIndex % 3
         val realRem = if (rem == prevRem) {
@@ -242,38 +234,32 @@ class WidgetStackProvider : AppWidgetProvider() {
 
         when (realRem) {
             0 -> {
-                view.removeAllViews(R.id.widget_content_even)
-                view.addView(R.id.widget_content_even, viewsToApply)
+                root.removeAllViews(R.id.widget_content_even)
+                root.addView(R.id.widget_content_even, viewsToApply)
             }
 
             1 -> {
-                view.removeAllViews(R.id.widget_content_odd)
-                view.addView(R.id.widget_content_odd, viewsToApply)
+                root.removeAllViews(R.id.widget_content_odd)
+                root.addView(R.id.widget_content_odd, viewsToApply)
             }
 
             2 -> {
-                view.removeAllViews(R.id.widget_content_third)
-                view.addView(R.id.widget_content_third, viewsToApply)
+                root.removeAllViews(R.id.widget_content_third)
+                root.addView(R.id.widget_content_third, viewsToApply)
             }
         }
 
-        if (forPageChange || fromConfig) {
-            view.setDisplayedChild(R.id.widget_content, realRem)
+        if (!fromChild) {
+            root.setDisplayedChild(R.id.widget_content, realRem)
         }
-
-        view.addView(R.id.widget_root, stackForward)
-        view.addView(R.id.widget_root, stackBackward)
-        view.addView(R.id.widget_root, stackConfigure)
 
         hoistWidgetData(
             context = context,
             innerView = viewsToApply,
-            outerView = view,
+            outerView = root,
             rootWidgetViews = rootWidgetViews,
-            innerWidgetId = widgetData.id
+            innerWidgetId = widgetData.id,
         )
-
-        return view
     }
 
     override fun onAppWidgetOptionsChanged(
@@ -299,14 +285,14 @@ class WidgetStackProvider : AppWidgetProvider() {
 
     companion object {
         const val ACTION_SWAP_INDEX = "${BuildConfig.APPLICATION_ID}.intent.action.SWAP_INDEX"
-        const val EXTRA_FROM_CONFIG = "from_host"
+        const val FROM_CHILD = "from_child"
         const val EXTRA_BACKWARD = "backward"
 
-        fun update(context: Context, ids: IntArray, fromConfig: Boolean = false) {
+        fun update(context: Context, ids: IntArray, fromChild: Boolean = false) {
             context.sendBroadcast(
                 createBaseIntent(context, ids)
                     .setAction(AppWidgetManager.ACTION_APPWIDGET_UPDATE)
-                    .putExtra(EXTRA_FROM_CONFIG, fromConfig),
+                    .putExtra(FROM_CHILD, fromChild),
             )
         }
 

@@ -289,19 +289,8 @@ class App : Application(), CoroutineScope by MainScope(), EventObserver {
             widgetHostCompat.deleteAppWidgetId(it)
         }
 
-        prefManager.widgetStackWidgets.takeIf { it.isNotEmpty() }?.let {
-            val correctMap = it.filter { (stackId, widgets) ->
-
-
-                if (appWidgetManager.getAppWidgetInfo(stackId) == null) {
-                    widgetHostCompat.deleteAppWidgetId(stackId)
-                    false
-                } else {
-                    widgets.isNotEmpty()
-                }
-            }
-
-            WidgetStackProvider.update(this, correctMap.keys.toIntArray())
+        prefManager.widgetStackWidgets.forEach { (stackId) ->
+            WidgetStackProvider.update(this, intArrayOf(stackId))
         }
 
         prefsHandler.register(this)
