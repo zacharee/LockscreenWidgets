@@ -30,6 +30,7 @@ import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
 import org.lsposed.hiddenapibypass.HiddenApiBypass
 import tk.zwander.common.activities.add.BaseBindWidgetActivity
+import tk.zwander.common.appwidget.WidgetStackMonitorService
 import tk.zwander.common.host.widgetHostCompat
 import tk.zwander.common.util.Event
 import tk.zwander.common.util.EventObserver
@@ -50,6 +51,7 @@ import tk.zwander.common.util.shizuku.shizukuManager
 import tk.zwander.lockscreenwidgets.activities.add.AddFrameWidgetActivity
 import tk.zwander.lockscreenwidgets.appwidget.WidgetStackProvider
 import tk.zwander.lockscreenwidgets.util.FramePrefs
+import tk.zwander.lockscreenwidgets.util.MainWidgetFrameDelegate
 import tk.zwander.widgetdrawer.activities.add.AddDrawerWidgetActivity
 
 /**
@@ -114,6 +116,10 @@ class App : Application(), CoroutineScope by MainScope(), EventObserver {
         HandlerRegistry {
             handler(PrefManager.KEY_TOUCH_PROTECTION) {
                 updateProxListener()
+            }
+
+            handler(PrefManager.KEY_WIDGET_STACK_WIDGETS) {
+                updateWidgetStackMonitor()
             }
         }
     }
@@ -292,6 +298,7 @@ class App : Application(), CoroutineScope by MainScope(), EventObserver {
         prefManager.widgetStackWidgets.forEach { (stackId) ->
             WidgetStackProvider.update(this, intArrayOf(stackId))
         }
+        updateWidgetStackMonitor()
 
         prefsHandler.register(this)
         migrationManager.runMigrations()
@@ -354,6 +361,19 @@ class App : Application(), CoroutineScope by MainScope(), EventObserver {
             registerProxListener()
         } else {
             unregisterProxListener()
+        }
+    }
+
+    fun updateWidgetStackMonitor() {
+        val shouldRun = prefManager.widgetStackWidgets.isNotEmpty() &&
+                MainWidgetFrameDelegate.peekInstance(this) == null
+
+        val serviceIntent = Intent(this, WidgetStackMonitorService::class.java)
+
+        if (shouldRun) {
+            ContextCompat.startForegroundService(this, serviceIntent)
+        } else {
+            stopService(serviceIntent)
         }
     }
 

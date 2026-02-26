@@ -416,4 +416,9 @@
     <string name="unit_milliseconds">ms</string>
 
     <string name="configure_task_affinity" translatable="false">configure.task</string>
+
+    <string name="widget_stack_monitor">Widget Stack Monitor</string>
+    <string name="widget_stack_monitor_desc">Used to keep widgets in widget stacks up to date.</string>
+
+    <string name="tap_to_hide">Tap to hide</string>
 </resources>

@@ -14,6 +14,8 @@
     <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES"
         tools:ignore="PackageVisibilityPolicy,QueryAllPackagesPermission" />
     <uses-permission android:name="android.permission.CALL_PHONE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
 
     <uses-permission android:name="com.huawei.android.totemweather.permission.ACCESS_WEATHERCLOCK_PROVIDER" />
     <uses-permission android:name="android.permission.ACCESS_WEATHERCLOCK_PROVIDER" />
@@ -397,6 +399,9 @@
         <service android:name="tk.zwander.common.appwidget.RemoteViewsProxyService"
             android:exported="true"
             android:permission="android.permission.BIND_REMOTEVIEWS" />
+        <service android:name="tk.zwander.common.appwidget.WidgetStackMonitorService"
+            android:foregroundServiceType="specialUse"
+            android:exported="false" />
 
         <receiver android:name=".appwidget.IDListProvider"
             android:label="@string/id_list"

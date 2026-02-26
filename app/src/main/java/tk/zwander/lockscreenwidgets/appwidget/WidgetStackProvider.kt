@@ -157,6 +157,7 @@ class WidgetStackProvider : AppWidgetProvider() {
             }
 
             App.instance.updateAutoChangeForStack(appWidgetId)
+            App.instance.updateWidgetStackMonitor()
             appWidgetManager.updateAppWidget(appWidgetId, root)
             context.eventManager.sendEvent(Event.StackUpdateComplete(appWidgetId))
         }

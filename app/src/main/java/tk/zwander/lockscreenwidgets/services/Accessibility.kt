@@ -121,6 +121,8 @@ class Accessibility : AccessibilityService(), CoroutineScope by MainScope(), Eve
         frameDelegate.onCreate()
         drawerDelegate.onCreate()
 
+        App.instance.updateWidgetStackMonitor()
+
         prefManager.currentSecondaryFramesWithStringDisplay.forEach { (secondaryId, secondaryDisplay) ->
             secondaryFrameDelegates[secondaryId] = SecondaryWidgetFrameDelegate(this, secondaryId, secondaryDisplay).also {
                 it.onCreate()
@@ -204,6 +206,8 @@ class Accessibility : AccessibilityService(), CoroutineScope by MainScope(), Eve
             secondaryFrameDelegates.forEach { (_, delegate) ->
                 delegate.onDestroy()
             }
+
+            App.instance.updateWidgetStackMonitor()
 
             logUtils.debugLog("Accessibility destroy work completed", null)
         }
