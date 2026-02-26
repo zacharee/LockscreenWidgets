@@ -5,7 +5,7 @@
     android:minResizeWidth="0dp"
     android:minResizeHeight="0dp"
     android:updatePeriodMillis="86400000"
-    android:initialLayout="@layout/stack_widget"
+    android:initialLayout="@layout/widget_stack"
     android:resizeMode="horizontal|vertical"
     android:widgetCategory="home_screen"
     android:targetCellWidth="3"

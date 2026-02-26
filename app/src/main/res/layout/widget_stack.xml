@@ -92,8 +92,8 @@
                 android:id="@+id/stack_configure">
 
                 <ImageView
-                    android:layout_width="16dp"
-                    android:layout_height="16dp"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
                     android:layout_gravity="center"
                     android:src="@drawable/ic_baseline_settings_24"
                     android:tint="?attr/colorOnPrimary"
@@ -140,8 +140,8 @@
                     android:id="@+id/stack_backward">
 
                     <ImageView
-                        android:layout_width="16dp"
-                        android:layout_height="16dp"
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
                         android:layout_gravity="center"
                         android:src="@drawable/arrow_left_24px"
                         android:tint="?attr/colorOnPrimary"
@@ -162,8 +162,8 @@
                     android:id="@+id/stack_forward">
 
                     <ImageView
-                        android:layout_width="16dp"
-                        android:layout_height="16dp"
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
                         android:layout_gravity="center"
                         android:src="@drawable/arrow_left_24px"
                         android:rotationY="-180"

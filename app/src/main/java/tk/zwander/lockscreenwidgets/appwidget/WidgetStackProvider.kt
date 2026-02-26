@@ -97,7 +97,7 @@ class WidgetStackProvider : AppWidgetProvider() {
         appWidgetIds: IntArray,
     ) {
         appWidgetIds.forEach { appWidgetId ->
-            val root = RemoteViews(context.packageName, R.layout.stack_widget)
+            val root = RemoteViews(context.packageName, R.layout.widget_stack)
             val options = appWidgetManager.getAppWidgetOptions(appWidgetId)
             val stackedWidgets = (context.prefManager.widgetStackWidgets[appWidgetId] ?: LinkedHashSet()).toList()
             val index = (context.prefManager.widgetStackIndices[appWidgetId] ?: 0)
