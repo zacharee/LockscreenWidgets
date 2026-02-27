@@ -22,6 +22,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.RecyclerView
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.map
@@ -624,7 +625,7 @@ open class MainWidgetFrameDelegate protected constructor(
             logUtils.debugLog("Removing overlay")
         }
 
-        withContext(Dispatchers.Main) {
+        withContext(Dispatchers.Main + NonCancellable) {
             viewModel.currentEditingInterfacePosition.value = -1
 
             globalState.handlingClick.remove(id)
@@ -641,11 +642,9 @@ open class MainWidgetFrameDelegate protected constructor(
 
                 logUtils.debugLog("Post-animation removal", null)
 
-                logUtils.debugLog("Posted removal", null)
+                wm?.safeRemoveView(frame)
 
-                if (frame.isAttachedToWindow) {
-                    wm?.safeRemoveView(frame)
-                }
+                logUtils.debugLog("Posted removal", null)
             } else if (!frame.isAttachedToWindow) {
                 wm?.safeRemoveView(frame, false)
             }
