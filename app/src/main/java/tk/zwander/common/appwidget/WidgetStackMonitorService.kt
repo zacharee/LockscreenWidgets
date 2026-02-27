@@ -38,6 +38,7 @@ class WidgetStackMonitorService : Service() {
             NotificationCompat.Builder(this, "widget_stack_monitor")
                 .setContentTitle(resources.getString(R.string.widget_stack_monitor))
                 .setContentText(resources.getString(R.string.tap_to_hide))
+                .setSmallIcon(R.mipmap.ic_launcher_round)
                 .setContentIntent(
                     PendingIntentCompat.getActivity(
                         this,
