@@ -7,11 +7,32 @@
     android:paddingHorizontal="2dp">
 
     <ImageView
-        android:id="@+id/page_dot"
+        android:id="@+id/page_dot_static"
         android:layout_width="12dp"
         android:layout_height="12dp"
-        android:src="@drawable/circle"
+        android:src="@drawable/circle_0"
         android:layout_gravity="center"
+        android:contentDescription="@null"
+        />
+
+    <ProgressBar
+        android:id="@+id/page_dot_active"
+        android:layout_width="12dp"
+        android:layout_height="12dp"
+        android:layout_gravity="center"
+        android:indeterminate="true"
+        android:indeterminateDrawable="@drawable/circle_to_selected"
+        android:visibility="invisible"
+        />
+
+    <ProgressBar
+        android:id="@+id/page_dot_inactive"
+        android:layout_width="12dp"
+        android:layout_height="12dp"
+        android:layout_gravity="center"
+        android:indeterminate="true"
+        android:indeterminateDrawable="@drawable/circle_to_inactive"
+        android:visibility="invisible"
         />
 
 </FrameLayout>

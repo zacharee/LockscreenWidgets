@@ -40,9 +40,11 @@ class WidgetStackProvider : AppWidgetProvider() {
     }
 
     private var fromChild = false
+    private lateinit var intent: Intent
 
     override fun onReceive(context: Context, intent: Intent) {
         fromChild = intent.getBooleanExtra(FROM_CHILD, false)
+        this.intent = intent
 
         if (intent.action == ACTION_SWAP_INDEX) {
             val autoSwap = intent.getBooleanExtra(EXTRA_AUTO_SWAP, false)
@@ -79,6 +81,9 @@ class WidgetStackProvider : AppWidgetProvider() {
                         }
                     }
                 }
+
+                intent.putExtra(EXTRA_SWAP_INDEX, newIndex)
+                intent.putExtra(EXTRA_PREVIOUS_INDEX, index)
 
                 context.prefManager.widgetStackIndices = context.prefManager.widgetStackIndices.apply {
                     this[widgetId] = newIndex
@@ -208,16 +213,42 @@ class WidgetStackProvider : AppWidgetProvider() {
             ),
         )
 
+        val previousIndex = intent.getIntExtra(EXTRA_PREVIOUS_INDEX, -1)
+
         root.removeAllViews(R.id.stack_dot_row)
 
         repeat(stackedWidgets.size) {
             val dot = RemoteViews(context.packageName, R.layout.widget_stack_page_dot)
-            dot.setImageViewResource(
-                R.id.page_dot,
-                if (index == it) {
-                    R.drawable.circle
+            dot.setViewVisibility(
+                R.id.page_dot_active,
+                if (index == it && previousIndex != -1) {
+                    View.VISIBLE
                 } else {
-                    R.drawable.circle_inactive
+                    View.INVISIBLE
+                },
+            )
+            dot.setViewVisibility(
+                R.id.page_dot_inactive,
+                if (it == previousIndex) {
+                    View.VISIBLE
+                } else {
+                    View.INVISIBLE
+                },
+            )
+            dot.setViewVisibility(
+                R.id.page_dot_static,
+                if (previousIndex == -1 || (index != previousIndex && index != it)) {
+                    View.VISIBLE
+                } else {
+                    View.INVISIBLE
+                },
+            )
+            dot.setImageViewResource(
+                R.id.page_dot_static,
+                if (index == it) {
+                    R.drawable.circle_5
+                } else {
+                    R.drawable.circle_0
                 },
             )
             dot.setOnClickPendingIntent(
@@ -330,6 +361,7 @@ class WidgetStackProvider : AppWidgetProvider() {
         const val EXTRA_BACKWARD = "backward"
         const val EXTRA_AUTO_SWAP = "auto_swap"
         const val EXTRA_SWAP_INDEX = "swap_index"
+        const val EXTRA_PREVIOUS_INDEX = "previous_index"
 
         fun update(context: Context, ids: IntArray, fromChild: Boolean = false) {
             context.sendBroadcast(
