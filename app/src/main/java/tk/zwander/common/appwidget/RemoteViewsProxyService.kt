@@ -22,6 +22,7 @@ import net.bytebuddy.android.AndroidClassLoadingStrategy
 import net.bytebuddy.implementation.MethodDelegation
 import net.bytebuddy.matcher.ElementMatchers.named
 import tk.zwander.common.util.appWidgetManager
+import tk.zwander.common.util.logUtils
 import tk.zwander.common.util.mainHandler
 
 class RemoteViewsProxyService : RemoteViewsService() {
@@ -85,79 +86,83 @@ class RemoteViewsProxyService : RemoteViewsService() {
 
         @SuppressLint("PrivateApi")
         fun onCreate() {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-                appWidgetManager.bindRemoteViewsService(
-                    this@RemoteViewsProxyService,
-                    widgetId,
-                    widgetIntent,
-                    try {
-                        getServiceDispatcher(
-                            connection,
-                            mainHandler,
-                            0,
-                        )
-                    } catch (_: NoSuchMethodError) {
-                        Context::class.java.getMethod(
-                            "getServiceDispatcher",
-                            ServiceConnection::class.java,
-                            Handler::class.java,
-                            Int::class.java,
-                        ).invoke(
-                            this@RemoteViewsProxyService,
-                            connection,
-                            mainHandler,
-                            0,
-                        ) as IServiceConnection
-                    },
-                    BIND_AUTO_CREATE or BIND_FOREGROUND_SERVICE_WHILE_AWAKE,
-                )
-            } else {
-                val proxyClass = Class.forName(
-                    $$"com.android.internal.widget.IRemoteViewsAdapterConnection$Stub",
-                )
-                val handler = object {
-                    @Keep
-                    fun onServiceConnected(service: IBinder?) {
-                        connection.onServiceConnected(
-                            ComponentName(this@RemoteViewsProxyService, Factory::class.java),
-                            service,
-                        )
-                    }
-
-                    @Keep
-                    fun onServiceDisconnected() {
-                        connection.onServiceDisconnected(
-                            ComponentName(this@RemoteViewsProxyService, Factory::class.java),
-                        )
-                    }
-                }
-                val proxy = ByteBuddy().subclass(proxyClass)
-                    .name("com.android.internal.widget.RemoteViewsAdapterConnectionProxy")
-                    .method(named("onServiceConnected"))
-                    .intercept(MethodDelegation.to(handler))
-                    .method(named("onServiceDisconnected"))
-                    .intercept(MethodDelegation.to(handler))
-                    .make()
-                    .load(Factory::class.java.classLoader, AndroidClassLoadingStrategy.Wrapping(cacheDir))
-                    .loaded
-                    .getDeclaredConstructor()
-                    .newInstance() as IInterface
-
-                AppWidgetManager::class.java
-                    .getDeclaredMethod(
-                        "bindRemoteViewsService",
-                        String::class.java,
-                        Int::class.java,
-                        Intent::class.java,
-                        IBinder::class.java,
-                    )
-                    .invoke(
-                        appWidgetManager,
-                        packageName,
+            try {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                    appWidgetManager.bindRemoteViewsService(
+                        this@RemoteViewsProxyService,
                         widgetId,
                         widgetIntent,
-                        proxy.asBinder(),
+                        try {
+                            getServiceDispatcher(
+                                connection,
+                                mainHandler,
+                                0,
+                            )
+                        } catch (_: NoSuchMethodError) {
+                            Context::class.java.getMethod(
+                                "getServiceDispatcher",
+                                ServiceConnection::class.java,
+                                Handler::class.java,
+                                Int::class.java,
+                            ).invoke(
+                                this@RemoteViewsProxyService,
+                                connection,
+                                mainHandler,
+                                0,
+                            ) as IServiceConnection
+                        },
+                        BIND_AUTO_CREATE or BIND_FOREGROUND_SERVICE_WHILE_AWAKE,
                     )
+                } else {
+                    val proxyClass = Class.forName(
+                        $$"com.android.internal.widget.IRemoteViewsAdapterConnection$Stub",
+                    )
+                    val handler = object {
+                        @Keep
+                        fun onServiceConnected(service: IBinder?) {
+                            connection.onServiceConnected(
+                                ComponentName(this@RemoteViewsProxyService, Factory::class.java),
+                                service,
+                            )
+                        }
+
+                        @Keep
+                        fun onServiceDisconnected() {
+                            connection.onServiceDisconnected(
+                                ComponentName(this@RemoteViewsProxyService, Factory::class.java),
+                            )
+                        }
+                    }
+                    val proxy = ByteBuddy().subclass(proxyClass)
+                        .name("com.android.internal.widget.RemoteViewsAdapterConnectionProxy")
+                        .method(named("onServiceConnected"))
+                        .intercept(MethodDelegation.to(handler))
+                        .method(named("onServiceDisconnected"))
+                        .intercept(MethodDelegation.to(handler))
+                        .make()
+                        .load(Factory::class.java.classLoader, AndroidClassLoadingStrategy.Wrapping(cacheDir))
+                        .loaded
+                        .getDeclaredConstructor()
+                        .newInstance() as IInterface
+
+                    AppWidgetManager::class.java
+                        .getDeclaredMethod(
+                            "bindRemoteViewsService",
+                            String::class.java,
+                            Int::class.java,
+                            Intent::class.java,
+                            IBinder::class.java,
+                        )
+                        .invoke(
+                            appWidgetManager,
+                            packageName,
+                            widgetId,
+                            widgetIntent,
+                            proxy.asBinder(),
+                        )
+                }
+            } catch (e: Exception) {
+                logUtils.debugLog("Error binding widget service $widgetId, $widgetIntent", e)
             }
         }
 
