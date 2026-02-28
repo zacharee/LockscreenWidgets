@@ -2,11 +2,13 @@ package tk.zwander.common.compose.components
 
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.material3.ButtonDefaults
@@ -34,6 +36,7 @@ fun CardSwitch(
     titleTextStyle: TextStyle = MaterialTheme.typography.headlineSmall,
     summaryTextStyle: TextStyle = MaterialTheme.typography.bodyMedium,
     backgroundColor: Color = Color.Transparent,
+    contentPadding: PaddingValues = ButtonDefaults.ContentPadding,
     accessory: (@Composable RowScope.() -> Unit)? = null,
 ) {
     SubduedOutlinedButton(
@@ -48,19 +51,20 @@ fun CardSwitch(
                     Modifier
                 },
             )
+            .defaultMinSize(minHeight = 64.dp)
             .wrapContentHeight()
-            .heightIn(min = 64.dp)
             .animateContentSize(),
         colors = ButtonDefaults.outlinedButtonColors(
             contentColor = MaterialTheme.colorScheme.onSurface,
             containerColor = backgroundColor,
         ),
+        contentPadding = contentPadding,
     ) {
         icon?.let {
             Image(
                 painter = icon,
                 contentDescription = contentDescription,
-                modifier = Modifier.size(48.dp)
+                modifier = Modifier.size(48.dp),
             )
             Spacer(Modifier.size(8.dp))
         }
@@ -72,18 +76,17 @@ fun CardSwitch(
 
         Column(
             modifier = Modifier.weight(1f),
+            verticalArrangement = Arrangement.spacedBy(4.dp),
         ) {
             Text(
                 text = title,
-                style = titleTextStyle
+                style = titleTextStyle,
             )
 
             if (!summary.isNullOrBlank()) {
-                Spacer(Modifier.size(4.dp))
-
                 Text(
                     text = summary,
-                    style = summaryTextStyle
+                    style = summaryTextStyle,
                 )
             }
         }
@@ -92,7 +95,7 @@ fun CardSwitch(
             checked = enabled,
             onCheckedChange = onEnabledChanged,
             colors = SwitchDefaults.colors(
-                uncheckedThumbColor = MaterialTheme.colorScheme.onSurface
+                uncheckedThumbColor = MaterialTheme.colorScheme.onSurface,
             ),
         )
     }

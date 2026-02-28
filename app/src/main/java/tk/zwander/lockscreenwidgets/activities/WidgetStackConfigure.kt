@@ -20,6 +20,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
@@ -29,6 +30,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.ime
+import androidx.compose.foundation.layout.minus
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBars
@@ -40,8 +42,10 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LocalMinimumInteractiveComponentSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
@@ -50,6 +54,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
@@ -141,6 +146,16 @@ class WidgetStackConfigure : BaseActivity() {
                 },
             )
 
+            var widgetPadding by rememberPreferenceState(
+                key = PrefManager.KEY_WIDGET_STACK_WIDGET_PADDING,
+                value = { prefManager.widgetStackWidgetPadding[widgetId] ?: hashMapOf() },
+                onChanged = { _, value ->
+                    prefManager.widgetStackWidgetPadding = prefManager.widgetStackWidgetPadding.apply {
+                        this[widgetId] = value
+                    }
+                },
+            )
+
             Content(
                 widgetId = widgetId,
                 onFinish = {
@@ -174,6 +189,10 @@ class WidgetStackConfigure : BaseActivity() {
                 onNewAutoChange = {
                     autoChange = it
                 },
+                widgetPadding = widgetPadding,
+                onWidgetPaddingChange = {
+                    widgetPadding = HashMap(it)
+                },
             )
         }
     }
@@ -185,9 +204,11 @@ fun Content(
     widgetId: Int,
     widgets: List<WidgetData>,
     autoChange: Pair<Boolean, Long>,
+    widgetPadding: Map<Int, Boolean>,
     onWidgetsChange: (List<WidgetData>) -> Unit,
     onNewAutoChange: (Pair<Boolean, Long>) -> Unit,
     onFinish: (success: Boolean) -> Unit,
+    onWidgetPaddingChange: (padding: Map<Int, Boolean>) -> Unit,
 ) {
     val context = LocalContext.current
     val density = LocalDensity.current
@@ -217,6 +238,10 @@ fun Content(
 
     var localAutoChange by remember {
         mutableStateOf(autoChange)
+    }
+
+    var localWidgetPadding by remember {
+        mutableStateOf(widgetPadding)
     }
 
     val addWidgetLauncher = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) {
@@ -349,20 +374,42 @@ fun Content(
                                     verticalAlignment = Alignment.CenterVertically,
                                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                                 ) {
-                                    WidgetItem(
-                                        image = icon(
-                                            info = providerInfo,
-                                            key = widget.id,
-                                        ),
-                                        previewLayout = widgetView,
-                                        label = null,
-                                        subLabel = null,
+                                    Column(
                                         modifier = Modifier.weight(1f),
-                                        itemModifier = Modifier
-                                            .heightIn(min = 150.dp)
-                                            .padding(8.dp)
-                                            .fillMaxWidth(),
-                                    )
+                                        verticalArrangement = Arrangement.spacedBy(4.dp),
+                                    ) {
+                                        WidgetItem(
+                                            image = icon(
+                                                info = providerInfo,
+                                                key = widget.id,
+                                            ),
+                                            previewLayout = widgetView,
+                                            label = null,
+                                            subLabel = null,
+                                            itemModifier = Modifier
+                                                .heightIn(min = 150.dp)
+                                                .padding(8.dp)
+                                                .fillMaxWidth(),
+                                        )
+
+                                        CompositionLocalProvider(
+                                            LocalMinimumInteractiveComponentSize provides 32.dp,
+                                        ) {
+                                            CardSwitch(
+                                                enabled = localWidgetPadding[widget.id] ?: false,
+                                                onEnabledChanged = {
+                                                    localWidgetPadding = localWidgetPadding.toMutableMap().apply {
+                                                        this[widget.id] = it
+                                                    }
+                                                },
+                                                title = stringResource(R.string.widget_padding),
+                                                modifier = Modifier.fillMaxWidth()
+                                                    .heightIn(min = 48.dp),
+                                                titleTextStyle = MaterialTheme.typography.titleMedium,
+                                                contentPadding = ButtonDefaults.ContentPadding - PaddingValues(horizontal = 12.dp),
+                                            )
+                                        }
+                                    }
 
                                     Column(
                                         verticalArrangement = Arrangement.spacedBy(8.dp),
@@ -493,6 +540,7 @@ fun Content(
                         onClick = {
                             onWidgetsChange(localWidgetList)
                             onNewAutoChange(localAutoChange)
+                            onWidgetPaddingChange(localWidgetPadding)
 
                             localRemovedWidgets.forEach {
                                 context.widgetHostCompat.deleteAppWidgetId(it.id)
@@ -653,7 +701,9 @@ fun ConfigurePreview() {
             onWidgetsChange = {},
             onNewAutoChange = {},
             onFinish = {},
+            onWidgetPaddingChange = {},
             autoChange = false to DEFAULT_CHANGE_DELAY_MS,
+            widgetPadding = mapOf(),
             widgets = listOf(
                 WidgetData.widget(
                     context = context,

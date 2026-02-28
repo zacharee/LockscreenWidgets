@@ -144,6 +144,7 @@ class PrefManager private constructor(private val context: Context) {
         const val KEY_WIDGET_STACK_WIDGETS = "widget_stack_widgets"
         const val KEY_WIDGET_STACK_INDICES = "widget_stack_indices"
         const val KEY_WIDGET_STACK_AUTO_CHANGE = "widget_stack_auto_change"
+        const val KEY_WIDGET_STACK_WIDGET_PADDING = "widget_stack_widget_padding_individual"
 
         const val VALUE_PAGE_INDICATOR_BEHAVIOR_HIDDEN = 0
         const val VALUE_PAGE_INDICATOR_BEHAVIOR_AUTO_HIDE = 1
@@ -835,6 +836,14 @@ class PrefManager private constructor(private val context: Context) {
         )
         set(value) {
             putString(KEY_WIDGET_STACK_AUTO_CHANGE, gson.toJson(value))
+        }
+
+    var widgetStackWidgetPadding: HashMap<Int, HashMap<Int, Boolean>>
+        get() = gson.mapFromJson(
+            getString(KEY_WIDGET_STACK_WIDGET_PADDING, ""),
+        )
+        set(value) {
+            putString(KEY_WIDGET_STACK_WIDGET_PADDING, gson.toJson(value))
         }
 
     @Suppress("DEPRECATION")

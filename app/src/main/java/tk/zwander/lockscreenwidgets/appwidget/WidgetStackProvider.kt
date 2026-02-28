@@ -12,6 +12,8 @@ import android.util.SizeF
 import android.util.SparseArray
 import android.view.View
 import android.widget.RemoteViews
+import androidx.compose.ui.unit.Density
+import androidx.compose.ui.unit.dp
 import androidx.core.app.PendingIntentCompat
 import androidx.core.net.toUri
 import androidx.core.os.BundleCompat
@@ -187,6 +189,7 @@ class WidgetStackProvider : AppWidgetProvider() {
         stackSize: Int,
     ) {
         val options = appWidgetManager.getAppWidgetOptions(stackId)
+        val applyPadding = context.prefManager.widgetStackWidgetPadding[stackId]?.get(innerWidgetId) ?: false
 
         root.setOnClickPendingIntent(
             R.id.stack_forward,
@@ -279,7 +282,7 @@ class WidgetStackProvider : AppWidgetProvider() {
         }
 
         val realSize = options?.let {
-            extractSizeFromOptions(it)
+            extractSizeFromOptions(it, applyPadding)
         }
 
         realSize?.apply {
@@ -356,6 +359,17 @@ class WidgetStackProvider : AppWidgetProvider() {
             root.setDisplayedChild(R.id.widget_content, realRem)
         }
 
+        val dpVal = with(Density(context)) {
+            8.dp.roundToPx()
+        }
+        root.setViewPadding(
+            R.id.widget_content,
+            if (applyPadding) dpVal else 0,
+            if (applyPadding) dpVal else 0,
+            if (applyPadding) dpVal else 0,
+            0,
+        )
+
         hoistWidgetData(
             innerView = viewsToApply,
             outerView = root,
@@ -427,7 +441,10 @@ class WidgetStackProvider : AppWidgetProvider() {
                 }
         }
 
-        fun extractSizeFromOptions(options: Bundle): Pair<Float, Float> {
+        fun extractSizeFromOptions(options: Bundle, applyPadding: Boolean): Pair<Float, Float> {
+            val horizontalPaddingDp = if (applyPadding) 16 else 0
+            val verticalPaddingDp = if (applyPadding) 8 else 0
+            val bottomBarHeightDp = 36
             val optionsWidth = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MAX_WIDTH).toFloat()
             val optionsHeight = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT).toFloat()
 
@@ -443,8 +460,8 @@ class WidgetStackProvider : AppWidgetProvider() {
                 optionsWidth to optionsHeight
             }
 
-            // Subtract bottom bar dp height.
-            return baseSize.first to (baseSize.second - 36)
+            return (baseSize.first - horizontalPaddingDp) to
+                    (baseSize.second - bottomBarHeightDp - verticalPaddingDp)
         }
 
         private fun createBaseIntent(context: Context, ids: IntArray): Intent {
