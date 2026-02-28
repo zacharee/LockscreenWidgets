@@ -15,6 +15,7 @@ import android.widget.RemoteViews
 import android.widget.RemoteViewsService
 import androidx.annotation.Keep
 import androidx.core.content.IntentCompat
+import androidx.core.net.toUri
 import com.android.internal.widget.IRemoteViewsFactory
 import net.bytebuddy.ByteBuddy
 import net.bytebuddy.android.AndroidClassLoadingStrategy
@@ -35,7 +36,9 @@ class RemoteViewsProxyService : RemoteViewsService() {
             ?: return null
 
         sFactories[widgetId]?.let {
-            it.onCreate()
+            if (!it.created) {
+                it.onCreate()
+            }
             return it
         }
 
@@ -47,7 +50,10 @@ class RemoteViewsProxyService : RemoteViewsService() {
         return newFactory
     }
 
-    inner class Factory(private val widgetId: Int, private val widgetIntent: Intent) : IRemoteViewsFactory.Stub() {
+    inner class Factory(
+        private val widgetId: Int,
+        private val widgetIntent: Intent,
+    ) : IRemoteViewsFactory.Stub() {
         var created = false
         var wrapped: IRemoteViewsFactory? = null
 
@@ -57,6 +63,7 @@ class RemoteViewsProxyService : RemoteViewsService() {
                 service: IBinder?,
             ) {
                 wrapped = asInterface(service)
+                created = true
             }
 
             override fun onServiceDisconnected(name: ComponentName?) {
@@ -152,11 +159,10 @@ class RemoteViewsProxyService : RemoteViewsService() {
                         proxy.asBinder(),
                     )
             }
-            created = true
         }
 
         override fun onDataSetChanged() {
-            if (wrapped?.isCreated == false) {
+            if (!created || wrapped?.isCreated == false) {
                 wrapped?.onDataSetChanged()
             }
         }
@@ -178,7 +184,7 @@ class RemoteViewsProxyService : RemoteViewsService() {
         }
 
         override fun getItemId(position: Int): Long {
-            return wrapped?.getItemId(position) ?: -1L
+            return wrapped?.getItemId(position) ?: 0L
         }
 
         override fun hasStableIds(): Boolean {
@@ -191,7 +197,7 @@ class RemoteViewsProxyService : RemoteViewsService() {
 
         override fun getRemoteCollectionItems(
             capSize: Int,
-            capBitmapSize: Int
+            capBitmapSize: Int,
         ): RemoteViews.RemoteCollectionItems? {
             return wrapped?.getRemoteCollectionItems(capSize, capBitmapSize)
         }
@@ -226,6 +232,7 @@ class RemoteViewsProxyService : RemoteViewsService() {
             val intent = Intent(context, RemoteViewsProxyService::class.java)
             intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, widgetId)
             intent.putExtra(EXTRA_INTENT, widgetIntent)
+            intent.data = "widgetproxy://${widgetId}".toUri()
 
             return intent
         }

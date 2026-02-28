@@ -54,6 +54,10 @@ class RemoteViewsLayoutInflaterContext(
         return super.getSystemService(name)
     }
 
+    override fun getApplicationContext(): Context {
+        return super.getApplicationContext() ?: baseContext
+    }
+
     private fun getWidgetData(): String {
         return try {
             appWidgetManager.getAppWidgetInfo(widgetId)

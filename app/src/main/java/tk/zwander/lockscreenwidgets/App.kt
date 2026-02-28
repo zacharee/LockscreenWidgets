@@ -371,7 +371,11 @@ class App : Application(), CoroutineScope by MainScope(), EventObserver {
         val serviceIntent = Intent(this, WidgetStackMonitorService::class.java)
 
         if (shouldRun) {
-            ContextCompat.startForegroundService(this, serviceIntent)
+            try {
+                ContextCompat.startForegroundService(this, serviceIntent)
+            } catch (e: Exception) {
+                logUtils.debugLog("Couldn't start foreground service", e)
+            }
         } else {
             stopService(serviceIntent)
         }

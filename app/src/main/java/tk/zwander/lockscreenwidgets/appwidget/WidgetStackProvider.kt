@@ -19,7 +19,6 @@ import androidx.core.util.forEach
 import androidx.core.util.plus
 import com.android.internal.appwidget.IAppWidgetService
 import tk.zwander.common.appwidget.RemoteViewsProxyService
-import tk.zwander.common.data.WidgetData
 import tk.zwander.common.host.widgetHostCompat
 import tk.zwander.common.util.Event
 import tk.zwander.common.util.eventManager
@@ -103,7 +102,6 @@ class WidgetStackProvider : AppWidgetProvider() {
     ) {
         appWidgetIds.forEach { appWidgetId ->
             val root = RemoteViews(context.packageName, R.layout.widget_stack)
-            val options = appWidgetManager.getAppWidgetOptions(appWidgetId)
             val stackedWidgets = (context.prefManager.widgetStackWidgets[appWidgetId] ?: LinkedHashSet()).toList()
             val index = (context.prefManager.widgetStackIndices[appWidgetId] ?: 0)
                 .coerceAtMost(stackedWidgets.lastIndex)
@@ -111,7 +109,13 @@ class WidgetStackProvider : AppWidgetProvider() {
             val widgetData = stackedWidgets.getOrNull(index)
             val widgetView =
                 widgetData?.let {
-                    appWidgetService.getAppWidgetViews(context.packageName, it.id)
+                    context.widgetHostCompat.cachedRemoteViews[it.id]?.let { cached ->
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                            RemoteViews(cached)
+                        } else {
+                            cached
+                        }
+                    } ?: appWidgetService.getAppWidgetViews(context.packageName, it.id)
                 }
 
             root.setViewVisibility(
@@ -140,12 +144,11 @@ class WidgetStackProvider : AppWidgetProvider() {
                     context = context,
                     appWidgetManager = appWidgetManager,
                     stackId = appWidgetId,
-                    options = options,
-                    widgetData = widgetData,
+                    innerWidgetId = widgetData.id,
                     index = index,
                     rootWidgetViews = widgetView,
                     root = root,
-                    stackedWidgets = stackedWidgets,
+                    stackSize = stackedWidgets.size,
                 )
             } else {
                 root.setOnClickPendingIntent(
@@ -173,13 +176,14 @@ class WidgetStackProvider : AppWidgetProvider() {
         context: Context,
         appWidgetManager: AppWidgetManager,
         stackId: Int,
-        options: Bundle?,
-        widgetData: WidgetData,
+        innerWidgetId: Int,
         index: Int,
         rootWidgetViews: RemoteViews,
         root: RemoteViews,
-        stackedWidgets: List<WidgetData>,
+        stackSize: Int,
     ) {
+        val options = appWidgetManager.getAppWidgetOptions(stackId)
+
         root.setOnClickPendingIntent(
             R.id.stack_forward,
             PendingIntentCompat.getBroadcast(
@@ -217,7 +221,7 @@ class WidgetStackProvider : AppWidgetProvider() {
 
         root.removeAllViews(R.id.stack_dot_row)
 
-        repeat(stackedWidgets.size) {
+        repeat(stackSize) {
             val dot = RemoteViews(context.packageName, R.layout.widget_stack_page_dot)
             dot.setViewVisibility(
                 R.id.page_dot_active,
@@ -281,17 +285,32 @@ class WidgetStackProvider : AppWidgetProvider() {
             options.putInt(AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT, realSize.second.roundToInt())
         }
 
-        if (options?.matches(appWidgetManager.getAppWidgetOptions(widgetData.id)) != true) {
-            appWidgetManager.updateAppWidgetOptions(widgetData.id, options)
+        if (options?.matches(appWidgetManager.getAppWidgetOptions(innerWidgetId)) != true) {
+            appWidgetManager.updateAppWidgetOptions(innerWidgetId, options)
         }
 
-        val viewsToApply = rootWidgetViews.getRemoteViewsToApplyCompat(context, realSize?.let { SizeF(it.first, it.second) })
+        val viewsToApply = rootWidgetViews.getRemoteViewsToApplyCompat(
+            context = context,
+            size = realSize?.let { SizeF(it.first, it.second) },
+        )
+
+        processActions(
+            context = context,
+            innerView = viewsToApply,
+            innerWidgetId = innerWidgetId,
+        )
+
+        hoistCollections(
+            innerView = viewsToApply,
+            rootWidgetViews = rootWidgetViews,
+            outerView = root,
+        )
 
         val rem = index % 3
         val prevIndex = if (index > 0) {
             index - 1
         } else {
-            stackedWidgets.lastIndex
+            stackSize - 1
         }
         val prevRem = prevIndex % 3
         val realRem = if (rem == prevRem) {
@@ -326,11 +345,8 @@ class WidgetStackProvider : AppWidgetProvider() {
         }
 
         hoistWidgetData(
-            context = context,
             innerView = viewsToApply,
             outerView = root,
-            rootWidgetViews = rootWidgetViews,
-            innerWidgetId = widgetData.id,
         )
     }
 
@@ -395,7 +411,6 @@ class WidgetStackProvider : AppWidgetProvider() {
                         putExtra(EXTRA_SWAP_INDEX, it)
                     }
                 }
-                .setData("widget://${ids.joinToString(",")}".toUri())
         }
 
         fun extractSizeFromOptions(options: Bundle): Pair<Float, Float> {
@@ -421,21 +436,16 @@ class WidgetStackProvider : AppWidgetProvider() {
         private fun createBaseIntent(context: Context, ids: IntArray): Intent {
             return Intent(context, WidgetStackProvider::class.java)
                 .putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, ids)
+                .setData("widgets://${ids.contentToString()}".toUri())
         }
 
         @Suppress("UNCHECKED_CAST")
-        private fun hoistWidgetData(
-            context: Context,
+        private fun hoistCollections(
             innerView: RemoteViews,
-            outerView: RemoteViews,
             rootWidgetViews: RemoteViews,
-            innerWidgetId: Int,
+            outerView: RemoteViews,
         ) {
-            val sourceActions = innerView::class.java.getDeclaredField("mActions")
-                .apply { isAccessible = true }
-                .get(innerView) as? MutableList<Any>
-
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.VANILLA_ICE_CREAM && innerView.hasLegacyLists()) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.VANILLA_ICE_CREAM) {
                 val collectionCacheSource = innerView::class.java.getDeclaredField("mCollectionCache")
                     .apply { isAccessible = true }
                     .get(innerView)
@@ -479,11 +489,19 @@ class WidgetStackProvider : AppWidgetProvider() {
                     )
                 }
             }
+        }
 
-            val collectionActions = (sourceActions?.filter { action ->
-                action::class.java.name.contains("SetRemoteCollectionItemListAdapterAction")
-                        || action::class.java.name.contains("SetRemoteViewsAdapterIntent")
-            } ?: listOf()).map { action ->
+        @Suppress("UNCHECKED_CAST")
+        private fun processActions(
+            context: Context,
+            innerView: RemoteViews,
+            innerWidgetId: Int,
+        ) {
+            val sourceActions = innerView::class.java.getDeclaredField("mActions")
+                .apply { isAccessible = true }
+                .get(innerView) as? MutableList<Any>
+
+            sourceActions?.forEach { action ->
                 if (action::class.java.name.contains("SetRemoteViewsAdapterIntent")) {
                     val wrappedIntentField = try {
                         action::class.java.getDeclaredField("mIntent")
@@ -498,9 +516,107 @@ class WidgetStackProvider : AppWidgetProvider() {
                     )
                     wrappedIntentField.set(action, newIntent)
                 }
-
-                action
             }
+
+//            val collectionActions = (sourceActions?.filter { action ->
+//                action::class.java.name.contains("SetRemoteCollectionItemListAdapterAction")
+//                        || action::class.java.name.contains("SetRemoteViewsAdapterIntent")
+//            } ?: listOf()).flatMap { action ->
+//                if (action::class.java.name.contains("SetRemoteCollectionItemListAdapterAction")) {
+//                    val wrappedIntentField = action::class.java
+//                        .getDeclaredField("mServiceIntent")
+//                        .apply { isAccessible = true }
+//                    val mIntentId = action::class.java
+//                        .getDeclaredField("mIntentId")
+//                        .apply { isAccessible = true }
+//                        .get(action) as Int
+//                    val wrappedIntent = wrappedIntentField.get(action) as? Intent
+//
+//                    action::class.java.getDeclaredField("mIsReplacedIntoAction")
+//                        .apply { isAccessible = true }
+//                        .set(action, true)
+//
+//                    val newIntent = RemoteViewsProxyService.createProxyIntent(
+//                        context = context,
+//                        widgetId = innerWidgetId,
+//                        widgetIntent = wrappedIntent,
+//                        intentId = mIntentId,
+//                    )
+//                    newIntent.data = newIntent.toUri(Intent.URI_INTENT_SCHEME).toUri()
+//
+//                    wrappedIntentField.set(action, newIntent)
+//
+//                    val collectionCacheDest = outerView::class.java.getDeclaredField("mCollectionCache")
+//                        .apply { isAccessible = true }
+//                        .get(outerView)
+//
+//                    val sourceUriToCollectionMapping = collectionCacheDest::class.java.getDeclaredField("mUriToCollectionMapping")
+//                        .apply { isAccessible = true }
+//                        .get(collectionCacheDest) as MutableMap<String, Any?>
+//                    val rootSourceIdToUriMapping = collectionCacheDest::class.java.getDeclaredField("mIdToUriMapping")
+//                        .apply { isAccessible = true }
+//                        .get(collectionCacheDest) as SparseArray<String>
+//
+//                    val oldUri = rootSourceIdToUriMapping[mIntentId]
+//                    val newUri = newIntent.toUri(0)
+//
+//                    rootSourceIdToUriMapping.set(mIntentId, newUri)
+//                    sourceUriToCollectionMapping[newUri.toString()] = sourceUriToCollectionMapping[oldUri.toString()]
+//
+////                    val legacyAction = Class.forName($$"android.widget.RemoteViews$SetRemoteViewsAdapterIntent")
+////                        .declaredConstructors
+////                        .also {
+////                            it.forEach {
+////                                Log.e("LSW", "${it.parameters.contentToString()}")
+////                            }
+////                        }
+////                        .find { it.parameterTypes.run { contains(Int::class.java) && contains(Intent::class.java) } }
+////                        ?.apply { isAccessible = true }
+////                        ?.newInstance(
+////                            null,
+////                            Class.forName($$"android.widget.RemoteViews$Action")
+////                                .getDeclaredField("mViewId")
+////                                .apply { isAccessible = true }
+////                                .get(action),
+////                            newIntent,
+////                        )
+//
+//                    return@flatMap listOf(action)
+////
+////                    return@flatMap listOf(legacyAction)
+//                }
+
+//                listOf(action)
+//            }
+        }
+
+        @SuppressLint("PrivateApi")
+        @Suppress("UNCHECKED_CAST")
+        private fun hoistWidgetData(
+            innerView: RemoteViews,
+            outerView: RemoteViews,
+        ): MutableList<Any> {
+            val sourceActions = innerView::class.java.getDeclaredField("mActions")
+                .apply { isAccessible = true }
+                .get(innerView) as? MutableList<Any>
+
+            val collectionActions = (sourceActions?.filter { action ->
+                action::class.java.name.contains("SetRemoteCollectionItemListAdapterAction")
+                        || action::class.java.name.contains("SetRemoteViewsAdapterIntent")
+            } ?: listOf())
+
+//            sourceActions?.forEach { action ->
+//                action::class.java.getMethod(
+//                    "setHierarchyRootData",
+//                    Class.forName($$"android.widget.RemoteViews$HierarchyRootData"),
+//                ).apply { isAccessible = true }
+//                    .invoke(
+//                        action,
+//                        outerView::class.java.getDeclaredMethod("getHierarchyRootData")
+//                            .apply { isAccessible = true }
+//                            .invoke(outerView),
+//                    )
+//            }
 
             val destActionsField = outerView::class.java.getDeclaredField("mActions")
                 .apply { isAccessible = true }
@@ -511,7 +627,31 @@ class WidgetStackProvider : AppWidgetProvider() {
                 (destActionsField.get(outerView) as? MutableList<Any>)?.addAll(collectionActions)
             }
 
-            sourceActions?.removeAll { collectionActions.contains(it) }
+//            rootWidgetViews::class.java.getDeclaredMethod(
+//                "configureAsChild",
+//                Class.forName($$"android.widget.RemoteViews$HierarchyRootData"),
+//            ).apply { isAccessible = true }
+//                .invoke(
+//                rootWidgetViews,
+//                outerView::class.java.getDeclaredMethod("getHierarchyRootData")
+//                    .apply { isAccessible = true }
+//                    .invoke(outerView),
+//            )
+//
+//            innerView::class.java.getDeclaredMethod(
+//                "configureAsChild",
+//                Class.forName($$"android.widget.RemoteViews$HierarchyRootData"),
+//            ).apply { isAccessible = true }
+//                .invoke(
+//                innerView,
+//                outerView::class.java.getDeclaredMethod("getHierarchyRootData")
+//                    .apply { isAccessible = true }
+//                    .invoke(outerView),
+//            )
+
+//            sourceActions?.removeAll { collectionActions.contains(it) }
+
+            return sourceActions!!
         }
     }
 }

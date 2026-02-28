@@ -57,7 +57,7 @@ internal fun items(
                     return@forEach
                 }
 
-                if (it.provider == ComponentName(context, WidgetStackProvider::class.java)) {
+                if (!showWidgetStackWidget && it.provider == ComponentName(context, WidgetStackProvider::class.java)) {
                     context.logUtils.debugLog("Excluding widget stack widget.")
                     return@forEach
                 }

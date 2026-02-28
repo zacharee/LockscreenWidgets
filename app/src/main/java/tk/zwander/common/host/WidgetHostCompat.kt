@@ -114,6 +114,8 @@ class WidgetHostCompat(
         }
     }
 
+    val cachedRemoteViews = HashMap<Int, RemoteViews?>()
+
     private fun createOnClickHandlerForWidget(widgetId: Int): Any {
         return when (mode) {
             is Mode.Class -> {
@@ -211,6 +213,8 @@ class WidgetHostCompat(
         val newAutoChange = context.prefManager.widgetStackAutoChange
         newAutoChange.remove(appWidgetId)
         context.prefManager.widgetStackAutoChange = newAutoChange
+
+        cachedRemoteViews.remove(appWidgetId)
     }
 
     @SuppressLint("PrivateApi")
