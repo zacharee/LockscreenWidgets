@@ -45,6 +45,7 @@ import tk.zwander.common.util.globalState
 import tk.zwander.common.util.handler
 import tk.zwander.common.util.isOrHasDeadObject
 import tk.zwander.common.util.logUtils
+import tk.zwander.common.util.mainHandler
 import tk.zwander.common.util.migrationManager
 import tk.zwander.common.util.prefManager
 import tk.zwander.common.util.shizuku.shizukuManager
@@ -406,6 +407,17 @@ class App : Application(), CoroutineScope by MainScope(), EventObserver {
         } else {
             alarmManager.cancel(pi)
         }
+    }
+
+    fun scheduleWidgetRefresh(id: Int) {
+        mainHandler.postDelayed({
+            WidgetStackProvider.update(
+                context = this,
+                ids = intArrayOf(id),
+                fromChild = false,
+                refresh = true,
+            )
+        }, 300)
     }
 
     private fun registerProxListener() {

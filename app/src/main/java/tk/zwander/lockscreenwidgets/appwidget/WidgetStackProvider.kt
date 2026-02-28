@@ -39,13 +39,17 @@ class WidgetStackProvider : AppWidgetProvider() {
     }
 
     private var fromChild = false
+    private var isSwap = false
+    private var refresh = false
     private lateinit var intent: Intent
 
     override fun onReceive(context: Context, intent: Intent) {
         fromChild = intent.getBooleanExtra(FROM_CHILD, false)
+        refresh = intent.getBooleanExtra(EXTRA_REFRESH, false)
         this.intent = intent
 
         if (intent.action == ACTION_SWAP_INDEX) {
+            isSwap = true
             val autoSwap = intent.getBooleanExtra(EXTRA_AUTO_SWAP, false)
             val targetIndex = intent.getIntExtra(EXTRA_SWAP_INDEX, -1)
 
@@ -323,6 +327,14 @@ class WidgetStackProvider : AppWidgetProvider() {
             rem
         }
 
+        if (!isSwap || refresh) {
+            root.removeAllViews(R.id.widget_content_even)
+            root.removeAllViews(R.id.widget_content_odd)
+            root.removeAllViews(R.id.widget_content_third)
+        } else {
+            App.instance.scheduleWidgetRefresh(stackId)
+        }
+
         when (realRem) {
             0 -> {
                 root.removeAllViews(R.id.widget_content_even)
@@ -340,7 +352,7 @@ class WidgetStackProvider : AppWidgetProvider() {
             }
         }
 
-        if (!fromChild) {
+        if (!fromChild && !refresh) {
             root.setDisplayedChild(R.id.widget_content, realRem)
         }
 
@@ -378,12 +390,14 @@ class WidgetStackProvider : AppWidgetProvider() {
         const val EXTRA_AUTO_SWAP = "auto_swap"
         const val EXTRA_SWAP_INDEX = "swap_index"
         const val EXTRA_PREVIOUS_INDEX = "previous_index"
+        const val EXTRA_REFRESH = "refresh"
 
-        fun update(context: Context, ids: IntArray, fromChild: Boolean = false) {
+        fun update(context: Context, ids: IntArray, fromChild: Boolean = false, refresh: Boolean = false) {
             context.sendBroadcast(
                 createBaseIntent(context, ids)
                     .setAction(AppWidgetManager.ACTION_APPWIDGET_UPDATE)
-                    .putExtra(FROM_CHILD, fromChild),
+                    .putExtra(FROM_CHILD, fromChild)
+                    .putExtra(EXTRA_REFRESH, refresh),
             )
         }
 
