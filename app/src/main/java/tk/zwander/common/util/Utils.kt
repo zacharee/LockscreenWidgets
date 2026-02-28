@@ -1,6 +1,5 @@
 package tk.zwander.common.util
 
-import android.app.Application
 import android.appwidget.AppWidgetProviderInfo
 import android.content.Context
 import android.content.Intent
@@ -87,7 +86,7 @@ suspend inline fun <T, S : Any> Collection<T>.mapIndexedParallel(crossinline act
 }
 
 val Context.safeApplicationContext: Context
-    get() = this as? Application ?: applicationContext
+    get() = applicationContext ?: this
 
 fun AppWidgetProviderInfo.loadPreviewOrIconDrawable(context: Context, density: Int = 0): Drawable? {
     return (loadPreviewImage(context, density) ?: loadIcon(context, density))
