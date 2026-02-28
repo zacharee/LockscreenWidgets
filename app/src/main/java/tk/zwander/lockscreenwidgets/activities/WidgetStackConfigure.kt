@@ -336,7 +336,7 @@ fun Content(
                                 }
 
                                 LaunchedEffect(widget.id) {
-                                    launch(Dispatchers.IO) {
+                                    launch(Dispatchers.Main) {
                                         widgetView = context.widgetViewCacheRegistry.getOrCreateView(
                                             context = context,
                                             appWidget = providerInfo,
