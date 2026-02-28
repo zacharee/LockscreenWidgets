@@ -455,7 +455,8 @@ class WidgetStackProvider : AppWidgetProvider() {
                     SizeF::class.java,
                 )
 
-                (allSizes?.minOf { it.width } ?: optionsWidth) to (allSizes?.maxOf { it.height } ?: optionsHeight)
+                (allSizes?.minOfOrNull { it.width } ?: optionsWidth) to
+                        (allSizes?.maxOfOrNull { it.height } ?: optionsHeight)
             } else {
                 optionsWidth to optionsHeight
             }
