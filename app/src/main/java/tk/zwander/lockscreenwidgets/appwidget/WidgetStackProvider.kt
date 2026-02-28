@@ -509,12 +509,15 @@ class WidgetStackProvider : AppWidgetProvider() {
                         action::class.java.getDeclaredField("intent")
                     }.apply { isAccessible = true }
                     val wrappedIntent = wrappedIntentField.get(action) as? Intent
-                    val newIntent = RemoteViewsProxyService.createProxyIntent(
-                        context = context,
-                        widgetId = innerWidgetId,
-                        widgetIntent = wrappedIntent,
-                    )
-                    wrappedIntentField.set(action, newIntent)
+
+                    if (wrappedIntent?.data == null || wrappedIntent.data?.scheme != "widgetproxy") {
+                        val newIntent = RemoteViewsProxyService.createProxyIntent(
+                            context = context,
+                            widgetId = innerWidgetId,
+                            widgetIntent = wrappedIntent,
+                        )
+                        wrappedIntentField.set(action, newIntent)
+                    }
                 }
             }
 
