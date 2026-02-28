@@ -300,6 +300,7 @@
     <string name="auto_cycle">Automatically Cycle</string>
     <string name="delay">Delay</string>
     <string name="unit_milliseconds">ms</string>
+    <string name="widget_padding">Widget Padding</string>
     <string name="widget_stack_monitor">Widget Stack Monitor</string>
     <string name="widget_stack_monitor_desc">Used to keep widgets in widget stacks up to date.</string>
     <string name="tap_to_hide">Tap to hide</string>
