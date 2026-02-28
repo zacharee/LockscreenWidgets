@@ -6,4 +6,6 @@
     android:initialLayout="@layout/blank_widget"
     android:resizeMode="horizontal|vertical"
     android:widgetCategory="keyguard"
+    android:previewLayout="@layout/widget_stack_preview"
+    android:previewImage="@drawable/widget_stack_preview_img"
     />
