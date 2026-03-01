@@ -252,6 +252,10 @@ class RemoteViewsProxyService : RemoteViewsService() {
             intent.putExtra(EXTRA_INTENT, widgetIntent)
             intent.data = "widgetproxy://${widgetId}".toUri()
 
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.BAKLAVA) {
+                intent.collectExtraIntentKeys()
+            }
+
             return intent
         }
     }
