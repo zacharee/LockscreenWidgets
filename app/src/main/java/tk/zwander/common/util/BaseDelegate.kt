@@ -364,6 +364,9 @@ abstract class BaseDelegate<State : Any>(
         val lsDisplay: LSDisplay?
             get() = delegate.display
 
+        val savedStateRegistryOwner: SavedStateRegistryOwner
+            get() = delegate
+
         abstract val widgetCornerRadiusKey: String
         abstract val containerCornerRadiusKey: String?
 

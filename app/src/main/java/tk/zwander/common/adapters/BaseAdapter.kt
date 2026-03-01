@@ -6,6 +6,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
+import android.os.UserHandle
 import android.util.SizeF
 import android.view.View
 import android.view.ViewGroup
@@ -49,8 +50,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.view.forEach
+import androidx.lifecycle.setViewTreeLifecycleOwner
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
+import androidx.savedstate.setViewTreeSavedStateRegistryOwner
 import com.arasthel.spannedgridlayoutmanager.SpanSize
 import com.arasthel.spannedgridlayoutmanager.SpannedGridLayoutManager
 import com.bugsnag.android.performance.compose.MeasuredComposable
@@ -217,7 +220,9 @@ abstract class BaseAdapter<VM : BaseDelegate.BaseViewModel<*, *>>(
     }
 
     protected open fun createWidgetViewHolder(view: ComposeViewHolderBinding): WidgetVH {
-        return WidgetVH(view)
+        return WidgetVH(view).also {
+            it.updateCompositionContext()
+        }
     }
 
     override fun onBindViewHolder(holder: BaseVH, position: Int) {
@@ -267,8 +272,8 @@ abstract class BaseAdapter<VM : BaseDelegate.BaseViewModel<*, *>>(
             } else {
                 val pkg = provider.packageName
                 val providerInfo = manager.getAppWidgetInfo(currentData.id)
-                    ?: (context.getAllInstalledWidgetProviders(pkg)
-                        .find { info -> info.provider == provider })
+                    ?: (context.getAllInstalledWidgetProviders(pkg)[currentData.profile ?: UserHandle.SYSTEM]
+                        ?.find { info -> info.provider == provider })
 
                 if (providerInfo == null) {
                     Toast.makeText(context, R.string.error_reconfiguring_widget, Toast.LENGTH_SHORT)
@@ -697,9 +702,14 @@ abstract class BaseAdapter<VM : BaseDelegate.BaseViewModel<*, *>>(
 
     abstract inner class BaseVH(protected val binding: ComposeViewHolderBinding) :
         RecyclerView.ViewHolder(binding.root) {
+        init {
+            binding.root.setViewTreeLifecycleOwner(viewModel.savedStateRegistryOwner)
+            binding.root.setViewTreeSavedStateRegistryOwner(viewModel.savedStateRegistryOwner)
+        }
+
         fun updateCompositionContext() {
             binding.root.setParentCompositionContext(
-                parent = viewModel.createLifecycleAwareWindowRecomposer()
+                parent = viewModel.createLifecycleAwareWindowRecomposer(),
             )
         }
 
