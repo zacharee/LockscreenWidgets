@@ -559,7 +559,7 @@ class WidgetStackProvider : AppWidgetProvider() {
         private fun hoistWidgetData(
             innerView: RemoteViews,
             outerView: RemoteViews,
-        ): MutableList<Any> {
+        ) {
             val sourceActions = innerView::class.java.getDeclaredField("mActions")
                 .apply { isAccessible = true }
                 .get(innerView) as? MutableList<Any>
@@ -614,8 +614,6 @@ class WidgetStackProvider : AppWidgetProvider() {
 //            )
 
 //            sourceActions?.removeAll { collectionActions.contains(it) }
-
-            return sourceActions!!
         }
     }
 }
