@@ -3,6 +3,7 @@ package tk.zwander.common.appwidget
 import android.annotation.SuppressLint
 import android.app.Service
 import android.content.Intent
+import android.os.Build
 import android.os.IBinder
 import android.provider.Settings
 import androidx.core.app.NotificationChannelCompat
@@ -23,7 +24,7 @@ class WidgetStackMonitorService : Service() {
 
         nm.createNotificationChannel(
             NotificationChannelCompat.Builder(
-                "widget_stack_monitor",
+                NOTIFICATION_CHANNEL_ID,
                 NotificationManagerCompat.IMPORTANCE_LOW,
             ).setName(resources.getString(R.string.widget_stack_monitor))
                 .setDescription(resources.getString(R.string.widget_stack_monitor_desc))
@@ -35,7 +36,7 @@ class WidgetStackMonitorService : Service() {
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         startForeground(
             100,
-            NotificationCompat.Builder(this, "widget_stack_monitor")
+            NotificationCompat.Builder(this, NOTIFICATION_CHANNEL_ID)
                 .setContentTitle(resources.getString(R.string.widget_stack_monitor))
                 .setContentText(resources.getString(R.string.tap_to_hide))
                 .setSmallIcon(R.mipmap.ic_launcher_round)
@@ -43,8 +44,14 @@ class WidgetStackMonitorService : Service() {
                     PendingIntentCompat.getActivity(
                         this,
                         500000,
-                        Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS)
-                            .putExtra(Settings.EXTRA_APP_PACKAGE, packageName),
+                        Intent(
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                                Settings.ACTION_CHANNEL_NOTIFICATION_SETTINGS
+                            } else {
+                                Settings.ACTION_APP_NOTIFICATION_SETTINGS
+                            },
+                        ).putExtra(Settings.EXTRA_APP_PACKAGE, packageName)
+                            .putExtra(Settings.EXTRA_CHANNEL_ID, NOTIFICATION_CHANNEL_ID),
                         0,
                         false,
                     ),
@@ -53,5 +60,9 @@ class WidgetStackMonitorService : Service() {
         )
 
         return START_STICKY
+    }
+
+    companion object {
+        const val NOTIFICATION_CHANNEL_ID = "widget_stack_monitor"
     }
 }
