@@ -270,30 +270,58 @@ class App : Application(), CoroutineScope by MainScope(), EventObserver {
 
         widgetHostCompat.startListening(this)
 
-        val widgetsToDelete = mutableListOf<Int>()
-        prefManager.widgetStackWidgets = HashMap(
-            prefManager.widgetStackWidgets.mapNotNull { (stackId, widgets) ->
-                val hasStackInfo = appWidgetManager.getAppWidgetInfo(stackId) != null
+        launch(Dispatchers.IO) {
+            val widgetsToDelete = mutableSetOf<Int>()
+            prefManager.widgetStackWidgets = HashMap(
+                prefManager.widgetStackWidgets.mapNotNull { (stackId, widgets) ->
+                    val hasStackInfo = appWidgetManager.getAppWidgetInfo(stackId) != null
 
-                if (!hasStackInfo) {
-                    widgetsToDelete.add(stackId)
-                    null
-                } else {
-                    widgets.removeAll { widget ->
-                        (appWidgetManager.getAppWidgetInfo(widget.id) == null).also {
-                            if (it) {
-                                widgetsToDelete.add(widget.id)
+                    if (!hasStackInfo) {
+                        widgetsToDelete.add(stackId)
+                        null
+                    } else {
+                        widgets.removeAll { widget ->
+                            (appWidgetManager.getAppWidgetInfo(widget.id) == null).also {
+                                if (it) {
+                                    widgetsToDelete.add(widget.id)
+                                }
                             }
                         }
+
+                        stackId to widgets
                     }
+                }.toMap(),
+            )
 
-                    stackId to widgets
+            @SuppressLint("NewApi")
+            widgetHostCompat.appWidgetIds.forEach { id ->
+                if (prefManager.currentWidgets.any { it.id == id }) {
+                    return@forEach
                 }
-            }.toMap(),
-        )
 
-        widgetsToDelete.forEach {
-            widgetHostCompat.deleteAppWidgetId(it)
+                prefManager.currentSecondaryFramesWithStringDisplay.forEach { (frameId) ->
+                    if (FramePrefs.getWidgetsForFrame(this@App, frameId).any { it.id == id }) {
+                        return@forEach
+                    }
+                }
+
+                if (prefManager.drawerWidgets.any { it.id == id }) {
+                    return@forEach
+                }
+
+                if (prefManager.widgetStackWidgets.any {
+                        it.key == id ||
+                                it.value.any { widget -> widget.id == id }
+                    }) {
+                    return@forEach
+                }
+
+                widgetsToDelete.add(id)
+            }
+
+            widgetsToDelete.forEach {
+                widgetHostCompat.deleteAppWidgetId(it)
+            }
         }
 
         prefManager.widgetStackWidgets.forEach { (stackId) ->
