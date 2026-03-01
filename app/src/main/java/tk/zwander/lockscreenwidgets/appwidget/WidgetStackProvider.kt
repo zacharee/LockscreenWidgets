@@ -262,22 +262,24 @@ class WidgetStackProvider : AppWidgetProvider() {
                     R.drawable.circle_0
                 },
             )
-            dot.setOnClickPendingIntent(
-                R.id.page_dot_root,
-                PendingIntentCompat.getBroadcast(
-                    context,
-                    80000 + stackId + it,
-                    createSwapIntent(
-                        context = context,
-                        ids = intArrayOf(stackId),
-                        backward = false,
-                        autoSwap = false,
-                        swapIndex = it,
+            if (index != it) {
+                dot.setOnClickPendingIntent(
+                    R.id.page_dot_root,
+                    PendingIntentCompat.getBroadcast(
+                        context,
+                        80000 + stackId + it,
+                        createSwapIntent(
+                            context = context,
+                            ids = intArrayOf(stackId),
+                            backward = false,
+                            autoSwap = false,
+                            swapIndex = it,
+                        ),
+                        0,
+                        false,
                     ),
-                    0,
-                    false,
-                ),
-            )
+                )
+            }
             root.addView(R.id.stack_dot_row, dot)
         }
 
