@@ -10,7 +10,6 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
@@ -20,7 +19,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.plus
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
@@ -96,8 +94,7 @@ class WidgetStackListActivity : BaseActivity() {
                                     modifier = Modifier.fillMaxSize(),
                                     contentPadding = WindowInsets.systemBars
                                         .only(WindowInsetsSides.Left + WindowInsetsSides.Right + WindowInsetsSides.Bottom)
-                                        .asPaddingValues() + PaddingValues(top = 16.dp),
-                                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                                        .asPaddingValues(),
                                 ) {
                                     itemsIndexed(items = widgetStacks, key = { _, id -> id }) { index, id ->
                                         Row(
@@ -109,11 +106,10 @@ class WidgetStackListActivity : BaseActivity() {
                                                         Intent(
                                                             context,
                                                             WidgetStackConfigure::class.java
-                                                        )
-                                                            .putExtra(
-                                                                AppWidgetManager.EXTRA_APPWIDGET_ID,
-                                                                id
-                                                            ),
+                                                        ).putExtra(
+                                                            AppWidgetManager.EXTRA_APPWIDGET_ID,
+                                                            id,
+                                                        ),
                                                     )
                                                 }
                                                 .padding(horizontal = 16.dp, vertical = 8.dp),
