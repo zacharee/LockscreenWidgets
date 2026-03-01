@@ -299,6 +299,7 @@
     <string name="auto_cycle">自动循环</string>
     <string name="delay">延迟</string>
     <string name="unit_milliseconds">毫秒</string>
+    <string name="widget_padding">Widget Padding</string>
     <string name="widget_stack_monitor">小部件堆栈监视器</string>
     <string name="widget_stack_monitor_desc">用来保持小部件堆栈中最新的部件。</string>
     <string name="tap_to_hide">点击可隐藏</string>
