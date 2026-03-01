@@ -94,6 +94,8 @@ class ZeroPaddingAppWidgetHostView(
     override fun updateAppWidget(remoteViews: RemoteViews?) {
         super.updateAppWidget(remoteViews)
 
+        context.logUtils.debugLog("Updating widget $appWidgetId, $remoteViews", null)
+
         context.widgetHostCompat.cachedRemoteViews[appWidgetId] = remoteViews
 
         findWidgetStackId()?.let {
@@ -103,6 +105,8 @@ class ZeroPaddingAppWidgetHostView(
 
     override fun updateAppWidgetOptions(options: Bundle?) {
         super.updateAppWidgetOptions(options)
+
+        context.logUtils.debugLog("Updating widget options $appWidgetId, $options", null)
 
         findWidgetStackId()?.let {
             WidgetStackProvider.updateOptions(App.instance, intArrayOf(it), options)

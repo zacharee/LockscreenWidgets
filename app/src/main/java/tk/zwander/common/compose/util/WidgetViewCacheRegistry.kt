@@ -33,7 +33,10 @@ class WidgetViewCacheRegistry private constructor(@Suppress("unused") private va
     fun getOrCreateView(context: Context, appWidgetId: Int, appWidget: AppWidgetProviderInfo): AppWidgetHostView {
         val widgetContext = try {
             RemoteViewsLayoutInflaterContext(
-                context.safeApplicationContext.themedContext.createApplicationContext(
+                context.safeApplicationContext.createContextAsUser(
+                    appWidget.profile,
+                    CONTEXT_INCLUDE_CODE or Context.CONTEXT_IGNORE_SECURITY,
+                ).themedContext.createApplicationContext(
                     appWidget.providerInfo.applicationInfo,
                     CONTEXT_INCLUDE_CODE or Context.CONTEXT_IGNORE_SECURITY,
                 ),

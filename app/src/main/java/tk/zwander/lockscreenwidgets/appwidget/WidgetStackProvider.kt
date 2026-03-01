@@ -355,9 +355,7 @@ class WidgetStackProvider : AppWidgetProvider() {
             }
         }
 
-        if (!fromChild && !refresh) {
-            root.setDisplayedChild(R.id.widget_content, realRem)
-        }
+        root.setDisplayedChild(R.id.widget_content, realRem)
 
         val dpVal = with(Density(context)) {
             8.dp.roundToPx()
