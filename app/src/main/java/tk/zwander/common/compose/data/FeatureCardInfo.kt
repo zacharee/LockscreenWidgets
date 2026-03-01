@@ -1,17 +1,26 @@
 package tk.zwander.common.compose.data
 
+import androidx.annotation.DrawableRes
+import androidx.annotation.StringRes
 import tk.zwander.common.data.MainPageButton
 import tk.zwander.common.util.EventObserver
+import tk.zwander.lockscreenwidgets.R
 
 data class FeatureCardInfo(
+    @StringRes
     val title: Int,
-    val version: String,
-    val enabledLabel: Int,
-    val disabledLabel: Int,
-    val enabledKey: String,
-    val buttons: List<MainPageButton>,
-    val onAddWidget: () -> Unit,
-    val isEnabled: () -> Boolean,
-    val onEnabledChanged: (Boolean) -> Unit,
+    @StringRes
+    val enabledLabel: Int? = null,
+    @StringRes
+    val disabledLabel: Int? = null,
+    val enabledKey: String? = null,
+    val buttons: List<MainPageButton> = listOf(),
+    val onAction: () -> Unit,
+    val isEnabled: () -> Boolean = { true },
+    val onEnabledChanged: (Boolean) -> Unit = {},
     val eventObserver: EventObserver? = null,
+    @StringRes
+    val actionButtonTextRes: Int = R.string.add_widget,
+    @DrawableRes
+    val actionButtonIconRes: Int? = R.drawable.ic_baseline_add_24,
 )

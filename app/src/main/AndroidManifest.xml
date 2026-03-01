@@ -277,6 +277,11 @@
             android:windowSoftInputMode="adjustResize"
             android:theme="@style/AppTheme.NoActionBar"
             />
+        <activity android:name="tk.zwander.common.activities.WidgetStackListActivity"
+            android:exported="true"
+            android:windowSoftInputMode="adjustResize"
+            android:theme="@style/AppTheme.NoActionBar"
+            />
 
         <service
             android:name="tk.zwander.lockscreenwidgets.services.Accessibility"
