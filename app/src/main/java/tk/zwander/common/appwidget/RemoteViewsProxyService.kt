@@ -86,6 +86,10 @@ class RemoteViewsProxyService : RemoteViewsService() {
 
         @SuppressLint("PrivateApi")
         fun onCreate() {
+            if (wrapped != null && wrapped?.asBinder()?.isBinderAlive == true) {
+                return
+            }
+
             try {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
                     appWidgetManager.bindRemoteViewsService(
@@ -167,32 +171,39 @@ class RemoteViewsProxyService : RemoteViewsService() {
         }
 
         override fun onDataSetChanged() {
+            onCreate()
             if (!created || wrapped?.isCreated == false) {
                 wrapped?.onDataSetChanged()
             }
         }
 
         override fun getCount(): Int {
+            onCreate()
             return wrapped?.count ?: 0
         }
 
         override fun getViewAt(position: Int): RemoteViews? {
+            onCreate()
             return wrapped?.getViewAt(position)
         }
 
         override fun getLoadingView(): RemoteViews? {
+            onCreate()
             return wrapped?.loadingView
         }
 
         override fun getViewTypeCount(): Int {
+            onCreate()
             return wrapped?.viewTypeCount ?: 1
         }
 
         override fun getItemId(position: Int): Long {
+            onCreate()
             return wrapped?.getItemId(position) ?: 0L
         }
 
         override fun hasStableIds(): Boolean {
+            onCreate()
             return wrapped?.hasStableIds() == true
         }
 
@@ -204,6 +215,7 @@ class RemoteViewsProxyService : RemoteViewsService() {
             capSize: Int,
             capBitmapSize: Int,
         ): RemoteViews.RemoteCollectionItems? {
+            onCreate()
             return wrapped?.getRemoteCollectionItems(capSize, capBitmapSize)
         }
 
@@ -215,6 +227,7 @@ class RemoteViewsProxyService : RemoteViewsService() {
         }
 
         override fun onDataSetChangedAsync() {
+            onCreate()
             wrapped?.onDataSetChangedAsync()
         }
     }
