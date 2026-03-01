@@ -49,7 +49,7 @@ class ConfigureLauncher(
             if (samsungConfigComponent != null) {
                 val launchIntent = Intent(AppWidgetManager.ACTION_APPWIDGET_CONFIGURE)
                 launchIntent.component = samsungConfigComponent
-                launchIntent.putExtra("appWidgetId", id)
+                launchIntent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, id)
 
                 currentConfigId = id
                 samsungConfigLauncher.launch(launchIntent)

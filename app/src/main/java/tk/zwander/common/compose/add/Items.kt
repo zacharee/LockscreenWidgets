@@ -11,6 +11,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import androidx.core.graphics.drawable.IconCompat
 import kotlinx.coroutines.Dispatchers
@@ -41,6 +42,7 @@ internal fun items(
     showWidgetStackWidget: Boolean,
 ): Pair<List<AppInfo>, List<AppInfo>> {
     val context = LocalContext.current
+    val density = LocalDensity.current
 
     val items = remember {
         mutableStateListOf<AppInfo>()
@@ -51,60 +53,66 @@ internal fun items(
             val apps = HashMap<String, AppInfo>()
             val packageManager = context.packageManager
 
-            context.getAllInstalledWidgetProviders().forEach {
-                if (BrokenAppsRegistry.isBroken(it)) {
-                    context.logUtils.debugLog("Hiding broken widget ${it.provider}.")
-                    return@forEach
-                }
-
-                if (!showWidgetStackWidget && it.provider == ComponentName(context, WidgetStackProvider::class.java)) {
-                    context.logUtils.debugLog("Excluding widget stack widget.")
-                    return@forEach
-                }
-
-                try {
-                    val appInfo = packageManager
-                        .getApplicationInfoCompat(it.provider.packageName, 0)
-                    val appResources = packageManager.getResourcesForApplication(appInfo)
-
-                    val appName = packageManager.getApplicationLabel(appInfo)
-                    val widgetName = it.loadLabel(packageManager)
-
-                    var app = apps[appInfo.packageName]
-                    if (app == null) {
-                        app = AppInfo(appName.toString(), appInfo)
-                        apps[appInfo.packageName] = app
+            context.getAllInstalledWidgetProviders().forEach { (profile, infos) ->
+                infos.forEach {
+                    if (BrokenAppsRegistry.isBroken(it)) {
+                        context.logUtils.debugLog("Hiding broken widget ${it.provider}.")
+                        return@forEach
                     }
 
-                    app.widgets.add(
-                        WidgetListInfo(
-                            widgetName,
-                            it.previewImage.run { if (this != 0) this else appInfo.icon }
-                                .let { iconResource ->
-                                    try {
-                                        IconCompat.createWithResource(
-                                            appResources,
-                                            appInfo.packageName,
-                                            iconResource,
-                                        )
-                                    } catch (e: IllegalArgumentException) {
-                                        context.logUtils.debugLog("Error creating icon", e)
-                                        null
-                                    }
-                                },
-                            app,
-                            it,
+                    if (!showWidgetStackWidget && it.provider == ComponentName(context, WidgetStackProvider::class.java)) {
+                        context.logUtils.debugLog("Excluding widget stack widget.")
+                        return@forEach
+                    }
+
+                    try {
+                        val appInfo = packageManager
+                            .getApplicationInfoCompat(it.provider.packageName, 0)
+                        val appResources = packageManager.getResourcesForApplication(appInfo)
+
+                        val appName = packageManager.getApplicationLabel(appInfo)
+                        val widgetName = it.loadLabel(packageManager)
+
+                        var app = apps[appInfo.packageName]
+                        if (app == null) {
+                            app = AppInfo(appName.toString(), appInfo)
+                            apps[appInfo.packageName] = app
+                        }
+
+                        app.widgets.add(
+                            WidgetListInfo(
+                                widgetName = widgetName,
+                                previewImg = it.previewImage.run { if (this != 0) this else appInfo.icon }
+                                    .let { iconResource ->
+                                        try {
+                                            IconCompat.createWithResource(
+                                                appResources,
+                                                appInfo.packageName,
+                                                iconResource,
+                                            )
+                                        } catch (e: IllegalArgumentException) {
+                                            context.logUtils.debugLog("Error creating icon", e)
+                                            null
+                                        }
+                                    },
+                                appInfo = app,
+                                itemInfo = it,
+                                profileIcon = packageManager.getUserBadgeForDensity(
+                                    profile,
+                                    density.density.toInt(),
+                                ),
+                            )
                         )
-                    )
-                } catch (e: PackageManager.NameNotFoundException) {
-                    context.logUtils.debugLog("Unable to parse application info for widget", e)
+                    } catch (e: PackageManager.NameNotFoundException) {
+                        context.logUtils.debugLog("Unable to parse application info for widget", e)
+                    }
                 }
             }
 
             if (showShortcuts) {
                 packageManager.queryIntentActivitiesCompat(
                     Intent(Intent.ACTION_CREATE_SHORTCUT),
-                    PackageManager.GET_RESOLVED_FILTER
+                    PackageManager.GET_RESOLVED_FILTER,
                 ).forEach {
                     try {
                         val appInfo =

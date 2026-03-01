@@ -6,6 +6,7 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.os.Parcelable
+import android.os.UserHandle
 import androidx.compose.ui.unit.dp
 import kotlinx.parcelize.IgnoredOnParcel
 import kotlinx.parcelize.Parcelize
@@ -38,6 +39,7 @@ data class WidgetData(
     val widgetProvider: String?,
     val size: WidgetSizeData?,
     val packageName: String?,
+    val profile: UserHandle?,
 ) : Parcelable {
     companion object {
         fun shortcut(
@@ -55,6 +57,7 @@ data class WidgetData(
                 id, WidgetType.SHORTCUT,
                 label, null, iconRes, shortcutIntent,
                 null, size, null,
+                null,
             )
         }
 
@@ -65,6 +68,7 @@ data class WidgetData(
             label: String,
             icon: String?,
             size: WidgetSizeData?,
+            profile: UserHandle?,
         ): WidgetData {
             IconPrefs.setIconForWidget(context, id, icon)
 
@@ -72,7 +76,7 @@ data class WidgetData(
                 id, WidgetType.WIDGET, label, null,
                 null, null,
                 widgetProvider.flattenToString(),
-                size, widgetProvider.packageName,
+                size, widgetProvider.packageName, profile,
             )
         }
 
@@ -86,6 +90,7 @@ data class WidgetData(
                 id, WidgetType.LAUNCHER_ITEM,
                 null, null, null, null,
                 componentName.flattenToString(), size, packageName,
+                null,
             )
         }
 
@@ -102,7 +107,7 @@ data class WidgetData(
             return WidgetData(
                 id, WidgetType.LAUNCHER_SHORTCUT,
                 label, null, null, intent,
-                null, size, null,
+                null, size, null, null,
             )
         }
     }
@@ -121,13 +126,18 @@ data class WidgetData(
         return other is WidgetData && other.id == id
                 && other.safeType == safeType
                 && (safeType != WidgetType.WIDGET || widgetProviderComponent == other.widgetProviderComponent)
+                && (
+                    profile == other.profile ||
+                    (profile == null && other.profile == UserHandle.SYSTEM) ||
+                    (profile == UserHandle.SYSTEM && other.profile == null)
+                )
     }
 
     override fun hashCode(): Int {
         return if (safeType != WidgetType.WIDGET) {
             Objects.hash(id, safeType)
         } else {
-            Objects.hash(id, safeType, widgetProviderComponent)
+            Objects.hash(id, safeType, widgetProviderComponent, (profile ?: UserHandle.SYSTEM))
         }
     }
 

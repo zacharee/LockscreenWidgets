@@ -117,6 +117,7 @@ fun AddWidgetScroller(
                             subLabel =
                                 "${widget.itemInfo.getCellWidthCompat(fullSize.width, gridSize.width)}x" +
                                         "${widget.itemInfo.getCellHeightCompat(fullSize.height, gridSize.height)}",
+                            badgeDrawable = widget.profileIcon,
                         ) {
                             onSelected(widget)
                         }

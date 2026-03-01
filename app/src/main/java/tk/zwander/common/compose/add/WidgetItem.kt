@@ -33,6 +33,7 @@ fun WidgetItem(
     modifier: Modifier = Modifier,
     itemModifier: Modifier = Modifier.size(200.dp)
         .padding(8.dp),
+    badgeDrawable: Drawable? = null,
     previewLayout: View? = null,
     onClick: (() -> Unit)? = null,
 ) {
@@ -103,6 +104,15 @@ fun WidgetItem(
                         interactionSource = remember { MutableInteractionSource() },
                     ),
             )
+
+            badgeDrawable?.let {
+                Image(
+                    painter = rememberDrawablePainter(it),
+                    contentDescription = null,
+                    modifier = Modifier.size(24.dp)
+                        .align(Alignment.BottomEnd),
+                )
+            }
         }
     }
 }

@@ -74,7 +74,8 @@ abstract class ReconfigureWidgetActivity : BaseBindWidgetActivity() {
                 prevId,
                 provider.provider,
                 "", null,
-                WidgetSizeData(1, 1)
+                WidgetSizeData(1, 1),
+                provider.profile,
             )
         )
 

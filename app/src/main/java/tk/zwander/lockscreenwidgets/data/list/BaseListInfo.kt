@@ -1,5 +1,6 @@
 package tk.zwander.lockscreenwidgets.data.list
 
+import android.graphics.drawable.Drawable
 import android.os.Parcelable
 import androidx.core.graphics.drawable.IconCompat
 import tk.zwander.common.data.BaseAppInfo
@@ -10,6 +11,7 @@ sealed class BaseListInfo<ItemInfo : Parcelable>(
     val icon: IconCompat?,
     val appInfo: BaseAppInfo<*>,
     val itemInfo: ItemInfo,
+    val profileIcon: Drawable? = null,
 ) : Comparable<BaseListInfo<ItemInfo>> {
     override fun compareTo(other: BaseListInfo<ItemInfo>): Int {
         return name.compareTo(other.name, true)

@@ -41,12 +41,12 @@ class ReconfigureDrawerWidgetActivity : ReconfigureWidgetActivity() {
 
     override fun createWidgetData(id: Int, provider: AppWidgetProviderInfo, overrideSize: WidgetSizeData?): WidgetData {
         return WidgetData.widget(
-            this,
-            id,
-            provider.provider,
-            provider.loadLabel(packageManager),
-            provider.createPersistablePreviewBitmap(this),
-            overrideSize ?: run {
+            context = this,
+            id = id,
+            widgetProvider = provider.provider,
+            label = provider.loadLabel(packageManager),
+            icon = provider.createPersistablePreviewBitmap(this),
+            size = overrideSize ?: run {
                 val defaultColSpan = provider.getCellWidthCompat(display.dpToPx(width), colCount)
                     .coerceAtMost(colCount)
 
@@ -57,7 +57,8 @@ class ReconfigureDrawerWidgetActivity : ReconfigureWidgetActivity() {
                     .coerceAtMost((display.rotatedRealSize.y / rowHeight) - 10)
 
                 WidgetSizeData(defaultColSpan, defaultRowSpan)
-            }
+            },
+            profile = provider.profile,
         )
     }
 }

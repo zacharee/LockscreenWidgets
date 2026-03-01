@@ -228,11 +228,13 @@ abstract class BaseBindWidgetActivity : BaseActivity() {
         }
 
     @Suppress("LeakingThis")
-    private val configureLauncher = ConfigureLauncher(
-        activity = this,
-        addNewWidget = ::addNewWidget,
-        finishIfNoErrors = ::finishIfNoErrors,
-    )
+    private val configureLauncher by lazy {
+        ConfigureLauncher(
+            activity = this,
+            addNewWidget = ::addNewWidget,
+            finishIfNoErrors = ::finishIfNoErrors,
+        )
+    }
 
     private var pendingErrors = 0
         set(value) {
@@ -268,7 +270,12 @@ abstract class BaseBindWidgetActivity : BaseActivity() {
         info: AppWidgetProviderInfo,
         id: Int = widgetHost.allocateAppWidgetId(),
     ) {
-        val canBind = appWidgetManager.bindAppWidgetIdIfAllowed(id, info.provider)
+        val canBind = appWidgetManager.bindAppWidgetIdIfAllowed(
+            id,
+            info.profile,
+            info.provider,
+            null,
+        )
 
         if (!canBind) getWidgetPermission(id, info.provider)
         else {
@@ -428,12 +435,13 @@ abstract class BaseBindWidgetActivity : BaseActivity() {
         overrideSize: WidgetSizeData? = null,
     ): WidgetData {
         return WidgetData.widget(
-            this,
-            id,
-            provider.provider,
-            provider.loadLabel(packageManager),
-            provider.createPersistablePreviewBitmap(this),
-            overrideSize ?: calculateInitialWidgetSize(provider),
+            context = this,
+            id = id,
+            widgetProvider = provider.provider,
+            label = provider.loadLabel(packageManager),
+            icon = provider.createPersistablePreviewBitmap(this),
+            size = overrideSize ?: calculateInitialWidgetSize(provider),
+            profile = provider.profile,
         )
     }
 

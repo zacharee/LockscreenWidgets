@@ -12,6 +12,7 @@ import android.content.res.Resources
 import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.os.ServiceManager
+import android.os.UserHandle
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -607,8 +608,8 @@ private fun Context.openWidgetConfig(currentData: WidgetData) {
     } else {
         val pkg = provider.packageName
         val providerInfo = appWidgetManager.getAppWidgetInfo(currentData.id)
-            ?: (getAllInstalledWidgetProviders(pkg)
-                .find { info -> info.provider == provider })
+            ?: (getAllInstalledWidgetProviders(pkg)[currentData.profile ?: UserHandle.SYSTEM]
+                ?.find { info -> info.provider == provider })
 
         if (providerInfo == null) {
             Toast.makeText(this, R.string.error_reconfiguring_widget, Toast.LENGTH_SHORT)
@@ -712,6 +713,7 @@ fun ConfigurePreview() {
                     label = "Widget 1",
                     icon = null,
                     size = WidgetSizeData(1, 1),
+                    profile = UserHandle.SYSTEM,
                 ),
                 WidgetData.widget(
                     context = context,
@@ -720,6 +722,7 @@ fun ConfigurePreview() {
                     label = "Widget 2",
                     icon = null,
                     size = WidgetSizeData(1, 1),
+                    profile = UserHandle.SYSTEM,
                 ),
                 WidgetData.widget(
                     context = context,
@@ -728,6 +731,7 @@ fun ConfigurePreview() {
                     label = "Widget 3",
                     icon = null,
                     size = WidgetSizeData(1, 1),
+                    profile = UserHandle.SYSTEM,
                 ),
                 WidgetData.widget(
                     context = context,
@@ -736,6 +740,7 @@ fun ConfigurePreview() {
                     label = "Widget 4",
                     icon = null,
                     size = WidgetSizeData(1, 1),
+                    profile = UserHandle.SYSTEM,
                 ),
             ),
         )

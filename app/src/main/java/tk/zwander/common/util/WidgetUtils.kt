@@ -8,6 +8,8 @@ import android.content.Context
 import android.content.pm.PackageManager
 import android.graphics.Color
 import android.os.Build
+import android.os.UserHandle
+import android.os.UserManager
 import android.util.SizeF
 import android.view.View
 import android.widget.RemoteViews
@@ -36,21 +38,33 @@ fun AppWidgetProviderInfo?.hasConfiguration(context: Context): Boolean {
             (configure != null || getSamsungConfigureComponent(context) != null)
 }
 
-fun Context.getAllInstalledWidgetProviders(pkg: String? = null): List<AppWidgetProviderInfo> {
+fun Context.getAllInstalledWidgetProviders(pkg: String? = null): Map<UserHandle, List<AppWidgetProviderInfo>> {
+    val userManager = getSystemService(Context.USER_SERVICE) as UserManager
+    val profiles = userManager.userProfiles
+
+    return profiles.associateWith { profile ->
+        getAllInstalledWidgetProvidersForProfile(profile, pkg)
+    }
+}
+
+private fun Context.getAllInstalledWidgetProvidersForProfile(
+    profile: UserHandle,
+    pkg: String?,
+): List<AppWidgetProviderInfo> {
     val manager = appWidgetManager
 
     return try {
         manager.getInstalledProvidersForProfile(
             AppWidgetProviderInfo.WIDGET_CATEGORY_HOME_SCREEN,
-            null,
+            profile,
             pkg
         ) + manager.getInstalledProvidersForProfile(
             AppWidgetProviderInfo.WIDGET_CATEGORY_KEYGUARD,
-            null,
+            profile,
             pkg
         ) + manager.getInstalledProvidersForProfile(
             AppWidgetProviderInfo.WIDGET_CATEGORY_SEARCHBOX,
-            null,
+            profile,
             pkg
         )
     } catch (e: NoSuchMethodError) {
