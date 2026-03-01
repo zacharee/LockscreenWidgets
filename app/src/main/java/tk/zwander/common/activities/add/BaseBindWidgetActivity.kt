@@ -228,13 +228,11 @@ abstract class BaseBindWidgetActivity : BaseActivity() {
         }
 
     @Suppress("LeakingThis")
-    private val configureLauncher by lazy {
-        ConfigureLauncher(
-            activity = this,
-            addNewWidget = ::addNewWidget,
-            finishIfNoErrors = ::finishIfNoErrors,
-        )
-    }
+    private val configureLauncher = ConfigureLauncher(
+        activity = this,
+        addNewWidget = ::addNewWidget,
+        finishIfNoErrors = ::finishIfNoErrors,
+    )
 
     private var pendingErrors = 0
         set(value) {
