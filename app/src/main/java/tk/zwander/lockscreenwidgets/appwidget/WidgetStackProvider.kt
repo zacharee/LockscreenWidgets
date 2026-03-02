@@ -418,6 +418,8 @@ class WidgetStackProvider : AppWidgetProvider() {
         const val EXTRA_PREVIOUS_INDEX = "previous_index"
         const val EXTRA_REFRESH = "refresh"
 
+        private val remoteViewsClass = RemoteViews::class.java
+
         fun update(context: Context, ids: IntArray, fromChild: Boolean = false, refresh: Boolean = false) {
             context.sendBroadcast(
                 createBaseIntent(context, ids)
@@ -483,6 +485,7 @@ class WidgetStackProvider : AppWidgetProvider() {
                 .setData("widgets://${ids.contentToString()}".toUri())
         }
 
+        @SuppressLint("PrivateApi")
         @Suppress("UNCHECKED_CAST")
         private fun hoistCollections(
             innerView: RemoteViews,
@@ -490,35 +493,37 @@ class WidgetStackProvider : AppWidgetProvider() {
             outerView: RemoteViews,
         ) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.VANILLA_ICE_CREAM) {
-                val collectionCacheSource = innerView::class.java.getDeclaredField("mCollectionCache")
+                val collectionCacheSource = remoteViewsClass.getDeclaredField("mCollectionCache")
                     .apply { isAccessible = true }
                     .get(innerView)
-                val rootCollectionCacheSource = rootWidgetViews::class.java.getDeclaredField("mCollectionCache")
+                val rootCollectionCacheSource = remoteViewsClass.getDeclaredField("mCollectionCache")
                     .apply { isAccessible = true }
                     .get(rootWidgetViews)
 
-                val collectionCacheDest = outerView::class.java.getDeclaredField("mCollectionCache")
+                val collectionCacheDest = remoteViewsClass.getDeclaredField("mCollectionCache")
                     .apply { isAccessible = true }
                     .get(outerView)
 
-                val sourceIdToUriMapping = collectionCacheSource::class.java.getDeclaredField("mIdToUriMapping")
+                val collectionCacheClass = collectionCacheSource::class.java
+
+                val sourceIdToUriMapping = collectionCacheClass.getDeclaredField("mIdToUriMapping")
                     .apply { isAccessible = true }
                     .get(collectionCacheSource) as SparseArray<String>
-                val sourceUriToCollectionMapping = collectionCacheSource::class.java.getDeclaredField("mUriToCollectionMapping")
+                val sourceUriToCollectionMapping = collectionCacheClass.getDeclaredField("mUriToCollectionMapping")
                     .apply { isAccessible = true }
                     .get(collectionCacheSource) as Map<String, *>
 
-                val rootSourceIdToUriMapping = rootCollectionCacheSource::class.java.getDeclaredField("mIdToUriMapping")
+                val rootSourceIdToUriMapping = collectionCacheClass.getDeclaredField("mIdToUriMapping")
                     .apply { isAccessible = true }
                     .get(rootCollectionCacheSource) as SparseArray<String>
-                val rootSourceUriToCollectionMapping = rootCollectionCacheSource::class.java.getDeclaredField("mUriToCollectionMapping")
+                val rootSourceUriToCollectionMapping = collectionCacheClass.getDeclaredField("mUriToCollectionMapping")
                     .apply { isAccessible = true }
                     .get(rootCollectionCacheSource) as Map<String, *>
 
                 (sourceIdToUriMapping + rootSourceIdToUriMapping).forEach { intentId, uri ->
                     val items = sourceUriToCollectionMapping[uri] ?: rootSourceUriToCollectionMapping[uri]!!
 
-                    collectionCacheDest::class.java.getDeclaredMethod(
+                    collectionCacheClass.getDeclaredMethod(
                         "addMapping",
                         Int::class.java,
                         String::class.java,
@@ -535,22 +540,25 @@ class WidgetStackProvider : AppWidgetProvider() {
             }
         }
 
+        @SuppressLint("PrivateApi")
         @Suppress("UNCHECKED_CAST")
         private fun processActions(
             context: Context,
             innerView: RemoteViews,
             innerWidgetId: Int,
         ) {
-            val sourceActions = innerView::class.java.getDeclaredField("mActions")
+            val sourceActions = remoteViewsClass.getDeclaredField("mActions")
                 .apply { isAccessible = true }
                 .get(innerView) as? MutableList<Any>
 
             sourceActions?.forEach { action ->
-                if (action::class.java.name.contains("SetRemoteViewsAdapterIntent")) {
+                val actionClass = action::class.java
+
+                if (actionClass.name.contains("SetRemoteViewsAdapterIntent")) {
                     val wrappedIntentField = try {
-                        action::class.java.getDeclaredField("mIntent")
+                        actionClass.getDeclaredField("mIntent")
                     } catch (_: NoSuchFieldException) {
-                        action::class.java.getDeclaredField("intent")
+                        actionClass.getDeclaredField("intent")
                     }.apply { isAccessible = true }
                     val wrappedIntent = wrappedIntentField.get(action) as? Intent
 
@@ -572,16 +580,17 @@ class WidgetStackProvider : AppWidgetProvider() {
             innerView: RemoteViews,
             outerView: RemoteViews,
         ) {
-            val sourceActions = innerView::class.java.getDeclaredField("mActions")
+            val sourceActions = remoteViewsClass.getDeclaredField("mActions")
                 .apply { isAccessible = true }
                 .get(innerView) as? MutableList<Any>
 
             val collectionActions = (sourceActions?.filter { action ->
-                action::class.java.name.contains("SetRemoteCollectionItemListAdapterAction")
-                        || action::class.java.name.contains("SetRemoteViewsAdapterIntent")
+                val actionClassName = action::class.java.name
+                actionClassName.contains("SetRemoteCollectionItemListAdapterAction")
+                        || actionClassName.contains("SetRemoteViewsAdapterIntent")
             } ?: listOf())
 
-            val destActionsField = outerView::class.java.getDeclaredField("mActions")
+            val destActionsField = remoteViewsClass.getDeclaredField("mActions")
                 .apply { isAccessible = true }
 
             if (destActionsField.get(outerView) == null) {
