@@ -6,7 +6,6 @@ import android.content.ContextWrapper
 import android.graphics.Point
 import android.hardware.display.DisplayManager
 import android.os.Build
-import android.util.DisplayMetrics
 import android.view.Display
 import android.view.Surface
 import android.view.WindowManager
@@ -27,9 +26,11 @@ val Context.lsDisplayManager: LSDisplayManager
     get() = LSDisplayManager.getInstance(this)
 
 fun LSDisplay?.orDefault(context: Context): LSDisplay {
-    return this ?: context.lsDisplayManager.availableDisplays
-        .value.values.find { it.display.displayId == Display.DEFAULT_DISPLAY } ?:
-        context.lsDisplayManager.availableDisplays.value.values.first()
+    return this ?: run {
+        val availableDisplays = context.lsDisplayManager.availableDisplays.value.values
+        availableDisplays.find { it.display.displayId == Display.DEFAULT_DISPLAY }
+            ?:availableDisplays.first()
+    }
 }
 
 class LSDisplayManager private constructor(context: Context) : ContextWrapper(context), CoroutineScope by App.instance {
@@ -134,8 +135,7 @@ class LSDisplayManager private constructor(context: Context) : ContextWrapper(co
 
         availableDisplays[displayId] = LSDisplay(
             display = display,
-            fontScale = createDisplayContext(display).resources.configuration.fontScale,
-            isLikelyRazr = isLikelyRazr,
+            density = Density(createDisplayContextCompat(display)),
         ).also {
             logUtils.debugLog("Processed display ${it.loggingId}", null)
         }
@@ -160,8 +160,7 @@ class LSDisplayManager private constructor(context: Context) : ContextWrapper(co
         availableDisplays.value = concatenatedDisplays.map {
             LSDisplay(
                 display = it,
-                fontScale = createDisplayContext(it).resources.configuration.fontScale,
-                isLikelyRazr = isLikelyRazr,
+                density = Density(createDisplayContextCompat(it)),
             )
         }.associateBy { it.displayId }
 
@@ -188,17 +187,9 @@ class LSDisplayManager private constructor(context: Context) : ContextWrapper(co
 
 class LSDisplay(
     val display: Display,
-    val fontScale: Float,
-    private val isLikelyRazr: Boolean,
+    val density: Density,
 ) {
     val displayId: Int = display.displayId
-
-    val density: Density by lazy {
-        Density(
-            density = realMetrics.density,
-            fontScale = fontScale,
-        )
-    }
 
     val realSize: Point by lazy {
         val size = rotatedRealSize
@@ -217,13 +208,6 @@ class LSDisplay(
             display.getRealSize(this)
         }
 
-    val realMetrics: DisplayMetrics by lazy {
-        DisplayMetrics().apply {
-            @Suppress("DEPRECATION")
-            display.getRealMetrics(this)
-        }
-    }
-
     val screenOrientation: Int
         get() = display.rotation
 
@@ -239,9 +223,6 @@ class LSDisplay(
 
     val isOn: Boolean
         get() = display.state == Display.STATE_ON
-
-    val isBuiltIn: Boolean
-        get() = display.isBuiltIn(isLikelyRazr)
 
     fun dpToPx(dpValue: Number): Int {
         return with (density) {
