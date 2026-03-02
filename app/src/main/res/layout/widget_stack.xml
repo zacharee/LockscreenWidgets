@@ -1,10 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/widget_root"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:animateLayoutChanges="true"
-    android:theme="@style/AppTheme">
+    android:theme="@style/AppTheme"
+    tools:ignore="UseAppTint">
 
     <LinearLayout
         android:id="@+id/add_widget"
@@ -22,6 +24,7 @@
             android:layout_height="48dp"
             android:src="@drawable/ic_baseline_add_24"
             android:tint="?attr/colorOnPrimary"
+            android:contentDescription="@string/add_widget"
             />
 
         <TextView
@@ -99,6 +102,7 @@
                         android:layout_gravity="center"
                         android:src="@drawable/ic_baseline_settings_24"
                         android:tint="?attr/colorOnPrimary"
+                        android:contentDescription="@string/settings"
                         />
 
                 </FrameLayout>
@@ -122,6 +126,7 @@
                         android:layout_gravity="center"
                         android:src="@drawable/baseline_refresh_24"
                         android:tint="?attr/colorOnPrimary"
+                        android:contentDescription="@string/refresh"
                         />
 
                 </FrameLayout>
@@ -168,6 +173,7 @@
                         android:layout_gravity="center"
                         android:src="@drawable/arrow_left_24px"
                         android:tint="?attr/colorOnPrimary"
+                        android:contentDescription="@string/previous"
                         />
 
                 </FrameLayout>
@@ -192,6 +198,7 @@
                         android:src="@drawable/arrow_left_24px"
                         android:rotationY="-180"
                         android:tint="?attr/colorOnPrimary"
+                        android:contentDescription="@string/next"
                         />
 
                 </FrameLayout>
