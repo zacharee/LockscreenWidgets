@@ -569,19 +569,6 @@ class WidgetStackProvider : AppWidgetProvider() {
                         || action::class.java.name.contains("SetRemoteViewsAdapterIntent")
             } ?: listOf())
 
-//            sourceActions?.forEach { action ->
-//                action::class.java.getMethod(
-//                    "setHierarchyRootData",
-//                    Class.forName($$"android.widget.RemoteViews$HierarchyRootData"),
-//                ).apply { isAccessible = true }
-//                    .invoke(
-//                        action,
-//                        outerView::class.java.getDeclaredMethod("getHierarchyRootData")
-//                            .apply { isAccessible = true }
-//                            .invoke(outerView),
-//                    )
-//            }
-
             val destActionsField = outerView::class.java.getDeclaredField("mActions")
                 .apply { isAccessible = true }
 
@@ -590,30 +577,6 @@ class WidgetStackProvider : AppWidgetProvider() {
             } else {
                 (destActionsField.get(outerView) as? MutableList<Any>)?.addAll(collectionActions)
             }
-
-//            rootWidgetViews::class.java.getDeclaredMethod(
-//                "configureAsChild",
-//                Class.forName($$"android.widget.RemoteViews$HierarchyRootData"),
-//            ).apply { isAccessible = true }
-//                .invoke(
-//                rootWidgetViews,
-//                outerView::class.java.getDeclaredMethod("getHierarchyRootData")
-//                    .apply { isAccessible = true }
-//                    .invoke(outerView),
-//            )
-//
-//            innerView::class.java.getDeclaredMethod(
-//                "configureAsChild",
-//                Class.forName($$"android.widget.RemoteViews$HierarchyRootData"),
-//            ).apply { isAccessible = true }
-//                .invoke(
-//                innerView,
-//                outerView::class.java.getDeclaredMethod("getHierarchyRootData")
-//                    .apply { isAccessible = true }
-//                    .invoke(outerView),
-//            )
-
-//            sourceActions?.removeAll { collectionActions.contains(it) }
         }
     }
 }
