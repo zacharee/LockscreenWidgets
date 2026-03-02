@@ -93,6 +93,7 @@ import tk.zwander.common.data.WidgetSizeData
 import tk.zwander.common.host.widgetHostCompat
 import tk.zwander.common.util.Event
 import tk.zwander.common.util.PrefManager
+import tk.zwander.common.util.UserHandleCompat
 import tk.zwander.common.util.appWidgetManager
 import tk.zwander.common.util.eventManager
 import tk.zwander.common.util.getAllInstalledWidgetProviders
@@ -608,7 +609,7 @@ private fun Context.openWidgetConfig(currentData: WidgetData) {
     } else {
         val pkg = provider.packageName
         val providerInfo = appWidgetManager.getAppWidgetInfo(currentData.id)
-            ?: (getAllInstalledWidgetProviders(pkg)[currentData.profile ?: UserHandle.SYSTEM]
+            ?: (getAllInstalledWidgetProviders(pkg)[currentData.profile ?: UserHandleCompat.SYSTEM]
                 ?.find { info -> info.provider == provider })
 
         if (providerInfo == null) {
@@ -713,7 +714,7 @@ fun ConfigurePreview() {
                     label = "Widget 1",
                     icon = null,
                     size = WidgetSizeData(1, 1),
-                    profile = UserHandle.SYSTEM,
+                    profile = UserHandleCompat.SYSTEM,
                 ),
                 WidgetData.widget(
                     context = context,
@@ -722,7 +723,7 @@ fun ConfigurePreview() {
                     label = "Widget 2",
                     icon = null,
                     size = WidgetSizeData(1, 1),
-                    profile = UserHandle.SYSTEM,
+                    profile = UserHandleCompat.SYSTEM,
                 ),
                 WidgetData.widget(
                     context = context,
@@ -731,7 +732,7 @@ fun ConfigurePreview() {
                     label = "Widget 3",
                     icon = null,
                     size = WidgetSizeData(1, 1),
-                    profile = UserHandle.SYSTEM,
+                    profile = UserHandleCompat.SYSTEM,
                 ),
                 WidgetData.widget(
                     context = context,
@@ -740,7 +741,7 @@ fun ConfigurePreview() {
                     label = "Widget 4",
                     icon = null,
                     size = WidgetSizeData(1, 1),
-                    profile = UserHandle.SYSTEM,
+                    profile = UserHandleCompat.SYSTEM,
                 ),
             ),
         )

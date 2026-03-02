@@ -6,7 +6,6 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
-import android.os.UserHandle
 import android.util.SizeF
 import android.view.View
 import android.view.ViewGroup
@@ -73,6 +72,7 @@ import tk.zwander.common.util.BaseDelegate
 import tk.zwander.common.util.BrokenAppsRegistry
 import tk.zwander.common.util.Event
 import tk.zwander.common.util.EventObserver
+import tk.zwander.common.util.UserHandleCompat
 import tk.zwander.common.util.appWidgetManager
 import tk.zwander.common.util.createWidgetErrorView
 import tk.zwander.common.util.eventManager
@@ -272,7 +272,7 @@ abstract class BaseAdapter<VM : BaseDelegate.BaseViewModel<*, *>>(
             } else {
                 val pkg = provider.packageName
                 val providerInfo = manager.getAppWidgetInfo(currentData.id)
-                    ?: (context.getAllInstalledWidgetProviders(pkg)[currentData.profile ?: UserHandle.SYSTEM]
+                    ?: (context.getAllInstalledWidgetProviders(pkg)[currentData.profile ?: UserHandleCompat.SYSTEM]
                         ?.find { info -> info.provider == provider })
 
                 if (providerInfo == null) {

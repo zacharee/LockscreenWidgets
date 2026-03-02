@@ -11,6 +11,7 @@ import androidx.compose.ui.unit.dp
 import kotlinx.parcelize.IgnoredOnParcel
 import kotlinx.parcelize.Parcelize
 import tk.zwander.common.iconpacks.iconPackManager
+import tk.zwander.common.util.UserHandleCompat
 import tk.zwander.common.util.base64ToBitmap
 import tk.zwander.common.util.density
 import tk.zwander.common.util.getRemoteDrawable
@@ -128,8 +129,8 @@ data class WidgetData(
                 && (safeType != WidgetType.WIDGET || widgetProviderComponent == other.widgetProviderComponent)
                 && (
                     profile == other.profile ||
-                    (profile == null && other.profile == UserHandle.SYSTEM) ||
-                    (profile == UserHandle.SYSTEM && other.profile == null)
+                    (profile == null && other.profile == UserHandleCompat.SYSTEM) ||
+                    (profile == UserHandleCompat.SYSTEM && other.profile == null)
                 )
     }
 
@@ -137,7 +138,7 @@ data class WidgetData(
         return if (safeType != WidgetType.WIDGET) {
             Objects.hash(id, safeType)
         } else {
-            Objects.hash(id, safeType, widgetProviderComponent, (profile ?: UserHandle.SYSTEM))
+            Objects.hash(id, safeType, widgetProviderComponent, (profile ?: UserHandleCompat.SYSTEM))
         }
     }
 
