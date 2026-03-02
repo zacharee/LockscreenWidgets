@@ -3,11 +3,14 @@ package tk.zwander.common.util
 import android.os.Bundle
 
 fun Bundle.matches(other: Bundle): Boolean {
-    if (this.keySet().size != other.keySet().size) {
+    val thisKeySet = this.keySet()
+    val otherKeySet = other.keySet()
+
+    if (thisKeySet.size != otherKeySet.size) {
         return false
     }
 
-    this.keySet().forEach { key ->
+    thisKeySet.forEach { key ->
         @Suppress("DEPRECATION")
         if (this[key] != other[key]) {
             return false
