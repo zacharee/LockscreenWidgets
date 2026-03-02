@@ -295,15 +295,13 @@ class WidgetStackProvider : AppWidgetProvider() {
             root.addView(R.id.stack_dot_row, dot)
         }
 
-        val realSize = options?.let {
-            extractSizeFromOptions(it, applyPadding)
-        }
-
-        realSize?.apply {
-            options.putInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH, realSize.first.roundToInt())
-            options.putInt(AppWidgetManager.OPTION_APPWIDGET_MAX_WIDTH, realSize.first.roundToInt())
-            options.putInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT, realSize.second.roundToInt())
-            options.putInt(AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT, realSize.second.roundToInt())
+        val realSize = options?.let { options ->
+            extractSizeFromOptions(options, applyPadding).also { size ->
+                options.putInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH, size.width.roundToInt())
+                options.putInt(AppWidgetManager.OPTION_APPWIDGET_MAX_WIDTH, size.width.roundToInt())
+                options.putInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT, size.height.roundToInt())
+                options.putInt(AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT, size.height.roundToInt())
+            }
         }
 
         if (options?.matches(appWidgetManager.getAppWidgetOptions(innerWidgetId)) != true) {
@@ -312,7 +310,7 @@ class WidgetStackProvider : AppWidgetProvider() {
 
         val viewsToApply = rootWidgetViews.getRemoteViewsToApplyCompat(
             context = context,
-            size = realSize?.let { SizeF(it.first, it.second) },
+            size = realSize,
         )
 
         processActions(
@@ -455,7 +453,7 @@ class WidgetStackProvider : AppWidgetProvider() {
                 }
         }
 
-        fun extractSizeFromOptions(options: Bundle, applyPadding: Boolean): Pair<Float, Float> {
+        fun extractSizeFromOptions(options: Bundle, applyPadding: Boolean): SizeF {
             val horizontalPaddingDp = if (applyPadding) 16 else 0
             val verticalPaddingDp = if (applyPadding) 8 else 0
             val bottomBarHeightDp = 36
@@ -475,8 +473,10 @@ class WidgetStackProvider : AppWidgetProvider() {
                 optionsWidth to optionsHeight
             }
 
-            return (baseSize.first - horizontalPaddingDp) to
-                    (baseSize.second - bottomBarHeightDp - verticalPaddingDp)
+            return SizeF(
+                (baseSize.first - horizontalPaddingDp),
+                    (baseSize.second - bottomBarHeightDp - verticalPaddingDp),
+            )
         }
 
         private fun createBaseIntent(context: Context, ids: IntArray): Intent {
