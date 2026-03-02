@@ -11,5 +11,7 @@
     android:targetCellWidth="3"
     android:targetCellHeight="3"
     android:widgetFeatures="reconfigurable"
+    android:previewImage="@drawable/widget_stack_preview_img"
+    android:previewLayout="@layout/widget_stack_preview"
     android:configure="tk.zwander.lockscreenwidgets.activities.WidgetStackConfigure"
     />
