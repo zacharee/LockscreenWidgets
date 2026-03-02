@@ -15,6 +15,7 @@
         android:layout_height="wrap_content"
         android:background="@drawable/pill"
         android:backgroundTint="?attr/colorPrimary"
+        android:clipChildren="true"
         android:layout_gravity="center"
         android:padding="16dp"
         android:gravity="center">
@@ -86,15 +87,15 @@
             <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:clipChildren="true"
                 android:background="@drawable/pill"
                 android:backgroundTint="?attr/colorPrimary">
 
                 <FrameLayout
                     android:layout_width="32dp"
                     android:layout_height="32dp"
-                    android:layout_gravity="start|bottom"
                     android:id="@+id/stack_configure"
-                    android:background="?android:selectableItemBackgroundBorderless">
+                    android:background="@drawable/stack_button_ripple_left">
 
                     <ImageView
                         android:layout_width="24dp"
@@ -116,9 +117,8 @@
                 <FrameLayout
                     android:layout_width="32dp"
                     android:layout_height="32dp"
-                    android:layout_gravity="start|bottom"
                     android:id="@+id/stack_refresh"
-                    android:background="?android:selectableItemBackgroundBorderless">
+                    android:background="@drawable/stack_button_ripple_right">
 
                     <ImageView
                         android:layout_width="24dp"
@@ -136,8 +136,7 @@
             <FrameLayout
                 android:layout_weight="1"
                 android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_gravity="end|bottom">
+                android:layout_height="wrap_content">
 
                 <LinearLayout
                     android:id="@+id/stack_dot_row"
@@ -147,6 +146,7 @@
                     android:orientation="horizontal"
                     android:layout_gravity="center"
                     android:gravity="center"
+                    android:clipChildren="true"
                     android:background="@drawable/pill"
                     android:backgroundTint="?attr/colorPrimary"
                     />
@@ -163,9 +163,8 @@
                 <FrameLayout
                     android:layout_width="32dp"
                     android:layout_height="32dp"
-                    android:layout_gravity="start|bottom"
                     android:id="@+id/stack_backward"
-                    android:background="?android:selectableItemBackgroundBorderless">
+                    android:background="@drawable/stack_button_ripple_left">
 
                     <ImageView
                         android:layout_width="24dp"
@@ -187,9 +186,8 @@
                 <FrameLayout
                     android:layout_width="32dp"
                     android:layout_height="32dp"
-                    android:layout_gravity="end|bottom"
                     android:id="@+id/stack_forward"
-                    android:background="?android:selectableItemBackgroundBorderless">
+                    android:background="@drawable/stack_button_ripple_right">
 
                     <ImageView
                         android:layout_width="24dp"
