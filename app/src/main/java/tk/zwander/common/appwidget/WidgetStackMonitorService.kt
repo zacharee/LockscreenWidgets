@@ -56,7 +56,7 @@ class WidgetStackMonitorService : Service() {
                 .setContentIntent(
                     PendingIntentCompat.getActivity(
                         this,
-                        500000,
+                        500001,
                         Intent(
                             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                                 Settings.ACTION_CHANNEL_NOTIFICATION_SETTINGS
@@ -64,7 +64,12 @@ class WidgetStackMonitorService : Service() {
                                 Settings.ACTION_APP_NOTIFICATION_SETTINGS
                             },
                         ).putExtra(Settings.EXTRA_APP_PACKAGE, packageName)
-                            .putExtra(Settings.EXTRA_CHANNEL_ID, NOTIFICATION_CHANNEL_ID),
+                            .putExtra("app_package", packageName)
+                            .putExtra("app_uid", applicationInfo.uid)
+                            .putExtra("package", packageName)
+                            .putExtra("uid", applicationInfo.uid)
+                            .putExtra(Settings.EXTRA_CHANNEL_ID, NOTIFICATION_CHANNEL_ID)
+                            .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
                         0,
                         false,
                     ),
