@@ -90,7 +90,8 @@
                     android:layout_width="32dp"
                     android:layout_height="32dp"
                     android:layout_gravity="start|bottom"
-                    android:id="@+id/stack_configure">
+                    android:id="@+id/stack_configure"
+                    android:background="?android:selectableItemBackgroundBorderless">
 
                     <ImageView
                         android:layout_width="24dp"
@@ -112,7 +113,8 @@
                     android:layout_width="32dp"
                     android:layout_height="32dp"
                     android:layout_gravity="start|bottom"
-                    android:id="@+id/stack_refresh">
+                    android:id="@+id/stack_refresh"
+                    android:background="?android:selectableItemBackgroundBorderless">
 
                     <ImageView
                         android:layout_width="24dp"
@@ -157,7 +159,8 @@
                     android:layout_width="32dp"
                     android:layout_height="32dp"
                     android:layout_gravity="start|bottom"
-                    android:id="@+id/stack_backward">
+                    android:id="@+id/stack_backward"
+                    android:background="?android:selectableItemBackgroundBorderless">
 
                     <ImageView
                         android:layout_width="24dp"
@@ -179,7 +182,8 @@
                     android:layout_width="32dp"
                     android:layout_height="32dp"
                     android:layout_gravity="end|bottom"
-                    android:id="@+id/stack_forward">
+                    android:id="@+id/stack_forward"
+                    android:background="?android:selectableItemBackgroundBorderless">
 
                     <ImageView
                         android:layout_width="24dp"
