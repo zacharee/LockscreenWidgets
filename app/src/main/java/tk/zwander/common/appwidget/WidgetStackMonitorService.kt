@@ -6,11 +6,15 @@ import android.content.Intent
 import android.os.Build
 import android.os.IBinder
 import android.provider.Settings
+import android.util.TypedValue
+import androidx.annotation.ColorInt
 import androidx.core.app.NotificationChannelCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.app.PendingIntentCompat
+import androidx.core.graphics.drawable.IconCompat
 import tk.zwander.lockscreenwidgets.R
+
 
 class WidgetStackMonitorService : Service() {
     private val nm by lazy { NotificationManagerCompat.from(this) }
@@ -34,12 +38,21 @@ class WidgetStackMonitorService : Service() {
 
     @SuppressLint("InlinedApi")
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        val typedValue = TypedValue()
+        theme.resolveAttribute(android.R.attr.textColorPrimary, typedValue, true)
+        @ColorInt val color = typedValue.data
+
         startForeground(
             100,
             NotificationCompat.Builder(this, NOTIFICATION_CHANNEL_ID)
                 .setContentTitle(resources.getString(R.string.widget_stack_monitor))
                 .setContentText(resources.getString(R.string.tap_to_hide))
-                .setSmallIcon(R.mipmap.ic_launcher_round)
+                .setSmallIcon(R.drawable.app_icon)
+                .setSmallIcon(
+                    IconCompat
+                        .createWithResource(this, R.drawable.app_icon)
+                        .setTint(color),
+                )
                 .setContentIntent(
                     PendingIntentCompat.getActivity(
                         this,
