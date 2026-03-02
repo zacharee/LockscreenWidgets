@@ -12,6 +12,7 @@ import android.net.Uri
 import android.view.Display
 import android.view.Gravity
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.unit.Density
 import androidx.core.content.edit
 import androidx.core.content.res.ResourcesCompat
 import androidx.preference.PreferenceManager
@@ -165,8 +166,7 @@ class PrefManager private constructor(private val context: Context) {
         get() = LSDisplay(
             display = (context.getSystemService(Context.DISPLAY_SERVICE) as DisplayManager)
                 .getDisplay(Display.DEFAULT_DISPLAY),
-            fontScale = 1f,
-            isLikelyRazr = context.isLikelyRazr,
+            density = Density(context),
         )
 
     //The actual SharedPreferences implementation

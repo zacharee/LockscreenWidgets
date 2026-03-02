@@ -15,6 +15,7 @@ import android.telephony.PhoneNumberUtils
 import android.view.Display
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -35,7 +36,6 @@ import tk.zwander.common.util.getCellHeightCompat
 import tk.zwander.common.util.getCellWidthCompat
 import tk.zwander.common.util.getRemoteDrawable
 import tk.zwander.common.util.hasConfiguration
-import tk.zwander.common.util.isLikelyRazr
 import tk.zwander.common.util.logUtils
 import tk.zwander.common.util.prefManager
 import tk.zwander.common.util.shortcutIdManager
@@ -62,8 +62,7 @@ abstract class BaseBindWidgetActivity : BaseActivity() {
     protected val display: LSDisplay by lazy {
         LSDisplay(
             display = displayManager.getDisplay(Display.DEFAULT_DISPLAY),
-            fontScale = resources.configuration.fontScale,
-            isLikelyRazr = isLikelyRazr,
+            density = Density(this),
         )
     }
 
