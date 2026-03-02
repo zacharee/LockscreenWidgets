@@ -96,10 +96,14 @@ class ZeroPaddingAppWidgetHostView(
 
         context.logUtils.debugLog("Updating widget $appWidgetId, $remoteViews", null)
 
-        context.widgetHostCompat.cachedRemoteViews[appWidgetId] = remoteViews
+        val oldViews = context.widgetHostCompat.cachedRemoteViews[appWidgetId]
 
-        findWidgetStackId()?.let {
-            WidgetStackProvider.update(App.instance, intArrayOf(it), true)
+        if (oldViews != remoteViews) {
+            context.widgetHostCompat.cachedRemoteViews[appWidgetId] = remoteViews
+
+            findWidgetStackId()?.let {
+                WidgetStackProvider.update(App.instance, intArrayOf(it), true)
+            }
         }
     }
 
