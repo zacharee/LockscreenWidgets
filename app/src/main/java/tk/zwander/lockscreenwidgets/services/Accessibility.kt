@@ -104,6 +104,8 @@ class Accessibility : AccessibilityService(), CoroutineScope by MainScope(), Eve
 
         logUtils.debugLog("Accessibility service created.", null)
 
+        App.instance.updateWidgetStackMonitor()
+
         launch(Dispatchers.Main) {
             lsDisplayManager.displayPowerStates.collect {
                 if (!it.anyOn) {
