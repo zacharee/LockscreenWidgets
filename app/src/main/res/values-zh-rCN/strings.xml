@@ -37,6 +37,9 @@
     <string name="general">通用</string>
     <string name="configure_widget">设置小部件</string>
     <string name="reorder_widget">重新排序小部件</string>
+    <string name="refresh">Refresh</string>
+    <string name="next">Next</string>
+    <string name="previous">Previous</string>
     <string name="drawer_enabled">抽屉已启用</string>
     <string name="frame_enabled">抽屉已启用</string>
     <string name="add_id_hint">com.android.systemui:id/这里任何id</string>
