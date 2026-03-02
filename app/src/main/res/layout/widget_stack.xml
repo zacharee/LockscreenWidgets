@@ -15,6 +15,7 @@
         android:layout_height="wrap_content"
         android:background="@drawable/pill"
         android:backgroundTint="?attr/colorPrimary"
+        android:foreground="@drawable/stack_button_ripple_symmetric"
         android:clipChildren="true"
         android:layout_gravity="center"
         android:padding="16dp"
