@@ -223,6 +223,18 @@ class WidgetStackProvider : AppWidgetProvider() {
                 false,
             ),
         )
+        root.setOnClickPendingIntent(
+            R.id.stack_refresh,
+            PendingIntentCompat.getBroadcast(
+                context,
+                stackId + 20000,
+                createBaseIntent(context, intArrayOf(stackId))
+                    .setAction(AppWidgetManager.ACTION_APPWIDGET_UPDATE)
+                    .putExtra(EXTRA_REFRESH, true),
+                0,
+                false
+            )
+        )
 
         val previousIndex = intent.getIntExtra(EXTRA_PREVIOUS_INDEX, -1)
 

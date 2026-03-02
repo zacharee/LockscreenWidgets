@@ -80,34 +80,57 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
-            <FrameLayout
-                android:layout_width="32dp"
-                android:layout_height="32dp"
-                android:layout_gravity="start|top"
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
                 android:background="@drawable/pill"
-                android:backgroundTint="?attr/colorPrimary"
-                android:id="@+id/stack_configure">
+                android:backgroundTint="?attr/colorPrimary">
 
-                <ImageView
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
-                    android:layout_gravity="center"
-                    android:src="@drawable/ic_baseline_settings_24"
-                    android:tint="?attr/colorOnPrimary"
+                <FrameLayout
+                    android:layout_width="32dp"
+                    android:layout_height="32dp"
+                    android:layout_gravity="start|bottom"
+                    android:id="@+id/stack_configure">
+
+                    <ImageView
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:layout_gravity="center"
+                        android:src="@drawable/ic_baseline_settings_24"
+                        android:tint="?attr/colorOnPrimary"
+                        />
+
+                </FrameLayout>
+
+                <FrameLayout
+                    android:layout_width="1dp"
+                    android:layout_height="match_parent"
+                    android:background="?attr/colorOnPrimary"
                     />
 
-            </FrameLayout>
+                <FrameLayout
+                    android:layout_width="32dp"
+                    android:layout_height="32dp"
+                    android:layout_gravity="start|bottom"
+                    android:id="@+id/stack_refresh">
 
-            <FrameLayout
-                android:id="@+id/padding"
-                android:layout_width="32dp"
-                android:layout_height="32dp"
-                />
+                    <ImageView
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:layout_gravity="center"
+                        android:src="@drawable/baseline_refresh_24"
+                        android:tint="?attr/colorOnPrimary"
+                        />
+
+                </FrameLayout>
+
+            </LinearLayout>
 
             <FrameLayout
                 android:layout_weight="1"
                 android:layout_width="0dp"
-                android:layout_height="wrap_content">
+                android:layout_height="wrap_content"
+                android:layout_gravity="end|bottom">
 
                 <LinearLayout
                     android:id="@+id/stack_dot_row"
