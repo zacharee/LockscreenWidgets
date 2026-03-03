@@ -6,14 +6,20 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.add
+import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.displayCutout
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -21,10 +27,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.motionEventSpy
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.platform.LocalResources
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.zIndex
+import androidx.core.view.updatePadding
 import tk.zwander.common.compose.components.BlurView
 import tk.zwander.common.compose.components.ConfirmWidgetRemovalLayout
 import tk.zwander.common.compose.components.DrawerToolbar
@@ -46,7 +53,7 @@ fun DrawerDelegate.DrawerViewModel.Drawer(
 ) {
     val context = LocalContext.current
     val density = LocalDensity.current
-    val resources = LocalResources.current
+    val layoutDirection = LocalLayoutDirection.current
     val backgroundColor by rememberPreferenceState(
         key = PrefManager.KEY_DRAWER_BACKGROUND_COLOR,
         value = { Color(context.prefManager.drawerBackgroundColor) },
@@ -54,32 +61,37 @@ fun DrawerDelegate.DrawerViewModel.Drawer(
 
     var itemToRemove by this.itemToRemove.collectAsMutableState()
     val selectedItem by this.selectedItem.collectAsState()
+    val cutoutPadding = WindowInsets.displayCutout
+    val statusBarPadding = cutoutPadding.only(WindowInsetsSides.Top).takeIf {
+        it.getTop(density) > 0
+    } ?: WindowInsets(top = context.statusBarHeight)
 
     val drawerSidePadding by rememberPreferenceState(
         key = PrefManager.KEY_DRAWER_SIDE_PADDING,
         value = {
-            with(density) {
-                context.prefManager.drawerSidePadding.dp.roundToPx()
-            }
+            context.prefManager.drawerSidePadding.dp
         },
     )
 
-    val statusBarHeight = remember(resources, density) {
-        with(density) {
-            context.statusBarHeight.toDp()
-        }
-    }
+    val backgroundOverStatusBar by rememberBooleanPreferenceState(
+        key = PrefManager.KEY_DRAWER_BACKGROUND_OVER_STATUS_BAR,
+        defaultValue = true,
+    )
 
     LaunchedEffect(selectedItem) {
         widgetGrid.selectedItem = selectedItem
     }
 
     LaunchedEffect(drawerSidePadding) {
-        widgetGrid.setPadding(
-            drawerSidePadding,
-            context.statusBarHeight,
-            drawerSidePadding,
-            widgetGrid.paddingBottom,
+        val combinedPadding = cutoutPadding.add(
+            WindowInsets(left = drawerSidePadding, right = drawerSidePadding),
+        )
+
+        widgetGrid.updatePadding(
+            left = combinedPadding.getLeft(density, layoutDirection),
+            top = statusBarPadding.getTop(density),
+            right = combinedPadding.getRight(density, layoutDirection),
+            bottom = combinedPadding.getBottom(density),
         )
     }
 
@@ -98,18 +110,13 @@ fun DrawerDelegate.DrawerViewModel.Drawer(
         Box(
             modifier = Modifier.fillMaxSize(),
         ) {
-            val backgroundOverStatusBar by rememberBooleanPreferenceState(
-                key = PrefManager.KEY_DRAWER_BACKGROUND_OVER_STATUS_BAR,
-                defaultValue = true,
-            )
-
             Box(
                 modifier = Modifier.fillMaxSize()
                     .padding(
-                        top = if (backgroundOverStatusBar) {
-                            0.dp
+                        if (backgroundOverStatusBar) {
+                            PaddingValues.Zero
                         } else {
-                            statusBarHeight
+                            statusBarPadding.asPaddingValues()
                         },
                     )
                     .background(backgroundColor)
@@ -123,10 +130,10 @@ fun DrawerDelegate.DrawerViewModel.Drawer(
             Box(
                 modifier = Modifier.fillMaxSize()
                     .padding(
-                        top = if (blurStatusBarArea) {
-                            0.dp
+                        if (blurStatusBarArea) {
+                            PaddingValues.Zero
                         } else {
-                            statusBarHeight
+                            statusBarPadding.asPaddingValues()
                         },
                     ),
             ) {
