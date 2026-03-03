@@ -450,7 +450,8 @@ fun Content(
                                             subLabel = null,
                                             itemModifier = Modifier
                                                 .heightIn(min = 150.dp)
-                                                .fillMaxWidth(),
+                                                .fillMaxWidth()
+                                                .padding(if (localWidgetPadding[widget.id] == true) 8.dp else 0.dp),
                                             cardShape = if (localStyles.roundedCorners) {
                                                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                                                     RoundedCornerShape(
