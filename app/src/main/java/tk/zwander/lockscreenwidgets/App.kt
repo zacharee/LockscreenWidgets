@@ -277,12 +277,14 @@ class App : Application(), CoroutineScope by MainScope(), EventObserver {
                     val hasStackInfo = appWidgetManager.getAppWidgetInfo(stackId) != null
 
                     if (!hasStackInfo) {
+                        logUtils.debugLog("Found invalid widget stack $stackId", null)
                         widgetsToDelete.add(stackId)
                         null
                     } else {
                         widgets.removeAll { widget ->
                             (appWidgetManager.getAppWidgetInfo(widget.id) == null).also {
                                 if (it) {
+                                    logUtils.debugLog("Found invalid widget ${widget.id} in stack $stackId", null)
                                     widgetsToDelete.add(widget.id)
                                 }
                             }
@@ -315,6 +317,8 @@ class App : Application(), CoroutineScope by MainScope(), EventObserver {
                     }) {
                     return@forEach
                 }
+
+                logUtils.debugLog("Found widget $id not in any widget lists", null)
 
                 widgetsToDelete.add(id)
             }
