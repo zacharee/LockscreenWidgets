@@ -6,6 +6,8 @@
     android:layout_height="match_parent"
     android:animateLayoutChanges="true"
     android:theme="@style/AppTheme"
+    android:clipToOutline="true"
+    android:background="@drawable/widget_stack_background"
     tools:ignore="UseAppTint">
 
     <LinearLayout
