@@ -79,10 +79,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.dropShadow
 import androidx.compose.ui.draw.rotate
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.graphics.shadow.Shadow
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
@@ -554,18 +555,20 @@ fun Content(
 
             Column(
                 modifier = Modifier
-                    .shadow(
-                        elevation = 16.dp,
+                    .dropShadow(
                         shape = bottomBarShape,
+                        shadow = Shadow(
+                            radius = 4.dp,
+                            color = Color.Black.copy(alpha = 0.5f),
+                        ),
                     )
-                    .background(MaterialTheme.colorScheme.surface)
                     .clip(bottomBarShape)
+                    .background(MaterialTheme.colorScheme.surface)
                     .padding(
                         bottom = 8.dp,
                     )
                     .wrapContentHeight()
                     .align(Alignment.BottomCenter),
-                verticalArrangement = Arrangement.spacedBy(4.dp),
             ) {
                 CompositionLocalProvider(
                     LocalMinimumInteractiveComponentSize provides 32.dp,
@@ -617,7 +620,8 @@ fun Content(
                     visible = showingBottomBarOptions,
                 ) {
                     LazyColumn(
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier.fillMaxWidth()
+                            .padding(top = 4.dp),
                         contentPadding = PaddingValues(horizontal = 16.dp),
                         verticalArrangement = Arrangement.spacedBy(8.dp),
                     ) {
@@ -711,7 +715,8 @@ fun Content(
                                 size.height.toDp()
                             }
                         }
-                        .padding(horizontal = 16.dp),
+                        .padding(horizontal = 16.dp)
+                        .padding(top = 4.dp),
                     horizontalArrangement = Arrangement.spacedBy(
                         8.dp,
                         Alignment.CenterHorizontally
