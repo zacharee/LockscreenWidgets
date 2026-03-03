@@ -214,6 +214,14 @@ class WidgetHostCompat(
         newAutoChange.remove(appWidgetId)
         context.prefManager.widgetStackAutoChange = newAutoChange
 
+        val newPadding = context.prefManager.widgetStackWidgetPadding
+        newPadding.remove(appWidgetId)
+        context.prefManager.widgetStackWidgetPadding = newPadding
+
+        val newStyles = context.prefManager.widgetStackStyle
+        newStyles.remove(appWidgetId)
+        context.prefManager.widgetStackStyle = newStyles
+
         cachedRemoteViews.remove(appWidgetId)
     }
 

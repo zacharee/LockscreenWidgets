@@ -23,6 +23,7 @@ import tk.zwander.common.data.SafePointF
 import tk.zwander.common.data.WidgetData
 import tk.zwander.common.data.WidgetSizeData
 import tk.zwander.common.data.WidgetTileInfo
+import tk.zwander.common.data.window.WidgetStackStyle
 import tk.zwander.common.iconpacks.IconEntry
 import tk.zwander.lockscreenwidgets.R
 import tk.zwander.lockscreenwidgets.activities.TaskerIsAllowedToShowFrame
@@ -146,6 +147,7 @@ class PrefManager private constructor(private val context: Context) {
         const val KEY_WIDGET_STACK_INDICES = "widget_stack_indices"
         const val KEY_WIDGET_STACK_AUTO_CHANGE = "widget_stack_auto_change"
         const val KEY_WIDGET_STACK_WIDGET_PADDING = "widget_stack_widget_padding_individual"
+        const val KEY_WIDGET_STACK_STYLE_OPTIONS = "widget_stack_style_options"
 
         const val VALUE_PAGE_INDICATOR_BEHAVIOR_HIDDEN = 0
         const val VALUE_PAGE_INDICATOR_BEHAVIOR_AUTO_HIDE = 1
@@ -844,6 +846,14 @@ class PrefManager private constructor(private val context: Context) {
         )
         set(value) {
             putString(KEY_WIDGET_STACK_WIDGET_PADDING, gson.toJson(value))
+        }
+
+    var widgetStackStyle: HashMap<Int, WidgetStackStyle>
+        get() = gson.mapFromJson(
+            getString(KEY_WIDGET_STACK_STYLE_OPTIONS, "")
+        )
+        set(value) {
+            putString(KEY_WIDGET_STACK_STYLE_OPTIONS, gson.toJson(value))
         }
 
     @Suppress("DEPRECATION")

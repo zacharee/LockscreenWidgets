@@ -19,8 +19,10 @@ import androidx.core.net.toUri
 import androidx.core.os.BundleCompat
 import androidx.core.util.forEach
 import androidx.core.util.plus
+import androidx.core.widget.RemoteViewsCompat.setViewBackgroundResource
 import com.android.internal.appwidget.IAppWidgetService
 import tk.zwander.common.appwidget.RemoteViewsProxyService
+import tk.zwander.common.data.window.WidgetStackStyle
 import tk.zwander.common.host.widgetHostCompat
 import tk.zwander.common.util.Event
 import tk.zwander.common.util.eventManager
@@ -190,6 +192,7 @@ class WidgetStackProvider : AppWidgetProvider() {
     ) {
         val options = appWidgetManager.getAppWidgetOptions(stackId)
         val applyPadding = context.prefManager.widgetStackWidgetPadding[stackId]?.get(innerWidgetId) ?: false
+        val styles = context.prefManager.widgetStackStyle[stackId] ?: WidgetStackStyle()
 
         root.setOnClickPendingIntent(
             R.id.stack_forward,
@@ -235,6 +238,12 @@ class WidgetStackProvider : AppWidgetProvider() {
                 false
             )
         )
+
+        val buttonBackground = if (styles.showButtonBackground) R.drawable.pill else R.drawable.pill_transparent
+        root.setViewBackgroundResource(R.id.add_widget, buttonBackground)
+        root.setViewBackgroundResource(R.id.start_controls_wrapper, buttonBackground)
+        root.setViewBackgroundResource(R.id.end_controls_wrapper, buttonBackground)
+        root.setViewBackgroundResource(R.id.stack_dot_row, buttonBackground)
 
         val previousIndex = intent.getIntExtra(EXTRA_PREVIOUS_INDEX, -1)
 

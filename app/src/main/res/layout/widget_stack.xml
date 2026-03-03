@@ -16,7 +16,6 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:background="@drawable/pill"
-        android:backgroundTint="?attr/colorPrimary"
         android:foreground="@drawable/stack_button_ripple_symmetric"
         android:clipChildren="true"
         android:layout_gravity="center"
@@ -88,11 +87,11 @@
             android:layout_height="wrap_content">
 
             <LinearLayout
+                android:id="@+id/start_controls_wrapper"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:clipChildren="true"
-                android:background="@drawable/pill"
-                android:backgroundTint="?attr/colorPrimary">
+                android:background="@drawable/pill">
 
                 <FrameLayout
                     android:layout_width="32dp"
@@ -151,14 +150,13 @@
                     android:gravity="center"
                     android:clipChildren="true"
                     android:background="@drawable/pill"
-                    android:backgroundTint="?attr/colorPrimary"
                     />
 
             </FrameLayout>
 
             <LinearLayout
+                android:id="@+id/end_controls_wrapper"
                 android:background="@drawable/pill"
-                android:backgroundTint="?attr/colorPrimary"
                 android:orientation="horizontal"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content">

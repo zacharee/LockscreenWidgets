@@ -12,11 +12,16 @@ import android.content.res.Resources
 import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.os.ServiceManager
-import android.os.UserHandle
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -34,6 +39,7 @@ import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.minus
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.windowInsetsPadding
@@ -41,12 +47,16 @@ import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LocalMinimumInteractiveComponentSize
+import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
@@ -66,7 +76,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
@@ -90,6 +104,7 @@ import tk.zwander.common.compose.util.rememberPreferenceState
 import tk.zwander.common.compose.util.widgetViewCacheRegistry
 import tk.zwander.common.data.WidgetData
 import tk.zwander.common.data.WidgetSizeData
+import tk.zwander.common.data.window.WidgetStackStyle
 import tk.zwander.common.host.widgetHostCompat
 import tk.zwander.common.util.Event
 import tk.zwander.common.util.PrefManager
@@ -158,6 +173,16 @@ class WidgetStackConfigure : BaseActivity() {
                 },
             )
 
+            var styles by rememberPreferenceState(
+                key = PrefManager.KEY_WIDGET_STACK_STYLE_OPTIONS,
+                value = { prefManager.widgetStackStyle[widgetId] ?: WidgetStackStyle() },
+                onChanged = { _, value ->
+                    prefManager.widgetStackStyle = prefManager.widgetStackStyle.apply {
+                        this[widgetId] = value
+                    }
+                },
+            )
+
             Content(
                 widgetId = widgetId,
                 onFinish = {
@@ -195,6 +220,10 @@ class WidgetStackConfigure : BaseActivity() {
                 onWidgetPaddingChange = {
                     widgetPadding = HashMap(it)
                 },
+                styles = styles,
+                onStylesChange = {
+                    styles = it
+                },
             )
         }
     }
@@ -211,6 +240,8 @@ fun Content(
     onNewAutoChange: (Pair<Boolean, Long>) -> Unit,
     onFinish: (success: Boolean) -> Unit,
     onWidgetPaddingChange: (padding: Map<Int, Boolean>) -> Unit,
+    styles: WidgetStackStyle,
+    onStylesChange: (styles: WidgetStackStyle) -> Unit,
 ) {
     val context = LocalContext.current
     val density = LocalDensity.current
@@ -244,6 +275,10 @@ fun Content(
 
     var localWidgetPadding by remember {
         mutableStateOf(widgetPadding)
+    }
+
+    var localStyles by remember {
+        mutableStateOf(styles)
     }
 
     val addWidgetLauncher = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) {
@@ -283,6 +318,17 @@ fun Content(
     val imeBottomPadding = WindowInsets.ime.only(WindowInsetsSides.Bottom)
         .takeIf { it.getBottom(density) > systemBarsBottomPadding.getBottom(density) }
 
+    var bottomBarHeight by remember {
+        mutableStateOf(0.dp)
+    }
+    var bottomBarToggleHeight by remember {
+        mutableStateOf(0.dp)
+    }
+
+    var showingBottomBarOptions by remember {
+        mutableStateOf(false)
+    }
+
     Surface(
         modifier = Modifier.fillMaxSize()
             .windowInsetsPadding(
@@ -292,7 +338,7 @@ fun Content(
                 ).add(imeBottomPadding ?: systemBarsBottomPadding),
             ),
     ) {
-        Column(
+        Box(
             modifier = Modifier.fillMaxSize(),
         ) {
             val listState = rememberLazyListState()
@@ -306,10 +352,11 @@ fun Content(
             }
 
             LazyColumn(
-                modifier = Modifier.fillMaxWidth()
-                    .weight(1f),
+                modifier = Modifier.fillMaxSize(),
                 contentPadding = WindowInsets.systemBars
-                    .only(WindowInsetsSides.Top).asPaddingValues(),
+                    .only(WindowInsetsSides.Top)
+                    .add(WindowInsets(bottom = bottomBarHeight + bottomBarToggleHeight + 20.dp))
+                    .asPaddingValues(),
                 state = listState,
             ) {
                 items(items = localWidgetList, key = { it.id }) { widget ->
@@ -452,67 +499,172 @@ fun Content(
                 }
             }
 
+            AnimatedVisibility(
+                visible = showingBottomBarOptions,
+                enter = fadeIn(),
+                exit = fadeOut(),
+                modifier = Modifier.fillMaxSize(),
+            ) {
+                Box(
+                    modifier = Modifier.fillMaxSize()
+                        .clickable(
+                            enabled = true,
+                            indication = null,
+                            interactionSource = remember { MutableInteractionSource() },
+                        ) {
+                            showingBottomBarOptions = false
+                        }
+                        .background(Color.Black.copy(alpha = 0.5f)),
+                )
+            }
+
+            val bottomBarShape = MaterialTheme.shapes.medium.copy(
+                bottomStart = CornerSize(0.dp),
+                bottomEnd = CornerSize(0.dp),
+            )
+
             Column(
                 modifier = Modifier
-                    .padding(
-                        horizontal = 16.dp,
-                        vertical = 8.dp,
+                    .shadow(
+                        elevation = 16.dp,
+                        shape = bottomBarShape,
                     )
-                    .wrapContentHeight(),
+                    .background(MaterialTheme.colorScheme.surface)
+                    .clip(bottomBarShape)
+                    .padding(
+                        bottom = 8.dp,
+                    )
+                    .wrapContentHeight()
+                    .align(Alignment.BottomCenter),
                 verticalArrangement = Arrangement.spacedBy(4.dp),
             ) {
-                CardSwitch(
-                    enabled = localAutoChange.first,
-                    onEnabledChanged = {
-                        localAutoChange = localAutoChange.copy(first = it)
-                    },
-                    title = stringResource(R.string.auto_cycle),
-                    modifier = Modifier
-                        .wrapContentHeight(),
-                    titleTextStyle = MaterialTheme.typography.titleMedium,
-                    accessory = {
-                        var temporaryTextState by remember(autoChange.second) {
-                            mutableStateOf(autoChange.second.toString())
+                CompositionLocalProvider(
+                    LocalMinimumInteractiveComponentSize provides 32.dp,
+                ) {
+                    Card(
+                        onClick = {
+                            showingBottomBarOptions = !showingBottomBarOptions
+                        },
+                        modifier = Modifier.onSizeChanged { size ->
+                            bottomBarToggleHeight = with (density) {
+                                size.height.toDp()
+                            }
+                        },
+                        colors = CardDefaults.cardColors(
+                            containerColor = Color.Transparent,
+                            disabledContainerColor = Color.Transparent,
+                        ),
+                    ) {
+                        Column(
+                            modifier = Modifier.fillMaxWidth()
+                                .heightIn(min = 32.dp)
+                                .padding(bottom = 4.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.Center,
+                        ) {
+                            val animatedRotation by animateFloatAsState(if (showingBottomBarOptions) 180f else 0f)
+                            Icon(
+                                painter = painterResource(R.drawable.arrow_up),
+                                contentDescription = stringResource(R.string.settings),
+                                modifier = Modifier.rotate(animatedRotation)
+                                    .size(24.dp),
+                            )
+
+                            AnimatedVisibility(
+                                visible = !showingBottomBarOptions,
+                            ) {
+                                Text(
+                                    text = stringResource(R.string.settings),
+                                    lineHeight = LocalTextStyle.current.fontSize,
+                                )
+                            }
+                        }
+                    }
+                }
+
+                AnimatedVisibility(
+                    visible = showingBottomBarOptions,
+                ) {
+                    LazyColumn(
+                        modifier = Modifier.fillMaxWidth(),
+                        contentPadding = PaddingValues(horizontal = 16.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp),
+                    ) {
+                        item {
+                            CardSwitch(
+                                enabled = localAutoChange.first,
+                                onEnabledChanged = {
+                                    localAutoChange = localAutoChange.copy(first = it)
+                                },
+                                title = stringResource(R.string.auto_cycle),
+                                modifier = Modifier
+                                    .wrapContentHeight(),
+                                titleTextStyle = MaterialTheme.typography.titleMedium,
+                                accessory = {
+                                    var temporaryTextState by remember(autoChange.second) {
+                                        mutableStateOf(autoChange.second.toString())
+                                    }
+
+                                    TextField(
+                                        value = temporaryTextState,
+                                        onValueChange = { newValue ->
+                                            temporaryTextState = newValue.filter { it.isDigit() }
+                                            localAutoChange = localAutoChange
+                                                .copy(
+                                                    second = temporaryTextState.toLongOrNull()
+                                                        ?.takeIf { it >= MIN_CHANGE_DELAY_MS }
+                                                        ?: localAutoChange.second,
+                                                )
+                                        },
+                                        label = {
+                                            Text(text = stringResource(R.string.delay))
+                                        },
+                                        suffix = {
+                                            Text(text = stringResource(R.string.unit_milliseconds))
+                                        },
+                                        keyboardOptions = KeyboardOptions.Default.copy(
+                                            keyboardType = KeyboardType.Number,
+                                        ),
+                                        modifier = Modifier
+                                            .widthIn(min = 0.dp)
+                                            .wrapContentHeight()
+                                            .weight(1f),
+                                        isError = temporaryTextState.toLongOrNull()
+                                            ?.takeIf { it >= MIN_CHANGE_DELAY_MS } == null,
+                                        colors = TextFieldDefaults.colors(
+                                            errorContainerColor = Color.Transparent,
+                                            focusedContainerColor = Color.Transparent,
+                                            disabledContainerColor = Color.Transparent,
+                                            unfocusedContainerColor = Color.Transparent,
+                                        ),
+                                    )
+                                },
+                            )
                         }
 
-                        TextField(
-                            value = temporaryTextState,
-                            onValueChange = { newValue ->
-                                temporaryTextState = newValue.filter { it.isDigit() }
-                                localAutoChange = localAutoChange
-                                    .copy(
-                                        second = temporaryTextState.toLongOrNull()
-                                            ?.takeIf { it >= MIN_CHANGE_DELAY_MS }
-                                            ?: localAutoChange.second,
+                        item {
+                            CardSwitch(
+                                enabled = localStyles.showButtonBackground,
+                                onEnabledChanged = {
+                                    localStyles = localStyles.copy(
+                                        showButtonBackground = it,
                                     )
-                            },
-                            label = {
-                                Text(text = stringResource(R.string.delay))
-                            },
-                            suffix = {
-                                Text(text = stringResource(R.string.unit_milliseconds))
-                            },
-                            keyboardOptions = KeyboardOptions.Default.copy(
-                                keyboardType = KeyboardType.Number,
-                            ),
-                            modifier = Modifier
-                                .widthIn(min = 0.dp)
-                                .wrapContentHeight()
-                                .weight(1f),
-                            isError = temporaryTextState.toLongOrNull()
-                                ?.takeIf { it >= MIN_CHANGE_DELAY_MS } == null,
-                            colors = TextFieldDefaults.colors(
-                                errorContainerColor = Color.Transparent,
-                                focusedContainerColor = Color.Transparent,
-                                disabledContainerColor = Color.Transparent,
-                                unfocusedContainerColor = Color.Transparent,
-                            ),
-                        )
-                    },
-                )
+                                },
+                                title = stringResource(R.string.show_button_backgrounds),
+                                titleTextStyle = MaterialTheme.typography.titleMedium,
+                            )
+                        }
+                    }
+                }
 
                 FlowRow(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier.fillMaxWidth()
+                        .onSizeChanged { size ->
+                            bottomBarHeight = with (density) {
+                                size.height.toDp()
+                            }
+                        }
+                        .padding(horizontal = 16.dp),
                     horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
                     verticalArrangement = Arrangement.spacedBy(4.dp),
                 ) {
@@ -543,6 +695,7 @@ fun Content(
                             onWidgetsChange(localWidgetList)
                             onNewAutoChange(localAutoChange)
                             onWidgetPaddingChange(localWidgetPadding)
+                            onStylesChange(localStyles)
 
                             localRemovedWidgets.forEach {
                                 context.widgetHostCompat.deleteAppWidgetId(it.id)
@@ -704,8 +857,10 @@ fun ConfigurePreview() {
             onNewAutoChange = {},
             onFinish = {},
             onWidgetPaddingChange = {},
+            onStylesChange = {},
             autoChange = false to DEFAULT_CHANGE_DELAY_MS,
             widgetPadding = mapOf(),
+            styles = WidgetStackStyle(),
             widgets = listOf(
                 WidgetData.widget(
                     context = context,
