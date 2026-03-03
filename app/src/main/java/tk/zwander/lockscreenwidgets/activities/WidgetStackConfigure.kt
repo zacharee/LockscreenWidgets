@@ -590,8 +590,7 @@ fun Content(
                         Column(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .heightIn(min = 32.dp)
-                                .padding(bottom = 4.dp),
+                                .heightIn(min = 32.dp),
                             horizontalAlignment = Alignment.CenterHorizontally,
                             verticalArrangement = Arrangement.Center,
                         ) {
@@ -610,6 +609,7 @@ fun Content(
                                 Text(
                                     text = stringResource(R.string.settings),
                                     lineHeight = LocalTextStyle.current.fontSize,
+                                    modifier = Modifier.padding(bottom = 4.dp),
                                 )
                             }
                         }
