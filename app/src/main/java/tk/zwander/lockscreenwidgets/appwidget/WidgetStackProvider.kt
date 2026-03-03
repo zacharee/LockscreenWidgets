@@ -137,7 +137,7 @@ class WidgetStackProvider : AppWidgetProvider() {
 
             // Dummy click listener to prevent default click behavior opening the main app.
             root.setOnClickPendingIntent(
-                R.id.widget_root,
+                android.R.id.background,
                 PendingIntentCompat.getBroadcast(
                     context,
                     Int.MAX_VALUE,
@@ -244,6 +244,17 @@ class WidgetStackProvider : AppWidgetProvider() {
         root.setViewBackgroundResource(R.id.start_controls_wrapper, buttonBackground)
         root.setViewBackgroundResource(R.id.end_controls_wrapper, buttonBackground)
         root.setViewBackgroundResource(R.id.stack_dot_row, buttonBackground)
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            root.setViewBackgroundResource(
+                android.R.id.background,
+                if (styles.roundedCorners) {
+                    R.drawable.widget_stack_background
+                } else {
+                    R.drawable.widget_stack_background_square
+                },
+            )
+        }
 
         val previousIndex = intent.getIntExtra(EXTRA_PREVIOUS_INDEX, -1)
 

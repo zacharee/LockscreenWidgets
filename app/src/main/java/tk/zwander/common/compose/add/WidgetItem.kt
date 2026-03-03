@@ -19,6 +19,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -35,11 +36,13 @@ fun WidgetItem(
         .padding(8.dp),
     badgeDrawable: Drawable? = null,
     previewLayout: View? = null,
+    cardShape: Shape = CardDefaults.outlinedShape,
     onClick: (() -> Unit)? = null,
 ) {
     OutlinedCard(
         border = CardDefaults.outlinedCardBorder(true),
         modifier = modifier,
+        shape = cardShape,
     ) {
         Box {
             Column(

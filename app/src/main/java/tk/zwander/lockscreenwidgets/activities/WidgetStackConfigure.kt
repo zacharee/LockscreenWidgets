@@ -10,6 +10,7 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.res.Resources
 import android.graphics.drawable.Drawable
+import android.os.Build
 import android.os.Bundle
 import android.os.ServiceManager
 import android.widget.Toast
@@ -48,6 +49,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CornerSize
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ButtonDefaults
@@ -80,9 +82,11 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
@@ -155,7 +159,10 @@ class WidgetStackConfigure : BaseActivity() {
 
             var autoChange by rememberPreferenceState(
                 key = PrefManager.KEY_WIDGET_STACK_AUTO_CHANGE,
-                value = { prefManager.widgetStackAutoChange[widgetId] ?: (false to DEFAULT_CHANGE_DELAY_MS) },
+                value = {
+                    prefManager.widgetStackAutoChange[widgetId]
+                        ?: (false to DEFAULT_CHANGE_DELAY_MS)
+                },
                 onChanged = { _, value ->
                     val newAutoChange = prefManager.widgetStackAutoChange
                     newAutoChange[widgetId] = value
@@ -167,9 +174,10 @@ class WidgetStackConfigure : BaseActivity() {
                 key = PrefManager.KEY_WIDGET_STACK_WIDGET_PADDING,
                 value = { prefManager.widgetStackWidgetPadding[widgetId] ?: hashMapOf() },
                 onChanged = { _, value ->
-                    prefManager.widgetStackWidgetPadding = prefManager.widgetStackWidgetPadding.apply {
-                        this[widgetId] = value
-                    }
+                    prefManager.widgetStackWidgetPadding =
+                        prefManager.widgetStackWidgetPadding.apply {
+                            this[widgetId] = value
+                        }
                 },
             )
 
@@ -281,20 +289,21 @@ fun Content(
         mutableStateOf(styles)
     }
 
-    val addWidgetLauncher = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) {
-        val addedWidget = it.data?.let { intent ->
-            IntentCompat.getParcelableExtra(
-                intent,
-                AddWidgetStackWidgetActivity.EXTRA_ADDED_WIDGET,
-                WidgetData::class.java,
-            )
-        }
+    val addWidgetLauncher =
+        rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+            val addedWidget = it.data?.let { intent ->
+                IntentCompat.getParcelableExtra(
+                    intent,
+                    AddWidgetStackWidgetActivity.EXTRA_ADDED_WIDGET,
+                    WidgetData::class.java,
+                )
+            }
 
-        if (addedWidget != null) {
-            localAddedWidgets = localAddedWidgets + addedWidget
-            localWidgetList = localWidgetList + addedWidget
+            if (addedWidget != null) {
+                localAddedWidgets = localAddedWidgets + addedWidget
+                localWidgetList = localWidgetList + addedWidget
+            }
         }
-    }
 
     LaunchedEffect(widgets) {
         localWidgetList = widgets.filterNot { localRemovedWidgets.contains(it) }
@@ -330,10 +339,11 @@ fun Content(
     }
 
     Surface(
-        modifier = Modifier.fillMaxSize()
+        modifier = Modifier
+            .fillMaxSize()
             .windowInsetsPadding(
                 insets = WindowInsets.systemBars.only(
-                        WindowInsetsSides.Start +
+                    WindowInsetsSides.Start +
                             WindowInsetsSides.End,
                 ).add(imeBottomPadding ?: systemBarsBottomPadding),
             ),
@@ -365,7 +375,8 @@ fun Content(
                         key = widget.id,
                     ) {
                         Box(
-                            modifier = Modifier.fillMaxWidth()
+                            modifier = Modifier
+                                .fillMaxWidth()
                                 .background(MaterialTheme.colorScheme.background)
                                 .heightIn(min = 56.dp)
                                 .padding(
@@ -411,11 +422,12 @@ fun Content(
 
                                 LaunchedEffect(widget.id) {
                                     launch(Dispatchers.Main) {
-                                        widgetView = context.widgetViewCacheRegistry.getOrCreateView(
-                                            context = context,
-                                            appWidget = providerInfo,
-                                            appWidgetId = widget.id,
-                                        )
+                                        widgetView =
+                                            context.widgetViewCacheRegistry.getOrCreateView(
+                                                context = context,
+                                                appWidget = providerInfo,
+                                                appWidgetId = widget.id,
+                                            )
                                     }
                                 }
 
@@ -437,8 +449,20 @@ fun Content(
                                             subLabel = null,
                                             itemModifier = Modifier
                                                 .heightIn(min = 150.dp)
-                                                .padding(8.dp)
                                                 .fillMaxWidth(),
+                                            cardShape = if (localStyles.roundedCorners) {
+                                                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                                                    RoundedCornerShape(
+                                                        size = dimensionResource(
+                                                            id = android.R.dimen.system_app_widget_background_radius,
+                                                        ),
+                                                    )
+                                                } else {
+                                                    CardDefaults.outlinedShape
+                                                }
+                                            } else {
+                                                RectangleShape
+                                            },
                                         )
 
                                         CompositionLocalProvider(
@@ -447,15 +471,19 @@ fun Content(
                                             CardSwitch(
                                                 enabled = localWidgetPadding[widget.id] ?: false,
                                                 onEnabledChanged = {
-                                                    localWidgetPadding = localWidgetPadding.toMutableMap().apply {
-                                                        this[widget.id] = it
-                                                    }
+                                                    localWidgetPadding =
+                                                        localWidgetPadding.toMutableMap().apply {
+                                                            this[widget.id] = it
+                                                        }
                                                 },
                                                 title = stringResource(R.string.widget_padding),
-                                                modifier = Modifier.fillMaxWidth()
+                                                modifier = Modifier
+                                                    .fillMaxWidth()
                                                     .heightIn(min = 48.dp),
                                                 titleTextStyle = MaterialTheme.typography.titleMedium,
-                                                contentPadding = ButtonDefaults.ContentPadding - PaddingValues(horizontal = 12.dp),
+                                                contentPadding = ButtonDefaults.ContentPadding - PaddingValues(
+                                                    horizontal = 12.dp
+                                                ),
                                             )
                                         }
                                     }
@@ -506,7 +534,8 @@ fun Content(
                 modifier = Modifier.fillMaxSize(),
             ) {
                 Box(
-                    modifier = Modifier.fillMaxSize()
+                    modifier = Modifier
+                        .fillMaxSize()
                         .clickable(
                             enabled = true,
                             indication = null,
@@ -546,7 +575,7 @@ fun Content(
                             showingBottomBarOptions = !showingBottomBarOptions
                         },
                         modifier = Modifier.onSizeChanged { size ->
-                            bottomBarToggleHeight = with (density) {
+                            bottomBarToggleHeight = with(density) {
                                 size.height.toDp()
                             }
                         },
@@ -556,7 +585,8 @@ fun Content(
                         ),
                     ) {
                         Column(
-                            modifier = Modifier.fillMaxWidth()
+                            modifier = Modifier
+                                .fillMaxWidth()
                                 .heightIn(min = 32.dp)
                                 .padding(bottom = 4.dp),
                             horizontalAlignment = Alignment.CenterHorizontally,
@@ -566,7 +596,8 @@ fun Content(
                             Icon(
                                 painter = painterResource(R.drawable.arrow_up),
                                 contentDescription = stringResource(R.string.settings),
-                                modifier = Modifier.rotate(animatedRotation)
+                                modifier = Modifier
+                                    .rotate(animatedRotation)
                                     .size(24.dp),
                             )
 
@@ -654,18 +685,37 @@ fun Content(
                                 titleTextStyle = MaterialTheme.typography.titleMedium,
                             )
                         }
+
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                            item {
+                                CardSwitch(
+                                    enabled = localStyles.roundedCorners,
+                                    onEnabledChanged = {
+                                        localStyles = localStyles.copy(
+                                            roundedCorners = it,
+                                        )
+                                    },
+                                    title = stringResource(R.string.rounded_corners),
+                                    titleTextStyle = MaterialTheme.typography.titleMedium,
+                                )
+                            }
+                        }
                     }
                 }
 
                 FlowRow(
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier
+                        .fillMaxWidth()
                         .onSizeChanged { size ->
-                            bottomBarHeight = with (density) {
+                            bottomBarHeight = with(density) {
                                 size.height.toDp()
                             }
                         }
                         .padding(horizontal = 16.dp),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
+                    horizontalArrangement = Arrangement.spacedBy(
+                        8.dp,
+                        Alignment.CenterHorizontally
+                    ),
                     verticalArrangement = Arrangement.spacedBy(4.dp),
                 ) {
                     OutlinedButton(
@@ -768,7 +818,10 @@ private fun Context.openWidgetConfig(currentData: WidgetData) {
         if (providerInfo == null) {
             Toast.makeText(this, R.string.error_reconfiguring_widget, Toast.LENGTH_SHORT)
                 .show()
-            logUtils.normalLog("Unable to reconfigure widget $provider: provider info is null.", null)
+            logUtils.normalLog(
+                "Unable to reconfigure widget $provider: provider info is null.",
+                null
+            )
         } else {
             WidgetStackReconfigureActivity.launch(
                 context = this,
