@@ -22,13 +22,14 @@ fun ExtraButton(
     maxFontSize: TextUnit = TextUnit.Unspecified,
 ) {
     SubduedOutlinedButton(
-        onClick = { info.onClick() },
-        modifier = modifier
+        onClick = info.onClick,
+        modifier = modifier,
+        enabled = info.dependency(),
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Image(
                 painter = painterResource(id = info.icon),
-                contentDescription = stringResource(id = info.title)
+                contentDescription = stringResource(id = info.title),
             )
             Spacer(Modifier.size(8.dp))
             AutoSizeText(

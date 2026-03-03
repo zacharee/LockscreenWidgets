@@ -22,6 +22,7 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -58,7 +59,9 @@ import tk.zwander.lockscreenwidgets.activities.ComposeFrameSettingsActivity
 import tk.zwander.lockscreenwidgets.activities.UsageActivity
 import tk.zwander.lockscreenwidgets.appwidget.WidgetStackProvider
 import tk.zwander.lockscreenwidgets.compose.SelectDisplayDialog
+import tk.zwander.lockscreenwidgets.util.MainWidgetFrameDelegate
 import tk.zwander.widgetdrawer.activities.ComposeDrawerSettingsActivity
+import tk.zwander.widgetdrawer.util.DrawerDelegate
 
 @Composable
 fun rememberFeatureCards(): List<FeatureCardInfo> {
@@ -99,20 +102,21 @@ fun rememberFeatureCards(): List<FeatureCardInfo> {
                 enabledKey = PrefManager.KEY_WIDGET_FRAME_ENABLED,
                 buttons = listOf(
                     MainPageButton(
-                        R.drawable.ic_baseline_preview_24,
-                        R.string.preview
+                        icon = R.drawable.ic_baseline_preview_24,
+                        title = R.string.preview,
+                        dependency = { MainWidgetFrameDelegate.readOnlyInstance.collectAsState().value != null },
                     ) {
                         context.eventManager.sendEvent(Event.PreviewFrames(Event.PreviewFrames.ShowMode.TOGGLE))
                     },
                     MainPageButton(
-                        R.drawable.ic_baseline_help_outline_24,
-                        R.string.usage
+                        icon = R.drawable.ic_baseline_help_outline_24,
+                        title = R.string.usage,
                     ) {
                         context.startActivity(Intent(context, UsageActivity::class.java))
                     },
                     MainPageButton(
-                        R.drawable.ic_baseline_settings_24,
-                        R.string.settings
+                        icon = R.drawable.ic_baseline_settings_24,
+                        title = R.string.settings,
                     ) {
                         context.startActivity(Intent(context, ComposeFrameSettingsActivity::class.java))
                     },
@@ -128,27 +132,28 @@ fun rememberFeatureCards(): List<FeatureCardInfo> {
                 onEnabledChanged = { context.prefManager.widgetFrameEnabled = it },
             ),
             FeatureCardInfo(
-                R.string.widget_drawer,
-                R.string.enabled,
-                R.string.disabled,
-                PrefManager.KEY_DRAWER_ENABLED,
-                listOf(
+                title = R.string.widget_drawer,
+                enabledLabel = R.string.enabled,
+                disabledLabel = R.string.disabled,
+                enabledKey = PrefManager.KEY_DRAWER_ENABLED,
+                buttons = listOf(
                     MainPageButton(
-                        R.drawable.ic_baseline_open_in_new_24,
-                        R.string.open_drawer
+                        icon = R.drawable.ic_baseline_open_in_new_24,
+                        title = R.string.open_drawer,
+                        dependency = { DrawerDelegate.readOnlyInstance.collectAsState().value != null },
                     ) {
                         context.eventManager.sendEvent(Event.ShowDrawer)
                     },
                     MainPageButton(
-                        R.drawable.ic_baseline_settings_24,
-                        R.string.settings
+                        icon = R.drawable.ic_baseline_settings_24,
+                        title = R.string.settings,
                     ) {
                         context.startActivity(Intent(context, ComposeDrawerSettingsActivity::class.java))
                     }
                 ),
-                { context.eventManager.sendEvent(Event.LaunchAddDrawerWidget(false)) },
-                { context.prefManager.drawerEnabled },
-                { context.prefManager.drawerEnabled = it }
+                onAction = { context.eventManager.sendEvent(Event.LaunchAddDrawerWidget(false)) },
+                isEnabled = { context.prefManager.drawerEnabled },
+                onEnabledChanged = { context.prefManager.drawerEnabled = it },
             ),
         ) + if (widgetStackIds.isEmpty()) {
             listOf()
