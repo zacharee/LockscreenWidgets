@@ -307,5 +307,7 @@
     <string name="widget_stacks">Widget Stacks</string>
     <string name="widget_stack_monitor">Widget Stack Monitor</string>
     <string name="widget_stack_monitor_desc">Used to keep widgets in widget stacks up to date.</string>
+    <string name="show_button_backgrounds">Show Button Backgrounds</string>
+    <string name="rounded_corners">Rounded corners</string>
     <string name="tap_to_hide">Tap to hide</string>
 </resources>
