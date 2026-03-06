@@ -402,7 +402,7 @@ fun Content(
                                     )
                                 }
 
-                                val providerInfo by remember {
+                                val providerInfo: AppWidgetProviderInfo? by remember {
                                     derivedStateOf {
                                         context.appWidgetManager.getAppWidgetInfo(widget.id)
                                     }
@@ -423,12 +423,13 @@ fun Content(
 
                                 LaunchedEffect(widget.id) {
                                     launch(Dispatchers.Main) {
-                                        widgetView =
+                                        widgetView = providerInfo?.let {
                                             context.widgetViewCacheRegistry.getOrCreateView(
                                                 context = context,
-                                                appWidget = providerInfo,
+                                                appWidget = it,
                                                 appWidgetId = widget.id,
                                             )
+                                        }
                                     }
                                 }
 
