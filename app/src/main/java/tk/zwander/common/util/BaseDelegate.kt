@@ -126,7 +126,7 @@ abstract class BaseDelegate<State : Any>(
             lifecycleRegistry.safeCurrentState = Lifecycle.State.CREATED
         }
 
-        lifecycleScope.launch {
+        viewModel.viewModelScope.launch {
             displayFlow.collect {
                 if (it != null) {
                     updateWindow()

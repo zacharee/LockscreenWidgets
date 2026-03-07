@@ -20,6 +20,7 @@ import androidx.core.graphics.component1
 import androidx.core.graphics.component2
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.viewModelScope
 import androidx.recyclerview.widget.RecyclerView
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.NonCancellable
@@ -504,7 +505,7 @@ open class MainWidgetFrameDelegate protected constructor(
 
         scrollToStoredPosition(false)
 
-        lifecycleScope.launch(Dispatchers.Main) {
+        viewModel.viewModelScope.launch(Dispatchers.Main) {
             lsDisplayManager.displayPowerStates
                 .map { it.displayStates[display?.uniqueIdCompat] != false }
                 .collect { isScreenOn ->
@@ -534,13 +535,13 @@ open class MainWidgetFrameDelegate protected constructor(
                 }
         }
 
-        lifecycleScope.launch(Dispatchers.Main) {
+        viewModel.viewModelScope.launch(Dispatchers.Main) {
             globalState.notificationsPanelFullyExpanded.collect {
                 updateState { it.copy(isPendingNotificationStateChange = true, isPreview = false) }
             }
         }
 
-        lifecycleScope.launch(Dispatchers.Main) {
+        viewModel.viewModelScope.launch(Dispatchers.Main) {
             globalState.notificationCount.collect {
                 //Receive updates from our notification listener service on how many
                 //notifications are currently shown to the user. This count excludes
