@@ -27,7 +27,6 @@ import com.getkeepsafe.relinker.ReLinker
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.MainScope
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.lsposed.hiddenapibypass.HiddenApiBypass
 import tk.zwander.common.activities.add.BaseBindWidgetActivity
@@ -272,8 +271,8 @@ class App : Application(), CoroutineScope by MainScope(), EventObserver {
         widgetHostCompat.startListening(this)
 
         launch(Dispatchers.IO) {
-            delay(1000L)
-
+//            delay(1000L)
+//
             val widgetsToDelete = mutableSetOf<Int>()
             prefManager.widgetStackWidgets = HashMap(
                 prefManager.widgetStackWidgets.mapNotNull { (stackId, widgets) ->
@@ -304,7 +303,7 @@ class App : Application(), CoroutineScope by MainScope(), EventObserver {
                     return@forEach
                 }
 
-                prefManager.currentSecondaryFramesWithStringDisplay.forEach { (frameId) ->
+                prefManager.currentSecondaryFramesWithStringDisplay.forEach innerForEach@{ (frameId) ->
                     if (FramePrefs.getWidgetsForFrame(this@App, frameId).any { it.id == id }) {
                         return@forEach
                     }
