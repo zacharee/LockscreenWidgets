@@ -149,8 +149,7 @@
                     android:layout_gravity="center"
                     android:gravity="center"
                     android:clipChildren="true"
-                    android:background="@drawable/pill"
-                    />
+                    android:background="@drawable/pill" />
 
             </FrameLayout>
 

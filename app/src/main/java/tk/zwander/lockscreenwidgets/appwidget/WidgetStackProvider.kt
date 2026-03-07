@@ -10,6 +10,7 @@ import android.os.Bundle
 import android.os.ServiceManager
 import android.util.SizeF
 import android.util.SparseArray
+import android.util.TypedValue
 import android.view.View
 import android.widget.RemoteViews
 import androidx.compose.ui.unit.Density
@@ -33,6 +34,7 @@ import tk.zwander.lockscreenwidgets.App
 import tk.zwander.lockscreenwidgets.BuildConfig
 import tk.zwander.lockscreenwidgets.R
 import tk.zwander.lockscreenwidgets.activities.WidgetStackConfigure
+import kotlin.math.floor
 import kotlin.math.roundToInt
 
 class WidgetStackProvider : AppWidgetProvider() {
@@ -192,8 +194,123 @@ class WidgetStackProvider : AppWidgetProvider() {
     ) {
         val options = appWidgetManager.getAppWidgetOptions(stackId)
         val applyPadding = context.prefManager.widgetStackWidgetPadding[stackId]?.get(innerWidgetId) ?: false
-        val styles = context.prefManager.widgetStackStyle[stackId] ?: WidgetStackStyle()
+        val realSize = options?.let { options ->
+            extractSizeFromOptions(options, applyPadding).also { size ->
+                options.putInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH, size.width.roundToInt())
+                options.putInt(AppWidgetManager.OPTION_APPWIDGET_MAX_WIDTH, size.width.roundToInt())
+                options.putInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT, size.height.roundToInt())
+                options.putInt(AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT, size.height.roundToInt())
+            }
+        }
 
+        setClickListeners(
+            context = context,
+            root = root,
+            stackId = stackId,
+        )
+
+        setBackgrounds(
+            context = context,
+            root = root,
+            stackId = stackId,
+        )
+
+        fillInPageRow(
+            context = context,
+            root = root,
+            realSize = realSize,
+            stackSize = stackSize,
+            index = index,
+            stackId = stackId,
+        )
+
+        if (options?.matches(appWidgetManager.getAppWidgetOptions(innerWidgetId)) != true) {
+            appWidgetManager.updateAppWidgetOptions(innerWidgetId, options)
+        }
+
+        val viewsToApply = rootWidgetViews.getRemoteViewsToApplyCompat(
+            context = context,
+            size = realSize,
+        )
+
+        processActions(
+            context = context,
+            innerView = viewsToApply,
+            innerWidgetId = innerWidgetId,
+        )
+
+        hoistCollections(
+            innerView = viewsToApply,
+            rootWidgetViews = rootWidgetViews,
+            outerView = root,
+        )
+
+        fillInFlipper(
+            index = index,
+            stackSize = stackSize,
+            stackId = stackId,
+            root = root,
+            viewsToApply = viewsToApply,
+        )
+
+        applyPadding(
+            context = context,
+            applyPadding = applyPadding,
+            root = root,
+        )
+
+        hoistWidgetData(
+            innerView = viewsToApply,
+            outerView = root,
+        )
+    }
+
+    private fun applyPadding(
+        context: Context,
+        applyPadding: Boolean,
+        root: RemoteViews,
+    ) {
+        val dpVal = with(Density(context)) {
+            8.dp.roundToPx()
+        }
+        root.setViewPadding(
+            R.id.widget_content,
+            if (applyPadding) dpVal else 0,
+            if (applyPadding) dpVal else 0,
+            if (applyPadding) dpVal else 0,
+            0,
+        )
+    }
+    
+    private fun setBackgrounds(
+        context: Context,
+        root: RemoteViews,
+        stackId: Int,
+    ) {
+        val styles = context.prefManager.widgetStackStyle[stackId] ?: WidgetStackStyle()
+        val buttonBackground = if (styles.showButtonBackground) R.drawable.pill else R.drawable.pill_transparent
+        root.setViewBackgroundResource(R.id.add_widget, buttonBackground)
+        root.setViewBackgroundResource(R.id.start_controls_wrapper, buttonBackground)
+        root.setViewBackgroundResource(R.id.end_controls_wrapper, buttonBackground)
+        root.setViewBackgroundResource(R.id.stack_dot_row, buttonBackground)
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            root.setViewBackgroundResource(
+                android.R.id.background,
+                if (styles.roundedCorners) {
+                    R.drawable.widget_stack_background
+                } else {
+                    R.drawable.widget_stack_background_square
+                },
+            )
+        }
+    }
+    
+    private fun setClickListeners(
+        context: Context,
+        root: RemoteViews,
+        stackId: Int,
+    ) {
         root.setOnClickPendingIntent(
             R.id.stack_forward,
             PendingIntentCompat.getBroadcast(
@@ -238,113 +355,15 @@ class WidgetStackProvider : AppWidgetProvider() {
                 false
             )
         )
-
-        val buttonBackground = if (styles.showButtonBackground) R.drawable.pill else R.drawable.pill_transparent
-        root.setViewBackgroundResource(R.id.add_widget, buttonBackground)
-        root.setViewBackgroundResource(R.id.start_controls_wrapper, buttonBackground)
-        root.setViewBackgroundResource(R.id.end_controls_wrapper, buttonBackground)
-        root.setViewBackgroundResource(R.id.stack_dot_row, buttonBackground)
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            root.setViewBackgroundResource(
-                android.R.id.background,
-                if (styles.roundedCorners) {
-                    R.drawable.widget_stack_background
-                } else {
-                    R.drawable.widget_stack_background_square
-                },
-            )
-        }
-
-        val previousIndex = intent.getIntExtra(EXTRA_PREVIOUS_INDEX, -1)
-
-        root.removeAllViews(R.id.stack_dot_row)
-
-        repeat(stackSize) {
-            val dot = RemoteViews(context.packageName, R.layout.widget_stack_page_dot)
-            dot.setViewVisibility(
-                R.id.page_dot_active,
-                if (index == it && previousIndex != -1) {
-                    View.VISIBLE
-                } else {
-                    View.INVISIBLE
-                },
-            )
-            dot.setViewVisibility(
-                R.id.page_dot_inactive,
-                if (it == previousIndex) {
-                    View.VISIBLE
-                } else {
-                    View.INVISIBLE
-                },
-            )
-            dot.setViewVisibility(
-                R.id.page_dot_static,
-                if (previousIndex == -1 || (index != previousIndex && index != it)) {
-                    View.VISIBLE
-                } else {
-                    View.INVISIBLE
-                },
-            )
-            dot.setImageViewResource(
-                R.id.page_dot_static,
-                if (index == it) {
-                    R.drawable.circle_5
-                } else {
-                    R.drawable.circle_0
-                },
-            )
-            if (index != it) {
-                dot.setOnClickPendingIntent(
-                    R.id.page_dot_root,
-                    PendingIntentCompat.getBroadcast(
-                        context,
-                        80000 + stackId + it,
-                        createSwapIntent(
-                            context = context,
-                            ids = intArrayOf(stackId),
-                            backward = false,
-                            autoSwap = false,
-                            swapIndex = it,
-                        ),
-                        0,
-                        false,
-                    ),
-                )
-            }
-            root.addView(R.id.stack_dot_row, dot)
-        }
-
-        val realSize = options?.let { options ->
-            extractSizeFromOptions(options, applyPadding).also { size ->
-                options.putInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH, size.width.roundToInt())
-                options.putInt(AppWidgetManager.OPTION_APPWIDGET_MAX_WIDTH, size.width.roundToInt())
-                options.putInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT, size.height.roundToInt())
-                options.putInt(AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT, size.height.roundToInt())
-            }
-        }
-
-        if (options?.matches(appWidgetManager.getAppWidgetOptions(innerWidgetId)) != true) {
-            appWidgetManager.updateAppWidgetOptions(innerWidgetId, options)
-        }
-
-        val viewsToApply = rootWidgetViews.getRemoteViewsToApplyCompat(
-            context = context,
-            size = realSize,
-        )
-
-        processActions(
-            context = context,
-            innerView = viewsToApply,
-            innerWidgetId = innerWidgetId,
-        )
-
-        hoistCollections(
-            innerView = viewsToApply,
-            rootWidgetViews = rootWidgetViews,
-            outerView = root,
-        )
-
+    }
+    
+    private fun fillInFlipper(
+        index: Int,
+        stackSize: Int,
+        stackId: Int,
+        root: RemoteViews,
+        viewsToApply: RemoteViews,
+    ) {
         val rem = index % 3
         val prevIndex = if (index > 0) {
             index - 1
@@ -388,22 +407,108 @@ class WidgetStackProvider : AppWidgetProvider() {
         }
 
         root.setDisplayedChild(R.id.widget_content, realRem)
+    }
+    
+    private fun fillInPageRow(
+        context: Context,
+        root: RemoteViews,
+        realSize: SizeF?,
+        stackSize: Int,
+        index: Int,
+        stackId: Int,
+    ) {
+        val previousIndex = intent.getIntExtra(EXTRA_PREVIOUS_INDEX, -1)
 
-        val dpVal = with(Density(context)) {
-            8.dp.roundToPx()
+        root.removeAllViews(R.id.stack_dot_row)
+
+        val availableDotWidth = realSize?.let { it.width - 162 }
+        val singleDotWidth = 16
+
+        val maxDots = availableDotWidth?.let {
+            floor(it / singleDotWidth).toInt()
         }
-        root.setViewPadding(
-            R.id.widget_content,
-            if (applyPadding) dpVal else 0,
-            if (applyPadding) dpVal else 0,
-            if (applyPadding) dpVal else 0,
-            0,
-        )
+        val dotSizeDp = maxDots?.takeIf { it < stackSize }?.let {
+            (floor(12 * it.toFloat() / stackSize) - 1)
+                .coerceAtMost(12f)
+                .takeIf { size -> size >= 9 }
+        }
+        val showText = maxDots != null &&
+                maxDots < stackSize &&
+                (dotSizeDp == null || Build.VERSION.SDK_INT < Build.VERSION_CODES.S)
 
-        hoistWidgetData(
-            innerView = viewsToApply,
-            outerView = root,
-        )
+        if (!showText) {
+            repeat(stackSize) {
+                val dot = RemoteViews(context.packageName, R.layout.widget_stack_page_dot)
+                dot.setViewVisibility(
+                    R.id.page_dot_active,
+                    if (index == it && previousIndex != -1) {
+                        View.VISIBLE
+                    } else {
+                        View.INVISIBLE
+                    },
+                )
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                    dot.setViewLayoutWidth(R.id.page_dot_active, dotSizeDp ?: 12f, TypedValue.COMPLEX_UNIT_DIP)
+                    dot.setViewLayoutHeight(R.id.page_dot_active, dotSizeDp ?: 12f, TypedValue.COMPLEX_UNIT_DIP)
+                }
+                dot.setViewVisibility(
+                    R.id.page_dot_inactive,
+                    if (it == previousIndex) {
+                        View.VISIBLE
+                    } else {
+                        View.INVISIBLE
+                    },
+                )
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                    dot.setViewLayoutWidth(R.id.page_dot_inactive, dotSizeDp ?: 12f, TypedValue.COMPLEX_UNIT_DIP)
+                    dot.setViewLayoutHeight(R.id.page_dot_inactive, dotSizeDp ?: 12f, TypedValue.COMPLEX_UNIT_DIP)
+                }
+                dot.setViewVisibility(
+                    R.id.page_dot_static,
+                    if (previousIndex == -1 || (index != previousIndex && index != it)) {
+                        View.VISIBLE
+                    } else {
+                        View.INVISIBLE
+                    },
+                )
+                dot.setImageViewResource(
+                    R.id.page_dot_static,
+                    if (index == it) {
+                        R.drawable.circle_5
+                    } else {
+                        R.drawable.circle_0
+                    },
+                )
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                    dot.setViewLayoutWidth(R.id.page_dot_static, dotSizeDp ?: 12f, TypedValue.COMPLEX_UNIT_DIP)
+                    dot.setViewLayoutHeight(R.id.page_dot_static, dotSizeDp ?: 12f, TypedValue.COMPLEX_UNIT_DIP)
+                }
+                if (index != it) {
+                    dot.setOnClickPendingIntent(
+                        R.id.page_dot_root,
+                        PendingIntentCompat.getBroadcast(
+                            context,
+                            80000 + stackId + it,
+                            createSwapIntent(
+                                context = context,
+                                ids = intArrayOf(stackId),
+                                backward = false,
+                                autoSwap = false,
+                                swapIndex = it,
+                            ),
+                            0,
+                            false,
+                        ),
+                    )
+                }
+                root.addView(R.id.stack_dot_row, dot)
+            }
+        } else {
+            val textViews = RemoteViews(context.packageName, R.layout.stack_page_text)
+            textViews.setTextViewText(R.id.stack_page_text, "${index + 1}/${stackSize}")
+
+            root.addView(R.id.stack_dot_row, textViews)
+        }
     }
 
     override fun onAppWidgetOptionsChanged(
