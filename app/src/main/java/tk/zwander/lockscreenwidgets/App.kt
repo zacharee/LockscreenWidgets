@@ -303,10 +303,10 @@ class App : Application(), CoroutineScope by MainScope(), EventObserver {
                     return@forEach
                 }
 
-                prefManager.currentSecondaryFramesWithStringDisplay.forEach innerForEach@{ (frameId) ->
-                    if (FramePrefs.getWidgetsForFrame(this@App, frameId).any { it.id == id }) {
-                        return@forEach
-                    }
+                if (prefManager.currentSecondaryFramesWithStringDisplay.any { (frameId) ->
+                        FramePrefs.getWidgetsForFrame(this@App, frameId).any { it.id == id }
+                    }) {
+                    return@forEach
                 }
 
                 if (prefManager.drawerWidgets.any { it.id == id }) {
