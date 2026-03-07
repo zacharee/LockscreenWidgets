@@ -342,7 +342,6 @@ class DrawerDelegate private constructor(context: Context, displayId: String) :
                             }
                         } else {
                             eventManager.sendEvent(Event.DrawerShown)
-                            eventManager.sendEvent(Event.DrawerAttachmentState(true))
                         }
                     }
                 })
@@ -468,9 +467,7 @@ class DrawerDelegate private constructor(context: Context, displayId: String) :
         withContext(Dispatchers.Main) {
             logUtils.debugLog("Trying to show drawer", null)
             if (!drawer.isAttachedToWindow && viewModel.drawerAnimationState.value != AnimationState.ADDING) {
-                if (hideHandle) {
-                    eventManager.sendEvent(Event.DrawerAttachmentState(true))
-                }
+                eventManager.sendEvent(Event.DrawerAttachmentState(true))
                 viewModel.drawerAnimationState.value = AnimationState.ADDING
                 drawer.alpha = 0f
                 wm?.safeAddView(drawer, params)
