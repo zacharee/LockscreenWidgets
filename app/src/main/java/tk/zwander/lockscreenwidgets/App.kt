@@ -271,8 +271,6 @@ class App : Application(), CoroutineScope by MainScope(), EventObserver {
         widgetHostCompat.startListening(this)
 
         launch(Dispatchers.IO) {
-//            delay(1000L)
-//
             val widgetsToDelete = mutableSetOf<Int>()
             prefManager.widgetStackWidgets = HashMap(
                 prefManager.widgetStackWidgets.mapNotNull { (stackId, widgets) ->
