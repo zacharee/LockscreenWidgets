@@ -82,7 +82,7 @@ fun DrawerDelegate.DrawerViewModel.Drawer(
         widgetGrid.selectedItem = selectedItem
     }
 
-    LaunchedEffect(drawerSidePadding) {
+    LaunchedEffect(drawerSidePadding, cutoutPadding, layoutDirection, statusBarPadding) {
         val combinedPadding = cutoutPadding.add(
             WindowInsets(left = drawerSidePadding, right = drawerSidePadding),
         )
