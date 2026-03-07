@@ -17,6 +17,7 @@ import androidx.compose.ui.Modifier
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.setViewTreeLifecycleOwner
+import androidx.lifecycle.viewModelScope
 import androidx.recyclerview.widget.RecyclerView
 import androidx.savedstate.setViewTreeSavedStateRegistryOwner
 import com.joaomgcd.taskerpluginlibrary.extensions.requestQuery
@@ -382,14 +383,14 @@ class DrawerDelegate private constructor(context: Context, displayId: String) :
         handle.setViewTreeLifecycleOwner(this)
         handle.setViewTreeSavedStateRegistryOwner(this)
 
-        lifecycleScope.launch {
+        viewModel.viewModelScope.launch(Dispatchers.Main) {
             tryShowHandle()
         }
 
         gridLayoutManager.customHeight =
             resources.getDimensionPixelSize(R.dimen.drawer_row_height).toDouble()
 
-        lifecycleScope.launch(Dispatchers.Main) {
+        viewModel.viewModelScope.launch(Dispatchers.Main) {
             lsDisplayManager.displayPowerStates
                 .map { it.displayStates[display?.uniqueIdCompat] == true }
                 .collect { isScreenOn ->
@@ -427,7 +428,7 @@ class DrawerDelegate private constructor(context: Context, displayId: String) :
     }
 
     private suspend fun tryShowHandle() {
-        logUtils.debugLog("Trying to show handle", null)
+        logUtils.debugLog("Trying to show handle on display ${display?.uniqueIdCompat}", null)
         if (prefManager.drawerEnabled && prefManager.showDrawerHandle &&
             lsDisplayManager.displayPowerStates.value.displayStates[display?.uniqueIdCompat] == true) {
             if (prefManager.showDrawerHandleOnlyWhenLocked && !globalState.wasOnKeyguard.value) {

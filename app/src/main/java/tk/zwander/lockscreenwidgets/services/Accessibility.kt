@@ -13,6 +13,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import tk.zwander.common.util.AccessibilityUtils.runAccessibilityJob
 import tk.zwander.common.util.AccessibilityUtils.runWindowOperation
@@ -120,6 +121,10 @@ class Accessibility : AccessibilityService(), CoroutineScope by MainScope(), Eve
             notificationTimeout = prefManager.accessibilityEventDelay.toLong()
         }
 
+        launch(Dispatchers.Main) {
+            lsDisplayManager.handleDisplayUpdates(this@Accessibility)
+        }
+
         frameDelegate.onCreate()
         drawerDelegate.onCreate()
 
@@ -136,10 +141,6 @@ class Accessibility : AccessibilityService(), CoroutineScope by MainScope(), Eve
         eventManager.sendEvent(Event.RequestNotificationCount)
         eventManager.addObserver(this)
         logUtils.debugLog("Accessibility service connected.", null)
-
-        launch(Dispatchers.Main) {
-            lsDisplayManager.handleDisplayUpdates(this@Accessibility)
-        }
 
         launch(Dispatchers.Main) {
             runWindowOperation(
@@ -197,6 +198,7 @@ class Accessibility : AccessibilityService(), CoroutineScope by MainScope(), Eve
 
         sharedPreferencesChangeHandler.unregister(this)
         eventManager.removeObserver(this)
+        lsDisplayManager.displayAndWmCache.value = mapOf()
 
         // This is hacky and ideally it'd stay inside Accessibility,
         // but I can't find a way to suspend the destruction of the
@@ -214,6 +216,7 @@ class Accessibility : AccessibilityService(), CoroutineScope by MainScope(), Eve
             logUtils.debugLog("Accessibility destroy work completed", null)
         }
 
+        cancel()
         logUtils.debugLog("Accessibility service destroyed.", null)
     }
 
