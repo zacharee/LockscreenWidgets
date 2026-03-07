@@ -78,6 +78,7 @@ import tk.zwander.common.util.createWidgetErrorView
 import tk.zwander.common.util.eventManager
 import tk.zwander.common.util.getAllInstalledWidgetProviders
 import tk.zwander.common.util.logUtils
+import tk.zwander.common.util.mainHandler
 import tk.zwander.common.util.mitigations.SafeContextWrapper
 import tk.zwander.common.util.prefManager
 import tk.zwander.common.util.setThemedContent
@@ -703,11 +704,14 @@ abstract class BaseAdapter<VM : BaseDelegate.BaseViewModel<*, *>>(
     abstract inner class BaseVH(protected val binding: ComposeViewHolderBinding) :
         RecyclerView.ViewHolder(binding.root) {
         init {
-            binding.root.setViewTreeLifecycleOwner(viewModel.savedStateRegistryOwner)
-            binding.root.setViewTreeSavedStateRegistryOwner(viewModel.savedStateRegistryOwner)
+            mainHandler.post {
+                updateCompositionContext()
+            }
         }
 
         fun updateCompositionContext() {
+            binding.root.setViewTreeLifecycleOwner(viewModel.savedStateRegistryOwner)
+            binding.root.setViewTreeSavedStateRegistryOwner(viewModel.savedStateRegistryOwner)
             binding.root.setParentCompositionContext(
                 parent = viewModel.createLifecycleAwareWindowRecomposer(),
             )

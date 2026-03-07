@@ -1,6 +1,7 @@
 package tk.zwander.lockscreenwidgets.compose
 
 import android.annotation.SuppressLint
+import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewConfiguration
@@ -19,7 +20,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
@@ -27,16 +30,22 @@ import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.recyclerview.widget.RecyclerView
+import androidx.savedstate.SavedStateRegistry
+import androidx.savedstate.SavedStateRegistryOwner
+import androidx.savedstate.compose.LocalSavedStateRegistryOwner
 import tk.zwander.common.compose.util.rememberPreferenceState
 import tk.zwander.common.data.WidgetData
 import tk.zwander.common.host.widgetHostCompat
 import tk.zwander.common.util.BaseDelegate
+import tk.zwander.common.util.BaseDelegate.BaseState
 import tk.zwander.common.util.FrameSizeAndPosition
 import tk.zwander.common.util.HandlerRegistry
 import tk.zwander.common.util.ISnappyLayoutManager
 import tk.zwander.common.util.LSDisplay
+import tk.zwander.common.util.LifecycleEffect
 import tk.zwander.common.util.PrefManager
 import tk.zwander.common.util.prefManager
 import tk.zwander.common.util.themedContext
@@ -59,6 +68,7 @@ fun WidgetFramePreviewLayout(
         val context = LocalContext.current
         val view = LocalView.current
         val lifecycleOwner = LocalLifecycleOwner.current
+        val savedStateRegistryOwner = LocalSavedStateRegistryOwner.current
 
         val widgetGridView = remember {
             WidgetGridHolderBinding.inflate(
@@ -79,91 +89,8 @@ fun WidgetFramePreviewLayout(
             }
         }
 
-        val dummyDelegate = remember(frameId) {
-            object : BaseDelegate<BaseDelegate.BaseState>(
-                context.themedContext,
-                display.uniqueIdCompat
-            ) {
-                override val lifecycle: Lifecycle
-                    get() = lifecycleOwner.lifecycle
-                val widgetGridAdapter = WidgetFrameAdapter(
-                    context = context.themedContext,
-                    viewModel = viewModel,
-                )
-
-                override val viewModel
-                    get() = @SuppressLint("StaticFieldLeak")
-                    object : MainWidgetFrameDelegate.IWidgetFrameViewModel<BaseState, BaseDelegate<BaseState>>(this) {
-                        override val containerCornerRadiusKey: String =
-                            PrefManager.KEY_FRAME_CORNER_RADIUS
-                        override val widgetCornerRadiusKey: String =
-                            PrefManager.KEY_FRAME_WIDGET_CORNER_RADIUS
-                        override val ignoreWidgetTouchesKey: String? = null
-                        override val doubleTapTurnOffDisplayKey: String? = null
-
-                        override val frameId: Int
-                            get() = frameId
-                        override val saveMode: FrameSizeAndPosition.FrameType
-                            get() = FrameSizeAndPosition.FrameType.SecondaryLockscreen.Portrait(frameId)
-                    }
-                override var state: BaseState = BaseState()
-                override val prefsHandler: HandlerRegistry = HandlerRegistry {}
-                override val adapter = widgetGridAdapter
-                override val gridLayoutManager: LayoutManager = object : LayoutManager(
-                    context.themedContext,
-                    RecyclerView.HORIZONTAL,
-                    FramePrefs.getRowCountForFrame(context, frameId),
-                    FramePrefs.getColCountForFrame(context, frameId),
-                ), ISnappyLayoutManager {
-                    override fun canScrollHorizontally(): Boolean {
-                        return false
-                    }
-
-                    override fun getPositionForVelocity(
-                        velocityX: Int,
-                        velocityY: Int,
-                    ): Int {
-                        return 0
-                    }
-
-                    override fun getFixScrollPos(
-                        velocityX: Int,
-                        velocityY: Int,
-                    ): Int {
-                        return 0
-                    }
-
-                    override fun canSnap(): Boolean {
-                        return false
-                    }
-                }
-                override val params: WindowManager.LayoutParams = WindowManager.LayoutParams()
-                override val rootView: View = view
-                override val recyclerView: RecyclerView = widgetGridView
-                override var currentWidgets: List<WidgetData>
-                    get() = FramePrefs.getWidgetsForFrame(this, frameId).toList()
-                    set(value) {
-                        FramePrefs.setWidgetsForFrame(this, frameId, value)
-                    }
-
-                init {
-                    gridLayoutManager.spanSizeLookup = adapter.spanSizeLookup
-                }
-
-                override fun isLocked(): Boolean {
-                    return false
-                }
-
-                override fun retrieveCounts(): Pair<Int?, Int?> {
-                    return FramePrefs.getGridSizeForFrame(this, frameId)
-                }
-
-                override suspend fun updateWindow() {}
-
-                override fun onWidgetClick(trigger: Boolean): Boolean {
-                    return false
-                }
-            }
+        var dummyDelegate by remember(frameId) {
+            mutableStateOf<PreviewDelegate?>(null)
         }
 
         val framePrefs = remember(frameId) {
@@ -179,6 +106,18 @@ fun WidgetFramePreviewLayout(
             value = { Color(framePrefs.backgroundColor) },
         )
         val animatedBackgroundColor by animateColorAsState(backgroundColor)
+
+        LifecycleEffect(Lifecycle.State.RESUMED) {
+            dummyDelegate = PreviewDelegate(
+                themedContext = context.themedContext,
+                targetDisplayId = display.uniqueIdCompat,
+                lifecycleOwner = lifecycleOwner,
+                frameId = frameId,
+                view = view,
+                widgetGridView = widgetGridView,
+                savedStateRegistryOwner = savedStateRegistryOwner,
+            )
+        }
 
         DisposableEffect(frameId) {
             val listener = "$frameId-preview-layout"
@@ -209,9 +148,9 @@ fun WidgetFramePreviewLayout(
                 AndroidView(
                     factory = { widgetGridView },
                     update = {
-                        it.layoutManager = dummyDelegate.gridLayoutManager
-                        it.adapter = dummyDelegate.widgetGridAdapter
-                        dummyDelegate.widgetGridAdapter.updateWidgets(dummyDelegate.currentWidgets)
+                        it.layoutManager = dummyDelegate?.gridLayoutManager
+                        it.adapter = dummyDelegate?.widgetGridAdapter
+                        dummyDelegate?.widgetGridAdapter?.updateWidgets(dummyDelegate?.currentWidgets ?: listOf())
 
                         it.scaleX = scale
                         it.scaleY = scale
@@ -244,5 +183,105 @@ fun WidgetFramePreviewLayout(
                 )
             }
         }
+    }
+}
+
+class PreviewDelegate(
+    themedContext: Context,
+    targetDisplayId: String,
+    view: View,
+    widgetGridView: RecyclerView,
+    private val lifecycleOwner: LifecycleOwner,
+    private val savedStateRegistryOwner: SavedStateRegistryOwner,
+    private val frameId: Int,
+) : BaseDelegate<BaseState>(
+    context = themedContext,
+    targetDisplayId = targetDisplayId,
+) {
+    override val lifecycle: Lifecycle
+        get() = lifecycleOwner.lifecycle
+
+    override val savedStateRegistry: SavedStateRegistry
+        get() = savedStateRegistryOwner.savedStateRegistry
+
+    override val viewModel
+        get() = @SuppressLint("StaticFieldLeak")
+        object : MainWidgetFrameDelegate.IWidgetFrameViewModel<
+                BaseState,
+                BaseDelegate<BaseState>,
+                >(this) {
+            override val containerCornerRadiusKey: String =
+                PrefManager.KEY_FRAME_CORNER_RADIUS
+            override val widgetCornerRadiusKey: String =
+                PrefManager.KEY_FRAME_WIDGET_CORNER_RADIUS
+            override val ignoreWidgetTouchesKey: String? = null
+            override val doubleTapTurnOffDisplayKey: String? = null
+
+            override val frameId: Int
+                get() = this@PreviewDelegate.frameId
+            override val saveMode: FrameSizeAndPosition.FrameType
+                get() = FrameSizeAndPosition.FrameType.SecondaryLockscreen.Portrait(frameId)
+        }
+    val widgetGridAdapter = WidgetFrameAdapter(
+        context = themedContext,
+        viewModel = viewModel,
+    )
+
+    override var state: BaseState = BaseState()
+    override val prefsHandler: HandlerRegistry = HandlerRegistry {}
+    override val adapter = widgetGridAdapter
+    override val gridLayoutManager: LayoutManager = object : LayoutManager(
+        themedContext,
+        RecyclerView.HORIZONTAL,
+        FramePrefs.getRowCountForFrame(themedContext, frameId),
+        FramePrefs.getColCountForFrame(themedContext, frameId),
+    ), ISnappyLayoutManager {
+        override fun canScrollHorizontally(): Boolean {
+            return false
+        }
+
+        override fun getPositionForVelocity(
+            velocityX: Int,
+            velocityY: Int,
+        ): Int {
+            return 0
+        }
+
+        override fun getFixScrollPos(
+            velocityX: Int,
+            velocityY: Int,
+        ): Int {
+            return 0
+        }
+
+        override fun canSnap(): Boolean {
+            return false
+        }
+    }
+    override val params: WindowManager.LayoutParams = WindowManager.LayoutParams()
+    override val rootView: View = view
+    override val recyclerView: RecyclerView = widgetGridView
+    override var currentWidgets: List<WidgetData>
+    get() = FramePrefs.getWidgetsForFrame(this, frameId).toList()
+    set(value) {
+        FramePrefs.setWidgetsForFrame(this, frameId, value)
+    }
+
+    init {
+        gridLayoutManager.spanSizeLookup = adapter.spanSizeLookup
+    }
+
+    override fun isLocked(): Boolean {
+        return false
+    }
+
+    override fun retrieveCounts(): Pair<Int?, Int?> {
+        return FramePrefs.getGridSizeForFrame(this, frameId)
+    }
+
+    override suspend fun updateWindow() {}
+
+    override fun onWidgetClick(trigger: Boolean): Boolean {
+        return false
     }
 }
