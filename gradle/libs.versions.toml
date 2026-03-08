@@ -13,7 +13,7 @@ bugsnagGradlePlugin = "1.0.0"
 byteBuddyAndroid = "1.18.5"
 composeBom = "2026.02.01"
 compose-material-icons-core = "1.7.8"
-composeintroslider = "a611e4f624"
+composeintroslider = "1.0.0"
 constraintlayout = "2.2.1"
 coreKtx = "1.17.0"
 core-remoteviews = "1.1.0"
@@ -29,8 +29,7 @@ preferenceKtx = "1.2.1"
 recyclerview = "1.4.0"
 relinker = "1.4.5"
 reorderable = "3.0.0"
-seekbarpreference = "963c47439b"
-spannedgridlayoutmanager = "999c2fc9f8"
+spannedgridlayoutmanager = "1.0.0"
 storage = "2.2.0"
 taskerpluginlibrary = "0.4.10"
 
@@ -53,7 +52,7 @@ compose-foundation-layout = { module = "androidx.compose.foundation:foundation-l
 compose-material3 = { module = "androidx.compose.material3:material3" }
 compose-material-icons-core = { module = "androidx.compose.material:material-icons-core", version.ref = "compose-material-icons-core" }
 compose-ui-tooling = { module = "androidx.compose.ui:ui-tooling" }
-composeIntroSlider = { module = "com.github.zacharee:ComposeIntroSlider", version.ref = "composeintroslider" }
+composeIntroSlider = { module = "dev.zwander:composeintroslider", version.ref = "composeintroslider" }
 constraintlayout = { module = "androidx.constraintlayout:constraintlayout", version.ref = "constraintlayout" }
 core-ktx = { module = "androidx.core:core-ktx", version.ref = "coreKtx" }
 core-remoteviews = { module = "androidx.core:core-remoteviews", version.ref = "core-remoteviews" }
@@ -76,7 +75,7 @@ reorderable = { module = "sh.calvin.reorderable:reorderable", version.ref = "reo
 relinker = { module = "com.getkeepsafe.relinker:relinker", version.ref = "relinker" }
 shizuku-api = { module = "dev.rikka.shizuku:api", version.ref = "shizuku" }
 shizuku-provider = { module = "dev.rikka.shizuku:provider", version.ref = "shizuku" }
-spannedGridLayoutManager = { module = "com.github.zacharee:SpannedGridLayoutManager", version.ref = "spannedgridlayoutmanager" }
+spannedGridLayoutManager = { module = "dev.zwander:spannedgridlayoutmanager", version.ref = "spannedgridlayoutmanager" }
 storage = { module = "com.anggrayudi:storage", version.ref = "storage" }
 taskerpluginlibrary = { module = "com.joaomgcd:taskerpluginlibrary", version.ref = "taskerpluginlibrary" }
 
