@@ -407,7 +407,7 @@ fun MainWidgetFrameDelegate.WidgetFrameViewModel.WidgetFrameLayout(
                             },
                         )
                         .transformable(
-                            state = rememberTransformableState { zoomChange, panChange, _ ->
+                            state = rememberTransformableState { _, zoomChange, panChange, _ ->
                                 with(density) {
                                     maskAdjustment = Offset(
                                         maskAdjustment.x + panChange.x.toDp().value,
