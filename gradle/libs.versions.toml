@@ -74,7 +74,6 @@ preference-ktx = { module = "androidx.preference:preference-ktx", version.ref = 
 recyclerview = { module = "androidx.recyclerview:recyclerview", version.ref = "recyclerview" }
 reorderable = { module = "sh.calvin.reorderable:reorderable", version.ref = "reorderable" }
 relinker = { module = "com.getkeepsafe.relinker:relinker", version.ref = "relinker" }
-seekBarPreference = { module = "com.github.zacharee:SeekBarPreference", version.ref = "seekbarpreference" }
 shizuku-api = { module = "dev.rikka.shizuku:api", version.ref = "shizuku" }
 shizuku-provider = { module = "dev.rikka.shizuku:provider", version.ref = "shizuku" }
 spannedGridLayoutManager = { module = "com.github.zacharee:SpannedGridLayoutManager", version.ref = "spannedgridlayoutmanager" }

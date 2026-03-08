@@ -109,7 +109,6 @@ dependencies {
     implementation(libs.gson)
     implementation(libs.material)
     implementation(libs.byte.buddy.android)
-    implementation(libs.seekBarPreference)
     implementation(libs.patreonSupportersRetrieval)
     implementation(libs.spannedGridLayoutManager)
     implementation(libs.composeIntroSlider)
