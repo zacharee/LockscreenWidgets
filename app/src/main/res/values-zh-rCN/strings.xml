@@ -311,4 +311,8 @@
     <string name="button_icon_color">Button Icon Color</string>
     <string name="rounded_corners">圆角</string>
     <string name="tap_to_hide">点击可隐藏</string>
+    <string name="filters">Filters</string>
+    <string name="filter_widgets">Widgets</string>
+    <string name="filter_shortcuts">Shortcuts</string>
+    <string name="filter_launcher_icons">App Launchers</string>
 </resources>
