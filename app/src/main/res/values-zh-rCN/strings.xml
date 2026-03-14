@@ -37,9 +37,9 @@
     <string name="general">通用</string>
     <string name="configure_widget">设置小部件</string>
     <string name="reorder_widget">重新排序小部件</string>
-    <string name="refresh">Refresh</string>
-    <string name="next">Next</string>
-    <string name="previous">Previous</string>
+    <string name="refresh">刷新</string>
+    <string name="next">下一个</string>
+    <string name="previous">上一个</string>
     <string name="drawer_enabled">抽屉已启用</string>
     <string name="frame_enabled">抽屉已启用</string>
     <string name="add_id_hint">com.android.systemui:id/这里任何id</string>
@@ -302,12 +302,17 @@
     <string name="auto_cycle">自动循环</string>
     <string name="delay">延迟</string>
     <string name="unit_milliseconds">毫秒</string>
-    <string name="widget_padding">Widget Padding</string>
-    <string name="manage_widget_stacks">Manage Widget Stacks</string>
-    <string name="widget_stacks">Widget Stacks</string>
+    <string name="widget_padding">小部件间填充</string>
+    <string name="manage_widget_stacks">管理小部件应用</string>
+    <string name="widget_stacks">部件栈</string>
     <string name="widget_stack_monitor">小部件堆栈监视器</string>
     <string name="widget_stack_monitor_desc">用来保持小部件堆栈中最新的部件。</string>
-    <string name="show_button_backgrounds">Show Button Backgrounds</string>
-    <string name="rounded_corners">Rounded corners</string>
+    <string name="show_button_backgrounds">显示按钮背景</string>
+    <string name="button_icon_color">Button Icon Color</string>
+    <string name="rounded_corners">圆角</string>
     <string name="tap_to_hide">点击可隐藏</string>
+    <string name="filters">Filters</string>
+    <string name="filter_widgets">Widgets</string>
+    <string name="filter_shortcuts">Shortcuts</string>
+    <string name="filter_launcher_icons">App Launchers</string>
 </resources>
