@@ -72,7 +72,7 @@ fun AddWidgetScroller(
             .asPaddingValues(),
     ) {
         items(items = filteredItems, key = { it.appInfo.packageName }) { app ->
-            Column(modifier = Modifier.fillMaxWidth()) {
+            Column(modifier = Modifier.fillMaxWidth().animateItem()) {
                 AppHeader(
                     app = app,
                     modifier = Modifier
@@ -118,6 +118,7 @@ fun AddWidgetScroller(
                                 "${widget.itemInfo.getCellWidthCompat(fullSize.width, gridSize.width)}x" +
                                         "${widget.itemInfo.getCellHeightCompat(fullSize.height, gridSize.height)}",
                             badgeDrawable = widget.profileIcon,
+                            modifier = Modifier.animateItem(),
                         ) {
                             onSelected(widget)
                         }

@@ -21,6 +21,7 @@ import com.google.gson.GsonBuilder
 import com.joaomgcd.taskerpluginlibrary.extensions.requestQuery
 import tk.zwander.common.data.SafePointF
 import tk.zwander.common.data.WidgetData
+import tk.zwander.common.data.WidgetListFilters
 import tk.zwander.common.data.WidgetSizeData
 import tk.zwander.common.data.WidgetTileInfo
 import tk.zwander.common.data.window.WidgetStackStyle
@@ -148,6 +149,7 @@ class PrefManager private constructor(private val context: Context) {
         const val KEY_WIDGET_STACK_AUTO_CHANGE = "widget_stack_auto_change"
         const val KEY_WIDGET_STACK_WIDGET_PADDING = "widget_stack_widget_padding_individual"
         const val KEY_WIDGET_STACK_STYLE_OPTIONS = "widget_stack_style_options"
+        const val KEY_WIDGET_LIST_CURRENT_FILTERS = "widget_list_current_filters"
 
         const val VALUE_PAGE_INDICATOR_BEHAVIOR_HIDDEN = 0
         const val VALUE_PAGE_INDICATOR_BEHAVIOR_AUTO_HIDE = 1
@@ -854,6 +856,13 @@ class PrefManager private constructor(private val context: Context) {
         )
         set(value) {
             putString(KEY_WIDGET_STACK_STYLE_OPTIONS, gson.toJson(value))
+        }
+
+    var widgetListFilters: WidgetListFilters
+        get() = gson.safeFromJson(getString(KEY_WIDGET_LIST_CURRENT_FILTERS, ""))
+            ?: WidgetListFilters()
+        set(value) {
+            putString(KEY_WIDGET_LIST_CURRENT_FILTERS, gson.toJson(value))
         }
 
     @Suppress("DEPRECATION")

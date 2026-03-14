@@ -3,6 +3,7 @@ package tk.zwander.common.compose.settings
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -16,7 +17,9 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SheetState
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -32,13 +35,11 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import tk.zwander.common.compose.components.AnimatedBottomSheet
 import tk.zwander.common.compose.util.rememberPreferenceState
+import tk.zwander.common.data.ListPickerEntry
 import tk.zwander.common.util.prefManager
 import tk.zwander.lockscreenwidgets.R
 
-data class ListPreferenceEntry(
-    val label: String,
-    val value: String?,
-)
+typealias ListPreferenceEntry = ListPickerEntry.StringEntry
 
 class ListPreference(
     title: @Composable () -> String,
@@ -143,8 +144,28 @@ fun ListPreference(
         },
     )
 
+    ListPickerDialog(
+        showingDialog = showingDialog,
+        onDialogShowingChanged = { showingDialog = it },
+        entries = entries,
+        currentEntries = entries.filter { it.value == currentValue },
+        onEntrySelected = { onValueSelected(it.value) },
+        state = state,
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun <V, T : ListPickerEntry<V>> ListPickerDialog(
+    showingDialog: Boolean,
+    onDialogShowingChanged: (Boolean) -> Unit,
+    entries: List<T>,
+    currentEntries: List<T>,
+    onEntrySelected: (T) -> Unit,
+    state: SheetState = rememberModalBottomSheetState(),
+) {
     AnimatedBottomSheet(
-        onDismissRequest = { showingDialog = false },
+        onDismissRequest = { onDialogShowingChanged(false) },
         sheetState = state,
         isVisible = showingDialog,
     ) {
@@ -152,11 +173,11 @@ fun ListPreference(
             modifier = Modifier.fillMaxWidth(),
             contentPadding = PaddingValues(vertical = 8.dp),
         ) {
-            items(items = entries, key = { it.value ?: "NULL_VALUE" }) { entry ->
+            items(items = entries, key = { it.getKey() }) { entry ->
                 Row(
                     modifier = Modifier.fillMaxWidth()
                         .heightIn(min = 64.dp)
-                        .clickable { onValueSelected(entry.value) }
+                        .clickable { onEntrySelected(entry) }
                         .padding(horizontal = 16.dp),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
@@ -170,7 +191,7 @@ fun ListPreference(
                         contentAlignment = Alignment.Center,
                     ) {
                         androidx.compose.animation.AnimatedVisibility(
-                            visible = currentValue == entry.value,
+                            visible = currentEntries.contains(entry),
                             enter = fadeIn(),
                             exit = fadeOut(),
                         ) {
@@ -182,6 +203,20 @@ fun ListPreference(
                         }
                     }
                 }
+            }
+        }
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.End),
+        ) {
+            TextButton(
+                onClick = { onDialogShowingChanged(false) },
+            ) {
+                Text(
+                    text = stringResource(R.string.done)
+                )
             }
         }
     }

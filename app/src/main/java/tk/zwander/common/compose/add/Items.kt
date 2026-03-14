@@ -10,6 +10,7 @@ import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
@@ -18,6 +19,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import tk.zwander.common.compose.util.matchesFilter
 import tk.zwander.common.data.AppInfo
+import tk.zwander.common.data.WidgetListFilters
 import tk.zwander.common.iconpacks.iconPackManager
 import tk.zwander.common.util.BrokenAppsRegistry
 import tk.zwander.common.util.componentInfoCompat
@@ -38,6 +40,7 @@ import java.util.TreeSet
 @Composable
 internal fun items(
     filter: String?,
+    filters: WidgetListFilters,
     showShortcuts: Boolean,
     showWidgetStackWidget: Boolean,
 ): Pair<List<AppInfo>, List<AppInfo>> {
@@ -260,19 +263,20 @@ internal fun items(
         items.addAll(apps.values.sorted())
     }
 
-    val filteredItems by remember(filter) {
+    val updatedFilter by rememberUpdatedState(filter)
+    val updatedFilters by rememberUpdatedState(filters)
+
+    val filteredItems by remember {
         derivedStateOf {
             items.mapNotNull { app ->
-                if (app.matchesFilter(filter)) {
+                if (app.matchesFilter(updatedFilter, updatedFilters)) {
                     app.copy(
-                        widgets = TreeSet(app.widgets.filter { it.matchesFilter(filter) }),
-                        shortcuts = TreeSet(app.shortcuts.filter { it.matchesFilter(filter) }),
+                        widgets = TreeSet(app.widgets.filter { it.matchesFilter(updatedFilter, updatedFilters) }),
+                        shortcuts = TreeSet(app.shortcuts.filter { it.matchesFilter(updatedFilter, updatedFilters) }),
                         launcherShortcuts = TreeSet(app.launcherShortcuts.filter {
-                            it.matchesFilter(
-                                filter
-                            )
+                            it.matchesFilter(updatedFilter, updatedFilters)
                         }),
-                        launcherItems = TreeSet(app.launcherItems.filter { it.matchesFilter(filter) }),
+                        launcherItems = TreeSet(app.launcherItems.filter { it.matchesFilter(updatedFilter, updatedFilters) }),
                     )
                 } else {
                     null
