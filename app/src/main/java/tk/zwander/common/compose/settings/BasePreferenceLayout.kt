@@ -42,7 +42,7 @@ open class BasePreference<ValueType>(
     val icon: @Composable () -> Painter?,
     val defaultValue: @Composable () -> ValueType,
     val onClick: (() -> Unit)? = null,
-    val widget: (@Composable () -> Unit)? = null,
+    val widget: (@Composable (Modifier) -> Unit)? = null,
     val widgetPosition: @Composable () -> WidgetPosition = { WidgetPosition.END },
     val enabled: @Composable () -> Boolean = { true },
     val visible: @Composable () -> Boolean = { true },
@@ -69,7 +69,7 @@ fun BasePreferenceLayout(
     modifier: Modifier = Modifier,
     icon: Painter? = null,
     onClick: (() -> Unit)? = null,
-    widget: (@Composable () -> Unit)? = null,
+    widget: (@Composable (Modifier) -> Unit)? = null,
     widgetPosition: WidgetPosition = WidgetPosition.END,
     summaryMaxLines: Int = Int.MAX_VALUE,
     enabled: Boolean = true,
@@ -149,17 +149,17 @@ fun BasePreferenceLayout(
                     if (widgetPosition == WidgetPosition.BOTTOM_INLINE) {
                         Spacer(modifier = Modifier.size(8.dp))
 
-                        widget?.invoke()
+                        widget?.invoke(Modifier)
                     }
                 }
 
                 if (widgetPosition == WidgetPosition.END) {
-                    widget?.invoke()
+                    widget?.invoke(Modifier)
                 }
             }
 
             if (widgetPosition == WidgetPosition.BOTTOM) {
-                widget?.invoke()
+                widget?.invoke(Modifier)
             }
         }
     }

@@ -130,10 +130,11 @@ fun ListPreference(
         enabled = enabled,
         widgetPosition = WidgetPosition.BOTTOM_INLINE,
         widget = entries.find { it.value == currentValue }?.label?.let {
-            {
+            { modifier: Modifier ->
                 Text(
                     text = it,
                     style = MaterialTheme.typography.bodyMedium,
+                    modifier = modifier,
                 )
             }
         },

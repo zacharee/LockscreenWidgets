@@ -5,6 +5,7 @@ import android.appwidget.AppWidgetManager
 import android.appwidget.AppWidgetProvider
 import android.content.Context
 import android.content.Intent
+import android.content.res.ColorStateList
 import android.os.Build
 import android.os.Bundle
 import android.os.ServiceManager
@@ -13,6 +14,7 @@ import android.util.SparseArray
 import android.util.TypedValue
 import android.view.View
 import android.widget.RemoteViews
+import androidx.annotation.ColorInt
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.dp
 import androidx.core.app.PendingIntentCompat
@@ -20,6 +22,8 @@ import androidx.core.net.toUri
 import androidx.core.os.BundleCompat
 import androidx.core.util.forEach
 import androidx.core.util.plus
+import androidx.core.widget.RemoteViewsCompat.setImageViewColorFilter
+import androidx.core.widget.RemoteViewsCompat.setProgressBarIndeterminateTintList
 import androidx.core.widget.RemoteViewsCompat.setViewBackgroundResource
 import com.android.internal.appwidget.IAppWidgetService
 import tk.zwander.common.appwidget.RemoteViewsProxyService
@@ -194,6 +198,8 @@ class WidgetStackProvider : AppWidgetProvider() {
     ) {
         val options = appWidgetManager.getAppWidgetOptions(stackId)
         val applyPadding = context.prefManager.widgetStackWidgetPadding[stackId]?.get(innerWidgetId) ?: false
+        val style = context.prefManager.widgetStackStyle[stackId] ?: WidgetStackStyle()
+        val iconColor = style.getIconColor(context)
         val realSize = options?.let { options ->
             extractSizeFromOptions(options, applyPadding).also { size ->
                 options.putInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH, size.width.roundToInt())
@@ -210,9 +216,13 @@ class WidgetStackProvider : AppWidgetProvider() {
         )
 
         setBackgrounds(
-            context = context,
             root = root,
-            stackId = stackId,
+            style = style,
+        )
+
+        setColors(
+            root = root,
+            iconColor = iconColor,
         )
 
         fillInPageRow(
@@ -222,6 +232,7 @@ class WidgetStackProvider : AppWidgetProvider() {
             stackSize = stackSize,
             index = index,
             stackId = stackId,
+            iconColor = iconColor,
         )
 
         if (options?.matches(appWidgetManager.getAppWidgetOptions(innerWidgetId)) != true) {
@@ -283,12 +294,10 @@ class WidgetStackProvider : AppWidgetProvider() {
     }
     
     private fun setBackgrounds(
-        context: Context,
         root: RemoteViews,
-        stackId: Int,
+        style: WidgetStackStyle,
     ) {
-        val styles = context.prefManager.widgetStackStyle[stackId] ?: WidgetStackStyle()
-        val buttonBackground = if (styles.showButtonBackground) R.drawable.pill else R.drawable.pill_transparent
+        val buttonBackground = if (style.showButtonBackground) R.drawable.pill else R.drawable.pill_transparent
         root.setViewBackgroundResource(R.id.add_widget, buttonBackground)
         root.setViewBackgroundResource(R.id.start_controls_wrapper, buttonBackground)
         root.setViewBackgroundResource(R.id.end_controls_wrapper, buttonBackground)
@@ -297,13 +306,39 @@ class WidgetStackProvider : AppWidgetProvider() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             root.setViewBackgroundResource(
                 android.R.id.background,
-                if (styles.roundedCorners) {
+                if (style.roundedCorners) {
                     R.drawable.widget_stack_background
                 } else {
                     R.drawable.widget_stack_background_square
                 },
             )
         }
+    }
+
+    private fun setColors(
+        root: RemoteViews,
+        @ColorInt
+        iconColor: Int,
+    ) {
+        root.setImageViewColorFilter(
+            R.id.stack_configure_img,
+            iconColor,
+        )
+
+        root.setImageViewColorFilter(
+            R.id.stack_refresh_img,
+            iconColor,
+        )
+
+        root.setImageViewColorFilter(
+            R.id.stack_backward_img,
+            iconColor,
+        )
+
+        root.setImageViewColorFilter(
+            R.id.stack_forward_img,
+            iconColor,
+        )
     }
     
     private fun setClickListeners(
@@ -416,6 +451,8 @@ class WidgetStackProvider : AppWidgetProvider() {
         stackSize: Int,
         index: Int,
         stackId: Int,
+        @ColorInt
+        iconColor: Int,
     ) {
         val previousIndex = intent.getIntExtra(EXTRA_PREVIOUS_INDEX, -1)
 
@@ -447,6 +484,11 @@ class WidgetStackProvider : AppWidgetProvider() {
                         View.INVISIBLE
                     },
                 )
+                @Suppress("NewApi")
+                dot.setProgressBarIndeterminateTintList(
+                    R.id.page_dot_active,
+                    ColorStateList.valueOf(iconColor),
+                )
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                     dot.setViewLayoutWidth(R.id.page_dot_active, dotSizeDp ?: 12f, TypedValue.COMPLEX_UNIT_DIP)
                     dot.setViewLayoutHeight(R.id.page_dot_active, dotSizeDp ?: 12f, TypedValue.COMPLEX_UNIT_DIP)
@@ -458,6 +500,11 @@ class WidgetStackProvider : AppWidgetProvider() {
                     } else {
                         View.INVISIBLE
                     },
+                )
+                @Suppress("NewApi")
+                dot.setProgressBarIndeterminateTintList(
+                    R.id.page_dot_inactive,
+                    ColorStateList.valueOf(iconColor),
                 )
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                     dot.setViewLayoutWidth(R.id.page_dot_inactive, dotSizeDp ?: 12f, TypedValue.COMPLEX_UNIT_DIP)
@@ -478,6 +525,10 @@ class WidgetStackProvider : AppWidgetProvider() {
                     } else {
                         R.drawable.circle_0
                     },
+                )
+                dot.setImageViewColorFilter(
+                    R.id.page_dot_static,
+                    iconColor,
                 )
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                     dot.setViewLayoutWidth(R.id.page_dot_static, dotSizeDp ?: 12f, TypedValue.COMPLEX_UNIT_DIP)

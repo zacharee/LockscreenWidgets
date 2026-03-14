@@ -11,6 +11,7 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -84,7 +85,7 @@ class PreferenceCategoryScope(context: Context) : ContextWrapper(context) {
         icon: @Composable () -> Painter?,
         defaultValue: @Composable () -> T,
         onClick: (() -> Unit)? = null,
-        widget: (@Composable () -> Unit)? = null,
+        widget: (@Composable (Modifier) -> Unit)? = null,
         widgetPosition: @Composable () -> WidgetPosition = { WidgetPosition.END },
         enabled: @Composable () -> Boolean = { true },
         visible: @Composable () -> Boolean = { true },

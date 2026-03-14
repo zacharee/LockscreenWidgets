@@ -84,6 +84,7 @@ import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.shadow.Shadow
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
@@ -105,6 +106,8 @@ import tk.zwander.common.activities.BaseActivity
 import tk.zwander.common.compose.AppTheme
 import tk.zwander.common.compose.add.WidgetItem
 import tk.zwander.common.compose.components.CardSwitch
+import tk.zwander.common.compose.components.CardWithEndAccessory
+import tk.zwander.common.compose.settings.ColorPickerLayout
 import tk.zwander.common.compose.util.rememberPreferenceState
 import tk.zwander.common.compose.util.widgetViewCacheRegistry
 import tk.zwander.common.data.WidgetData
@@ -117,6 +120,7 @@ import tk.zwander.common.util.UserHandleCompat
 import tk.zwander.common.util.appWidgetManager
 import tk.zwander.common.util.eventManager
 import tk.zwander.common.util.getAllInstalledWidgetProviders
+import tk.zwander.common.util.getAttrColor
 import tk.zwander.common.util.loadPreviewOrIconDrawable
 import tk.zwander.common.util.logUtils
 import tk.zwander.common.util.prefManager
@@ -690,6 +694,37 @@ fun Content(
                                 title = stringResource(R.string.show_button_backgrounds),
                                 titleTextStyle = MaterialTheme.typography.titleMedium,
                             )
+                        }
+
+                        item {
+                            var showingPickerDialog by remember {
+                                mutableStateOf(false)
+                            }
+
+                            ColorPickerLayout(
+                                color = Color(localStyles.getIconColor(context)),
+                                onColorChanged = {
+                                    localStyles = localStyles.copy(
+                                        iconColor = it.toArgb(),
+                                    )
+                                },
+                                showingPickerDialog = showingPickerDialog,
+                                onShowingPickerDialogChanged = {
+                                    showingPickerDialog = it
+                                },
+                                initialColor = Color(context.getAttrColor(R.attr.colorOnPrimary)),
+                            ) { modifier, colorPreview ->
+                                CardWithEndAccessory(
+                                    onClick = {
+                                        showingPickerDialog = true
+                                    },
+                                    title = stringResource(R.string.button_icon_color),
+                                    titleTextStyle = MaterialTheme.typography.titleMedium,
+                                    modifier = modifier,
+                                ) {
+                                    colorPreview(it)
+                                }
+                            }
                         }
 
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {

@@ -13,11 +13,15 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -37,6 +41,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -107,6 +112,7 @@ fun ColorPickerPreference(
         modifier = modifier,
         icon = icon,
         enabled = enabled,
+        defaultValue = defaultValue,
     )
 }
 
@@ -117,6 +123,7 @@ fun ColorPickerPreference(
     summary: String?,
     color: Color,
     onColorChanged: (color: Color) -> Unit,
+    defaultValue: Color,
     modifier: Modifier = Modifier,
     icon: Painter? = null,
     enabled: Boolean = true,
@@ -125,6 +132,37 @@ fun ColorPickerPreference(
         mutableStateOf(false)
     }
 
+    ColorPickerLayout(
+        color = color,
+        showingPickerDialog = showingPickerDialog,
+        onShowingPickerDialogChanged = { showingPickerDialog = it },
+        onColorChanged = onColorChanged,
+        modifier = modifier,
+        initialColor = defaultValue,
+    ) { modifier, colorPreview ->
+        BasePreferenceLayout(
+            title = title,
+            summary = summary,
+            modifier = modifier,
+            icon = icon,
+            onClick = { showingPickerDialog = true },
+            widget = colorPreview,
+            enabled = enabled,
+        )
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun ColorPickerLayout(
+    color: Color,
+    showingPickerDialog: Boolean,
+    onShowingPickerDialogChanged: (Boolean) -> Unit,
+    onColorChanged: (color: Color) -> Unit,
+    modifier: Modifier = Modifier,
+    initialColor: Color = remember { color },
+    layout: @Composable (modifier: Modifier, colorPreview: @Composable (modifier: Modifier) -> Unit) -> Unit,
+) {
     val bottomSheetState = rememberModalBottomSheetState(
         skipPartiallyExpanded = true,
     )
@@ -172,32 +210,27 @@ fun ColorPickerPreference(
         }
     }
 
-    BasePreferenceLayout(
-        title = title,
-        summary = summary,
-        modifier = modifier,
-        icon = icon,
-        onClick = { showingPickerDialog = true },
-        widget = {
-            Box(
-                modifier = Modifier
-                    .size(48.dp)
-                    .background(
-                        color = color,
-                        shape = CircleShape,
-                    )
-                    .border(
-                        width = 2.dp,
-                        color = MaterialTheme.colorScheme.onSurface,
-                        shape = CircleShape,
-                    ),
-            )
-        },
-        enabled = enabled,
-    )
+    layout(
+        modifier,
+    ) {
+        Box(
+            modifier = Modifier
+                .size(48.dp)
+                .background(
+                    color = color,
+                    shape = CircleShape,
+                )
+                .border(
+                    width = 2.dp,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    shape = CircleShape,
+                )
+                .then(modifier),
+        )
+    }
 
     AnimatedBottomSheet(
-        onDismissRequest = { showingPickerDialog = false },
+        onDismissRequest = { onShowingPickerDialogChanged(false) },
         sheetState = bottomSheetState,
         isVisible = showingPickerDialog,
     ) {
@@ -241,12 +274,26 @@ fun ColorPickerPreference(
                 isError = !textFieldValid,
                 textStyle = LocalTextStyle.current.copy(textAlign = TextAlign.Center),
                 prefix = { Text(text = "#") },
+                modifier = Modifier.widthIn(min = 100.dp),
+                trailingIcon = {
+                    IconButton(
+                        onClick = {
+                            controller.selectByColor(initialColor, true)
+                        },
+                    ) {
+                        Icon(
+                            painter = painterResource(R.drawable.undo),
+                            contentDescription = stringResource(R.string.reset),
+                        )
+                    }
+                },
             )
 
             AlphaTile(
                 modifier = Modifier
                     .size(84.dp)
-                    .clip(RoundedCornerShape(8.dp)),
+                    .clip(RoundedCornerShape(8.dp))
+                    .border(1.dp, LocalContentColor.current, RoundedCornerShape(8.dp)),
                 controller = controller,
             )
 
@@ -256,14 +303,14 @@ fun ColorPickerPreference(
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 TextButton(
-                    onClick = { showingPickerDialog = false },
+                    onClick = { onShowingPickerDialogChanged(false) },
                 ) {
                     Text(text = stringResource(R.string.cancel))
                 }
 
                 TextButton(
                     onClick = {
-                        showingPickerDialog = false
+                        onShowingPickerDialogChanged(false)
                         onColorChanged(controller.selectedColor.value)
                     },
                     enabled = textFieldValid,

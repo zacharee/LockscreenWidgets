@@ -100,6 +100,7 @@
                     android:background="@drawable/stack_button_ripple_left">
 
                     <ImageView
+                        android:id="@+id/stack_configure_img"
                         android:layout_width="24dp"
                         android:layout_height="24dp"
                         android:layout_gravity="center"
@@ -123,6 +124,7 @@
                     android:background="@drawable/stack_button_ripple_right">
 
                     <ImageView
+                        android:id="@+id/stack_refresh_img"
                         android:layout_width="24dp"
                         android:layout_height="24dp"
                         android:layout_gravity="center"
@@ -167,6 +169,7 @@
                     android:background="@drawable/stack_button_ripple_left">
 
                     <ImageView
+                        android:id="@+id/stack_backward_img"
                         android:layout_width="24dp"
                         android:layout_height="24dp"
                         android:layout_gravity="center"
@@ -190,6 +193,7 @@
                     android:background="@drawable/stack_button_ripple_right">
 
                     <ImageView
+                        android:id="@+id/stack_forward_img"
                         android:layout_width="24dp"
                         android:layout_height="24dp"
                         android:layout_gravity="center"

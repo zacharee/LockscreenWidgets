@@ -6,13 +6,12 @@ import android.content.Intent
 import android.os.Build
 import android.os.IBinder
 import android.provider.Settings
-import android.util.TypedValue
-import androidx.annotation.ColorInt
 import androidx.core.app.NotificationChannelCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.app.PendingIntentCompat
 import androidx.core.graphics.drawable.IconCompat
+import tk.zwander.common.util.getAttrColor
 import tk.zwander.lockscreenwidgets.R
 
 
@@ -38,9 +37,7 @@ class WidgetStackMonitorService : Service() {
 
     @SuppressLint("InlinedApi")
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        val typedValue = TypedValue()
-        theme.resolveAttribute(android.R.attr.textColorPrimary, typedValue, true)
-        @ColorInt val color = typedValue.data
+        val color = getAttrColor(android.R.attr.textColorPrimary)
 
         startForeground(
             100,
