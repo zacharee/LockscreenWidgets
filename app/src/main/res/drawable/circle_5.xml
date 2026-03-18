@@ -5,6 +5,9 @@
         android:height="12dp"
         />
 
+    <solid android:color="@android:color/transparent"
+        />
+
     <stroke android:color="?attr/colorOnPrimary"
         android:width="6dp"
         />

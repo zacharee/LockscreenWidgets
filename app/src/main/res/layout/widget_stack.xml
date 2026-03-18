@@ -112,6 +112,7 @@
                 </FrameLayout>
 
                 <FrameLayout
+                    android:id="@+id/divider_left"
                     android:layout_width="1dp"
                     android:layout_height="match_parent"
                     android:background="?attr/colorOnPrimary"
@@ -181,6 +182,7 @@
                 </FrameLayout>
 
                 <FrameLayout
+                    android:id="@+id/divider_right"
                     android:layout_width="1dp"
                     android:layout_height="match_parent"
                     android:background="?attr/colorOnPrimary"

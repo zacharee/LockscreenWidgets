@@ -6,6 +6,7 @@ import android.appwidget.AppWidgetProvider
 import android.content.Context
 import android.content.Intent
 import android.content.res.ColorStateList
+import android.graphics.BlendMode
 import android.os.Build
 import android.os.Bundle
 import android.os.ServiceManager
@@ -23,7 +24,10 @@ import androidx.core.os.BundleCompat
 import androidx.core.util.forEach
 import androidx.core.util.plus
 import androidx.core.widget.RemoteViewsCompat.setImageViewColorFilter
+import androidx.core.widget.RemoteViewsCompat.setImageViewImageTintList
+import androidx.core.widget.RemoteViewsCompat.setProgressBarIndeterminateTintBlendMode
 import androidx.core.widget.RemoteViewsCompat.setProgressBarIndeterminateTintList
+import androidx.core.widget.RemoteViewsCompat.setViewBackgroundColor
 import androidx.core.widget.RemoteViewsCompat.setViewBackgroundResource
 import com.android.internal.appwidget.IAppWidgetService
 import tk.zwander.common.appwidget.RemoteViewsProxyService
@@ -34,6 +38,7 @@ import tk.zwander.common.util.eventManager
 import tk.zwander.common.util.getRemoteViewsToApplyCompat
 import tk.zwander.common.util.matches
 import tk.zwander.common.util.prefManager
+import tk.zwander.common.util.themedContext
 import tk.zwander.lockscreenwidgets.App
 import tk.zwander.lockscreenwidgets.BuildConfig
 import tk.zwander.lockscreenwidgets.R
@@ -199,7 +204,7 @@ class WidgetStackProvider : AppWidgetProvider() {
         val options = appWidgetManager.getAppWidgetOptions(stackId)
         val applyPadding = context.prefManager.widgetStackWidgetPadding[stackId]?.get(innerWidgetId) ?: false
         val style = context.prefManager.widgetStackStyle[stackId] ?: WidgetStackStyle()
-        val iconColor = style.getIconColor(context)
+        val iconColor = style.getIconColor(context.themedContext)
         val realSize = options?.let { options ->
             extractSizeFromOptions(options, applyPadding).also { size ->
                 options.putInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH, size.width.roundToInt())
@@ -325,6 +330,11 @@ class WidgetStackProvider : AppWidgetProvider() {
             iconColor,
         )
 
+        root.setViewBackgroundColor(
+            R.id.divider_left,
+            iconColor,
+        )
+
         root.setImageViewColorFilter(
             R.id.stack_refresh_img,
             iconColor,
@@ -332,6 +342,11 @@ class WidgetStackProvider : AppWidgetProvider() {
 
         root.setImageViewColorFilter(
             R.id.stack_backward_img,
+            iconColor,
+        )
+
+        root.setViewBackgroundColor(
+            R.id.divider_right,
             iconColor,
         )
 
@@ -490,6 +505,12 @@ class WidgetStackProvider : AppWidgetProvider() {
                     ColorStateList.valueOf(iconColor),
                 )
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                    dot.setProgressBarIndeterminateTintBlendMode(
+                        R.id.page_dot_active,
+                        BlendMode.SRC_ATOP,
+                    )
+                }
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                     dot.setViewLayoutWidth(R.id.page_dot_active, dotSizeDp ?: 12f, TypedValue.COMPLEX_UNIT_DIP)
                     dot.setViewLayoutHeight(R.id.page_dot_active, dotSizeDp ?: 12f, TypedValue.COMPLEX_UNIT_DIP)
                 }
@@ -506,6 +527,12 @@ class WidgetStackProvider : AppWidgetProvider() {
                     R.id.page_dot_inactive,
                     ColorStateList.valueOf(iconColor),
                 )
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                    dot.setProgressBarIndeterminateTintBlendMode(
+                        R.id.page_dot_inactive,
+                        BlendMode.SRC_ATOP,
+                    )
+                }
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                     dot.setViewLayoutWidth(R.id.page_dot_inactive, dotSizeDp ?: 12f, TypedValue.COMPLEX_UNIT_DIP)
                     dot.setViewLayoutHeight(R.id.page_dot_inactive, dotSizeDp ?: 12f, TypedValue.COMPLEX_UNIT_DIP)
@@ -530,6 +557,12 @@ class WidgetStackProvider : AppWidgetProvider() {
                     R.id.page_dot_static,
                     iconColor,
                 )
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                    dot.setImageViewImageTintList(
+                        R.id.page_dot_static,
+                        ColorStateList.valueOf(iconColor),
+                    )
+                }
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                     dot.setViewLayoutWidth(R.id.page_dot_static, dotSizeDp ?: 12f, TypedValue.COMPLEX_UNIT_DIP)
                     dot.setViewLayoutHeight(R.id.page_dot_static, dotSizeDp ?: 12f, TypedValue.COMPLEX_UNIT_DIP)
