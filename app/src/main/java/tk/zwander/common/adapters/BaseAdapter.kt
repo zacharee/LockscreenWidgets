@@ -616,6 +616,9 @@ abstract class BaseAdapter<VM : BaseDelegate.BaseViewModel<*, *>>(
                 invalidate()
 
                 val index = widgets.indexOfFirst { it.id == data.id }
+                if (index == -1) {
+                    return
+                }
                 widgets[index] = data
             }
         }
