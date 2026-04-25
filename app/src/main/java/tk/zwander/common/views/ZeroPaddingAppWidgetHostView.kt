@@ -9,6 +9,7 @@ import android.graphics.Canvas
 import android.os.Bundle
 import android.util.AttributeSet
 import android.view.View
+import android.widget.AdapterView
 import android.widget.RemoteViews
 import tk.zwander.common.host.widgetHostCompat
 import tk.zwander.common.util.RemoteViewsLayoutInflaterContext
@@ -73,6 +74,14 @@ class ZeroPaddingAppWidgetHostView(
         } catch (e: UnsupportedOperationException) {
             context.logUtils.debugLog("Error generating layout params for ${appWidgetInfo?.provider}", e)
             generateDefaultLayoutParams()
+        }
+    }
+
+    override fun getDefaultView(): View? {
+        return super.getDefaultView()?.also { view ->
+            if (view !is AdapterView<*>) {
+                view.setOnClickListener(::onDefaultViewClicked)
+            }
         }
     }
 
