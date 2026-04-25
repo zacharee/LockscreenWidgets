@@ -16,6 +16,7 @@ import com.google.gson.JsonSerializer
 import com.google.gson.JsonSyntaxException
 import com.google.gson.reflect.TypeToken
 import tk.zwander.common.data.SafePointF
+import java.lang.reflect.ParameterizedType
 import java.lang.reflect.Type
 
 class CrashFixExclusionStrategy : ExclusionStrategy {
@@ -39,7 +40,7 @@ class GsonUriHandler : JsonDeserializer<Uri?>, JsonSerializer<Uri?> {
     override fun deserialize(
         src: JsonElement?,
         srcType: Type,
-        context: JsonDeserializationContext?
+        context: JsonDeserializationContext?,
     ): Uri? {
         return src?.let {
             try {
@@ -86,11 +87,55 @@ class GsonSafePointFHandler : JsonSerializer<SafePointF?>, JsonDeserializer<Safe
     override fun deserialize(
         json: JsonElement?,
         typeOfT: Type?,
-        context: JsonDeserializationContext?
+        context: JsonDeserializationContext?,
     ): SafePointF? {
         val obj = json?.asJsonObject ?: return null
 
         return SafePointF(obj.get("x").asFloat, obj.get("y").asFloat)
+    }
+}
+
+class GsonPairHandler : JsonSerializer<Pair<*, *>?>, JsonDeserializer<Pair<*, *>?> {
+    override fun serialize(
+        src: Pair<*, *>?,
+        typeOfSrc: Type?,
+        context: JsonSerializationContext?,
+    ): JsonElement? {
+        return src?.toString()?.let { JsonPrimitive(it) }
+    }
+
+    override fun deserialize(
+        json: JsonElement?,
+        typeOfT: Type?,
+        context: JsonDeserializationContext,
+    ): Pair<*, *>? {
+        if (json?.isJsonPrimitive == true) {
+            val obj = json.asJsonPrimitive?.asString ?: return null
+            val realType = typeOfT as ParameterizedType
+            val aType = realType.actualTypeArguments[0]
+            val bType = realType.actualTypeArguments[1]
+            val stripped = obj.replace("(", "")
+                .replace(")", "")
+            val (a, b) = stripped.split(", ")
+
+            return Pair(
+                context.deserialize<Any>(JsonPrimitive(a), aType),
+                context.deserialize<Any>(JsonPrimitive(b), bType),
+            )
+        } else {
+            val obj = json?.asJsonObject ?: return null
+            val realType = typeOfT as ParameterizedType
+            val aType = realType.actualTypeArguments[0]
+            val bType = realType.actualTypeArguments[1]
+
+            val a = obj.get("first")
+            val b = obj.get("second")
+
+            return Pair(
+                context.deserialize<Any>(a, aType),
+                context.deserialize<Any>(b, bType),
+            )
+        }
     }
 }
 

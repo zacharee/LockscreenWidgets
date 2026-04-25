@@ -180,6 +180,7 @@ class PrefManager private constructor(private val context: Context) {
         .registerTypeAdapter(Uri::class.java, GsonUriHandler())
         .registerTypeAdapter(Intent::class.java, GsonIntentHandler())
         .registerTypeAdapter(SafePointF::class.java, GsonSafePointFHandler())
+        .registerTypeAdapter(Pair::class.java, GsonPairHandler())
         .create()
 
     //The widgets currently added to the widget frame

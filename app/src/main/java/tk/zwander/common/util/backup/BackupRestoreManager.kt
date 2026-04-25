@@ -31,7 +31,7 @@ class BackupRestoreManager private constructor(private val context: Context) {
 
     enum class Which {
         FRAME,
-        DRAWER
+        DRAWER;
     }
 
     fun createBackupString(which: Which): String {
@@ -76,54 +76,59 @@ class BackupRestoreManager private constructor(private val context: Context) {
         }
 
         return try {
-            val dataMap = context.prefManager.gson.mapFromJson<String, String?>(
+            val dataMap = context.prefManager.gson.mapFromJson<String, Any?>(
                 string,
             )
 
             handleDataMap(dataMap, which)
         } catch (e: Exception) {
-            context.logUtils.debugLog("No data map. Trying old restore.", e)
+            context.logUtils.normalLog("No data map. Trying old restore.", e)
+
+            if (!isValidWidgetsString(string)) {
+                return false
+            }
 
             handleWidgetString(string, which)
         }
     }
 
-    private fun handleDataMap(dataMap: HashMap<String, String?>, which: Which): Boolean {
+    private fun handleDataMap(dataMap: HashMap<String, Any?>, which: Which): Boolean {
         if (dataMap.isEmpty()) {
             context.logUtils.debugLog("Backup data empty.")
             return false
         }
 
-        val newWidgets = dataMap[PrefManager.KEY_CURRENT_WIDGETS]
-        val rows = dataMap[PrefManager.KEY_FRAME_ROW_COUNT]
-        val cols = dataMap[PrefManager.KEY_FRAME_COL_COUNT]
+        val gson = context.prefManager.gson
+        val newWidgets = dataMap[PrefManager.KEY_CURRENT_WIDGETS].toString()
+        val rows = dataMap[PrefManager.KEY_FRAME_ROW_COUNT]?.toString()?.toIntOrNull()
+        val cols = dataMap[PrefManager.KEY_FRAME_COL_COUNT]?.toString()?.toIntOrNull()
 
         if (which == Which.FRAME) {
             val secondaryFramesOld = dataMap["secondaryFrames"]?.let {
-                context.prefManager.gson.safeFromJson<ArrayList<Int>>(it)
+                context.prefManager.gson.safeFromJson<ArrayList<Int>>(it.toString())
             }
             val secondaryFramesNew = dataMap["secondaryFramesNew"]?.let {
-                context.prefManager.gson.mapFromJson<Int, Int>(it)
+                context.prefManager.gson.mapFromJson<Int, Int>(it.toString())
             }
             val secondaryFramesNewest = dataMap["secondaryFramesNewest"]?.let {
-                context.prefManager.gson.mapFromJson<Int, String>(it)
+                context.prefManager.gson.mapFromJson<Int, String>(it.toString())
             }
             val frameWidgetsMap = dataMap["frameWidgetsMap"]?.let {
-                context.prefManager.gson.mapFromJson<Int, LinkedHashSet<WidgetData>>(it)
+                context.prefManager.gson.mapFromJson<Int, LinkedHashSet<WidgetData>>(it.toString())
             }
             val frameWidgetsMapNew = dataMap["frameWidgetsMapNew"]?.let {
-                context.prefManager.gson.mapFromJson<Pair<Int, Int>, HashSet<WidgetData>>(it)
+                context.prefManager.gson.mapFromJson<Pair<Int, String>, HashSet<WidgetData>>(it.toString())
             }
             val frameGridsMap = dataMap["frameGridsMap"]?.let {
-                context.prefManager.gson.mapFromJson<Int, Pair<Int, Int>>(it)
+                context.prefManager.gson.mapFromJson<Int, Pair<Int, Int>>(it.toString())
             }
             val frameGridsMapNew = dataMap["frameGridsMapNew"]?.let {
-                context.prefManager.gson.mapFromJson<Pair<Int, Int>, Pair<Int, Int>>(it)
+                context.prefManager.gson.mapFromJson<Pair<Int, String>, Pair<Int, Int>>(it.toString())
             }
 
-            secondaryFramesOld?.let {
+            secondaryFramesOld?.let { frameId ->
                 context.prefManager.currentSecondaryFramesWithStringDisplay = HashMap(
-                    it.associateWith {
+                    frameId.associateWith {
                         "${Display.DEFAULT_DISPLAY}"
                     },
                 )
@@ -166,13 +171,13 @@ class BackupRestoreManager private constructor(private val context: Context) {
 
         return handleWidgetString(newWidgets, which).also {
             if (it) {
-                rows?.toIntOrNull()?.let { rows ->
+                rows?.let { rows ->
                     when (which) {
                         Which.FRAME -> context.prefManager.frameRowCount = rows
                         Which.DRAWER -> {}
                     }
                 }
-                cols?.toIntOrNull()?.let { cols ->
+                cols?.let { cols ->
                     when (which) {
                         Which.FRAME -> context.prefManager.frameColCount = cols
                         Which.DRAWER -> context.prefManager.drawerColCount = cols
@@ -185,11 +190,6 @@ class BackupRestoreManager private constructor(private val context: Context) {
     private fun handleWidgetString(newWidgets: String?, which: Which): Boolean {
         if (newWidgets.isNullOrBlank()) {
             context.logUtils.debugLog("Widget string is null.")
-            return false
-        }
-
-        if (!isValidWidgetsString(newWidgets)) {
-            context.logUtils.debugLog("Invalid widget string.")
             return false
         }
 
