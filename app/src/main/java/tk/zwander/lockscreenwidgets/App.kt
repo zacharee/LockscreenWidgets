@@ -204,6 +204,15 @@ class App : Application(), CoroutineScope by MainScope(), EventObserver {
                             } catch (_: OutOfMemoryError) {
                                 "Too large to parse."
                             },
+                            "stacks" to try {
+                                prefManager.gson.toJson(
+                                    prefManager.widgetStackWidgets.map { (id, widgets) ->
+                                        id to widgets.map { widget -> widget.copy(icon = null, iconRes = null) }
+                                    },
+                                )
+                            } catch (_: OutOfMemoryError) {
+                                "Too large to parse."
+                            },
                         ).apply {
                             prefManager.currentSecondaryFramesWithStringDisplay.forEach { (frameId, frameDisplay) ->
                                 put(
