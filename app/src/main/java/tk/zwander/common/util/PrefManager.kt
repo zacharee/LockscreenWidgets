@@ -766,6 +766,7 @@ class PrefManager private constructor(private val context: Context) {
         }
 
     @Deprecated("Doesn't support displays", ReplaceWith("PrefManager.currentSecondaryFramesWithDisplay"))
+    @Suppress("DEPRECATION")
     var currentSecondaryFrames: List<Int>
         get() = getStringSet(KEY_CURRENT_FRAMES, setOf()).map { it.toInt() }
         set(value) {
@@ -773,6 +774,7 @@ class PrefManager private constructor(private val context: Context) {
         }
 
     @Deprecated("Doesn't support unique display IDs", ReplaceWith("PrefManager.currentSecondaryFramesWithStringDisplay"))
+    @Suppress("DEPRECATION")
     var currentSecondaryFramesWithDisplay: HashMap<Int, Int>
         get() = gson.mapFromJson(
             getString(KEY_CURRENT_FRAMES_WITH_DISPLAY, ""),
