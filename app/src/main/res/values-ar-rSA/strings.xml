@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <string name="version_template">رقم_الإصدار</string>
+    <string name="version_template">v%s</string>
     <string name="edit_gesture_hint">اضغط على التطبيق المصغر بإصبعين للتحريك وضبط الحجم.</string>
     <string name="edit_gesture_hint_2">حسناً! اضغط بإصبعين لإخفاء عناصر الواجهة.</string>
     <string name="hide_gesture_hint">اضغط على اطار التطبيق المصغر بثلاث اصابع لإخفائة مؤقتاً. سيبقى مخفياً حتى تطفئ وتشغل الشاشة مجددا.</string>
