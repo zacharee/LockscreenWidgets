@@ -77,24 +77,28 @@ class ZeroPaddingAppWidgetHostView(
     }
 
     override fun onDefaultViewClicked(view: View) {
-        context.appWidgetManager.noteAppWidgetTapped(appWidgetId)
+        try {
+            context.appWidgetManager.noteAppWidgetTapped(appWidgetId)
 
-        appWidgetInfo?.let { info ->
-            context.packageManager.getLaunchIntentForPackage(info.provider.packageName)
-                ?.let { mainIntent ->
-                    if (onDefaultClick(
-                            PendingIntent.getActivity(context, 0, mainIntent, PendingIntent.FLAG_IMMUTABLE),
-                    )) {
-                        context.startActivity(mainIntent)
+            appWidgetInfo?.let { info ->
+                context.packageManager.getLaunchIntentForPackage(info.provider.packageName)
+                    ?.let { mainIntent ->
+                        if (onDefaultClick(
+                                PendingIntent.getActivity(context, 0, mainIntent, PendingIntent.FLAG_IMMUTABLE),
+                            )) {
+                            context.startActivity(mainIntent)
+                        }
                     }
-                }
+            }
+        } catch (e: SecurityException) {
+            context.logUtils.normalLog("Error launching default view click for ${appWidgetInfo?.provider}", e)
         }
     }
 
     override fun updateAppWidget(remoteViews: RemoteViews?) {
         super.updateAppWidget(remoteViews)
 
-        context.logUtils.debugLog("Updating widget $appWidgetId, $remoteViews", null)
+        context.logUtils.debugLog("Updating widget $appWidgetId, ${appWidgetInfo?.provider}, $remoteViews", null)
 
         val oldViews = context.widgetHostCompat.cachedRemoteViews[appWidgetId]
 

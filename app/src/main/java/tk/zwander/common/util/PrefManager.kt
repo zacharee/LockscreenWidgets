@@ -821,9 +821,14 @@ class PrefManager private constructor(private val context: Context) {
         }
 
     var widgetStackWidgets: HashMap<Int, LinkedHashSet<WidgetData>>
-        get() = gson.mapFromJson(
-            getString(KEY_WIDGET_STACK_WIDGETS, ""),
-        )
+        get() = try {
+            gson.mapFromJson(
+                getString(KEY_WIDGET_STACK_WIDGETS, ""),
+            )
+        } catch (e: NullPointerException) {
+            context.logUtils.normalLog("Error getting widget stack widgets", e)
+            hashMapOf()
+        }
         set(value) {
             putString(KEY_WIDGET_STACK_WIDGETS, gson.toJson(value))
         }
