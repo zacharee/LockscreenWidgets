@@ -29,7 +29,7 @@ preferenceKtx = "1.2.1"
 recyclerview = "1.4.0"
 relinker = "1.4.5"
 reorderable = "3.1.0"
-spannedgridlayoutmanager = "1.0.0"
+spannedgridlayoutmanager = "1.0.2"
 storage = "2.2.0"
 taskerpluginlibrary = "0.4.10"
 

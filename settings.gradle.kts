@@ -12,11 +12,10 @@ dependencyResolutionManagement {
     repositories {
         google()
         mavenCentral()
+        mavenLocal()
         maven("https://jitpack.io")
     }
 }
 
-include(":app"/*, ":spannedlm"*/)
+include(":app")
 rootProject.name = "Lockscreen Widgets"
-
-//project(":spannedlm").projectDir = new File("../SpannedGridLayoutManager/spannedgridlayoutmanager")

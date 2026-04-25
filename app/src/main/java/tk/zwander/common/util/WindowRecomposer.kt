@@ -67,29 +67,29 @@ fun View.createLifecycleAwareWindowRecomposerWithoutDetachCancel(
             "ViewTreeLifecycleOwner not found from $this"
         }
 
+    val attachStateListener = object : View.OnAttachStateChangeListener {
+        override fun onViewAttachedToWindow(v: View) {
+            // The clock starts life as paused so resume it when starting. If it is
+            // already running (this ON_START is after an ON_STOP) then the resume is
+            // ignored.
+            pausableClock?.resume()
+
+            // Resumes the frame clock dispatching If this is an ON_START after an
+            // ON_STOP that paused it. If the recomposer is not paused  calling
+            // `resumeFrameClock()` is ignored.
+            recomposer.resumeCompositionFrameClock()
+        }
+
+        override fun onViewDetachedFromWindow(v: View) {
+            recomposer.pauseCompositionFrameClock()
+        }
+    }
+
     // Removing the view holding the ViewTreeRecomposer means we may never be reattached again.
     // Since this factory function is used to create a new recomposer for each invocation and
     // doesn't reuse a single instance like other factories might, shut it down whenever it
     // becomes detached. This can easily happen as part of setting a new content view.
-    addOnAttachStateChangeListener(
-        object : View.OnAttachStateChangeListener {
-            override fun onViewAttachedToWindow(v: View) {
-                // The clock starts life as paused so resume it when starting. If it is
-                // already running (this ON_START is after an ON_STOP) then the resume is
-                // ignored.
-                pausableClock?.resume()
-
-                // Resumes the frame clock dispatching If this is an ON_START after an
-                // ON_STOP that paused it. If the recomposer is not paused  calling
-                // `resumeFrameClock()` is ignored.
-                recomposer.resumeCompositionFrameClock()
-            }
-
-            override fun onViewDetachedFromWindow(v: View) {
-                recomposer.pauseCompositionFrameClock()
-            }
-        }
-    )
+    addOnAttachStateChangeListener(attachStateListener)
     viewTreeLifecycle.addObserver(
         object : LifecycleEventObserver {
             override fun onStateChanged(source: LifecycleOwner, event: Lifecycle.Event) {
@@ -140,6 +140,7 @@ fun View.createLifecycleAwareWindowRecomposerWithoutDetachCancel(
                     }
                     Lifecycle.Event.ON_DESTROY -> {
                         recomposer.cancel()
+                        removeOnAttachStateChangeListener(attachStateListener)
                     }
                     Lifecycle.Event.ON_PAUSE -> {
                         // Nothing

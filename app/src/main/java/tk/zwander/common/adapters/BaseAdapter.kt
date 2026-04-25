@@ -42,6 +42,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.layout.layoutId
 import androidx.compose.ui.platform.LocalResources
+import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -713,6 +714,9 @@ abstract class BaseAdapter<VM : BaseDelegate.BaseViewModel<*, *>>(
         }
 
         fun updateCompositionContext() {
+            binding.root.setViewCompositionStrategy(
+                ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed,
+            )
             binding.root.setViewTreeLifecycleOwner(viewModel.savedStateRegistryOwner)
             binding.root.setViewTreeSavedStateRegistryOwner(viewModel.savedStateRegistryOwner)
             binding.root.setParentCompositionContext(

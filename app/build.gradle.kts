@@ -112,7 +112,6 @@ dependencies {
     implementation(libs.patreonSupportersRetrieval)
     implementation(libs.spannedGridLayoutManager)
     implementation(libs.composeIntroSlider)
-//    implementation(project(":spannedlm"))
 
     implementation(platform(libs.compose.bom))
     implementation(libs.activity.compose)
