@@ -26,7 +26,6 @@ import androidx.core.util.plus
 import androidx.core.widget.RemoteViewsCompat.setImageViewColorFilter
 import androidx.core.widget.RemoteViewsCompat.setImageViewImageTintList
 import androidx.core.widget.RemoteViewsCompat.setProgressBarIndeterminateTintBlendMode
-import androidx.core.widget.RemoteViewsCompat.setProgressBarIndeterminateTintList
 import androidx.core.widget.RemoteViewsCompat.setViewBackgroundColor
 import androidx.core.widget.RemoteViewsCompat.setViewBackgroundResource
 import com.android.internal.appwidget.IAppWidgetService
@@ -38,6 +37,7 @@ import tk.zwander.common.util.eventManager
 import tk.zwander.common.util.getRemoteViewsToApplyCompat
 import tk.zwander.common.util.matches
 import tk.zwander.common.util.prefManager
+import tk.zwander.common.util.setProgressIndeterminateTintListCompat
 import tk.zwander.common.util.themedContext
 import tk.zwander.lockscreenwidgets.App
 import tk.zwander.lockscreenwidgets.BuildConfig
@@ -499,18 +499,18 @@ class WidgetStackProvider : AppWidgetProvider() {
                         View.INVISIBLE
                     },
                 )
-                @Suppress("NewApi")
-                dot.setProgressBarIndeterminateTintList(
+
+                dot.setProgressIndeterminateTintListCompat(
                     R.id.page_dot_active,
                     ColorStateList.valueOf(iconColor),
                 )
+
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                     dot.setProgressBarIndeterminateTintBlendMode(
                         R.id.page_dot_active,
                         BlendMode.SRC_ATOP,
                     )
-                }
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+
                     dot.setViewLayoutWidth(R.id.page_dot_active, dotSizeDp ?: 12f, TypedValue.COMPLEX_UNIT_DIP)
                     dot.setViewLayoutHeight(R.id.page_dot_active, dotSizeDp ?: 12f, TypedValue.COMPLEX_UNIT_DIP)
                 }
@@ -522,8 +522,7 @@ class WidgetStackProvider : AppWidgetProvider() {
                         View.INVISIBLE
                     },
                 )
-                @Suppress("NewApi")
-                dot.setProgressBarIndeterminateTintList(
+                dot.setProgressIndeterminateTintListCompat(
                     R.id.page_dot_inactive,
                     ColorStateList.valueOf(iconColor),
                 )
