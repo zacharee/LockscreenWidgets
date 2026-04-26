@@ -93,10 +93,10 @@ kotlin {
 dependencies {
     implementation(fileTree("libs") { include("*.jar") })
     implementation(libs.kotlin.stdlib)
+    implementation(libs.kotlin.reflect)
     implementation(libs.kotlinx.coroutines.core)
     implementation(libs.kotlinx.coroutines.android)
     implementation(libs.atomicfu)
-    implementation(kotlin("reflect"))
 
     implementation(libs.core.ktx)
     implementation(libs.core.remoteviews)
