@@ -6,6 +6,7 @@ import android.appwidget.AppWidgetHostView
 import android.appwidget.AppWidgetProviderInfo
 import android.content.Context
 import android.graphics.Canvas
+import android.os.Build
 import android.os.Bundle
 import android.util.AttributeSet
 import android.view.View
@@ -87,7 +88,9 @@ class ZeroPaddingAppWidgetHostView(
 
     override fun onDefaultViewClicked(view: View) {
         try {
-            context.appWidgetManager.noteAppWidgetTapped(appWidgetId)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                context.appWidgetManager.noteAppWidgetTapped(appWidgetId)
+            }
 
             appWidgetInfo?.let { info ->
                 context.packageManager.getLaunchIntentForPackage(info.provider.packageName)
