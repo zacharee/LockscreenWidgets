@@ -125,7 +125,7 @@ open class NestedRecyclerView @JvmOverloads constructor(
         dxConsumed: Int,
         dyConsumed: Int,
         dxUnconsumed: Int,
-        dyUnconsumed: Int
+        dyUnconsumed: Int,
     ) {
         if (target === nestedScrollTarget && dyUnconsumed != 0) {
             // The descendant could not fully consume the scroll. We remember that in order
@@ -143,7 +143,7 @@ open class NestedRecyclerView @JvmOverloads constructor(
         dyConsumed: Int,
         dxUnconsumed: Int,
         dyUnconsumed: Int,
-        type: Int
+        type: Int,
     ) {
         onNestedScroll(target, dxConsumed, dyConsumed, dxUnconsumed, dyUnconsumed)
     }
@@ -156,7 +156,7 @@ open class NestedRecyclerView @JvmOverloads constructor(
         dxUnconsumed: Int,
         dyUnconsumed: Int,
         type: Int,
-        consumed: IntArray
+        consumed: IntArray,
     ) {
         onNestedScroll(target, dxConsumed, dyConsumed, dxUnconsumed, dyUnconsumed, type)
     }
@@ -190,7 +190,7 @@ open class NestedRecyclerView @JvmOverloads constructor(
         target: View,
         velocityX: Float,
         velocityY: Float,
-        consumed: Boolean
+        consumed: Boolean,
     ) = super.onNestedFling(target, velocityX, velocityY, consumed).also {
         // If the nested fling wasn't consumed, then the touch helper can act.
         // Otherwise, disable it.
@@ -227,7 +227,7 @@ open class NestedRecyclerView @JvmOverloads constructor(
                         view: AbsListView?,
                         firstVisibleItem: Int,
                         visibleItemCount: Int,
-                        totalItemCount: Int
+                        totalItemCount: Int,
                     ) {}
                 })
                 view.setOnTouchListener { _, event ->
