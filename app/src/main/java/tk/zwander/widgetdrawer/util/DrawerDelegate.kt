@@ -64,6 +64,8 @@ import kotlin.math.sign
 class DrawerDelegate private constructor(context: Context, displayId: String) :
     BaseDelegate<DrawerDelegate.State>(context, displayId) {
     companion object {
+        const val ID = -2
+
         @SuppressLint("StaticFieldLeak")
         private val instance = MutableStateFlow<DrawerDelegate?>(null)
 
@@ -212,7 +214,7 @@ class DrawerDelegate private constructor(context: Context, displayId: String) :
             updateCounts()
         }
         handler(PrefManager.KEY_LOCK_WIDGET_DRAWER) {
-            viewModel.currentEditingInterfacePosition.value = -1
+            viewModel.currentEditingInterfacePosition.value = RecyclerView.NO_POSITION
         }
         handler(PrefManager.KEY_SHOW_DRAWER_HANDLE_ONLY_WHEN_LOCKED) {
             if (!prefManager.showDrawerHandleOnlyWhenLocked) {
@@ -366,7 +368,7 @@ class DrawerDelegate private constructor(context: Context, displayId: String) :
                 eventManager.sendEvent(Event.CloseDrawer)
             } else {
                 if (prefManager.requestUnlockDrawer) {
-                    globalState.handlingClick[-2] = Unit
+                    globalState.handlingClick[ID] = Unit
                 }
             }
 
@@ -415,7 +417,7 @@ class DrawerDelegate private constructor(context: Context, displayId: String) :
     override fun onItemSelected(selected: Boolean, highlighted: Boolean) {
         super.onItemSelected(selected, highlighted)
         viewModel.selectedItem.value = selected
-        globalState.handlingClick.remove(-2)
+        globalState.handlingClick.remove(ID)
     }
 
     override fun isLocked(): Boolean {
@@ -500,8 +502,8 @@ class DrawerDelegate private constructor(context: Context, displayId: String) :
             logUtils.debugLog("Trying to hide drawer, $callListener", null)
             if (drawer.isAttachedToWindow && viewModel.drawerAnimationState.value != AnimationState.REMOVING) {
                 viewModel.drawerAnimationState.value = AnimationState.REMOVING
-                globalState.handlingClick.remove(-2)
-                viewModel.currentEditingInterfacePosition.value = -1
+                globalState.handlingClick.remove(ID)
+                viewModel.currentEditingInterfacePosition.value = RecyclerView.NO_POSITION
 
                 drawer.fadeOut(DrawerOrFrame.DRAWER)
                 wm?.safeRemoveView(drawer)
@@ -522,7 +524,8 @@ class DrawerDelegate private constructor(context: Context, displayId: String) :
         prefManager.drawerColCount,
     ) {
         override fun canScrollVertically(): Boolean {
-            return (viewModel.currentEditingInterfacePosition.value == -1 || commonState.isHoldingItem) && super.canScrollVertically()
+            return (viewModel.currentEditingInterfacePosition.value == RecyclerView.NO_POSITION ||
+                    commonState.isHoldingItem) && super.canScrollVertically()
         }
     }
 

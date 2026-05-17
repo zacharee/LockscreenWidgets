@@ -46,6 +46,7 @@ import tk.zwander.lockscreenwidgets.compose.SelectDisplayDialog
 import tk.zwander.lockscreenwidgets.services.isNotificationListenerActive
 import tk.zwander.lockscreenwidgets.util.FramePrefs
 import tk.zwander.lockscreenwidgets.util.FrameSpecificPreferences
+import tk.zwander.lockscreenwidgets.util.MainWidgetFrameDelegate
 
 class ComposeFrameSettingsActivity : BaseActivity() {
     private val Context.shouldShowBlurOptions: Boolean
@@ -79,7 +80,7 @@ class ComposeFrameSettingsActivity : BaseActivity() {
             }
 
             var selectedFrame by remember {
-                mutableIntStateOf(-1)
+                mutableIntStateOf(MainWidgetFrameDelegate.ID)
             }
 
             var isSelectingFrame by remember {
@@ -757,7 +758,7 @@ class ComposeFrameSettingsActivity : BaseActivity() {
                         pendingMovedFrameId = null
                     },
                     onDisplaySelected = {
-                        if (pendingMoved == -1) {
+                        if (pendingMoved == MainWidgetFrameDelegate.ID) {
                             prefManager.primaryFrameDisplay = it
                         } else {
                             prefManager.currentSecondaryFramesWithStringDisplay =
@@ -789,7 +790,7 @@ class ComposeFrameSettingsActivity : BaseActivity() {
                                     prefManager.currentSecondaryFramesWithStringDisplay.apply {
                                         this.remove(pending)
                                         if (selectedFrame == pending) {
-                                            selectedFrame = -1
+                                            selectedFrame = MainWidgetFrameDelegate.ID
                                         }
                                     }
                                 pendingFrameToRemove = null

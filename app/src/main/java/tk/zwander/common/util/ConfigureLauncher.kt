@@ -14,6 +14,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity.RESULT_OK
 import androidx.core.app.ActivityOptionsCompat
 import com.android.internal.appwidget.IAppWidgetService
+import tk.zwander.common.host.WidgetHostCompat
 import tk.zwander.common.host.widgetHostCompat
 
 class ConfigureLauncher(
@@ -119,12 +120,14 @@ class ConfigureLauncher(
 
     fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         if (requestCode == CONFIGURE_REQ) {
-            val id = data?.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, currentConfigId ?: -1)
-                ?: currentConfigId
+            val id = data?.getIntExtra(
+                AppWidgetManager.EXTRA_APPWIDGET_ID,
+                currentConfigId ?: WidgetHostCompat.INVALID_WIDGET_ID,
+            ) ?: currentConfigId
 
             activity.logUtils.debugLog("Configure complete for id $id $currentConfigId", null)
 
-            if (id != null && id != -1) {
+            if (id != null && id != WidgetHostCompat.INVALID_WIDGET_ID) {
                 val widgetInfo: AppWidgetProviderInfo? = activity.appWidgetManager.getAppWidgetInfo(id)
                 var resultOk = resultCode == RESULT_OK
 

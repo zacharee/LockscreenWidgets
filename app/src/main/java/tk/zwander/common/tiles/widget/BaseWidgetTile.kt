@@ -20,6 +20,7 @@ import androidx.compose.ui.unit.dp
 import androidx.core.content.res.ResourcesCompat
 import com.android.internal.appwidget.IAppWidgetService
 import tk.zwander.common.activities.add.AddTileWidgetActivity
+import tk.zwander.common.host.WidgetHostCompat
 import tk.zwander.common.host.widgetHostCompat
 import tk.zwander.common.util.PrefManager
 import tk.zwander.common.util.appWidgetManager
@@ -55,13 +56,13 @@ abstract class BaseWidgetTile : TileService(), SharedPreferences.OnSharedPrefere
     protected abstract val tileId: Int
     protected val widgetId: Int
         get() {
-            val data = prefManager.customTiles[tileId] ?: return -1
+            val data = prefManager.customTiles[tileId] ?: return WidgetHostCompat.INVALID_WIDGET_ID
             return data.widgetId
         }
     protected val widgetInfo: AppWidgetProviderInfo?
         get() {
             val widgetId = widgetId
-            if (widgetId == -1) return null
+            if (widgetId == WidgetHostCompat.INVALID_WIDGET_ID) return null
 
             return appWidgetManager.getAppWidgetInfo(widgetId)
         }

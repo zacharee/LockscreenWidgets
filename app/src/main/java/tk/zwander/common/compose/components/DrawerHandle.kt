@@ -184,11 +184,10 @@ fun DrawerDelegate.DrawerViewModel.DrawerHandle(
                                     Gravity.RIGHT
                                 }
 
-                                else -> -1
+                                else -> Gravity.NO_GRAVITY
                             }
-                            if (gravity != -1) {
+                            if (gravity != Gravity.NO_GRAVITY) {
                                 params.gravity = Gravity.TOP or gravity
-                                @Suppress("AssignedValueIsNeverRead")
                                 side = gravity
 
                                 if (oldGravity != gravity) {

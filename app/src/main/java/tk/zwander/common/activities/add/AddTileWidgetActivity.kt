@@ -16,6 +16,8 @@ class AddTileWidgetActivity : AddWidgetActivity() {
     companion object {
         const val EXTRA_TILE_ID = "tile_id"
 
+        const val NO_ID = -1
+
         fun createIntent(context: Context, tileId: Int): Intent {
             return Intent(context, AddTileWidgetActivity::class.java).apply {
                 addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
@@ -37,12 +39,12 @@ class AddTileWidgetActivity : AddWidgetActivity() {
     override val currentIds: Collection<Int>
         get() = prefManager.customTiles.values.map { it.widgetId }
 
-    private val tileId by lazy { intent.getIntExtra(EXTRA_TILE_ID, -1) }
+    private val tileId by lazy { intent.getIntExtra(EXTRA_TILE_ID, NO_ID) }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        if (tileId == -1) {
+        if (tileId == NO_ID) {
             finish()
             return
         }

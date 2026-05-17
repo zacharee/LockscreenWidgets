@@ -147,7 +147,7 @@ class FrameSpecificPreferences(
 
     companion object {
         fun keyFor(frameId: Int, baseKey: String): String {
-            if (frameId == -1) {
+            if (frameId == MainWidgetFrameDelegate.ID) {
                 return baseKey
             }
 
@@ -159,7 +159,7 @@ class FrameSpecificPreferences(
             baseKey: String,
             def: Boolean = false,
         ): Boolean {
-            return (listOf(-1) + context.prefManager.currentSecondaryFramesWithStringDisplay.map { it.key }).any { frameId ->
+            return (listOf(MainWidgetFrameDelegate.ID) + context.prefManager.currentSecondaryFramesWithStringDisplay.map { it.key }).any { frameId ->
                 context.prefManager.getBoolean(keyFor(frameId, baseKey), def)
             }
         }
@@ -172,7 +172,7 @@ object FramePrefs {
     const val KEY_FRAME_COL_COUNT = "FRAME_COL_COUNT_FOR_FRAME_"
 
     fun getWidgetsForFrame(context: Context, frameId: Int): Set<WidgetData> {
-        if (frameId == -1) {
+        if (frameId == MainWidgetFrameDelegate.ID) {
             return context.prefManager.currentWidgets
         }
 
@@ -189,7 +189,7 @@ object FramePrefs {
     fun setWidgetsForFrame(context: Context, frameId: Int, widgets: Collection<WidgetData>) {
         val set = LinkedHashSet(widgets.toSet())
 
-        if (frameId == -1) {
+        if (frameId == MainWidgetFrameDelegate.ID) {
             context.prefManager.currentWidgets = set
             return
         }
@@ -205,7 +205,7 @@ object FramePrefs {
     }
 
     fun getRowCountForFrame(context: Context, frameId: Int): Int {
-        return if (frameId == -1) {
+        return if (frameId == MainWidgetFrameDelegate.ID) {
             context.prefManager.frameRowCount
         } else {
             context.prefManager.getInt(generatePrefKey(KEY_FRAME_ROW_COUNT, frameId), 1)
@@ -213,7 +213,7 @@ object FramePrefs {
     }
 
     fun getColCountForFrame(context: Context, frameId: Int): Int {
-        return if (frameId == -1) {
+        return if (frameId == MainWidgetFrameDelegate.ID) {
             context.prefManager.frameColCount
         } else {
             context.prefManager.getInt(generatePrefKey(KEY_FRAME_COL_COUNT, frameId), 1)
@@ -221,7 +221,7 @@ object FramePrefs {
     }
 
     fun setRowCountForFrame(context: Context, frameId: Int, rowCount: Int) {
-        if (frameId == -1) {
+        if (frameId == MainWidgetFrameDelegate.ID) {
             context.prefManager.frameRowCount = rowCount
             return
         }
@@ -230,7 +230,7 @@ object FramePrefs {
     }
 
     fun setColCountForFrame(context: Context, frameId: Int, colCount: Int) {
-        if (frameId == -1) {
+        if (frameId == MainWidgetFrameDelegate.ID) {
             context.prefManager.frameColCount = colCount
             return
         }
@@ -239,7 +239,7 @@ object FramePrefs {
     }
 
     fun removeFrame(context: Context, frameId: Int) {
-        if (frameId == -1) {
+        if (frameId == MainWidgetFrameDelegate.ID) {
             return
         }
 
@@ -264,7 +264,7 @@ object FramePrefs {
     }
 
     fun generateCurrentWidgetsKey(id: Int): String {
-        if (id == -1) {
+        if (id == MainWidgetFrameDelegate.ID) {
             return PrefManager.KEY_CURRENT_WIDGETS
         }
 
@@ -272,7 +272,7 @@ object FramePrefs {
     }
 
     fun generatePrefKey(baseKey: String, id: Int): String {
-        if (id == -1) {
+        if (id == MainWidgetFrameDelegate.ID) {
             when (baseKey) {
                 KEY_FRAME_COL_COUNT -> return PrefManager.KEY_FRAME_COL_COUNT
                 KEY_FRAME_ROW_COUNT -> return PrefManager.KEY_FRAME_ROW_COUNT

@@ -61,6 +61,8 @@ class SelectIconPackActivity : BaseActivity() {
         private const val EXTRA_SHORTCUT_ID = "shortcut_id"
         private const val EXTRA_FROM_DRAWER = "from_drawer"
 
+        const val NO_ID = SelectIconFromPackActivity.NO_ID
+
         fun launchForOverride(context: Context, shortcutId: Int, fromDrawer: Boolean = false) {
             val intent = Intent(context, SelectIconPackActivity::class.java)
             intent.putExtra(EXTRA_SHORTCUT_ID, shortcutId)
@@ -71,7 +73,7 @@ class SelectIconPackActivity : BaseActivity() {
         }
     }
 
-    private val shortcutId by lazy { intent.getIntExtra(EXTRA_SHORTCUT_ID, -1).takeIf { it != -1 } }
+    private val shortcutId by lazy { intent.getIntExtra(EXTRA_SHORTCUT_ID, NO_ID).takeIf { it != NO_ID } }
     private val fromDrawer by lazy { intent.getBooleanExtra(EXTRA_FROM_DRAWER, false) }
 
     private val shortcutOverrideLauncher =

@@ -48,6 +48,8 @@ class WidgetHostCompat(
     id: Int,
 ) : AppWidgetHost(context, id) {
     companion object {
+        const val INVALID_WIDGET_ID = -1
+
         private const val HOST_ID = 1003
 
         private val ON_CLICK_HANDLER_CLASS by lazy {

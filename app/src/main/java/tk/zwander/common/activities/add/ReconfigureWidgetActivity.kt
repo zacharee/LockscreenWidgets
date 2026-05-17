@@ -4,9 +4,11 @@ import android.annotation.SuppressLint
 import android.appwidget.AppWidgetProviderInfo
 import android.os.Build
 import android.os.Bundle
+import com.android.internal.widget.RecyclerView
 import tk.zwander.common.activities.DismissOrUnlockActivity
 import tk.zwander.common.data.WidgetData
 import tk.zwander.common.data.WidgetSizeData
+import tk.zwander.common.host.WidgetHostCompat
 import tk.zwander.common.util.appWidgetManager
 import tk.zwander.common.util.logUtils
 
@@ -16,7 +18,7 @@ abstract class ReconfigureWidgetActivity : BaseBindWidgetActivity() {
         const val EXTRA_PROVIDER_INFO = "provider_info"
     }
 
-    private val prevId by lazy { intent.getIntExtra(EXTRA_PREVIOUS_ID, -1) }
+    private val prevId by lazy { intent.getIntExtra(EXTRA_PREVIOUS_ID, WidgetHostCompat.INVALID_WIDGET_ID) }
     private val providerInfo by lazy {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             intent.getParcelableExtra(EXTRA_PROVIDER_INFO, AppWidgetProviderInfo::class.java)
@@ -32,7 +34,7 @@ abstract class ReconfigureWidgetActivity : BaseBindWidgetActivity() {
 
         val providerInfo = providerInfo
 
-        if (prevId == -1 || providerInfo == null) {
+        if (prevId == WidgetHostCompat.INVALID_WIDGET_ID || providerInfo == null) {
             finish()
             return
         }
@@ -79,12 +81,14 @@ abstract class ReconfigureWidgetActivity : BaseBindWidgetActivity() {
             )
         )
 
-        val oldWidget = if (oldWidgetIndex != -1) newSet.removeAt(oldWidgetIndex) else null
+        val oldWidget = if (oldWidgetIndex != RecyclerView.NO_POSITION) newSet.removeAt(oldWidgetIndex) else null
 
         val widget = createWidgetData(id, provider, oldWidget?.safeSize)
 
         val safeIndex =
-            if (oldWidgetIndex != -1) oldWidgetIndex else newSet.lastIndex.run { if (this == -1) 0 else this }
+            if (oldWidgetIndex != RecyclerView.NO_POSITION) oldWidgetIndex else newSet.lastIndex.run {
+                if (this == RecyclerView.NO_POSITION) 0 else this
+            }
 
         newSet.add(safeIndex, widget)
 

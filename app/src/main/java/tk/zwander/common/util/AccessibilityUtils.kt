@@ -659,7 +659,7 @@ object AccessibilityUtils {
                     logUtils.debugLog("Starting dismiss Activity because of window change.", null)
                     DismissOrUnlockActivity.launch(context)
 
-                    if (globalState.handlingClick.value.containsKey(-2)) {
+                    if (globalState.handlingClick.value.containsKey(DrawerDelegate.ID)) {
                         logUtils.debugLog("Hiding drawer because of window change", null)
                         eventManager.sendEvent(Event.CloseDrawer)
                     }

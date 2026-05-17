@@ -123,7 +123,7 @@ fun rememberFeatureCards(): List<FeatureCardInfo> {
                 ),
                 onAction = {
                     if (!BuildConfig.DEBUG && context.prefManager.currentSecondaryFramesWithStringDisplay.isEmpty()) {
-                        context.eventManager.sendEvent(Event.LaunchAddWidget(-1))
+                        context.eventManager.sendEvent(Event.LaunchAddWidget(MainWidgetFrameDelegate.ID))
                     } else {
                         showingDisplaySelectorAddFrameWidget = true
                     }

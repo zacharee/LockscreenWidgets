@@ -4,6 +4,7 @@ import android.appwidget.AppWidgetProviderInfo
 import android.content.Context
 import android.view.View
 import android.view.ViewGroup
+import com.android.internal.widget.RecyclerView
 import tk.zwander.common.activities.SelectIconPackActivity
 import tk.zwander.common.adapters.BaseAdapter
 import tk.zwander.common.data.WidgetData
@@ -90,7 +91,7 @@ open class WidgetFrameAdapter(
                     if (event.frameId == viewModel.frameId) {
                         val pos = bindingAdapterPosition
 
-                        if (pos != -1 && pos < widgets.size) {
+                        if (pos != RecyclerView.NO_POSITION && pos < widgets.size) {
                             onResize(widgets[pos], 0, 1)
                         }
                     }

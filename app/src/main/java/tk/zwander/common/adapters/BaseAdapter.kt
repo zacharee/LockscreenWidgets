@@ -207,7 +207,7 @@ abstract class BaseAdapter<VM : BaseDelegate.BaseViewModel<*, *>>(
         return if (widgets.isEmpty()) {
             VIEW_TYPE_ADD.toLong()
         } else {
-            widgets.getOrNull(position)?.id?.toLong() ?: -1
+            widgets.getOrNull(position)?.id?.toLong() ?: RecyclerView.NO_ID
         }
     }
 
@@ -612,7 +612,7 @@ abstract class BaseAdapter<VM : BaseDelegate.BaseViewModel<*, *>>(
 
             onResize(newData, amount, step)
             didResize = true
-            bindingAdapterPosition.takeIf { it != -1 }?.let { pos ->
+            bindingAdapterPosition.takeIf { it != RecyclerView.NO_POSITION }?.let { pos ->
                 currentWidgets = widgets.apply {
                     this[pos] = newData
                 }
@@ -629,7 +629,7 @@ abstract class BaseAdapter<VM : BaseDelegate.BaseViewModel<*, *>>(
                 invalidate()
 
                 val index = widgets.indexOfFirst { it.id == data.id }
-                if (index == -1) {
+                if (index == RecyclerView.NO_POSITION) {
                     return
                 }
                 widgets[index] = data

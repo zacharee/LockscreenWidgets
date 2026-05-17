@@ -113,6 +113,7 @@ import tk.zwander.common.compose.util.widgetViewCacheRegistry
 import tk.zwander.common.data.WidgetData
 import tk.zwander.common.data.WidgetSizeData
 import tk.zwander.common.data.window.WidgetStackStyle
+import tk.zwander.common.host.WidgetHostCompat
 import tk.zwander.common.host.widgetHostCompat
 import tk.zwander.common.util.Event
 import tk.zwander.common.util.PrefManager
@@ -135,7 +136,7 @@ private const val MIN_CHANGE_DELAY_MS = 2000L
 
 class WidgetStackConfigure : BaseActivity() {
     private val widgetId by lazy {
-        intent.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, -1)
+        intent.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, WidgetHostCompat.INVALID_WIDGET_ID)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -148,7 +149,7 @@ class WidgetStackConfigure : BaseActivity() {
             },
         )
 
-        if (widgetId == -1) {
+        if (widgetId == WidgetHostCompat.INVALID_WIDGET_ID) {
             finish()
             return
         }

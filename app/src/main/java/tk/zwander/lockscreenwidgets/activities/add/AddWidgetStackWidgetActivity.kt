@@ -7,11 +7,12 @@ import android.os.Bundle
 import androidx.compose.ui.unit.IntSize
 import tk.zwander.common.activities.add.AddWidgetActivity
 import tk.zwander.common.data.WidgetData
+import tk.zwander.common.host.WidgetHostCompat
 import tk.zwander.common.util.prefManager
 
 class AddWidgetStackWidgetActivity : AddWidgetActivity() {
     private val widgetId by lazy {
-        intent.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, -1)
+        intent.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, WidgetHostCompat.INVALID_WIDGET_ID)
     }
 
     override val showShortcuts: Boolean = false
@@ -25,7 +26,7 @@ class AddWidgetStackWidgetActivity : AddWidgetActivity() {
         set(_) {}
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        if (widgetId == -1) {
+        if (widgetId == WidgetHostCompat.INVALID_WIDGET_ID) {
             finish()
         }
 

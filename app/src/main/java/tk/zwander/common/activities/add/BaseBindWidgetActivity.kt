@@ -22,6 +22,7 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import tk.zwander.common.activities.BaseActivity
 import tk.zwander.common.data.WidgetData
 import tk.zwander.common.data.WidgetSizeData
+import tk.zwander.common.host.WidgetHostCompat
 import tk.zwander.common.host.widgetHostCompat
 import tk.zwander.common.util.BugsnagUtils
 import tk.zwander.common.util.ConfigureLauncher
@@ -71,9 +72,12 @@ abstract class BaseBindWidgetActivity : BaseActivity() {
     private val permRequest =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
             try {
-                val id = result.data?.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, currentRequestId ?: -1) ?: currentRequestId
+                val id = result.data?.getIntExtra(
+                    AppWidgetManager.EXTRA_APPWIDGET_ID,
+                    currentRequestId ?: WidgetHostCompat.INVALID_WIDGET_ID,
+                ) ?: currentRequestId
 
-                if (id == null || id == -1) {
+                if (id == null || id == WidgetHostCompat.INVALID_WIDGET_ID) {
                     logUtils.debugLog("Unable to get widget ID.", null)
                     return@registerForActivityResult
                 }

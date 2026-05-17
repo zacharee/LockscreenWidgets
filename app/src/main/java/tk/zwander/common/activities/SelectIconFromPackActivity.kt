@@ -58,6 +58,8 @@ class SelectIconFromPackActivity : BaseActivity() {
         private const val EXTRA_SHORTCUT_ID = "shortcut_id"
         private const val EXTRA_ICON_PACK_PACKAGE_NAME = "icon_pack_package_name"
 
+        const val NO_ID = -1
+
         fun createIntent(context: Context, shortcutId: Int, iconPackPackageName: String): Intent {
             val intent = Intent(context, SelectIconFromPackActivity::class.java)
             intent.putExtra(EXTRA_SHORTCUT_ID, shortcutId)
@@ -67,7 +69,9 @@ class SelectIconFromPackActivity : BaseActivity() {
         }
     }
 
-    private val shortcutId by lazy { intent.getIntExtra(EXTRA_SHORTCUT_ID, -1).takeIf { it != -1 } }
+    private val shortcutId by lazy {
+        intent.getIntExtra(EXTRA_SHORTCUT_ID, NO_ID).takeIf { it != NO_ID }
+    }
     private val iconPackPackageName by lazy { intent.getStringExtra(EXTRA_ICON_PACK_PACKAGE_NAME) }
 
     override fun onCreate(savedInstanceState: Bundle?) {

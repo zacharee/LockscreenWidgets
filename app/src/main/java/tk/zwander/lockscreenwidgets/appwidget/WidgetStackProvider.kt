@@ -29,6 +29,7 @@ import androidx.core.widget.RemoteViewsCompat.setProgressBarIndeterminateTintBle
 import androidx.core.widget.RemoteViewsCompat.setViewBackgroundColor
 import androidx.core.widget.RemoteViewsCompat.setViewBackgroundResource
 import com.android.internal.appwidget.IAppWidgetService
+import com.android.internal.widget.RecyclerView
 import tk.zwander.common.appwidget.RemoteViewsProxyService
 import tk.zwander.common.data.window.WidgetStackStyle
 import tk.zwander.common.host.widgetHostCompat
@@ -66,7 +67,7 @@ class WidgetStackProvider : AppWidgetProvider() {
         if (intent.action == ACTION_SWAP_INDEX) {
             isSwap = true
             val autoSwap = intent.getBooleanExtra(EXTRA_AUTO_SWAP, false)
-            val targetIndex = intent.getIntExtra(EXTRA_SWAP_INDEX, -1)
+            val targetIndex = intent.getIntExtra(EXTRA_SWAP_INDEX, RecyclerView.NO_POSITION)
 
             val backward = intent.getBooleanExtra(EXTRA_BACKWARD, false)
             val widgetIds = intent.getIntArrayExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS)
@@ -82,7 +83,7 @@ class WidgetStackProvider : AppWidgetProvider() {
                 val index = (context.prefManager.widgetStackIndices[widgetId] ?: 0)
                     .coerceAtMost(stackedWidgets.lastIndex)
 
-                val newIndex = if (targetIndex != -1) {
+                val newIndex = if (targetIndex != RecyclerView.NO_POSITION) {
                     targetIndex
                 } else {
                     if (backward) {
@@ -469,7 +470,7 @@ class WidgetStackProvider : AppWidgetProvider() {
         @ColorInt
         iconColor: Int,
     ) {
-        val previousIndex = intent.getIntExtra(EXTRA_PREVIOUS_INDEX, -1)
+        val previousIndex = intent.getIntExtra(EXTRA_PREVIOUS_INDEX, RecyclerView.NO_POSITION)
 
         root.removeAllViews(R.id.stack_dot_row)
 
@@ -493,7 +494,7 @@ class WidgetStackProvider : AppWidgetProvider() {
                 val dot = RemoteViews(context.packageName, R.layout.widget_stack_page_dot)
                 dot.setViewVisibility(
                     R.id.page_dot_active,
-                    if (index == it && previousIndex != -1) {
+                    if (index == it && previousIndex != RecyclerView.NO_POSITION) {
                         View.VISIBLE
                     } else {
                         View.INVISIBLE
@@ -538,7 +539,7 @@ class WidgetStackProvider : AppWidgetProvider() {
                 }
                 dot.setViewVisibility(
                     R.id.page_dot_static,
-                    if (previousIndex == -1 || (index != previousIndex && index != it)) {
+                    if (previousIndex == RecyclerView.NO_POSITION || (index != previousIndex && index != it)) {
                         View.VISIBLE
                     } else {
                         View.INVISIBLE

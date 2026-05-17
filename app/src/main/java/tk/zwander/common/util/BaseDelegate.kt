@@ -197,7 +197,7 @@ abstract class BaseDelegate<State : Any>(
                         }
                     }
 
-                    viewModel.currentEditingInterfacePosition.value = -1
+                    viewModel.currentEditingInterfacePosition.value = RecyclerView.NO_POSITION
                     adapter.updateWidgets(newWidgets)
                     gridLayoutManager.doOnLayoutCompleted {
                         if (!recyclerView.isComputingLayout) {
@@ -243,7 +243,7 @@ abstract class BaseDelegate<State : Any>(
         if (moved) {
             updateCommonState { it.copy(updatedForMoveOrRemove = true) }
             currentWidgets = adapter.widgets
-            viewModel.currentEditingInterfacePosition.value = -1
+            viewModel.currentEditingInterfacePosition.value = RecyclerView.NO_POSITION
         }
     }
 
@@ -348,7 +348,7 @@ abstract class BaseDelegate<State : Any>(
     ) : ViewModel() {
         val itemToRemove = MutableStateFlow<WidgetData?>(null)
         val isResizingItem = MutableStateFlow(false)
-        val currentEditingInterfacePosition = MutableStateFlow(-1)
+        val currentEditingInterfacePosition = MutableStateFlow(RecyclerView.NO_POSITION)
 
         val params: WindowManager.LayoutParams
             get() = delegate.params

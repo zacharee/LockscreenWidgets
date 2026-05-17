@@ -119,7 +119,7 @@ fun MainWidgetFrameDelegate.WidgetFrameViewModel.FrameEditWrapperLayout(
                 Row(
                     modifier = Modifier.align(Alignment.TopEnd),
                 ) {
-                    if (frameId != -1) {
+                    if (frameId != MainWidgetFrameDelegate.ID) {
                         IconButton(
                             onClick = onRemovePressed,
                         ) {

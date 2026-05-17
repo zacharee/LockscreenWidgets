@@ -144,7 +144,7 @@ class Accessibility : AccessibilityService(), CoroutineScope by MainScope(), Eve
 
         launch(Dispatchers.Main) {
             runWindowOperation(
-                frameDelegates = secondaryFrameDelegates + (-1 to frameDelegate),
+                frameDelegates = secondaryFrameDelegates + (MainWidgetFrameDelegate.ID to frameDelegate),
                 drawerDelegate = drawerDelegate,
                 isScreenOn = lsDisplayManager.isAnyDisplayOn,
                 isOnKeyguard = kgm.isKeyguardLocked,
@@ -166,7 +166,7 @@ class Accessibility : AccessibilityService(), CoroutineScope by MainScope(), Eve
                 accessibilityJob = runAccessibilityJob(
                     context = this@Accessibility,
                     event = eventCopy,
-                    frameDelegates = secondaryFrameDelegates + (-1 to frameDelegate),
+                    frameDelegates = secondaryFrameDelegates + (MainWidgetFrameDelegate.ID to frameDelegate),
                     drawerDelegate = drawerDelegate,
                     kgm = kgm,
                     imm = imm,

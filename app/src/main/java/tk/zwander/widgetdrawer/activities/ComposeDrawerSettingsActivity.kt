@@ -1,6 +1,7 @@
 package tk.zwander.widgetdrawer.activities
 
 import android.content.Context
+import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
 import androidx.compose.ui.res.painterResource
@@ -316,7 +317,7 @@ class ComposeDrawerSettingsActivity : BaseActivity() {
                         title = { stringResource(R.string.drawer_handle_color) },
                         summary = { stringResource(R.string.drawer_handle_color_desc) },
                         key = { PrefManager.KEY_DRAWER_HANDLE_COLOR },
-                        defaultValue = { -1 },
+                        defaultValue = { Color.WHITE },
                         icon = {
                             painterResource(R.drawable.ic_baseline_color_lens_24)
                         },

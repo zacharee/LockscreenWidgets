@@ -70,10 +70,12 @@ import kotlin.math.floor
  */
 open class MainWidgetFrameDelegate protected constructor(
     context: Context,
-    protected val id: Int = -1,
+    protected val id: Int = ID,
     override var targetDisplayId: String,
 ) : BaseDelegate<MainWidgetFrameDelegate.State>(context, targetDisplayId) {
     companion object {
+        const val ID = -1
+
         private val instance = MutableStateFlow<MainWidgetFrameDelegate?>(null)
 
         val readOnlyInstance = instance.asStateFlow()
@@ -150,7 +152,7 @@ open class MainWidgetFrameDelegate protected constructor(
             val isLandscape = prefManager.separateFrameLayoutForLandscape &&
                     (state.screenOrientation == Surface.ROTATION_90 ||
                             state.screenOrientation == Surface.ROTATION_270)
-            val isMainFrame = id == -1
+            val isMainFrame = id == ID
 
             return when {
                 globalState.notificationsPanelFullyExpanded.value[display?.displayId] == true &&
@@ -282,7 +284,7 @@ open class MainWidgetFrameDelegate protected constructor(
         handler(
             PrefManager.KEY_LOCK_WIDGET_FRAME,
         ) {
-            viewModel.currentEditingInterfacePosition.value = -1
+            viewModel.currentEditingInterfacePosition.value = RecyclerView.NO_POSITION
         }
         handler(PrefManager.KEY_WIDGET_FRAME_ENABLED) {
             lifecycleScope.launch {
@@ -560,7 +562,7 @@ open class MainWidgetFrameDelegate protected constructor(
 
         super.onDestroy()
 
-        if (id == -1) {
+        if (id == ID) {
             invalidateInstance()
         }
     }
@@ -627,7 +629,7 @@ open class MainWidgetFrameDelegate protected constructor(
         }
 
         withContext(Dispatchers.Main + NonCancellable) {
-            viewModel.currentEditingInterfacePosition.value = -1
+            viewModel.currentEditingInterfacePosition.value = RecyclerView.NO_POSITION
 
             globalState.handlingClick.remove(id)
             forceWakelock(on = false, updateOverlay = false)
@@ -945,7 +947,8 @@ open class MainWidgetFrameDelegate protected constructor(
         FramePrefs.getColCountForFrame(this@MainWidgetFrameDelegate, id),
     ), ISnappyLayoutManager {
         override fun canScrollHorizontally(): Boolean {
-            return (viewModel.currentEditingInterfacePosition.value == -1 || commonState.isHoldingItem) && super.canScrollHorizontally()
+            return (viewModel.currentEditingInterfacePosition.value == RecyclerView.NO_POSITION ||
+                    commonState.isHoldingItem) && super.canScrollHorizontally()
         }
 
         override fun getFixScrollPos(velocityX: Int, velocityY: Int): Int {
@@ -969,11 +972,11 @@ open class MainWidgetFrameDelegate protected constructor(
                 rectsHelper.rows[targetRow]?.firstOrNull() ?: firstVisiblePosition
             }.also {
                 prefManager.currentPage = it
-            }.run { if (this == -1) 0 else this }
+            }.run { if (this == RecyclerView.NO_POSITION) 0 else this }
         }
 
         override fun canSnap(): Boolean {
-            return viewModel.currentEditingInterfacePosition.value == -1
+            return viewModel.currentEditingInterfacePosition.value == RecyclerView.NO_POSITION
         }
     }
 

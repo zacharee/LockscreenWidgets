@@ -51,6 +51,7 @@ import tk.zwander.common.util.LSDisplay
 import tk.zwander.common.util.PrefManager
 import tk.zwander.common.util.prefManager
 import tk.zwander.lockscreenwidgets.R
+import tk.zwander.lockscreenwidgets.util.MainWidgetFrameDelegate
 import java.util.TreeSet
 import kotlin.math.absoluteValue
 
@@ -81,7 +82,7 @@ fun SelectDisplayDialog(
     )
     val defaultFrame by remember {
         derivedStateOf {
-            -1 to defaultFrameDisplay
+            MainWidgetFrameDelegate.ID to defaultFrameDisplay
         }
     }
     val allFrames by remember {
@@ -111,7 +112,7 @@ fun SelectDisplayDialog(
                 allFrames.filter { it.value == "${Display.DEFAULT_DISPLAY}" }
                     .keys.sorted()
             } else {
-                listOf(-2)
+                listOf()
             }
         }
     }
@@ -173,7 +174,7 @@ fun SelectDisplayDialog(
                     verticalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                        if (framesForDefaultDisplay.isNotEmpty()) {
+                        if (framesForDefaultDisplay.isNotEmpty() || onDisplaySelected != null) {
                             item(key = "DEFAULT_DISPLAY") {
                                 DisplayCard(
                                     labelText = "${stringResource(R.string.default_display)} (${Display.DEFAULT_DISPLAY})",

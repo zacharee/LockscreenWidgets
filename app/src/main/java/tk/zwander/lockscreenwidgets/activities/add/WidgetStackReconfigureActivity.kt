@@ -7,11 +7,12 @@ import android.content.Intent
 import android.os.Bundle
 import tk.zwander.common.activities.add.ReconfigureWidgetActivity
 import tk.zwander.common.data.WidgetData
+import tk.zwander.common.host.WidgetHostCompat
 import tk.zwander.common.util.prefManager
 
 class WidgetStackReconfigureActivity : ReconfigureWidgetActivity() {
     private val widgetId by lazy {
-        intent.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, -1)
+        intent.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, WidgetHostCompat.INVALID_WIDGET_ID)
     }
 
     override val colCount: Int = 1
@@ -25,7 +26,7 @@ class WidgetStackReconfigureActivity : ReconfigureWidgetActivity() {
         }
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        if (widgetId == -1) {
+        if (widgetId == WidgetHostCompat.INVALID_WIDGET_ID) {
             finish()
         }
 

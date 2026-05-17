@@ -21,6 +21,7 @@ import net.bytebuddy.ByteBuddy
 import net.bytebuddy.android.AndroidClassLoadingStrategy
 import net.bytebuddy.implementation.MethodDelegation
 import net.bytebuddy.matcher.ElementMatchers.named
+import tk.zwander.common.host.WidgetHostCompat
 import tk.zwander.common.util.appWidgetManager
 import tk.zwander.common.util.logUtils
 import tk.zwander.common.util.mainHandler
@@ -31,8 +32,8 @@ class RemoteViewsProxyService : RemoteViewsService() {
     }
 
     override fun onBind(intent: Intent?): IBinder? {
-        val widgetId = intent?.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, -1)
-            ?.takeIf { it != -1 } ?: return null
+        val widgetId = intent?.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, WidgetHostCompat.INVALID_WIDGET_ID)
+            ?.takeIf { it != WidgetHostCompat.INVALID_WIDGET_ID } ?: return null
         val widgetIntent = IntentCompat.getParcelableExtra(intent, EXTRA_INTENT, Intent::class.java)
             ?: return null
 
