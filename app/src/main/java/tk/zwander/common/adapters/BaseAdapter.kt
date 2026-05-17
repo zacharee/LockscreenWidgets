@@ -43,12 +43,14 @@ import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.layout.layoutId
 import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.platform.ViewCompositionStrategy
+import androidx.compose.ui.platform.rememberNestedScrollInteropConnection
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.core.view.ViewCompat
 import androidx.core.view.forEach
 import androidx.lifecycle.setViewTreeLifecycleOwner
 import androidx.recyclerview.widget.DiffUtil
@@ -315,6 +317,7 @@ abstract class BaseAdapter<VM : BaseDelegate.BaseViewModel<*, *>>(
             binding.root.id = data.id
             binding.root.setThemedContent {
                 val currentEditingPosition by viewModel.currentEditingInterfacePosition.collectAsState()
+                val nestedScrollConnection = rememberNestedScrollInteropConnection(binding.root)
 
                 viewModel.WidgetItemLayout(
                     needsReconfigure = data.type == WidgetType.WIDGET && widgetInfo == null,
@@ -322,12 +325,19 @@ abstract class BaseAdapter<VM : BaseDelegate.BaseViewModel<*, *>>(
                     widgetContents = { modifier ->
                         when (data.safeType) {
                             WidgetType.WIDGET -> widgetInfo?.let {
-                                WidgetContents(data, widgetInfo, modifier)
+                                WidgetContents(
+                                    data = data,
+                                    widgetInfo = widgetInfo,
+                                    modifier = modifier,
+                                )
                             }
                             WidgetType.SHORTCUT, WidgetType.LAUNCHER_SHORTCUT -> {
-                                ShortcutContent(data, modifier)
+                                ShortcutContent(data = data, modifier = modifier)
                             }
-                            WidgetType.LAUNCHER_ITEM -> LauncherIconContent(data, modifier)
+                            WidgetType.LAUNCHER_ITEM -> LauncherIconContent(
+                                data = data,
+                                modifier = modifier,
+                            )
                             WidgetType.HEADER -> {}
                         }
                     },
@@ -363,6 +373,7 @@ abstract class BaseAdapter<VM : BaseDelegate.BaseViewModel<*, *>>(
                     modifier = Modifier.fillMaxSize().layoutId("widget_${data.id}"),
                     ignoreTouchesKey = viewModel.ignoreWidgetTouchesKey,
                     doubleTapTurnOffKey = viewModel.doubleTapTurnOffDisplayKey,
+                    nestedScrollConnection = nestedScrollConnection,
                 )
             }
         }
@@ -488,6 +499,7 @@ abstract class BaseAdapter<VM : BaseDelegate.BaseViewModel<*, *>>(
                     factory = {
                         widgetView.apply {
                             (parent as? ViewGroup)?.removeView(this)
+                            ViewCompat.setNestedScrollingEnabled(this, true)
                         }
                     },
                     modifier = modifier,

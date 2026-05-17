@@ -5,12 +5,14 @@ import android.content.Context
 import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
+import android.view.ViewConfiguration
 import android.widget.AbsListView
 import androidx.core.view.NestedScrollingParent3
 import androidx.core.view.NestedScrollingParentHelper
 import androidx.core.view.ViewCompat
 import androidx.recyclerview.widget.RecyclerView
 import tk.zwander.common.util.verticalScrollOffset
+import kotlin.math.absoluteValue
 
 //https://stackoverflow.com/a/68318211/5496177
 open class NestedRecyclerView @JvmOverloads constructor(
@@ -178,6 +180,11 @@ open class NestedRecyclerView @JvmOverloads constructor(
         return super.onNestedPreFling(target, velocityX, velocityY)
     }
 
+    override fun onScrollStateChanged(state: Int) {
+        super.onScrollStateChanged(state)
+        nestedScrollingListener?.invoke(state != SCROLL_STATE_IDLE)
+    }
+
     /* In ViewGroup for API 21+. */
     override fun onNestedFling(
         target: View,
@@ -195,6 +202,8 @@ open class NestedRecyclerView @JvmOverloads constructor(
         nestedScrollTarget = view
         nestedScrollTargetWasUnableToScroll = false
 
+        val slop = ViewConfiguration.get(context).scaledTouchSlop
+
         view?.setOnTouchListener { _, event ->
             if (event.action == MotionEvent.ACTION_UP) {
                 nestedScrollingListener?.invoke(true)
@@ -206,6 +215,8 @@ open class NestedRecyclerView @JvmOverloads constructor(
         when (view) {
             is AbsListView -> {
                 var previousScrollOffset = view.verticalScrollOffset
+                var prevY = 0f
+                var downY = 0f
 
                 view.setOnScrollListener(object : AbsListView.OnScrollListener {
                     override fun onScrollStateChanged(view: AbsListView?, scrollState: Int) {
@@ -220,12 +231,24 @@ open class NestedRecyclerView @JvmOverloads constructor(
                     ) {}
                 })
                 view.setOnTouchListener { _, event ->
-                    if (event.action == MotionEvent.ACTION_MOVE) {
-                        val offset = view.verticalScrollOffset
+                    when (event.action) {
+                        MotionEvent.ACTION_DOWN -> {
+                            downY = event.rawY
+                        }
+                        MotionEvent.ACTION_MOVE -> {
+                            val offset = view.verticalScrollOffset
 
-                        if (previousScrollOffset != offset) {
-                            nestedScrollingListener?.invoke(true)
-                            previousScrollOffset = offset
+                            if (previousScrollOffset != offset) {
+                                nestedScrollingListener?.invoke(true)
+                                previousScrollOffset = offset
+                            }
+
+                            if (prevY != event.rawY &&
+                                (event.rawY - downY).absoluteValue > slop) {
+                                nestedScrollingListener?.invoke(true)
+                                prevY = event.rawY
+                                downY = Int.MIN_VALUE.toFloat()
+                            }
                         }
                     }
                     false
