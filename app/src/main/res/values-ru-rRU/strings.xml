@@ -160,6 +160,8 @@
     <string name="settings_screen_double_tap_turn_off_screen">Двойное нажатие для выключения экрана</string>
     <string name="settings_screen_double_tap_turn_off_screen_desc_frame">Дважды коснуться пустого места (за пределами виджета), чтобы выключить экран. Это относится ко всему кадру, когда включена функция \"Игнорировать виджет\".</string>
     <string name="settings_screen_double_tap_turn_off_screen_drawer">Дважды коснуться пустого места (за пределами виджета), чтобы отключить экран.</string>
+    <string name="settings_screen_not_touchable">Ignore All Touches</string>
+    <string name="settings_screen_not_touchable_desc">When enabled, the selected frame will ignore all touches, and the whatever is underneath will receive them instead. Frames will always respond to touches in preview mode.</string>
     <string name="intro_welcome_title">Добро пожаловать!</string>
     <string name="intro_welcome_desc">Lockscreen Widgets — это простое приложение с простой целью: вернуть виджеты экрана блокировки Android KitKat. Ваши виджеты будут отображаться в простом постраничном слайдере на экране блокировки.</string>
     <string name="intro_usage_title">Основное применение</string>
