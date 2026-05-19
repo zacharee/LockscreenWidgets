@@ -277,7 +277,9 @@ abstract class BaseDelegate<State : Any>(
         }
     }
 
+    @CallSuper
     protected open fun onItemSelected(selected: Boolean, highlighted: Boolean) {
+        viewModel.selectedItem.value = selected
         updateCommonState { it.copy(isHoldingItem = selected, isItemHighlighted = highlighted) }
     }
 
@@ -349,6 +351,7 @@ abstract class BaseDelegate<State : Any>(
         val itemToRemove = MutableStateFlow<WidgetData?>(null)
         val isResizingItem = MutableStateFlow(false)
         val currentEditingInterfacePosition = MutableStateFlow(RecyclerView.NO_POSITION)
+        val selectedItem = MutableStateFlow(false)
 
         val params: WindowManager.LayoutParams
             get() = delegate.params

@@ -1,69 +1,24 @@
 package tk.zwander.common.views
 
-import android.annotation.SuppressLint
 import android.content.Context
 import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
-import android.view.ViewConfiguration
-import android.widget.AbsListView
 import androidx.core.view.NestedScrollingParent3
 import androidx.core.view.NestedScrollingParentHelper
 import androidx.core.view.ViewCompat
-import androidx.recyclerview.widget.RecyclerView
-import tk.zwander.common.util.verticalScrollOffset
-import kotlin.math.absoluteValue
 
 //https://stackoverflow.com/a/68318211/5496177
 open class NestedRecyclerView @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
     defStyleAttr: Int = 0,
-) : RecyclerView(context, attrs, defStyleAttr), NestedScrollingParent3 {
+) : ScrollingItemTouchRecyclerView(context, attrs, defStyleAttr), NestedScrollingParent3 {
     private var nestedScrollTarget: View? = null
     private var nestedScrollTargetWasUnableToScroll = false
     private val parentHelper by lazy { NestedScrollingParentHelper(this) }
 
-    /**
-     * Set this wherever you have access to your item touch helper instance.
-     * Using `attachToRecyclerView(null)` resets any long-press timers.
-     *
-     * Example:
-     *
-     * nestedRecyclerView.nestedScrollingListener = {
-     *      itemTouchHelper.attachToRecyclerView(if (!it) nestedRecyclerView else null)
-     * }
-     */
-    var nestedScrollingListener: ((Boolean) -> Unit)? = null
-
-    /**
-     * Set this from your item touch helper callback to let the RecyclerView
-     * know when an item is selected (prevents an inverse nested scrolling issue
-     * where the nested view scrolls and the item touch helper doesn't receive
-     * further callbacks).
-     *
-     * Example:
-     * override fun onSelectedChanged(viewHolder: RecyclerView.ViewHolder?, actionState: Int) {
-     *      if (actionState != ItemTouchHelper.ACTION_STATE_IDLE) nestedRecyclerView.selectedItem = true
-     *      ...
-     * }
-     * ...
-     * override fun clearView(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder) {
-     *      nestedRecyclerView.selectedItem = false
-     *      ...
-     * }
-     */
-    var selectedItem: Boolean = false
-
     override fun dispatchTouchEvent(ev: MotionEvent): Boolean {
-        if (ev.action == MotionEvent.ACTION_UP) {
-            // This is to prevent an issue where the item touch helper receives
-            // an ACTION_DOWN but then doesn't later get the ACTION_UP event,
-            // causing it to run any long-press events.
-            nestedScrollingListener?.invoke(true)
-            nestedScrollingListener?.invoke(false)
-        }
-
         // Nothing special if no child scrolling target.
         if (nestedScrollTarget == null || selectedItem) return super.dispatchTouchEvent(ev)
 
@@ -89,8 +44,10 @@ open class NestedRecyclerView @JvmOverloads constructor(
     }
 
     // We only support vertical scrolling.
-    override fun onStartNestedScroll(child: View, target: View, nestedScrollAxes: Int) =
-        nestedScrollAxes and ViewCompat.SCROLL_AXIS_VERTICAL != 0
+    override fun onStartNestedScroll(child: View, target: View, nestedScrollAxes: Int): Boolean {
+        super.onStartNestedScroll(child, target, nestedScrollAxes)
+        return nestedScrollAxes and ViewCompat.SCROLL_AXIS_VERTICAL != 0
+    }
 
     /*  Introduced with NestedScrollingParent2. */
     override fun onStartNestedScroll(child: View, target: View, axes: Int, type: Int) =
@@ -199,77 +156,8 @@ open class NestedRecyclerView @JvmOverloads constructor(
         nestedScrollingListener?.invoke(!it)
     }
 
-    @SuppressLint("NewApi", "ClickableViewAccessibility")
     private fun setTarget(view: View?) {
         nestedScrollTarget = view
         nestedScrollTargetWasUnableToScroll = false
-
-        val slop = ViewConfiguration.get(context).scaledTouchSlop
-
-        view?.setOnTouchListener { _, event ->
-            if (event.action == MotionEvent.ACTION_UP) {
-                nestedScrollingListener?.invoke(true)
-                nestedScrollingListener?.invoke(false)
-            }
-            false
-        }
-
-        when (view) {
-            is AbsListView -> {
-                var previousScrollOffset = view.verticalScrollOffset
-                var prevY = 0f
-                var downY = 0f
-
-                view.setOnScrollListener(object : AbsListView.OnScrollListener {
-                    override fun onScrollStateChanged(view: AbsListView?, scrollState: Int) {
-                        nestedScrollingListener?.invoke(scrollState != AbsListView.OnScrollListener.SCROLL_STATE_IDLE)
-                    }
-
-                    override fun onScroll(
-                        view: AbsListView?,
-                        firstVisibleItem: Int,
-                        visibleItemCount: Int,
-                        totalItemCount: Int,
-                    ) {}
-                })
-                view.setOnTouchListener { _, event ->
-                    when (event.action) {
-                        MotionEvent.ACTION_DOWN -> {
-                            downY = event.rawY
-                        }
-                        MotionEvent.ACTION_MOVE -> {
-                            val offset = view.verticalScrollOffset
-
-                            if (previousScrollOffset != offset) {
-                                nestedScrollingListener?.invoke(true)
-                                previousScrollOffset = offset
-                            }
-
-                            if (prevY != event.rawY &&
-                                (event.rawY - downY).absoluteValue > slop) {
-                                nestedScrollingListener?.invoke(true)
-                                prevY = event.rawY
-                                downY = Int.MIN_VALUE.toFloat()
-                            }
-                        }
-                    }
-                    false
-                }
-            }
-            is RecyclerView -> {
-                view.addOnScrollListener(object : OnScrollListener() {
-                    override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
-                        nestedScrollingListener?.invoke(newState != SCROLL_STATE_IDLE)
-                    }
-                })
-            }
-            else -> {
-                view?.setOnScrollChangeListener { _, _, scrollY, _, oldScrollY ->
-                    if (scrollY != oldScrollY) {
-                        nestedScrollingListener?.invoke(true)
-                    }
-                }
-            }
-        }
     }
 }

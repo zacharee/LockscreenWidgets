@@ -416,7 +416,6 @@ class DrawerDelegate private constructor(context: Context, displayId: String) :
 
     override fun onItemSelected(selected: Boolean, highlighted: Boolean) {
         super.onItemSelected(selected, highlighted)
-        viewModel.selectedItem.value = selected
         globalState.handlingClick.remove(ID)
     }
 
@@ -533,7 +532,6 @@ class DrawerDelegate private constructor(context: Context, displayId: String) :
 
     class DrawerViewModel(delegate: DrawerDelegate) :
         BaseViewModel<State, DrawerDelegate>(delegate) {
-        val selectedItem = MutableStateFlow(false)
         val scrollingOpen = MutableStateFlow(false)
         val latestScrollInVelocity = MutableStateFlow(0f)
         val handleAnimationState = MutableStateFlow(AnimationState.IDLE)
