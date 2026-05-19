@@ -271,7 +271,19 @@ fun MainWidgetFrameDelegate.WidgetFrameViewModel.WidgetFrameLayout(
 
                 @Suppress("COMPOSE_APPLIER_CALL_MISMATCH")
                 AndroidView(
-                    factory = { widgetGrid },
+                    factory = {
+                        widgetGrid.apply {
+                            nestedScrollingListener = {
+                                itemTouchHelper.attachToRecyclerView(
+                                    if (it) {
+                                        null
+                                    } else {
+                                        widgetGrid
+                                    }
+                                )
+                            }
+                        }
+                    },
                     update = {
                         it.isHorizontalScrollBarEnabled =
                             pageIndicatorBehavior != PrefManager.VALUE_PAGE_INDICATOR_BEHAVIOR_HIDDEN

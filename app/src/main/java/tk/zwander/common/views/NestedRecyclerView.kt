@@ -16,7 +16,9 @@ import kotlin.math.absoluteValue
 
 //https://stackoverflow.com/a/68318211/5496177
 open class NestedRecyclerView @JvmOverloads constructor(
-    context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
+    context: Context,
+    attrs: AttributeSet? = null,
+    defStyleAttr: Int = 0,
 ) : RecyclerView(context, attrs, defStyleAttr), NestedScrollingParent3 {
     private var nestedScrollTarget: View? = null
     private var nestedScrollTargetWasUnableToScroll = false

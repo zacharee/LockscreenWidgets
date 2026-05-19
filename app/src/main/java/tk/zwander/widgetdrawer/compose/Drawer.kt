@@ -149,7 +149,7 @@ fun DrawerDelegate.DrawerViewModel.Drawer(
             AndroidView(
                 factory = {
                     widgetGrid.apply {
-                        widgetGrid.nestedScrollingListener = {
+                        nestedScrollingListener = {
                             itemTouchHelper.attachToRecyclerView(
                                 if (it) {
                                     null
