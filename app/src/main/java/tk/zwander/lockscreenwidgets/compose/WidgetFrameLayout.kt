@@ -164,15 +164,21 @@ fun MainWidgetFrameDelegate.WidgetFrameViewModel.WidgetFrameLayout(
                 awaitPointerEventScope {
                     while (true) {
                         val pointerEvent = awaitPointerEvent(pass = PointerEventPass.Initial)
+                        val interestingChanges = pointerEvent.changes.filter { change ->
+                            change.pressed
+                        }.distinctBy { it.id.value }
 
-                        if (pointerEvent.changes.size == 2 && !isAdjustingMask) {
-                            pointerEvent.changes.forEach { it.consume() }
+                        if (interestingChanges.size == 2 && !isAdjustingMask) {
+                            interestingChanges.forEach { it.consume() }
 
                             val thirdEvent = withTimeoutOrNull(10L) {
                                 awaitPointerEvent(pass = PointerEventPass.Initial)
                             }
+                            val interestingThirdEventChanges = thirdEvent?.changes?.filter { change ->
+                                change.pressed
+                            }?.distinctBy { it.id.value } ?: listOf()
 
-                            if (thirdEvent == null || thirdEvent.changes.size <= 2) {
+                            if (thirdEvent == null || interestingThirdEventChanges.size <= 2) {
                                 isInEditingMode = !isInEditingMode && !isLocked
                                 if (acknowledgedTwoFingerTap == null) {
                                     acknowledgedTwoFingerTap = false
@@ -188,7 +194,7 @@ fun MainWidgetFrameDelegate.WidgetFrameViewModel.WidgetFrameLayout(
                                 }
                             }
 
-                            thirdEvent?.changes?.forEach { it.consume() }
+                            interestingThirdEventChanges.forEach { it.consume() }
                             waitForUpOrCancellation(pass = PointerEventPass.Initial)
                         }
                     }
