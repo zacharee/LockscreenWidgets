@@ -275,10 +275,11 @@ object FramePrefs {
 
     fun generatePrefKey(baseKey: String, id: Int): String {
         if (id == MainWidgetFrameDelegate.ID) {
-            when (baseKey) {
-                KEY_FRAME_COL_COUNT -> return PrefManager.KEY_FRAME_COL_COUNT
-                KEY_FRAME_ROW_COUNT -> return PrefManager.KEY_FRAME_ROW_COUNT
-                KEY_FRAME_WIDGETS -> return PrefManager.KEY_CURRENT_WIDGETS
+            return when (baseKey) {
+                KEY_FRAME_COL_COUNT -> PrefManager.KEY_FRAME_COL_COUNT
+                KEY_FRAME_ROW_COUNT -> PrefManager.KEY_FRAME_ROW_COUNT
+                KEY_FRAME_WIDGETS -> PrefManager.KEY_CURRENT_WIDGETS
+                else -> baseKey
             }
         }
 
