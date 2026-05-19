@@ -160,6 +160,8 @@
     <string name="settings_screen_double_tap_turn_off_screen">Doppeltippen zum Ausschalten des Bildschirms</string>
     <string name="settings_screen_double_tap_turn_off_screen_desc_frame">Doppeltippen Sie auf einen leeren Bereich (außerhalb eines Widgets), um den Bildschirm auszuschalten. Dies gilt für den gesamten Rahmen, wenn \"Widget-Berührungen ignorieren\" aktiviert ist.</string>
     <string name="settings_screen_double_tap_turn_off_screen_drawer">Doppeltippen Sie auf einen leeren Platz (außerhalb eines Widgets), um den Bildschirm auszuschalten.</string>
+    <string name="settings_screen_not_touchable">Ignore All Touches</string>
+    <string name="settings_screen_not_touchable_desc">When enabled, the selected frame will ignore all touches, and the whatever is underneath will receive them instead. Frames will always respond to touches in preview mode.</string>
     <string name="intro_welcome_title">Willkommen!</string>
     <string name="intro_welcome_desc">Lockscreen Widgets ist eine simple App mit einem simplen Grund: die Sperrbildschirm-Widgets von Android KitKat zu reimplementieren. Deine Widgets werden in einem simplen Rahmen mit Seiten auf dem Sperrbildschirm erscheinen.</string>
     <string name="intro_usage_title">Grundlegende Verwendung</string>

@@ -160,6 +160,8 @@
     <string name="settings_screen_double_tap_turn_off_screen">Ekranı Kapatmak için İki Kez Tıkla</string>
     <string name="settings_screen_double_tap_turn_off_screen_desc_frame">Ekranı kapatmak için (widget\'ın dışındaki) boş bir alana iki kez tıklayın. \"Widget Dokunuşlarını Yoksay\" seçeneği etkinleştirildiğinde bu, tüm çerçeve için geçerlidir.</string>
     <string name="settings_screen_double_tap_turn_off_screen_drawer">Ekranı kapatmak için (widget\'ın dışındaki) boş bir alana iki kez tıklayın.</string>
+    <string name="settings_screen_not_touchable">Ignore All Touches</string>
+    <string name="settings_screen_not_touchable_desc">When enabled, the selected frame will ignore all touches, and the whatever is underneath will receive them instead. Frames will always respond to touches in preview mode.</string>
     <string name="intro_welcome_title">Hoşgeldiniz!</string>
     <string name="intro_welcome_desc">Lockscreen Widgets, basit bir amacı olan basit bir uygulamadır: Android KitKat\'ın kilit ekranı widget\'larını geri getirmek. Widget\'larınız kilit ekranında basit bir sayfa kaydırıcıda gösterilecektir.</string>
     <string name="intro_usage_title">Temel Kullanım</string>
