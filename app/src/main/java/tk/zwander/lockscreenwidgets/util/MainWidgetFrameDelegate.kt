@@ -145,6 +145,12 @@ open class MainWidgetFrameDelegate protected constructor(
                     }
                 }
             }
+
+            if (actualNewState.ignoreAllTouches != oldState.ignoreAllTouches) {
+                lifecycleScope.launch(Dispatchers.Main) {
+                    updateIgnoreAllTouches()
+                }
+            }
         }
 
     private val saveMode: FrameSizeAndPosition.FrameType
@@ -307,6 +313,11 @@ open class MainWidgetFrameDelegate protected constructor(
 
             if (canShow()) {
                 addWindow()
+            }
+        }
+        handler(FrameSpecificPreferences.keyFor(id, PrefManager.KEY_FRAME_IGNORE_TOUCHES)) {
+            updateState {
+                it.copy(ignoreAllTouches = framePrefs.ignoreAllTouches)
             }
         }
     }
@@ -552,6 +563,12 @@ open class MainWidgetFrameDelegate protected constructor(
                 //make sure to hide the widget frame.
                 updateWindowState()
             }
+        }
+
+        updateState {
+            it.copy(
+                ignoreAllTouches = framePrefs.ignoreAllTouches,
+            )
         }
     }
 
@@ -929,6 +946,15 @@ open class MainWidgetFrameDelegate protected constructor(
         }
     }
 
+    private suspend fun updateIgnoreAllTouches() {
+        params.flags = if (state.ignoreAllTouches) {
+            params.flags or WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE
+        } else {
+            params.flags and WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE.inv()
+        }
+        updateOverlay()
+    }
+
     private fun scrollToStoredPosition(override: Boolean = false) {
         try {
             gridLayoutManager.scrollToPosition(if (override || prefManager.rememberFramePosition) prefManager.currentPage else 0)
@@ -999,6 +1025,7 @@ open class MainWidgetFrameDelegate protected constructor(
         val isPendingOrientationStateChange: Boolean = false,
         val isTempHide: Boolean = false,
         val screenOrientation: Int = Surface.ROTATION_0,
+        val ignoreAllTouches: Boolean = false,
     )
 
     open class WidgetFrameViewModel(delegate: MainWidgetFrameDelegate) :

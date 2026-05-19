@@ -127,6 +127,12 @@ class FrameSpecificPreferences(
             putBoolean(PrefManager.KEY_FRAME_IGNORE_WIDGET_TOUCHES, value)
         }
 
+    var ignoreAllTouches: Boolean
+        get() = getBoolean(PrefManager.KEY_FRAME_IGNORE_TOUCHES, false)
+        set(value) {
+            putBoolean(PrefManager.KEY_FRAME_IGNORE_TOUCHES, value)
+        }
+
     private fun getInt(baseKey: String, def: Int): Int {
         return context.prefManager.getInt(keyFor(baseKey), def)
     }
@@ -147,11 +153,7 @@ class FrameSpecificPreferences(
 
     companion object {
         fun keyFor(frameId: Int, baseKey: String): String {
-            if (frameId == MainWidgetFrameDelegate.ID) {
-                return baseKey
-            }
-
-            return "${baseKey}_${frameId}"
+            return FramePrefs.generatePrefKey(baseKey, frameId)
         }
 
         fun doAnyFramesHaveSettingEnabled(

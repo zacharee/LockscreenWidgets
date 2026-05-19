@@ -668,7 +668,20 @@ class ComposeFrameSettingsActivity : BaseActivity() {
                         key = {
                             FrameSpecificPreferences.keyFor(
                                 selectedFrame,
-                                PrefManager.KEY_FRAME_IGNORE_WIDGET_TOUCHES
+                                PrefManager.KEY_FRAME_IGNORE_WIDGET_TOUCHES,
+                            )
+                        },
+                        icon = { painterResource(R.drawable.baseline_do_not_touch_24) },
+                        defaultValue = { false },
+                    )
+
+                    switchPreference(
+                        title = { stringResource(R.string.settings_screen_not_touchable) },
+                        summary = { stringResource(R.string.settings_screen_not_touchable_desc) },
+                        key = {
+                            FrameSpecificPreferences.keyFor(
+                                selectedFrame,
+                                PrefManager.KEY_FRAME_IGNORE_TOUCHES,
                             )
                         },
                         icon = { painterResource(R.drawable.baseline_do_not_touch_24) },

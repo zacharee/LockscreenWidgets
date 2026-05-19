@@ -150,6 +150,7 @@ class PrefManager private constructor(private val context: Context) {
         const val KEY_WIDGET_STACK_WIDGET_PADDING = "widget_stack_widget_padding_individual"
         const val KEY_WIDGET_STACK_STYLE_OPTIONS = "widget_stack_style_options"
         const val KEY_WIDGET_LIST_CURRENT_FILTERS = "widget_list_current_filters"
+        const val KEY_FRAME_IGNORE_TOUCHES = "frame_ignore_touches"
 
         const val VALUE_PAGE_INDICATOR_BEHAVIOR_HIDDEN = 0
         const val VALUE_PAGE_INDICATOR_BEHAVIOR_AUTO_HIDE = 1
