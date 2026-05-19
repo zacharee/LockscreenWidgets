@@ -122,6 +122,8 @@ fun rememberFeatureCards(): List<FeatureCardInfo> {
                     },
                 ),
                 onAction = {
+                    context.eventManager.sendEvent(Event.PreviewFrames(Event.PreviewFrames.ShowMode.HIDE))
+
                     if (!BuildConfig.DEBUG && context.prefManager.currentSecondaryFramesWithStringDisplay.isEmpty()) {
                         context.eventManager.sendEvent(Event.LaunchAddWidget(MainWidgetFrameDelegate.ID))
                     } else {
