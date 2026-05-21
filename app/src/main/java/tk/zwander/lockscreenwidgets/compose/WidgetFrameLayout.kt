@@ -91,7 +91,6 @@ fun MainWidgetFrameDelegate.WidgetFrameViewModel.WidgetFrameLayout(
     )
 
     var acknowledgedTwoFingerTap by this.acknowledgedTwoFingerTap.collectAsMutableState()
-    @Suppress("VariableNeverRead")
     var acknowledgedThreeFingerTap by this.acknowledgedThreeFingerTap.collectAsMutableState()
     var itemToRemove by this.itemToRemove.collectAsMutableState()
 
@@ -187,7 +186,6 @@ fun MainWidgetFrameDelegate.WidgetFrameViewModel.WidgetFrameLayout(
                                 }
                             } else {
                                 if (firstViewing) {
-                                    @Suppress("AssignedValueIsNeverRead")
                                     acknowledgedThreeFingerTap = true
                                 } else {
                                     context.eventManager.sendEvent(Event.TempHide(frameId = frameId))

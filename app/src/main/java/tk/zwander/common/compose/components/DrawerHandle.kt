@@ -249,7 +249,6 @@ fun DrawerDelegate.DrawerViewModel.DrawerHandle(
                 onLongClick = {
                     if (!updatedScrollingOpen && !updatedIsMoving && !updatedLockPosition) {
                         context.vibrate()
-                        @Suppress("AssignedValueIsNeverRead")
                         isMoving = true
                     }
                 },
