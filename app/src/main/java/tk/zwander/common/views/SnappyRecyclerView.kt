@@ -1,6 +1,5 @@
 package tk.zwander.common.views
 
-import android.annotation.SuppressLint
 import android.content.Context
 import android.util.AttributeSet
 import android.view.MotionEvent
@@ -13,9 +12,22 @@ class SnappyRecyclerView(
     context: Context,
     attrs: AttributeSet? = null,
 ) : ScrollingItemTouchRecyclerView(context, attrs) {
-
     private var latestVX = 0
     private var latestVY = 0
+
+    private var origX = 0f
+    private var origY = 0f
+
+    private var prevX = 0f
+    private var prevY = 0f
+
+    private var dispatchDownX = 0f
+    private var dispatchDownY = 0f
+
+    private var dispatchPrevX = 0f
+    private var dispatchPrevY = 0f
+
+    private var isVerticalSwipe = false
 
     override fun fling(velocityX: Int, velocityY: Int): Boolean {
         val slop = ViewConfiguration.get(context).scaledPagingTouchSlop
@@ -23,8 +35,9 @@ class SnappyRecyclerView(
         latestVX = velocityX
         latestVY = velocityY
 
-        val shouldSnap = layoutManager?.canScrollVertically() == true && velocityY.absoluteValue > slop ||
-                layoutManager?.canScrollHorizontally() == true && velocityX.absoluteValue > slop
+        val shouldSnap =
+            layoutManager?.canScrollVertically() == true && velocityY.absoluteValue > slop ||
+                    layoutManager?.canScrollHorizontally() == true && velocityX.absoluteValue > slop
 
         if (shouldSnap) {
             val layoutManager = layoutManager
@@ -40,15 +53,59 @@ class SnappyRecyclerView(
         return super.fling(velocityX, velocityY)
     }
 
-    private var dispatchDownX = 0f
-    private var dispatchDownY = 0f
-
-    private var dispatchPrevX = 0f
-    private var dispatchPrevY = 0f
-
-    private var isVerticalSwipe = false
-
     override fun dispatchTouchEvent(ev: MotionEvent): Boolean {
+        val lm = layoutManager
+
+        when (ev.action) {
+            MotionEvent.ACTION_DOWN -> {
+                origX = ev.rawX
+                origY = ev.rawY
+
+                prevX = origX
+                prevY = origY
+            }
+            MotionEvent.ACTION_MOVE -> {
+                val vx = ev.rawX - origX
+                val vy = ev.rawY - origY
+
+                latestVX = vx.toInt()
+                latestVY = vy.toInt()
+
+                prevX = ev.rawX
+                prevY = ev.rawY
+            }
+        }
+
+        if (lm is ISnappyLayoutManager
+            && (ev.action == MotionEvent.ACTION_UP ||
+                    ev.action == MotionEvent.ACTION_CANCEL)
+            && ((lm.canScrollHorizontally() && latestVX.absoluteValue > touchSlop &&
+                    (latestVY.absoluteValue < touchSlop || latestVX.absoluteValue > latestVY.absoluteValue) ||
+                    (lm.canScrollVertically() && latestVY.absoluteValue > touchSlop &&
+                            (latestVX.absoluteValue < touchSlop || latestVY.absoluteValue > latestVX.absoluteValue))))
+        ) {
+            // The layout manager is a SnappyLayoutManager, which means that the
+            // children should be snapped to a grid at the end of a drag or
+            // fling. The motion event is either a user lifting their finger or
+            // the cancellation of a motion events, so this is the time to take
+            // over the scrolling to perform our own functionality.
+            // Finally, the scroll state is idle--meaning that the resultant
+            // velocity after the user's gesture was below the threshold, and
+            // no fling was performed, so the view may be in an unaligned state
+            // and will not be flung to a proper state.
+            if (lm.canSnap()) {
+                val vx = latestVX
+                val vy = latestVY
+
+                handler?.post {
+                    smoothScrollToPosition(lm.getFixScrollPos(vx, vy))
+                }
+            }
+
+            latestVX = 0
+            latestVY = 0
+        }
+
         // Nothing special if no child scrolling target.
         if (nestedScrollTarget == null || selectedItem) return super.dispatchTouchEvent(ev)
 
@@ -71,7 +128,6 @@ class SnappyRecyclerView(
                     isVerticalSwipe = true
 
                     requestDisallowInterceptTouchEvent(true)
-//                    nestedScrollingListener?.invoke(true)
                     handled = super.dispatchTouchEvent(ev)
                 }
 
@@ -92,12 +148,6 @@ class SnappyRecyclerView(
         return handled
     }
 
-    private var origX = 0f
-    private var origY = 0f
-
-    private var prevX = 0f
-    private var prevY = 0f
-
     override fun onLayout(changed: Boolean, l: Int, t: Int, r: Int, b: Int) {
         super.onLayout(changed, l, t, r, b)
         val canScroll = when {
@@ -106,62 +156,5 @@ class SnappyRecyclerView(
             else -> false
         }
         overScrollMode = if (canScroll) OVER_SCROLL_ALWAYS else OVER_SCROLL_NEVER
-    }
-
-    @SuppressLint("ClickableViewAccessibility")
-    override fun onTouchEvent(e: MotionEvent): Boolean {
-        // We want the parent to handle all touch events--there's a lot going on there,
-        // and there is no reason to overwrite that functionality--bad things will happen.
-        val ret = super.onTouchEvent(e)
-        val lm = layoutManager
-
-        when (e.action) {
-            MotionEvent.ACTION_DOWN -> {
-                origX = e.rawX
-                origY = e.rawY
-
-                prevX = origX
-                prevY = origY
-            }
-            MotionEvent.ACTION_MOVE -> {
-                val vx = e.rawX - prevX
-                val vy = e.rawY - prevY
-
-//                val slopTestX = e.rawX - origX
-//                val slopTestY = e.rawY - origY
-
-                latestVX = vx.toInt()
-                latestVY = vy.toInt()
-
-                prevX = e.rawX
-                prevY = e.rawY
-            }
-        }
-
-        if (lm is ISnappyLayoutManager
-            && (e.action == MotionEvent.ACTION_UP ||
-                    e.action == MotionEvent.ACTION_CANCEL)
-            && scrollState == SCROLL_STATE_IDLE
-            && (latestVX.absoluteValue > touchSlop &&
-                    (latestVY.absoluteValue < touchSlop || latestVX.absoluteValue > latestVY.absoluteValue))
-        ) {
-            // The layout manager is a SnappyLayoutManager, which means that the
-            // children should be snapped to a grid at the end of a drag or
-            // fling. The motion event is either a user lifting their finger or
-            // the cancellation of a motion events, so this is the time to take
-            // over the scrolling to perform our own functionality.
-            // Finally, the scroll state is idle--meaning that the resultant
-            // velocity after the user's gesture was below the threshold, and
-            // no fling was performed, so the view may be in an unaligned state
-            // and will not be flung to a proper state.
-            if (lm.canSnap()) {
-                smoothScrollToPosition(lm.getFixScrollPos(latestVX, latestVY))
-            }
-
-            latestVX = 0
-            latestVY = 0
-        }
-
-        return ret
     }
 }
