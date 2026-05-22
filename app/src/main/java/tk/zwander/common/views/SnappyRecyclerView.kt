@@ -3,23 +3,15 @@ package tk.zwander.common.views
 import android.annotation.SuppressLint
 import android.content.Context
 import android.util.AttributeSet
-import android.util.Log
 import android.view.MotionEvent
-import android.view.View
 import android.view.ViewConfiguration
 import androidx.core.view.NestedScrollingParent3
-import androidx.core.view.NestedScrollingParentHelper
-import androidx.core.view.ViewCompat
 import tk.zwander.common.util.ISnappyLayoutManager
 import kotlin.math.absoluteValue
 
 //Based on https://stackoverflow.com/a/26445064/5496177
 class SnappyRecyclerView(context: Context, attrs: AttributeSet? = null) :
     ScrollingItemTouchRecyclerView(context, attrs), NestedScrollingParent3 {
-    private val parentHelper = NestedScrollingParentHelper(this)
-
-    private var nestedScrollTarget: View? = null
-    private var nestedScrollTargetWasUnableToScroll = false
 
     private var latestVX = 0
     private var latestVY = 0
@@ -78,9 +70,8 @@ class SnappyRecyclerView(context: Context, attrs: AttributeSet? = null) :
                     isVerticalSwipe = true
 
                     requestDisallowInterceptTouchEvent(true)
+//                    nestedScrollingListener?.invoke(true)
                     handled = super.dispatchTouchEvent(ev)
-                } else {
-                    requestDisallowInterceptTouchEvent(false)
                 }
 
                 dispatchPrevX = ev.rawX
@@ -123,8 +114,6 @@ class SnappyRecyclerView(context: Context, attrs: AttributeSet? = null) :
         val ret = super.onTouchEvent(e)
         val lm = layoutManager
 
-        val touchSlop = ViewConfiguration.get(context).scaledTouchSlop
-
         when (e.action) {
             MotionEvent.ACTION_DOWN -> {
                 origX = e.rawX
@@ -137,15 +126,14 @@ class SnappyRecyclerView(context: Context, attrs: AttributeSet? = null) :
                 val vx = e.rawX - prevX
                 val vy = e.rawY - prevY
 
-                val slopTestX = e.rawX - origX
-                val slopTestY = e.rawY - origY
+//                val slopTestX = e.rawX - origX
+//                val slopTestY = e.rawY - origY
 
-                latestVX = if (slopTestX.absoluteValue > vx.absoluteValue) slopTestX.toInt() else vx.toInt()
-                latestVY = if (slopTestY.absoluteValue > vy.absoluteValue) slopTestY.toInt() else vy.toInt()
+                latestVX = vx.toInt()
+                latestVY = vy.toInt()
 
-                nestedScrollingListener?.invoke(
-                    vx.absoluteValue > touchSlop || vy.absoluteValue > touchSlop,
-                )
+                prevX = e.rawX
+                prevY = e.rawY
             }
         }
 
@@ -153,7 +141,8 @@ class SnappyRecyclerView(context: Context, attrs: AttributeSet? = null) :
             && (e.action == MotionEvent.ACTION_UP ||
                     e.action == MotionEvent.ACTION_CANCEL)
             && scrollState == SCROLL_STATE_IDLE
-            && (latestVX != 0 || latestVY != 0)
+            && (latestVX.absoluteValue > touchSlop &&
+                    (latestVY.absoluteValue < touchSlop || latestVX.absoluteValue > latestVY.absoluteValue))
         ) {
             // The layout manager is a SnappyLayoutManager, which means that the
             // children should be snapped to a grid at the end of a drag or
@@ -173,97 +162,5 @@ class SnappyRecyclerView(context: Context, attrs: AttributeSet? = null) :
         }
 
         return ret
-    }
-
-    override fun getNestedScrollAxes(): Int {
-        return parentHelper.nestedScrollAxes
-    }
-
-    override fun onStartNestedScroll(
-        child: View,
-        target: View,
-        axes: Int,
-        type: Int,
-    ): Boolean {
-        return onStartNestedScroll(child, target, axes)
-    }
-
-    override fun onStartNestedScroll(child: View, target: View, nestedScrollAxes: Int): Boolean {
-        super.onStartNestedScroll(child, target, nestedScrollAxes)
-        return nestedScrollAxes and ViewCompat.SCROLL_AXIS_VERTICAL != 0
-    }
-
-    override fun onNestedScrollAccepted(
-        child: View,
-        target: View,
-        axes: Int,
-        type: Int,
-    ) {
-        if (axes and SCROLL_AXIS_VERTICAL != 0) {
-            // A descendant started scrolling, so we'll observe it.
-            setTarget(target)
-        }
-        parentHelper.onNestedScrollAccepted(child, target, axes, type)
-    }
-
-    override fun onNestedScrollAccepted(child: View, target: View, axes: Int) {
-        if (axes and SCROLL_AXIS_VERTICAL != 0) {
-            // A descendant started scrolling, so we'll observe it.
-            setTarget(target)
-        }
-        parentHelper.onNestedScrollAccepted(child, target, axes)
-    }
-
-    override fun onStopNestedScroll(target: View, type: Int) {
-        // The descendant finished scrolling. Clean up!
-        setTarget(null)
-        parentHelper.onStopNestedScroll(target, type)
-    }
-
-    override fun onStopNestedScroll(child: View) {
-        // The descendant finished scrolling. Clean up!
-        setTarget(null)
-        parentHelper.onStopNestedScroll(child)
-    }
-
-    override fun onNestedScroll(
-        target: View,
-        dxConsumed: Int,
-        dyConsumed: Int,
-        dxUnconsumed: Int,
-        dyUnconsumed: Int,
-        type: Int,
-    ) {
-        nestedScrollingListener?.invoke(true)
-        onNestedScroll(target, dxConsumed, dyConsumed, dxUnconsumed, dyUnconsumed)
-    }
-
-    override fun onNestedPreScroll(
-        target: View,
-        dx: Int,
-        dy: Int,
-        consumed: IntArray,
-        type: Int,
-    ) {
-        onNestedPreScroll(target, dx, dy, consumed)
-    }
-
-    override fun onNestedScroll(
-        target: View,
-        dxConsumed: Int,
-        dyConsumed: Int,
-        dxUnconsumed: Int,
-        dyUnconsumed: Int,
-        type: Int,
-        consumed: IntArray,
-    ) {
-        nestedScrollingListener?.invoke(true)
-        onNestedScroll(target, dxConsumed, dyConsumed, dxUnconsumed, dyUnconsumed)
-    }
-
-    private fun setTarget(view: View?) {
-        Log.e("LSW", "Setting target $view")
-        nestedScrollTarget = view
-        nestedScrollTargetWasUnableToScroll = false
     }
 }

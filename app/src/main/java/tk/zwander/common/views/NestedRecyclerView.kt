@@ -5,8 +5,6 @@ import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
 import androidx.core.view.NestedScrollingParent3
-import androidx.core.view.NestedScrollingParentHelper
-import androidx.core.view.ViewCompat
 
 //https://stackoverflow.com/a/68318211/5496177
 open class NestedRecyclerView @JvmOverloads constructor(
@@ -14,9 +12,6 @@ open class NestedRecyclerView @JvmOverloads constructor(
     attrs: AttributeSet? = null,
     defStyleAttr: Int = 0,
 ) : ScrollingItemTouchRecyclerView(context, attrs, defStyleAttr), NestedScrollingParent3 {
-    private var nestedScrollTarget: View? = null
-    private var nestedScrollTargetWasUnableToScroll = false
-    private val parentHelper by lazy { NestedScrollingParentHelper(this) }
 
     override fun dispatchTouchEvent(ev: MotionEvent): Boolean {
         // Nothing special if no child scrolling target.
@@ -39,46 +34,6 @@ open class NestedRecyclerView @JvmOverloads constructor(
         return handled
     }
 
-    override fun getNestedScrollAxes(): Int {
-        return parentHelper.nestedScrollAxes
-    }
-
-    // We only support vertical scrolling.
-    override fun onStartNestedScroll(child: View, target: View, nestedScrollAxes: Int): Boolean {
-        super.onStartNestedScroll(child, target, nestedScrollAxes)
-        return nestedScrollAxes and ViewCompat.SCROLL_AXIS_VERTICAL != 0
-    }
-
-    /*  Introduced with NestedScrollingParent2. */
-    override fun onStartNestedScroll(child: View, target: View, axes: Int, type: Int) =
-        onStartNestedScroll(child, target, axes)
-
-    override fun onNestedScrollAccepted(child: View, target: View, axes: Int) {
-        if (axes and SCROLL_AXIS_VERTICAL != 0) {
-            // A descendant started scrolling, so we'll observe it.
-            setTarget(target)
-        }
-        parentHelper.onNestedScrollAccepted(child, target, axes)
-    }
-
-    /*  Introduced with NestedScrollingParent2. */
-    override fun onNestedScrollAccepted(child: View, target: View, axes: Int, type: Int) {
-        if (axes and SCROLL_AXIS_VERTICAL != 0) {
-            // A descendant started scrolling, so we'll observe it.
-            setTarget(target)
-        }
-        parentHelper.onNestedScrollAccepted(child, target, axes, type)
-    }
-
-    override fun onNestedPreScroll(target: View, dx: Int, dy: Int, consumed: IntArray) {
-        super.onNestedPreScroll(target, dx, dy, consumed)
-    }
-
-    /*  Introduced with NestedScrollingParent2. */
-    override fun onNestedPreScroll(target: View, dx: Int, dy: Int, consumed: IntArray, type: Int) {
-        onNestedPreScroll(target, dx, dy, consumed)
-    }
-
     override fun onNestedScroll(
         target: View,
         dxConsumed: Int,
@@ -93,54 +48,5 @@ open class NestedRecyclerView @JvmOverloads constructor(
             // Let the parent start to consume scroll events.
             target.parent?.requestDisallowInterceptTouchEvent(false)
         }
-    }
-
-    /*  Introduced with NestedScrollingParent2. */
-    override fun onNestedScroll(
-        target: View,
-        dxConsumed: Int,
-        dyConsumed: Int,
-        dxUnconsumed: Int,
-        dyUnconsumed: Int,
-        type: Int,
-    ) {
-        onNestedScroll(target, dxConsumed, dyConsumed, dxUnconsumed, dyUnconsumed)
-    }
-
-    /*  Introduced with NestedScrollingParent3. */
-    override fun onNestedScroll(
-        target: View,
-        dxConsumed: Int,
-        dyConsumed: Int,
-        dxUnconsumed: Int,
-        dyUnconsumed: Int,
-        type: Int,
-        consumed: IntArray,
-    ) {
-        onNestedScroll(target, dxConsumed, dyConsumed, dxUnconsumed, dyUnconsumed, type)
-    }
-
-    /* From ViewGroup */
-    override fun onStopNestedScroll(child: View) {
-        // The descendant finished scrolling. Clean up!
-        setTarget(null)
-        parentHelper.onStopNestedScroll(child)
-    }
-
-    /*  Introduced with NestedScrollingParent2. */
-    override fun onStopNestedScroll(target: View, type: Int) {
-        // The descendant finished scrolling. Clean up!
-        setTarget(null)
-        parentHelper.onStopNestedScroll(target, type)
-    }
-
-    /*  Introduced with NestedScrollingParent2. */
-    override fun onNestedPreFling(target: View, velocityX: Float, velocityY: Float): Boolean {
-        return super.onNestedPreFling(target, velocityX, velocityY)
-    }
-
-    private fun setTarget(view: View?) {
-        nestedScrollTarget = view
-        nestedScrollTargetWasUnableToScroll = false
     }
 }
