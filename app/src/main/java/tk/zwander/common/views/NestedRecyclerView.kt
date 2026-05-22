@@ -4,15 +4,13 @@ import android.content.Context
 import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
-import androidx.core.view.NestedScrollingParent3
 
 //https://stackoverflow.com/a/68318211/5496177
 open class NestedRecyclerView @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
     defStyleAttr: Int = 0,
-) : ScrollingItemTouchRecyclerView(context, attrs, defStyleAttr), NestedScrollingParent3 {
-
+) : ScrollingItemTouchRecyclerView(context, attrs, defStyleAttr) {
     override fun dispatchTouchEvent(ev: MotionEvent): Boolean {
         // Nothing special if no child scrolling target.
         if (nestedScrollTarget == null || selectedItem) return super.dispatchTouchEvent(ev)

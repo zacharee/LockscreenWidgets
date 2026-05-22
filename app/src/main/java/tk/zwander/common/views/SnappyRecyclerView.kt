@@ -5,13 +5,14 @@ import android.content.Context
 import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.ViewConfiguration
-import androidx.core.view.NestedScrollingParent3
 import tk.zwander.common.util.ISnappyLayoutManager
 import kotlin.math.absoluteValue
 
 //Based on https://stackoverflow.com/a/26445064/5496177
-class SnappyRecyclerView(context: Context, attrs: AttributeSet? = null) :
-    ScrollingItemTouchRecyclerView(context, attrs), NestedScrollingParent3 {
+class SnappyRecyclerView(
+    context: Context,
+    attrs: AttributeSet? = null,
+) : ScrollingItemTouchRecyclerView(context, attrs) {
 
     private var latestVX = 0
     private var latestVY = 0
