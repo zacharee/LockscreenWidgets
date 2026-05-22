@@ -18,7 +18,6 @@ import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -60,7 +59,6 @@ fun DrawerDelegate.DrawerViewModel.Drawer(
     )
 
     var itemToRemove by this.itemToRemove.collectAsMutableState()
-    val selectedItem by this.selectedItem.collectAsState()
     val cutoutPadding = WindowInsets.displayCutout
     val statusBarPadding = cutoutPadding.only(WindowInsetsSides.Top).takeIf {
         it.getTop(density) > 0
@@ -77,10 +75,6 @@ fun DrawerDelegate.DrawerViewModel.Drawer(
         key = PrefManager.KEY_DRAWER_BACKGROUND_OVER_STATUS_BAR,
         defaultValue = true,
     )
-
-    LaunchedEffect(selectedItem) {
-        widgetGrid.selectedItem = selectedItem
-    }
 
     LaunchedEffect(drawerSidePadding, cutoutPadding, layoutDirection, statusBarPadding) {
         val combinedPadding = cutoutPadding.add(
@@ -148,17 +142,7 @@ fun DrawerDelegate.DrawerViewModel.Drawer(
 
             AndroidView(
                 factory = {
-                    widgetGrid.apply {
-                        nestedScrollingListener = {
-                            itemTouchHelper.attachToRecyclerView(
-                                if (it) {
-                                    null
-                                } else {
-                                    widgetGrid
-                                }
-                            )
-                        }
-                    }
+                    widgetGrid
                 },
                 modifier = Modifier
                     .fillMaxSize()

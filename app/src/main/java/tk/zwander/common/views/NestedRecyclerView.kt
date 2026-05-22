@@ -139,23 +139,6 @@ open class NestedRecyclerView @JvmOverloads constructor(
         return super.onNestedPreFling(target, velocityX, velocityY)
     }
 
-    override fun onScrollStateChanged(state: Int) {
-        super.onScrollStateChanged(state)
-        nestedScrollingListener?.invoke(state != SCROLL_STATE_IDLE)
-    }
-
-    /* In ViewGroup for API 21+. */
-    override fun onNestedFling(
-        target: View,
-        velocityX: Float,
-        velocityY: Float,
-        consumed: Boolean,
-    ) = super.onNestedFling(target, velocityX, velocityY, consumed).also {
-        // If the nested fling wasn't consumed, then the touch helper can act.
-        // Otherwise, disable it.
-        nestedScrollingListener?.invoke(!it)
-    }
-
     private fun setTarget(view: View?) {
         nestedScrollTarget = view
         nestedScrollTargetWasUnableToScroll = false

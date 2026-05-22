@@ -127,7 +127,7 @@ class DrawerDelegate private constructor(context: Context, displayId: String) :
     }
     override val rootView: View
         get() = drawer
-    override val recyclerView: RecyclerView
+    override val recyclerView: DrawerRecycler
         get() = widgetGrid
     override var currentWidgets: List<WidgetData>
         get() = prefManager.drawerWidgets.toList()

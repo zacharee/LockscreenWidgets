@@ -40,6 +40,7 @@ import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.input.pointer.pointerInteropFilter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalResources
@@ -186,7 +187,8 @@ fun BaseDelegate.BaseViewModel<*, *>.WidgetItemLayout(
                                 width = 1.dp,
                                 color = LocalContentColor.current,
                                 shape = RoundedCornerShape(animatedCornerRadius),
-                            ),
+                            )
+                            .pointerInteropFilter { false },
                     ) {
                         if (colCount > 1) {
                             Icon(

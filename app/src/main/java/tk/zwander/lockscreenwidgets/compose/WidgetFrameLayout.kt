@@ -29,7 +29,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -52,6 +51,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.zIndex
+import androidx.core.view.ViewCompat
 import com.bugsnag.android.performance.compose.MeasuredComposable
 import tk.zwander.common.compose.components.BlurView
 import tk.zwander.common.compose.components.ConfirmFrameRemovalLayout
@@ -137,12 +137,6 @@ fun MainWidgetFrameDelegate.WidgetFrameViewModel.WidgetFrameLayout(
             context.prefManager.maskedModeScaleForDisplay = mutatedValue
         },
     )
-
-    val selectedItem by this.selectedItem.collectAsState()
-
-    LaunchedEffect(selectedItem) {
-        widgetGrid.selectedItem = selectedItem
-    }
 
     Card(
         modifier = modifier
@@ -283,16 +277,8 @@ fun MainWidgetFrameDelegate.WidgetFrameViewModel.WidgetFrameLayout(
                 @Suppress("COMPOSE_APPLIER_CALL_MISMATCH")
                 AndroidView(
                     factory = {
-                        widgetGrid.apply {
-                            nestedScrollingListener = {
-                                itemTouchHelper.attachToRecyclerView(
-                                    if (it) {
-                                        null
-                                    } else {
-                                        widgetGrid
-                                    }
-                                )
-                            }
+                        widgetGrid.also {
+                            ViewCompat.setNestedScrollingEnabled(it, true)
                         }
                     },
                     update = {

@@ -48,22 +48,47 @@ open class ScrollingItemTouchRecyclerView @JvmOverloads constructor(
      */
     var selectedItem: Boolean = false
 
+    init {
+        isNestedScrollingEnabled = true
+    }
+
     override fun dispatchTouchEvent(ev: MotionEvent): Boolean {
         if (ev.action == MotionEvent.ACTION_UP) {
-            // This is to prevent an issue where the item touch helper receives
-            // an ACTION_DOWN but then doesn't later get the ACTION_UP event,
-            // causing it to run any long-press events.
-            nestedScrollingListener?.invoke(true)
+//            // This is to prevent an issue where the item touch helper receives
+//            // an ACTION_DOWN but then doesn't later get the ACTION_UP event,
+//            // causing it to run any long-press events.
+//            nestedScrollingListener?.invoke(true)
             nestedScrollingListener?.invoke(false)
         }
 
         return super.dispatchTouchEvent(ev)
     }
 
+    override fun onNestedPreScroll(target: View, dx: Int, dy: Int, consumed: IntArray) {
+        nestedScrollingListener?.invoke(true)
+        super.onNestedPreScroll(target, dx, dy, consumed)
+    }
+
     @CallSuper
     override fun onStartNestedScroll(child: View, target: View, nestedScrollAxes: Int): Boolean {
         handleNestedTarget(child)
-        return super.onStartNestedScroll(child, target, nestedScrollAxes)
+        return !selectedItem
+    }
+
+    override fun onScrollStateChanged(state: Int) {
+        super.onScrollStateChanged(state)
+    }
+
+    /* In ViewGroup for API 21+. */
+    override fun onNestedFling(
+        target: View,
+        velocityX: Float,
+        velocityY: Float,
+        consumed: Boolean,
+    ) = super.onNestedFling(target, velocityX, velocityY, consumed).also {
+        // If the nested fling wasn't consumed, then the touch helper can act.
+        // Otherwise, disable it.
+        nestedScrollingListener?.invoke(!it)
     }
 
     @SuppressLint("NewApi", "ClickableViewAccessibility")
@@ -72,7 +97,7 @@ open class ScrollingItemTouchRecyclerView @JvmOverloads constructor(
 
         view.setOnTouchListener { _, event ->
             if (event.action == MotionEvent.ACTION_UP) {
-                nestedScrollingListener?.invoke(true)
+//                nestedScrollingListener?.invoke(true)
                 nestedScrollingListener?.invoke(false)
             }
             false

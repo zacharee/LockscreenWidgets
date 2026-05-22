@@ -49,6 +49,7 @@ import tk.zwander.common.util.LifecycleEffect
 import tk.zwander.common.util.PrefManager
 import tk.zwander.common.util.prefManager
 import tk.zwander.common.util.themedContext
+import tk.zwander.common.views.SnappyRecyclerView
 import tk.zwander.lockscreenwidgets.adapters.WidgetFrameAdapter
 import tk.zwander.lockscreenwidgets.databinding.WidgetGridHolderBinding
 import tk.zwander.lockscreenwidgets.util.FramePrefs
@@ -190,7 +191,7 @@ class PreviewDelegate(
     themedContext: Context,
     targetDisplayId: String,
     view: View,
-    widgetGridView: RecyclerView,
+    widgetGridView: SnappyRecyclerView,
     private val lifecycleOwner: LifecycleOwner,
     private val savedStateRegistryOwner: SavedStateRegistryOwner,
     private val frameId: Int,
@@ -260,7 +261,7 @@ class PreviewDelegate(
     }
     override val params: WindowManager.LayoutParams = WindowManager.LayoutParams()
     override val rootView: View = view
-    override val recyclerView: RecyclerView = widgetGridView
+    override val recyclerView: SnappyRecyclerView = widgetGridView
     override var currentWidgets: List<WidgetData>
     get() = FramePrefs.getWidgetsForFrame(this, frameId).toList()
     set(value) {

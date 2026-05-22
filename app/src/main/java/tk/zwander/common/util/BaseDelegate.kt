@@ -36,6 +36,7 @@ import tk.zwander.common.data.WidgetType
 import tk.zwander.common.host.WidgetHostCompat
 import tk.zwander.common.host.widgetHostCompat
 import tk.zwander.common.util.mitigations.SafeContextWrapper
+import tk.zwander.common.views.ScrollingItemTouchRecyclerView
 import java.util.concurrent.ConcurrentLinkedDeque
 
 @Suppress("MemberVisibilityCanBePrivate")
@@ -75,7 +76,7 @@ abstract class BaseDelegate<State : Any>(
     abstract val gridLayoutManager: LayoutManager
     protected abstract val params: WindowManager.LayoutParams
     protected abstract val rootView: View
-    protected abstract val recyclerView: RecyclerView
+    protected abstract val recyclerView: ScrollingItemTouchRecyclerView
     abstract var currentWidgets: List<WidgetData>
 
     protected val lifecycleRegistry by lazy { LifecycleRegistry(this) }
@@ -116,7 +117,18 @@ abstract class BaseDelegate<State : Any>(
         recyclerView.setHasFixedSize(true)
         recyclerView.adapter = adapter
         recyclerView.layoutManager = gridLayoutManager
+
         itemTouchHelper.attachToRecyclerView(recyclerView)
+        recyclerView.nestedScrollingListener = {
+            itemTouchHelper.attachToRecyclerView(
+                if (it) {
+                    null
+                } else {
+                    recyclerView
+                },
+            )
+        }
+
         adapter.updateWidgets(currentWidgets)
 
         updateCounts()
@@ -262,7 +274,6 @@ abstract class BaseDelegate<State : Any>(
     /**
      * Force the display to remain on, or remove that force.
      *
-     * @param wm the WindowManager to use.
      * @param on whether to add or remove the force flag.
      */
     protected suspend fun forceWakelock(on: Boolean, updateOverlay: Boolean = true) {
@@ -279,7 +290,7 @@ abstract class BaseDelegate<State : Any>(
 
     @CallSuper
     protected open fun onItemSelected(selected: Boolean, highlighted: Boolean) {
-        viewModel.selectedItem.value = selected
+        recyclerView.selectedItem = selected
         updateCommonState { it.copy(isHoldingItem = selected, isItemHighlighted = highlighted) }
     }
 
@@ -351,16 +362,12 @@ abstract class BaseDelegate<State : Any>(
         val itemToRemove = MutableStateFlow<WidgetData?>(null)
         val isResizingItem = MutableStateFlow(false)
         val currentEditingInterfacePosition = MutableStateFlow(RecyclerView.NO_POSITION)
-        val selectedItem = MutableStateFlow(false)
 
         val params: WindowManager.LayoutParams
             get() = delegate.params
 
         val wm: WindowManager?
             get() = delegate.wm
-
-        val itemTouchHelper: ItemTouchHelper
-            get() = delegate.itemTouchHelper
 
         val state: State
             get() = delegate.state

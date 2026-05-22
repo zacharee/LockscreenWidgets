@@ -2,6 +2,8 @@ package tk.zwander.common.views.remote
 
 import android.content.Context
 import android.util.AttributeSet
+import android.util.Log
+import android.view.MotionEvent
 import android.widget.ListView
 import androidx.core.view.NestedScrollingChild3
 import androidx.core.view.NestedScrollingChildHelper
@@ -67,15 +69,20 @@ class CatchingListView(
     }
 
     override fun startNestedScroll(p0: Int, p1: Int): Boolean {
-        return helper.startNestedScroll(p0, p1)
+        return helper.startNestedScroll(p0, p1).also {
+            Log.e("LSW", "Start nested scroll $p0, $p1, $it")
+        }
     }
 
     override fun stopNestedScroll(p0: Int) {
         helper.stopNestedScroll(p0)
+        Log.e("LSW", "Stop nested scroll $p0")
     }
 
     override fun hasNestedScrollingParent(p0: Int): Boolean {
-        return helper.hasNestedScrollingParent(p0)
+        return helper.hasNestedScrollingParent(p0).also {
+            Log.e("LSW", "Has nested scrolling parent $p0, $it")
+        }
     }
 
     override fun dispatchNestedScroll(
@@ -86,7 +93,9 @@ class CatchingListView(
         p4: IntArray?,
         p5: Int,
     ): Boolean {
-        return helper.dispatchNestedScroll(p0, p1, p2, p3, p4, p5)
+        return helper.dispatchNestedScroll(p0, p1, p2, p3, p4, p5).also {
+            Log.e("LSW", "Dispatch nested scroll $p0, $p1, $p2, $p3, ${p4.contentToString()}, $p5, $it")
+        }
     }
 
     override fun dispatchNestedPreScroll(
@@ -96,7 +105,9 @@ class CatchingListView(
         p3: IntArray?,
         p4: Int,
     ): Boolean {
-        return helper.dispatchNestedPreScroll(p0, p1, p2, p3, p4)
+        return helper.dispatchNestedPreScroll(p0, p1, p2, p3, p4).also {
+            Log.e("LSW", "Dispatch nested pre scroll $p0, $p1, ${p2.contentToString()}, ${p3.contentToString()}, $p4, $it")
+        }
     }
 
     override fun dispatchNestedScroll(
@@ -108,7 +119,9 @@ class CatchingListView(
         p5: Int,
         p6: IntArray,
     ) {
-        helper.dispatchNestedScroll(p0, p1, p2, p3, p4, p5, p6)
+        helper.dispatchNestedScroll(p0, p1, p2, p3, p4, p5, p6).also {
+            Log.e("LSW", "Dispatch nested scroll $p0, $p1, $p2, $p3, ${p4.contentToString()}, $p5, ${p6.contentToString()}, $it")
+        }
     }
 
     override fun dispatchNestedFling(
@@ -116,11 +129,15 @@ class CatchingListView(
         velocityY: Float,
         consumed: Boolean,
     ): Boolean {
-        return helper.dispatchNestedFling(velocityX, velocityY, consumed)
+        return helper.dispatchNestedFling(velocityX, velocityY, consumed).also {
+            Log.e("LSW", "Dispatch nested fling $velocityX, $velocityY, $consumed, $it")
+        }
     }
 
     override fun dispatchNestedPreFling(velocityX: Float, velocityY: Float): Boolean {
-        return helper.dispatchNestedPreFling(velocityX, velocityY)
+        return helper.dispatchNestedPreFling(velocityX, velocityY).also {
+            Log.e("LSW", "Dispatch nested pre fling $velocityX, $velocityY, $it")
+        }
     }
 
     override fun dispatchNestedPreScroll(
@@ -129,7 +146,9 @@ class CatchingListView(
         consumed: IntArray?,
         offsetInWindow: IntArray?,
     ): Boolean {
-        return helper.dispatchNestedPreScroll(dx, dy, consumed, offsetInWindow)
+        return helper.dispatchNestedPreScroll(dx, dy, consumed, offsetInWindow).also {
+            Log.e("LSW", "Dispatch nested pre scroll $dx, $dy, ${consumed.contentToString()}, ${offsetInWindow.contentToString()}, $it")
+        }
     }
 
     override fun dispatchNestedScroll(
@@ -145,14 +164,29 @@ class CatchingListView(
             dxUnconsumed,
             dyUnconsumed,
             offsetInWindow,
-        )
+        ).also {
+            Log.e("LSW", "Dispatch nested scroll $dxConsumed, $dyConsumed, $dxUnconsumed, $dyUnconsumed, ${offsetInWindow.contentToString()}, $it")
+        }
     }
 
     override fun hasNestedScrollingParent(): Boolean {
-        return helper.hasNestedScrollingParent()
+        return helper.hasNestedScrollingParent().also {
+            Log.e("LSW", "Has nested scrolling parent $it")
+        }
     }
 
     override fun isNestedScrollingEnabled(): Boolean {
         return helper.isNestedScrollingEnabled
+    }
+
+    override fun onScrollChanged(l: Int, t: Int, oldl: Int, oldt: Int) {
+        Log.e("LSW", "on scroll changed $l $t $oldl $oldt")
+        super.onScrollChanged(l, t, oldl, oldt)
+    }
+
+    override fun onInterceptTouchEvent(ev: MotionEvent): Boolean {
+        return super.onInterceptTouchEvent(ev).also {
+            Log.e("LSW", "On intercept touch event $it ${MotionEvent.actionToString(ev.action)}")
+        }
     }
 }

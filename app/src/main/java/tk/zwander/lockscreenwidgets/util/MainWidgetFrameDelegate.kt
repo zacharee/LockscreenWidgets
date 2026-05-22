@@ -58,6 +58,7 @@ import tk.zwander.common.util.safeRemoveView
 import tk.zwander.common.util.set
 import tk.zwander.common.util.themedContext
 import tk.zwander.common.util.wallpaperUtils
+import tk.zwander.common.views.SnappyRecyclerView
 import tk.zwander.lockscreenwidgets.adapters.WidgetFrameAdapter
 import tk.zwander.lockscreenwidgets.compose.WidgetFrameLayout
 import tk.zwander.lockscreenwidgets.data.Mode
@@ -241,7 +242,7 @@ open class MainWidgetFrameDelegate protected constructor(
 
     override val rootView: View
         get() = frame
-    override val recyclerView: RecyclerView
+    override val recyclerView: SnappyRecyclerView
         get() = widgetGrid
     override var currentWidgets: List<WidgetData>
         get() = FramePrefs.getWidgetsForFrame(this, id).toList()
