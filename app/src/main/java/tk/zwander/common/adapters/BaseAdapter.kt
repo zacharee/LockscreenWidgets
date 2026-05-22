@@ -52,10 +52,8 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.view.ViewCompat
 import androidx.core.view.forEach
-import androidx.lifecycle.setViewTreeLifecycleOwner
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
-import androidx.savedstate.setViewTreeSavedStateRegistryOwner
 import com.arasthel.spannedgridlayoutmanager.SpanSize
 import com.arasthel.spannedgridlayoutmanager.SpannedGridLayoutManager
 import com.bugsnag.android.performance.compose.MeasuredComposable
@@ -95,7 +93,7 @@ import kotlin.math.min
 abstract class BaseAdapter<VM : BaseDelegate.BaseViewModel<*, *>>(
     protected val context: Context,
     protected val viewModel: VM,
-) : RecyclerView.Adapter<BaseAdapter<VM>.BaseVH>() {
+) : RecyclerView.Adapter<BaseAdapter.BaseVH>() {
     companion object {
         const val VIEW_TYPE_WIDGET = 0
         const val VIEW_TYPE_ADD = 1
@@ -224,13 +222,10 @@ abstract class BaseAdapter<VM : BaseDelegate.BaseViewModel<*, *>>(
     }
 
     protected open fun createWidgetViewHolder(view: ComposeViewHolderBinding): WidgetVH {
-        return WidgetVH(view).also {
-            it.updateCompositionContext()
-        }
+        return WidgetVH(view)
     }
 
     override fun onBindViewHolder(holder: BaseVH, position: Int) {
-        holder.updateCompositionContext()
         holder.performBind()
     }
 
@@ -717,7 +712,7 @@ abstract class BaseAdapter<VM : BaseDelegate.BaseViewModel<*, *>>(
         }
     }
 
-    abstract inner class BaseVH(protected val binding: ComposeViewHolderBinding) :
+    abstract class BaseVH(protected val binding: ComposeViewHolderBinding) :
         RecyclerView.ViewHolder(binding.root) {
         init {
             mainHandler.post {
@@ -727,13 +722,13 @@ abstract class BaseAdapter<VM : BaseDelegate.BaseViewModel<*, *>>(
 
         fun updateCompositionContext() {
             binding.root.setViewCompositionStrategy(
-                ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed,
+                ViewCompositionStrategy.DisposeOnDetachedFromWindowOrReleasedFromPool,
             )
-            binding.root.setViewTreeLifecycleOwner(viewModel.savedStateRegistryOwner)
-            binding.root.setViewTreeSavedStateRegistryOwner(viewModel.savedStateRegistryOwner)
-            binding.root.setParentCompositionContext(
-                parent = viewModel.createLifecycleAwareWindowRecomposer(),
-            )
+//            binding.root.setViewTreeLifecycleOwner(viewModel.savedStateRegistryOwner)
+//            binding.root.setViewTreeSavedStateRegistryOwner(viewModel.savedStateRegistryOwner)
+//            binding.root.setParentCompositionContext(
+//                parent = viewModel.createLifecycleAwareWindowRecomposer(),
+//            )
         }
 
         abstract fun performBind()

@@ -8,7 +8,6 @@ import android.view.MotionEvent
 import android.view.View
 import android.view.WindowManager
 import androidx.annotation.CallSuper
-import androidx.compose.runtime.Recomposer
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleRegistry
 import androidx.lifecycle.ViewModel
@@ -378,20 +377,11 @@ abstract class BaseDelegate<State : Any>(
         val lsDisplay: LSDisplay?
             get() = delegate.display
 
-        val savedStateRegistryOwner: SavedStateRegistryOwner
-            get() = delegate
-
         abstract val widgetCornerRadiusKey: String
         abstract val containerCornerRadiusKey: String?
 
         abstract val ignoreWidgetTouchesKey: String?
         abstract val doubleTapTurnOffDisplayKey: String?
-
-        fun createLifecycleAwareWindowRecomposer(): Recomposer {
-            return delegate.rootView.createLifecycleAwareWindowRecomposerWithoutDetachCancel(
-                lifecycle = delegate.lifecycle,
-            )
-        }
 
         suspend fun updateWindow() {
             delegate.updateWindow()
