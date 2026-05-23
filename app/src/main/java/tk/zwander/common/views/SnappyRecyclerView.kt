@@ -27,7 +27,7 @@ class SnappyRecyclerView(
     private var dispatchPrevX = 0f
     private var dispatchPrevY = 0f
 
-    private var isVerticalSwipe = false
+    private var isNestedSwipe = false
 
     override fun fling(velocityX: Int, velocityY: Int): Boolean {
         val slop = ViewConfiguration.get(context).scaledPagingTouchSlop
@@ -124,8 +124,20 @@ class SnappyRecyclerView(
                 val vx = (dispatchPrevX - ev.rawX).absoluteValue
                 val vy = (dispatchPrevY - ev.rawY).absoluteValue
 
-                if (isVerticalSwipe || (vy > vx && vy > ViewConfiguration.get(context).scaledTouchSlop)) {
-                    isVerticalSwipe = true
+                val overThreshold = when {
+                    layoutManager?.canScrollHorizontally() == true -> {
+                        vy > vx && vy > touchSlop
+                    }
+                    layoutManager?.canScrollVertically() == true -> {
+                        vx > vy && vx > touchSlop
+                    }
+                    else -> {
+                        false
+                    }
+                }
+
+                if (isNestedSwipe || overThreshold) {
+                    isNestedSwipe = true
 
                     requestDisallowInterceptTouchEvent(true)
                     handled = super.dispatchTouchEvent(ev)
@@ -136,12 +148,13 @@ class SnappyRecyclerView(
             }
 
             MotionEvent.ACTION_UP -> {
-                isVerticalSwipe = false
+                requestDisallowInterceptTouchEvent(false)
+                isNestedSwipe = false
             }
         }
 
-        requestDisallowInterceptTouchEvent(false)
         if (!handled || nestedScrollTargetWasUnableToScroll) {
+            requestDisallowInterceptTouchEvent(false)
             handled = super.dispatchTouchEvent(ev)
         }
 

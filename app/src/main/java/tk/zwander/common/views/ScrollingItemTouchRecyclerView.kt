@@ -189,8 +189,6 @@ open class ScrollingItemTouchRecyclerView @JvmOverloads constructor(
 
     @SuppressLint("NewApi", "ClickableViewAccessibility")
     private fun handleNestedTarget(view: View) {
-        val slop = ViewConfiguration.get(context).scaledTouchSlop
-
         when (view) {
             is AbsListView -> {
                 var previousScrollOffset = view.verticalScrollOffset
@@ -219,7 +217,7 @@ open class ScrollingItemTouchRecyclerView @JvmOverloads constructor(
                             }
 
                             if (prevY != event.rawY &&
-                                (event.rawY - prevY).absoluteValue > slop) {
+                                (event.rawY - prevY).absoluteValue > touchSlop) {
                                 nestedScrollingListener?.invoke(true)
                                 prevY = event.rawY
                             }
