@@ -248,10 +248,10 @@ class App : Application(), CoroutineScope by MainScope(), EventObserver {
 
                 true
             }
-
-            val previousHandler = Thread.getDefaultUncaughtExceptionHandler()
-            Thread.setDefaultUncaughtExceptionHandler(GlobalExceptionHandler(this, previousHandler))
         }
+
+        val previousHandler = Thread.getDefaultUncaughtExceptionHandler()
+        Thread.setDefaultUncaughtExceptionHandler(GlobalExceptionHandler(this, previousHandler))
 
         //Make sure we can access hidden APIs
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
