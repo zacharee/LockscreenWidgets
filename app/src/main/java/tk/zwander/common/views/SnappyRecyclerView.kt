@@ -106,8 +106,8 @@ class SnappyRecyclerView(
             latestVY = 0
         }
 
-        // Nothing special if no child scrolling target.
-        if (nestedScrollTarget == null || selectedItem) return super.dispatchTouchEvent(ev)
+        // No scrolling if no selected item.
+        if (selectedItem) return super.dispatchTouchEvent(ev)
 
         var handled = false
 

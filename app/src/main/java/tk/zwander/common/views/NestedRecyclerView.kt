@@ -21,7 +21,7 @@ open class NestedRecyclerView @JvmOverloads constructor(
     private var isNestedSwipe = false
 
     override fun dispatchTouchEvent(ev: MotionEvent): Boolean {
-        // Nothing special if no child scrolling target.
+        // No scrolling if no selected item.
         if (selectedItem) {
             return super.dispatchTouchEvent(ev)
         }
@@ -42,6 +42,8 @@ open class NestedRecyclerView @JvmOverloads constructor(
                 val vy = (dispatchDownY - ev.rawY).absoluteValue
 
                 val overThreshold = when {
+                    // Assuming cross-axis "nested" scrolling here for the widget frame.
+                    // This could probably be cleaned up but it works.
                     layoutManager?.canScrollHorizontally() == true -> {
                         vx > touchSlop
                     }
