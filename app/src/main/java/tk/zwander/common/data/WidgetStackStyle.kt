@@ -1,4 +1,4 @@
-package tk.zwander.common.data.window
+package tk.zwander.common.data
 
 import android.content.Context
 import android.os.Parcelable

@@ -23,8 +23,8 @@ import tk.zwander.common.data.SafePointF
 import tk.zwander.common.data.WidgetData
 import tk.zwander.common.data.WidgetListFilters
 import tk.zwander.common.data.WidgetSizeData
+import tk.zwander.common.data.WidgetStackStyle
 import tk.zwander.common.data.WidgetTileInfo
-import tk.zwander.common.data.window.WidgetStackStyle
 import tk.zwander.common.iconpacks.IconEntry
 import tk.zwander.lockscreenwidgets.R
 import tk.zwander.lockscreenwidgets.activities.TaskerIsAllowedToShowFrame

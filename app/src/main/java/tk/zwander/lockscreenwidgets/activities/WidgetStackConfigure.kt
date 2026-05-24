@@ -112,7 +112,7 @@ import tk.zwander.common.compose.util.rememberPreferenceState
 import tk.zwander.common.compose.util.widgetViewCacheRegistry
 import tk.zwander.common.data.WidgetData
 import tk.zwander.common.data.WidgetSizeData
-import tk.zwander.common.data.window.WidgetStackStyle
+import tk.zwander.common.data.WidgetStackStyle
 import tk.zwander.common.host.WidgetHostCompat
 import tk.zwander.common.host.widgetHostCompat
 import tk.zwander.common.util.Event

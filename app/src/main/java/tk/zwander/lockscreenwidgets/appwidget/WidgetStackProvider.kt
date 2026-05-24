@@ -31,7 +31,7 @@ import androidx.core.widget.RemoteViewsCompat.setViewBackgroundResource
 import com.android.internal.appwidget.IAppWidgetService
 import com.android.internal.widget.RecyclerView
 import tk.zwander.common.appwidget.RemoteViewsProxyService
-import tk.zwander.common.data.window.WidgetStackStyle
+import tk.zwander.common.data.WidgetStackStyle
 import tk.zwander.common.host.widgetHostCompat
 import tk.zwander.common.util.Event
 import tk.zwander.common.util.eventManager
