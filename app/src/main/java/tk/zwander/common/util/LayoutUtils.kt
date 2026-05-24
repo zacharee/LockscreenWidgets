@@ -100,10 +100,15 @@ fun createTouchHelperCallback(
         ) {
             super.clearView(recyclerView, viewHolder)
 
-            onItemActive(false)
-            onItemSelected(false, false)
+            if (!viewModel.isResizingItem.value) {
+                onItemActive(false)
+                onItemSelected(
+                    false,
+                    viewModel.currentEditingInterfacePosition.value != RecyclerView.NO_POSITION,
+                )
 
-            viewHolder.itemView.alpha = 1.0f
+                viewHolder.itemView.alpha = 1.0f
+            }
         }
 
         override fun interpolateOutOfBoundsScroll(

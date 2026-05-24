@@ -289,7 +289,7 @@ abstract class BaseDelegate<State : Any>(
 
     @CallSuper
     protected open fun onItemSelected(selected: Boolean, highlighted: Boolean) {
-        recyclerView.selectedItem = selected
+        recyclerView.selectedItem = selected || highlighted
         updateCommonState { it.copy(isHoldingItem = selected, isItemHighlighted = highlighted) }
     }
 

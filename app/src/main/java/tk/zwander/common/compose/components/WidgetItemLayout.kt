@@ -38,8 +38,6 @@ import androidx.compose.ui.composed
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
-import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
-import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.input.pointer.pointerInteropFilter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -80,7 +78,6 @@ fun BaseDelegate.BaseViewModel<*, *>.WidgetItemLayout(
     rowCount: Int,
     colCount: Int,
     isEditing: Boolean,
-    nestedScrollConnection: NestedScrollConnection,
     modifier: Modifier = Modifier,
 ) {
     val context = LocalContext.current
@@ -113,8 +110,7 @@ fun BaseDelegate.BaseViewModel<*, *>.WidgetItemLayout(
             LocalContentColor provides Color.White,
         ) {
             Box(
-                modifier = Modifier.fillMaxSize()
-                    .nestedScroll(nestedScrollConnection),
+                modifier = Modifier.fillMaxSize(),
                 contentAlignment = Alignment.Center,
             ) {
                 widgetContents(Modifier.fillMaxSize())

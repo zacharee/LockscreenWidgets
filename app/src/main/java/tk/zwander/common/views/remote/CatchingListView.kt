@@ -2,7 +2,6 @@ package tk.zwander.common.views.remote
 
 import android.content.Context
 import android.util.AttributeSet
-import android.view.MotionEvent
 import android.widget.ListView
 import androidx.core.view.NestedScrollingChild3
 import androidx.core.view.NestedScrollingChildHelper
@@ -157,11 +156,15 @@ class CatchingListView(
         return helper.isNestedScrollingEnabled
     }
 
-    override fun onScrollChanged(l: Int, t: Int, oldl: Int, oldt: Int) {
-        super.onScrollChanged(l, t, oldl, oldt)
+    override fun setNestedScrollingEnabled(enabled: Boolean) {
+        helper.isNestedScrollingEnabled = enabled
     }
 
-    override fun onInterceptTouchEvent(ev: MotionEvent): Boolean {
-        return super.onInterceptTouchEvent(ev)
+    override fun startNestedScroll(axes: Int): Boolean {
+        return helper.startNestedScroll(axes)
+    }
+
+    override fun stopNestedScroll() {
+        helper.stopNestedScroll()
     }
 }

@@ -121,15 +121,15 @@ class SnappyRecyclerView(
             }
 
             MotionEvent.ACTION_MOVE -> {
-                val vx = (dispatchPrevX - ev.rawX).absoluteValue
-                val vy = (dispatchPrevY - ev.rawY).absoluteValue
+                val vx = (dispatchDownX - ev.rawX).absoluteValue
+                val vy = (dispatchDownY - ev.rawY).absoluteValue
 
                 val overThreshold = when {
                     layoutManager?.canScrollHorizontally() == true -> {
-                        vy > vx && vy > touchSlop
+                        vy > touchSlop
                     }
                     layoutManager?.canScrollVertically() == true -> {
-                        vx > vy && vx > touchSlop
+                        vx > touchSlop
                     }
                     else -> {
                         false
@@ -140,6 +140,7 @@ class SnappyRecyclerView(
                     isNestedSwipe = true
 
                     requestDisallowInterceptTouchEvent(true)
+                    nestedScrollingListener?.invoke(true)
                     handled = super.dispatchTouchEvent(ev)
                 }
 
@@ -149,6 +150,7 @@ class SnappyRecyclerView(
 
             MotionEvent.ACTION_UP -> {
                 requestDisallowInterceptTouchEvent(false)
+                nestedScrollingListener?.invoke(false)
                 isNestedSwipe = false
             }
         }

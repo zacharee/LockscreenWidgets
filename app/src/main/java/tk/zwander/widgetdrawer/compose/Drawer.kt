@@ -30,6 +30,7 @@ import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.zIndex
+import androidx.core.view.ViewCompat
 import androidx.core.view.updatePadding
 import tk.zwander.common.compose.components.BlurView
 import tk.zwander.common.compose.components.ConfirmWidgetRemovalLayout
@@ -142,7 +143,9 @@ fun DrawerDelegate.DrawerViewModel.Drawer(
 
             AndroidView(
                 factory = {
-                    widgetGrid
+                    widgetGrid.also {
+                        ViewCompat.setNestedScrollingEnabled(it, true)
+                    }
                 },
                 modifier = Modifier
                     .fillMaxSize()

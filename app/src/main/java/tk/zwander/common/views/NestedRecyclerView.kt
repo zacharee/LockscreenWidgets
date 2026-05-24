@@ -4,6 +4,7 @@ import android.content.Context
 import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
+import kotlin.math.absoluteValue
 
 //https://stackoverflow.com/a/68318211/5496177
 open class NestedRecyclerView @JvmOverloads constructor(
@@ -11,21 +12,68 @@ open class NestedRecyclerView @JvmOverloads constructor(
     attrs: AttributeSet? = null,
     defStyleAttr: Int = 0,
 ) : ScrollingItemTouchRecyclerView(context, attrs, defStyleAttr) {
+    private var dispatchDownX = 0f
+    private var dispatchDownY = 0f
+
+    private var dispatchPrevX = 0f
+    private var dispatchPrevY = 0f
+
+    private var isNestedSwipe = false
+
     override fun dispatchTouchEvent(ev: MotionEvent): Boolean {
         // Nothing special if no child scrolling target.
-        if (nestedScrollTarget == null || selectedItem) return super.dispatchTouchEvent(ev)
+        if (selectedItem) {
+            return super.dispatchTouchEvent(ev)
+        }
 
-        // Inhibit the execution of our onInterceptTouchEvent for now...
-        requestDisallowInterceptTouchEvent(true)
-        // ... but do all other processing.
-        var handled = super.dispatchTouchEvent(ev)
+        var handled = false
 
-        // If the first dispatch yielded an unhandled event or the descendant view is unable to
-        // scroll in the direction the user is scrolling, we dispatch once more but without skipping
-        // our onInterceptTouchEvent. Note that RecyclerView automatically cancels active touches of
-        // all its descendants once it starts scrolling so we don't have to do that.
-        requestDisallowInterceptTouchEvent(false)
+        when (ev.action) {
+            MotionEvent.ACTION_DOWN -> {
+                dispatchDownX = ev.rawX
+                dispatchDownY = ev.rawY
+
+                dispatchPrevX = dispatchDownX
+                dispatchPrevY = dispatchDownY
+            }
+
+            MotionEvent.ACTION_MOVE -> {
+                val vx = (dispatchDownX - ev.rawX).absoluteValue
+                val vy = (dispatchDownY - ev.rawY).absoluteValue
+
+                val overThreshold = when {
+                    layoutManager?.canScrollHorizontally() == true -> {
+                        vx > touchSlop
+                    }
+                    layoutManager?.canScrollVertically() == true -> {
+                        vy > touchSlop
+                    }
+                    else -> {
+                        false
+                    }
+                }
+
+                if (isNestedSwipe || overThreshold) {
+                    isNestedSwipe = true
+
+                    requestDisallowInterceptTouchEvent(true)
+                    nestedScrollingListener?.invoke(true)
+                    handled = super.dispatchTouchEvent(ev)
+                }
+
+                dispatchPrevX = ev.rawX
+                dispatchPrevY = ev.rawY
+            }
+
+            MotionEvent.ACTION_UP -> {
+                requestDisallowInterceptTouchEvent(false)
+                nestedScrollingListener?.invoke(false)
+                isNestedSwipe = false
+            }
+        }
+
         if (!handled || nestedScrollTargetWasUnableToScroll) {
+            requestDisallowInterceptTouchEvent(false)
             handled = super.dispatchTouchEvent(ev)
         }
 
@@ -46,5 +94,7 @@ open class NestedRecyclerView @JvmOverloads constructor(
             // Let the parent start to consume scroll events.
             target.parent?.requestDisallowInterceptTouchEvent(false)
         }
+
+        super.onNestedScroll(target, dxConsumed, dyConsumed, dxUnconsumed, dyUnconsumed)
     }
 }

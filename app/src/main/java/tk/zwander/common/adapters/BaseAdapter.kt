@@ -40,6 +40,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shadow
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.layoutId
 import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.platform.ViewCompositionStrategy
@@ -50,7 +51,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
-import androidx.core.view.ViewCompat
 import androidx.core.view.forEach
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
@@ -310,9 +310,10 @@ abstract class BaseAdapter<VM : BaseDelegate.BaseViewModel<*, *>>(
             }
 
             binding.root.id = data.id
+            binding.root.disposeComposition()
             binding.root.setThemedContent {
                 val currentEditingPosition by viewModel.currentEditingInterfacePosition.collectAsState()
-                val nestedScrollConnection = rememberNestedScrollInteropConnection(binding.root)
+                val nestedScrollConnection = rememberNestedScrollInteropConnection()
 
                 viewModel.WidgetItemLayout(
                     needsReconfigure = data.type == WidgetType.WIDGET && widgetInfo == null,
@@ -365,10 +366,10 @@ abstract class BaseAdapter<VM : BaseDelegate.BaseViewModel<*, *>>(
                     rowCount = rowCount,
                     colCount = colCount,
                     isEditing = currentEditingPosition == bindingAdapterPosition,
-                    modifier = Modifier.fillMaxSize().layoutId("widget_${data.id}"),
+                    modifier = Modifier.fillMaxSize().layoutId("widget_${data.id}")
+                        .nestedScroll(nestedScrollConnection),
                     ignoreTouchesKey = viewModel.ignoreWidgetTouchesKey,
                     doubleTapTurnOffKey = viewModel.doubleTapTurnOffDisplayKey,
-                    nestedScrollConnection = nestedScrollConnection,
                 )
             }
         }
@@ -402,12 +403,6 @@ abstract class BaseAdapter<VM : BaseDelegate.BaseViewModel<*, *>>(
                             ).apply hostView@{
                                 findScrollableViewsInHierarchy(this).forEach { list ->
                                     list.isNestedScrollingEnabled = true
-                                }
-
-                                this.viewTreeObserver.addOnGlobalLayoutListener {
-                                    findScrollableViewsInHierarchy(this).forEach { list ->
-                                        list.isNestedScrollingEnabled = true
-                                    }
                                 }
 
                                 viewModel.lsDisplay?.let { display ->
@@ -489,13 +484,10 @@ abstract class BaseAdapter<VM : BaseDelegate.BaseViewModel<*, *>>(
                 }
             }
 
-            widgetView?.let { widgetView ->
+            widgetView?.let { v ->
                 AndroidView(
                     factory = {
-                        widgetView.apply {
-                            (parent as? ViewGroup)?.removeView(this)
-                            ViewCompat.setNestedScrollingEnabled(this, true)
-                        }
+                        v
                     },
                     modifier = modifier,
                 )
