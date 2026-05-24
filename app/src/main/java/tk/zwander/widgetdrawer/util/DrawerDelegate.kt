@@ -6,9 +6,12 @@ import android.animation.ValueAnimator
 import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.PixelFormat
+import android.os.Build
 import android.view.Gravity
 import android.view.View
 import android.view.ViewConfiguration
+import android.view.WindowInsets
+import android.view.WindowInsetsController
 import android.view.WindowManager
 import android.view.animation.AccelerateInterpolator
 import android.view.animation.DecelerateInterpolator
@@ -163,7 +166,13 @@ class DrawerDelegate private constructor(context: Context, displayId: String) :
             )
         }.apply {
             addOnAttachStateChangeListener(object : View.OnAttachStateChangeListener {
-                override fun onViewAttachedToWindow(v: View) {}
+                override fun onViewAttachedToWindow(v: View) {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                        val controller = v.windowInsetsController
+                        controller?.systemBarsBehavior = WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+                        controller?.hide(WindowInsets.Type.navigationBars())
+                    }
+                }
 
                 override fun onViewDetachedFromWindow(v: View) {
                     eventManager.sendEvent(Event.DrawerAttachmentState(false))

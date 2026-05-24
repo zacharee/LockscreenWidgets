@@ -21,6 +21,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.systemGestureExclusion
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardColors
 import androidx.compose.material3.Icon
@@ -367,7 +368,8 @@ abstract class BaseAdapter<VM : BaseDelegate.BaseViewModel<*, *>>(
                     colCount = colCount,
                     isEditing = currentEditingPosition == bindingAdapterPosition,
                     modifier = Modifier.fillMaxSize().layoutId("widget_${data.id}")
-                        .nestedScroll(nestedScrollConnection),
+                        .nestedScroll(nestedScrollConnection)
+                        .systemGestureExclusion(),
                     ignoreTouchesKey = viewModel.ignoreWidgetTouchesKey,
                     doubleTapTurnOffKey = viewModel.doubleTapTurnOffDisplayKey,
                 )
