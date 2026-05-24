@@ -9,8 +9,11 @@ import android.animation.ObjectAnimator
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.ContextWrapper
+import android.os.Build
 import android.view.LayoutInflater
 import android.view.View
+import android.view.WindowInsets
+import android.view.WindowInsetsController
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.appcompat.view.ContextThemeWrapper
@@ -237,6 +240,14 @@ suspend fun View.fadeIn(drawerOrFrame: DrawerOrFrame) {
             }
         })
         animator.start()
+    }
+}
+
+fun View.hideNavBarsForGestureExclusion() {
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+        val controller = windowInsetsController
+        controller?.systemBarsBehavior = WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+        controller?.hide(WindowInsets.Type.navigationBars())
     }
 }
 

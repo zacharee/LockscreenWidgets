@@ -15,6 +15,7 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.absolutePadding
 import androidx.compose.foundation.shape.AbsoluteRoundedCornerShape
+import androidx.compose.foundation.systemGestureExclusion
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -144,6 +145,7 @@ fun DrawerDelegate.DrawerViewModel.DrawerHandle(
 
     Box(
         modifier = modifier
+            .systemGestureExclusion()
             .absolutePadding(
                 left = if (side == Gravity.LEFT) 0.dp else 4.dp,
                 right = if (side == Gravity.RIGHT) 0.dp else 4.dp,
