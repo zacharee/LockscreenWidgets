@@ -27,6 +27,7 @@
     <string name="disabled">已禁用</string>
     <string name="accessibility_settings">辅助功能设置</string>
     <string name="battery_whitelist">电池允许列表</string>
+    <string name="autostart">Autostart</string>
     <string name="back">返回</string>
     <string name="clear">清除</string>
     <string name="launcher">启动器</string>
@@ -177,6 +178,8 @@
     <string name="intro_battery_optimization_desc">许多装置，包括那些运行MIUI和EMUI的装置，都有令人难以置信的电池管理。 这可能导致锁屏界面小部件在您不想被杀死时被杀死。 点击下面的按钮来读取您如何允许在您的特定设备上列出锁屏部件。</string>
     <string name="intro_moto_razr_allow_secondary_display_access">允许次要显示访问</string>
     <string name="intro_moto_razr_allow_secondary_display_access_desc">锁屏小部件支持在多个显示器中添加帧，但Motorola默认在Razr模型上阻止对第三方应用的二次显示访问。 点击下方可打开屏幕，允许锁屏小部件使用封面显示。 一旦找到，在列表中找到锁屏小部件。点击它并启用\"允许在外部显示\"。</string>
+    <string name="intro_autostart_title">Allow Autostart</string>
+    <string name="intro_autostart_desc">Your firmware implements an autostart permission system, which may prevent Lockscreen Widgets from running correctly. Use the button below to allow Lockscreen Widgets autostart permissions.</string>
     <string name="intro_done_title">全部完成！</string>
     <string name="intro_done_desc">就是这样！请检查您的锁屏界面，您现在应该看到小部件框架！</string>
     <string name="usage_add_widget">添加小组件</string>
