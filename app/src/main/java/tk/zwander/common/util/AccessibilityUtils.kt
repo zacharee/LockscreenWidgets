@@ -63,6 +63,7 @@ object AccessibilityUtils {
         val securityInputIds = unitMapOf(
             "com.android.systemui:id/keyguard_host_view",
             "com.android.systemui:id/keyguard_security_container",
+            "element:BouncerContent",
         )
 
         val notificationsPanelIds = unitMapOf(
