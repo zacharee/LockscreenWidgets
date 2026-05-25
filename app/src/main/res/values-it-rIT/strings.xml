@@ -27,6 +27,7 @@
     <string name="disabled">Disattivato</string>
     <string name="accessibility_settings">Impostazioni di Accessibilità</string>
     <string name="battery_whitelist">Eccezione ottimizzazione batteria</string>
+    <string name="autostart">Autostart</string>
     <string name="back">Indietro</string>
     <string name="clear">Cancella</string>
     <string name="launcher">Launcher</string>
@@ -177,6 +178,8 @@
     <string name="intro_battery_optimization_desc">Molti dispositivi, fra cui quelli con MIUI ed EMUI, possiedono una gestione della batteria estremamente aggressiva e possono causare la chiusura non richiesta di Lockscreen Widgets. Tocca il tasto qui sotto per leggere come escludere l\'app dall\'ottimizzazione della batteria sul tuo dispositivo.</string>
     <string name="intro_moto_razr_allow_secondary_display_access">Autorizza accesso allo schermo secondario</string>
     <string name="intro_moto_razr_allow_secondary_display_access_desc">Lockscreen Widgets supporta l\'aggiunta di riquadri su schermi multipli, ma Motorola ne blocca l\'accesso per impostazione predefinita ad app di terze parti sui modelli Razr. Tocca qui sotto per aprire la schermata dove autorizzare Lockscreen Widgets a usare lo schermo esterno, cerca l\'app nella lista, toccala, ed attiva \"Autorizza su schermo esterno\".</string>
+    <string name="intro_autostart_title">Allow Autostart</string>
+    <string name="intro_autostart_desc">Your firmware implements an autostart permission system, which may prevent Lockscreen Widgets from running correctly. Use the button below to allow Lockscreen Widgets autostart permissions.</string>
     <string name="intro_done_title">Fatto!</string>
     <string name="intro_done_desc">Questo è tutto! Controlla la tua schermata di blocco e dovresti vedere il riquadro widget!</string>
     <string name="usage_add_widget">Aggiungi widget</string>
