@@ -27,6 +27,7 @@
     <string name="disabled">Devre dışı</string>
     <string name="accessibility_settings">Erişilebilirlik Ayarları</string>
     <string name="battery_whitelist">Pil İzin Listesi</string>
+    <string name="autostart">Autostart</string>
     <string name="back">Geri</string>
     <string name="clear">Temizle</string>
     <string name="launcher">Başlatıcı</string>
@@ -177,6 +178,8 @@
     <string name="intro_battery_optimization_desc">MIUI ve EMUI kullananlar da dahil olmak üzere birçok cihaz inanılmaz agresif bir pil yönetimine sahiptir. Bu, istemediğiniz zaman Kilit Ekranı Widget\'larının kapatılmasına neden olabilir. Belirli cihazınızda Kilit Ekranı Widget\'larını izin listesine nasıl ekleyebileceğinizi okumak için aşağıdaki düğmeye tıklayın.</string>
     <string name="intro_moto_razr_allow_secondary_display_access">İkincil Ekran Erişimine İzin Ver</string>
     <string name="intro_moto_razr_allow_secondary_display_access_desc">Lockscreen Widgets, birden fazla ekrana çerçeve eklemeyi destekler, ancak Motorola, Razr modellerinde varsayılan olarak üçüncü taraf uygulamaların ikincil ekrana erişimini engeller. Aşağıya dokunarak, Lockscreen Widgets\'ın kapak ekranını kullanmasına izin verebileceğiniz ekranı açın. Burada, listeden Lockscreen Widgets\'ı bulun, üzerine dokunun ve \"Harici ekranda izin ver\" seçeneğini etkinleştirin.</string>
+    <string name="intro_autostart_title">Allow Autostart</string>
+    <string name="intro_autostart_desc">Your firmware implements an autostart permission system, which may prevent Lockscreen Widgets from running correctly. Use the button below to allow Lockscreen Widgets autostart permissions.</string>
     <string name="intro_done_title">Hepsi tamam!</string>
     <string name="intro_done_desc">İşte bu kadar! Kilit ekranınızı kontrol edin ve artık widget çerçevesini görmelisiniz!</string>
     <string name="usage_add_widget">Widget ekle</string>
