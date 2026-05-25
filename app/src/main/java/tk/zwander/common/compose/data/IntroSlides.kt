@@ -35,8 +35,10 @@ import tk.zwander.common.compose.AppTheme
 import tk.zwander.common.util.LifecycleEffect
 import tk.zwander.common.util.canReadWallpaper
 import tk.zwander.common.util.isAccessibilityEnabled
+import tk.zwander.common.util.launchAutostartActivity
 import tk.zwander.common.util.launchUrl
 import tk.zwander.common.util.logUtils
+import tk.zwander.common.util.missingAutostart
 import tk.zwander.common.util.openAccessibilitySettings
 import tk.zwander.common.util.shizuku.ShizukuManager
 import tk.zwander.common.util.shizuku.shizukuManager
@@ -402,12 +404,35 @@ fun rememberIntroSlides(
                     OutlinedButton(
                         onClick = {
                             context.launchUrl("https://dontkillmyapp.com/?app=Lockscreen%20Widgets")
-                        }
+                        },
                     ) {
                         Text(text = stringResource(id = R.string.more_info))
                     }
                 },
             ))
+        }
+
+        if ((startReason == OnboardingActivity.RetroMode.NONE && context.missingAutostart()) ||
+            startReason == OnboardingActivity.RetroMode.AUTOSTART
+        ) {
+            slides.add(
+                SimpleIntroPage(
+                    title = { stringResource(id = R.string.intro_autostart_title) },
+                    description = { stringResource(id = R.string.intro_autostart_desc) },
+                    slideColor = { MaterialTheme.colorScheme.background },
+                    contentColor = { MaterialTheme.colorScheme.onBackground },
+                    icon = { painterResource(id = R.drawable.ic_baseline_power_settings_new_24) },
+                    extraContent = {
+                        OutlinedButton(
+                            onClick = {
+                                context.launchAutostartActivity()
+                            },
+                        ) {
+                            Text(text = stringResource(id = R.string.grant))
+                        }
+                    },
+                ),
+            )
         }
 
         if (startReason == OnboardingActivity.RetroMode.NONE) {

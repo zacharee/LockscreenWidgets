@@ -75,6 +75,7 @@ class OnboardingActivity : ComponentActivity() {
         STORAGE,
         BATTERY,
         MOTO_SECONDARY_DISPLAY,
+        AUTOSTART,
         NONE,
     }
 

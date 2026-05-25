@@ -146,6 +146,7 @@ dependencies {
 
     implementation(libs.colorpicker.compose)
     implementation(libs.reorderable)
+    implementation(libs.miui.autostart)
 
     coreLibraryDesugaring(libs.desugar.jdk.libs)
 }

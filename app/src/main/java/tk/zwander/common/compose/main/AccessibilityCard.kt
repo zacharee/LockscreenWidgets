@@ -14,6 +14,10 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -23,8 +27,11 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.Lifecycle
 import tk.zwander.common.activities.OnboardingActivity
 import tk.zwander.common.compose.components.ContentColoredOutlinedButton
+import tk.zwander.common.util.LifecycleEffect
+import tk.zwander.common.util.missingAutostart
 import tk.zwander.common.util.openAccessibilitySettings
 import tk.zwander.lockscreenwidgets.R
 
@@ -73,7 +80,7 @@ fun AccessibilityCard(
                     onClick = {
                         OnboardingActivity.start(
                             context,
-                            OnboardingActivity.RetroMode.BATTERY
+                            OnboardingActivity.RetroMode.BATTERY,
                         )
                     },
                     colors = ButtonDefaults.outlinedButtonColors(
@@ -84,6 +91,33 @@ fun AccessibilityCard(
                     modifier = Modifier.padding(end = 4.dp),
                 ) {
                     Text(text = stringResource(id = R.string.battery_whitelist))
+                }
+
+                var needsAutostart by remember {
+                    mutableStateOf(false)
+                }
+
+                LifecycleEffect(Lifecycle.State.RESUMED) {
+                    needsAutostart = context.missingAutostart()
+                }
+
+                if (needsAutostart) {
+                    ContentColoredOutlinedButton(
+                        onClick = {
+                            OnboardingActivity.start(
+                                context,
+                                OnboardingActivity.RetroMode.AUTOSTART,
+                            )
+                        },
+                        colors = ButtonDefaults.outlinedButtonColors(
+                            containerColor = Color.Transparent,
+                            contentColor = MaterialTheme.colorScheme.onErrorContainer,
+                        ),
+                        border = ButtonDefaults.outlinedButtonBorder(true).copy(brush = SolidColor(MaterialTheme.colorScheme.onErrorContainer)),
+                        modifier = Modifier.padding(end = 4.dp),
+                    ) {
+                        Text(text = stringResource(id = R.string.autostart))
+                    }
                 }
 
                 ContentColoredOutlinedButton(

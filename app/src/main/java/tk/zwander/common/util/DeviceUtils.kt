@@ -2,6 +2,7 @@ package tk.zwander.common.util
 
 import android.content.Context
 import android.os.Build
+import android.os.SystemProperties
 import tk.zwander.lockscreenwidgets.BuildConfig
 
 val Context.isTouchWiz: Boolean
@@ -15,3 +16,6 @@ val Context.isPixelUI: Boolean
 
 val Context.isLikelyRazr: Boolean
     get() = packageManager.hasSystemFeature("com.motorola.hardware.cli") || BuildConfig.DEBUG
+
+val isMiui: Boolean
+    get() = SystemProperties.get("ro.miui.ui.version.code").isNotBlank() || BuildConfig.DEBUG

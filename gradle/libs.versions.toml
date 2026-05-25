@@ -23,6 +23,7 @@ hiddenapibypass = "6.1"
 kotlin = "2.3.21"
 lifecycle = "2.10.0"
 material = "1.14.0"
+miui-autostart = "v1.3"
 msz-progress-indicator = "0.8.0"
 patreonsupportersretrieval = "1.0.0"
 preferenceKtx = "1.2.1"
@@ -68,6 +69,7 @@ lifecycle-runtime-ktx = { module = "androidx.lifecycle:lifecycle-runtime-ktx", v
 lifecycle-service = { module = "androidx.lifecycle:lifecycle-service", version.ref = "lifecycle" }
 lifecycle-viewmodel-compose = { module = "androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "lifecycle" }
 material = { module = "com.google.android.material:material", version.ref = "material" }
+miui-autostart = { module = "com.github.XomaDev:MIUI-autostart", version.ref = "miui-autostart" }
 msz-progress-indicator = { module = "com.ehsanmsz:msz-progress-indicator", version.ref = "msz-progress-indicator" }
 patreonSupportersRetrieval = { module = "dev.zwander:patreonsupportersretrieval", version.ref = "patreonsupportersretrieval" }
 preference-ktx = { module = "androidx.preference:preference-ktx", version.ref = "preferenceKtx" }
