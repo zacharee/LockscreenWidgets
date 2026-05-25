@@ -222,7 +222,7 @@ object AccessibilityUtils {
             val safeRoot = try {
                 rawWindow.root
             } catch (e: Exception) {
-                logUtils.normalLog("Error getting window root", e)
+                logUtils.debugLog("Error getting window root", e)
                 null
             }
             val isSysUi = safeRoot?.packageName == "com.android.systemui"

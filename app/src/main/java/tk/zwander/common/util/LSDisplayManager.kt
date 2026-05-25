@@ -54,7 +54,7 @@ class LSDisplayManager private constructor(context: Context) : ContextWrapper(co
 
     private val displayListener = object : DisplayManager.DisplayListener {
         override fun onDisplayAdded(displayId: Int) {
-            logUtils.normalLog("Display $displayId added", null)
+            logUtils.debugLog("Display $displayId added", null)
 
             processDisplay(displayId)
         }

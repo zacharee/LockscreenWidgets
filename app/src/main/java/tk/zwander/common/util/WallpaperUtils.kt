@@ -162,10 +162,10 @@ class WallpaperUtils private constructor(private val context: Context) {
                 old()
             }
         } catch (e: Exception) {
-            context.logUtils.normalLog("Error retrieving wallpaper", e)
+            context.logUtils.debugLog("Error retrieving wallpaper", e)
             null
         } catch (e: NoSuchMethodError) {
-            context.logUtils.normalLog("Error retrieving wallpaper", e)
+            context.logUtils.debugLog("Error retrieving wallpaper", e)
             null
         }
     }
