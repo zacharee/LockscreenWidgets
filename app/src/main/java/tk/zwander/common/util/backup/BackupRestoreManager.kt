@@ -98,7 +98,6 @@ class BackupRestoreManager private constructor(private val context: Context) {
             return false
         }
 
-        val gson = context.prefManager.gson
         val newWidgets = dataMap[PrefManager.KEY_CURRENT_WIDGETS].toString()
         val rows = dataMap[PrefManager.KEY_FRAME_ROW_COUNT]?.toString()?.toIntOrNull()
         val cols = dataMap[PrefManager.KEY_FRAME_COL_COUNT]?.toString()?.toIntOrNull()
