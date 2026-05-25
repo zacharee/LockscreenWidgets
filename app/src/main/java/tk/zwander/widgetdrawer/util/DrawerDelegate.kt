@@ -182,6 +182,7 @@ class DrawerDelegate private constructor(context: Context, displayId: String) :
                 params = handleParams,
                 displayId = displayId,
                 updateWindow = {
+                    it.hideNavBarsForGestureExclusion()
                     wm?.safeUpdateViewLayout(it, handleParams)
                 },
                 modifier = Modifier.fillMaxSize(),
@@ -193,9 +194,7 @@ class DrawerDelegate private constructor(context: Context, displayId: String) :
                         v.hideNavBarsForGestureExclusion()
                     }
 
-                    override fun onViewDetachedFromWindow(v: View) {
-
-                    }
+                    override fun onViewDetachedFromWindow(v: View) {}
                 },
             )
         }
@@ -508,6 +507,7 @@ class DrawerDelegate private constructor(context: Context, displayId: String) :
             }
 
             if (isAttached) {
+                drawer.hideNavBarsForGestureExclusion()
                 wm?.safeUpdateViewLayout(drawer, params)
             }
         }
