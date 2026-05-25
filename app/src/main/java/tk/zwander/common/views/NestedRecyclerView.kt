@@ -11,7 +11,7 @@ open class NestedRecyclerView @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
     defStyleAttr: Int = 0,
-) : ScrollingItemTouchRecyclerView(context, attrs, defStyleAttr) {
+) : ScrollingItemTouchRecyclerView(context = context, attrs = attrs, defStyleAttr = defStyleAttr) {
     private var dispatchDownX = 0f
     private var dispatchDownY = 0f
 

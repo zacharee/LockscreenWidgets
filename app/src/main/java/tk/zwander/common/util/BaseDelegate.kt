@@ -42,7 +42,7 @@ import java.util.concurrent.ConcurrentLinkedDeque
 abstract class BaseDelegate<State : Any>(
     context: Context,
     open val targetDisplayId: String,
-) : SafeContextWrapper(context),
+) : SafeContextWrapper(context = context),
     EventObserver, WidgetHostCompat.OnClickCallback, SavedStateRegistryOwner {
     protected val kgm by lazy { keyguardManager }
     protected val widgetHost by lazy { widgetHostCompat }
@@ -316,12 +316,12 @@ abstract class BaseDelegate<State : Any>(
         private val context: Context,
         orientation: Int,
         rowCount: Int,
-        colCount: Int
+        colCount: Int,
     ) : SpannedGridLayoutManager(
-        context,
-        orientation,
-        rowCount,
-        colCount
+        context = context,
+        orientation = orientation,
+        _rowCount = rowCount,
+        _columnCount = colCount,
     ) {
         private val onLayoutCompletedCallbacks = ConcurrentLinkedDeque<() -> Unit>()
 

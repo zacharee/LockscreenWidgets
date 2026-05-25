@@ -30,7 +30,7 @@ class ZeroPaddingAppWidgetHostView(
     widgetId: Int,
     private val onAttach: (AppWidgetHostView) -> Unit,
     private val onDefaultClick: (PendingIntent) -> Boolean,
-) : AppWidgetHostView(RemoteViewsLayoutInflaterContext(context, widgetId)) {
+) : AppWidgetHostView(RemoteViewsLayoutInflaterContext(context = context, widgetId = widgetId)) {
     override fun setAppWidget(appWidgetId: Int, info: AppWidgetProviderInfo?) {
         super.setAppWidget(appWidgetId, info)
 

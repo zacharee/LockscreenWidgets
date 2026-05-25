@@ -73,7 +73,10 @@ open class MainWidgetFrameDelegate protected constructor(
     context: Context,
     protected val id: Int = ID,
     override var targetDisplayId: String,
-) : BaseDelegate<MainWidgetFrameDelegate.State>(context, targetDisplayId) {
+) : BaseDelegate<MainWidgetFrameDelegate.State>(
+    context = context,
+    targetDisplayId = targetDisplayId,
+) {
     companion object {
         const val ID = -1
 

@@ -11,7 +11,7 @@ import kotlin.math.absoluteValue
 class SnappyRecyclerView(
     context: Context,
     attrs: AttributeSet? = null,
-) : ScrollingItemTouchRecyclerView(context, attrs) {
+) : ScrollingItemTouchRecyclerView(context = context, attrs = attrs) {
     private var latestVX = 0
     private var latestVY = 0
 

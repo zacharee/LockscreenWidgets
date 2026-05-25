@@ -319,7 +319,11 @@ class WidgetHostCompat(
             context: Context,
             widgetId: Int,
             onClickCallbacks: MutableSet<OnClickCallback>,
-        ) : BaseInnerOnClickHandler(context, onClickCallbacks, widgetId), InvocationHandler {
+        ) : BaseInnerOnClickHandler(
+            context = context,
+            onClickCallbacks = onClickCallbacks,
+            widgetId = widgetId,
+        ), InvocationHandler {
             @SuppressLint("BlockedPrivateApi", "PrivateApi")
             override fun invoke(proxy: Any?, method: Method?, args: Array<out Any>?): Any? {
                 if (method?.name == "onScroll") return null
@@ -352,14 +356,18 @@ class WidgetHostCompat(
             widgetId: Int,
             onClickCallbacks: MutableSet<OnClickCallback>,
             private val clickHandlerClass: Class<*>,
-        ) : BaseInnerOnClickHandler(context, onClickCallbacks, widgetId) {
+        ) : BaseInnerOnClickHandler(
+            context = context,
+            onClickCallbacks = onClickCallbacks,
+            widgetId = widgetId,
+        ) {
             private val defaultHandler = clickHandlerClass.getConstructor().newInstance()
 
             @Suppress("unused")
             fun onClickHandler(
                 view: View,
                 pendingIntent: PendingIntent,
-                fillInIntent: Intent
+                fillInIntent: Intent,
             ): Boolean {
                 return if (checkPendingIntent(context, pendingIntent, widgetId, onClickCallbacks)) {
                     clickHandlerClass.getMethod("onClickHandler", View::class.java, PendingIntent::class.java, Intent::class.java)
@@ -374,7 +382,7 @@ class WidgetHostCompat(
                 view: View,
                 pendingIntent: PendingIntent,
                 fillInIntent: Intent,
-                windowingMode: Int
+                windowingMode: Int,
             ): Boolean {
                 return if (checkPendingIntent(context, pendingIntent, widgetId, onClickCallbacks)) {
                     clickHandlerClass.getMethod("onClickHandler", View::class.java, PendingIntent::class.java, Intent::class.java, Int::class.java)
