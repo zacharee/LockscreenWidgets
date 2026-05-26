@@ -46,6 +46,8 @@ class CatchingListView(
             super.layoutChildren()
         } catch (e: IllegalStateException) {
             BugsnagUtils.notify(e)
+        } catch (e: ArrayIndexOutOfBoundsException) {
+            BugsnagUtils.notify(e)
         }
     }
 
