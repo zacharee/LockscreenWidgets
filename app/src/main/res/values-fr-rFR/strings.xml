@@ -38,9 +38,9 @@
     <string name="general">General</string>
     <string name="configure_widget">Configure Widget</string>
     <string name="reorder_widget">Reorder Widget</string>
-    <string name="refresh">Refresh</string>
-    <string name="next">Next</string>
-    <string name="previous">Previous</string>
+    <string name="refresh">Rafraîchir</string>
+    <string name="next">Suivant</string>
+    <string name="previous">Précédent</string>
     <string name="drawer_enabled">Drawer activé</string>
     <string name="frame_enabled">Cadre activé</string>
     <string name="add_id_hint">com.android.systemui:id/un_id_ici</string>
@@ -65,7 +65,7 @@
     <string name="alert_remove_widget_confirm">Retirer le widget ?</string>
     <string name="alert_remove_widget_confirm_desc">Êtes-vous sûr de vouloir supprimer cet élément ?</string>
     <string name="main_screen_social_mastodon">Mastodon</string>
-    <string name="main_screen_social_mastodon_desc">Suivez-moi sur Mastodon pour des mises à jour sur mes applications et des annecdotes sur leur développement.</string>
+    <string name="main_screen_social_mastodon_desc">Suivez-moi sur Mastodon pour des mises à jour sur mes applications et des anecdotes sur leur développement.</string>
     <string name="main_screen_social_website">Site internet</string>
     <string name="main_screen_social_website_desc">Jetez un coup d\'œil à mon site Web si vous n\'avez rien de mieux à faire.</string>
     <string name="main_screen_social_email">E-mail</string>
@@ -75,7 +75,7 @@
     <string name="main_screen_social_patreon">Patreon</string>
     <string name="main_screen_social_patreon_desc">Pour 1 $ chaque mois, vous avez accès à toutes mes applications payantes, ainsi qu\'à quelques trucs sympas.</string>
     <string name="main_screen_accessibility_not_started">Le service d\'accessibilité n\'est actuellement pas en cours d\'exécution. Cela peut être dû au fait que vous deviez autoriser Widgets Lockscreen dans les optimisations de batterie de votre téléphone, il se peut aussi que vous n\'ayez simplement qu\'à le désactiver réactiver dans les Paramètres.</string>
-    <string name="intro_privacy_policy_desc">Lockscreen Widgets ne recueille aucune donnée au-delà de ce qui est nécessaire pour l\'analyse des crash. En savoir plus ci-dessous.</string>
+    <string name="intro_privacy_policy_desc">Lockscreen Widgets ne recueille aucune donnée au-delà de ce qui est nécessaire pour l\'analyse des crashs. En savoir plus ci-dessous.</string>
     <string name="main_screen_privacy_policy_desc">Lockscreen Widgets ne recueille aucune donnée au-delà de ce qui est nécessaire pour l\'analyse de crash. Appuyez ici pour en savoir plus.</string>
     <string name="settings_screen_hide_when_notifications_shown">Masquer lors de l\'affichage des notifications</string>
     <string name="settings_screen_hide_when_notifications_shown_desc">Masquer le cadre du widget lorsqu\'il y a des notifications qui sont affichées. Cela nécessite l\'utilisation d\'un service d\'écoute de notification. Vous n\'êtes pas obligé d\'accorder cette utilisation.</string>
@@ -158,8 +158,8 @@
     <string name="settings_screen_force_widget_update_desc">Lorsque les widgets sont à l\'écran, les mises à jour en attente ne sont pas toujours faites. Pour contourner ce problème, Lockscreen Widgets force tous les widgets à se recharger par défaut, ce qui peut causer un flash. Désactivez cette option pour éviter ce flash, attention dès lors à leur mise à jour.</string>
     <string name="settings_screen_hide_when_keyboard_shown">Masquer lorsque le clavier est affiché</string>
     <string name="settings_screen_hide_when_keyboard_shown_desc">Masquer le cadre du widget lorsque le clavier est visible à l\'écran.</string>
-    <string name="settings_screen_double_tap_turn_off_screen">Double-Tap to Turn Off Screen</string>
-    <string name="settings_screen_double_tap_turn_off_screen_desc_frame">Double-tap an empty space (outside of a widget) to turn off the screen. This applies to the whole frame when \"Ignore Widget Touches\" is enabled.</string>
+    <string name="settings_screen_double_tap_turn_off_screen">Toucher deux fois pour éteindre l\'écran</string>
+    <string name="settings_screen_double_tap_turn_off_screen_desc_frame">Touchez deux fois un espace vide (en dehors d\'un widget) pour éteindre l\'écran. Cela s\'applique à tout l\'écran lorsque \"Ignorer les touchers sur le widget\" est activé.</string>
     <string name="settings_screen_double_tap_turn_off_screen_drawer">Double-tap an empty space (outside of a widget) to turn off the screen.</string>
     <string name="settings_screen_not_touchable">Ignore All Touches</string>
     <string name="settings_screen_not_touchable_desc">When enabled, the selected frame will ignore all touches, and the whatever is underneath will receive them instead. Frames will always respond to touches in preview mode.</string>
