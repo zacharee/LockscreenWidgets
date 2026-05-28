@@ -261,6 +261,7 @@
     <string name="on_lock_screen">Nella schermata di blocco</string>
     <string name="in_notification_center">Nel centro notifiche</string>
     <string name="in_locked_notification_center">Nel centro notifiche bloccato</string>
+    <string name="in_previews">In Previews</string>
     <string name="reset_frame_position_size_confirm_message">Reimpostare posizione e dimensione?</string>
     <string name="install_shizuku">Installa Shizuku</string>
     <string name="open_shizuku">Apri Shizuku</string>
