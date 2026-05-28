@@ -261,6 +261,7 @@
     <string name="on_lock_screen">على شاشة القفل</string>
     <string name="in_notification_center">في مركز الاشعارات</string>
     <string name="in_locked_notification_center">في مركز الإشعارات المقفل</string>
+    <string name="in_previews">In Previews</string>
     <string name="reset_frame_position_size_confirm_message">هل أنت متأكد من أنك تريد إعادة تعيين الموقع والحجم؟</string>
     <string name="install_shizuku">Install Shizuku</string>
     <string name="open_shizuku">Open Shizuku</string>
