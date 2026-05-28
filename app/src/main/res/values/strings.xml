@@ -356,6 +356,7 @@
     <string name="on_lock_screen">On Lock Screen</string>
     <string name="in_notification_center">In Notification Center</string>
     <string name="in_locked_notification_center">In Locked Notification Center</string>
+    <string name="in_previews">In Previews</string>
     <string name="reset_frame_position_size_confirm_message">Are you sure you want to reset the position and size?</string>
 
     <string name="install_shizuku">Install Shizuku</string>

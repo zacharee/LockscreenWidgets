@@ -145,6 +145,38 @@ fun ClearFrameDataCard(
                     }
                 },
             ),
+            FrameDataItem(
+                title = R.string.in_previews,
+                action = {
+                    context.frameSizeAndPosition.removeSizeForType(
+                        FrameSizeAndPosition.FrameType.Preview.Portrait,
+                    )
+                    context.frameSizeAndPosition.removeSizeForType(
+                        FrameSizeAndPosition.FrameType.Preview.Landscape,
+                    )
+                    context.frameSizeAndPosition.removePositionForType(
+                        FrameSizeAndPosition.FrameType.Preview.Portrait,
+                    )
+                    context.frameSizeAndPosition.removePositionForType(
+                        FrameSizeAndPosition.FrameType.Preview.Landscape,
+                    )
+
+                    context.prefManager.currentSecondaryFramesWithStringDisplay.forEach { (frameId, _) ->
+                        context.frameSizeAndPosition.removeSizeForType(
+                            FrameSizeAndPosition.FrameType.SecondaryPreview.Portrait(frameId),
+                        )
+                        context.frameSizeAndPosition.removeSizeForType(
+                            FrameSizeAndPosition.FrameType.SecondaryPreview.Landscape(frameId),
+                        )
+                        context.frameSizeAndPosition.removePositionForType(
+                            FrameSizeAndPosition.FrameType.SecondaryPreview.Portrait(frameId),
+                        )
+                        context.frameSizeAndPosition.removePositionForType(
+                            FrameSizeAndPosition.FrameType.SecondaryPreview.Landscape(frameId),
+                        )
+                    }
+                },
+            ),
         )
     }
 
