@@ -90,8 +90,8 @@
     <string name="settings_screen_animate_show_hide">إظهار/إخفاء الرسوم المتحركة</string>
     <string name="settings_screen_animate_show_hide_desc">قم بتحريك إظهار/إخفاء إطار الويدجيت. </string>
     <string name="settings_screen_debug_log">سجل تصحيح الأخطاء</string>
-    <string name="settings_screen_debug_log_desc">Turn this on to create verbose logs of Lockscreen Widgets\' state.</string>
-    <string name="settings_screen_clear_debug_log">Clear Debug Logs</string>
+    <string name="settings_screen_debug_log_desc">قم بتشغيل هذا الخيار لإنشاء سجلات مفصلة لحالة Lockscreen Widgets.</string>
+    <string name="settings_screen_clear_debug_log">مسح سجلات التصحيح الأخطاء</string>
     <string name="settings_screen_clear_debug_log_desc">Clear previous debug logs.</string>
     <string name="settings_screen_export_debug_log">Export Debug Logs</string>
     <string name="settings_screen_export_debug_log_desc">Export debug logs to a file.</string>
@@ -261,6 +261,7 @@
     <string name="on_lock_screen">على شاشة القفل</string>
     <string name="in_notification_center">في مركز الاشعارات</string>
     <string name="in_locked_notification_center">في مركز الإشعارات المقفل</string>
+    <string name="in_previews">In Previews</string>
     <string name="reset_frame_position_size_confirm_message">هل أنت متأكد من أنك تريد إعادة تعيين الموقع والحجم؟</string>
     <string name="install_shizuku">Install Shizuku</string>
     <string name="open_shizuku">Open Shizuku</string>

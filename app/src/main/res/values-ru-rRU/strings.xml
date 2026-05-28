@@ -261,6 +261,7 @@
     <string name="on_lock_screen">На экране блокировки</string>
     <string name="in_notification_center">В Центре уведомлений</string>
     <string name="in_locked_notification_center">В центре уведомлений на заблокированном экране</string>
+    <string name="in_previews">In Previews</string>
     <string name="reset_frame_position_size_confirm_message">Вы уверены, что хотите изменить положение и размер?</string>
     <string name="install_shizuku">Установить Shizuku</string>
     <string name="open_shizuku">Открыть Shizuku</string>

@@ -261,6 +261,7 @@
     <string name="on_lock_screen">Auf Sperrbildschirm</string>
     <string name="in_notification_center">Im Benachrichtigungszentrum</string>
     <string name="in_locked_notification_center">Im gesperrten Benachrichtigungszentrum</string>
+    <string name="in_previews">In Previews</string>
     <string name="reset_frame_position_size_confirm_message">Bist du dir sicher, dass du die Position und die Größe zurücksetzen möchtest?</string>
     <string name="install_shizuku">Installiere Shizuku</string>
     <string name="open_shizuku">Shizuku öffnen</string>

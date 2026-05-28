@@ -27,7 +27,7 @@
     <string name="disabled">Désactivé</string>
     <string name="accessibility_settings">Paramètres d’accessibilité</string>
     <string name="battery_whitelist">Liste d\'accès au contrôle de la batterie</string>
-    <string name="autostart">Autostart</string>
+    <string name="autostart">Démarrage automatique</string>
     <string name="back">Retour</string>
     <string name="clear">Effacer</string>
     <string name="launcher">Lanceur d\'applications</string>
@@ -38,9 +38,9 @@
     <string name="general">General</string>
     <string name="configure_widget">Configure Widget</string>
     <string name="reorder_widget">Reorder Widget</string>
-    <string name="refresh">Refresh</string>
-    <string name="next">Next</string>
-    <string name="previous">Previous</string>
+    <string name="refresh">Rafraîchir</string>
+    <string name="next">Suivant</string>
+    <string name="previous">Précédent</string>
     <string name="drawer_enabled">Drawer activé</string>
     <string name="frame_enabled">Cadre activé</string>
     <string name="add_id_hint">com.android.systemui:id/un_id_ici</string>
@@ -65,7 +65,7 @@
     <string name="alert_remove_widget_confirm">Retirer le widget ?</string>
     <string name="alert_remove_widget_confirm_desc">Êtes-vous sûr de vouloir supprimer cet élément ?</string>
     <string name="main_screen_social_mastodon">Mastodon</string>
-    <string name="main_screen_social_mastodon_desc">Suivez-moi sur Mastodon pour des mises à jour sur mes applications et des annecdotes sur leur développement.</string>
+    <string name="main_screen_social_mastodon_desc">Suivez-moi sur Mastodon pour des mises à jour sur mes applications et des anecdotes sur leur développement.</string>
     <string name="main_screen_social_website">Site internet</string>
     <string name="main_screen_social_website_desc">Jetez un coup d\'œil à mon site Web si vous n\'avez rien de mieux à faire.</string>
     <string name="main_screen_social_email">E-mail</string>
@@ -75,7 +75,7 @@
     <string name="main_screen_social_patreon">Patreon</string>
     <string name="main_screen_social_patreon_desc">Pour 1 $ chaque mois, vous avez accès à toutes mes applications payantes, ainsi qu\'à quelques trucs sympas.</string>
     <string name="main_screen_accessibility_not_started">Le service d\'accessibilité n\'est actuellement pas en cours d\'exécution. Cela peut être dû au fait que vous deviez autoriser Widgets Lockscreen dans les optimisations de batterie de votre téléphone, il se peut aussi que vous n\'ayez simplement qu\'à le désactiver réactiver dans les Paramètres.</string>
-    <string name="intro_privacy_policy_desc">Lockscreen Widgets ne recueille aucune donnée au-delà de ce qui est nécessaire pour l\'analyse des crash. En savoir plus ci-dessous.</string>
+    <string name="intro_privacy_policy_desc">Lockscreen Widgets ne recueille aucune donnée au-delà de ce qui est nécessaire pour l\'analyse des crashs. En savoir plus ci-dessous.</string>
     <string name="main_screen_privacy_policy_desc">Lockscreen Widgets ne recueille aucune donnée au-delà de ce qui est nécessaire pour l\'analyse de crash. Appuyez ici pour en savoir plus.</string>
     <string name="settings_screen_hide_when_notifications_shown">Masquer lors de l\'affichage des notifications</string>
     <string name="settings_screen_hide_when_notifications_shown_desc">Masquer le cadre du widget lorsqu\'il y a des notifications qui sont affichées. Cela nécessite l\'utilisation d\'un service d\'écoute de notification. Vous n\'êtes pas obligé d\'accorder cette utilisation.</string>
@@ -130,7 +130,7 @@
     <string name="settings_screen_separate_position_for_lock_nc">Position du centre de notification différente lors du verrouillage</string>
     <string name="settings_screen_separate_position_for_lock_nc_desc">Sur One UI 3, la mise en page du centre de notification est légèrement différente lorsque le téléphone est verrouillé et déverrouillé. Activez cette option pour utiliser un positionnement séparé pour le cadre du widget dans ces deux modes.</string>
     <string name="settings_screen_lock_widget_frame">Verrouiller le cadre du widget</string>
-    <string name="settings_screen_lock_widget_frame_desc">Lorsque cette option est activée, le cadre du widget ignorera tous les touchers directes. Vous ne pourrez ni déplacer ni modifier les widgets depuis le cadre, mais le geste de masquage à trois doigts fonctionnera toujours et vous pourrez toujours interagir avec les widgets.</string>
+    <string name="settings_screen_lock_widget_frame_desc">Lorsque cette option est activée, le cadre du widget ignorera tous les touchers directs. Vous ne pourrez ni déplacer ni modifier les widgets depuis le cadre, mais le geste de masquage à trois doigts fonctionnera toujours et vous pourrez toujours interagir avec les widgets.</string>
     <string name="settings_screen_ignore_widget_touches">Ignorer les touchers sur le widget</string>
     <string name="settings_screen_ignore_widget_touches_desc">Lorsque cette option est activée, les touches sur les widgets seront ignorées. Cela empêchera les lancements accidentels d\'applications, mais empêchera également l\'interaction avec les widgets.</string>
     <string name="settings_screen_lock_widget_drawer">Verrouiller organisation Widget</string>
@@ -158,11 +158,11 @@
     <string name="settings_screen_force_widget_update_desc">Lorsque les widgets sont à l\'écran, les mises à jour en attente ne sont pas toujours faites. Pour contourner ce problème, Lockscreen Widgets force tous les widgets à se recharger par défaut, ce qui peut causer un flash. Désactivez cette option pour éviter ce flash, attention dès lors à leur mise à jour.</string>
     <string name="settings_screen_hide_when_keyboard_shown">Masquer lorsque le clavier est affiché</string>
     <string name="settings_screen_hide_when_keyboard_shown_desc">Masquer le cadre du widget lorsque le clavier est visible à l\'écran.</string>
-    <string name="settings_screen_double_tap_turn_off_screen">Double-Tap to Turn Off Screen</string>
-    <string name="settings_screen_double_tap_turn_off_screen_desc_frame">Double-tap an empty space (outside of a widget) to turn off the screen. This applies to the whole frame when \"Ignore Widget Touches\" is enabled.</string>
-    <string name="settings_screen_double_tap_turn_off_screen_drawer">Double-tap an empty space (outside of a widget) to turn off the screen.</string>
-    <string name="settings_screen_not_touchable">Ignore All Touches</string>
-    <string name="settings_screen_not_touchable_desc">When enabled, the selected frame will ignore all touches, and the whatever is underneath will receive them instead. Frames will always respond to touches in preview mode.</string>
+    <string name="settings_screen_double_tap_turn_off_screen">Toucher deux fois pour éteindre l\'écran</string>
+    <string name="settings_screen_double_tap_turn_off_screen_desc_frame">Touchez deux fois un espace vide (en dehors d\'un widget) pour éteindre l\'écran. Cela s\'applique à tout l\'écran lorsque \"Ignorer les touchers sur le widget\" est activé.</string>
+    <string name="settings_screen_double_tap_turn_off_screen_drawer">Touchez deux fois un espace vide (en dehors d\'un widget) pour éteindre l\'écran.</string>
+    <string name="settings_screen_not_touchable">Ignorer tous les touchers</string>
+    <string name="settings_screen_not_touchable_desc">Lorsque cette option est activée, le widget ignorera tous les touchers, ils seront reçus par ce qui se trouve en dessous. Les widgets répondront toujours aux touchers en mode prévisualisation.</string>
     <string name="intro_welcome_title">Bienvenue !</string>
     <string name="intro_welcome_desc">Lockscreen Widgets est une application simple avec un but simple : récupérer les widgets d\'écran de verrouillage d\'Android KitKat. Vos widgets s\'afficheront dans un slider paginé sur l\'écran de verrouillage.</string>
     <string name="intro_usage_title">Utilisation basique</string>
@@ -178,7 +178,7 @@
     <string name="intro_battery_optimization_desc">De nombreux appareils, y compris ceux qui exécutent MIUI et EMUI, sont particulièrement agressifs avec la batterie. Cela peut involontairement tuer Lockscreen Widgets. Cliquez sur le bouton ci-dessous pour apprendre à autoriser Lockscreen Widgets à tourner correctement malgré cette complication (sujet en anglais).</string>
     <string name="intro_moto_razr_allow_secondary_display_access">Allow Secondary Display Access</string>
     <string name="intro_moto_razr_allow_secondary_display_access_desc">Lockscreen Widgets supports adding frames to multiple displays, but Motorola blocks secondary display access to third party apps by default on the Razr models. Tap below to open the screen where you can grant permission to Lockscreen Widgets to use the cover display. Once there, find Lockscreen Widgets in the list, tap it, and enable \"Allow on external display\".</string>
-    <string name="intro_autostart_title">Allow Autostart</string>
+    <string name="intro_autostart_title">Autoriser le démarrage automatique</string>
     <string name="intro_autostart_desc">Your firmware implements an autostart permission system, which may prevent Lockscreen Widgets from running correctly. Use the button below to allow Lockscreen Widgets autostart permissions.</string>
     <string name="intro_done_title">Parfait !</string>
     <string name="intro_done_desc">C\'est tout bon ! Vérifiez votre écran de verrouillage et vous devriez maintenant voir le cadre du widget !</string>
@@ -261,6 +261,7 @@
     <string name="on_lock_screen">Sur l\'écran de verrouillage</string>
     <string name="in_notification_center">Dans le centre de notifications</string>
     <string name="in_locked_notification_center">Dans le centre de notification verrouillé</string>
+    <string name="in_previews">In Previews</string>
     <string name="reset_frame_position_size_confirm_message">Êtes-vous sûr de vouloir réinitialiser la position et la taille ?</string>
     <string name="install_shizuku">Installer Shizuku</string>
     <string name="open_shizuku">Lancer Shizuku</string>

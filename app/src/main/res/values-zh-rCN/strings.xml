@@ -261,6 +261,7 @@
     <string name="on_lock_screen">锁屏界面</string>
     <string name="in_notification_center">在通知中心</string>
     <string name="in_locked_notification_center">在锁定的通知中心</string>
+    <string name="in_previews">In Previews</string>
     <string name="reset_frame_position_size_confirm_message">您确定要重置位置和大小吗？</string>
     <string name="install_shizuku">安装 Shizuku</string>
     <string name="open_shizuku">打开 Shizuku</string>
