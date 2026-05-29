@@ -395,11 +395,12 @@ object AccessibilityUtils {
     suspend fun Context.runWindowOperation(
         frameDelegates: Map<Int, MainWidgetFrameDelegate>,
         drawerDelegate: DrawerDelegate,
-        isScreenOn: Boolean,
-        isOnKeyguard: Boolean,
         getWindows: () -> SparseArray<List<AccessibilityWindowInfo>>?,
         initialRun: Boolean = false,
     ) {
+        val isScreenOn = lsDisplayManager.isAnyDisplayOn
+        val isOnKeyguard = globalState.wasOnKeyguard.value
+
         logUtils.debugLog(
             "Trying to run window operation " +
                     "${initialRun}, " +
@@ -616,22 +617,22 @@ object AccessibilityUtils {
                 null
             )
 
-            frameDelegates.forEach { (_, frameDelegate) ->
-                frameDelegate.updateStateAndWindowState(
-                    updateAccessibility = true,
-                    transform = {
-                        it.copy(
-                            screenOrientation = frameDelegate.screenOrientation ?: it.screenOrientation,
-                        )
-                    },
-                )
+            if (prefManager.widgetFrameEnabled) {
+                frameDelegates.forEach { (_, frameDelegate) ->
+                    frameDelegate.updateStateAndWindowState(
+                        updateAccessibility = true,
+                        transform = {
+                            it.copy(
+                                screenOrientation = frameDelegate.screenOrientation ?: it.screenOrientation,
+                            )
+                        },
+                    )
+                }
             }
 
             runWindowOperation(
                 frameDelegates = frameDelegates,
                 drawerDelegate = drawerDelegate,
-                isOnKeyguard = globalState.wasOnKeyguard.value,
-                isScreenOn = lsDisplayManager.isAnyDisplayOn,
                 getWindows = getWindows,
             )
 
@@ -683,8 +684,10 @@ object AccessibilityUtils {
                 //Sometimes the event is already recycled somehow.
             }
 
-            frameDelegates.forEach { (_, frameDelegate) ->
-                frameDelegate.updateStateAndWindowState(true)
+            if (prefManager.widgetFrameEnabled) {
+                frameDelegates.forEach { (_, frameDelegate) ->
+                    frameDelegate.updateStateAndWindowState(true)
+                }
             }
         }
     }

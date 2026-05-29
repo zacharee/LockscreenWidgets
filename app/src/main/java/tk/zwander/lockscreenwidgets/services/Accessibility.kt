@@ -24,6 +24,7 @@ import tk.zwander.common.util.LSDisplayManager
 import tk.zwander.common.util.PrefManager
 import tk.zwander.common.util.copyCompat
 import tk.zwander.common.util.eventManager
+import tk.zwander.common.util.globalState
 import tk.zwander.common.util.handler
 import tk.zwander.common.util.keyguardManager
 import tk.zwander.common.util.logUtils
@@ -143,11 +144,11 @@ class Accessibility : AccessibilityService(), CoroutineScope by MainScope(), Eve
         logUtils.debugLog("Accessibility service connected.", null)
 
         launch(Dispatchers.Main) {
+            globalState.wasOnKeyguard.value = kgm.isKeyguardLocked
+
             runWindowOperation(
                 frameDelegates = secondaryFrameDelegates + (MainWidgetFrameDelegate.ID to frameDelegate),
                 drawerDelegate = drawerDelegate,
-                isScreenOn = lsDisplayManager.isAnyDisplayOn,
-                isOnKeyguard = kgm.isKeyguardLocked,
                 getWindows = ::getWindowsSafely,
                 initialRun = true,
             )
