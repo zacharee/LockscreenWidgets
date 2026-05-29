@@ -14,7 +14,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.setViewTreeLifecycleOwner
 import androidx.lifecycle.viewModelScope
-import androidx.recyclerview.widget.ItemTouchHelper
+import androidx.recyclerview.widget.FixedItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import androidx.savedstate.SavedStateRegistry
 import androidx.savedstate.SavedStateRegistryController
@@ -96,7 +96,7 @@ abstract class BaseDelegate<State : Any>(
         )
     }
     protected val itemTouchHelper by lazy {
-        ItemTouchHelper(touchHelperCallback)
+        FixedItemTouchHelper(touchHelperCallback)
     }
 
     val isAttached: Boolean
