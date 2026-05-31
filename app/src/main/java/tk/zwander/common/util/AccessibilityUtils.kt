@@ -217,6 +217,7 @@ object AccessibilityUtils {
 
         val presentIds = prefManager.presentIds.associateWith {}
         val nonPresentIds = prefManager.nonPresentIds.associateWith {}
+        val isPixelUI = isPixelUI
 
         val processed = windows.mapIndexedParallel { index, rawWindow ->
             val safeRoot = try {
@@ -225,7 +226,8 @@ object AccessibilityUtils {
                 logUtils.debugLog("Error getting window root", e)
                 null
             }
-            val isSysUi = safeRoot?.packageName == "com.android.systemui"
+            val isSysUi = safeRoot?.packageName == "com.android.systemui" ||
+                    safeRoot?.packageName == "miui.systemui.plugin"
             val window = WindowRootPair(rawWindow, safeRoot, index)
 
             if (isSysUi) {
