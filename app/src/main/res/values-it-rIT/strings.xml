@@ -265,7 +265,6 @@
     <string name="reset_frame_position_size_confirm_message">Reimpostare posizione e dimensione?</string>
     <string name="install_shizuku">Installa Shizuku</string>
     <string name="open_shizuku">Apri Shizuku</string>
-    <string name="grant_read_media_images">Autorizza READ_MEDIA_IMAGES</string>
     <string name="failed_to_add_shortcut">Impossibile aggiungere la scorciatoia.</string>
     <string name="directly_check_for_activity">Verifica diretta Attività</string>
     <string name="directly_check_for_activity_desc">Quanto attivato, Lockscreen Widget userà le API di Android per verificare se un widget sta avviando un\'Attività. Può essere più rapido della rilevazione integrata dell\'app, ma può causare falsi positivi.</string>

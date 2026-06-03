@@ -265,7 +265,6 @@
     <string name="reset_frame_position_size_confirm_message">هل أنت متأكد من أنك تريد إعادة تعيين الموقع والحجم؟</string>
     <string name="install_shizuku">Install Shizuku</string>
     <string name="open_shizuku">Open Shizuku</string>
-    <string name="grant_read_media_images">منح قراءة الوسائط والصور</string>
     <string name="failed_to_add_shortcut">غير قادر على إضافة الاختصار.</string>
     <string name="directly_check_for_activity">التحقق مباشرة من النشاط</string>
     <string name="directly_check_for_activity_desc">When enabled, Lockscreen Widgets will use Android\'s API to check whether a widget tap is launching an Activity. This can be faster than Lockscreen Widgets\' built-in detection, but may cause false positives.</string>

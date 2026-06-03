@@ -362,8 +362,6 @@
     <string name="install_shizuku">Install Shizuku</string>
     <string name="open_shizuku">Open Shizuku</string>
 
-    <string name="grant_read_media_images">Grant READ_MEDIA_IMAGES</string>
-
     <string name="failed_to_add_shortcut">Unable to add shortcut.</string>
 
     <string name="directly_check_for_activity">Directly Check for Activity</string>

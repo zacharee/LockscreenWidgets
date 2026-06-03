@@ -265,7 +265,6 @@
     <string name="reset_frame_position_size_confirm_message">¿Seguro que quieres restablecer la posición y el tamaño?</string>
     <string name="install_shizuku">Instalar Shizuku</string>
     <string name="open_shizuku">Abrir Shizuku</string>
-    <string name="grant_read_media_images">Grant READ_MEDIA_IMAGES</string>
     <string name="failed_to_add_shortcut">No se ha podido crear el Acceso directo.</string>
     <string name="directly_check_for_activity">Comprobar actividad directamente</string>
     <string name="directly_check_for_activity_desc">Cuando está activado, Lockscreen Widgets utilizará la API de Android para comprobar si al tocar un widget estás lanzando una actividad de la app correspondiente. Esto puede ser más rápido que la detección integrada de Lockscreen Widgets, pero puede causar falsos positivos.</string>

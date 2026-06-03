@@ -265,7 +265,6 @@
     <string name="reset_frame_position_size_confirm_message">Pozisyonu ve boyutu sıfırlamak istediğinizden emin misiniz?</string>
     <string name="install_shizuku">Shizuku\'yu yükle</string>
     <string name="open_shizuku">Shizuku\'yu Aç</string>
-    <string name="grant_read_media_images">READ_MEDIA_IMAGES\'i onayla</string>
     <string name="failed_to_add_shortcut">Kısayol oluşturulamadı.</string>
     <string name="directly_check_for_activity">Doğrudan Aktiviteyi Kontrol Et</string>
     <string name="directly_check_for_activity_desc">Etkinleştirildiğinde, Lockscreen Widgets bir widget dokunuşunun bir Aktivite başlatıp başlatmadığını kontrol etmek için Android\'in API\'sini kullanır. Bu, Kilit Ekranı Widget\'larının yerleşik algılamasından daha hızlı olabilir, ancak yanlış pozitiflere neden olabilir.</string>

@@ -265,7 +265,6 @@
     <string name="reset_frame_position_size_confirm_message">Bist du dir sicher, dass du die Position und die Größe zurücksetzen möchtest?</string>
     <string name="install_shizuku">Installiere Shizuku</string>
     <string name="open_shizuku">Shizuku öffnen</string>
-    <string name="grant_read_media_images">Erlaube READ_MEDIA_IMAGES</string>
     <string name="failed_to_add_shortcut">Verknüpfung kann nicht hinzugefügt werden.</string>
     <string name="directly_check_for_activity">Direkt auf Aktivität prüfen</string>
     <string name="directly_check_for_activity_desc">Wenn aktiviert, werden Sperrbildschirm-Widgets die Android-API verwenden, um zu überprüfen, ob ein Widget-Tippen eine Aktivität startet. Dies kann schneller sein als die eingebaute Erkennung von Lockscreen Widgets, kann aber zu Fehlstarts führen.</string>

@@ -265,7 +265,6 @@
     <string name="reset_frame_position_size_confirm_message">您确定要重置位置和大小吗？</string>
     <string name="install_shizuku">安装 Shizuku</string>
     <string name="open_shizuku">打开 Shizuku</string>
-    <string name="grant_read_media_images">获取 READ_MEDIA_MIMAGES</string>
     <string name="failed_to_add_shortcut">无法添加快捷方式。</string>
     <string name="directly_check_for_activity">直接检查活动</string>
     <string name="directly_check_for_activity_desc">如果启用，锁屏小部件将使用 Android 的 API 来检查小部件是否正在启动活动。 这可能比锁屏小部件内置检测更快，但可能会导致虚假阳性。</string>
