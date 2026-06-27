@@ -10,7 +10,7 @@ plugins {
     alias(libs.plugins.bugsnag)
 }
 
-val jdkVersion = project.properties["jdk.version"].toString()
+val jdkVersion = project.findProperty("jdk.version").toString()
 
 android {
     compileSdk = 36
@@ -44,7 +44,7 @@ android {
 
     buildTypes {
         all {
-            buildConfigField("Integer", "DATABASE_VERSION", project.properties["databaseVersion"].toString())
+            buildConfigField("Integer", "DATABASE_VERSION", project.findProperty("databaseVersion").toString())
         }
     }
 
