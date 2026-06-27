@@ -5,9 +5,9 @@ import android.appwidget.AppWidgetHostView
 import android.appwidget.AppWidgetProviderInfo
 import android.content.Context
 import android.content.Context.CONTEXT_INCLUDE_CODE
-import android.view.ViewGroup
 import tk.zwander.common.host.widgetHostCompat
 import tk.zwander.common.util.RemoteViewsLayoutInflaterContext
+import tk.zwander.common.util.andRemoveFromParent
 import tk.zwander.common.util.logUtils
 import tk.zwander.common.util.safeApplicationContext
 import tk.zwander.common.util.themedContext
@@ -52,9 +52,7 @@ class WidgetViewCacheRegistry private constructor(@Suppress("unused") private va
             context.widgetHostCompat.createView(
                 widgetContext ?: context, appWidgetId, appWidget,
             )
-        }.also {
-            (it.parent as? ViewGroup?)?.removeView(it)
-        }
+        }.andRemoveFromParent()
     }
 
     fun removeView(appWidgetId: Int) {

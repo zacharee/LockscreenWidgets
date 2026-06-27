@@ -25,6 +25,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import com.google.accompanist.drawablepainter.rememberDrawablePainter
+import tk.zwander.common.util.andRemoveFromParent
 
 @Composable
 fun WidgetItem(
@@ -75,7 +76,9 @@ fun WidgetItem(
                             contentAlignment = Alignment.Center,
                         ) {
                             AndroidView(
-                                factory = { previewLayout },
+                                factory = {
+                                    previewLayout.andRemoveFromParent()
+                                },
                                 update = {},
                                 modifier = Modifier.fillMaxSize(),
                             )

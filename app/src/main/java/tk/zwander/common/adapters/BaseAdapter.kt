@@ -488,9 +488,7 @@ abstract class BaseAdapter<VM : BaseDelegate.BaseViewModel<*, *>>(
 
             widgetView?.let { v ->
                 AndroidView(
-                    factory = {
-                        v
-                    },
+                    factory = { v },
                     modifier = modifier,
                 )
             }

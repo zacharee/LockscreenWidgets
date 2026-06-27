@@ -47,6 +47,7 @@ import tk.zwander.common.util.ISnappyLayoutManager
 import tk.zwander.common.util.LSDisplay
 import tk.zwander.common.util.LifecycleEffect
 import tk.zwander.common.util.PrefManager
+import tk.zwander.common.util.andRemoveFromParent
 import tk.zwander.common.util.prefManager
 import tk.zwander.common.util.themedContext
 import tk.zwander.common.views.SnappyRecyclerView
@@ -147,7 +148,9 @@ fun WidgetFramePreviewLayout(
                 )
 
                 AndroidView(
-                    factory = { widgetGridView },
+                    factory = {
+                        widgetGridView.andRemoveFromParent()
+                    },
                     update = {
                         it.layoutManager = dummyDelegate?.gridLayoutManager
                         it.adapter = dummyDelegate?.widgetGridAdapter

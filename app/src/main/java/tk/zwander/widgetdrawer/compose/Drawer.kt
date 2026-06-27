@@ -39,6 +39,7 @@ import tk.zwander.common.compose.util.rememberBooleanPreferenceState
 import tk.zwander.common.compose.util.rememberPreferenceState
 import tk.zwander.common.util.Event
 import tk.zwander.common.util.PrefManager
+import tk.zwander.common.util.andRemoveFromParent
 import tk.zwander.common.util.collectAsMutableState
 import tk.zwander.common.util.eventManager
 import tk.zwander.common.util.prefManager
@@ -143,7 +144,7 @@ fun DrawerDelegate.DrawerViewModel.Drawer(
 
             AndroidView(
                 factory = {
-                    widgetGrid.also {
+                    widgetGrid.andRemoveFromParent().also {
                         ViewCompat.setNestedScrollingEnabled(it, true)
                     }
                 },
