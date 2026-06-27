@@ -9,9 +9,7 @@ import android.content.Intent
 import android.os.BadParcelableException
 import android.os.Build
 import android.os.DeadObjectException
-import android.os.Handler
 import android.os.IBinder
-import android.os.Looper
 import android.os.Parcel
 import android.os.SystemProperties
 import android.provider.Settings
@@ -32,6 +30,7 @@ import tk.zwander.common.util.EventObserver
 import tk.zwander.common.util.eventManager
 import tk.zwander.common.util.globalState
 import tk.zwander.common.util.logUtils
+import tk.zwander.common.util.mainHandler
 import tk.zwander.common.util.stringify
 
 //Check if the notification listener service is enabled
@@ -52,7 +51,6 @@ val Context.isNotificationListenerActive: Boolean
 class NotificationListener : NotificationListenerService(), EventObserver, LifecycleOwner {
     private val dispatcher = ServiceLifecycleDispatcher(this)
     private val nm by lazy { getSystemService(NOTIFICATION_SERVICE) as NotificationManager }
-    private val handler by lazy { Handler(Looper.getMainLooper()) }
 
     private val isListening = atomic(false)
     private val updateJob = atomic<Job?>(null)
@@ -63,7 +61,7 @@ class NotificationListener : NotificationListenerService(), EventObserver, Lifec
     override fun onListenerConnected() {
         logUtils.debugLog("Notification listener connected.", null)
         isListening.value = true
-        handler.post {
+        mainHandler.post {
             logUtils.debugLog("Sending notification update because listener was connected.", null)
             sendUpdate()
         }
@@ -115,7 +113,7 @@ class NotificationListener : NotificationListenerService(), EventObserver, Lifec
                         "Sending notification update because update was requested.",
                         null
                     )
-                    handler.post {
+                    mainHandler.post {
                         sendUpdate()
                     }
                 }

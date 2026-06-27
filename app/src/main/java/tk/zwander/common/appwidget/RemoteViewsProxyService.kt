@@ -14,6 +14,7 @@ import android.os.IInterface
 import android.widget.RemoteViews
 import android.widget.RemoteViewsService
 import androidx.annotation.Keep
+import androidx.annotation.RequiresApi
 import androidx.core.content.IntentCompat
 import androidx.core.net.toUri
 import com.android.internal.widget.IRemoteViewsFactory
@@ -213,11 +214,30 @@ class RemoteViewsProxyService : RemoteViewsService() {
         }
 
         override fun getRemoteCollectionItems(
+            p0: Int,
+            p1: Int,
+            p2: Boolean,
+        ): RemoteViews.RemoteCollectionItems? {
+            onCreate()
+            return wrapped?.getRemoteCollectionItems(p0, p1, p2)
+        }
+
+        @Suppress("unused")
+        @RequiresApi(Build.VERSION_CODES.S)
+        fun getRemoteCollectionItems(
             capSize: Int,
             capBitmapSize: Int,
         ): RemoteViews.RemoteCollectionItems? {
             onCreate()
-            return wrapped?.getRemoteCollectionItems(capSize, capBitmapSize)
+
+            return wrapped?.let {
+                it::class.java.getDeclaredMethod(
+                    "getRemoteCollectionItems",
+                    Int::class.java,
+                    Int::class.java,
+                ).invoke(it, capSize, capBitmapSize) as?
+                        RemoteViews.RemoteCollectionItems
+            }
         }
 
         override fun onDestroy(intent: Intent?) {

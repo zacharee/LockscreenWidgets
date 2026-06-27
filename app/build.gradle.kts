@@ -13,13 +13,13 @@ plugins {
 val jdkVersion = project.findProperty("jdk.version").toString()
 
 android {
-    compileSdk = 36
+    compileSdk = 37
 
     defaultConfig {
         namespace = "tk.zwander.lockscreenwidgets"
         applicationId = "tk.zwander.lockscreenwidgets"
         minSdk = 23
-        targetSdk = 36
+        targetSdk = 37
         versionCode = 196
         versionName = "4.1.3"
 
