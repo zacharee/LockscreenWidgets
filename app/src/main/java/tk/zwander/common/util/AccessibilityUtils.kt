@@ -112,7 +112,10 @@ object AccessibilityUtils {
         isPixelUI: Boolean,
     ) {
         if (!nodeState.onFaceWidgets.value) {
-            if (node.hasWildcardId("com.samsung.android.app.aodservice:id/facewidget_")) {
+            if (node.hasWildcardId("com.samsung.android.app.aodservice:id/facewidget_") &&
+                !node.hasVisibleIds(
+                    unitMapOf("com.samsung.android.app.aodservice:id/facewidget_clock_container"),
+                )) {
                 nodeState.onFaceWidgets.value = true
             }
         }
@@ -280,20 +283,26 @@ object AccessibilityUtils {
 
             if (
                 safeRoot?.packageName == "com.samsung.android.app.cocktailbarservice" &&
-                rawWindow.isFocused && rawWindow.isActive
+                safeRoot.isVisibleToUser
             ) {
                 hasEdgePanelWindow = true
             }
 
-            if (safeRoot?.packageName == "com.samsung.android.app.notes") {
+            if (safeRoot?.packageName == "com.samsung.android.app.notes" &&
+                safeRoot.isVisibleToUser
+            ) {
                 hasScreenOffMemoWindow = true
             }
 
-            if (safeRoot?.packageName == "com.samsung.android.app.aodservice") {
+            if (safeRoot?.packageName == "com.samsung.android.app.aodservice" &&
+                safeRoot.isVisibleToUser
+            ) {
                 hasFaceWidgetsWindow = true
             }
 
-            if (prefManager.hideFrameOnApps.contains(safeRoot?.packageName)) {
+            if (prefManager.hideFrameOnApps.contains(safeRoot?.packageName) &&
+                safeRoot?.isVisibleToUser == true
+            ) {
                 hasHideForPresentApp = true
             }
 
