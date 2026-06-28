@@ -738,8 +738,8 @@ open class MainWidgetFrameDelegate protected constructor(
         fun forCommon(): Boolean {
             return lsDisplayManager.displayPowerStates.value.displayStates[display?.uniqueIdCompat] == true
                     && !state.isTempHide
-                    && globalState.hideForPresentIds.value[display?.displayId] == false
-                    && globalState.hideForNonPresentIds.value[display?.displayId] == false
+                    && globalState.hideForPresentIds.value[display?.displayId] != true
+                    && globalState.hideForNonPresentIds.value[display?.displayId] != true
                     && prefManager.widgetFrameEnabled
                     && (!prefManager.hideInLandscape || state.screenOrientation == Surface.ROTATION_0 || state.screenOrientation == Surface.ROTATION_180)
                     && prefManager.canShowFrameFromTasker
@@ -759,17 +759,18 @@ open class MainWidgetFrameDelegate protected constructor(
         fun forLockscreen(): Boolean {
             return globalState.wasOnKeyguard.value
                     && (framePrefs.showOnMainLockScreen || !framePrefs.showInNotificationShade)
-                    && (!framePrefs.hideOnFaceWidgets || globalState.isOnFaceWidgets.value[display?.displayId] == false)
+                    && (!framePrefs.hideOnFaceWidgets || globalState.isOnFaceWidgets.value[display?.displayId] != true)
                     && ((globalState.currentAppLayer.value[display?.displayId] ?: 0) < 0 &&
                             globalState.currentAppPackage.value[display?.displayId] == null)
-                    && (globalState.isOnEdgePanel.value[display?.displayId] == false || !framePrefs.hideOnEdgePanel)
-                    && globalState.isOnScreenOffMemo.value[display?.displayId] == false
-                    && (globalState.showingNotificationsPanel.value[display?.displayId] == false ||
+                    && (globalState.isOnEdgePanel.value[display?.displayId] != true || !framePrefs.hideOnEdgePanel)
+                    && globalState.isOnScreenOffMemo.value[display?.displayId] != true
+                    && (globalState.showingNotificationsPanel.value[display?.displayId] != true ||
                             !framePrefs.hideOnNotificationShade)
-                    && (globalState.showingSecurityInput.value[display?.displayId] == false ||
+                    && (globalState.showingSecurityInput.value[display?.displayId] != true ||
                             !framePrefs.hideOnSecurityPage)
                     && (globalState.notificationCount.value == 0 || !framePrefs.hideOnNotifications)
-                    && globalState.hidingForPresentApp.value[display?.displayId] == false
+                    && globalState.hidingForPresentApp.value[display?.displayId] != true
+                    && globalState.showingPowerMenu.value[display?.displayId] != true
                     && forCommon()
         }
 
@@ -796,7 +797,8 @@ open class MainWidgetFrameDelegate protected constructor(
                         "forceShowFrame: ${prefManager.forceShowFrame}\n" +
                         "hideOnFaceWidgets: ${framePrefs.hideOnFaceWidgets}\n" +
                         "hideWhenKeyboardShown: ${framePrefs.hideWhenKeyboardShown}\n" +
-                        "displayPower: ${lsDisplayManager.displayPowerStates.value.displayStates[display?.uniqueIdCompat]}\n",
+                        "displayPower: ${lsDisplayManager.displayPowerStates.value.displayStates[display?.uniqueIdCompat]}\n" +
+                        "showingPowerMenu: ${globalState.showingPowerMenu.value[display?.displayId]}\n",
                 null,
             )
         }

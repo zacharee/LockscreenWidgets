@@ -47,6 +47,7 @@ object AccessibilityUtils {
         val hasSettingsContainerButton: AtomicBoolean = atomic(false),
         val onFaceWidgets: AtomicBoolean = atomic(false),
         val hasNotificationsShowing: AtomicBoolean = atomic(false),
+        val showingPowerMenu: AtomicBoolean = atomic(false),
     )
 
     data object IDMaps {
@@ -101,6 +102,10 @@ object AccessibilityUtils {
 
         val clearAllButtonIds = unitMapOf(
             "com.android.systemui:id/clear_all",
+        )
+
+        val powerMenuIds = unitMapOf(
+            "com.android.systemui:id/sec_global_actions_icon",
         )
     }
 
@@ -187,6 +192,12 @@ object AccessibilityUtils {
         if (!nodeState.hideForNonPresentIds.value && nonPresentIds.isNotEmpty()) {
             if (!node.hasVisibleIds(nonPresentIds)) {
                 nodeState.hideForNonPresentIds.value = true
+            }
+        }
+
+        if (!nodeState.showingPowerMenu.value) {
+            if (node.hasVisibleIds(IDMaps.powerMenuIds)) {
+                nodeState.showingPowerMenu.value = true
             }
         }
     }
@@ -493,6 +504,7 @@ object AccessibilityUtils {
                 globalState.currentAppPackage[displayId] = windowInfo.topAppWindowPackageName
                 globalState.hidingForPresentApp[displayId] = windowInfo.hasHideForPresentApp
                 globalState.onMainLockScreen[displayId] = windowInfo.nodeState.onMainLockscreen.value
+                globalState.showingPowerMenu[displayId] = windowInfo.nodeState.showingPowerMenu.value
                 globalState.showingSecurityInput[displayId] = windowInfo.nodeState.showingSecurityInput.value
                 globalState.accessibilitySeesNotificationsOnMainLockScreen[displayId] = windowInfo.nodeState.onMainLockscreen.value &&
                         windowInfo.nodeState.hasNotificationsShowing.value
