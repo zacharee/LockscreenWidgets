@@ -450,9 +450,4 @@
     <string name="filter_widgets">Widgets</string>
     <string name="filter_shortcuts">Shortcuts</string>
     <string name="filter_launcher_icons">App Launchers</string>
-
-    <string name="on_device_wallpaper_collection_id" translatable="false">
-      on_device_wallpapers
-    </string>
-    <string name="on_device_wallpaper_title">Android wallpaper</string>
 </resources>
