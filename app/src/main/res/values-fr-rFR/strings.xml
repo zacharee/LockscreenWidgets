@@ -163,6 +163,8 @@
     <string name="settings_screen_double_tap_turn_off_screen_drawer">Touchez deux fois un espace vide (en dehors d\'un widget) pour éteindre l\'écran.</string>
     <string name="settings_screen_not_touchable">Ignorer tous les touchers</string>
     <string name="settings_screen_not_touchable_desc">Lorsque cette option est activée, le widget ignorera tous les touchers, ils seront reçus par ce qui se trouve en dessous. Les widgets répondront toujours aux touchers en mode prévisualisation.</string>
+    <string name="settings_screen_install_wallpaper_server">Install Wallpaper Server</string>
+    <string name="settings_screen_install_wallpaper_server_desc">On Android 13 and later, Lockscreen Widgets requires the use of a companion app to retrieve the device wallpaper.</string>
     <string name="intro_welcome_title">Bienvenue !</string>
     <string name="intro_welcome_desc">Lockscreen Widgets est une application simple avec un but simple : récupérer les widgets d\'écran de verrouillage d\'Android KitKat. Vos widgets s\'afficheront dans un slider paginé sur l\'écran de verrouillage.</string>
     <string name="intro_usage_title">Utilisation basique</string>
@@ -173,7 +175,8 @@
     <string name="intro_notification_listener_desc">Lockscreen Widgets peut masquer le cadre du widget lorsqu\'il y a des notifications affichées. Pour ce faire, vous devrez activer l\'écouteur de notification. Ce droit n\'est pas absolument nécessaire pour l\'utilisation de l\'application.</string>
     <string name="intro_read_storage_title">Accès au stockage externe</string>
     <string name="intro_read_storage_desc">Lockscreen Widgets a un mode \"masqé\", où il utilisera votre fond d\'écran comme fond d\'écran du widget, le rendant transparent ou biencapable de couvrir les éléments de l\'écran de verrouillage. Pour ce faire, Lockscreen Widgets a besoin d\'avoir accès au stockage de votre appareil. Vous n\'êtes pas obligé d\'autoriser l\'accès pour le moment. Si vous utilisez Lollipop, cette autorisation est déjà accordée. Plus de détails sont disponibles dans la politique de confidentialité.</string>
-    <string name="intro_read_external_storage_desc_13_addendum">Sur Android 13 et plus, vous devrez utiliser Shizuku pour accorder les autorisations requises.</string>
+    <string name="intro_wallpaper_companion_title">Wallpaper Companion</string>
+    <string name="intro_wallpaper_companion_desc">On Android 13 and later, Lockscreen Widgets requires a companion app to retrieve the wallpaper. You only need to install this if you want to use Masked Mode.</string>
     <string name="intro_battery_optimization">Optimisation de la batterie</string>
     <string name="intro_battery_optimization_desc">De nombreux appareils, y compris ceux qui exécutent MIUI et EMUI, sont particulièrement agressifs avec la batterie. Cela peut involontairement tuer Lockscreen Widgets. Cliquez sur le bouton ci-dessous pour apprendre à autoriser Lockscreen Widgets à tourner correctement malgré cette complication (sujet en anglais).</string>
     <string name="intro_moto_razr_allow_secondary_display_access">Allow Secondary Display Access</string>
@@ -265,6 +268,7 @@
     <string name="reset_frame_position_size_confirm_message">Êtes-vous sûr de vouloir réinitialiser la position et la taille ?</string>
     <string name="install_shizuku">Installer Shizuku</string>
     <string name="open_shizuku">Lancer Shizuku</string>
+    <string name="install">Install</string>
     <string name="failed_to_add_shortcut">Impossible d\'ajouter un raccourci.</string>
     <string name="directly_check_for_activity">Vérification directe de l\'activité</string>
     <string name="directly_check_for_activity_desc">Lorsque cette option est activée, Lockscreen Widgets utilisera l\'API d\'Android pour vérifier si un clic de widget lance une activité. Cette méthode peut être plus rapide que la détection intégrée de Lockscreen Widgets, mais elle peut entraîner des faux positifs.</string>
@@ -321,4 +325,5 @@
     <string name="filter_widgets">Widgets</string>
     <string name="filter_shortcuts">Shortcuts</string>
     <string name="filter_launcher_icons">App Launchers</string>
+    <string name="on_device_wallpaper_title">Android wallpaper</string>
 </resources>
