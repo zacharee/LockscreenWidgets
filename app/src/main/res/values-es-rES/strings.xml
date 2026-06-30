@@ -163,6 +163,8 @@
     <string name="settings_screen_double_tap_turn_off_screen_drawer">Double-tap an empty space (outside of a widget) to turn off the screen.</string>
     <string name="settings_screen_not_touchable">Ignore All Touches</string>
     <string name="settings_screen_not_touchable_desc">When enabled, the selected frame will ignore all touches, and the whatever is underneath will receive them instead. Frames will always respond to touches in preview mode.</string>
+    <string name="settings_screen_install_wallpaper_server">Install Wallpaper Server</string>
+    <string name="settings_screen_install_wallpaper_server_desc">On Android 13 and later, Lockscreen Widgets requires the use of a companion app to retrieve the device wallpaper.</string>
     <string name="intro_welcome_title">¡Te damos la bienvenida!</string>
     <string name="intro_welcome_desc">Lockscreen Widgets es una aplicación simple con un propósito también simple: traer de vuelta los widgets de la Pantalla de Bloqueo de Android KitKat. Tus widgets se mostrarán en un sencillo panel de páginas deslizables en la Pantalla de Bloqueo.</string>
     <string name="intro_usage_title">Uso básico</string>
@@ -173,7 +175,8 @@
     <string name="intro_notification_listener_desc">Lockscreen Widgets puede ocultar el Panel de widgets mientras se muestran notificaciones. Para ello, necesitarás habilitar el Listener de Notificaciones. Pero no tienes que habilitarlo ahora mismo.</string>
     <string name="intro_read_storage_title">Leer almacenamiento externo</string>
     <string name="intro_read_storage_desc">Lockscreen Mode tiene un \"Modo Máscara\" que utiliza tu imagen de fondo de pantalla como el fondo del Panel de widgets, para hacer que parezca transparente, y además siga pudiendo tapar los elementos de la Pantalla de Bloqueo. Pero para hacer esto, Lockscreen Widgets necesita que le concedas el permiso para poder acceder a las carpetas de almacenamiento de tu dispositivo. No tienes que conceder este permiso ahora. Si usas Android Lollipop, este permiso ya está concedido. Para más detalles, lee la Política de Privacidad.</string>
-    <string name="intro_read_external_storage_desc_13_addendum">En Android 13 o posterior, tendrás que usar Shizuku para conceder los permisos necesarios.</string>
+    <string name="intro_wallpaper_companion_title">Wallpaper Companion</string>
+    <string name="intro_wallpaper_companion_desc">On Android 13 and later, Lockscreen Widgets requires a companion app to retrieve the wallpaper. You only need to install this if you want to use Masked Mode.</string>
     <string name="intro_battery_optimization">Ahorro de energía</string>
     <string name="intro_battery_optimization_desc">Muchos dispositivos, incluyendo los que tienen sistemas operativos MIUI y EMUI, tienen una gestión increíblemente agresiva de la batería. Esto puede causar que la app Lockscreen Widget sea cerrada aunque no quieras. Toca en el botón de abajo para descubrir qué puedes hacer para que Lockscreen Widgets esté ejecutándose en todo momento en tu dispositivo.</string>
     <string name="intro_moto_razr_allow_secondary_display_access">Allow Secondary Display Access</string>
@@ -265,6 +268,7 @@
     <string name="reset_frame_position_size_confirm_message">¿Seguro que quieres restablecer la posición y el tamaño?</string>
     <string name="install_shizuku">Instalar Shizuku</string>
     <string name="open_shizuku">Abrir Shizuku</string>
+    <string name="install">Install</string>
     <string name="failed_to_add_shortcut">No se ha podido crear el Acceso directo.</string>
     <string name="directly_check_for_activity">Comprobar actividad directamente</string>
     <string name="directly_check_for_activity_desc">Cuando está activado, Lockscreen Widgets utilizará la API de Android para comprobar si al tocar un widget estás lanzando una actividad de la app correspondiente. Esto puede ser más rápido que la detección integrada de Lockscreen Widgets, pero puede causar falsos positivos.</string>
@@ -321,4 +325,5 @@
     <string name="filter_widgets">Widgets</string>
     <string name="filter_shortcuts">Shortcuts</string>
     <string name="filter_launcher_icons">App Launchers</string>
+    <string name="on_device_wallpaper_title">Android wallpaper</string>
 </resources>
