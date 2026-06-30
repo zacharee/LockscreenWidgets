@@ -163,6 +163,8 @@
     <string name="settings_screen_double_tap_turn_off_screen_drawer">انقر نقراً مزدوجاً على مساحة فارغة (خارج عنصر واجهة المستخدم) لإيقاف تشغيل الشاشة.</string>
     <string name="settings_screen_not_touchable">تجاهل جميع اللمسات</string>
     <string name="settings_screen_not_touchable_desc">عند تفعيل هذه الخاصية، سيتجاهل الإطار المحدد جميع اللمسات، وسيستقبلها العنصر الموجود أسفله. تستجيب الإطارات دائمًا للمسات في وضع المعاينة.</string>
+    <string name="settings_screen_install_wallpaper_server">Install Wallpaper Server</string>
+    <string name="settings_screen_install_wallpaper_server_desc">On Android 13 and later, Lockscreen Widgets requires the use of a companion app to retrieve the device wallpaper.</string>
     <string name="intro_welcome_title">مرحباً!</string>
     <string name="intro_welcome_desc">تطبيق Lockscreen Widgets هو تطبيق بسيط ذو هدف بسيط: إعادة إحياء أدوات شاشة القفل في نظام Android KitKat. ستظهر أدواتك في شريط تمرير بسيط على شاشة القفل.</string>
     <string name="intro_usage_title">الاستخدام الأساسي</string>
@@ -173,6 +175,8 @@
     <string name="intro_notification_listener_desc">يمكن لـ Lockscreen Widgets إخفاء إطار الويدجت أثناء عرض الإشعارات. للقيام بذلك، ستحتاج إلى تفعيل مستمع الإشعارات. ليس عليك منح هذا الإذن الآن.</string>
     <string name="intro_read_storage_title">قراءة وحدة التخزين الخارجية</string>
     <string name="intro_read_storage_desc">يحتوي تطبيق Lockscreen Widgets على وضع \"إخفاء\"، حيث يستخدم خلفية سطح المكتب كخلفية لإطار التطبيق، مما يجعله يبدو شفافًا، مع إمكانية تغطية عناصر شاشة القفل. للقيام بذلك، يحتاج التطبيق إلى إذن لقراءة بيانات جهازك. لستَ مُلزمًا بمنح هذا الإذن الآن. إذا كنت تستخدم نظام Lollipop، فهذا الإذن مُمنوحٌ لك مُسبقًا. للمزيد من التفاصيل، يُرجى مراجعة سياسة الخصوصية.</string>
+    <string name="intro_wallpaper_companion_title">Wallpaper Companion</string>
+    <string name="intro_wallpaper_companion_desc">On Android 13 and later, Lockscreen Widgets requires a companion app to retrieve the wallpaper. You only need to install this if you want to use Masked Mode.</string>
     <string name="intro_battery_optimization">تحسين أداء البطارية</string>
     <string name="intro_battery_optimization_desc">تتميز العديد من الأجهزة، بما فيها الأجهزة التي تعمل بنظامي MIUI وEMUI، بإدارة بطارية فعّالة للغاية. قد يؤدي ذلك إلى إيقاف تشغيل أدوات شاشة القفل دون رغبتك. انقر على الزر أدناه لمعرفة كيفية إضافة أدوات شاشة القفل إلى قائمة الأجهزة المسموح بها على جهازك.</string>
     <string name="intro_moto_razr_allow_secondary_display_access">السماح بالوصول إلى الشاشة الثانوية</string>
@@ -264,6 +268,7 @@
     <string name="reset_frame_position_size_confirm_message">هل أنت متأكد من أنك تريد إعادة تعيين الموقع والحجم؟</string>
     <string name="install_shizuku">Install Shizuku</string>
     <string name="open_shizuku">Open Shizuku</string>
+    <string name="install">Install</string>
     <string name="failed_to_add_shortcut">غير قادر على إضافة الاختصار.</string>
     <string name="directly_check_for_activity">التحقق مباشرة من النشاط</string>
     <string name="directly_check_for_activity_desc">When enabled, Lockscreen Widgets will use Android\'s API to check whether a widget tap is launching an Activity. This can be faster than Lockscreen Widgets\' built-in detection, but may cause false positives.</string>
@@ -324,4 +329,5 @@
     <string name="filter_widgets">Widgets</string>
     <string name="filter_shortcuts">Shortcuts</string>
     <string name="filter_launcher_icons">App Launchers</string>
+    <string name="on_device_wallpaper_title">Android wallpaper</string>
 </resources>
