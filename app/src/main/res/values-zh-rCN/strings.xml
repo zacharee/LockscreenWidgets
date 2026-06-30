@@ -324,5 +324,4 @@
     <string name="filter_widgets">小部件</string>
     <string name="filter_shortcuts">快捷方式</string>
     <string name="filter_launcher_icons">应用启动器</string>
-    <string name="on_device_wallpaper_title">Android wallpaper</string>
 </resources>
