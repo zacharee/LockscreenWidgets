@@ -163,6 +163,8 @@
     <string name="settings_screen_double_tap_turn_off_screen_drawer">Ekranı kapatmak için (widget\'ın dışındaki) boş bir alana iki kez tıklayın.</string>
     <string name="settings_screen_not_touchable">Ignore All Touches</string>
     <string name="settings_screen_not_touchable_desc">When enabled, the selected frame will ignore all touches, and the whatever is underneath will receive them instead. Frames will always respond to touches in preview mode.</string>
+    <string name="settings_screen_install_wallpaper_server">Install Wallpaper Server</string>
+    <string name="settings_screen_install_wallpaper_server_desc">On Android 13 and later, Lockscreen Widgets requires the use of a companion app to retrieve the device wallpaper.</string>
     <string name="intro_welcome_title">Hoşgeldiniz!</string>
     <string name="intro_welcome_desc">Lockscreen Widgets, basit bir amacı olan basit bir uygulamadır: Android KitKat\'ın kilit ekranı widget\'larını geri getirmek. Widget\'larınız kilit ekranında basit bir sayfa kaydırıcıda gösterilecektir.</string>
     <string name="intro_usage_title">Temel Kullanım</string>
@@ -173,7 +175,8 @@
     <string name="intro_notification_listener_desc">Kilit Ekranı Widget\'ları bildirimler görüntülenirken widget çerçevesini gizleyebilir. Bunu yapmak için Bildirim Dinleyicisini etkinleştirmeniz gerekir. Bunu şu anda onaylamanız gerekmez.</string>
     <string name="intro_read_storage_title">Harici Depolamayı Oku</string>
     <string name="intro_read_storage_desc">Lockscreen Widgets, duvar kağıdınızı widget çerçevesi arka planı olarak kullanacağı ve şeffaf görünmesini sağlayacağı, aynı zamanda kilit ekranı öğelerini örtebileceği bir \"maskeleme\" moduna sahiptir. Bunu yapmak için, Lockscreen Widgets\'ın cihazınızın depolama alanını okuyabilmek için izne ihtiyacı vardır. Bunu şu anda vermeniz gerekmez. Lollipop kullanıyorsanız, bu izin zaten verilmiştir. Gizlilik politikasında daha fazla ayrıntı mevcuttur.</string>
-    <string name="intro_read_external_storage_desc_13_addendum">Android 13 ve üzeri sürümlerde gerekli izinleri vermek için Shizuku\'yu kullanmanız gerekecektir.</string>
+    <string name="intro_wallpaper_companion_title">Wallpaper Companion</string>
+    <string name="intro_wallpaper_companion_desc">On Android 13 and later, Lockscreen Widgets requires a companion app to retrieve the wallpaper. You only need to install this if you want to use Masked Mode.</string>
     <string name="intro_battery_optimization">Pil Optimizasyonu</string>
     <string name="intro_battery_optimization_desc">MIUI ve EMUI kullananlar da dahil olmak üzere birçok cihaz inanılmaz agresif bir pil yönetimine sahiptir. Bu, istemediğiniz zaman Kilit Ekranı Widget\'larının kapatılmasına neden olabilir. Belirli cihazınızda Kilit Ekranı Widget\'larını izin listesine nasıl ekleyebileceğinizi okumak için aşağıdaki düğmeye tıklayın.</string>
     <string name="intro_moto_razr_allow_secondary_display_access">İkincil Ekran Erişimine İzin Ver</string>
@@ -265,6 +268,7 @@
     <string name="reset_frame_position_size_confirm_message">Pozisyonu ve boyutu sıfırlamak istediğinizden emin misiniz?</string>
     <string name="install_shizuku">Shizuku\'yu yükle</string>
     <string name="open_shizuku">Shizuku\'yu Aç</string>
+    <string name="install">Install</string>
     <string name="failed_to_add_shortcut">Kısayol oluşturulamadı.</string>
     <string name="directly_check_for_activity">Doğrudan Aktiviteyi Kontrol Et</string>
     <string name="directly_check_for_activity_desc">Etkinleştirildiğinde, Lockscreen Widgets bir widget dokunuşunun bir Aktivite başlatıp başlatmadığını kontrol etmek için Android\'in API\'sini kullanır. Bu, Kilit Ekranı Widget\'larının yerleşik algılamasından daha hızlı olabilir, ancak yanlış pozitiflere neden olabilir.</string>
@@ -321,4 +325,5 @@
     <string name="filter_widgets">Widgetler</string>
     <string name="filter_shortcuts">Kısayollar</string>
     <string name="filter_launcher_icons">Uygulama Başlatıcıları</string>
+    <string name="on_device_wallpaper_title">Android wallpaper</string>
 </resources>
