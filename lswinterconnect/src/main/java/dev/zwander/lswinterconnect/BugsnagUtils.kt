@@ -1,4 +1,4 @@
-package tk.zwander.common.util
+package dev.zwander.lswinterconnect
 
 import com.bugsnag.android.BreadcrumbType
 import com.bugsnag.android.Bugsnag

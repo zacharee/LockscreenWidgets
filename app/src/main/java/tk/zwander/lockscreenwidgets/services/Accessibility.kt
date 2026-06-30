@@ -28,11 +28,12 @@ import tk.zwander.common.util.globalState
 import tk.zwander.common.util.handler
 import tk.zwander.common.util.keyguardManager
 import tk.zwander.common.util.logUtils
-import tk.zwander.common.util.peekLogUtils
 import tk.zwander.common.util.prefManager
+import tk.zwander.common.util.wallpaperClient
 import tk.zwander.lockscreenwidgets.App
 import tk.zwander.lockscreenwidgets.appwidget.IDListProvider
 import tk.zwander.lockscreenwidgets.util.FramePrefs
+import tk.zwander.lockscreenwidgets.util.FrameSpecificPreferences
 import tk.zwander.lockscreenwidgets.util.MainWidgetFrameDelegate
 import tk.zwander.lockscreenwidgets.util.SecondaryWidgetFrameDelegate
 import tk.zwander.widgetdrawer.util.DrawerDelegate
@@ -118,6 +119,13 @@ class Accessibility : AccessibilityService(), CoroutineScope by MainScope(), Eve
     }
 
     override fun onServiceConnected() {
+        if (FrameSpecificPreferences.doAnyFramesHaveSettingEnabled(
+            context = this,
+            baseKey = PrefManager.KEY_FRAME_MASKED_MODE,
+        )) {
+            wallpaperClient.tryBindService()
+        }
+
         serviceInfo = serviceInfo.apply {
             notificationTimeout = prefManager.accessibilityEventDelay.toLong()
         }
@@ -240,7 +248,7 @@ class Accessibility : AccessibilityService(), CoroutineScope by MainScope(), Eve
             // Sometimes throws a SecurityException talking about mismatching
             // user IDs. In that case, return null and don't update any window-based
             // state items.
-            peekLogUtils?.debugLog("Error getting windows", e)
+            logUtils.debugLog("Error getting windows", e)
             null
         }
     }

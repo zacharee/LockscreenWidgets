@@ -19,6 +19,7 @@ import androidx.preference.PreferenceManager
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.joaomgcd.taskerpluginlibrary.extensions.requestQuery
+import dev.zwander.lswinterconnect.safeApplicationContext
 import tk.zwander.common.data.SafePointF
 import tk.zwander.common.data.WidgetData
 import tk.zwander.common.data.WidgetListFilters

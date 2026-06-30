@@ -2,6 +2,7 @@ package tk.zwander.common.util
 
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleRegistry
+import dev.zwander.lswinterconnect.peekLogUtils
 
 var LifecycleRegistry.safeCurrentState: Lifecycle.State
     get() = currentState

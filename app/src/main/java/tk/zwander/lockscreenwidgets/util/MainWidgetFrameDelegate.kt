@@ -57,6 +57,7 @@ import tk.zwander.common.util.safeCurrentState
 import tk.zwander.common.util.safeRemoveView
 import tk.zwander.common.util.set
 import tk.zwander.common.util.themedContext
+import tk.zwander.common.util.wallpaperClient
 import tk.zwander.common.util.wallpaperUtils
 import tk.zwander.common.views.SnappyRecyclerView
 import tk.zwander.lockscreenwidgets.adapters.WidgetFrameAdapter
@@ -322,6 +323,11 @@ open class MainWidgetFrameDelegate protected constructor(
         handler(FrameSpecificPreferences.keyFor(id, PrefManager.KEY_FRAME_IGNORE_TOUCHES)) {
             updateState {
                 it.copy(ignoreAllTouches = framePrefs.ignoreAllTouches)
+            }
+        }
+        handler(FrameSpecificPreferences.keyFor(id, PrefManager.KEY_FRAME_MASKED_MODE)) {
+            if (framePrefs.maskedMode) {
+                wallpaperClient.tryBindService()
             }
         }
     }
@@ -832,7 +838,7 @@ open class MainWidgetFrameDelegate protected constructor(
             logUtils.debugLog("Trying to retrieve wallpaper", null)
 
             try {
-                val drawable = wallpaperUtils.wallpaperDrawable
+                val drawable = wallpaperUtils.getWallpaperDrawable(id)
 
                 logUtils.debugLog("Retrieved wallpaper: $drawable", null)
 

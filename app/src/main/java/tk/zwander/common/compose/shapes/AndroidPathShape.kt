@@ -7,7 +7,7 @@ import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.asComposePath
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.LayoutDirection
-import tk.zwander.common.util.peekLogUtils
+import dev.zwander.lswinterconnect.peekLogUtils
 
 class AndroidPathShape(
     private val displayPath: android.graphics.Path,

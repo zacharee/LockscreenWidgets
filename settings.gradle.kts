@@ -1,5 +1,11 @@
 @file:Suppress("UnstableApiUsage")
 
+include(":lswinterconnect")
+
+
+include(":lswwallpaper")
+
+
 pluginManagement {
     repositories {
         gradlePluginPortal()

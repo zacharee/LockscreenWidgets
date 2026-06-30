@@ -120,11 +120,11 @@ fun MainWidgetFrameDelegate.WidgetFrameViewModel.WidgetFrameLayout(
             } ?: Offset(0f, 0f)
         },
         onChanged = { _, value ->
-            val mutatedValue = HashMap(context.prefManager.maskedModeAdjustment.toMutableMap())
             lsDisplay?.uniqueIdCompat?.let {
+                val mutatedValue = HashMap(context.prefManager.maskedModeAdjustment.toMutableMap())
                 mutatedValue[it] = value
+                context.prefManager.maskedModeAdjustment = mutatedValue
             }
-            context.prefManager.maskedModeAdjustment = mutatedValue
         },
     )
     var maskScale by rememberPreferenceState(
@@ -148,7 +148,10 @@ fun MainWidgetFrameDelegate.WidgetFrameViewModel.WidgetFrameLayout(
                 if (doubleTapTurnOffDisplay && !firstViewing) {
                     detectTapGestures(
                         onDoubleTap = {
-                            context.logUtils.debugLog("Sending display off from base frame layer", null)
+                            context.logUtils.debugLog(
+                                "Sending display off from base frame layer",
+                                null
+                            )
                             context.eventManager.sendEvent(Event.TurnOffDisplay)
                         },
                     )
@@ -168,9 +171,10 @@ fun MainWidgetFrameDelegate.WidgetFrameViewModel.WidgetFrameLayout(
                             val thirdEvent = withTimeoutOrNull(10L) {
                                 awaitPointerEvent(pass = PointerEventPass.Initial)
                             }
-                            val interestingThirdEventChanges = thirdEvent?.changes?.filter { change ->
-                                change.pressed
-                            }?.distinctBy { it.id.value } ?: listOf()
+                            val interestingThirdEventChanges =
+                                thirdEvent?.changes?.filter { change ->
+                                    change.pressed
+                                }?.distinctBy { it.id.value } ?: listOf()
 
                             if (thirdEvent == null || interestingThirdEventChanges.size <= 2) {
                                 isInEditingMode = !isInEditingMode && !isLocked
@@ -405,7 +409,8 @@ fun MainWidgetFrameDelegate.WidgetFrameViewModel.WidgetFrameLayout(
                 modifier = Modifier.zIndex(7f),
             ) {
                 Box(
-                    modifier = Modifier.fillMaxSize()
+                    modifier = Modifier
+                        .fillMaxSize()
                         .draggable2D(
                             state = rememberDraggable2DState { offset ->
                                 with(density) {

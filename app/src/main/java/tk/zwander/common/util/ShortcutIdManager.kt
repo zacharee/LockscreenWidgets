@@ -2,6 +2,7 @@ package tk.zwander.common.util
 
 import android.annotation.SuppressLint
 import android.content.Context
+import dev.zwander.lswinterconnect.safeApplicationContext
 import tk.zwander.common.host.widgetHostCompat
 
 val Context.shortcutIdManager: ShortcutIdManager

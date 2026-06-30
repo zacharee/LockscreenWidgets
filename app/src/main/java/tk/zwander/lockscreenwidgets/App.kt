@@ -24,6 +24,7 @@ import com.bugsnag.android.ExitInfoPluginConfiguration
 import com.bugsnag.android.performance.BugsnagPerformance
 import com.bugsnag.android.performance.PerformanceConfiguration
 import com.getkeepsafe.relinker.ReLinker
+import dev.zwander.lswinterconnect.LogUtils
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.MainScope
@@ -37,12 +38,13 @@ import tk.zwander.common.util.EventObserver
 import tk.zwander.common.util.GlobalExceptionHandler
 import tk.zwander.common.util.HandlerRegistry
 import tk.zwander.common.util.LSDisplayManager
-import tk.zwander.common.util.LogUtils
 import tk.zwander.common.util.PrefManager
+import tk.zwander.common.util.WallpaperClient
 import tk.zwander.common.util.appWidgetManager
 import tk.zwander.common.util.eventManager
 import tk.zwander.common.util.globalState
 import tk.zwander.common.util.handler
+import tk.zwander.common.util.isDebug
 import tk.zwander.common.util.isOrHasDeadObject
 import tk.zwander.common.util.logUtils
 import tk.zwander.common.util.mainHandler
@@ -258,7 +260,12 @@ class App : Application(), CoroutineScope by MainScope(), EventObserver {
             HiddenApiBypass.setHiddenApiExemptions("L")
         }
 
-        LogUtils.createInstance(this)
+        LogUtils.createInstance(
+            context = this,
+            isDebug = { isDebug },
+            writeToFile = true,
+        )
+        WallpaperClient.getInstance(this)
 
         globalState.onCreate(this)
 

@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+
+    <application
+        android:allowBackup="true"
+        android:label="@string/app_name"
+        android:supportsRtl="true"
+        android:icon="@mipmap/ic_launcher"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:name=".App">
+        <activity android:name=".PermissionRequestActivity"
+            android:enabled="true"
+            android:exported="false"
+            android:theme="@style/AppTheme.Null"
+            />
+
+        <service
+            android:name=".WallpaperServerService"
+            android:enabled="true"
+            android:exported="true"
+            android:permission="tk.zwander.lockscreenwidgets.WALLPAPER_INTERCONNECT"
+            android:foregroundServiceType="specialUse"
+            />
+    </application>
+
+</manifest>

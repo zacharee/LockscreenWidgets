@@ -5,7 +5,7 @@ import android.util.AttributeSet
 import android.widget.ListView
 import androidx.core.view.NestedScrollingChild3
 import androidx.core.view.NestedScrollingChildHelper
-import tk.zwander.common.util.BugsnagUtils
+import dev.zwander.lswinterconnect.BugsnagUtils
 import tk.zwander.common.util.appWidgetManager
 import tk.zwander.common.util.logUtils
 

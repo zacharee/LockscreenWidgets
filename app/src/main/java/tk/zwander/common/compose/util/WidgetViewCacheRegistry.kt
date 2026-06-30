@@ -5,11 +5,11 @@ import android.appwidget.AppWidgetHostView
 import android.appwidget.AppWidgetProviderInfo
 import android.content.Context
 import android.content.Context.CONTEXT_INCLUDE_CODE
+import dev.zwander.lswinterconnect.safeApplicationContext
 import tk.zwander.common.host.widgetHostCompat
 import tk.zwander.common.util.RemoteViewsLayoutInflaterContext
 import tk.zwander.common.util.andRemoveFromParent
 import tk.zwander.common.util.logUtils
-import tk.zwander.common.util.safeApplicationContext
 import tk.zwander.common.util.themedContext
 
 val Context.widgetViewCacheRegistry: WidgetViewCacheRegistry

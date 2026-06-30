@@ -20,18 +20,18 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ServiceLifecycleDispatcher
 import androidx.lifecycle.lifecycleScope
 import com.bugsnag.android.BreadcrumbType
+import dev.zwander.lswinterconnect.BugsnagUtils
+import dev.zwander.lswinterconnect.stringify
 import kotlinx.atomicfu.atomic
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
-import tk.zwander.common.util.BugsnagUtils
 import tk.zwander.common.util.Event
 import tk.zwander.common.util.EventObserver
 import tk.zwander.common.util.eventManager
 import tk.zwander.common.util.globalState
 import tk.zwander.common.util.logUtils
 import tk.zwander.common.util.mainHandler
-import tk.zwander.common.util.stringify
 
 //Check if the notification listener service is enabled
 val Context.isNotificationListenerActive: Boolean

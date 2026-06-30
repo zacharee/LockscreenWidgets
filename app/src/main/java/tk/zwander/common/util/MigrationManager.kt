@@ -2,6 +2,7 @@ package tk.zwander.common.util
 
 import android.annotation.SuppressLint
 import android.content.Context
+import dev.zwander.lswinterconnect.safeApplicationContext
 import tk.zwander.common.util.migrations.AddExtraWidgetInfoMigration
 import tk.zwander.common.util.migrations.FrameDimAmountMigration
 import tk.zwander.common.util.migrations.FrameSizeAndPositionMigration

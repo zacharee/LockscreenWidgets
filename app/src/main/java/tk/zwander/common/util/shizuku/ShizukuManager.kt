@@ -16,6 +16,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.Lifecycle
+import dev.zwander.lswinterconnect.safeApplicationContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.coroutineScope
@@ -27,7 +28,6 @@ import rikka.shizuku.Shizuku
 import rikka.shizuku.ShizukuProvider
 import tk.zwander.common.util.LifecycleEffect
 import tk.zwander.common.util.logUtils
-import tk.zwander.common.util.safeApplicationContext
 import tk.zwander.lockscreenwidgets.App
 import tk.zwander.lockscreenwidgets.BuildConfig
 import tk.zwander.lockscreenwidgets.IShizukuService

@@ -19,6 +19,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.res.stringResource
+import androidx.lifecycle.Lifecycle
 import tk.zwander.common.activities.BaseActivity
 import tk.zwander.common.activities.HideForIDsActivity
 import tk.zwander.common.activities.HideOnAppsChooserActivity
@@ -31,6 +32,7 @@ import tk.zwander.common.compose.settings.createCommonSection
 import tk.zwander.common.compose.settings.rememberBooleanPreferenceDependency
 import tk.zwander.common.compose.settings.rememberPreferenceScreen
 import tk.zwander.common.compose.util.rememberPreferenceState
+import tk.zwander.common.util.LifecycleEffect
 import tk.zwander.common.util.PrefManager
 import tk.zwander.common.util.backup.BackupRestoreManager
 import tk.zwander.common.util.canReadWallpaper
@@ -38,8 +40,10 @@ import tk.zwander.common.util.isLikelyRazr
 import tk.zwander.common.util.isOneUI
 import tk.zwander.common.util.isPixelUI
 import tk.zwander.common.util.isTouchWiz
+import tk.zwander.common.util.launchUrl
 import tk.zwander.common.util.prefManager
 import tk.zwander.common.util.setThemedContent
+import tk.zwander.common.util.wallpaperClient
 import tk.zwander.lockscreenwidgets.BuildConfig
 import tk.zwander.lockscreenwidgets.R
 import tk.zwander.lockscreenwidgets.compose.SelectDisplayDialog
@@ -267,6 +271,36 @@ class ComposeFrameSettingsActivity : BaseActivity() {
                                 )
                                 false
                             } else true
+                        },
+                    )
+
+                    preference(
+                        title = { stringResource(R.string.settings_screen_install_wallpaper_server) },
+                        summary = { stringResource(R.string.settings_screen_install_wallpaper_server_desc) },
+                        key = { "install_wallpaper_server" },
+                        onClick = {
+                            launchUrl("https://github.com/zacharee/LockscreenWidgets/releases/latest")
+                        },
+                        icon = { painterResource(R.drawable.app_icon) },
+                        defaultValue = { null },
+                        enabled = {
+                            rememberBooleanPreferenceDependency(
+                                FrameSpecificPreferences.keyFor(
+                                    selectedFrame,
+                                    PrefManager.KEY_FRAME_MASKED_MODE
+                                )
+                            )
+                        },
+                        visible = {
+                            var state by remember {
+                                mutableStateOf(!wallpaperClient.isServerInstalled)
+                            }
+
+                            LifecycleEffect(Lifecycle.State.RESUMED) {
+                                state = !wallpaperClient.isServerInstalled
+                            }
+
+                            state
                         },
                     )
 

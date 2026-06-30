@@ -173,7 +173,6 @@
     <string name="intro_notification_listener_desc">Lockscreen Widget può nascondere il riquadro widget quando vengono mostrate delle notifiche. Per farlo, devi attivare l\'accesso alle notifiche. Non è necessario autorizzarlo ora.</string>
     <string name="intro_read_storage_title">Lettura memoria esterna</string>
     <string name="intro_read_storage_desc">Lockscreen Widgets possiede una Modalità Maschera, dove puoi usare il tuo wallpaper come sfondo del riquadro widget in modo tale che appaia trasparente ma comunque in grado di coprire gli elementi dello schermo. Per farlo, è necessario il permesso di lettura della memoria del dispositivo. Non è necessario autorizzarlo ora. Se sei su Lollipop, questo permesso è già concesso. Maggiori informazioni sono disponibili nell\'informativa sulla privacy.</string>
-    <string name="intro_read_external_storage_desc_13_addendum">A partire da Android 13, è necessario usare Shizuku per concedere i permessi richiesti.</string>
     <string name="intro_battery_optimization">Ottimizzazione batteria</string>
     <string name="intro_battery_optimization_desc">Molti dispositivi, fra cui quelli con MIUI ed EMUI, possiedono una gestione della batteria estremamente aggressiva e possono causare la chiusura non richiesta di Lockscreen Widgets. Tocca il tasto qui sotto per leggere come escludere l\'app dall\'ottimizzazione della batteria sul tuo dispositivo.</string>
     <string name="intro_moto_razr_allow_secondary_display_access">Autorizza accesso allo schermo secondario</string>

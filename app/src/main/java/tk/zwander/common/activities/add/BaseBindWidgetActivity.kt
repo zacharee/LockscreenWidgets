@@ -24,7 +24,7 @@ import tk.zwander.common.data.WidgetData
 import tk.zwander.common.data.WidgetSizeData
 import tk.zwander.common.host.WidgetHostCompat
 import tk.zwander.common.host.widgetHostCompat
-import tk.zwander.common.util.BugsnagUtils
+import dev.zwander.lswinterconnect.BugsnagUtils
 import tk.zwander.common.util.ConfigureLauncher
 import tk.zwander.common.util.FrameSizeAndPosition
 import tk.zwander.common.util.LSDisplay

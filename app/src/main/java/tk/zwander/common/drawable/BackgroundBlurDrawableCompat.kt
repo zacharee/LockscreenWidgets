@@ -8,7 +8,7 @@ import android.view.ViewRootImpl
 import androidx.annotation.RequiresApi
 import androidx.appcompat.graphics.drawable.DrawableWrapperCompat
 import com.android.internal.graphics.drawable.BackgroundBlurDrawable
-import tk.zwander.common.util.peekLogUtils
+import dev.zwander.lswinterconnect.peekLogUtils
 
 sealed class BackgroundBlurDrawableCompat(protected open val wrapped: Drawable) : DrawableWrapperCompat(wrapped) {
     abstract fun setColor(@ColorInt color: Int)

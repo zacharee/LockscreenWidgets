@@ -11,6 +11,7 @@ import android.view.Surface
 import android.view.WindowManager
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.dp
+import dev.zwander.lswinterconnect.safeApplicationContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow

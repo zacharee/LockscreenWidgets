@@ -18,6 +18,7 @@ import androidx.core.graphics.createBitmap
 import androidx.core.graphics.drawable.toBitmap
 import androidx.core.graphics.get
 import androidx.core.graphics.scale
+import dev.zwander.lswinterconnect.peekLogUtils
 import java.io.ByteArrayOutputStream
 import java.io.IOException
 

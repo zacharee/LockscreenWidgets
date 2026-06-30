@@ -23,7 +23,7 @@ android {
         versionCode = 196
         versionName = "4.1.3"
 
-        manifestPlaceholders["build_uuid"] = UUID.nameUUIDFromBytes("InstallWithOptions_${versionCode}".toByteArray()).toString()
+        manifestPlaceholders["build_uuid"] = UUID.nameUUIDFromBytes("LockscreenWidgets_${versionCode}".toByteArray()).toString()
 
         @Suppress("UnstableApiUsage")
         externalNativeBuild {
@@ -147,6 +147,9 @@ dependencies {
     implementation(libs.colorpicker.compose)
     implementation(libs.reorderable)
     implementation(libs.miui.autostart)
+    implementation(libs.glide)
+
+    implementation(project(":lswinterconnect"))
 
     coreLibraryDesugaring(libs.desugar.jdk.libs)
 }

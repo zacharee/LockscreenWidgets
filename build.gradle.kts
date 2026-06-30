@@ -4,6 +4,7 @@ plugins {
     alias(libs.plugins.kotlin.atomicfu) apply false
     alias(libs.plugins.kotlin.compose) apply false
     alias(libs.plugins.kotlin.parcelize) apply false
+    alias(libs.plugins.android.library) apply false
 }
 
 tasks.register<Delete>("clean") {

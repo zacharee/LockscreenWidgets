@@ -12,6 +12,7 @@ import android.content.res.XmlResourceParser
 import android.util.Xml
 import androidx.core.content.ContextCompat
 import androidx.core.content.res.ResourcesCompat
+import dev.zwander.lswinterconnect.safeApplicationContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -26,7 +27,6 @@ import tk.zwander.common.util.PrefManager
 import tk.zwander.common.util.handler
 import tk.zwander.common.util.logUtils
 import tk.zwander.common.util.prefManager
-import tk.zwander.common.util.safeApplicationContext
 import tk.zwander.lockscreenwidgets.App
 import tk.zwander.lockscreenwidgets.R
 import java.io.IOException

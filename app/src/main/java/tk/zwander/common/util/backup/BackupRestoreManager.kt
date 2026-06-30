@@ -3,13 +3,13 @@ package tk.zwander.common.util.backup
 import android.annotation.SuppressLint
 import android.content.Context
 import android.view.Display
+import dev.zwander.lswinterconnect.safeApplicationContext
 import tk.zwander.common.data.WidgetData
 import tk.zwander.common.host.widgetHostCompat
 import tk.zwander.common.util.PrefManager
 import tk.zwander.common.util.logUtils
 import tk.zwander.common.util.mapFromJson
 import tk.zwander.common.util.prefManager
-import tk.zwander.common.util.safeApplicationContext
 import tk.zwander.common.util.safeFromJson
 import tk.zwander.lockscreenwidgets.util.FramePrefs
 

@@ -46,6 +46,7 @@ import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import dev.zwander.lswinterconnect.peekLogUtils
 import tk.zwander.common.compose.util.rememberBooleanPreferenceState
 import tk.zwander.common.compose.util.rememberPreferenceState
 import tk.zwander.common.data.WidgetData
@@ -55,7 +56,6 @@ import tk.zwander.common.util.BaseDelegate
 import tk.zwander.common.util.Event
 import tk.zwander.common.util.eventManager
 import tk.zwander.common.util.logUtils
-import tk.zwander.common.util.peekLogUtils
 import tk.zwander.common.util.prefManager
 import tk.zwander.lockscreenwidgets.R
 import kotlin.math.absoluteValue

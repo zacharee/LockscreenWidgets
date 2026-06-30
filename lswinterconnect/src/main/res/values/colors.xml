@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="launcher_icon_foreground">@android:color/white</color>
+    <color name="launcher_icon_background_start">#0EB6CC</color>
+    <color name="launcher_icon_background_end">#5226E7</color>
+</resources>

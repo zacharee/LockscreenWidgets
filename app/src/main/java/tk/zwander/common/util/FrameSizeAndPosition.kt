@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Point
 import android.graphics.PointF
+import dev.zwander.lswinterconnect.safeApplicationContext
 import tk.zwander.common.data.SafePointF
 import tk.zwander.lockscreenwidgets.R
 

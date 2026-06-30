@@ -173,7 +173,6 @@
     <string name="intro_notification_listener_desc">锁屏界面小部件可以在显示通知时隐藏小部件框架。 要做到这一点，您需要启用通知监听器。您现在不必授予此权限。</string>
     <string name="intro_read_storage_title">读取外部存储</string>
     <string name="intro_read_storage_desc">锁屏小部件有一个“掩码”模式，它将使用你的壁纸作为小部件的背景画面。 使它看起来是透明的，同时也能够覆盖锁屏元素。 要做到这一点，Lockscreen 小部件需要权限才能读取您设备的存储空间。您现在无需授予此权限。 如果您正在运行Lollipop，这个权限已经被授予。隐私策略中有更多详细信息。</string>
-    <string name="intro_read_external_storage_desc_13_addendum">在 Android 13 及更高版本，您需要使用 Shizuku 授予所需的权限。</string>
     <string name="intro_battery_optimization">电池优化</string>
     <string name="intro_battery_optimization_desc">许多装置，包括那些运行MIUI和EMUI的装置，都有令人难以置信的电池管理。 这可能导致锁屏界面小部件在您不想被杀死时被杀死。 点击下面的按钮来读取您如何允许在您的特定设备上列出锁屏部件。</string>
     <string name="intro_moto_razr_allow_secondary_display_access">允许次要显示访问</string>

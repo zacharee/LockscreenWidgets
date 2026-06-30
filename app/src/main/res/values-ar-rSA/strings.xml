@@ -173,7 +173,6 @@
     <string name="intro_notification_listener_desc">يمكن لـ Lockscreen Widgets إخفاء إطار الويدجت أثناء عرض الإشعارات. للقيام بذلك، ستحتاج إلى تفعيل مستمع الإشعارات. ليس عليك منح هذا الإذن الآن.</string>
     <string name="intro_read_storage_title">قراءة وحدة التخزين الخارجية</string>
     <string name="intro_read_storage_desc">يحتوي تطبيق Lockscreen Widgets على وضع \"إخفاء\"، حيث يستخدم خلفية سطح المكتب كخلفية لإطار التطبيق، مما يجعله يبدو شفافًا، مع إمكانية تغطية عناصر شاشة القفل. للقيام بذلك، يحتاج التطبيق إلى إذن لقراءة بيانات جهازك. لستَ مُلزمًا بمنح هذا الإذن الآن. إذا كنت تستخدم نظام Lollipop، فهذا الإذن مُمنوحٌ لك مُسبقًا. للمزيد من التفاصيل، يُرجى مراجعة سياسة الخصوصية.</string>
-    <string name="intro_read_external_storage_desc_13_addendum">في نظام Android 13 والإصدارات الأحدث، ستحتاج إلى استخدام Shizuku لمنح الأذونات المطلوبة. </string>
     <string name="intro_battery_optimization">تحسين أداء البطارية</string>
     <string name="intro_battery_optimization_desc">تتميز العديد من الأجهزة، بما فيها الأجهزة التي تعمل بنظامي MIUI وEMUI، بإدارة بطارية فعّالة للغاية. قد يؤدي ذلك إلى إيقاف تشغيل أدوات شاشة القفل دون رغبتك. انقر على الزر أدناه لمعرفة كيفية إضافة أدوات شاشة القفل إلى قائمة الأجهزة المسموح بها على جهازك.</string>
     <string name="intro_moto_razr_allow_secondary_display_access">السماح بالوصول إلى الشاشة الثانوية</string>

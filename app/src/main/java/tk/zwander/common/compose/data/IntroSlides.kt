@@ -21,7 +21,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -29,7 +28,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.Lifecycle
 import dev.zwander.composeintroslider.IntroPage
 import dev.zwander.composeintroslider.SimpleIntroPage
-import kotlinx.coroutines.launch
 import tk.zwander.common.activities.OnboardingActivity
 import tk.zwander.common.compose.AppTheme
 import tk.zwander.common.util.LifecycleEffect
@@ -40,8 +38,7 @@ import tk.zwander.common.util.launchUrl
 import tk.zwander.common.util.logUtils
 import tk.zwander.common.util.missingAutostart
 import tk.zwander.common.util.openAccessibilitySettings
-import tk.zwander.common.util.shizuku.ShizukuManager
-import tk.zwander.common.util.shizuku.shizukuManager
+import tk.zwander.common.util.wallpaperClient
 import tk.zwander.lockscreenwidgets.BuildConfig
 import tk.zwander.lockscreenwidgets.R
 import tk.zwander.lockscreenwidgets.services.isNotificationListenerActive
@@ -56,7 +53,6 @@ fun rememberIntroSlides(
     val slides = remember(startReason) {
         mutableStateListOf<IntroPage>()
     }
-    val scope = rememberCoroutineScope()
 
     var hasAccessibility by remember {
         mutableStateOf(context.isAccessibilityEnabled)
@@ -272,51 +268,26 @@ fun rememberIntroSlides(
             ))
         }
 
-        if (startReason == OnboardingActivity.RetroMode.NONE || startReason == OnboardingActivity.RetroMode.STORAGE) {
+        if ((startReason == OnboardingActivity.RetroMode.NONE &&
+                    Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) ||
+            startReason == OnboardingActivity.RetroMode.STORAGE) {
             slides.add(SimpleIntroPage(
                 title = { stringResource(id = R.string.intro_read_storage_title) },
                 description = {
-                    stringResource(id = R.string.intro_read_storage_desc).run {
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                            "$this ${stringResource(id = R.string.intro_read_external_storage_desc_13_addendum)}"
-                        } else {
-                            this
-                        }
-                    }
+                    stringResource(id = R.string.intro_read_storage_desc)
                 },
                 slideColor = { MaterialTheme.colorScheme.background },
                 contentColor = { MaterialTheme.colorScheme.onBackground },
                 extraContent = {
-                    val shizukuInstalled by ShizukuManager.rememberShizukuInstallStateAsState()
-                    val shizukuRunning by ShizukuManager.rememberShizukuRunningStateAsState()
-
                     var showingGrantFailureDialog by remember {
                         mutableStateOf(false)
                     }
 
                     OutlinedButton(
                         onClick = {
-                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                                if (shizukuRunning) {
-                                    scope.launch {
-                                        context.shizukuManager.runShizukuCommand {
-                                            try {
-                                                grantReadExternalStorage()
-                                            } catch (e: SecurityException) {
-                                                context.logUtils.debugLog("Error granting read external storage", e)
-                                                showingGrantFailureDialog = true
-                                            }
-                                            canReadWallpaper = context.canReadWallpaper
-                                        }
-                                    }
-                                } else if (!shizukuInstalled || !context.shizukuManager.launchShizuku()) {
-                                    context.launchUrl("https://shizuku.rikka.app/download/")
-                                }
-                            } else {
-                                storagePermissionLauncher.launch(
-                                    arrayOf(android.Manifest.permission.READ_EXTERNAL_STORAGE),
-                                )
-                            }
+                            storagePermissionLauncher.launch(
+                                arrayOf(android.Manifest.permission.READ_EXTERNAL_STORAGE),
+                            )
                         },
                         enabled = !canReadWallpaper,
                     ) {
@@ -325,21 +296,7 @@ fun rememberIntroSlides(
                                 id = if (canReadWallpaper) {
                                     R.string.granted
                                 } else {
-                                    when {
-                                        Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU -> {
-                                            if (shizukuInstalled && shizukuRunning) {
-                                                R.string.grant
-                                            } else if (shizukuInstalled) {
-                                                R.string.open_shizuku
-                                            } else {
-                                                R.string.install_shizuku
-                                            }
-                                        }
-
-                                        else -> {
-                                            R.string.grant
-                                        }
-                                    }
+                                    R.string.grant
                                 },
                             ),
                         )
@@ -388,6 +345,29 @@ fun rememberIntroSlides(
                     }
                 },
                 canMoveForward = { startReason != OnboardingActivity.RetroMode.STORAGE || canReadWallpaper || BuildConfig.DEBUG },
+            ))
+        }
+
+        if (startReason == OnboardingActivity.RetroMode.NONE &&
+            Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
+            !context.wallpaperClient.isServerInstalled
+        ) {
+            slides.add(SimpleIntroPage(
+                title = { stringResource(id = R.string.intro_wallpaper_companion_title) },
+                description = {
+                    stringResource(id = R.string.intro_wallpaper_companion_desc)
+                },
+                slideColor = { MaterialTheme.colorScheme.background },
+                contentColor = { MaterialTheme.colorScheme.onBackground },
+                extraContent = {
+                    OutlinedButton(
+                        onClick = {
+                            context.launchUrl("https://github.com/zacharee/LockscreenWidgets/releases/latest")
+                        }
+                    ) {
+                        Text(text = stringResource(id = R.string.install))
+                    }
+                },
             ))
         }
 

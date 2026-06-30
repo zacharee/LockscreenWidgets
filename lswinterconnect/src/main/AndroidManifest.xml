@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <permission android:name="tk.zwander.lockscreenwidgets.WALLPAPER_INTERCONNECT"
+        android:protectionLevel="signature" />
+
+    <uses-permission android:name="tk.zwander.lockscreenwidgets.WALLPAPER_INTERCONNECT"
+        />
+
+    <application>
+        <meta-data android:name="google_analytics_adid_collection_enabled" android:value="false" />
+        <meta-data
+            android:name="com.bugsnag.android.API_KEY"
+            android:value="a7b3e6e6f38ef16b7c3e80cb689f78a3"/>
+    </application>
+</manifest>

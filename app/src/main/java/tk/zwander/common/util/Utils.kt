@@ -16,8 +16,6 @@ import android.widget.AbsListView
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
-import com.google.gson.GsonBuilder
-import com.google.gson.Strictness
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
@@ -85,9 +83,6 @@ suspend inline fun <T, S : Any> Collection<T>.mapIndexedParallel(crossinline act
     }
 }
 
-val Context.safeApplicationContext: Context
-    get() = applicationContext ?: this
-
 fun AppWidgetProviderInfo.loadPreviewOrIconDrawable(context: Context, density: Int = 0): Drawable? {
     return (loadPreviewImage(context, density) ?: loadIcon(context, density))
 }
@@ -122,16 +117,3 @@ val AbsListView.verticalScrollOffset: Int
             .apply { isAccessible = true }
             .invoke(this) as Int
     }
-
-fun Throwable.stringify(): String? {
-    return try {
-        GsonBuilder()
-            .setStrictness(Strictness.LENIENT)
-            .enableComplexMapKeySerialization()
-            .create()
-            .toJson(this)
-    } catch (e: Throwable) {
-        peekLogUtils?.normalLog("Unable to serialize throwable.", e)
-        null
-    }
-}

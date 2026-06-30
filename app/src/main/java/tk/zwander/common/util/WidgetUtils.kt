@@ -14,6 +14,7 @@ import android.util.SizeF
 import android.view.View
 import android.widget.RemoteViews
 import android.widget.TextView
+import dev.zwander.lswinterconnect.safeApplicationContext
 import tk.zwander.lockscreenwidgets.R
 import kotlin.math.floor
 

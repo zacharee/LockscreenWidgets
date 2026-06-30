@@ -23,6 +23,7 @@ import androidx.compose.ui.unit.Density
 import androidx.core.view.LayoutInflaterCompat
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
+import dev.zwander.lswinterconnect.safeApplicationContext
 import tk.zwander.common.adapters.BaseAdapter
 import tk.zwander.common.compose.AppTheme
 import tk.zwander.common.data.WidgetType
