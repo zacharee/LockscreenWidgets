@@ -3,3 +3,5 @@ files:
     translation: /app/src/main/res/values-%android_code%/strings.xml
   - source: /fastlane/metadata/android/en-US/*.txt
     translation: /fastlane/metadata/android/%locale%/%original_file_name%
+  - source: /lswwallpaper/src/main/res/values/strings.xml
+    translation: /lswwallpaper/src/main/res/values-%android_code%/strings.xml
