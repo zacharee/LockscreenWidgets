@@ -89,7 +89,7 @@ jobs:
     - name: Rename Companion APK
       run: |
         STRIPPED_COMPANION_NAME=$(echo "${{ steps.sign_companion_apk.outputs.signedReleaseFile }}" | sed s/"-unsigned-signed"//)
-        mv ${{ steps.sign_companion_apk.outputs.signedReleaseFile }} $STRIPPED_NAME
+        mv ${{ steps.sign_companion_apk.outputs.signedReleaseFile }} $STRIPPED_COMPANION_NAME
         echo "STRIPPED_COMPANION_NAME=$STRIPPED_COMPANION_NAME" >> $GITHUB_ENV
     - name: Upload App APK
       if: ${{ always() }}
