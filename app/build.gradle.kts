@@ -147,7 +147,6 @@ dependencies {
     implementation(libs.colorpicker.compose)
     implementation(libs.reorderable)
     implementation(libs.miui.autostart)
-    implementation(libs.glide)
 
     implementation(project(":lswinterconnect"))
 
