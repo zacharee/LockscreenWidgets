@@ -293,11 +293,15 @@ class ComposeFrameSettingsActivity : BaseActivity() {
                         },
                         visible = {
                             var state by remember {
-                                mutableStateOf(!wallpaperClient.isServerInstalled)
+                                mutableStateOf(
+                                    !wallpaperClient.isServerInstalled &&
+                                            Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU,
+                                )
                             }
 
                             LifecycleEffect(Lifecycle.State.RESUMED) {
-                                state = !wallpaperClient.isServerInstalled
+                                state = !wallpaperClient.isServerInstalled  &&
+                                        Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU
                             }
 
                             state
