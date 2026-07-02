@@ -18,9 +18,10 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SheetState
+import androidx.compose.material3.SheetValue
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.material3.rememberBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -119,8 +120,9 @@ fun ListPreference(
     var showingDialog by remember {
         mutableStateOf(false)
     }
-    val state = rememberModalBottomSheetState(
-        skipPartiallyExpanded = true,
+    val state = rememberBottomSheetState(
+        initialValue = SheetValue.Hidden,
+        enabledValues = setOf(SheetValue.Hidden, SheetValue.Expanded),
     )
 
     BasePreferenceLayout(
@@ -162,7 +164,9 @@ fun <V, T : ListPickerEntry<V>> ListPickerDialog(
     entries: List<T>,
     currentEntries: List<T>,
     onEntrySelected: (T) -> Unit,
-    state: SheetState = rememberModalBottomSheetState(),
+    state: SheetState = rememberBottomSheetState(
+        initialValue = SheetValue.Hidden,
+    ),
 ) {
     AnimatedBottomSheet(
         onDismissRequest = { onDialogShowingChanged(false) },

@@ -9,8 +9,9 @@ import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.SheetValue
 import androidx.compose.material3.Surface
-import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.material3.rememberBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -137,8 +138,9 @@ fun AddWidgetLayout(
     ListPickerDialog(
         showingDialog = showingFiltersDialog,
         onDialogShowingChanged = { showingFiltersDialog = it },
-        state = rememberModalBottomSheetState(
-            skipPartiallyExpanded = true,
+        state = rememberBottomSheetState(
+            initialValue = SheetValue.Hidden,
+            enabledValues = setOf(SheetValue.Hidden, SheetValue.Expanded),
         ),
         entries = remember {
             WidgetListFilters.Category.entries.map { category ->
