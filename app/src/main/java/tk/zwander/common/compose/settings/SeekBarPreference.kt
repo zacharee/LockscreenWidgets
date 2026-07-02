@@ -372,6 +372,7 @@ private fun SeekBarLayout(
                     interactionSource = remember { MutableInteractionSource() },
                     indication = ripple(bounded = false),
                     onClick = { showingDialog = true },
+                    enabled = enabled,
                 )
                 .padding(4.dp),
         ) {

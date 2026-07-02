@@ -84,8 +84,8 @@ fun BasePreferenceLayout(
             modifier = Modifier
                 .alpha(animatedAlpha)
                 .then(
-                    if (onClick != null && enabled) {
-                        Modifier.clickable(onClick = onClick)
+                    if (onClick != null) {
+                        Modifier.clickable(onClick = onClick, enabled = enabled)
                     } else {
                         Modifier
                     },
