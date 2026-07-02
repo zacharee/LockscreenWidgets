@@ -12,14 +12,23 @@ plugins {
 
 val jdkVersion = project.findProperty("jdk.version").toString()
 
+val compileSdkVersion = project.findProperty("compileSdk").toString().toInt()
+val compileSdkMinorVersion = project.findProperty("compileSdkMinor").toString().toInt()
+val targetSdkVersion = project.findProperty("targetSdk").toString().toInt()
+val minSdkVersion = project.findProperty("minSdk").toString().toInt()
+
 android {
-    compileSdk = 37
+    compileSdk {
+        version = release(compileSdkVersion) {
+            minorApiLevel = compileSdkMinorVersion
+        }
+    }
 
     defaultConfig {
         namespace = "tk.zwander.lockscreenwidgets"
         applicationId = "tk.zwander.lockscreenwidgets"
-        minSdk = 23
-        targetSdk = 37
+        minSdk = minSdkVersion
+        targetSdk = targetSdkVersion
         versionCode = 197
         versionName = "4.2.0"
 

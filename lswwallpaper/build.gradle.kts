@@ -1,18 +1,27 @@
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import java.util.UUID
 
 plugins {
     alias(libs.plugins.android.application)
 }
 
+val jdkVersion = project.findProperty("jdk.version").toString()
+
+val compileSdkVersion = project.findProperty("compileSdk").toString().toInt()
+val compileSdkMinorVersion = project.findProperty("compileSdkMinor").toString().toInt()
+val minSdkVersion = project.findProperty("minSdk").toString().toInt()
+
 android {
     namespace = "dev.zwander.lswwallpaper"
     compileSdk {
-        version = release(37)
+        version = release(compileSdkVersion) {
+            minorApiLevel = compileSdkMinorVersion
+        }
     }
 
     defaultConfig {
         applicationId = "dev.zwander.lswwallpaper"
-        minSdk = 23
+        minSdk = minSdkVersion
         //noinspection ExpiredTargetSdkVersion
         targetSdk = 29
         versionCode = 1
@@ -29,8 +38,8 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+        sourceCompatibility = JavaVersion.toVersion(jdkVersion)
+        targetCompatibility = JavaVersion.toVersion(jdkVersion)
     }
 
     buildFeatures {
@@ -42,6 +51,15 @@ android {
 afterEvaluate {
     base {
         archivesName.set("LSWWallpaperCompanion_${android.defaultConfig.versionName}")
+    }
+}
+
+kotlin {
+    compilerOptions {
+        jvmTarget.set(JvmTarget.fromTarget(jdkVersion))
+        freeCompilerArgs.addAll(
+            "-Xcontext-parameters",
+        )
     }
 }
 
