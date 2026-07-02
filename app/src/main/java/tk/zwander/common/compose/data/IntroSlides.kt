@@ -360,12 +360,29 @@ fun rememberIntroSlides(
                 slideColor = { MaterialTheme.colorScheme.background },
                 contentColor = { MaterialTheme.colorScheme.onBackground },
                 extraContent = {
+                    var isInstalled by remember {
+                        mutableStateOf(context.wallpaperClient.isServerInstalled)
+                    }
+
+                    LifecycleEffect(Lifecycle.State.RESUMED) {
+                        isInstalled = context.wallpaperClient.isServerInstalled
+                    }
+
                     OutlinedButton(
                         onClick = {
                             context.launchUrl("https://github.com/zacharee/LockscreenWidgets/releases/latest")
-                        }
+                        },
+                        enabled = !isInstalled,
                     ) {
-                        Text(text = stringResource(id = R.string.install))
+                        Text(
+                            text = stringResource(
+                                id = if (isInstalled) {
+                                    R.string.installed
+                                } else {
+                                    R.string.install
+                                },
+                            ),
+                        )
                     }
                 },
                 icon = { painterResource(R.drawable.image) },

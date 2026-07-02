@@ -368,6 +368,7 @@
     <string name="open_shizuku">Open Shizuku</string>
 
     <string name="install">Install</string>
+    <string name="installed">Installed</string>
 
     <string name="failed_to_add_shortcut">Unable to add shortcut.</string>
 
