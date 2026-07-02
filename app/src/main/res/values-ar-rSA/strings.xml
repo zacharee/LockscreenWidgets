@@ -269,6 +269,7 @@
     <string name="install_shizuku">Install Shizuku</string>
     <string name="open_shizuku">Open Shizuku</string>
     <string name="install">Install</string>
+    <string name="installed">Installed</string>
     <string name="failed_to_add_shortcut">غير قادر على إضافة الاختصار.</string>
     <string name="directly_check_for_activity">التحقق مباشرة من النشاط</string>
     <string name="directly_check_for_activity_desc">When enabled, Lockscreen Widgets will use Android\'s API to check whether a widget tap is launching an Activity. This can be faster than Lockscreen Widgets\' built-in detection, but may cause false positives.</string>
