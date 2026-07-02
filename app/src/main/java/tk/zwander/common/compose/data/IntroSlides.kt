@@ -368,6 +368,7 @@ fun rememberIntroSlides(
                         Text(text = stringResource(id = R.string.install))
                     }
                 },
+                icon = { painterResource(R.drawable.image) },
             ))
         }
 
