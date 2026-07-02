@@ -46,7 +46,7 @@ jobs:
       if: ${{ always() }}
       uses: actions/upload-artifact@v4
       with:
-        name: logs
+        name: logs-companion
         path: ${{ github.workspace }}/lswwallpaper/build/outputs/logs/
     - name: Check App Output Exists
       run: ls -laR ${{ github.workspace }}/app/build/outputs/apk/
@@ -103,7 +103,7 @@ jobs:
       if: ${{ always() }}
       uses: actions/upload-artifact@v4
       with:
-        name: LockscreenWidgets
+        name: LockscreenWidgets-Companion
         path: ${{ env.STRIPPED_COMPANION_NAME }}
       env:
         SIGNED_RELEASE_FILE: ${{ env.STRIPPED_COMPANION_NAME }}
