@@ -9,6 +9,7 @@ import android.content.IntentFilter
 import android.content.ServiceConnection
 import android.content.pm.PackageManager
 import android.os.IBinder
+import androidx.core.content.ContextCompat
 import dev.zwander.lswinterconnect.IWallpaperAPI
 import dev.zwander.lswinterconnect.peekLogUtils
 import dev.zwander.lswinterconnect.safeApplicationContext
@@ -71,7 +72,8 @@ class WallpaperClient private constructor(private val context: Context) {
     init {
         tryBindService()
 
-        context.registerReceiver(
+        ContextCompat.registerReceiver(
+            context,
             companionInstallReceiver,
             IntentFilter().apply {
                 listOf(
@@ -84,6 +86,7 @@ class WallpaperClient private constructor(private val context: Context) {
                     Intent.ACTION_PACKAGE_RESTARTED,
                 ).forEach { addAction(it) }
             },
+            ContextCompat.RECEIVER_EXPORTED,
         )
     }
 
