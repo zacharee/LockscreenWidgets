@@ -41,14 +41,14 @@ class WallpaperClient private constructor(private val context: Context) {
             name: ComponentName?,
             service: IBinder?,
         ) {
-            peekLogUtils?.normalLog("Got service", null)
+            peekLogUtils?.debugLog("Got service", null)
             context.wallpaperUtils.wallpaperServerConnected(
                 IWallpaperAPI.Stub.asInterface(service),
             )
         }
 
         override fun onServiceDisconnected(name: ComponentName?) {
-            peekLogUtils?.normalLog("Lost service", null)
+            peekLogUtils?.debugLog("Lost service", null)
             context.wallpaperUtils.wallpaperServerDisconnected()
             tryBindService()
         }
@@ -95,7 +95,7 @@ class WallpaperClient private constructor(private val context: Context) {
             context.unbindService(serviceConnection)
         } catch (_: IllegalArgumentException) {}
 
-        peekLogUtils?.normalLog("Trying bind", null)
+        peekLogUtils?.debugLog("Trying bind", null)
         val result = context.bindService(
             serviceIntent,
             serviceConnection,
@@ -108,6 +108,6 @@ class WallpaperClient private constructor(private val context: Context) {
                     Context.BIND_ALLOW_ACTIVITY_STARTS or
                     Context.BIND_INCLUDE_CAPABILITIES,
         )
-        peekLogUtils?.normalLog("bound? $result", null)
+        peekLogUtils?.debugLog("bound? $result", null)
     }
 }
