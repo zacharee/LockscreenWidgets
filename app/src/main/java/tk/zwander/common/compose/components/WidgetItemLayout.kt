@@ -1,5 +1,6 @@
 package tk.zwander.common.compose.components
 
+import android.util.Log
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -8,8 +9,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
-import androidx.compose.foundation.gestures.draggable2D
-import androidx.compose.foundation.gestures.rememberDraggable2DState
+import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -38,7 +38,7 @@ import androidx.compose.ui.composed
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
-import androidx.compose.ui.input.pointer.pointerInteropFilter
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalResources
@@ -47,6 +47,9 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import dev.zwander.lswinterconnect.peekLogUtils
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.launch
 import tk.zwander.common.compose.util.rememberBooleanPreferenceState
 import tk.zwander.common.compose.util.rememberPreferenceState
 import tk.zwander.common.data.WidgetData
@@ -184,7 +187,7 @@ fun BaseDelegate.BaseViewModel<*, *>.WidgetItemLayout(
                                 color = LocalContentColor.current,
                                 shape = RoundedCornerShape(animatedCornerRadius),
                             )
-                            .pointerInteropFilter { false },
+                            .clickable(true, onClick = {}),
                     ) {
                         if (colCount > 1) {
                             Icon(
@@ -343,54 +346,65 @@ fun Modifier.dragDetection(
     var totalDeltaY = remember { 0f }
     var threshold = remember { getResizeThresholdPx(which) }
 
-    val state = rememberDraggable2DState { delta ->
-        val deltaX = delta.x
-        val deltaY = delta.y
+    pointerInput(which) {
+        coroutineScope {
+            launch(Dispatchers.Unconfined) {
+                detectDragGestures(
+                    onDragStart = {
+                        Log.e("LSW", "start")
+                        viewModel.isResizingItem.value = true
+                        totalDeltaX = 0f
+                        totalDeltaY = 0f
+                        threshold = getResizeThresholdPx(which)
+                    },
+                    onDragEnd = {
+                        Log.e("LSW", "end")
+                        viewModel.isResizingItem.value = false
+                        liftCallback()
+                    },
+                    onDragCancel = {
+                        Log.e("LSW", "cancel")
+                        viewModel.isResizingItem.value = false
+                        liftCallback()
+                    },
+                    onDrag = { change, offset ->
+                        Log.e("LSW", "drag $offset")
+                        val deltaX = offset.x
+                        val deltaY = offset.y
 
-        val newDx = deltaX + totalDeltaX
-        val newDy = deltaY + totalDeltaY
+                        val newDx = deltaX + totalDeltaX
+                        val newDy = deltaY + totalDeltaY
 
-        peekLogUtils?.debugLog("Dragging $which: dx=$deltaX, dy=$deltaY, newDx=$newDx, newDy=$newDy", null)
+                        peekLogUtils?.debugLog("Dragging $which: dx=$deltaX, dy=$deltaY, newDx=$newDx, newDy=$newDy", null)
 
-        if (which == Which.LEFT || which == Which.RIGHT) {
-            totalDeltaX = if (newDx.absoluteValue > threshold) {
-                val reportedDx = threshold * newDx.sign
-                resizeCallback(true, newDx.sign.toInt(), reportedDx.toInt())
-                if (newDx < 0) {
-                    newDx + threshold
-                } else {
-                    newDx - threshold
-                }
-            } else {
-                newDx
-            }
-        } else {
-            totalDeltaY = if (newDy.absoluteValue > threshold) {
-                val reportedDy = threshold * newDy.sign
-                resizeCallback(true, newDy.sign.toInt(), reportedDy.toInt())
-                if (newDy < 0) {
-                    newDy + threshold
-                } else {
-                    newDy - threshold
-                }
-            } else {
-                newDy
+                        if (which == Which.LEFT || which == Which.RIGHT) {
+                            totalDeltaX = if (newDx.absoluteValue > threshold) {
+                                val reportedDx = threshold * newDx.sign
+                                resizeCallback(true, newDx.sign.toInt(), reportedDx.toInt())
+                                if (newDx < 0) {
+                                    newDx + threshold
+                                } else {
+                                    newDx - threshold
+                                }
+                            } else {
+                                newDx
+                            }
+                        } else {
+                            totalDeltaY = if (newDy.absoluteValue > threshold) {
+                                val reportedDy = threshold * newDy.sign
+                                resizeCallback(true, newDy.sign.toInt(), reportedDy.toInt())
+                                if (newDy < 0) {
+                                    newDy + threshold
+                                } else {
+                                    newDy - threshold
+                                }
+                            } else {
+                                newDy
+                            }
+                        }
+                    },
+                )
             }
         }
     }
-
-    draggable2D(
-        state = state,
-        onDragStarted = {
-            viewModel.isResizingItem.value = true
-            totalDeltaX = 0f
-            totalDeltaY = 0f
-            threshold = getResizeThresholdPx(which)
-        },
-        onDragStopped = {
-            viewModel.isResizingItem.value = false
-            liftCallback()
-        },
-        startDragImmediately = true,
-    )
 }

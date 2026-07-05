@@ -245,6 +245,20 @@ class DrawerDelegate private constructor(context: Context, displayId: String) :
 
     override val viewModel = DrawerViewModel(this)
 
+    override val recyclerViewAttachmentStateListener = object : View.OnAttachStateChangeListener {
+        val superObj = super@DrawerDelegate.recyclerViewAttachmentStateListener
+
+        override fun onViewAttachedToWindow(v: View) {
+            superObj.onViewAttachedToWindow(v)
+        }
+
+        override fun onViewDetachedFromWindow(v: View) {
+            if (!drawer.isAttachedToWindow && !handle.isAttachedToWindow) {
+                superObj.onViewDetachedFromWindow(v)
+            }
+        }
+    }
+
     @SuppressLint("RtlHardcoded")
     override suspend fun onEvent(event: Event) {
         super.onEvent(event)
@@ -295,15 +309,6 @@ class DrawerDelegate private constructor(context: Context, displayId: String) :
                         viewModel.drawerAnimationState.value = AnimationState.IDLE
                     } else {
                         drawer.alpha = 1f
-                    }
-
-                    if (lifecycleRegistry.currentState < Lifecycle.State.CREATED) {
-                        lifecycleRegistry.safeCurrentState = Lifecycle.State.CREATED
-                    }
-                    lifecycleRegistry.safeCurrentState = Lifecycle.State.RESUMED
-                } else {
-                    if (!handle.isAttachedToWindow) {
-                        lifecycleRegistry.safeCurrentState = Lifecycle.State.STARTED
                     }
                 }
             }
@@ -451,11 +456,6 @@ class DrawerDelegate private constructor(context: Context, displayId: String) :
             if (prefManager.showDrawerHandleOnlyWhenLocked && !globalState.wasOnKeyguard.value) {
                 return
             }
-
-            if (lifecycleRegistry.currentState < Lifecycle.State.CREATED) {
-                lifecycleRegistry.safeCurrentState = Lifecycle.State.CREATED
-            }
-            lifecycleRegistry.safeCurrentState = Lifecycle.State.RESUMED
 
             if (!handle.isAttachedToWindow && viewModel.handleAnimationState.value != AnimationState.ADDING) {
                 wm?.safeAddView(handle, handleParams)

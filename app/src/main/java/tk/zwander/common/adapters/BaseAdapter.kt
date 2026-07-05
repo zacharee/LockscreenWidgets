@@ -44,7 +44,6 @@ import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.layoutId
 import androidx.compose.ui.platform.LocalResources
-import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.platform.rememberNestedScrollInteropConnection
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -311,7 +310,7 @@ abstract class BaseAdapter<VM : BaseDelegate.BaseViewModel<*, *>>(
             }
 
             binding.root.id = data.id
-            binding.root.disposeComposition()
+//            binding.root.disposeComposition()
             binding.root.setThemedContent {
                 val currentEditingPosition by viewModel.currentEditingInterfacePosition.collectAsState()
                 val nestedScrollConnection = rememberNestedScrollInteropConnection()
@@ -713,9 +712,9 @@ abstract class BaseAdapter<VM : BaseDelegate.BaseViewModel<*, *>>(
         }
 
         fun updateCompositionContext() {
-            binding.root.setViewCompositionStrategy(
-                ViewCompositionStrategy.DisposeOnDetachedFromWindowOrReleasedFromPool,
-            )
+//            binding.root.setViewCompositionStrategy(
+//                ViewCompositionStrategy.DisposeOnDetachedFromWindowOrReleasedFromPool,
+//            )
 //            binding.root.setViewTreeLifecycleOwner(viewModel.savedStateRegistryOwner)
 //            binding.root.setViewTreeSavedStateRegistryOwner(viewModel.savedStateRegistryOwner)
 //            binding.root.setParentCompositionContext(

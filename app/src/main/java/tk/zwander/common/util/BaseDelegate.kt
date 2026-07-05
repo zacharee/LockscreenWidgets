@@ -102,9 +102,23 @@ abstract class BaseDelegate<State : Any>(
     val isAttached: Boolean
         get() = rootView.isAttachedToWindow
 
+    protected open val recyclerViewAttachmentStateListener = object : View.OnAttachStateChangeListener {
+        override fun onViewAttachedToWindow(v: View) {
+            lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_RESUME)
+        }
+
+        override fun onViewDetachedFromWindow(v: View) {
+            lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_PAUSE)
+        }
+    }
+
     @CallSuper
     open fun onCreate() {
         logUtils.debugLog("Creating ${this::class.java}", null)
+
+        savedStateRegistryController.performAttach()
+        savedStateRegistryController.performRestore(null)
+        lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_CREATE)
 
         rootView.setViewTreeLifecycleOwner(this)
         rootView.setViewTreeSavedStateRegistryOwner(this)
@@ -127,15 +141,11 @@ abstract class BaseDelegate<State : Any>(
                 },
             )
         }
+        recyclerView.addOnAttachStateChangeListener(recyclerViewAttachmentStateListener)
 
         adapter.updateWidgets(currentWidgets)
 
         updateCounts()
-        if (lifecycleRegistry.currentState == Lifecycle.State.INITIALIZED) {
-            savedStateRegistryController.performAttach()
-            savedStateRegistryController.performRestore(null)
-            lifecycleRegistry.safeCurrentState = Lifecycle.State.CREATED
-        }
 
         viewModel.viewModelScope.launch {
             displayFlow.collect {
@@ -178,10 +188,10 @@ abstract class BaseDelegate<State : Any>(
         widgetHost.removeOnClickCallback(this)
         itemTouchHelper.attachToRecyclerView(null)
 
+        recyclerView.removeOnAttachStateChangeListener(recyclerViewAttachmentStateListener)
+
         currentWidgets = ArrayList(adapter.widgets)
-        if (lifecycleRegistry.currentState.isAtLeast(Lifecycle.State.CREATED)) {
-            lifecycleRegistry.safeCurrentState = Lifecycle.State.DESTROYED
-        }
+        lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_DESTROY)
 
         viewModel.viewModelScope.cancel()
     }

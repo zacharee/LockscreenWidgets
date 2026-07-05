@@ -53,7 +53,6 @@ import tk.zwander.common.util.mainHandler
 import tk.zwander.common.util.prefManager
 import tk.zwander.common.util.remove
 import tk.zwander.common.util.safeAddView
-import tk.zwander.common.util.safeCurrentState
 import tk.zwander.common.util.safeRemoveView
 import tk.zwander.common.util.set
 import tk.zwander.common.util.themedContext
@@ -446,10 +445,6 @@ open class MainWidgetFrameDelegate protected constructor(
 
                     try {
                         if (event.attached) {
-                            if (lifecycleRegistry.currentState < Lifecycle.State.CREATED) {
-                                lifecycleRegistry.safeCurrentState = Lifecycle.State.CREATED
-                            }
-                            lifecycleRegistry.safeCurrentState = Lifecycle.State.RESUMED
                             updateWallpaperLayerIfNeeded()
                             //Even with the startListening() call above,
                             //it doesn't seem like pending updates always get
@@ -459,8 +454,6 @@ open class MainWidgetFrameDelegate protected constructor(
                                 adapter.updateViews()
                             }
                             scrollToStoredPosition(false)
-                        } else {
-                            lifecycleRegistry.safeCurrentState = Lifecycle.State.STARTED
                         }
                     } catch (e: NullPointerException) {
                         //The stupid "Attempt to read from field 'com.android.server.appwidget.AppWidgetServiceImpl$ProviderId
