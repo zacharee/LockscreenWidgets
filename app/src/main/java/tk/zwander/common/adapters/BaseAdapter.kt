@@ -74,6 +74,7 @@ import tk.zwander.common.util.BrokenAppsRegistry
 import tk.zwander.common.util.Event
 import tk.zwander.common.util.EventObserver
 import tk.zwander.common.util.UserHandleCompat
+import tk.zwander.common.util.andRemoveFromParent
 import tk.zwander.common.util.appWidgetManager
 import tk.zwander.common.util.createWidgetErrorView
 import tk.zwander.common.util.eventManager
@@ -487,7 +488,7 @@ abstract class BaseAdapter<VM : BaseDelegate.BaseViewModel<*, *>>(
 
             widgetView?.let { v ->
                 AndroidView(
-                    factory = { v },
+                    factory = { v.andRemoveFromParent() },
                     modifier = modifier,
                 )
             }
