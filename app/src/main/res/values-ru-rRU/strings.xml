@@ -163,6 +163,8 @@
     <string name="settings_screen_double_tap_turn_off_screen_drawer">Дважды коснуться пустого места (за пределами виджета), чтобы отключить экран.</string>
     <string name="settings_screen_not_touchable">Ignore All Touches</string>
     <string name="settings_screen_not_touchable_desc">When enabled, the selected frame will ignore all touches, and the whatever is underneath will receive them instead. Frames will always respond to touches in preview mode.</string>
+    <string name="settings_screen_install_wallpaper_server">Install Wallpaper Server</string>
+    <string name="settings_screen_install_wallpaper_server_desc">On Android 13 and later, Lockscreen Widgets requires the use of a companion app to retrieve the device wallpaper.</string>
     <string name="intro_welcome_title">Добро пожаловать!</string>
     <string name="intro_welcome_desc">Lockscreen Widgets — это простое приложение с простой целью: вернуть виджеты экрана блокировки Android KitKat. Ваши виджеты будут отображаться в простом постраничном слайдере на экране блокировки.</string>
     <string name="intro_usage_title">Основное применение</string>
@@ -173,6 +175,8 @@
     <string name="intro_notification_listener_desc">Lockscreen Widgets может скрывать виджет при отображении уведомлений. Для этого необходимо включить прослушиватель уведомлений. Сейчас это делать не обязательно.</string>
     <string name="intro_read_storage_title">Shizuku и Данные из внешнего хранилища</string>
     <string name="intro_read_storage_desc">Lockscreen Widgets имеет режим «маскировки», в котором он будет использовать обои в качестве фона рамки виджета, делая его прозрачным, а также скрывать элементы экрана блокировки. Для этого Lockscreen Widgets требуется разрешение на чтение хранилища устройства. Вам не нужно предоставлять его прямо сейчас. Если вы используете Lollipop, это разрешение уже предоставлено. Более подробная информация доступна в политике конфиденциальности.</string>
+    <string name="intro_wallpaper_companion_title">Wallpaper Companion</string>
+    <string name="intro_wallpaper_companion_desc">On Android 13 and later, Lockscreen Widgets requires a companion app to retrieve the wallpaper. You only need to install this if you want to use Masked Mode.</string>
     <string name="intro_battery_optimization">Оптимизация батареи</string>
     <string name="intro_battery_optimization_desc">Многие устройства, включая те, что работают под управлением MIUI и EMUI, имеют невероятно агрессивное управление батареей. Это может привести к отключению виджетов экрана блокировки, когда вы этого не хотите. Нажмите кнопку ниже, чтобы узнать, как можно добавить виджеты экрана блокировки в список разрешенных на вашем устройстве.</string>
     <string name="intro_moto_razr_allow_secondary_display_access">Разрешить доступ ко второму экрану</string>
@@ -264,6 +268,8 @@
     <string name="reset_frame_position_size_confirm_message">Вы уверены, что хотите изменить положение и размер?</string>
     <string name="install_shizuku">Установить Shizuku</string>
     <string name="open_shizuku">Открыть Shizuku</string>
+    <string name="install">Install</string>
+    <string name="installed">Installed</string>
     <string name="failed_to_add_shortcut">Невозможно добавить ярлык.</string>
     <string name="directly_check_for_activity">Проверить активность напрямую</string>
     <string name="directly_check_for_activity_desc">Когда эта функция включена, Lockscreen Widgets будет использовать API Android для проверки того, запускает ли виджет Activity при нажатии. Это может быть быстрее, чем встроенное определение Lockscreen Widgets, но может вызывать ложные срабатывания.</string>
