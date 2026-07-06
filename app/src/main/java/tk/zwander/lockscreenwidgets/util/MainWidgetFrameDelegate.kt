@@ -345,7 +345,9 @@ open class MainWidgetFrameDelegate protected constructor(
 
         override fun onViewAttachedToWindow(v: View) {
             superObj.onViewAttachedToWindow(v)
-            onFrameAttachmentStateChanged(true)
+            v.post {
+                onFrameAttachmentStateChanged(true)
+            }
         }
 
         override fun onViewDetachedFromWindow(v: View) {

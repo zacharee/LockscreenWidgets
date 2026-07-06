@@ -31,7 +31,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -41,8 +40,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.motionEventSpy
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.layout.onGloballyPositioned
-import androidx.compose.ui.layout.positionOnScreen
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.colorResource
@@ -214,7 +211,6 @@ fun MainWidgetFrameDelegate.WidgetFrameViewModel.WidgetFrameLayout(
                 .fillMaxSize(),
         ) {
             val wallpaper by wallpaperInfo.collectAsState()
-            var position by remember { mutableStateOf(Offset.Zero) }
 
             BlurView(
                 modifier = Modifier
@@ -245,13 +241,13 @@ fun MainWidgetFrameDelegate.WidgetFrameViewModel.WidgetFrameLayout(
                         update = {
                             it.setImageDrawable(drawable)
                             it.imageMatrix = Matrix().apply {
-                                setScale(maskScale, maskScale)
-                                postTranslate(
+                                setTranslate(
                                     wallpaper.dx +
-                                            with(density) { maskAdjustment.x.dp.toPx() } - position.x,
+                                            with(density) { maskAdjustment.x.dp.toPx() },
                                     wallpaper.dy +
-                                            with(density) { maskAdjustment.y.dp.toPx() } - position.y,
+                                            with(density) { maskAdjustment.y.dp.toPx() },
                                 )
+                                postScale(maskScale, maskScale)
                             }
                             it.colorFilter = PorterDuffColorFilter(
                                 android.graphics.Color.argb(
@@ -261,10 +257,7 @@ fun MainWidgetFrameDelegate.WidgetFrameViewModel.WidgetFrameLayout(
                                 PorterDuff.Mode.SRC_ATOP,
                             )
                         },
-                        modifier = Modifier.zIndex(0f)
-                            .onGloballyPositioned {
-                                position = it.positionOnScreen()
-                            },
+                        modifier = Modifier.zIndex(0f),
                     )
                 }
             }
