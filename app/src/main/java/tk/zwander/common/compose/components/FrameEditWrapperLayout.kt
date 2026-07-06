@@ -1,11 +1,14 @@
 package tk.zwander.common.compose.components
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.draggable
 import androidx.compose.foundation.gestures.draggable2D
 import androidx.compose.foundation.gestures.rememberDraggable2DState
 import androidx.compose.foundation.gestures.rememberDraggableState
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -16,9 +19,9 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.AbsoluteAlignment
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -54,13 +57,18 @@ fun MainWidgetFrameDelegate.WidgetFrameViewModel.FrameEditWrapperLayout(
         key = framePrefs.keyFor(PrefManager.KEY_FRAME_MASKED_MODE),
     )
 
-    Surface(
+    Box(
         modifier = modifier.border(
             width = 1.dp,
             color = Color.White,
             shape = RoundedCornerShape(cornerRadius.dp),
+        ).background(
+            color = colorResource(R.color.backdrop),
+        ).clickable(
+            indication = null,
+            interactionSource = remember { MutableInteractionSource() },
+            onClick = {},
         ),
-        color = colorResource(R.color.backdrop),
     ) {
         Box(
             modifier = Modifier.fillMaxSize(),

@@ -1,6 +1,5 @@
 package tk.zwander.common.compose.components
 
-import android.util.Log
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -34,7 +33,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.AbsoluteAlignment
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.composed
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
@@ -47,9 +45,6 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import dev.zwander.lswinterconnect.peekLogUtils
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.launch
 import tk.zwander.common.compose.util.rememberBooleanPreferenceState
 import tk.zwander.common.compose.util.rememberPreferenceState
 import tk.zwander.common.data.WidgetData
@@ -187,7 +182,12 @@ fun BaseDelegate.BaseViewModel<*, *>.WidgetItemLayout(
                                 color = LocalContentColor.current,
                                 shape = RoundedCornerShape(animatedCornerRadius),
                             )
-                            .clickable(true, onClick = {}),
+                            .clickable(
+                                enabled = true,
+                                indication = null,
+                                interactionSource = remember { MutableInteractionSource() },
+                                onClick = {},
+                            ),
                     ) {
                         if (colCount > 1) {
                             Icon(
@@ -331,80 +331,62 @@ fun Modifier.dragDetection(
     resizeCallback: (Boolean, Int, Int) -> Unit,
     liftCallback: () -> Unit,
     viewModel: BaseDelegate.BaseViewModel<*, *>,
-) = composed(
-    inspectorInfo = {
-        name = "dragDetection"
-
-        properties["getResizeThresholdPx"] = getResizeThresholdPx
-        properties["which"] = which
-        properties["resizeCallback"] = resizeCallback
-        properties["liftCallback"] = liftCallback
-        properties["viewModel"] = viewModel
-    },
-) {
+): Modifier {
     var totalDeltaX = remember { 0f }
     var totalDeltaY = remember { 0f }
     var threshold = remember { getResizeThresholdPx(which) }
 
-    pointerInput(which) {
-        coroutineScope {
-            launch(Dispatchers.Unconfined) {
-                detectDragGestures(
-                    onDragStart = {
-                        Log.e("LSW", "start")
-                        viewModel.isResizingItem.value = true
-                        totalDeltaX = 0f
-                        totalDeltaY = 0f
-                        threshold = getResizeThresholdPx(which)
-                    },
-                    onDragEnd = {
-                        Log.e("LSW", "end")
-                        viewModel.isResizingItem.value = false
-                        liftCallback()
-                    },
-                    onDragCancel = {
-                        Log.e("LSW", "cancel")
-                        viewModel.isResizingItem.value = false
-                        liftCallback()
-                    },
-                    onDrag = { change, offset ->
-                        Log.e("LSW", "drag $offset")
-                        val deltaX = offset.x
-                        val deltaY = offset.y
+    return pointerInput(Unit) {
+        detectDragGestures(
+            onDragStart = {
+                viewModel.isResizingItem.value = true
+                totalDeltaX = 0f
+                totalDeltaY = 0f
+                threshold = getResizeThresholdPx(which)
+            },
+            onDragEnd = {
+                viewModel.isResizingItem.value = false
+                liftCallback()
+            },
+            onDragCancel = {
+                viewModel.isResizingItem.value = false
+                liftCallback()
+            },
+            onDrag = { _, offset ->
+                val deltaX = offset.x
+                val deltaY = offset.y
 
-                        val newDx = deltaX + totalDeltaX
-                        val newDy = deltaY + totalDeltaY
+                val newDx = deltaX + totalDeltaX
+                val newDy = deltaY + totalDeltaY
 
-                        peekLogUtils?.debugLog("Dragging $which: dx=$deltaX, dy=$deltaY, newDx=$newDx, newDy=$newDy", null)
+                peekLogUtils?.debugLog("Dragging $which: dx=$deltaX, dy=$deltaY, newDx=$newDx, newDy=$newDy", null)
 
-                        if (which == Which.LEFT || which == Which.RIGHT) {
-                            totalDeltaX = if (newDx.absoluteValue > threshold) {
-                                val reportedDx = threshold * newDx.sign
-                                resizeCallback(true, newDx.sign.toInt(), reportedDx.toInt())
-                                if (newDx < 0) {
-                                    newDx + threshold
-                                } else {
-                                    newDx - threshold
-                                }
-                            } else {
-                                newDx
-                            }
+                if (which == Which.LEFT || which == Which.RIGHT) {
+                    totalDeltaX = if (newDx.absoluteValue > threshold) {
+                        val reportedDx = threshold * newDx.sign
+                        resizeCallback(true, newDx.sign.toInt(), reportedDx.toInt())
+                        if (newDx < 0) {
+                            newDx + threshold
                         } else {
-                            totalDeltaY = if (newDy.absoluteValue > threshold) {
-                                val reportedDy = threshold * newDy.sign
-                                resizeCallback(true, newDy.sign.toInt(), reportedDy.toInt())
-                                if (newDy < 0) {
-                                    newDy + threshold
-                                } else {
-                                    newDy - threshold
-                                }
-                            } else {
-                                newDy
-                            }
+                            newDx - threshold
                         }
-                    },
-                )
-            }
-        }
+                    } else {
+                        newDx
+                    }
+                } else {
+                    totalDeltaY = if (newDy.absoluteValue > threshold) {
+                        val reportedDy = threshold * newDy.sign
+                        resizeCallback(true, newDy.sign.toInt(), reportedDy.toInt())
+                        if (newDy < 0) {
+                            newDy + threshold
+                        } else {
+                            newDy - threshold
+                        }
+                    } else {
+                        newDy
+                    }
+                }
+            },
+        )
     }
 }

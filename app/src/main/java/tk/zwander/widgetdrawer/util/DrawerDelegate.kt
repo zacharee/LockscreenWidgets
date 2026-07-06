@@ -14,6 +14,7 @@ import android.view.animation.AccelerateInterpolator
 import android.view.animation.DecelerateInterpolator
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.compositionContext
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.setViewTreeLifecycleOwner
@@ -245,8 +246,8 @@ class DrawerDelegate private constructor(context: Context, displayId: String) :
 
     override val viewModel = DrawerViewModel(this)
 
-    override val recyclerViewAttachmentStateListener = object : View.OnAttachStateChangeListener {
-        val superObj = super@DrawerDelegate.recyclerViewAttachmentStateListener
+    override val rootViewAttachmentStateListener = object : View.OnAttachStateChangeListener {
+        val superObj = super@DrawerDelegate.rootViewAttachmentStateListener
 
         override fun onViewAttachedToWindow(v: View) {
             superObj.onViewAttachedToWindow(v)
@@ -405,6 +406,7 @@ class DrawerDelegate private constructor(context: Context, displayId: String) :
 
         handle.setViewTreeLifecycleOwner(this)
         handle.setViewTreeSavedStateRegistryOwner(this)
+        handle.compositionContext = recomposer
 
         viewModel.viewModelScope.launch(Dispatchers.Main) {
             tryShowHandle()

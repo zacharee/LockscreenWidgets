@@ -43,7 +43,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.layoutId
+import androidx.compose.ui.platform.AbstractComposeView
 import androidx.compose.ui.platform.LocalResources
+import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.platform.rememberNestedScrollInteropConnection
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -213,7 +215,7 @@ abstract class BaseAdapter<VM : BaseDelegate.BaseViewModel<*, *>>(
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): BaseVH {
         val inflater = baseLayoutInflater
 
-        val view = ComposeViewHolderBinding.inflate(inflater, parent, false)
+        val view = ComposeViewHolderBinding.inflate(inflater, parent, false).root
 
         return if (viewType == VIEW_TYPE_ADD) {
             AddWidgetVH(view)
@@ -222,7 +224,7 @@ abstract class BaseAdapter<VM : BaseDelegate.BaseViewModel<*, *>>(
         }
     }
 
-    protected open fun createWidgetViewHolder(view: ComposeViewHolderBinding): WidgetVH {
+    protected open fun createWidgetViewHolder(view: AbstractComposeView): WidgetVH {
         return WidgetVH(view)
     }
 
@@ -257,7 +259,7 @@ abstract class BaseAdapter<VM : BaseDelegate.BaseViewModel<*, *>>(
      * has specified for the frame.
      */
     @SuppressLint("ClickableViewAccessibility")
-    open inner class WidgetVH(binding: ComposeViewHolderBinding) : BaseVH(binding),
+    open inner class WidgetVH(view: AbstractComposeView) : BaseVH(view),
         EventObserver {
         private val currentData: WidgetData?
             get() = widgets.getOrNull(bindingAdapterPosition)
@@ -310,9 +312,8 @@ abstract class BaseAdapter<VM : BaseDelegate.BaseViewModel<*, *>>(
                 null
             }
 
-            binding.root.id = data.id
-//            binding.root.disposeComposition()
-            binding.root.setThemedContent {
+            view.disposeComposition()
+            this@WidgetVH.view.setThemedContent {
                 val currentEditingPosition by viewModel.currentEditingInterfacePosition.collectAsState()
                 val nestedScrollConnection = rememberNestedScrollInteropConnection()
 
@@ -608,8 +609,8 @@ abstract class BaseAdapter<VM : BaseDelegate.BaseViewModel<*, *>>(
 
         //Make sure the item's size is properly updated on a frame resize, or on initial bind
         protected fun onResize(data: WidgetData, amount: Int, direction: Int) {
-            binding.root.apply {
-                layoutParams = layoutParams.apply {
+            this@WidgetVH.view.apply {
+                layoutParams = (layoutParams ?: ViewGroup.LayoutParams(0, 0)).apply {
                     onWidgetResize(data, this, amount, direction)
                 }
                 forceLayout()
@@ -628,9 +629,9 @@ abstract class BaseAdapter<VM : BaseDelegate.BaseViewModel<*, *>>(
      * Represents the "add button" page when no widgets are currently
      * added to the frame.
      */
-    inner class AddWidgetVH(binding: ComposeViewHolderBinding) : BaseVH(binding) {
+    inner class AddWidgetVH(view: AbstractComposeView) : BaseVH(view) {
         override fun performBind() {
-            binding.root.setThemedContent {
+            this@AddWidgetVH.view.setThemedContent {
                 MeasuredComposable(name = "AddWidgetLayout") {
                     val resources = LocalResources.current
                     val widgetCornerRadius by rememberPreferenceState(
@@ -704,8 +705,8 @@ abstract class BaseAdapter<VM : BaseDelegate.BaseViewModel<*, *>>(
         }
     }
 
-    abstract class BaseVH(protected val binding: ComposeViewHolderBinding) :
-        RecyclerView.ViewHolder(binding.root) {
+    abstract class BaseVH(protected val view: AbstractComposeView) :
+        RecyclerView.ViewHolder(view) {
         init {
             mainHandler.post {
                 updateCompositionContext()
@@ -713,14 +714,9 @@ abstract class BaseAdapter<VM : BaseDelegate.BaseViewModel<*, *>>(
         }
 
         fun updateCompositionContext() {
-//            binding.root.setViewCompositionStrategy(
-//                ViewCompositionStrategy.DisposeOnDetachedFromWindowOrReleasedFromPool,
-//            )
-//            binding.root.setViewTreeLifecycleOwner(viewModel.savedStateRegistryOwner)
-//            binding.root.setViewTreeSavedStateRegistryOwner(viewModel.savedStateRegistryOwner)
-//            binding.root.setParentCompositionContext(
-//                parent = viewModel.createLifecycleAwareWindowRecomposer(),
-//            )
+            view.setViewCompositionStrategy(
+                ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed,
+            )
         }
 
         abstract fun performBind()

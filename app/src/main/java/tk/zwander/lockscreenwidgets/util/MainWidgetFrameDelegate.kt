@@ -16,6 +16,7 @@ import android.view.WindowManager
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.core.graphics.component1
 import androidx.core.graphics.component2
 import androidx.lifecycle.Lifecycle
@@ -238,7 +239,7 @@ open class MainWidgetFrameDelegate protected constructor(
                 widgetGrid = widgetGrid,
                 modifier = Modifier.fillMaxSize(),
             )
-        }
+        }.also { it.setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed) }
     }
 
     override val gridLayoutManager = SpannedLayoutManager()
@@ -339,6 +340,23 @@ open class MainWidgetFrameDelegate protected constructor(
                 (globalState.showingNotificationsPanel.value[display?.displayId] == false ||
                         framePrefs.hideOnNotificationShade)
 
+    override val rootViewAttachmentStateListener: View.OnAttachStateChangeListener = object : View.OnAttachStateChangeListener {
+        val superObj = super@MainWidgetFrameDelegate.rootViewAttachmentStateListener
+
+        override fun onViewAttachedToWindow(v: View) {
+            superObj.onViewAttachedToWindow(v)
+            onFrameAttachmentStateChanged(true)
+        }
+
+        override fun onViewDetachedFromWindow(v: View) {
+            viewModel.isEditing.value = false
+            viewModel.isRemoving.value = false
+
+            superObj.onViewDetachedFromWindow(v)
+            onFrameAttachmentStateChanged(false)
+        }
+    }
+
     override suspend fun onEvent(event: Event) {
         super.onEvent(event)
 
@@ -431,35 +449,6 @@ open class MainWidgetFrameDelegate protected constructor(
                         eventManager.sendEvent(Event.FrameResizeFinished(id))
                         updateWallpaperLayerIfNeeded()
                         adapter.updateViews()
-                    }
-                }
-            }
-            //We only really want to be listening to widget changes
-            //while the frame is on-screen. Otherwise, we're wasting battery.
-            is Event.FrameAttachmentState -> {
-                if (event.frameId == id) {
-                    if (lifecycleRegistry.currentState == Lifecycle.State.DESTROYED) {
-                        logUtils.debugLog("Already destroyed, not handling attachment state", null)
-                        return
-                    }
-
-                    try {
-                        if (event.attached) {
-                            updateWallpaperLayerIfNeeded()
-                            //Even with the startListening() call above,
-                            //it doesn't seem like pending updates always get
-                            //dispatched. Rebinding all the widgets forces
-                            //them to update.
-                            if (prefManager.frameForceWidgetReload) {
-                                adapter.updateViews()
-                            }
-                            scrollToStoredPosition(false)
-                        }
-                    } catch (e: NullPointerException) {
-                        //The stupid "Attempt to read from field 'com.android.server.appwidget.AppWidgetServiceImpl$ProviderId
-                        //com.android.server.appwidget.AppWidgetServiceImpl$Provider.id' on a null object reference"
-                        //Exception is thrown on stopListening() as well for some reason.
-                        logUtils.debugLog("Error handling attachment state", e)
                     }
                 }
             }
@@ -635,7 +624,6 @@ open class MainWidgetFrameDelegate protected constructor(
 
                 if (wm?.safeAddView(frame, params) == true) {
                     frame.fadeAndScaleIn(DrawerOrFrame.FRAME)
-                    eventManager.sendEvent(Event.FrameAttachmentState(id, true))
                 }
 
                 viewModel.animationState.value = AnimationState.STATE_IDLE
@@ -673,7 +661,32 @@ open class MainWidgetFrameDelegate protected constructor(
             }
 
             viewModel.animationState.value = AnimationState.STATE_IDLE
-            eventManager.sendEvent(Event.FrameAttachmentState(id, false))
+        }
+    }
+
+    private fun onFrameAttachmentStateChanged(attached: Boolean) {
+        if (lifecycleRegistry.currentState == Lifecycle.State.DESTROYED) {
+            logUtils.debugLog("Already destroyed, not handling attachment state", null)
+            return
+        }
+
+        try {
+            if (attached) {
+                updateWallpaperLayerIfNeeded()
+                //Even with the startListening() call above,
+                //it doesn't seem like pending updates always get
+                //dispatched. Rebinding all the widgets forces
+                //them to update.
+                if (prefManager.frameForceWidgetReload) {
+                    adapter.updateViews()
+                }
+                scrollToStoredPosition(false)
+            }
+        } catch (e: NullPointerException) {
+            //The stupid "Attempt to read from field 'com.android.server.appwidget.AppWidgetServiceImpl$ProviderId
+            //com.android.server.appwidget.AppWidgetServiceImpl$Provider.id' on a null object reference"
+            //Exception is thrown on stopListening() as well for some reason.
+            logUtils.debugLog("Error handling attachment state", e)
         }
     }
 
@@ -1040,6 +1053,8 @@ open class MainWidgetFrameDelegate protected constructor(
         val acknowledgedTwoFingerTap = MutableStateFlow<Boolean?>(null)
         val acknowledgedThreeFingerTap = MutableStateFlow(false)
         val isAdjustingMask = MutableStateFlow(false)
+        val isEditing = MutableStateFlow(false)
+        val isRemoving = MutableStateFlow(false)
 
         override val containerCornerRadiusKey: String = PrefManager.KEY_FRAME_CORNER_RADIUS
         override val widgetCornerRadiusKey: String = PrefManager.KEY_FRAME_WIDGET_CORNER_RADIUS

@@ -18,6 +18,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.appcompat.view.ContextThemeWrapper
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.platform.AbstractComposeView
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.unit.Density
 import androidx.core.view.LayoutInflaterCompat
@@ -276,10 +277,12 @@ val Context.themedLayoutInflater: LayoutInflater
         )
     }
 
-fun ComposeView.setThemedContent(content: @Composable () -> Unit) {
-    setContent {
-        AppTheme {
-            content()
+fun AbstractComposeView.setThemedContent(content: @Composable () -> Unit) {
+    if (this is ComposeView) {
+        setContent {
+            AppTheme {
+                content()
+            }
         }
     }
 }

@@ -31,9 +31,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -54,8 +52,6 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.zIndex
 import androidx.core.view.ViewCompat
 import com.bugsnag.android.performance.compose.MeasuredComposable
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import tk.zwander.common.compose.components.BlurView
 import tk.zwander.common.compose.components.ConfirmFrameRemovalLayout
 import tk.zwander.common.compose.components.ConfirmWidgetRemovalLayout
@@ -81,7 +77,6 @@ fun MainWidgetFrameDelegate.WidgetFrameViewModel.WidgetFrameLayout(
 ) {
     val context = LocalContext.current
     val density = LocalDensity.current
-    val scope = rememberCoroutineScope()
     val frameCornerRadius by rememberPreferenceState(
         key = PrefManager.KEY_FRAME_CORNER_RADIUS,
         value = { context.prefManager.cornerRadiusDp.dp },
@@ -108,12 +103,8 @@ fun MainWidgetFrameDelegate.WidgetFrameViewModel.WidgetFrameLayout(
         key = PrefManager.KEY_TOUCH_PROTECTION,
     )
     val proxTooClose by globalState.proxTooClose.collectAsState()
-    var isInEditingMode by remember {
-        mutableStateOf(false)
-    }
-    var removing by remember {
-        mutableStateOf(false)
-    }
+    var isInEditingMode by isEditing.collectAsMutableState()
+    var removing by isRemoving.collectAsMutableState()
     var isAdjustingMask by this.isAdjustingMask.collectAsMutableState()
 
     var maskAdjustment by rememberPreferenceState(
@@ -145,41 +136,39 @@ fun MainWidgetFrameDelegate.WidgetFrameViewModel.WidgetFrameLayout(
 
     Card(
         modifier = modifier
-            .pointerInput(scope) {
+            .pointerInput(Unit) {
                 interceptOutOfBoundsChildEvents = true
-                scope.launch(Dispatchers.Unconfined) {
-                    awaitPointerEventScope {
-                        while (true) {
-                            val event = awaitPointerEvent(pass = PointerEventPass.Initial)
-                            val interestingChanges = event.changes.filter { it.pressed }
+                awaitPointerEventScope {
+                    while (true) {
+                        val event = awaitPointerEvent(pass = PointerEventPass.Initial)
+                        val interestingChanges = event.changes.filter { it.pressed }
 
-                            if (interestingChanges.size >= 2 && !isAdjustingMask) {
-                                val thirdFinger = withTimeoutOrNull(50L) {
-                                    awaitPointerEvent(pass = PointerEventPass.Initial)
-                                }
-                                val interestingThirdChanges = thirdFinger?.changes?.filter {
-                                    it.pressed
-                                } ?: listOf()
-
-                                if (interestingThirdChanges.size < 3) {
-                                    isInEditingMode = !isInEditingMode && !isLocked
-                                    if (acknowledgedTwoFingerTap == null) {
-                                        acknowledgedTwoFingerTap = false
-                                    } else if (acknowledgedTwoFingerTap == false) {
-                                        acknowledgedTwoFingerTap = true
-                                    }
-                                } else {
-                                    if (firstViewing) {
-                                        acknowledgedThreeFingerTap = true
-                                    } else {
-                                        context.eventManager.sendEvent(Event.TempHide(frameId = frameId))
-                                    }
-                                }
-
-                                event.changes.forEach { it.consume() }
-                                thirdFinger?.changes?.forEach { it.consume() }
-                                waitForUpOrCancellation(pass = PointerEventPass.Initial)
+                        if (interestingChanges.size >= 2 && !isAdjustingMask) {
+                            event.changes.forEach { it.consume() }
+                            val thirdFinger = withTimeoutOrNull(50L) {
+                                awaitPointerEvent(pass = PointerEventPass.Initial)
                             }
+                            val interestingThirdChanges = thirdFinger?.changes?.filter {
+                                it.pressed
+                            } ?: listOf()
+
+                            if (interestingThirdChanges.size < 3) {
+                                isInEditingMode = !isInEditingMode && !isLocked
+                                if (acknowledgedTwoFingerTap == null) {
+                                    acknowledgedTwoFingerTap = false
+                                } else if (acknowledgedTwoFingerTap == false) {
+                                    acknowledgedTwoFingerTap = true
+                                }
+                            } else {
+                                if (firstViewing) {
+                                    acknowledgedThreeFingerTap = true
+                                } else {
+                                    context.eventManager.sendEvent(Event.TempHide(frameId = frameId))
+                                }
+                            }
+
+                            thirdFinger?.changes?.forEach { it.consume() }
+                            waitForUpOrCancellation(pass = PointerEventPass.Initial)
                         }
                     }
                 }
@@ -188,18 +177,16 @@ fun MainWidgetFrameDelegate.WidgetFrameViewModel.WidgetFrameLayout(
                 doubleTapTurnOffDisplay,
                 firstViewing,
             ) {
-                scope.launch {
-                    if (doubleTapTurnOffDisplay && !firstViewing) {
-                        detectTapGestures(
-                            onDoubleTap = {
-                                context.logUtils.debugLog(
-                                    "Sending display off from base frame layer",
-                                    null
-                                )
-                                context.eventManager.sendEvent(Event.TurnOffDisplay)
-                            },
-                        )
-                    }
+                if (doubleTapTurnOffDisplay && !firstViewing) {
+                    detectTapGestures(
+                        onDoubleTap = {
+                            context.logUtils.debugLog(
+                                "Sending display off from base frame layer",
+                                null
+                            )
+                            context.eventManager.sendEvent(Event.TurnOffDisplay)
+                        },
+                    )
                 }
             }
             .motionEventSpy { event ->
@@ -284,7 +271,6 @@ fun MainWidgetFrameDelegate.WidgetFrameViewModel.WidgetFrameLayout(
                     value = { context.prefManager.pageIndicatorBehavior },
                 )
 
-                @Suppress("COMPOSE_APPLIER_CALL_MISMATCH")
                 AndroidView(
                     factory = {
                         widgetGrid.andRemoveFromParent().also {

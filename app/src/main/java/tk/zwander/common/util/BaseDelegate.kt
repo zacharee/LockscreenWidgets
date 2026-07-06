@@ -8,6 +8,7 @@ import android.view.MotionEvent
 import android.view.View
 import android.view.WindowManager
 import androidx.annotation.CallSuper
+import androidx.compose.ui.platform.compositionContext
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleRegistry
 import androidx.lifecycle.ViewModel
@@ -95,21 +96,42 @@ abstract class BaseDelegate<State : Any>(
             viewModel = viewModel,
         )
     }
-    protected val itemTouchHelper by lazy {
-        FixedItemTouchHelper(touchHelperCallback)
-    }
+    protected var itemTouchHelper: FixedItemTouchHelper? = null
 
     val isAttached: Boolean
         get() = rootView.isAttachedToWindow
 
-    protected open val recyclerViewAttachmentStateListener = object : View.OnAttachStateChangeListener {
+    protected fun setUpTouchHelper() {
+        itemTouchHelper?.attachToRecyclerView(null)
+        itemTouchHelper = FixedItemTouchHelper(touchHelperCallback)
+        itemTouchHelper?.attachToRecyclerView(recyclerView)
+    }
+
+    protected open val rootViewAttachmentStateListener = object : View.OnAttachStateChangeListener {
         override fun onViewAttachedToWindow(v: View) {
             lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_RESUME)
+            rootView.post {
+                setUpTouchHelper()
+            }
         }
 
         override fun onViewDetachedFromWindow(v: View) {
+            recyclerView.onTouchEvent(
+                MotionEvent.obtain(
+                    System.currentTimeMillis(),
+                    System.currentTimeMillis(),
+                    MotionEvent.ACTION_CANCEL,
+                    0f,
+                    0f,
+                    0,
+                ),
+            )
             lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_PAUSE)
         }
+    }
+
+    protected open val recomposer by lazy {
+        rootView.createAlwaysOnComposer(lifecycle = lifecycle)
     }
 
     @CallSuper
@@ -122,6 +144,7 @@ abstract class BaseDelegate<State : Any>(
 
         rootView.setViewTreeLifecycleOwner(this)
         rootView.setViewTreeSavedStateRegistryOwner(this)
+        rootView.compositionContext = recomposer
 
         prefsHandler.register(this)
         eventManager.addObserver(this)
@@ -131,9 +154,9 @@ abstract class BaseDelegate<State : Any>(
         recyclerView.adapter = adapter
         recyclerView.layoutManager = gridLayoutManager
 
-        itemTouchHelper.attachToRecyclerView(recyclerView)
+        setUpTouchHelper()
         recyclerView.nestedScrollingListener = {
-            itemTouchHelper.attachToRecyclerView(
+            itemTouchHelper?.attachToRecyclerView(
                 if (it) {
                     null
                 } else {
@@ -141,7 +164,7 @@ abstract class BaseDelegate<State : Any>(
                 },
             )
         }
-        recyclerView.addOnAttachStateChangeListener(recyclerViewAttachmentStateListener)
+        rootView.addOnAttachStateChangeListener(rootViewAttachmentStateListener)
 
         adapter.updateWidgets(currentWidgets)
 
@@ -186,9 +209,10 @@ abstract class BaseDelegate<State : Any>(
         eventManager.removeObserver(this)
         prefsHandler.unregister(this)
         widgetHost.removeOnClickCallback(this)
-        itemTouchHelper.attachToRecyclerView(null)
+        itemTouchHelper?.attachToRecyclerView(null)
 
-        recyclerView.removeOnAttachStateChangeListener(recyclerViewAttachmentStateListener)
+        rootView.removeOnAttachStateChangeListener(rootViewAttachmentStateListener)
+        recomposer.cancel()
 
         currentWidgets = ArrayList(adapter.widgets)
         lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_DESTROY)

@@ -4,6 +4,7 @@ import android.appwidget.AppWidgetProviderInfo
 import android.content.Context
 import android.view.View
 import android.view.ViewGroup
+import androidx.compose.ui.platform.AbstractComposeView
 import com.android.internal.widget.RecyclerView
 import tk.zwander.common.activities.SelectIconPackActivity
 import tk.zwander.common.adapters.BaseAdapter
@@ -14,7 +15,6 @@ import tk.zwander.common.util.eventManager
 import tk.zwander.common.util.frameSizeAndPosition
 import tk.zwander.common.util.orDefault
 import tk.zwander.lockscreenwidgets.activities.add.ReconfigureFrameWidgetActivity
-import tk.zwander.lockscreenwidgets.databinding.ComposeViewHolderBinding
 import tk.zwander.lockscreenwidgets.util.FramePrefs
 import tk.zwander.lockscreenwidgets.util.MainWidgetFrameDelegate
 
@@ -78,11 +78,11 @@ open class WidgetFrameAdapter(
         }
     }
 
-    override fun createWidgetViewHolder(view: ComposeViewHolderBinding): WidgetVH {
+    override fun createWidgetViewHolder(view: AbstractComposeView): WidgetVH {
         return WidgetFrameWidgetVH(view)
     }
 
-    inner class WidgetFrameWidgetVH(view: ComposeViewHolderBinding) : WidgetVH(view) {
+    inner class WidgetFrameWidgetVH(view: AbstractComposeView) : WidgetVH(view) {
         override suspend fun onEvent(event: Event) {
             super.onEvent(event)
 
