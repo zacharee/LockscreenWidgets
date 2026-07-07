@@ -134,8 +134,15 @@ abstract class BaseDelegate<State : Any>(
         rootView.createAlwaysOnComposer(lifecycle = lifecycle)
     }
 
+    var created = false
+        protected set
+
     @CallSuper
     open fun onCreate() {
+        if (created) {
+            return
+        }
+
         logUtils.debugLog("Creating ${this::class.java}", null)
 
         savedStateRegistryController.performAttach()
@@ -200,6 +207,8 @@ abstract class BaseDelegate<State : Any>(
                 false
             }
         }
+
+        created = true
     }
 
     @CallSuper
@@ -218,6 +227,8 @@ abstract class BaseDelegate<State : Any>(
         lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_DESTROY)
 
         viewModel.viewModelScope.cancel()
+
+        created = false
     }
 
     @SuppressLint("NotifyDataSetChanged")

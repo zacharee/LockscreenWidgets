@@ -404,6 +404,10 @@ class DrawerDelegate private constructor(context: Context, displayId: String) :
     override fun onCreate() {
         super.onCreate()
 
+        if (created) {
+            return
+        }
+
         handle.setViewTreeLifecycleOwner(this)
         handle.setViewTreeSavedStateRegistryOwner(this)
         handle.compositionContext = recomposer

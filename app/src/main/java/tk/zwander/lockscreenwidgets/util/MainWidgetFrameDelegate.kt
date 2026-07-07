@@ -510,6 +510,10 @@ open class MainWidgetFrameDelegate protected constructor(
     override fun onCreate() {
         super.onCreate()
 
+        if (created) {
+            return
+        }
+
         scrollToStoredPosition(false)
 
         viewModel.viewModelScope.launch(Dispatchers.Main) {
