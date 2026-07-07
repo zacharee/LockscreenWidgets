@@ -58,8 +58,8 @@ sealed class BackgroundBlurDrawableCompat(protected open val wrapped: Drawable) 
     }
 
     companion object {
-        operator fun invoke(viewRootImpl: ViewRootImpl): BackgroundBlurDrawableCompat? {
-            return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+        operator fun invoke(viewRootImpl: ViewRootImpl?): BackgroundBlurDrawableCompat? {
+            return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && viewRootImpl != null) {
                 BackgroundBlurDrawableCompatApi31(viewRootImpl.createBackgroundBlurDrawable())
             } else {
                 null

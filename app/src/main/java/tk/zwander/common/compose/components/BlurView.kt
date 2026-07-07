@@ -102,7 +102,7 @@ fun BaseDelegate.BaseViewModel<*, *>.BlurView(
             if (blurAmount > 0 &&
                 shouldBlur &&
                 crossBlurEnabled &&
-                view.rootView.viewRootImpl.isHardwareEnabled
+                view.rootView.viewRootImpl?.isHardwareEnabled == true
             ) {
                 if (newBlurDrawable == null) {
                     context.logUtils.debugLog("Creating BackgroundBlurDrawableCompat.", null)
