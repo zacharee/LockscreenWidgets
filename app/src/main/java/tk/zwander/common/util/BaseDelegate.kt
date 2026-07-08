@@ -207,8 +207,6 @@ abstract class BaseDelegate<State : Any>(
                 false
             }
         }
-
-        created = true
     }
 
     @CallSuper

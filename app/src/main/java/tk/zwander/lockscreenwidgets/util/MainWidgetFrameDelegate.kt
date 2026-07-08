@@ -568,6 +568,8 @@ open class MainWidgetFrameDelegate protected constructor(
                 ignoreAllTouches = framePrefs.ignoreAllTouches,
             )
         }
+
+        created = true
     }
 
     override suspend fun onDestroy() {

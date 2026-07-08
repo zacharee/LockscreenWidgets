@@ -430,6 +430,8 @@ class DrawerDelegate private constructor(context: Context, displayId: String) :
                     }
                 }
         }
+
+        created = true
     }
 
     override suspend fun onDestroy() {
