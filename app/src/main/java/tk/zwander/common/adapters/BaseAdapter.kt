@@ -363,7 +363,13 @@ abstract class BaseAdapter<VM : BaseDelegate.BaseViewModel<*, *>>(
                         )
                     },
                     liftCallback = {
-                        notifyItemChanged(bindingAdapterPosition)
+                        mainHandler.post {
+                            try {
+                                notifyItemChanged(bindingAdapterPosition)
+                            } catch (e: IllegalStateException) {
+                                context.logUtils.debugLog("Unable to update item at $bindingAdapterPosition", e)
+                            }
+                        }
                     },
                     rowCount = rowCount,
                     colCount = colCount,
