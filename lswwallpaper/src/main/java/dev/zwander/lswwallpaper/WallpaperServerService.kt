@@ -19,6 +19,8 @@ class WallpaperServerService : Service() {
     override fun onCreate() {
         super.onCreate()
 
+        logUtils.debugLog("Wallpaper server service onCreate", null)
+
         NotificationManagerCompat.from(this)
             .createNotificationChannel(
                 NotificationChannelCompat.Builder(
@@ -40,16 +42,20 @@ class WallpaperServerService : Service() {
         )
 
         if (!hasReadExternalStorage) {
+            logUtils.debugLog("No storage permissions, requesting", null)
             launchPermissionActivity()
         }
     }
 
     override fun onBind(intent: Intent): IBinder {
+        logUtils.debugLog("Binding $intent", null)
         return WallpaperServer(applicationContext)
     }
 
     override fun onDestroy() {
         super.onDestroy()
+
+        logUtils.debugLog("Stopping wallpaper server service", null)
 
         ServiceCompat.stopForeground(this, ServiceCompat.STOP_FOREGROUND_REMOVE)
     }

@@ -10,18 +10,29 @@ import dev.zwander.lswinterconnect.directWallpaperUtils
 class WallpaperServer(private val context: Context) : IWallpaperAPI.Stub() {
     private val registeredListeners = mutableListOf<IWallpaperListener>()
     private val listenerAdapter: DirectWallpaperUtils.WallpaperChangedListener = {
-        registeredListeners.forEach { it.onWallpaperChanged() }
+        registeredListeners.removeIf { !it.asBinder().isBinderAlive }
+        registeredListeners.forEach {
+            try {
+                it.onWallpaperChanged()
+            } catch (e: Throwable) {
+                context.logUtils.debugLog("Error calling wallpaper change listener", e)
+            }
+        }
     }
 
     override fun getWallpaper(flag: Int): Bitmap? {
+        context.logUtils.debugLog("Getting wallpaper $flag")
         return context.directWallpaperUtils.getWallpaperBitmap(flag)
     }
 
     override fun peekWallpaper(flag: Int): Bitmap? {
+        context.logUtils.debugLog("Peeking wallpaper $flag")
         return context.directWallpaperUtils.peekWallpaperBitmap(flag)
     }
 
     override fun registerWallpaperListener(listener: IWallpaperListener) {
+        context.logUtils.debugLog("Registering wallpaper listener $listener")
+
         if (registeredListeners.isEmpty()) {
             context.directWallpaperUtils.registerChangeListener(listenerAdapter)
         }
@@ -29,6 +40,8 @@ class WallpaperServer(private val context: Context) : IWallpaperAPI.Stub() {
     }
 
     override fun unregisterWallpaperListener(listener: IWallpaperListener) {
+        context.logUtils.debugLog("Unregistering wallpaper listener $listener")
+
         registeredListeners.remove(listener)
         if (registeredListeners.isEmpty()) {
             context.directWallpaperUtils.unregisterChangeListener(listenerAdapter)
