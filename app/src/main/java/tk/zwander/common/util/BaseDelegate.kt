@@ -222,7 +222,9 @@ abstract class BaseDelegate<State : Any>(
         recomposer.cancel()
 
         currentWidgets = ArrayList(adapter.widgets)
-        lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_DESTROY)
+        if (lifecycle.currentState > Lifecycle.State.INITIALIZED) {
+            lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_DESTROY)
+        }
 
         viewModel.viewModelScope.cancel()
 
