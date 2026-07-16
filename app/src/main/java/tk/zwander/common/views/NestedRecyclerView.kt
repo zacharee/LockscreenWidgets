@@ -20,6 +20,10 @@ open class NestedRecyclerView @JvmOverloads constructor(
 
     private var isNestedSwipe = false
 
+    init {
+        tag = TAG
+    }
+
     override fun dispatchTouchEvent(ev: MotionEvent): Boolean {
         // No scrolling if no selected item.
         if (selectedItem) {
@@ -98,5 +102,9 @@ open class NestedRecyclerView @JvmOverloads constructor(
         }
 
         super.onNestedScroll(target, dxConsumed, dyConsumed, dxUnconsumed, dyUnconsumed)
+    }
+
+    companion object {
+        const val TAG = "nestedRecyclerView"
     }
 }

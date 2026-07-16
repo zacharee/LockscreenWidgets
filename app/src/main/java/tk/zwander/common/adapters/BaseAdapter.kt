@@ -9,7 +9,6 @@ import android.os.Build
 import android.util.SizeF
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ListView
 import android.widget.Toast
 import androidx.annotation.CallSuper
 import androidx.compose.foundation.background
@@ -41,6 +40,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shadow
+import androidx.compose.ui.input.nestedscroll.NestedScrollDispatcher
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.layoutId
 import androidx.compose.ui.platform.AbstractComposeView
@@ -376,7 +376,10 @@ abstract class BaseAdapter<VM : BaseDelegate.BaseViewModel<*, *>>(
                     colCount = colCount,
                     isEditing = currentEditingPosition == bindingAdapterPosition,
                     modifier = Modifier.fillMaxSize().layoutId("widget_${data.id}")
-                        .nestedScroll(nestedScrollConnection)
+                        .nestedScroll(
+                            connection = nestedScrollConnection,
+                            dispatcher = remember { NestedScrollDispatcher() },
+                        )
                         .systemGestureExclusion(),
                     ignoreTouchesKey = viewModel.ignoreWidgetTouchesKey,
                     doubleTapTurnOffKey = viewModel.doubleTapTurnOffDisplayKey,
@@ -550,7 +553,7 @@ abstract class BaseAdapter<VM : BaseDelegate.BaseViewModel<*, *>>(
             val ret = arrayListOf<View>()
 
             if (root is ViewGroup) {
-                if (root is ListView && root !is ComposeAdapterView) {
+                if (root !is ComposeAdapterView) {
                     ret.add(root)
                 }
 

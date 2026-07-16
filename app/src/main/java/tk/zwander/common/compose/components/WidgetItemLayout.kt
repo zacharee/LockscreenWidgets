@@ -8,7 +8,10 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.detectDragGestures
+import androidx.compose.foundation.gestures.rememberScrollableState
+import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -96,7 +99,8 @@ fun BaseDelegate.BaseViewModel<*, *>.WidgetItemLayout(
         ?: remember { mutableStateOf(false) }
 
     Card(
-        modifier = modifier,
+        modifier = modifier
+            .scrollable(rememberScrollableState { it }, orientation = Orientation.Vertical),
         colors = CardDefaults.outlinedCardColors(
             containerColor = Color.Transparent,
             disabledContainerColor = Color.Transparent,
@@ -108,10 +112,12 @@ fun BaseDelegate.BaseViewModel<*, *>.WidgetItemLayout(
             LocalContentColor provides Color.White,
         ) {
             Box(
-                modifier = Modifier.fillMaxSize(),
+                modifier = Modifier.fillMaxSize()
+                    .scrollable(rememberScrollableState { it }, orientation = Orientation.Vertical),
                 contentAlignment = Alignment.Center,
             ) {
-                widgetContents(Modifier.fillMaxSize())
+                widgetContents(Modifier.fillMaxSize()
+                    .scrollable(rememberScrollableState { it }, orientation = Orientation.Vertical))
 
                 if (ignoreTouches) {
                     Box(

@@ -138,6 +138,7 @@ class LazyGridGridView(
                     )
                 },
                 state = scrollableState,
+                overscrollEffect = null,
             ) {
                 adapterState.value?.let { adapter ->
                     items(

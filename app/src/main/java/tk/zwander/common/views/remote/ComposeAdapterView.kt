@@ -16,8 +16,10 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.nestedscroll.NestedScrollDispatcher
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.rememberNestedScrollInteropConnection
@@ -42,6 +44,8 @@ interface ComposeAdapterView : RemoteViewsAdapter.RemoteAdapterConnectionCallbac
         target.isNestedScrollingEnabled = false
         target.isScrollContainer = false
         target.adapter = DummyAdapter(composeView)
+        target.overScrollMode = View.OVER_SCROLL_NEVER
+        target.requestDisallowInterceptTouchEvent(true)
 
         composeView.setContent {
             val nestedScrollConnection = rememberNestedScrollInteropConnection()
@@ -61,7 +65,14 @@ interface ComposeAdapterView : RemoteViewsAdapter.RemoteAdapterConnectionCallbac
                 }
             }
 
-            Content(modifier = Modifier.fillMaxSize().nestedScroll(nestedScrollConnection))
+            Content(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .nestedScroll(
+                        connection = nestedScrollConnection,
+                        dispatcher = remember { NestedScrollDispatcher() },
+                    ),
+            )
         }
     }
 

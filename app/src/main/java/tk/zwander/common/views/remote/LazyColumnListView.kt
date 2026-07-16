@@ -65,6 +65,7 @@ class LazyColumnListView(
         LazyColumn(
             modifier = modifier,
             state = scrollableState,
+            overscrollEffect = null,
         ) {
             adapterState.value?.let { adapter ->
                 items(
