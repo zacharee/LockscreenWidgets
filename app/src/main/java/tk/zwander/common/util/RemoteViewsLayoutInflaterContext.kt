@@ -5,9 +5,9 @@ import android.content.ContextWrapper
 import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.view.View
-import tk.zwander.common.views.remote.CatchingListView
 import tk.zwander.common.views.remote.CatchingTextClock
-import tk.zwander.common.views.remote.NestedGridView
+import tk.zwander.common.views.remote.LazyColumnListView
+import tk.zwander.common.views.remote.LazyGridGridView
 
 class RemoteViewsLayoutInflaterContext(
     context: Context,
@@ -23,9 +23,9 @@ class RemoteViewsLayoutInflaterContext(
             ): View? {
                 logUtils.debugLog("onCreateView(${name}) for widget ${getWidgetData()}", null)
                 return when (name) {
-                    "ListView" -> CatchingListView(context, attrs, widgetId)
+                    "ListView" -> LazyColumnListView(context, attrs)
                     "TextClock" -> CatchingTextClock(context, attrs)
-                    "GridView" -> NestedGridView(context, attrs)
+                    "GridView" -> LazyGridGridView(context, attrs)
                     else -> null
                 }
             }

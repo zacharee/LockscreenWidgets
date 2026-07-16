@@ -87,6 +87,7 @@ import tk.zwander.common.util.mitigations.SafeContextWrapper
 import tk.zwander.common.util.prefManager
 import tk.zwander.common.util.setThemedContent
 import tk.zwander.common.util.themedLayoutInflater
+import tk.zwander.common.views.remote.ComposeAdapterView
 import tk.zwander.lockscreenwidgets.R
 import tk.zwander.lockscreenwidgets.databinding.ComposeViewHolderBinding
 import java.util.Collections
@@ -549,7 +550,7 @@ abstract class BaseAdapter<VM : BaseDelegate.BaseViewModel<*, *>>(
             val ret = arrayListOf<View>()
 
             if (root is ViewGroup) {
-                if (root is ListView) {
+                if (root is ListView && root !is ComposeAdapterView) {
                     ret.add(root)
                 }
 

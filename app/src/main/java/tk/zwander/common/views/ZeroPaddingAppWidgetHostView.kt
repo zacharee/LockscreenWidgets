@@ -31,6 +31,10 @@ class ZeroPaddingAppWidgetHostView(
     private val onAttach: (AppWidgetHostView) -> Unit,
     private val onDefaultClick: (PendingIntent) -> Boolean,
 ) : AppWidgetHostView(RemoteViewsLayoutInflaterContext(context = context, widgetId = widgetId)) {
+    init {
+        isNestedScrollingEnabled = true
+    }
+
     override fun setAppWidget(appWidgetId: Int, info: AppWidgetProviderInfo?) {
         super.setAppWidget(appWidgetId, info)
 
