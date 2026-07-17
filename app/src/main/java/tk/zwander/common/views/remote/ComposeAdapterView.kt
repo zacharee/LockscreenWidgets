@@ -3,6 +3,8 @@ package tk.zwander.common.views.remote
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.content.Intent.FilterComparison
+import android.database.DataSetObserver
+import android.util.Log
 import android.view.RemotableViewMethod
 import android.view.View
 import android.view.ViewGroup
@@ -15,6 +17,7 @@ import androidx.compose.foundation.gestures.animateScrollBy
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.MutableIntState
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -34,6 +37,7 @@ interface ComposeAdapterView {
     var deferNotifyDataSetChanged: Boolean
 
     val adapterState: MutableState<RemoteViewsAdapter?>
+    val adapterCountState: MutableIntState
     val compositionScope: MutableState<CoroutineScope?>
     val scrollableState: ScrollableState
     val listViewRef: AbsListView
@@ -41,12 +45,13 @@ interface ComposeAdapterView {
     @Composable
     fun Content(modifier: Modifier = Modifier)
 
+    @SuppressLint("PrivateApi")
     fun setUp(target: AbsListView) {
         target.isNestedScrollingEnabled = false
-        target.isScrollContainer = false
-        target.adapter = DummyAdapter(composeView)
+//        target.isScrollContainer = false
+//        target.adapter = DummyAdapter(composeView)
         target.overScrollMode = View.OVER_SCROLL_NEVER
-        target.requestDisallowInterceptTouchEvent(true)
+//        target.requestDisallowInterceptTouchEvent(true)
 
         composeView.setContent {
             val nestedScrollConnection = rememberNestedScrollInteropConnection()
@@ -65,6 +70,35 @@ interface ComposeAdapterView {
                     remoteAdapter?.saveRemoteViewsCache()
                 }
             }
+
+            DisposableEffect(adapterState.value) {
+                adapterCountState.intValue = adapterState.value?.count ?: 0
+
+                val dataSetObserver = object : DataSetObserver() {
+                    override fun onChanged() {
+                        Log.e("LSW", "Data changed")
+                        adapterCountState.intValue = 0
+                        adapterCountState.intValue = adapterState.value?.count ?: 0
+                    }
+
+                    override fun onInvalidated() {
+                        Log.e("LSW", "Data inv")
+                        adapterCountState.intValue = 0
+                        adapterCountState.intValue = adapterState.value?.count ?: 0
+                    }
+                }
+
+                adapterState.value?.registerDataSetObserver(dataSetObserver)
+
+                onDispose {
+                    adapterCountState.intValue = 0
+                    try {
+                        adapterState.value?.unregisterDataSetObserver(dataSetObserver)
+                    } catch (_: IllegalStateException) {}
+                }
+            }
+
+            Log.e("LSW", "${adapterCountState.intValue}")
 
             Content(
                 modifier = Modifier
@@ -109,7 +143,7 @@ interface ComposeAdapterView {
 
         deferNotifyDataSetChanged = false
 
-        remoteAdapter = RemoteViewsAdapter(composeView.context, intent, listViewRef, isAsync)
+        remoteAdapter = RemoteViewsAdapter(listViewRef.context, intent, listViewRef, isAsync)
         if (remoteAdapter?.isDataReady == true) {
             adapterState.value = remoteAdapter
         }

@@ -43,6 +43,7 @@ class LazyGridGridView(
 
     override val composeView = ComposeView(context)
     override val adapterState = mutableStateOf<RemoteViewsAdapter?>(null)
+    override val adapterCountState = mutableIntStateOf(0)
     override val compositionScope = mutableStateOf<CoroutineScope?>(null)
     override val scrollableState = LazyGridState()
 
@@ -96,7 +97,7 @@ class LazyGridGridView(
         val adjustedIndex = remember {
             { index: Int ->
                 if (isStackFromBottom) {
-                    remoteAdapter?.let { it.count - 1 - index } ?: 0
+                    adapterCountState.intValue - 1 - index
                 } else {
                     index
                 }
@@ -146,7 +147,7 @@ class LazyGridGridView(
             ) {
                 adapterState.value?.let { adapter ->
                     items(
-                        count = adapter.count,
+                        count = adapterCountState.intValue,
                         key = if (adapter.hasStableIds()) {
                             {
                                 adapter.getItemId(adjustedIndex(it))

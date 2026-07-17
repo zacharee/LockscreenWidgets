@@ -1,10 +1,11 @@
 package tk.zwander.common.views.remote
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.util.AttributeSet
+import android.util.Log
 import android.widget.AbsListView
-import android.widget.FrameLayout
 import android.widget.ListView
 import android.widget.RemoteViews
 import android.widget.RemoteViewsAdapter
@@ -12,6 +13,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.snapshotFlow
@@ -22,24 +24,25 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import tk.zwander.common.util.andRemoveFromParent
 
+@SuppressLint("ViewConstructor")
 class LazyColumnListView(
     context: Context,
     attrs: AttributeSet,
+    override val composeView: ComposeView,
 ) : ListView(context, attrs), ComposeAdapterView {
     override var remoteAdapter: RemoteViewsAdapter? = null
     override var deferNotifyDataSetChanged = false
 
-    override val composeView = ComposeView(context)
     override val adapterState = mutableStateOf<RemoteViewsAdapter?>(null)
+    override val adapterCountState = mutableIntStateOf(0)
     override val compositionScope = mutableStateOf<CoroutineScope?>(null)
 
     override val scrollableState = LazyListState()
     override val listViewRef: AbsListView
         get() = this
 
-    override fun onFinishInflate() {
-        super.onFinishInflate()
-
+    override fun onAttachedToWindow() {
+        super.onAttachedToWindow()
         setUp(this)
     }
 
@@ -58,7 +61,7 @@ class LazyColumnListView(
         val adjustedIndex = remember {
             { index: Int ->
                 if (isStackFromBottom) {
-                    remoteAdapter?.let { it.count - 1 - index } ?: 0
+                    adapterCountState.intValue - 1 - index
                 } else {
                     index
                 }
@@ -72,7 +75,7 @@ class LazyColumnListView(
         ) {
             adapterState.value?.let { adapter ->
                 items(
-                    count = adapter.count,
+                    count = adapterCountState.intValue,
                     key = if (adapter.hasStableIds()) {
                         {
                             adapter.getItemId(adjustedIndex(it))
@@ -84,16 +87,15 @@ class LazyColumnListView(
                     val realIndex = adjustedIndex(index)
 
                     AndroidView(
-                        factory = { FrameLayout(it) },
+                        factory = {
+                            adapter.getView(
+                                realIndex,
+                                null,
+                                listViewRef,
+                            ).andRemoveFromParent()
+                        },
                         update = {
-                            it.removeAllViews()
-                            it.addView(
-                                adapter.getView(
-                                    realIndex,
-                                    null,
-                                    it,
-                                ).andRemoveFromParent(),
-                            )
+
                         },
                     )
                 }
@@ -133,29 +135,39 @@ class LazyColumnListView(
 
     override fun setRemoteViewsAdapter(intent: Intent) {
         super<ComposeAdapterView>.setRemoteViewsAdapter(intent)
+        super<ListView>.setRemoteViewsAdapter(intent)
     }
 
     override fun setRemoteViewsAdapter(intent: Intent?, isAsync: Boolean) {
         super<ComposeAdapterView>.setRemoteViewsAdapter(intent, isAsync)
+        super<ListView>.setRemoteViewsAdapter(intent, isAsync)
     }
 
     override fun setRemoteViewsInteractionHandler(handler: RemoteViews.InteractionHandler?) {
         super<ComposeAdapterView>.setRemoteViewsInteractionHandler(handler)
+        super<ListView>.setRemoteViewsInteractionHandler(handler)
     }
 
     override fun setRemoteViewsAdapterAsync(intent: Intent): Runnable {
-        return super<ComposeAdapterView>.setRemoteViewsAdapterAsync(intent)
+        return Runnable {
+            super<ComposeAdapterView>.setRemoteViewsAdapterAsync(intent).run()
+            super<ListView>.setRemoteViewsAdapterAsync(intent).run()
+        }
     }
 
     override fun onRemoteAdapterConnected(): Boolean {
+        Log.e("LSW", "Adapter connect")
+        super<ListView>.onRemoteAdapterConnected()
         return super<ComposeAdapterView>.onRemoteAdapterConnected()
     }
 
     override fun onRemoteAdapterDisconnected() {
+        super<ListView>.onRemoteAdapterDisconnected()
         super<ComposeAdapterView>.onRemoteAdapterDisconnected()
     }
 
     override fun deferNotifyDataSetChanged() {
+        super<ListView>.deferNotifyDataSetChanged()
         super<ComposeAdapterView>.deferNotifyDataSetChanged()
     }
 }
