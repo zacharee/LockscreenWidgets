@@ -405,6 +405,10 @@ class App : Application(), CoroutineScope by MainScope(), EventObserver {
         }
     }
 
+    override fun getApplicationContext(): Context? {
+        return this
+    }
+
     private fun updateProxListener() {
         if (prefManager.touchProtection) {
             registerProxListener()

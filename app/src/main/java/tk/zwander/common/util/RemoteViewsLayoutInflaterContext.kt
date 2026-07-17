@@ -2,12 +2,15 @@ package tk.zwander.common.util
 
 import android.content.Context
 import android.content.ContextWrapper
+import android.os.Build
 import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.view.View
+import tk.zwander.common.views.remote.CatchingListView
 import tk.zwander.common.views.remote.CatchingTextClock
 import tk.zwander.common.views.remote.LazyColumnListView
 import tk.zwander.common.views.remote.LazyGridGridView
+import tk.zwander.common.views.remote.NestedGridView
 
 class RemoteViewsLayoutInflaterContext(
     context: Context,
@@ -23,9 +26,17 @@ class RemoteViewsLayoutInflaterContext(
             ): View? {
                 logUtils.debugLog("onCreateView(${name}) for widget ${getWidgetData()}", null)
                 return when (name) {
-                    "ListView" -> LazyColumnListView(context, attrs)
+                    "ListView" -> if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.BAKLAVA) {
+                        LazyColumnListView(context, attrs)
+                    } else {
+                        CatchingListView(context, attrs, widgetId)
+                    }
                     "TextClock" -> CatchingTextClock(context, attrs)
-                    "GridView" -> LazyGridGridView(context, attrs)
+                    "GridView" -> if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.BAKLAVA) {
+                        LazyGridGridView(context, attrs)
+                    } else {
+                        NestedGridView(context, attrs)
+                    }
                     else -> null
                 }
             }
