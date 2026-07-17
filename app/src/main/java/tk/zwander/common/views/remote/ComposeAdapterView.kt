@@ -27,7 +27,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import tk.zwander.common.util.andRemoveFromParent
 
-interface ComposeAdapterView : RemoteViewsAdapter.RemoteAdapterConnectionCallback {
+interface ComposeAdapterView {
     val composeView: ComposeView
 
     var remoteAdapter: RemoteViewsAdapter?
@@ -36,6 +36,7 @@ interface ComposeAdapterView : RemoteViewsAdapter.RemoteAdapterConnectionCallbac
     val adapterState: MutableState<RemoteViewsAdapter?>
     val compositionScope: MutableState<CoroutineScope?>
     val scrollableState: ScrollableState
+    val listViewRef: AbsListView
 
     @Composable
     fun Content(modifier: Modifier = Modifier)
@@ -86,14 +87,14 @@ interface ComposeAdapterView : RemoteViewsAdapter.RemoteAdapterConnectionCallbac
     }
 
     fun setRemoteViewsAdapterAsync(intent: Intent): Runnable {
-        return RemoteViewsAdapter.AsyncRemoteAdapterAction(this, intent)
+        return RemoteViewsAdapter.AsyncRemoteAdapterAction(listViewRef, intent)
     }
 
     fun setRemoteViewsInteractionHandler(handler: RemoteViews.InteractionHandler?) {
         remoteAdapter?.setRemoteViewsInteractionHandler(handler)
     }
 
-    override fun setRemoteViewsAdapter(intent: Intent?, isAsync: Boolean) {
+    fun setRemoteViewsAdapter(intent: Intent?, isAsync: Boolean) {
         // Ensure that we don't already have a RemoteViewsAdapter that is bound to an existing
         // service handling the specified intent.
         if (remoteAdapter != null) {
@@ -108,14 +109,14 @@ interface ComposeAdapterView : RemoteViewsAdapter.RemoteAdapterConnectionCallbac
 
         deferNotifyDataSetChanged = false
 
-        remoteAdapter = RemoteViewsAdapter(composeView.context, intent, this, isAsync)
+        remoteAdapter = RemoteViewsAdapter(composeView.context, intent, listViewRef, isAsync)
         if (remoteAdapter?.isDataReady == true) {
             adapterState.value = remoteAdapter
         }
     }
 
     @SuppressLint("DiscouragedPrivateApi")
-    override fun onRemoteAdapterConnected(): Boolean {
+    fun onRemoteAdapterConnected(): Boolean {
         if (remoteAdapter !== adapterState) {
             adapterState.value = remoteAdapter
             if (deferNotifyDataSetChanged) {
@@ -133,9 +134,9 @@ interface ComposeAdapterView : RemoteViewsAdapter.RemoteAdapterConnectionCallbac
         return false
     }
 
-    override fun onRemoteAdapterDisconnected() {}
+    fun onRemoteAdapterDisconnected() {}
 
-    override fun deferNotifyDataSetChanged() {
+    fun deferNotifyDataSetChanged() {
         deferNotifyDataSetChanged = true
     }
 

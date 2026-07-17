@@ -3,6 +3,7 @@ package tk.zwander.common.views.remote
 import android.content.Context
 import android.content.Intent
 import android.util.AttributeSet
+import android.widget.AbsListView
 import android.widget.FrameLayout
 import android.widget.ListView
 import android.widget.RemoteViews
@@ -33,6 +34,8 @@ class LazyColumnListView(
     override val compositionScope = mutableStateOf<CoroutineScope?>(null)
 
     override val scrollableState = LazyListState()
+    override val listViewRef: AbsListView
+        get() = this
 
     override fun onFinishInflate() {
         super.onFinishInflate()

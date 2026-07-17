@@ -7,6 +7,7 @@ import android.view.Gravity
 import android.view.RemotableViewMethod
 import android.view.ViewDebug.ExportedProperty
 import android.view.inspector.InspectableProperty
+import android.widget.AbsListView
 import android.widget.FrameLayout
 import android.widget.GridView
 import android.widget.RemoteViews
@@ -44,6 +45,9 @@ class LazyGridGridView(
     override val adapterState = mutableStateOf<RemoteViewsAdapter?>(null)
     override val compositionScope = mutableStateOf<CoroutineScope?>(null)
     override val scrollableState = LazyGridState()
+
+    override val listViewRef: AbsListView
+        get() = this
 
     private val gravity = mutableIntStateOf(Gravity.START)
     private val horizontalSpacing = mutableIntStateOf(0)
