@@ -213,6 +213,7 @@ fun FeatureCard(
             text = stringResource(id = info.title),
             textAlign = TextAlign.Center,
             style = MaterialTheme.typography.headlineLarge,
+            color = MaterialTheme.colorScheme.onSurface,
         )
 
         if (info.description != null) {
