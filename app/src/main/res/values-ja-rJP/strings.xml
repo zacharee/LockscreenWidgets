@@ -4,7 +4,7 @@
     <string name="edit_gesture_hint">二本指でタップして移動やリサイズします</string>
     <string name="edit_gesture_hint_2">二本指でタップして編集モードを終了します</string>
     <string name="hide_gesture_hint">三本指でタップして一時的に非表示にできます。画面をOFF→ONすることで再度表示されます</string>
-    <string name="accessibility_service_desc">このアプリでは、ロック画面の通知の中央にウィジェットを表示するため、アクセシビリティサービスが必要です。これ以外の動作には使用せず、情報の収集も行いません。</string>
+    <string name="accessibility_service_desc">Lockscreen Widgets requires an Accessibility Service to display on the lock screen and in the notification center. No data is collected, and no actions will be performed on the device. This permission is optional if you are only using the home screen widget stacks.</string>
     <string name="add_widget">ウィジェット追加</string>
     <string name="grant">許可</string>
     <string name="granted">Granted</string>
@@ -315,6 +315,7 @@
     <string name="widget_padding">Widget Padding</string>
     <string name="manage_widget_stacks">Manage Widget Stacks</string>
     <string name="widget_stacks">Widget Stacks</string>
+    <string name="no_widgets_in_stack">Tap \"Add Widget\" to add a widget to the stack.</string>
     <string name="widget_stack_monitor">Widget Stack Monitor</string>
     <string name="widget_stack_monitor_desc">Used to keep widgets in widget stacks up to date.</string>
     <string name="show_button_backgrounds">Show Button Backgrounds</string>
