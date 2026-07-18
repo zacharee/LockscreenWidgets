@@ -33,6 +33,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import tk.zwander.lockscreenwidgets.R
 
@@ -44,6 +45,7 @@ fun ContentCard(
     colors: CardColors = CardDefaults.cardColors(),
     elevation: CardElevation = CardDefaults.cardElevation(),
     border: BorderStroke? = null,
+    verticalSpacing: Dp = 8.dp,
     content: @Composable ColumnScope.() -> Unit,
 ) {
     Card(
@@ -58,7 +60,7 @@ fun ContentCard(
             modifier = Modifier
                 .fillMaxWidth(),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(8.dp),
+            verticalArrangement = Arrangement.spacedBy(verticalSpacing),
         ) {
             var expanded by rememberSaveable {
                 mutableStateOf(false)
@@ -85,7 +87,12 @@ fun ContentCard(
                     .fillMaxWidth(),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
-                content()
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(verticalSpacing),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                ) {
+                    content()
+                }
 
                 if (expandedContent != null) {
                     AnimatedVisibility(
@@ -93,12 +100,16 @@ fun ContentCard(
                         modifier = Modifier.wrapContentHeight(),
                     ) {
                         Column(
-                            verticalArrangement = Arrangement.spacedBy(8.dp),
-                            modifier = Modifier.fillMaxWidth(),
+                            horizontalAlignment = Alignment.CenterHorizontally,
                         ) {
-                            Spacer(modifier = Modifier.size(8.dp))
+                            Spacer(modifier = Modifier.size(verticalSpacing))
 
-                            expandedContent()
+                            Column(
+                                verticalArrangement = Arrangement.spacedBy(verticalSpacing),
+                                modifier = Modifier.fillMaxWidth(),
+                            ) {
+                                expandedContent()
+                            }
                         }
                     }
                 }

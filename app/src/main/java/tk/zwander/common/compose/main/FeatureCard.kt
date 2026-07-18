@@ -155,6 +155,7 @@ fun FeatureCard(
 
     ContentCard(
         modifier = modifier.fillMaxWidth(),
+        verticalSpacing = 0.dp,
     ) {
         Text(
             text = stringResource(id = info.title),

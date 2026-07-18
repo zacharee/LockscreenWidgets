@@ -2,18 +2,17 @@ package tk.zwander.common.compose.main
 
 import android.content.Context
 import android.net.Uri
-import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.size
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import tk.zwander.common.compose.components.ClearFrameDataCard
 import tk.zwander.common.compose.components.ClickableCard
 import tk.zwander.common.compose.components.ContentCard
@@ -83,18 +82,20 @@ fun DebugCard(
             ClearFrameDataCard()
         },
     ) {
-        Text(
-            text = stringResource(id = R.string.category_debug),
-            textAlign = TextAlign.Center,
-            style = MaterialTheme.typography.headlineLarge,
-        )
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            Text(
+                text = stringResource(id = R.string.category_debug),
+                textAlign = TextAlign.Center,
+                style = MaterialTheme.typography.headlineLarge,
+            )
 
-        Text(
-            text = stringResource(id = R.string.version_template, BuildConfig.VERSION_NAME),
-            textAlign = TextAlign.Center,
-        )
-
-        Spacer(modifier = Modifier.size(8.dp))
+            Text(
+                text = stringResource(id = R.string.version_template, BuildConfig.VERSION_NAME),
+                textAlign = TextAlign.Center,
+            )
+        }
 
         PreferenceSwitch(
             key = PrefManager.KEY_ENABLE_BUGSNAG,
