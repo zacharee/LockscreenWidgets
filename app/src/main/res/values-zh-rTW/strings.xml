@@ -4,7 +4,7 @@
     <string name="edit_gesture_hint">使用兩隻手指點擊小工具以移動它並調整大小。</string>
     <string name="edit_gesture_hint_2">很棒！ 用兩隻手指點擊可以隱藏編輯畫面。</string>
     <string name="hide_gesture_hint">用三隻手指點擊小工具可以暫時隱藏它。 它將保持隱藏狀態，直到您關閉並再次打開螢幕。</string>
-    <string name="accessibility_service_desc">鎖定螢幕小工具需要輔助服務才能顯示在鎖定畫面和通知中心。 不會收集任何數據，也不會在設備上執行任何操作。</string>
+    <string name="accessibility_service_desc">Lockscreen Widgets requires an Accessibility Service to display on the lock screen and in the notification center. No data is collected, and no actions will be performed on the device. This permission is optional if you are only using the home screen widget stacks.</string>
     <string name="add_widget">新增小工具</string>
     <string name="grant">授權</string>
     <string name="granted">Granted</string>
@@ -315,6 +315,7 @@
     <string name="widget_padding">Widget Padding</string>
     <string name="manage_widget_stacks">Manage Widget Stacks</string>
     <string name="widget_stacks">Widget Stacks</string>
+    <string name="no_widgets_in_stack">Tap \"Add Widget\" to add a widget to the stack.</string>
     <string name="widget_stack_monitor">Widget Stack Monitor</string>
     <string name="widget_stack_monitor_desc">Used to keep widgets in widget stacks up to date.</string>
     <string name="show_button_backgrounds">Show Button Backgrounds</string>
