@@ -1,6 +1,5 @@
 package tk.zwander.common.compose.main
 
-import android.content.ComponentName
 import android.content.Intent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.Image
@@ -17,7 +16,6 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.material3.Card
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -40,24 +38,20 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.isUnspecified
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.Lifecycle
-import tk.zwander.common.activities.WidgetStackListActivity
 import tk.zwander.common.compose.components.CardSwitch
+import tk.zwander.common.compose.components.ContentCard
 import tk.zwander.common.compose.data.FeatureCardInfo
 import tk.zwander.common.compose.util.rememberBooleanPreferenceState
 import tk.zwander.common.data.MainPageButton
 import tk.zwander.common.util.Event
 import tk.zwander.common.util.EventObserverEffect
-import tk.zwander.common.util.LifecycleEffect
 import tk.zwander.common.util.PrefManager
-import tk.zwander.common.util.appWidgetManager
 import tk.zwander.common.util.eventManager
 import tk.zwander.common.util.prefManager
 import tk.zwander.lockscreenwidgets.BuildConfig
 import tk.zwander.lockscreenwidgets.R
 import tk.zwander.lockscreenwidgets.activities.ComposeFrameSettingsActivity
 import tk.zwander.lockscreenwidgets.activities.UsageActivity
-import tk.zwander.lockscreenwidgets.appwidget.WidgetStackProvider
 import tk.zwander.lockscreenwidgets.compose.SelectDisplayDialog
 import tk.zwander.lockscreenwidgets.util.MainWidgetFrameDelegate
 import tk.zwander.widgetdrawer.activities.ComposeDrawerSettingsActivity
@@ -69,16 +63,6 @@ fun rememberFeatureCards(): List<FeatureCardInfo> {
 
     var showingDisplaySelectorAddFrameWidget by remember {
         mutableStateOf(false)
-    }
-
-    var widgetStackIds by remember {
-        mutableStateOf<List<Int>>(listOf())
-    }
-
-    LifecycleEffect(Lifecycle.State.RESUMED) {
-        widgetStackIds = context.appWidgetManager.getAppWidgetIds(
-            ComponentName(context, WidgetStackProvider::class.java),
-        ).toList()
     }
 
     if (showingDisplaySelectorAddFrameWidget) {
@@ -93,7 +77,7 @@ fun rememberFeatureCards(): List<FeatureCardInfo> {
         )
     }
 
-    return remember(widgetStackIds.size) {
+    return remember {
         listOf(
             FeatureCardInfo(
                 title = R.string.app_name,
@@ -157,22 +141,7 @@ fun rememberFeatureCards(): List<FeatureCardInfo> {
                 isEnabled = { context.prefManager.drawerEnabled },
                 onEnabledChanged = { context.prefManager.drawerEnabled = it },
             ),
-        ) + if (widgetStackIds.isEmpty()) {
-            listOf()
-        } else {
-            listOf(
-                FeatureCardInfo(
-                    title = R.string.widget_stacks,
-                    actionButtonTextRes = R.string.manage_widget_stacks,
-                    actionButtonIconRes = null,
-                    onAction = {
-                        context.startActivity(
-                            Intent(context, WidgetStackListActivity::class.java),
-                        )
-                    },
-                ),
-            )
-        }
+        )
     }
 }
 
@@ -184,140 +153,132 @@ fun FeatureCard(
 ) {
     EventObserverEffect(info.eventObserver)
 
-    Card(
-        modifier = modifier
-            .fillMaxWidth(),
+    ContentCard(
+        modifier = modifier.fillMaxWidth(),
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-        ) {
-            Text(
-                text = stringResource(id = info.title),
-                textAlign = TextAlign.Center,
-                style = MaterialTheme.typography.headlineLarge,
+        Text(
+            text = stringResource(id = info.title),
+            textAlign = TextAlign.Center,
+            style = MaterialTheme.typography.headlineLarge,
+        )
+
+        Box(modifier = Modifier.fillMaxWidth(0.25f)) {
+            HorizontalDivider(
+                modifier = Modifier.padding(top = 12.dp, bottom = 16.dp),
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
+        }
 
-            Box(modifier = Modifier.fillMaxWidth(0.25f)) {
-                HorizontalDivider(
-                    modifier = Modifier.padding(top = 12.dp, bottom = 16.dp),
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
+        var enabled by if (info.enabledKey != null) {
+            rememberBooleanPreferenceState(
+                key = info.enabledKey,
+                enabled = { info.isEnabled() },
+                onEnabledChanged = { _, v -> info.onEnabledChanged(v) },
+            )
+        } else {
+            remember {
+                mutableStateOf(true)
             }
+        }
 
-            var enabled by if (info.enabledKey != null) {
-                rememberBooleanPreferenceState(
-                    key = info.enabledKey,
-                    enabled = { info.isEnabled() },
-                    onEnabledChanged = { _, v -> info.onEnabledChanged(v) },
-                )
-            } else {
-                remember {
-                    mutableStateOf(true)
-                }
-            }
-
-            info.enabledKey?.let {
-                info.enabledLabel?.let {
-                    CardSwitch(
-                        enabled = enabled,
-                        onEnabledChanged = { enabled = it },
-                        title = stringResource(
-                            id = if (enabled || info.disabledLabel == null) {
-                                info.enabledLabel
-                            } else {
-                                info.disabledLabel
-                            },
-                        ),
-                    )
-                }
-            }
-
-            AnimatedVisibility(visible = enabled) {
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                ) {
-                    info.enabledKey?.let {
-                        Spacer(Modifier.size(16.dp))
-                    }
-
-                    SubduedOutlinedButton(
-                        onClick = {
-                            info.onAction()
+        info.enabledKey?.let {
+            info.enabledLabel?.let {
+                CardSwitch(
+                    enabled = enabled,
+                    onEnabledChanged = { enabled = it },
+                    title = stringResource(
+                        id = if (enabled || info.disabledLabel == null) {
+                            info.enabledLabel
+                        } else {
+                            info.disabledLabel
                         },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .heightIn(min = 64.dp),
-                    ) {
-                        info.actionButtonIconRes?.let {
-                            Image(
-                                painter = painterResource(id = it),
-                                contentDescription = stringResource(id = info.actionButtonTextRes),
-                                contentScale = ContentScale.FillHeight,
-                                modifier = Modifier.size(32.dp),
-                            )
-                        }
-                        Spacer(Modifier.size(16.dp))
-                        Text(
-                            text = stringResource(id = info.actionButtonTextRes),
-                            style = MaterialTheme.typography.headlineSmall,
+                    ),
+                )
+            }
+        }
+
+        AnimatedVisibility(visible = enabled) {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                info.enabledKey?.let {
+                    Spacer(Modifier.size(16.dp))
+                }
+
+                SubduedOutlinedButton(
+                    onClick = {
+                        info.onAction()
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .heightIn(min = 64.dp),
+                ) {
+                    info.actionButtonIconRes?.let {
+                        Image(
+                            painter = painterResource(id = it),
+                            contentDescription = stringResource(id = info.actionButtonTextRes),
+                            contentScale = ContentScale.FillHeight,
+                            modifier = Modifier.size(32.dp),
                         )
                     }
+                    Spacer(Modifier.size(16.dp))
+                    Text(
+                        text = stringResource(id = info.actionButtonTextRes),
+                        style = MaterialTheme.typography.headlineSmall,
+                    )
+                }
 
-                    if (info.buttons.isNotEmpty()) {
-                        Spacer(Modifier.size(16.dp))
+                if (info.buttons.isNotEmpty()) {
+                    Spacer(Modifier.size(16.dp))
 
-                        BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
-                            val width = this.maxWidth
+                    BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
+                        val width = this.maxWidth
 
-                            var maxItemHeight by remember(info.buttons.toList()) {
-                                mutableIntStateOf(0)
-                            }
-                            var minTextSize by remember(info.buttons.toList()) {
-                                mutableStateOf(16.sp)
-                            }
+                        var maxItemHeight by remember(info.buttons.toList()) {
+                            mutableIntStateOf(0)
+                        }
+                        var minTextSize by remember(info.buttons.toList()) {
+                            mutableStateOf(16.sp)
+                        }
 
-                            FlowRow(
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                verticalArrangement = Arrangement.Center,
-                                modifier = Modifier.fillMaxWidth(),
-                            ) {
-                                val itemsPerRow = info.buttons.size.coerceAtMost(3)
-                                val columnWidth = (width - (12.dp * (itemsPerRow - 1))) / itemsPerRow
+                        FlowRow(
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalArrangement = Arrangement.Center,
+                            modifier = Modifier.fillMaxWidth(),
+                        ) {
+                            val itemsPerRow = info.buttons.size.coerceAtMost(3)
+                            val columnWidth = (width - (12.dp * (itemsPerRow - 1))) / itemsPerRow
 
-                                info.buttons.forEachIndexed { index, mainPageButton ->
-                                    ExtraButton(
-                                        info = mainPageButton,
-                                        modifier = Modifier
-                                            .width(columnWidth)
-                                            .padding(
-                                                start = if (index == 0) 0.dp else 4.dp,
-                                                end = if (index == info.buttons.lastIndex) 0.dp else 4.dp,
-                                            )
-                                            .onSizeChanged { s ->
-                                                if (s.height > maxItemHeight) {
-                                                    maxItemHeight = s.height
-                                                }
+                            info.buttons.forEachIndexed { index, mainPageButton ->
+                                ExtraButton(
+                                    info = mainPageButton,
+                                    modifier = Modifier
+                                        .width(columnWidth)
+                                        .padding(
+                                            start = if (index == 0) 0.dp else 4.dp,
+                                            end = if (index == info.buttons.lastIndex) 0.dp else 4.dp,
+                                        )
+                                        .onSizeChanged { s ->
+                                            if (s.height > maxItemHeight) {
+                                                maxItemHeight = s.height
                                             }
-                                            .then(
-                                                if (maxItemHeight > 0) {
-                                                    with(LocalDensity.current) {
-                                                        Modifier.height(maxItemHeight.toDp())
-                                                    }
-                                                } else {
-                                                    Modifier
+                                        }
+                                        .then(
+                                            if (maxItemHeight > 0) {
+                                                with(LocalDensity.current) {
+                                                    Modifier.height(maxItemHeight.toDp())
                                                 }
-                                            ),
-                                        onFontSizeCalculated = { min ->
-                                            if (minTextSize.isUnspecified || min < minTextSize) {
-                                                minTextSize = min
+                                            } else {
+                                                Modifier
                                             }
-                                        },
-                                        maxFontSize = minTextSize,
-                                    )
-                                }
+                                        ),
+                                    onFontSizeCalculated = { min ->
+                                        if (minTextSize.isUnspecified || min < minTextSize) {
+                                            minTextSize = min
+                                        }
+                                    },
+                                    maxFontSize = minTextSize,
+                                )
                             }
                         }
                     }
