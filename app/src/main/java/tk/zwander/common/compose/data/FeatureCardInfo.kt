@@ -10,6 +10,8 @@ data class FeatureCardInfo(
     @StringRes
     val title: Int,
     @StringRes
+    val description: Int? = null,
+    @StringRes
     val enabledLabel: Int? = null,
     @StringRes
     val disabledLabel: Int? = null,
@@ -20,7 +22,7 @@ data class FeatureCardInfo(
     val onEnabledChanged: (Boolean) -> Unit = {},
     val eventObserver: EventObserver? = null,
     @StringRes
-    val actionButtonTextRes: Int = R.string.add_widget,
+    val actionButtonTextRes: Int? = R.string.add_widget,
     @DrawableRes
     val actionButtonIconRes: Int? = R.drawable.ic_baseline_add_24,
 )

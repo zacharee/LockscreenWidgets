@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name" translatable="false">Lockscreen Widgets Wallpaper Plugin</string>
+    <string name="app_name" translatable="false">Widgets Anywhere Wallpaper Plugin</string>
 
     <string name="foreground_notif_title">Running</string>
     <string name="foreground_notif_desc">Long-press to hide this notification.</string>
