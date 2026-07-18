@@ -207,7 +207,6 @@ fun rememberIntroSlides(
                         }
                     }
                 },
-                canMoveForward = { hasAccessibility || BuildConfig.DEBUG },
             ))
         }
 
