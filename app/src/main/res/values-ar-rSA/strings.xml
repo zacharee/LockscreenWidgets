@@ -4,7 +4,7 @@
     <string name="edit_gesture_hint">اضغط على التطبيق المصغر بإصبعين للتحريك وضبط الحجم.</string>
     <string name="edit_gesture_hint_2">حسناً! اضغط بإصبعين لإخفاء عناصر الواجهة.</string>
     <string name="hide_gesture_hint">اضغط على اطار التطبيق المصغر بثلاث اصابع لإخفائة مؤقتاً. سيبقى مخفياً حتى تطفئ وتشغل الشاشة مجددا.</string>
-    <string name="accessibility_service_desc">التطبيقات المصغرة لشاشة القفل تحتاح الى خدمة إمكانية الوصول للعرض على شاشة القفل ومركز الاشعارات. لن يتم جمع بيانات. ولا إجراء سيتم في الجهاز.</string>
+    <string name="accessibility_service_desc">Lockscreen Widgets requires an Accessibility Service to display on the lock screen and in the notification center. No data is collected, and no actions will be performed on the device. This permission is optional if you are only using the home screen widget stacks.</string>
     <string name="add_widget">اضافة تطبيق مصغر</string>
     <string name="grant">سماح</string>
     <string name="granted">تم الموافقة</string>
@@ -320,6 +320,7 @@
     <string name="widget_padding">Widget Padding</string>
     <string name="manage_widget_stacks">Manage Widget Stacks</string>
     <string name="widget_stacks">Widget Stacks</string>
+    <string name="no_widgets_in_stack">Tap \"Add Widget\" to add a widget to the stack.</string>
     <string name="widget_stack_monitor">Widget Stack Monitor</string>
     <string name="widget_stack_monitor_desc">Used to keep widgets in widget stacks up to date.</string>
     <string name="show_button_backgrounds">Show Button Backgrounds</string>
