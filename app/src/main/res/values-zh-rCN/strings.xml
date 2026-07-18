@@ -4,7 +4,7 @@
     <string name="edit_gesture_hint">用两个手指点击小部件框架来移动和调整大小。</string>
     <string name="edit_gesture_hint_2">太棒了！用两个手指点击来隐藏编辑界面。</string>
     <string name="hide_gesture_hint">三指轻点小部件边框即可暂时隐藏它。它会一直隐藏，直到您关闭并重新打开屏幕。</string>
-    <string name="accessibility_service_desc">锁屏小部件需要启用辅助功能服务才能在锁屏界面和通知中心显示。不会收集任何数据，也不会对设备执行任何操作。</string>
+    <string name="accessibility_service_desc">Lockscreen Widgets requires an Accessibility Service to display on the lock screen and in the notification center. No data is collected, and no actions will be performed on the device. This permission is optional if you are only using the home screen widget stacks.</string>
     <string name="add_widget">添加小组件</string>
     <string name="grant">授予权限</string>
     <string name="granted">已授予权限</string>
@@ -315,6 +315,7 @@
     <string name="widget_padding">小部件间填充</string>
     <string name="manage_widget_stacks">管理小部件应用</string>
     <string name="widget_stacks">部件栈</string>
+    <string name="no_widgets_in_stack">Tap \"Add Widget\" to add a widget to the stack.</string>
     <string name="widget_stack_monitor">小部件堆栈监视器</string>
     <string name="widget_stack_monitor_desc">用来保持小部件堆栈中最新的部件。</string>
     <string name="show_button_backgrounds">显示按钮背景</string>
