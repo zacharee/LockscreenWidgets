@@ -4,7 +4,7 @@
     <string name="edit_gesture_hint">Widget çerçevesine iki parmağınızla dokunarak onu taşıyabilir ve yeniden boyutlandırabilirsiniz.</string>
     <string name="edit_gesture_hint_2">Harika! Düzenleme arayüzünü gizlemek için iki parmağınızla dokunun.</string>
     <string name="hide_gesture_hint">Widget çerçevesine üç parmağınızla dokunarak geçici olarak gizleyebilirsiniz. Ekranı kapatıp tekrar açana kadar gizli kalacaktır.</string>
-    <string name="accessibility_service_desc">Kilit Ekranı Widget\'larının kilit ekranında ve bildirim merkezinde görüntülenmesi için bir Erişilebilirlik Hizmeti gerekir. Hiçbir veri toplanmaz ve cihazda hiçbir işlem gerçekleştirilmez.</string>
+    <string name="accessibility_service_desc">Lockscreen Widgets requires an Accessibility Service to display on the lock screen and in the notification center. No data is collected, and no actions will be performed on the device. This permission is optional if you are only using the home screen widget stacks.</string>
     <string name="add_widget">Widget ekle</string>
     <string name="grant">İzin ver</string>
     <string name="granted">İzin verildi</string>
@@ -316,6 +316,7 @@
     <string name="widget_padding">Widget\'in İç Boşluğu</string>
     <string name="manage_widget_stacks">Widget Yığınlarını Yönet</string>
     <string name="widget_stacks">Widget Yığınları</string>
+    <string name="no_widgets_in_stack">Tap \"Add Widget\" to add a widget to the stack.</string>
     <string name="widget_stack_monitor">Widget Yığını Monitörü</string>
     <string name="widget_stack_monitor_desc">Widget yığınlarındaki widget\'ları güncel tutmak için kullanılır.</string>
     <string name="show_button_backgrounds">Buton Arkaplanlarını Göster</string>
