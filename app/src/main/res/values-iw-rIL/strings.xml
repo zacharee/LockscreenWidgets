@@ -4,7 +4,7 @@
     <string name="edit_gesture_hint">לחץ על מסגרת התוסף עם שתי אצבעות כדי לשנות גודל.</string>
     <string name="edit_gesture_hint_2">נהדר! לחץ עם שני אצבעות כדי להסתיר את ממשק המשתמש של העריכה.</string>
     <string name="hide_gesture_hint">לחץ על מסגרת הווידג\'ט עם שלוש אצבעות כדי להסתיר אותה זמנית. היא תישאר מוסתרת עד שתכבה ותפעיל שוב את התצוגה.</string>
-    <string name="accessibility_service_desc">ווידג\'טים של מסך נעילה דורשים שירות נגישות כדי שיוצגו במסך הנעילה ובמרכז ההתראות. לא נאספים נתונים ולא יבוצעו פעולות במכשיר.</string>
+    <string name="accessibility_service_desc">Lockscreen Widgets requires an Accessibility Service to display on the lock screen and in the notification center. No data is collected, and no actions will be performed on the device. This permission is optional if you are only using the home screen widget stacks.</string>
     <string name="add_widget">הוסף וידג\'ט</string>
     <string name="grant">הענק</string>
     <string name="granted">הוענק</string>
@@ -318,6 +318,7 @@
     <string name="widget_padding">Widget Padding</string>
     <string name="manage_widget_stacks">Manage Widget Stacks</string>
     <string name="widget_stacks">Widget Stacks</string>
+    <string name="no_widgets_in_stack">Tap \"Add Widget\" to add a widget to the stack.</string>
     <string name="widget_stack_monitor">Widget Stack Monitor</string>
     <string name="widget_stack_monitor_desc">Used to keep widgets in widget stacks up to date.</string>
     <string name="show_button_backgrounds">Show Button Backgrounds</string>
