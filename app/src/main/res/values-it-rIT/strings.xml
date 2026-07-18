@@ -4,7 +4,7 @@
     <string name="edit_gesture_hint">Tocca il riquadro widget con due dita per spostarlo e ridimensionarlo.</string>
     <string name="edit_gesture_hint_2">Ottimo! Tocca con due dita per nascondere l\'interfaccia di modifica.</string>
     <string name="hide_gesture_hint">Tocca il riquadro widget con tre dita per nasconderlo temporaneamente fino a quando non spegnerai e riaccenderai il display.</string>
-    <string name="accessibility_service_desc">Lockscren Widgets richiede di attivare il Servizio di Accessibilità per apparire nella schermata di blocco e il centro notifiche. Nessun dato viene raccolto, e nessuna azione verrà eseguita sul dispositivo.</string>
+    <string name="accessibility_service_desc">Lockscreen Widgets requires an Accessibility Service to display on the lock screen and in the notification center. No data is collected, and no actions will be performed on the device. This permission is optional if you are only using the home screen widget stacks.</string>
     <string name="add_widget">Aggiungi widget</string>
     <string name="grant">Autorizza</string>
     <string name="granted">Autorizzato</string>
@@ -316,6 +316,7 @@
     <string name="widget_padding">Widget Padding</string>
     <string name="manage_widget_stacks">Manage Widget Stacks</string>
     <string name="widget_stacks">Widget Stacks</string>
+    <string name="no_widgets_in_stack">Tap \"Add Widget\" to add a widget to the stack.</string>
     <string name="widget_stack_monitor">Widget Stack Monitor</string>
     <string name="widget_stack_monitor_desc">Used to keep widgets in widget stacks up to date.</string>
     <string name="show_button_backgrounds">Show Button Backgrounds</string>
