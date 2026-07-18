@@ -4,7 +4,7 @@
     <string name="edit_gesture_hint">Klepněte na widget dvěma prsty pro přesun a změnu velikosti.</string>
     <string name="edit_gesture_hint_2">Skvělé! Klepnutím dvěma prsty skryjete uživatelské rozhraní pro úpravy.</string>
     <string name="hide_gesture_hint">Klepněte na widget třemi prsty pro dočasně skrytí. Bude skrytý, dokud obrazovku nevypnete a znovu zapnete.</string>
-    <string name="accessibility_service_desc">Widgety na zamykací obrazovce vyžadují službu Usnadnění zobrazení na zamykací obrazovce a v oznamovací centru. Nejsou shromažďována žádná data a na zařízení nebudou prováděny žádné akce.</string>
+    <string name="accessibility_service_desc">Lockscreen Widgets requires an Accessibility Service to display on the lock screen and in the notification center. No data is collected, and no actions will be performed on the device. This permission is optional if you are only using the home screen widget stacks.</string>
     <string name="add_widget">Přidat Widget</string>
     <string name="grant">Udělit</string>
     <string name="granted">Uděleno</string>
@@ -318,6 +318,7 @@
     <string name="widget_padding">Widget Padding</string>
     <string name="manage_widget_stacks">Manage Widget Stacks</string>
     <string name="widget_stacks">Widget Stacks</string>
+    <string name="no_widgets_in_stack">Tap \"Add Widget\" to add a widget to the stack.</string>
     <string name="widget_stack_monitor">Widget Stack Monitor</string>
     <string name="widget_stack_monitor_desc">Used to keep widgets in widget stacks up to date.</string>
     <string name="show_button_backgrounds">Show Button Backgrounds</string>
