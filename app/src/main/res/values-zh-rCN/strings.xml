@@ -175,7 +175,7 @@
     <string name="intro_usage_title">基本用法</string>
     <string name="intro_usage_desc">点击“加”页面添加小部件、按住以重新排序/调整大小/删除列表中的小部件。 并用两个手指点击框架上的任何位置移动/调整帧大小或添加一个部件。 您也可以用三指来隐藏小部件帧，直到屏幕关闭并再次开启。</string>
     <string name="intro_accessibility_title">无障碍功能</string>
-    <string name="intro_accessibility_desc">To be able to display on the lock screen, you\'ll need to activate Widgets Anywhere\' Accessibility Service. This app doesn\'t collect any data from your screen.</string>
+    <string name="intro_accessibility_desc">To be able to display on the lock screen, you\'ll need to activate Widgets Anywhere\'s Accessibility Service. This app doesn\'t collect any data from your screen.</string>
     <string name="intro_notification_listener_title">通知侦听器</string>
     <string name="intro_notification_listener_desc">Widgets Anywhere can hide the widget frame while there are notifications displayed. To do so, you\'ll need to enable the Notification Listener. You don\'t have to grant this right now.</string>
     <string name="intro_read_storage_title">读取外部存储</string>
@@ -277,7 +277,7 @@
     <string name="installed">Installed</string>
     <string name="failed_to_add_shortcut">无法添加快捷方式。</string>
     <string name="directly_check_for_activity">直接检查活动</string>
-    <string name="directly_check_for_activity_desc">When enabled, Widgets Anywhere will use Android\'s API to check whether a widget tap is launching an Activity. This can be faster than Widgets Anywhere\' built-in detection, but may cause false positives.</string>
+    <string name="directly_check_for_activity_desc">When enabled, Widgets Anywhere will use Android\'s API to check whether a widget tap is launching an Activity. This can be faster than Widgets Anywhere\'s built-in detection, but may cause false positives.</string>
     <string name="translate">翻译</string>
     <string name="translate_desc">Help translate Widgets Anywhere into your language.</string>
     <string name="error_reconfiguring_widget">重新配置小部件出错</string>
