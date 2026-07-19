@@ -4,25 +4,32 @@ import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import tk.zwander.common.data.MainPageButton
 import tk.zwander.common.util.EventObserver
-import tk.zwander.lockscreenwidgets.R
 
 data class FeatureCardInfo(
     @StringRes
     val title: Int,
     @StringRes
     val description: Int? = null,
+    val buttons: List<MainPageButton> = listOf(),
+    val eventObserver: EventObserver? = null,
+    val action: ActionInfo? = null,
+    val enabled: EnabledInfo? = null,
+)
+
+data class ActionInfo(
     @StringRes
-    val enabledLabel: Int? = null,
+    val label: Int,
+    @DrawableRes
+    val icon: Int? = null,
+    val onAction: () -> Unit,
+)
+
+data class EnabledInfo(
+    @StringRes
+    val enabledLabel: Int,
     @StringRes
     val disabledLabel: Int? = null,
-    val enabledKey: String? = null,
-    val buttons: List<MainPageButton> = listOf(),
-    val onAction: () -> Unit,
-    val isEnabled: () -> Boolean = { true },
-    val onEnabledChanged: (Boolean) -> Unit = {},
-    val eventObserver: EventObserver? = null,
-    @StringRes
-    val actionButtonTextRes: Int? = R.string.add_widget,
-    @DrawableRes
-    val actionButtonIconRes: Int? = R.drawable.ic_baseline_add_24,
+    val key: String,
+    val isEnabled: () -> Boolean,
+    val onEnabledChanged: (Boolean) -> Unit,
 )

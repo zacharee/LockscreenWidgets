@@ -45,6 +45,8 @@ import androidx.lifecycle.Lifecycle
 import tk.zwander.common.activities.WidgetStackListActivity
 import tk.zwander.common.compose.components.CardSwitch
 import tk.zwander.common.compose.components.ContentCard
+import tk.zwander.common.compose.data.ActionInfo
+import tk.zwander.common.compose.data.EnabledInfo
 import tk.zwander.common.compose.data.FeatureCardInfo
 import tk.zwander.common.compose.util.rememberBooleanPreferenceState
 import tk.zwander.common.data.MainPageButton
@@ -54,6 +56,7 @@ import tk.zwander.common.util.LifecycleEffect
 import tk.zwander.common.util.PrefManager
 import tk.zwander.common.util.appWidgetManager
 import tk.zwander.common.util.eventManager
+import tk.zwander.common.util.isOneUI
 import tk.zwander.common.util.prefManager
 import tk.zwander.lockscreenwidgets.BuildConfig
 import tk.zwander.lockscreenwidgets.R
@@ -104,10 +107,14 @@ fun rememberFeatureCards(): Map<String, List<FeatureCardInfo>> {
             map["MainFeatures"] = listOf(
                 FeatureCardInfo(
                     title = R.string.lock_screen_widgets,
-                    enabledLabel = R.string.enabled,
-                    disabledLabel = R.string.disabled,
                     description = R.string.lock_screen_widgets_desc,
-                    enabledKey = PrefManager.KEY_WIDGET_FRAME_ENABLED,
+                    enabled = EnabledInfo(
+                        enabledLabel = R.string.enabled,
+                        disabledLabel = R.string.disabled,
+                        key = PrefManager.KEY_WIDGET_FRAME_ENABLED,
+                        isEnabled = { context.prefManager.widgetFrameEnabled },
+                        onEnabledChanged = { context.prefManager.widgetFrameEnabled = it },
+                    ),
                     buttons = listOf(
                         MainPageButton(
                             icon = R.drawable.ic_baseline_preview_24,
@@ -129,7 +136,10 @@ fun rememberFeatureCards(): Map<String, List<FeatureCardInfo>> {
                             context.startActivity(Intent(context, ComposeFrameSettingsActivity::class.java))
                         },
                     ),
-                    onAction = {
+                    action = ActionInfo(
+                        label = R.string.add_widget,
+                        icon = R.drawable.ic_baseline_add_24,
+                    ) {
                         context.eventManager.sendEvent(Event.PreviewFrames(Event.PreviewFrames.ShowMode.HIDE))
 
                         if (!BuildConfig.DEBUG && context.prefManager.currentSecondaryFramesWithStringDisplay.isEmpty()) {
@@ -138,15 +148,17 @@ fun rememberFeatureCards(): Map<String, List<FeatureCardInfo>> {
                             showingDisplaySelectorAddFrameWidget = true
                         }
                     },
-                    isEnabled = { context.prefManager.widgetFrameEnabled },
-                    onEnabledChanged = { context.prefManager.widgetFrameEnabled = it },
                 ),
                 FeatureCardInfo(
                     title = R.string.widget_drawer,
-                    enabledLabel = R.string.enabled,
-                    disabledLabel = R.string.disabled,
                     description = R.string.widget_drawer_desc,
-                    enabledKey = PrefManager.KEY_DRAWER_ENABLED,
+                    enabled = EnabledInfo(
+                        enabledLabel = R.string.enabled,
+                        disabledLabel = R.string.disabled,
+                        key = PrefManager.KEY_DRAWER_ENABLED,
+                        isEnabled = { context.prefManager.drawerEnabled },
+                        onEnabledChanged = { context.prefManager.drawerEnabled = it },
+                    ),
                     buttons = listOf(
                         MainPageButton(
                             icon = R.drawable.ic_baseline_open_in_new_24,
@@ -162,13 +174,18 @@ fun rememberFeatureCards(): Map<String, List<FeatureCardInfo>> {
                             context.startActivity(Intent(context, ComposeDrawerSettingsActivity::class.java))
                         }
                     ),
-                    onAction = { context.eventManager.sendEvent(Event.LaunchAddDrawerWidget(false)) },
-                    isEnabled = { context.prefManager.drawerEnabled },
-                    onEnabledChanged = { context.prefManager.drawerEnabled = it },
+                    action = ActionInfo(
+                        label = R.string.add_widget,
+                        icon = R.drawable.ic_baseline_add_24,
+                    ) {
+                        context.eventManager.sendEvent(
+                            Event.LaunchAddDrawerWidget(false),
+                        )
+                    },
                 ),
             )
 
-            map["WidgetStacks"] = listOf(
+            map["ExtraFeatures"] = listOfNotNull(
                 FeatureCardInfo(
                     title = R.string.widget_stacks,
                     description = if (updatedWidgetStackIds.isEmpty()) {
@@ -176,18 +193,27 @@ fun rememberFeatureCards(): Map<String, List<FeatureCardInfo>> {
                     } else {
                         R.string.widget_stacks_desc
                     },
-                    actionButtonTextRes = if (updatedWidgetStackIds.isNotEmpty()) {
-                        R.string.manage_widget_stacks
+                    action = if (updatedWidgetStackIds.isNotEmpty()) {
+                        ActionInfo(
+                            label = R.string.manage_widget_stacks,
+                            icon = R.drawable.ic_baseline_layers_24,
+                        ) {
+                            context.startActivity(
+                                Intent(context, WidgetStackListActivity::class.java),
+                            )
+                        }
                     } else {
                         null
                     },
-                    onAction = {
-                        context.startActivity(
-                            Intent(context, WidgetStackListActivity::class.java),
-                        )
-                    },
-                    actionButtonIconRes = R.drawable.ic_baseline_layers_24,
                 ),
+                if (context.isOneUI) {
+                    FeatureCardInfo(
+                        title = R.string.one_ui_widget_tiles_title,
+                        description = R.string.one_ui_widget_tiles_desc,
+                    )
+                } else {
+                    null
+                },
             )
 
             map
@@ -223,9 +249,9 @@ fun FeatureCard(
             )
         }
 
-        if ((info.enabledKey != null && info.enabledLabel != null) ||
+        if (info.enabled != null ||
                 info.buttons.isNotEmpty() ||
-                info.actionButtonTextRes != null) {
+                info.action != null) {
             Box(modifier = Modifier.fillMaxWidth(0.25f)) {
                 HorizontalDivider(
                     modifier = Modifier.padding(top = 12.dp, bottom = 16.dp),
@@ -234,11 +260,11 @@ fun FeatureCard(
             }
         }
 
-        var enabled by if (info.enabledKey != null) {
+        var enabled by if (info.enabled != null) {
             rememberBooleanPreferenceState(
-                key = info.enabledKey,
-                enabled = { info.isEnabled() },
-                onEnabledChanged = { _, v -> info.onEnabledChanged(v) },
+                key = info.enabled.key,
+                enabled = { info.enabled.isEnabled() },
+                onEnabledChanged = { _, v -> info.enabled.onEnabledChanged(v) },
             )
         } else {
             remember {
@@ -246,53 +272,51 @@ fun FeatureCard(
             }
         }
 
-        info.enabledKey?.let {
-            info.enabledLabel?.let {
-                CardSwitch(
-                    enabled = enabled,
-                    onEnabledChanged = { enabled = it },
-                    title = stringResource(
-                        id = if (enabled || info.disabledLabel == null) {
-                            info.enabledLabel
-                        } else {
-                            info.disabledLabel
-                        },
-                    ),
-                )
-            }
+        info.enabled?.let {
+            CardSwitch(
+                enabled = enabled,
+                onEnabledChanged = { enabled = it },
+                title = stringResource(
+                    id = if (enabled || info.enabled.disabledLabel == null) {
+                        info.enabled.enabledLabel
+                    } else {
+                        info.enabled.disabledLabel
+                    },
+                ),
+            )
         }
 
         AnimatedVisibility(
-            visible = (enabled || info.enabledKey == null || info.enabledLabel == null) &&
-                    (info.actionButtonTextRes != null || info.buttons.isNotEmpty()),
+            visible = (enabled || info.enabled == null) &&
+                    (info.action != null || info.buttons.isNotEmpty()),
         ) {
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
-                info.enabledKey?.let {
+                info.enabled?.let {
                     Spacer(Modifier.size(16.dp))
                 }
 
-                info.actionButtonTextRes?.let {
+                info.action?.let {
                     SubduedOutlinedButton(
                         onClick = {
-                            info.onAction()
+                            info.action.onAction()
                         },
                         modifier = Modifier
                             .fillMaxWidth()
                             .heightIn(min = 64.dp),
                     ) {
-                        info.actionButtonIconRes?.let {
+                        info.action.icon?.let {
                             Image(
                                 painter = painterResource(id = it),
-                                contentDescription = stringResource(id = info.actionButtonTextRes),
+                                contentDescription = stringResource(id = info.action.label),
                                 contentScale = ContentScale.FillHeight,
                                 modifier = Modifier.size(32.dp),
                             )
                         }
                         Spacer(Modifier.size(16.dp))
                         Text(
-                            text = stringResource(id = info.actionButtonTextRes),
+                            text = stringResource(id = info.action.label),
                             style = MaterialTheme.typography.headlineSmall,
                         )
                     }
