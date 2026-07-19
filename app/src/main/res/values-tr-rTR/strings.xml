@@ -175,7 +175,7 @@
     <string name="intro_usage_title">Temel Kullanım</string>
     <string name="intro_usage_desc">Bir widget eklemek için \"artı\" sayfasına dokunun, listedeki widget\'ları yeniden sıralamak/yeniden boyutlandırmak/kaldırmak için basılı tutun ve çerçevenin herhangi bir yerine iki parmağınızla dokunarak çerçeveyi hareket ettirin/yeniden boyutlandırın veya bir widget ekleyin. Ekran kapatılıp tekrar açılana kadar widget çerçevesini gizlemek için üç parmağınızla da dokunabilirsiniz.</string>
     <string name="intro_accessibility_title">Erişilebilirlik</string>
-    <string name="intro_accessibility_desc">To be able to display on the lock screen, you\'ll need to activate Widgets Anywhere\' Accessibility Service. This app doesn\'t collect any data from your screen.</string>
+    <string name="intro_accessibility_desc">To be able to display on the lock screen, you\'ll need to activate Widgets Anywhere\'s Accessibility Service. This app doesn\'t collect any data from your screen.</string>
     <string name="intro_notification_listener_title">Bildirim Dinleyicisi</string>
     <string name="intro_notification_listener_desc">Widgets Anywhere can hide the widget frame while there are notifications displayed. To do so, you\'ll need to enable the Notification Listener. You don\'t have to grant this right now.</string>
     <string name="intro_read_storage_title">Harici Depolamayı Oku</string>
@@ -277,7 +277,7 @@
     <string name="installed">Installed</string>
     <string name="failed_to_add_shortcut">Kısayol oluşturulamadı.</string>
     <string name="directly_check_for_activity">Doğrudan Aktiviteyi Kontrol Et</string>
-    <string name="directly_check_for_activity_desc">When enabled, Widgets Anywhere will use Android\'s API to check whether a widget tap is launching an Activity. This can be faster than Widgets Anywhere\' built-in detection, but may cause false positives.</string>
+    <string name="directly_check_for_activity_desc">When enabled, Widgets Anywhere will use Android\'s API to check whether a widget tap is launching an Activity. This can be faster than Widgets Anywhere\'s built-in detection, but may cause false positives.</string>
     <string name="translate">Çeviri</string>
     <string name="translate_desc">Help translate Widgets Anywhere into your language.</string>
     <string name="error_reconfiguring_widget">Widget yeniden yapılandırılırken hata oluştu</string>
