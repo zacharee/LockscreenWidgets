@@ -336,4 +336,6 @@
     <string name="filter_widgets">Widgets</string>
     <string name="filter_shortcuts">Shortcuts</string>
     <string name="filter_launcher_icons">App Launchers</string>
+    <string name="one_ui_widget_tiles_title">One UI Tile Widgets</string>
+    <string name="one_ui_widget_tiles_desc">Display home screen widgets in the expanded view of quick settings tiles in the notification center. Get started by adding a \"Widgets Anywhere\" QS tile.</string>
 </resources>
