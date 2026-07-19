@@ -175,7 +175,7 @@
     <string name="intro_usage_title">Основное применение</string>
     <string name="intro_usage_desc">Нажмите на страницу \"плюс\", чтобы добавить виджет. Нажмите и удерживайте, чтобы изменить порядок/размер/удалить виджеты в списке. Нажмите в любом месте рамки двумя пальцами, чтобы переместить/изменить размер рамки или добавить виджет. Вы также можете нажать тремя пальцами, чтобы скрыть рамку виджета, пока экран не выключится и не включится снова.</string>
     <string name="intro_accessibility_title">Спец. возможности</string>
-    <string name="intro_accessibility_desc">To be able to display on the lock screen, you\'ll need to activate Widgets Anywhere\' Accessibility Service. This app doesn\'t collect any data from your screen.</string>
+    <string name="intro_accessibility_desc">To be able to display on the lock screen, you\'ll need to activate Widgets Anywhere\'s Accessibility Service. This app doesn\'t collect any data from your screen.</string>
     <string name="intro_notification_listener_title">Слушатель уведомлений</string>
     <string name="intro_notification_listener_desc">Widgets Anywhere can hide the widget frame while there are notifications displayed. To do so, you\'ll need to enable the Notification Listener. You don\'t have to grant this right now.</string>
     <string name="intro_read_storage_title">Shizuku и Данные из внешнего хранилища</string>
@@ -277,7 +277,7 @@
     <string name="installed">Installed</string>
     <string name="failed_to_add_shortcut">Невозможно добавить ярлык.</string>
     <string name="directly_check_for_activity">Проверить активность напрямую</string>
-    <string name="directly_check_for_activity_desc">When enabled, Widgets Anywhere will use Android\'s API to check whether a widget tap is launching an Activity. This can be faster than Widgets Anywhere\' built-in detection, but may cause false positives.</string>
+    <string name="directly_check_for_activity_desc">When enabled, Widgets Anywhere will use Android\'s API to check whether a widget tap is launching an Activity. This can be faster than Widgets Anywhere\'s built-in detection, but may cause false positives.</string>
     <string name="translate">Перевод</string>
     <string name="translate_desc">Help translate Widgets Anywhere into your language.</string>
     <string name="error_reconfiguring_widget">Ошибка при перенастройке виджета</string>
