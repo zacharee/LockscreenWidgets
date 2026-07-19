@@ -175,7 +175,7 @@
     <string name="intro_usage_title">الاستخدام الأساسي</string>
     <string name="intro_usage_desc">انقر على علامة الجمع (+) لإضافة عنصر واجهة مستخدم، واضغط مطولاً لإعادة ترتيب/تغيير حجم/إزالة عناصر واجهة المستخدم في القائمة، وانقر في أي مكان على الإطار بإصبعين لتحريك/تغيير حجم الإطار أو إضافة عنصر واجهة مستخدم. يمكنك أيضًا النقر بثلاثة أصابع لإخفاء إطار عنصر واجهة المستخدم حتى يتم إيقاف تشغيل الشاشة ثم تعمل مجدداً .</string>
     <string name="intro_accessibility_title">إمكانية الوصول</string>
-    <string name="intro_accessibility_desc">To be able to display on the lock screen, you\'ll need to activate Widgets Anywhere\' Accessibility Service. This app doesn\'t collect any data from your screen.</string>
+    <string name="intro_accessibility_desc">To be able to display on the lock screen, you\'ll need to activate Widgets Anywhere\'s Accessibility Service. This app doesn\'t collect any data from your screen.</string>
     <string name="intro_notification_listener_title">مستمع الإشعارات</string>
     <string name="intro_notification_listener_desc">Widgets Anywhere can hide the widget frame while there are notifications displayed. To do so, you\'ll need to enable the Notification Listener. You don\'t have to grant this right now.</string>
     <string name="intro_read_storage_title">قراءة وحدة التخزين الخارجية</string>
@@ -277,7 +277,7 @@
     <string name="installed">Installed</string>
     <string name="failed_to_add_shortcut">غير قادر على إضافة الاختصار.</string>
     <string name="directly_check_for_activity">التحقق مباشرة من النشاط</string>
-    <string name="directly_check_for_activity_desc">When enabled, Widgets Anywhere will use Android\'s API to check whether a widget tap is launching an Activity. This can be faster than Widgets Anywhere\' built-in detection, but may cause false positives.</string>
+    <string name="directly_check_for_activity_desc">When enabled, Widgets Anywhere will use Android\'s API to check whether a widget tap is launching an Activity. This can be faster than Widgets Anywhere\'s built-in detection, but may cause false positives.</string>
     <string name="translate">ترجمة</string>
     <string name="translate_desc">Help translate Widgets Anywhere into your language.</string>
     <string name="error_reconfiguring_widget">Error reconfiguring widget</string>
