@@ -86,7 +86,7 @@ android {
 
 afterEvaluate {
     base {
-        archivesName.set("LockscreenWidgets_${android.defaultConfig.versionName}")
+        archivesName.set("WidgetsAnywhere_${android.defaultConfig.versionName}")
     }
 }
 

@@ -50,7 +50,7 @@ android {
 
 afterEvaluate {
     base {
-        archivesName.set("LSWWallpaperCompanion_${android.defaultConfig.versionName}")
+        archivesName.set("WAWallpaperCompanion_${android.defaultConfig.versionName}")
     }
 }
 
