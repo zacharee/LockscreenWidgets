@@ -48,7 +48,7 @@ import tk.zwander.widgetdrawer.util.DrawerDelegate
 import tk.zwander.widgetdrawer.views.DrawerRecycler
 
 @Composable
-fun DrawerDelegate.DrawerViewModel.Drawer(
+fun DrawerDelegate.DrawerViewModel.DrawerLayout(
     widgetGrid: DrawerRecycler,
     modifier: Modifier = Modifier,
 ) {

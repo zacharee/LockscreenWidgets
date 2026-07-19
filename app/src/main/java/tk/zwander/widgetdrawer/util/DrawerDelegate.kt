@@ -58,7 +58,7 @@ import tk.zwander.common.util.themedContext
 import tk.zwander.lockscreenwidgets.R
 import tk.zwander.widgetdrawer.activities.TaskerIsShowingDrawer
 import tk.zwander.widgetdrawer.adapters.DrawerAdapter
-import tk.zwander.widgetdrawer.compose.Drawer
+import tk.zwander.widgetdrawer.compose.DrawerLayout
 import tk.zwander.widgetdrawer.views.DrawerRecycler
 import kotlin.math.absoluteValue
 import kotlin.math.sign
@@ -159,7 +159,7 @@ class DrawerDelegate private constructor(context: Context, displayId: String) :
 
     private val drawer by lazy {
         viewModel.createComposeViewHolder {
-            Drawer(
+            DrawerLayout(
                 widgetGrid = widgetGrid,
                 modifier = Modifier.fillMaxSize(),
             )

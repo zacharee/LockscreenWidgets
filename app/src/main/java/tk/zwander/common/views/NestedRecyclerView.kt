@@ -22,6 +22,7 @@ open class NestedRecyclerView @JvmOverloads constructor(
 
     init {
         tag = TAG
+        clipToPadding = false
     }
 
     override fun dispatchTouchEvent(ev: MotionEvent): Boolean {
