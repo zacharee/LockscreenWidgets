@@ -175,7 +175,7 @@
     <string name="intro_usage_title">Uso básico</string>
     <string name="intro_usage_desc">Pulsa la página \"Más\" para añadir un widget, mantén pulsado para reordenar/redimensionar o eliminar widgets en la lista, y pulsa en cualquier lugar del Panel de widgets con los dos dedos para mover/redimensionar el Panel o añadir un widget. También puedes tocar con tres dedos para ocultar el Panel de widgets hasta que la pantalla se apague y se vuelva a encender.</string>
     <string name="intro_accessibility_title">Accesibilidad</string>
-    <string name="intro_accessibility_desc">To be able to display on the lock screen, you\'ll need to activate Widgets Anywhere\' Accessibility Service. This app doesn\'t collect any data from your screen.</string>
+    <string name="intro_accessibility_desc">To be able to display on the lock screen, you\'ll need to activate Widgets Anywhere\'s Accessibility Service. This app doesn\'t collect any data from your screen.</string>
     <string name="intro_notification_listener_title">Agente Listener de notificaciones</string>
     <string name="intro_notification_listener_desc">Widgets Anywhere can hide the widget frame while there are notifications displayed. To do so, you\'ll need to enable the Notification Listener. You don\'t have to grant this right now.</string>
     <string name="intro_read_storage_title">Leer almacenamiento externo</string>
@@ -277,7 +277,7 @@
     <string name="installed">Installed</string>
     <string name="failed_to_add_shortcut">No se ha podido crear el Acceso directo.</string>
     <string name="directly_check_for_activity">Comprobar actividad directamente</string>
-    <string name="directly_check_for_activity_desc">When enabled, Widgets Anywhere will use Android\'s API to check whether a widget tap is launching an Activity. This can be faster than Widgets Anywhere\' built-in detection, but may cause false positives.</string>
+    <string name="directly_check_for_activity_desc">When enabled, Widgets Anywhere will use Android\'s API to check whether a widget tap is launching an Activity. This can be faster than Widgets Anywhere\'s built-in detection, but may cause false positives.</string>
     <string name="translate">Traducir</string>
     <string name="translate_desc">Help translate Widgets Anywhere into your language.</string>
     <string name="error_reconfiguring_widget">Error al reconfigurar el widget</string>
