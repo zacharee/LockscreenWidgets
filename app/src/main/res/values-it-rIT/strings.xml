@@ -175,7 +175,7 @@
     <string name="intro_usage_title">Utilizzo di base</string>
     <string name="intro_usage_desc">Tocca la pagina \"più\" per aggiungere un widget, tieni premuto per riordinare/ridimensionare/rimuovere quelli presenti nella lista, e tocca con due dita in un punto qualsiasi del riquadro per spostarlo/ridimensionarlo o aggiungere un widget. Puoi anche toccare con tre dita per nascondere il riquadro finché non spegnerai e riaccenderai lo schermo.</string>
     <string name="intro_accessibility_title">Accessibilità</string>
-    <string name="intro_accessibility_desc">To be able to display on the lock screen, you\'ll need to activate Widgets Anywhere\' Accessibility Service. This app doesn\'t collect any data from your screen.</string>
+    <string name="intro_accessibility_desc">To be able to display on the lock screen, you\'ll need to activate Widgets Anywhere\'s Accessibility Service. This app doesn\'t collect any data from your screen.</string>
     <string name="intro_notification_listener_title">Accesso alle notifiche</string>
     <string name="intro_notification_listener_desc">Widgets Anywhere can hide the widget frame while there are notifications displayed. To do so, you\'ll need to enable the Notification Listener. You don\'t have to grant this right now.</string>
     <string name="intro_read_storage_title">Lettura memoria esterna</string>
@@ -277,7 +277,7 @@
     <string name="installed">Installed</string>
     <string name="failed_to_add_shortcut">Impossibile aggiungere la scorciatoia.</string>
     <string name="directly_check_for_activity">Verifica diretta Attività</string>
-    <string name="directly_check_for_activity_desc">When enabled, Widgets Anywhere will use Android\'s API to check whether a widget tap is launching an Activity. This can be faster than Widgets Anywhere\' built-in detection, but may cause false positives.</string>
+    <string name="directly_check_for_activity_desc">When enabled, Widgets Anywhere will use Android\'s API to check whether a widget tap is launching an Activity. This can be faster than Widgets Anywhere\'s built-in detection, but may cause false positives.</string>
     <string name="translate">Traduci</string>
     <string name="translate_desc">Help translate Widgets Anywhere into your language.</string>
     <string name="error_reconfiguring_widget">Errore riconfigurazione widget</string>
