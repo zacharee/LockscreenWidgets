@@ -461,4 +461,6 @@
 
     <string name="one_ui_widget_tiles_title">One UI Tile Widgets</string>
     <string name="one_ui_widget_tiles_desc">Display home screen widgets in the expanded view of quick settings tiles in the notification center. Get started by adding a \"Widgets Anywhere\" QS tile.</string>
+
+    <string name="bugsnag_user_id">Bugsnag User ID</string>
 </resources>

@@ -1,12 +1,11 @@
 package tk.zwander.common.compose.components
 
 import androidx.compose.animation.animateContentSize
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
-import androidx.compose.foundation.layout.size
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -31,6 +30,7 @@ fun ClickableCard(
         ) {
             Column(
                 modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(4.dp),
             ) {
                 Text(
                     text = title,
@@ -38,8 +38,6 @@ fun ClickableCard(
                 )
 
                 if (!summary.isNullOrBlank()) {
-                    Spacer(Modifier.size(4.dp))
-
                     Text(
                         text = summary,
                         style = MaterialTheme.typography.bodyMedium,

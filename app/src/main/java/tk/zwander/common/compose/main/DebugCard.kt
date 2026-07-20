@@ -1,22 +1,31 @@
 package tk.zwander.common.compose.main
 
+import android.content.ClipData
 import android.content.Context
 import android.net.Uri
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.ClipEntry
+import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
+import com.bugsnag.android.Bugsnag
+import kotlinx.coroutines.launch
 import tk.zwander.common.compose.components.ClearFrameDataCard
 import tk.zwander.common.compose.components.ClickableCard
 import tk.zwander.common.compose.components.ContentCard
 import tk.zwander.common.compose.components.PreferenceSwitch
+import tk.zwander.common.compose.util.rememberBooleanPreferenceState
 import tk.zwander.common.util.PrefManager
 import tk.zwander.common.util.contracts.rememberCreateDocumentLauncherWithDownloadFallback
 import tk.zwander.common.util.logUtils
@@ -37,7 +46,9 @@ private fun Context.writeLog(uri: Uri?) {
 fun DebugCard(
     modifier: Modifier = Modifier,
 ) {
+    val scope = rememberCoroutineScope()
     val context = LocalContext.current
+    val clipboard = LocalClipboard.current
 
     val debugExportLauncher = rememberCreateDocumentLauncherWithDownloadFallback(
         mimeType = "text/plain",
@@ -104,5 +115,31 @@ fun DebugCard(
             summary = stringResource(id = R.string.debug_enable_bugsnag_desc),
             defaultValue = true,
         )
+
+        val bugsnagEnabled by rememberBooleanPreferenceState(
+            key = PrefManager.KEY_ENABLE_BUGSNAG,
+        )
+
+        AnimatedVisibility(
+            visible = bugsnagEnabled,
+            modifier = Modifier.fillMaxWidth(),
+        ) {
+            ClickableCard(
+                title = stringResource(R.string.bugsnag_user_id),
+                summary = Bugsnag.getUser().id,
+                onClick = {
+                    scope.launch {
+                        clipboard.setClipEntry(
+                            clipEntry = ClipEntry(
+                                clipData = ClipData.newPlainText(
+                                    "user_id",
+                                    Bugsnag.getUser().id,
+                                ),
+                            ),
+                        )
+                    }
+                },
+            )
+        }
     }
 }
