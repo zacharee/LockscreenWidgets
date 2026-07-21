@@ -983,9 +983,9 @@ open class MainWidgetFrameDelegate protected constructor(
 
     private fun scrollToStoredPosition(override: Boolean = false) {
         try {
-            gridLayoutManager.scrollToPosition(if (override || prefManager.rememberFramePosition) prefManager.currentPage else 0)
+            gridLayoutManager.scrollToPosition(if (override || prefManager.rememberFramePosition) framePrefs.currentIndex else 0)
         } catch (e: Throwable) {
-            logUtils.debugLog("Error scrolling to stored position ${prefManager.currentPage}, " +
+            logUtils.debugLog("Error scrolling to stored position ${framePrefs.currentIndex}, " +
                     "override=$override, " +
                     "remember=${prefManager.rememberFramePosition}", e)
         }
@@ -1023,7 +1023,7 @@ open class MainWidgetFrameDelegate protected constructor(
                 ) * columnCount).toInt()
                 rectsHelper.rows[targetRow]?.firstOrNull() ?: firstVisiblePosition
             }.also {
-                prefManager.currentPage = it
+                framePrefs.currentIndex = it
             }.run { if (this == RecyclerView.NO_POSITION) 0 else this }
         }
 
@@ -1071,7 +1071,7 @@ open class MainWidgetFrameDelegate protected constructor(
         override val doubleTapTurnOffDisplayKey: String =
             PrefManager.KEY_DOUBLE_TAP_EMPTY_FRAME_SPACE_TURN_OFF_DISPLAY
 
-        val framePrefs: FrameSpecificPreferences
+        override val framePrefs: FrameSpecificPreferences
             get() = delegate.framePrefs
 
         override val frameId: Int
@@ -1087,6 +1087,7 @@ open class MainWidgetFrameDelegate protected constructor(
             >(delegate: Delegate) : BaseViewModel<State, Delegate>(delegate) {
         abstract val frameId: Int
         abstract val saveMode: FrameSizeAndPosition.FrameType
+        abstract val framePrefs: FrameSpecificPreferences
 
         override val containerCornerRadiusKey: String = PrefManager.KEY_FRAME_CORNER_RADIUS
         override val widgetCornerRadiusKey: String = PrefManager.KEY_FRAME_WIDGET_CORNER_RADIUS

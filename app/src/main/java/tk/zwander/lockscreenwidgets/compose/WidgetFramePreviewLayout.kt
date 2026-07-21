@@ -221,6 +221,12 @@ class PreviewDelegate(
             override val ignoreWidgetTouchesKey: String? = null
             override val doubleTapTurnOffDisplayKey: String? = null
 
+            override val framePrefs: FrameSpecificPreferences =
+                FrameSpecificPreferences(
+                    frameId = this@PreviewDelegate.frameId,
+                    context = this@PreviewDelegate,
+                )
+
             override val frameId: Int
                 get() = this@PreviewDelegate.frameId
             override val saveMode: FrameSizeAndPosition.FrameType

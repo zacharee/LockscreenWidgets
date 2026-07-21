@@ -133,6 +133,12 @@ class FrameSpecificPreferences(
             putBoolean(PrefManager.KEY_FRAME_IGNORE_TOUCHES, value)
         }
 
+    var currentIndex: Int
+        get() = getInt(PrefManager.KEY_CURRENT_PAGE, 0)
+        set(value) {
+            putInt(PrefManager.KEY_CURRENT_PAGE, value)
+        }
+
     private fun getInt(baseKey: String, def: Int): Int {
         return context.prefManager.getInt(keyFor(baseKey), def)
     }

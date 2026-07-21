@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.content.Context
 import dev.zwander.lswinterconnect.safeApplicationContext
 import tk.zwander.common.util.migrations.AddExtraWidgetInfoMigration
+import tk.zwander.common.util.migrations.CurrentFrameIndexMigration
 import tk.zwander.common.util.migrations.FrameDimAmountMigration
 import tk.zwander.common.util.migrations.FrameSizeAndPositionMigration
 import tk.zwander.common.util.migrations.SecondaryFrameToFrameWithDisplayMigration
@@ -36,6 +37,7 @@ class MigrationManager private constructor(private val context: Context) {
         SecondaryFrameToFrameWithDisplayMigration(),
         SecondaryFrameWithDisplayToStringDisplayMigration(),
         WidgetIconMigration(),
+        CurrentFrameIndexMigration(),
     )
 
     fun runMigrations() {

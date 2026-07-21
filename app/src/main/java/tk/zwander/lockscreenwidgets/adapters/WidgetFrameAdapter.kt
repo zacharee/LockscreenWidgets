@@ -37,9 +37,9 @@ open class WidgetFrameAdapter(
     override val rowSpanForAddButton: Int
         get() = rowCount
     override var currentWidgets: Collection<WidgetData>
-        get() = FramePrefs.getWidgetsForFrame(context, viewModel.frameId)
+        get() = viewModel.framePrefs.currentWidgets
         set(value) {
-            FramePrefs.setWidgetsForFrame(context, viewModel.frameId, value)
+            viewModel.framePrefs.currentWidgets = value.toSet()
         }
 
     override fun launchAddActivity() {

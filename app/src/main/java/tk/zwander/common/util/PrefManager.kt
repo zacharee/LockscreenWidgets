@@ -384,6 +384,7 @@ class PrefManager private constructor(private val context: Context) {
 
     //The current page/index of the frame the user is currently on. Stored value may be higher
     //than the last index of the current widgets, so make sure to guard against that.
+    @Deprecated("Use [FrameSpecificPreferences] instead.")
     var currentPage: Int
         get() = getInt(KEY_CURRENT_PAGE, 0)
         set(value) {
@@ -938,6 +939,7 @@ class PrefManager private constructor(private val context: Context) {
     fun putStringSet(key: String, value: Set<String>) = prefs.edit(true) { putStringSet(key, value) }
 
     fun remove(key: String) = prefs.edit(true) { remove(key) }
+    fun contains(key: String) = prefs.contains(key)
 
     fun getResourceFloat(@IntegerRes resource: Int): Float {
         return context.resources.getInteger(resource).toFloat()
