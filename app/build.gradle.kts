@@ -30,7 +30,7 @@ android {
         minSdk = minSdkVersion
         targetSdk = targetSdkVersion
         versionCode = 202
-        versionName = "4.3.0"
+        versionName = "4.3.0-beta01"
 
         manifestPlaceholders["build_uuid"] = UUID.nameUUIDFromBytes("LockscreenWidgets_${versionCode}".toByteArray()).toString()
 
