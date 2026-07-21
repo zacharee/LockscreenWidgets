@@ -5,6 +5,7 @@ import android.appwidget.AppWidgetManager
 import android.appwidget.AppWidgetProviderInfo
 import android.content.ActivityNotFoundException
 import android.content.ComponentName
+import android.content.Context
 import android.content.Intent
 import android.content.pm.LauncherApps
 import android.content.pm.PackageManager
@@ -19,20 +20,18 @@ import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import dev.zwander.lswinterconnect.BugsnagUtils
 import tk.zwander.common.activities.BaseActivity
 import tk.zwander.common.data.WidgetData
 import tk.zwander.common.data.WidgetSizeData
 import tk.zwander.common.host.WidgetHostCompat
 import tk.zwander.common.host.widgetHostCompat
-import dev.zwander.lswinterconnect.BugsnagUtils
 import tk.zwander.common.util.ConfigureLauncher
-import tk.zwander.common.util.FrameSizeAndPosition
 import tk.zwander.common.util.LSDisplay
 import tk.zwander.common.util.appWidgetManager
 import tk.zwander.common.util.componentNameCompat
 import tk.zwander.common.util.createPersistablePreviewBitmap
 import tk.zwander.common.util.density
-import tk.zwander.common.util.frameSizeAndPosition
 import tk.zwander.common.util.getCellHeightCompat
 import tk.zwander.common.util.getCellWidthCompat
 import tk.zwander.common.util.getRemoteDrawable
@@ -43,24 +42,24 @@ import tk.zwander.common.util.shortcutIdManager
 import tk.zwander.common.util.toSafeBitmap
 import tk.zwander.lockscreenwidgets.R
 import tk.zwander.lockscreenwidgets.data.list.ShortcutListInfo
-import tk.zwander.lockscreenwidgets.util.FramePrefs
 
-abstract class BaseBindWidgetActivity : BaseActivity() {
+abstract class BaseBindWidgetActivity : BaseActivity(), IConfigureActivity {
     companion object {
         const val EXTRA_HOLDER_ID = "holder_id"
     }
 
     protected val widgetHost by lazy { widgetHostCompat }
 
-    protected abstract var currentWidgets: MutableSet<WidgetData>
-    protected open val holderId by lazy { intent.getIntExtra(EXTRA_HOLDER_ID, Int.MIN_VALUE) }
+    override val holderId by lazy { intent.getIntExtra(EXTRA_HOLDER_ID, Int.MIN_VALUE) }
+    override val context: Context
+        get() = this
 
     protected open val currentIds: Collection<Int>
         get() = currentWidgets.map { it.id }
     protected open val deleteOnConfigureError: Boolean = true
 
     protected val displayManager by lazy { getSystemService(DISPLAY_SERVICE) as DisplayManager }
-    protected val display: LSDisplay by lazy {
+    override val display: LSDisplay by lazy {
         LSDisplay(
             display = displayManager.getDisplay(Display.DEFAULT_DISPLAY),
             density = Density(this),
@@ -397,21 +396,6 @@ abstract class BaseBindWidgetActivity : BaseActivity() {
     }
 
     protected open fun onItemSuccessfullyAdded(data: WidgetData) {}
-
-    protected open val colCount: Int
-        get() = FramePrefs.getColCountForFrame(this, holderId)
-    protected open val rowCount: Int
-        get() = FramePrefs.getRowCountForFrame(this, holderId)
-    protected open val height: Float
-        get() = frameSizeAndPosition.getSizeForType(
-            FrameSizeAndPosition.FrameType.LockNormal.Portrait,
-            display,
-        ).y
-    protected open val width: Float
-        get() = frameSizeAndPosition.getSizeForType(
-            FrameSizeAndPosition.FrameType.LockNormal.Portrait,
-            display,
-        ).y
 
     protected open fun calculateInitialWidgetColSpan(provider: AppWidgetProviderInfo): Int {
         return provider.getCellWidthCompat(display.dpToPx(width), colCount)

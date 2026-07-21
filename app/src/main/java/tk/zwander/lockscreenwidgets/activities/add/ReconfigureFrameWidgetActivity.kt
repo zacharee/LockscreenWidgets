@@ -3,11 +3,10 @@ package tk.zwander.lockscreenwidgets.activities.add
 import android.appwidget.AppWidgetProviderInfo
 import android.content.Context
 import android.content.Intent
+import tk.zwander.common.activities.add.IFrameConfigureActivity
 import tk.zwander.common.activities.add.ReconfigureWidgetActivity
-import tk.zwander.common.data.WidgetData
-import tk.zwander.lockscreenwidgets.util.FramePrefs
 
-class ReconfigureFrameWidgetActivity : ReconfigureWidgetActivity() {
+class ReconfigureFrameWidgetActivity : ReconfigureWidgetActivity(), IFrameConfigureActivity {
     companion object {
         fun launch(context: Context, id: Int, frameId: Int, providerInfo: AppWidgetProviderInfo) {
             val intent = Intent(context, ReconfigureFrameWidgetActivity::class.java)
@@ -20,10 +19,4 @@ class ReconfigureFrameWidgetActivity : ReconfigureWidgetActivity() {
             context.startActivity(intent)
         }
     }
-
-    override var currentWidgets: MutableSet<WidgetData>
-        get() = FramePrefs.getWidgetsForFrame(this, holderId).toMutableSet()
-        set(value) {
-            FramePrefs.setWidgetsForFrame(this, holderId, value)
-        }
 }

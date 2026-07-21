@@ -18,7 +18,7 @@ abstract class ReconfigureWidgetActivity : BaseBindWidgetActivity() {
         const val EXTRA_PROVIDER_INFO = "provider_info"
     }
 
-    private val prevId by lazy { intent.getIntExtra(EXTRA_PREVIOUS_ID, WidgetHostCompat.INVALID_WIDGET_ID) }
+    protected val prevId by lazy { intent.getIntExtra(EXTRA_PREVIOUS_ID, WidgetHostCompat.INVALID_WIDGET_ID) }
     private val providerInfo by lazy {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             intent.getParcelableExtra(EXTRA_PROVIDER_INFO, AppWidgetProviderInfo::class.java)

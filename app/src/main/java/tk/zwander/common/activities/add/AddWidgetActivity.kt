@@ -34,7 +34,6 @@ abstract class AddWidgetActivity : BaseBindWidgetActivity() {
             display.dpToPx(width),
             display.dpToPx(height),
         )
-    protected abstract val gridSize: IntSize
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

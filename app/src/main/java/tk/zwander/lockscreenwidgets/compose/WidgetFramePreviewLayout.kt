@@ -53,7 +53,6 @@ import tk.zwander.common.util.themedContext
 import tk.zwander.common.views.SnappyRecyclerView
 import tk.zwander.lockscreenwidgets.adapters.WidgetFrameAdapter
 import tk.zwander.lockscreenwidgets.databinding.WidgetGridHolderBinding
-import tk.zwander.lockscreenwidgets.util.FramePrefs
 import tk.zwander.lockscreenwidgets.util.FrameSpecificPreferences
 import tk.zwander.lockscreenwidgets.util.MainWidgetFrameDelegate
 
@@ -202,6 +201,11 @@ class PreviewDelegate(
     context = themedContext,
     targetDisplayId = targetDisplayId,
 ) {
+    private val frameSpecificPrefs = FrameSpecificPreferences(
+        frameId = this@PreviewDelegate.frameId,
+        context = this@PreviewDelegate,
+    )
+
     override val lifecycle: Lifecycle
         get() = lifecycleOwner.lifecycle
 
@@ -221,11 +225,7 @@ class PreviewDelegate(
             override val ignoreWidgetTouchesKey: String? = null
             override val doubleTapTurnOffDisplayKey: String? = null
 
-            override val framePrefs: FrameSpecificPreferences =
-                FrameSpecificPreferences(
-                    frameId = this@PreviewDelegate.frameId,
-                    context = this@PreviewDelegate,
-                )
+            override val framePrefs: FrameSpecificPreferences = frameSpecificPrefs
 
             override val frameId: Int
                 get() = this@PreviewDelegate.frameId
@@ -243,8 +243,8 @@ class PreviewDelegate(
     override val gridLayoutManager: LayoutManager = object : LayoutManager(
         themedContext,
         RecyclerView.HORIZONTAL,
-        FramePrefs.getRowCountForFrame(themedContext, frameId),
-        FramePrefs.getColCountForFrame(themedContext, frameId),
+        frameSpecificPrefs.rowCount,
+        frameSpecificPrefs.colCount,
     ), ISnappyLayoutManager {
         override fun canScrollHorizontally(): Boolean {
             return false
@@ -272,9 +272,9 @@ class PreviewDelegate(
     override val rootView: View = view
     override val recyclerView: SnappyRecyclerView = widgetGridView
     override var currentWidgets: List<WidgetData>
-    get() = FramePrefs.getWidgetsForFrame(this, frameId).toList()
+    get() = frameSpecificPrefs.currentWidgets.toList()
     set(value) {
-        FramePrefs.setWidgetsForFrame(this, frameId, value)
+        frameSpecificPrefs.currentWidgets = value.toSet()
     }
 
     init {
@@ -286,7 +286,7 @@ class PreviewDelegate(
     }
 
     override fun retrieveCounts(): Pair<Int?, Int?> {
-        return FramePrefs.getGridSizeForFrame(this, frameId)
+        return frameSpecificPrefs.gridSize
     }
 
     override suspend fun updateWindow() {}

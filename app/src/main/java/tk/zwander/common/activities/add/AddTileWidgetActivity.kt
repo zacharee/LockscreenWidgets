@@ -26,8 +26,16 @@ class AddTileWidgetActivity : AddWidgetActivity() {
         }
     }
 
-    override val fullSize: IntSize = IntSize(300, 300)
-    override val gridSize: IntSize = IntSize(1, 1)
+    override val fullSize: IntSize = IntSize(width.toInt(), height.toInt())
+
+    override val colCount: Int
+        get() = 1
+    override val rowCount: Int
+        get() = 1
+    override val width: Float
+        get() = 300f
+    override val height: Float
+        get() = 300f
 
     override val showShortcuts: Boolean
         get() = false

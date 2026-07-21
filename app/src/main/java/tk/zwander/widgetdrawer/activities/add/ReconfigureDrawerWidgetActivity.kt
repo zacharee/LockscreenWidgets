@@ -3,6 +3,7 @@ package tk.zwander.widgetdrawer.activities.add
 import android.appwidget.AppWidgetProviderInfo
 import android.content.Context
 import android.content.Intent
+import tk.zwander.common.activities.add.IDrawerConfigureActivity
 import tk.zwander.common.activities.add.ReconfigureWidgetActivity
 import tk.zwander.common.data.WidgetData
 import tk.zwander.common.data.WidgetSizeData
@@ -11,10 +12,9 @@ import tk.zwander.common.util.createPersistablePreviewBitmap
 import tk.zwander.common.util.eventManager
 import tk.zwander.common.util.getCellHeightCompat
 import tk.zwander.common.util.getCellWidthCompat
-import tk.zwander.common.util.prefManager
 import tk.zwander.lockscreenwidgets.R
 
-class ReconfigureDrawerWidgetActivity : ReconfigureWidgetActivity() {
+class ReconfigureDrawerWidgetActivity : ReconfigureWidgetActivity(), IDrawerConfigureActivity {
     companion object {
         fun launch(context: Context, id: Int, providerInfo: AppWidgetProviderInfo) {
             val intent = Intent(context, ReconfigureDrawerWidgetActivity::class.java)
@@ -26,12 +26,6 @@ class ReconfigureDrawerWidgetActivity : ReconfigureWidgetActivity() {
             context.startActivity(intent)
         }
     }
-
-    override var currentWidgets: MutableSet<WidgetData>
-        get() = prefManager.drawerWidgets
-        set(value) {
-            prefManager.drawerWidgets = LinkedHashSet(value)
-        }
 
     override fun onDestroy() {
         super.onDestroy()

@@ -1,43 +1,32 @@
 package tk.zwander.lockscreenwidgets.activities.add
 
-import android.appwidget.AppWidgetManager
 import android.appwidget.AppWidgetProviderInfo
 import android.content.Context
 import android.content.Intent
-import android.os.Bundle
 import tk.zwander.common.activities.add.ReconfigureWidgetActivity
 import tk.zwander.common.data.WidgetData
-import tk.zwander.common.host.WidgetHostCompat
 import tk.zwander.common.util.prefManager
 
 class WidgetStackReconfigureActivity : ReconfigureWidgetActivity() {
-    private val widgetId by lazy {
-        intent.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, WidgetHostCompat.INVALID_WIDGET_ID)
-    }
-
     override val colCount: Int = 1
     override val rowCount: Int = 1
+    override val width: Float = 100f
+    override val height: Float = 100f
 
     override var currentWidgets: MutableSet<WidgetData>
-        get() = prefManager.widgetStackWidgets[widgetId] ?: LinkedHashSet()
+        get() = prefManager.widgetStackWidgets[holderId] ?: LinkedHashSet()
         set(value) {
-            val newWidgets = prefManager.widgetStackWidgets
-            newWidgets[widgetId] = LinkedHashSet(value)
+            val stacks = prefManager.widgetStackWidgets
+            stacks[holderId] = LinkedHashSet(value)
+            prefManager.widgetStackWidgets = stacks
         }
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        if (widgetId == WidgetHostCompat.INVALID_WIDGET_ID) {
-            finish()
-        }
-
-        super.onCreate(savedInstanceState)
-    }
 
     companion object {
-        fun launch(context: Context, widgetId: Int, providerInfo: AppWidgetProviderInfo) {
+        fun launch(context: Context, stackId: Int, widgetId: Int, providerInfo: AppWidgetProviderInfo) {
             val intent = Intent(context, WidgetStackReconfigureActivity::class.java)
             intent.putExtra(EXTRA_PREVIOUS_ID, widgetId)
             intent.putExtra(EXTRA_PROVIDER_INFO, providerInfo)
+            intent.putExtra(EXTRA_HOLDER_ID, stackId)
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
 
             context.startActivity(intent)

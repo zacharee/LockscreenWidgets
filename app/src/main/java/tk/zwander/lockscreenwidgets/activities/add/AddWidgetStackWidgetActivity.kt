@@ -20,6 +20,9 @@ class AddWidgetStackWidgetActivity : AddWidgetActivity() {
     override val gridSize: IntSize = IntSize(1, 1)
     override val colCount: Int = 1
     override val rowCount: Int = 1
+    override val width: Float = 100f
+    override val height: Float = 100f
+
     override var currentWidgets: MutableSet<WidgetData>
         get() = prefManager.widgetStackWidgets[widgetId] ?: LinkedHashSet()
         // Saving happens in the configuration Activity when hitting Apply.

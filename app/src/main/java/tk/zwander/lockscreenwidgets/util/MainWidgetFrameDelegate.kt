@@ -249,9 +249,9 @@ open class MainWidgetFrameDelegate protected constructor(
     override val recyclerView: SnappyRecyclerView
         get() = widgetGrid
     override var currentWidgets: List<WidgetData>
-        get() = FramePrefs.getWidgetsForFrame(this, id).toList()
+        get() = framePrefs.currentWidgets.toList()
         set(value) {
-            FramePrefs.setWidgetsForFrame(this, id, value)
+            framePrefs.currentWidgets = value.toSet()
         }
 
     override val viewModel = WidgetFrameViewModel(this)
@@ -599,7 +599,7 @@ open class MainWidgetFrameDelegate protected constructor(
     }
 
     override fun retrieveCounts(): Pair<Int, Int> {
-        return FramePrefs.getGridSizeForFrame(this, id)
+        return framePrefs.gridSize
     }
 
     override fun widgetRemovalConfirmed(event: Event.RemoveWidgetConfirmed, position: Int) {

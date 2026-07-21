@@ -503,7 +503,7 @@ fun Content(
                                     ) {
                                         IconButton(
                                             onClick = {
-                                                context.openWidgetConfig(widget)
+                                                context.openWidgetConfig(widget, widgetId)
                                             },
                                         ) {
                                             Icon(
@@ -857,7 +857,7 @@ fun Content(
     }
 }
 
-private fun Context.openWidgetConfig(currentData: WidgetData) {
+private fun Context.openWidgetConfig(currentData: WidgetData, stackId: Int) {
     val provider = currentData.widgetProviderComponent
 
     if (provider == null) {
@@ -880,6 +880,7 @@ private fun Context.openWidgetConfig(currentData: WidgetData) {
         } else {
             WidgetStackReconfigureActivity.launch(
                 context = this,
+                stackId = stackId,
                 widgetId = currentData.id,
                 providerInfo = providerInfo,
             )

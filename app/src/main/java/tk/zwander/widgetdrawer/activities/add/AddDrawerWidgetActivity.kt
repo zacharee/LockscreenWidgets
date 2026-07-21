@@ -5,18 +5,18 @@ import android.content.Context
 import android.content.Intent
 import androidx.compose.ui.unit.IntSize
 import tk.zwander.common.activities.add.AddWidgetActivity
+import tk.zwander.common.activities.add.IDrawerConfigureActivity
 import tk.zwander.common.data.WidgetData
 import tk.zwander.common.util.Event
 import tk.zwander.common.util.eventManager
 import tk.zwander.common.util.getCellHeightCompat
 import tk.zwander.common.util.prefManager
 import tk.zwander.lockscreenwidgets.R
-import kotlin.math.roundToInt
 
 /**
  * Manage selecting the widget for the drawer.
  */
-class AddDrawerWidgetActivity : AddWidgetActivity() {
+class AddDrawerWidgetActivity : AddWidgetActivity(), IDrawerConfigureActivity {
     companion object {
         const val EXTRA_FROM_DRAWER = "from_drawer"
 
