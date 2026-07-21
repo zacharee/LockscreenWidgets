@@ -15,7 +15,6 @@ import tk.zwander.common.util.eventManager
 import tk.zwander.common.util.frameSizeAndPosition
 import tk.zwander.common.util.orDefault
 import tk.zwander.lockscreenwidgets.activities.add.ReconfigureFrameWidgetActivity
-import tk.zwander.lockscreenwidgets.util.FramePrefs
 import tk.zwander.lockscreenwidgets.util.MainWidgetFrameDelegate
 
 /**
@@ -29,9 +28,9 @@ open class WidgetFrameAdapter(
     viewModel,
 ) {
     override val colCount: Int
-        get() = FramePrefs.getColCountForFrame(context, viewModel.frameId)
+        get() = viewModel.framePrefs.colCount
     override val rowCount: Int
-        get() = FramePrefs.getRowCountForFrame(context, viewModel.frameId)
+        get() = viewModel.framePrefs.rowCount
     override val minRowSpan: Int
         get() = 1
     override val rowSpanForAddButton: Int

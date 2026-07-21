@@ -995,8 +995,8 @@ open class MainWidgetFrameDelegate protected constructor(
     inner class SpannedLayoutManager : LayoutManager(
         this@MainWidgetFrameDelegate,
         RecyclerView.HORIZONTAL,
-        FramePrefs.getRowCountForFrame(this@MainWidgetFrameDelegate, id),
-        FramePrefs.getColCountForFrame(this@MainWidgetFrameDelegate, id),
+        framePrefs.rowCount,
+        framePrefs.colCount,
     ), ISnappyLayoutManager {
         override fun canScrollHorizontally(): Boolean {
             return (viewModel.currentEditingInterfacePosition.value == RecyclerView.NO_POSITION ||
