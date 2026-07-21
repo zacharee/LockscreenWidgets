@@ -24,8 +24,8 @@ android {
         minSdk = minSdkVersion
         //noinspection ExpiredTargetSdkVersion
         targetSdk = 29
-        versionCode = 2
-        versionName = "1.1"
+        versionCode = 3
+        versionName = "1.2"
 
         manifestPlaceholders["build_uuid"] = UUID.nameUUIDFromBytes("LSWWallpaperCompanion_${versionCode}".toByteArray()).toString()
     }
