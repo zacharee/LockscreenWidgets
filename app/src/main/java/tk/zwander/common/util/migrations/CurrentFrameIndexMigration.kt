@@ -6,6 +6,7 @@ import tk.zwander.common.util.prefManager
 import tk.zwander.lockscreenwidgets.util.FrameSpecificPreferences
 import tk.zwander.lockscreenwidgets.util.MainWidgetFrameDelegate
 
+@Suppress("DEPRECATION")
 class CurrentFrameIndexMigration : Migration {
     override val runOnOrBelowDatabaseVersion: Int = 9
 
