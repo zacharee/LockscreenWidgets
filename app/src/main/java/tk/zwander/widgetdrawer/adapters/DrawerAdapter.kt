@@ -49,7 +49,7 @@ class DrawerAdapter(
     override fun getThresholdPx(which: WidgetResizeListener.Which): Int {
         return context.run {
             if (which == WidgetResizeListener.Which.LEFT || which == WidgetResizeListener.Which.RIGHT) {
-                viewModel.lsDisplay.orDefault(context).rotatedRealSize.x / colCount
+                viewModel.display.orDefault(context).rotatedRealSize.x / colCount
             } else {
                 resources.getDimensionPixelSize(R.dimen.drawer_row_height)
             }

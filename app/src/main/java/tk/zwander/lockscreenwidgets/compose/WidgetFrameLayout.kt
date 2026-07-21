@@ -110,12 +110,12 @@ fun MainWidgetFrameDelegate.WidgetFrameViewModel.WidgetFrameLayout(
     var maskAdjustment by rememberPreferenceState(
         key = PrefManager.KEY_MASKED_MODE_ADJUSTMENT_FOR_DISPLAY,
         value = {
-            lsDisplay?.uniqueIdCompat?.let {
+            display?.uniqueIdCompat?.let {
                 context.prefManager.maskedModeAdjustment[it]
             } ?: Offset(0f, 0f)
         },
         onChanged = { _, value ->
-            lsDisplay?.uniqueIdCompat?.let {
+            display?.uniqueIdCompat?.let {
                 val mutatedValue = HashMap(context.prefManager.maskedModeAdjustment.toMutableMap())
                 mutatedValue[it] = value
                 context.prefManager.maskedModeAdjustment = mutatedValue
@@ -125,11 +125,11 @@ fun MainWidgetFrameDelegate.WidgetFrameViewModel.WidgetFrameLayout(
     var maskScale by rememberPreferenceState(
         key = PrefManager.KEY_MASKED_MODE_SCALE_FOR_DISPLAY,
         value = {
-            context.prefManager.maskedModeScaleForDisplay[lsDisplay?.uniqueIdCompat] ?: 1.0f
+            context.prefManager.maskedModeScaleForDisplay[display?.uniqueIdCompat] ?: 1.0f
         },
         onChanged = { _, value ->
             val mutatedValue = HashMap(context.prefManager.maskedModeScaleForDisplay.toMutableMap())
-            mutatedValue[lsDisplay?.uniqueIdCompat] = value
+            mutatedValue[display?.uniqueIdCompat] = value
             context.prefManager.maskedModeScaleForDisplay = mutatedValue
         },
     )
@@ -163,7 +163,7 @@ fun MainWidgetFrameDelegate.WidgetFrameViewModel.WidgetFrameLayout(
                                 if (firstViewing) {
                                     acknowledgedThreeFingerTap = true
                                 } else {
-                                    context.eventManager.sendEvent(Event.TempHide(frameId = frameId))
+                                    context.eventManager.sendEvent(Event.TempHide(frameId = holderId))
                                 }
                             }
 
@@ -192,11 +192,11 @@ fun MainWidgetFrameDelegate.WidgetFrameViewModel.WidgetFrameLayout(
             .motionEventSpy { event ->
                 when (event.action) {
                     MotionEvent.ACTION_DOWN -> {
-                        context.eventManager.sendEvent(Event.FrameIntercept(frameId, true))
+                        context.eventManager.sendEvent(Event.FrameIntercept(holderId, true))
                     }
 
                     MotionEvent.ACTION_UP -> {
-                        context.eventManager.sendEvent(Event.FrameIntercept(frameId, false))
+                        context.eventManager.sendEvent(Event.FrameIntercept(holderId, false))
                     }
                 }
             },
@@ -345,7 +345,7 @@ fun MainWidgetFrameDelegate.WidgetFrameViewModel.WidgetFrameLayout(
                     MeasuredComposable(name = "IDList") {
                         IDListLayout(
                             modifier = Modifier.fillMaxSize(),
-                            displayId = lsDisplay?.displayId,
+                            displayId = this@WidgetFrameLayout.display?.displayId,
                         )
                     }
                 }
@@ -362,7 +362,7 @@ fun MainWidgetFrameDelegate.WidgetFrameViewModel.WidgetFrameLayout(
                     contentAlignment = Alignment.Center,
                 ) {
                     FrameEditWrapperLayout(
-                        frameId = frameId,
+                        frameId = holderId,
                         onRemovePressed = {
                             removing = true
                         },
@@ -381,7 +381,7 @@ fun MainWidgetFrameDelegate.WidgetFrameViewModel.WidgetFrameLayout(
                     contentAlignment = Alignment.Center,
                 ) {
                     ConfirmFrameRemovalLayout(
-                        itemToRemove = frameId,
+                        itemToRemove = holderId,
                         onItemRemovalConfirmed = { removed, data ->
                             context.eventManager.sendEvent(
                                 Event.RemoveFrameConfirmed(

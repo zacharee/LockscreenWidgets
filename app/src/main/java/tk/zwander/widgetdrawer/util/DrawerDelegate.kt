@@ -32,7 +32,7 @@ import tk.zwander.common.activities.DismissOrUnlockActivity
 import tk.zwander.common.compose.components.DrawerHandle
 import tk.zwander.common.compose.util.createComposeViewHolder
 import tk.zwander.common.compose.util.findAccessibility
-import tk.zwander.common.data.WidgetData
+import tk.zwander.common.data.provider.IDrawerProvider
 import tk.zwander.common.util.BaseDelegate
 import tk.zwander.common.util.DrawerOrFrame
 import tk.zwander.common.util.Event
@@ -47,7 +47,6 @@ import tk.zwander.common.util.hideNavBarsForGestureExclusion
 import tk.zwander.common.util.logUtils
 import tk.zwander.common.util.lsDisplayManager
 import tk.zwander.common.util.mainHandler
-import tk.zwander.common.util.orDefault
 import tk.zwander.common.util.prefManager
 import tk.zwander.common.util.remove
 import tk.zwander.common.util.safeAddView
@@ -65,7 +64,7 @@ import kotlin.math.absoluteValue
 import kotlin.math.sign
 
 class DrawerDelegate private constructor(context: Context, displayId: String) :
-    BaseDelegate<DrawerDelegate.State>(context = context, targetDisplayId = displayId) {
+    BaseDelegate<DrawerDelegate.State>(context = context, targetDisplayId = displayId), IDrawerProvider {
     companion object {
         const val ID = -2
 
@@ -105,6 +104,9 @@ class DrawerDelegate private constructor(context: Context, displayId: String) :
         }
     }
 
+    override val holderId: Int
+        get() = ID
+
     override var state = State()
         set(value) {
             field = value
@@ -119,7 +121,7 @@ class DrawerDelegate private constructor(context: Context, displayId: String) :
             flags = WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN or
                     WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS
 
-            display?.rotatedRealSize?.let { displaySize ->
+            this@DrawerDelegate.display?.rotatedRealSize?.let { displaySize ->
                 width = displaySize.x
                 height = displaySize.y
             }
@@ -132,18 +134,13 @@ class DrawerDelegate private constructor(context: Context, displayId: String) :
         get() = drawer
     override val recyclerView: DrawerRecycler
         get() = widgetGrid
-    override var currentWidgets: Set<WidgetData>
-        get() = prefManager.drawerWidgets
-        set(value) {
-            prefManager.drawerWidgets = LinkedHashSet(value)
-        }
 
     private val handleParams by lazy {
         WindowManager.LayoutParams().apply {
             type = WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY
             flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
 
-            display?.let { display ->
+            this@DrawerDelegate.display?.let { display ->
                 width = display.dpToPx(context.prefManager.drawerHandleWidth)
                 height = display.dpToPx(context.prefManager.drawerHandleHeight)
             }
@@ -346,7 +343,7 @@ class DrawerDelegate private constructor(context: Context, displayId: String) :
                     event.from == Gravity.LEFT -> viewModel.latestScrollInVelocity.value > 0
                     else -> viewModel.latestScrollInVelocity.value < 0
                 }
-                val metThreshold = display?.let { display ->
+                val metThreshold = this@DrawerDelegate.display?.let { display ->
                     distanceFromEdge > display.dpToPx(100f) && velocityMatches
                 } ?: false
 
@@ -422,7 +419,7 @@ class DrawerDelegate private constructor(context: Context, displayId: String) :
 
         viewModel.viewModelScope.launch(Dispatchers.Main) {
             lsDisplayManager.displayPowerStates
-                .map { it.displayStates[display?.uniqueIdCompat] == true }
+                .map { it.displayStates[this@DrawerDelegate.display?.uniqueIdCompat] == true }
                 .collect { isScreenOn ->
                     if (isScreenOn) {
                         tryShowHandle()
@@ -459,9 +456,9 @@ class DrawerDelegate private constructor(context: Context, displayId: String) :
     }
 
     private suspend fun tryShowHandle() {
-        logUtils.debugLog("Trying to show handle on display ${display?.uniqueIdCompat}", null)
+        logUtils.debugLog("Trying to show handle on display ${this@DrawerDelegate.display?.uniqueIdCompat}", null)
         if (prefManager.drawerEnabled && prefManager.showDrawerHandle &&
-            lsDisplayManager.displayPowerStates.value.displayStates[display?.uniqueIdCompat] == true) {
+            lsDisplayManager.displayPowerStates.value.displayStates[this@DrawerDelegate.display?.uniqueIdCompat] == true) {
             if (prefManager.showDrawerHandleOnlyWhenLocked && !globalState.wasOnKeyguard.value) {
                 return
             }
@@ -509,7 +506,7 @@ class DrawerDelegate private constructor(context: Context, displayId: String) :
         withContext(Dispatchers.Main) {
             logUtils.debugLog("Updating drawer window", null)
             params.apply {
-                display?.rotatedRealSize?.let { displaySize ->
+                this@DrawerDelegate.display?.rotatedRealSize?.let { displaySize ->
                     width = displaySize.x
                     height = displaySize.y
                 }
@@ -538,10 +535,6 @@ class DrawerDelegate private constructor(context: Context, displayId: String) :
         }
     }
 
-    override fun retrieveCounts(): Pair<Int?, Int?> {
-        return null to prefManager.drawerColCount
-    }
-
     inner class SpannedLayoutManager : LayoutManager(
         this@DrawerDelegate,
         RecyclerView.VERTICAL,
@@ -567,12 +560,6 @@ class DrawerDelegate private constructor(context: Context, displayId: String) :
         override val widgetCornerRadiusKey: String = PrefManager.KEY_DRAWER_WIDGET_CORNER_RADIUS
         override val ignoreWidgetTouchesKey: String? = null
         override val doubleTapTurnOffDisplayKey: String = PrefManager.KEY_DOUBLE_TAP_EMPTY_DRAWER_SPACE_TURN_OFF_DISPLAY
-
-        override val colCount: Int
-            get() = delegate.prefManager.drawerColCount
-        override val rowCount: Int
-            get() = (lsDisplay.orDefault(delegate).rotatedRealSize.y /
-                    delegate.resources.getDimensionPixelSize(R.dimen.drawer_row_height)) - 5
     }
 }
 

@@ -33,6 +33,8 @@ import kotlinx.coroutines.withContext
 import tk.zwander.common.adapters.BaseAdapter
 import tk.zwander.common.data.WidgetData
 import tk.zwander.common.data.WidgetType
+import tk.zwander.common.data.provider.ICurrentWidgetsProvider
+import tk.zwander.common.data.provider.IRowColumProvider
 import tk.zwander.common.host.WidgetHostCompat
 import tk.zwander.common.host.widgetHostCompat
 import tk.zwander.common.util.mitigations.SafeContextWrapper
@@ -44,13 +46,17 @@ abstract class BaseDelegate<State : Any>(
     context: Context,
     open val targetDisplayId: String,
 ) : SafeContextWrapper(context = context),
-    EventObserver, WidgetHostCompat.OnClickCallback, SavedStateRegistryOwner {
+    EventObserver, WidgetHostCompat.OnClickCallback, SavedStateRegistryOwner,
+    ICurrentWidgetsProvider, IRowColumProvider {
     protected val kgm by lazy { keyguardManager }
     protected val widgetHost by lazy { widgetHostCompat }
     protected val wm: WindowManager?
-        get() = lsDisplayManager.displayAndWmCache.value[display?.uniqueIdCompat]?.windowManager
-    val display: LSDisplay?
+        get() = lsDisplayManager.displayAndWmCache.value[this@BaseDelegate.display?.uniqueIdCompat]?.windowManager
+    override val display: LSDisplay?
         get() = displayFlow.value
+
+    override val context: Context
+        get() = this
 
     protected val displayFlow: StateFlow<LSDisplay?> by lazy {
         lsDisplayManager.collectDisplay(targetDisplayId).stateIn(
@@ -61,7 +67,7 @@ abstract class BaseDelegate<State : Any>(
     }
 
     val screenOrientation: Int?
-        get() = display?.screenOrientation
+        get() = this@BaseDelegate.display?.screenOrientation
 
     open var commonState: BaseState = BaseState()
         protected set
@@ -77,7 +83,6 @@ abstract class BaseDelegate<State : Any>(
     protected abstract val params: WindowManager.LayoutParams
     protected abstract val rootView: View
     protected abstract val recyclerView: ScrollingItemTouchRecyclerView
-    abstract var currentWidgets: Set<WidgetData>
 
     protected val lifecycleRegistry by lazy { LifecycleRegistry(this) }
     protected val savedStateRegistryController by lazy { SavedStateRegistryController.create(this) }
@@ -307,11 +312,11 @@ abstract class BaseDelegate<State : Any>(
      * Make sure the number of rows/columns in the frame/drawer reflects the user-selected value.
      */
     protected fun updateCounts() {
-        val counts = retrieveCounts()
+        val counts = gridSize
 
         gridLayoutManager.apply {
-            counts.first?.let { rowCount = it }
-            counts.second?.let { columnCount = it }
+            counts.width.let { columnCount = it }
+            counts.height.let { rowCount = it }
         }
     }
 
@@ -339,7 +344,6 @@ abstract class BaseDelegate<State : Any>(
     }
 
     protected abstract fun isLocked(): Boolean
-    protected abstract fun retrieveCounts(): Pair<Int?, Int?>
 
     protected open fun widgetRemovalConfirmed(event: Event.RemoveWidgetConfirmed, position: Int) {}
 
@@ -402,7 +406,7 @@ abstract class BaseDelegate<State : Any>(
     @SuppressLint("StaticFieldLeak")
     abstract class BaseViewModel<State : Any, Delegate : BaseDelegate<State>>(
         protected val delegate: Delegate,
-    ) : ViewModel() {
+    ) : ViewModel(), IRowColumProvider, ICurrentWidgetsProvider {
         val itemToRemove = MutableStateFlow<WidgetData?>(null)
         val isResizingItem = MutableStateFlow(false)
         val currentEditingInterfacePosition = MutableStateFlow(RecyclerView.NO_POSITION)
@@ -416,20 +420,28 @@ abstract class BaseDelegate<State : Any>(
         val state: State
             get() = delegate.state
 
+        override val holderId: Int
+            get() = delegate.holderId
+
         val isLocked: Boolean
             get() = delegate.isLocked()
 
-        val lsDisplay: LSDisplay?
+        override val display: LSDisplay?
             get() = delegate.display
 
-        var currentWidgets: Set<WidgetData>
+        override val context: Context
+            get() = delegate
+
+        override val rowCount: Int
+            get() = delegate.rowCount
+        override val colCount: Int
+            get() = delegate.colCount
+
+        override var currentWidgets: Set<WidgetData>
             get() = delegate.currentWidgets
             set(value) {
                 delegate.currentWidgets = value
             }
-
-        abstract val colCount: Int
-        abstract val rowCount: Int
 
         abstract val widgetCornerRadiusKey: String
         abstract val containerCornerRadiusKey: String?

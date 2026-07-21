@@ -190,11 +190,11 @@ class LSDisplay(
     val display: Display,
     val density: Density,
 ) {
-    val displayId: Int = display.displayId
+    val displayId: Int = this@LSDisplay.display.displayId
 
     val realSize: Point by lazy {
         val size = rotatedRealSize
-        val currentRotation = display.rotation
+        val currentRotation = this@LSDisplay.display.rotation
 
         if (currentRotation == Surface.ROTATION_270 || currentRotation == Surface.ROTATION_90) {
             Point(size.y, size.x)
@@ -206,24 +206,24 @@ class LSDisplay(
     val rotatedRealSize: Point
         get() = Point().apply {
             @Suppress("DEPRECATION")
-            display.getRealSize(this)
+            this@LSDisplay.display.getRealSize(this)
         }
 
     val screenOrientation: Int
-        get() = display.rotation
+        get() = this@LSDisplay.display.rotation
 
     val uniqueIdCompat: String
         get() = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            display.uniqueId ?: display.displayId.toString()
+            this@LSDisplay.display.uniqueId ?: this@LSDisplay.display.displayId.toString()
         } else {
-            display.displayId.toString()
+            this@LSDisplay.display.displayId.toString()
         }
 
     val loggingId: String
         get() = "$uniqueIdCompat,$displayId"
 
     val isOn: Boolean
-        get() = display.state == Display.STATE_ON
+        get() = this@LSDisplay.display.state == Display.STATE_ON
 
     fun dpToPx(dpValue: Number): Int {
         return with (density) {

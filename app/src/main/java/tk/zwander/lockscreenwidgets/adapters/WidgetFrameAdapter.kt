@@ -33,11 +33,11 @@ open class WidgetFrameAdapter(
         get() = rowCount
 
     override fun launchAddActivity() {
-        context.eventManager.sendEvent(Event.LaunchAddWidget(viewModel.frameId))
+        context.eventManager.sendEvent(Event.LaunchAddWidget(holderId))
     }
 
     override fun launchReconfigure(id: Int, providerInfo: AppWidgetProviderInfo) {
-        ReconfigureFrameWidgetActivity.launch(context, id, viewModel.frameId, providerInfo)
+        ReconfigureFrameWidgetActivity.launch(context, id, holderId, providerInfo)
     }
 
     override fun View.onWidgetResize(
@@ -58,7 +58,7 @@ open class WidgetFrameAdapter(
 
     override fun getThresholdPx(which: WidgetResizeListener.Which): Int {
         return context.run {
-            val display = viewModel.lsDisplay.orDefault(this)
+            val display = viewModel.display.orDefault(this)
             val frameSize = frameSizeAndPosition.getSizeForType(viewModel.saveMode, display)
             if (which == WidgetResizeListener.Which.LEFT || which == WidgetResizeListener.Which.RIGHT) {
                 display.dpToPx(frameSize.x.toInt()) / colCount
@@ -78,7 +78,7 @@ open class WidgetFrameAdapter(
 
             when (event) {
                 is Event.FrameMoveFinished -> {
-                    if (event.frameId == viewModel.frameId) {
+                    if (event.frameId == holderId) {
                         val pos = bindingAdapterPosition
 
                         if (pos != RecyclerView.NO_POSITION && pos < widgets.size) {

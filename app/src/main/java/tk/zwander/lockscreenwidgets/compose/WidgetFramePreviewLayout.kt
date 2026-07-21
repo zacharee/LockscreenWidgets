@@ -37,7 +37,7 @@ import androidx.savedstate.SavedStateRegistry
 import androidx.savedstate.SavedStateRegistryOwner
 import androidx.savedstate.compose.LocalSavedStateRegistryOwner
 import tk.zwander.common.compose.util.rememberPreferenceState
-import tk.zwander.common.data.WidgetData
+import tk.zwander.common.data.provider.IFrameProvider
 import tk.zwander.common.host.widgetHostCompat
 import tk.zwander.common.util.BaseDelegate
 import tk.zwander.common.util.BaseDelegate.BaseState
@@ -200,11 +200,9 @@ class PreviewDelegate(
 ) : BaseDelegate<BaseState>(
     context = themedContext,
     targetDisplayId = targetDisplayId,
-) {
-    private val frameSpecificPrefs = FrameSpecificPreferences(
-        frameId = this@PreviewDelegate.frameId,
-        context = this@PreviewDelegate,
-    )
+), IFrameProvider {
+    override val holderId: Int
+        get() = frameId
 
     override val lifecycle: Lifecycle
         get() = lifecycleOwner.lifecycle
@@ -213,25 +211,7 @@ class PreviewDelegate(
         get() = savedStateRegistryOwner.savedStateRegistry
 
     override val viewModel
-        get() = @SuppressLint("StaticFieldLeak")
-        object : MainWidgetFrameDelegate.IWidgetFrameViewModel<
-                BaseState,
-                BaseDelegate<BaseState>,
-                >(this) {
-            override val containerCornerRadiusKey: String =
-                PrefManager.KEY_FRAME_CORNER_RADIUS
-            override val widgetCornerRadiusKey: String =
-                PrefManager.KEY_FRAME_WIDGET_CORNER_RADIUS
-            override val ignoreWidgetTouchesKey: String? = null
-            override val doubleTapTurnOffDisplayKey: String? = null
-
-            override val framePrefs: FrameSpecificPreferences = frameSpecificPrefs
-
-            override val frameId: Int
-                get() = this@PreviewDelegate.frameId
-            override val saveMode: FrameSizeAndPosition.FrameType
-                get() = FrameSizeAndPosition.FrameType.SecondaryLockscreen.Portrait(frameId)
-        }
+        get() = PreviewViewModel()
     val widgetGridAdapter = WidgetFrameAdapter(
         context = themedContext,
         viewModel = viewModel,
@@ -243,8 +223,8 @@ class PreviewDelegate(
     override val gridLayoutManager: LayoutManager = object : LayoutManager(
         themedContext,
         RecyclerView.HORIZONTAL,
-        frameSpecificPrefs.rowCount,
-        frameSpecificPrefs.colCount,
+        framePrefs.rowCount,
+        framePrefs.colCount,
     ), ISnappyLayoutManager {
         override fun canScrollHorizontally(): Boolean {
             return false
@@ -271,11 +251,6 @@ class PreviewDelegate(
     override val params: WindowManager.LayoutParams = WindowManager.LayoutParams()
     override val rootView: View = view
     override val recyclerView: SnappyRecyclerView = widgetGridView
-    override var currentWidgets: Set<WidgetData>
-    get() = frameSpecificPrefs.currentWidgets
-    set(value) {
-        frameSpecificPrefs.currentWidgets = value
-    }
 
     init {
         gridLayoutManager.spanSizeLookup = adapter.spanSizeLookup
@@ -285,13 +260,25 @@ class PreviewDelegate(
         return false
     }
 
-    override fun retrieveCounts(): Pair<Int?, Int?> {
-        return frameSpecificPrefs.gridSize
-    }
-
     override suspend fun updateWindow() {}
 
     override fun onWidgetClick(trigger: Boolean): Boolean {
         return false
+    }
+
+    @SuppressLint("StaticFieldLeak")
+    inner class PreviewViewModel : MainWidgetFrameDelegate.IWidgetFrameViewModel<
+            BaseState,
+            BaseDelegate<BaseState>,
+            >(this) {
+        override val containerCornerRadiusKey: String =
+            PrefManager.KEY_FRAME_CORNER_RADIUS
+        override val widgetCornerRadiusKey: String =
+            PrefManager.KEY_FRAME_WIDGET_CORNER_RADIUS
+        override val ignoreWidgetTouchesKey: String? = null
+        override val doubleTapTurnOffDisplayKey: String? = null
+
+        override val saveMode: FrameSizeAndPosition.FrameType
+            get() = FrameSizeAndPosition.FrameType.SecondaryLockscreen.Portrait(frameId)
     }
 }

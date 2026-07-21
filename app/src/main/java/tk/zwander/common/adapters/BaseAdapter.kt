@@ -69,12 +69,14 @@ import tk.zwander.common.compose.util.rememberPreferenceState
 import tk.zwander.common.compose.util.widgetViewCacheRegistry
 import tk.zwander.common.data.WidgetData
 import tk.zwander.common.data.WidgetType
+import tk.zwander.common.data.provider.IRowColumProvider
 import tk.zwander.common.host.widgetHostCompat
 import tk.zwander.common.listeners.WidgetResizeListener
 import tk.zwander.common.util.BaseDelegate
 import tk.zwander.common.util.BrokenAppsRegistry
 import tk.zwander.common.util.Event
 import tk.zwander.common.util.EventObserver
+import tk.zwander.common.util.LSDisplay
 import tk.zwander.common.util.UserHandleCompat
 import tk.zwander.common.util.andRemoveFromParent
 import tk.zwander.common.util.appWidgetManager
@@ -95,9 +97,9 @@ import kotlin.math.min
 
 @Suppress("LeakingThis")
 abstract class BaseAdapter<VM : BaseDelegate.BaseViewModel<*, *>>(
-    protected val context: Context,
+    override val context: Context,
     protected val viewModel: VM,
-) : RecyclerView.Adapter<BaseAdapter.BaseVH>() {
+) : RecyclerView.Adapter<BaseAdapter.BaseVH>(), IRowColumProvider {
     companion object {
         const val VIEW_TYPE_WIDGET = 0
         const val VIEW_TYPE_ADD = 1
@@ -114,13 +116,20 @@ abstract class BaseAdapter<VM : BaseDelegate.BaseViewModel<*, *>>(
 
     private val baseLayoutInflater = context.themedLayoutInflater
 
-    protected val colCount: Int
+    override val colCount: Int
         get() = viewModel.colCount
-    protected val rowCount: Int
+    override val rowCount: Int
         get() = viewModel.rowCount
+
+    override val holderId: Int
+        get() = viewModel.holderId
+
     protected open val minColSpan: Int = 1
     protected abstract val minRowSpan: Int
     protected abstract val rowSpanForAddButton: Int
+
+    override val display: LSDisplay?
+        get() = viewModel.display
 
     init {
         setHasStableIds(true)
@@ -419,7 +428,7 @@ abstract class BaseAdapter<VM : BaseDelegate.BaseViewModel<*, *>>(
                                     list.isNestedScrollingEnabled = true
                                 }
 
-                                viewModel.lsDisplay?.let { display ->
+                                viewModel.display?.let { display ->
                                     val width = display.pxToDp(itemView.width)
                                     val height = display.pxToDp(itemView.height)
 
