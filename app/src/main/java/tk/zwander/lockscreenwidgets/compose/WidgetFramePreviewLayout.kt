@@ -153,7 +153,7 @@ fun WidgetFramePreviewLayout(
                     update = {
                         it.layoutManager = dummyDelegate?.gridLayoutManager
                         it.adapter = dummyDelegate?.widgetGridAdapter
-                        dummyDelegate?.widgetGridAdapter?.updateWidgets(dummyDelegate?.currentWidgets ?: listOf())
+                        dummyDelegate?.widgetGridAdapter?.updateWidgets(dummyDelegate?.currentWidgets ?: setOf())
 
                         it.scaleX = scale
                         it.scaleY = scale
@@ -271,10 +271,10 @@ class PreviewDelegate(
     override val params: WindowManager.LayoutParams = WindowManager.LayoutParams()
     override val rootView: View = view
     override val recyclerView: SnappyRecyclerView = widgetGridView
-    override var currentWidgets: List<WidgetData>
-    get() = frameSpecificPrefs.currentWidgets.toList()
+    override var currentWidgets: Set<WidgetData>
+    get() = frameSpecificPrefs.currentWidgets
     set(value) {
-        frameSpecificPrefs.currentWidgets = value.toSet()
+        frameSpecificPrefs.currentWidgets = value
     }
 
     init {

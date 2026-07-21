@@ -40,7 +40,7 @@ class AddTileWidgetActivity : AddWidgetActivity() {
     override val showShortcuts: Boolean
         get() = false
 
-    override var currentWidgets: MutableSet<WidgetData>
+    override var currentWidgets: Set<WidgetData>
         get() = mutableSetOf()
         set(_) {}
 

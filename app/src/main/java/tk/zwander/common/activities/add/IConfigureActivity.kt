@@ -23,7 +23,7 @@ sealed interface IConfigureActivity {
     val gridSize: IntSize
         get() = IntSize(colCount, rowCount)
 
-    var currentWidgets: MutableSet<WidgetData>
+    var currentWidgets: Set<WidgetData>
 }
 
 interface IFrameConfigureActivity : IConfigureActivity {
@@ -46,7 +46,7 @@ interface IFrameConfigureActivity : IConfigureActivity {
             display,
         ).y
 
-    override var currentWidgets: MutableSet<WidgetData>
+    override var currentWidgets: Set<WidgetData>
         get() = framePrefs.currentWidgets.toMutableSet()
         set(value) {
             framePrefs.currentWidgets = value
@@ -70,7 +70,7 @@ interface IDrawerConfigureActivity : IConfigureActivity {
             display.rotatedRealSize.y / context.resources.getDimensionPixelSize(R.dimen.drawer_row_height) - 10,
         )
 
-    override var currentWidgets: MutableSet<WidgetData>
+    override var currentWidgets: Set<WidgetData>
         get() = context.prefManager.drawerWidgets
         set(value) {
             context.prefManager.drawerWidgets = LinkedHashSet(value)

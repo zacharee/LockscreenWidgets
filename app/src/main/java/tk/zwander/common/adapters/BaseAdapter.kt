@@ -114,12 +114,13 @@ abstract class BaseAdapter<VM : BaseDelegate.BaseViewModel<*, *>>(
 
     private val baseLayoutInflater = context.themedLayoutInflater
 
-    protected abstract val colCount: Int
-    protected abstract val rowCount: Int
+    protected val colCount: Int
+        get() = viewModel.colCount
+    protected val rowCount: Int
+        get() = viewModel.rowCount
     protected open val minColSpan: Int = 1
     protected abstract val minRowSpan: Int
     protected abstract val rowSpanForAddButton: Int
-    protected abstract var currentWidgets: Collection<WidgetData>
 
     init {
         setHasStableIds(true)
@@ -132,8 +133,8 @@ abstract class BaseAdapter<VM : BaseDelegate.BaseViewModel<*, *>>(
      * Otherwise, calculate the difference and notify
      * accordingly.
      */
-    fun updateWidgets(newWidgets: List<WidgetData>) {
-        val uniqueNewWidgets = newWidgets.distinctBy { it.id }
+    fun updateWidgets(newWidgets: Set<WidgetData>) {
+        val uniqueNewWidgets = newWidgets.toList()
 
         if (!didResize) {
             if (widgets.isEmpty()) {
@@ -477,7 +478,7 @@ abstract class BaseAdapter<VM : BaseDelegate.BaseViewModel<*, *>>(
                                 ),
                                 Toast.LENGTH_LONG,
                             ).show()
-                            currentWidgets = currentWidgets.toMutableList().apply {
+                            viewModel.currentWidgets = viewModel.currentWidgets.toMutableSet().apply {
                                 remove(data)
                                 host.deleteAppWidgetId(data.id)
                             }
@@ -490,7 +491,7 @@ abstract class BaseAdapter<VM : BaseDelegate.BaseViewModel<*, *>>(
                         "Broken app widget detected: ${widgetInfo.provider}. Removing from adapter list.",
                         null,
                     )
-                    currentWidgets = currentWidgets.toMutableList().apply {
+                    viewModel.currentWidgets = viewModel.currentWidgets.toMutableSet().apply {
                         remove(data)
                         host.deleteAppWidgetId(data.id)
                     }
@@ -611,9 +612,9 @@ abstract class BaseAdapter<VM : BaseDelegate.BaseViewModel<*, *>>(
             onResize(newData, amount, step)
             didResize = true
             bindingAdapterPosition.takeIf { it != RecyclerView.NO_POSITION }?.let { pos ->
-                currentWidgets = widgets.apply {
+                viewModel.currentWidgets = widgets.apply {
                     this[pos] = newData
-                }
+                }.toMutableSet()
             }
         }
 

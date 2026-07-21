@@ -77,7 +77,7 @@ abstract class BaseDelegate<State : Any>(
     protected abstract val params: WindowManager.LayoutParams
     protected abstract val rootView: View
     protected abstract val recyclerView: ScrollingItemTouchRecyclerView
-    abstract var currentWidgets: List<WidgetData>
+    abstract var currentWidgets: Set<WidgetData>
 
     protected val lifecycleRegistry by lazy { LifecycleRegistry(this) }
     protected val savedStateRegistryController by lazy { SavedStateRegistryController.create(this) }
@@ -221,7 +221,7 @@ abstract class BaseDelegate<State : Any>(
         rootView.removeOnAttachStateChangeListener(rootViewAttachmentStateListener)
         recomposer.cancel()
 
-        currentWidgets = ArrayList(adapter.widgets)
+        currentWidgets = adapter.widgets.toMutableSet()
         if (lifecycle.currentState > Lifecycle.State.INITIALIZED) {
             lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_DESTROY)
         }
@@ -241,7 +241,7 @@ abstract class BaseDelegate<State : Any>(
                 if (event.remove && currentWidgets.contains(event.item)) {
                     updateCommonState { it.copy(updatedForMoveOrRemove = true) }
 
-                    val newWidgets = currentWidgets.toMutableList().apply {
+                    val newWidgets = currentWidgets.toMutableSet().apply {
                         remove(event.item)
                         when (event.item?.safeType) {
                             WidgetType.WIDGET -> widgetHost.deleteAppWidgetId(event.item.id)
@@ -298,7 +298,7 @@ abstract class BaseDelegate<State : Any>(
     protected open fun onWidgetMoved(moved: Boolean) {
         if (moved) {
             updateCommonState { it.copy(updatedForMoveOrRemove = true) }
-            currentWidgets = adapter.widgets
+            currentWidgets = adapter.widgets.toMutableSet()
             viewModel.currentEditingInterfacePosition.value = RecyclerView.NO_POSITION
         }
     }
@@ -421,6 +421,15 @@ abstract class BaseDelegate<State : Any>(
 
         val lsDisplay: LSDisplay?
             get() = delegate.display
+
+        var currentWidgets: Set<WidgetData>
+            get() = delegate.currentWidgets
+            set(value) {
+                delegate.currentWidgets = value
+            }
+
+        abstract val colCount: Int
+        abstract val rowCount: Int
 
         abstract val widgetCornerRadiusKey: String
         abstract val containerCornerRadiusKey: String?

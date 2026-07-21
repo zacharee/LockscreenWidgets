@@ -44,7 +44,7 @@ class AddDrawerWidgetActivity : AddWidgetActivity(), IDrawerConfigureActivity {
     override val height: Float
         get() = display.pxToDp(display.rotatedRealSize.y)
 
-    override var currentWidgets: MutableSet<WidgetData>
+    override var currentWidgets: Set<WidgetData>
         get() = prefManager.drawerWidgets
         set(value) {
             prefManager.drawerWidgets = LinkedHashSet(value)

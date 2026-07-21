@@ -27,19 +27,10 @@ open class WidgetFrameAdapter(
     context,
     viewModel,
 ) {
-    override val colCount: Int
-        get() = viewModel.framePrefs.colCount
-    override val rowCount: Int
-        get() = viewModel.framePrefs.rowCount
     override val minRowSpan: Int
         get() = 1
     override val rowSpanForAddButton: Int
         get() = rowCount
-    override var currentWidgets: Collection<WidgetData>
-        get() = viewModel.framePrefs.currentWidgets
-        set(value) {
-            viewModel.framePrefs.currentWidgets = value.toSet()
-        }
 
     override fun launchAddActivity() {
         context.eventManager.sendEvent(Event.LaunchAddWidget(viewModel.frameId))

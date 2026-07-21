@@ -11,7 +11,6 @@ import tk.zwander.common.listeners.WidgetResizeListener
 import tk.zwander.common.util.Event
 import tk.zwander.common.util.eventManager
 import tk.zwander.common.util.orDefault
-import tk.zwander.common.util.prefManager
 import tk.zwander.lockscreenwidgets.R
 import tk.zwander.widgetdrawer.activities.add.ReconfigureDrawerWidgetActivity
 import tk.zwander.widgetdrawer.util.DrawerDelegate
@@ -23,20 +22,10 @@ class DrawerAdapter(
     context,
     viewModel,
 ) {
-    override val colCount: Int
-        get() = context.prefManager.drawerColCount
-    override val rowCount: Int
-        get() = (viewModel.lsDisplay.orDefault(context).rotatedRealSize.y /
-                context.resources.getDimensionPixelSize(R.dimen.drawer_row_height)) - 5
     override val minRowSpan: Int
         get() = 5
     override val rowSpanForAddButton: Int
         get() = 20
-    override var currentWidgets: Collection<WidgetData>
-        get() = context.prefManager.drawerWidgets
-        set(value) {
-            context.prefManager.drawerWidgets = LinkedHashSet(value)
-        }
 
     override fun launchAddActivity() {
         context.eventManager.sendEvent(Event.CloseDrawer)

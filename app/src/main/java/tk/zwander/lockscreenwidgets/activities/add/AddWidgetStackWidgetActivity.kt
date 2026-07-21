@@ -23,7 +23,7 @@ class AddWidgetStackWidgetActivity : AddWidgetActivity() {
     override val width: Float = 100f
     override val height: Float = 100f
 
-    override var currentWidgets: MutableSet<WidgetData>
+    override var currentWidgets: Set<WidgetData>
         get() = prefManager.widgetStackWidgets[widgetId] ?: LinkedHashSet()
         // Saving happens in the configuration Activity when hitting Apply.
         set(_) {}

@@ -13,7 +13,7 @@ class WidgetStackReconfigureActivity : ReconfigureWidgetActivity() {
     override val width: Float = 100f
     override val height: Float = 100f
 
-    override var currentWidgets: MutableSet<WidgetData>
+    override var currentWidgets: Set<WidgetData>
         get() = prefManager.widgetStackWidgets[holderId] ?: LinkedHashSet()
         set(value) {
             val stacks = prefManager.widgetStackWidgets

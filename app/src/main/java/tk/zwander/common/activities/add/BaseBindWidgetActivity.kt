@@ -386,7 +386,7 @@ abstract class BaseBindWidgetActivity : BaseActivity(), IConfigureActivity {
      */
     protected open fun addNewWidget(id: Int, provider: AppWidgetProviderInfo) {
         val data = createWidgetData(id, provider)
-        currentWidgets = currentWidgets.apply {
+        currentWidgets = currentWidgets.toMutableSet().apply {
             add(data)
         }
         if (pendingErrors == 0) {
@@ -437,7 +437,7 @@ abstract class BaseBindWidgetActivity : BaseActivity(), IConfigureActivity {
     }
 
     protected open fun addNewShortcut(shortcut: WidgetData) {
-        currentWidgets = currentWidgets.apply {
+        currentWidgets = currentWidgets.toMutableSet().apply {
             add(shortcut)
         }
         if (pendingErrors == 0) {
