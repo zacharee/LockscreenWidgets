@@ -32,17 +32,8 @@ class AddDrawerWidgetActivity : AddWidgetActivity(), IDrawerConfigureActivity {
     override val gridSize: IntSize
         get() = IntSize(
             colCount,
-            display.rotatedRealSize.y / resources.getDimensionPixelSize(R.dimen.drawer_row_height) - 10,
+            rowCount,
         )
-
-    override val colCount: Int
-        get() = prefManager.drawerColCount
-    override val rowCount: Int
-        get() = 1
-    override val width: Float
-        get() = display.pxToDp(display.rotatedRealSize.x)
-    override val height: Float
-        get() = display.pxToDp(display.rotatedRealSize.y)
 
     override var currentWidgets: Set<WidgetData>
         get() = prefManager.drawerWidgets
@@ -55,9 +46,9 @@ class AddDrawerWidgetActivity : AddWidgetActivity(), IDrawerConfigureActivity {
     override fun calculateInitialWidgetRowSpan(provider: AppWidgetProviderInfo): Int {
         val rowHeight = resources.getDimensionPixelSize(R.dimen.drawer_row_height)
 
-        return provider.getCellHeightCompat(rowHeight, (display.rotatedRealSize.y / rowHeight) - 10)
+        return provider.getCellHeightCompat(rowHeight, rowCount)
             .coerceAtLeast(10)
-            .coerceAtMost((display.rotatedRealSize.y / rowHeight) - 10)
+            .coerceAtMost(rowCount)
     }
 
     override fun onDestroy() {

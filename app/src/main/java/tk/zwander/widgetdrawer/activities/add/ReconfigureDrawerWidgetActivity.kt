@@ -46,9 +46,9 @@ class ReconfigureDrawerWidgetActivity : ReconfigureWidgetActivity(), IDrawerConf
 
                 val rowHeight = resources.getDimensionPixelSize(R.dimen.drawer_row_height)
 
-                val defaultRowSpan = provider.getCellHeightCompat(rowHeight, (display.rotatedRealSize.y / rowHeight) - 10)
+                val defaultRowSpan = provider.getCellHeightCompat(rowHeight, rowCount)
                     .coerceAtLeast(10)
-                    .coerceAtMost((display.rotatedRealSize.y / rowHeight) - 10)
+                    .coerceAtMost(rowCount)
 
                 WidgetSizeData(defaultColSpan, defaultRowSpan)
             },
