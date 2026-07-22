@@ -12,7 +12,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 @Composable
 fun LifecycleEffect(
     vararg triggerOn: Lifecycle.State,
-    keys: List<Any> = listOf(),
+    keys: List<Any> = [],
     block: suspend CoroutineScope.(Lifecycle.State) -> Unit,
 ) {
     val lifecycle = LocalLifecycleOwner.current.lifecycle

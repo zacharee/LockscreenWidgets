@@ -6,7 +6,7 @@ import tk.zwander.lockscreenwidgets.R
 
 @Parcelize
 data class WidgetListFilters(
-    val currentCategories: List<Category> = listOf(),
+    val currentCategories: List<Category> = [],
 ) : Parcelable {
     enum class Category(val labelRes: Int) {
         WIDGETS(R.string.filter_widgets),

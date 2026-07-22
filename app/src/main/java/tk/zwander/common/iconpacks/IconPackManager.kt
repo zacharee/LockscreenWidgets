@@ -1,11 +1,7 @@
 package tk.zwander.common.iconpacks
 
 import android.annotation.SuppressLint
-import android.content.BroadcastReceiver
-import android.content.ComponentName
-import android.content.Context
-import android.content.Intent
-import android.content.IntentFilter
+import android.content.*
 import android.content.pm.PackageManager
 import android.content.res.Resources
 import android.content.res.XmlResourceParser
@@ -22,15 +18,11 @@ import kotlinx.coroutines.launch
 import org.xmlpull.v1.XmlPullParser
 import org.xmlpull.v1.XmlPullParserException
 import org.xmlpull.v1.XmlPullParserFactory
-import tk.zwander.common.util.HandlerRegistry
-import tk.zwander.common.util.PrefManager
-import tk.zwander.common.util.handler
-import tk.zwander.common.util.logUtils
-import tk.zwander.common.util.prefManager
+import tk.zwander.common.util.*
 import tk.zwander.lockscreenwidgets.App
 import tk.zwander.lockscreenwidgets.R
 import java.io.IOException
-import java.util.TreeSet
+import java.util.*
 
 val Context.iconPackManager: IconPackManager
     get() = IconPackManager.getInstance(this)
@@ -40,12 +32,12 @@ val Context.iconPackManager: IconPackManager
  */
 class IconPackManager private constructor(private val context: Context) : CoroutineScope by App.instance {
     companion object {
-        private val iconPackIntents = listOf(
+        private val iconPackIntents = [
             Intent("com.novalauncher.THEME"),
             Intent("org.adw.launcher.icons.ACTION_PICK_ICON"),
             Intent("com.dlto.atom.launcher.THEME"),
             Intent("android.intent.action.MAIN").addCategory("com.anddoes.launcher.THEME"),
-        )
+        ]
 
         @SuppressLint("StaticFieldLeak")
         private var instance: IconPackManager? = null

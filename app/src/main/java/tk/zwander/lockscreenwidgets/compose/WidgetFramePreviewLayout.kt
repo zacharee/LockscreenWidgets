@@ -16,13 +16,7 @@ import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.derivedStateOf
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
@@ -39,17 +33,8 @@ import androidx.savedstate.compose.LocalSavedStateRegistryOwner
 import tk.zwander.common.compose.util.rememberPreferenceState
 import tk.zwander.common.data.provider.IFrameProvider
 import tk.zwander.common.host.widgetHostCompat
-import tk.zwander.common.util.BaseDelegate
+import tk.zwander.common.util.*
 import tk.zwander.common.util.BaseDelegate.BaseState
-import tk.zwander.common.util.FrameSizeAndPosition
-import tk.zwander.common.util.HandlerRegistry
-import tk.zwander.common.util.ISnappyLayoutManager
-import tk.zwander.common.util.LSDisplay
-import tk.zwander.common.util.LifecycleEffect
-import tk.zwander.common.util.PrefManager
-import tk.zwander.common.util.andRemoveFromParent
-import tk.zwander.common.util.prefManager
-import tk.zwander.common.util.themedContext
 import tk.zwander.common.views.SnappyRecyclerView
 import tk.zwander.lockscreenwidgets.adapters.WidgetFrameAdapter
 import tk.zwander.lockscreenwidgets.databinding.WidgetGridHolderBinding
@@ -153,7 +138,7 @@ fun WidgetFramePreviewLayout(
                     update = {
                         it.layoutManager = dummyDelegate?.gridLayoutManager
                         it.adapter = dummyDelegate?.widgetGridAdapter
-                        dummyDelegate?.widgetGridAdapter?.updateWidgets(dummyDelegate?.currentWidgets ?: setOf())
+                        dummyDelegate?.widgetGridAdapter?.updateWidgets(dummyDelegate?.currentWidgets.orEmpty())
 
                         it.scaleX = scale
                         it.scaleY = scale

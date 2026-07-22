@@ -254,7 +254,7 @@ private fun SeekBarLayout(
 
     val sheetState = rememberBottomSheetState(
         initialValue = SheetValue.Hidden,
-        enabledValues = setOf(SheetValue.Hidden, SheetValue.Expanded),
+        enabledValues = [SheetValue.Hidden, SheetValue.Expanded],
     )
 
     val decimalSeparator = remember {

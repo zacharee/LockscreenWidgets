@@ -41,7 +41,7 @@ class AddTileWidgetActivity : AddWidgetActivity() {
         get() = false
 
     override var currentWidgets: Set<WidgetData>
-        get() = mutableSetOf()
+        get() = []
         set(_) {}
 
     override val currentIds: Collection<Int>

@@ -6,11 +6,7 @@ import android.content.Context
 import android.graphics.Color
 import tk.zwander.common.data.WidgetData
 import tk.zwander.common.host.widgetHostCompat
-import tk.zwander.common.util.FrameSizeAndPosition
-import tk.zwander.common.util.PrefManager
-import tk.zwander.common.util.frameSizeAndPosition
-import tk.zwander.common.util.prefManager
-import tk.zwander.common.util.safeFromJson
+import tk.zwander.common.util.*
 
 class FrameSpecificPreferences(
     val frameId: Int,
@@ -167,7 +163,7 @@ class FrameSpecificPreferences(
             baseKey: String,
             def: Boolean = false,
         ): Boolean {
-            return (listOf(MainWidgetFrameDelegate.ID) + context.prefManager.currentSecondaryFramesWithStringDisplay.map { it.key }).any { frameId ->
+            return ([MainWidgetFrameDelegate.ID] + context.prefManager.currentSecondaryFramesWithStringDisplay.map { it.key }).any { frameId ->
                 context.prefManager.getBoolean(keyFor(frameId, baseKey), def)
             }
         }
@@ -262,10 +258,10 @@ object FramePrefs {
         context.prefManager.remove(generatePrefKey(KEY_FRAME_ROW_COUNT, frameId))
         context.prefManager.remove(generatePrefKey(KEY_FRAME_COL_COUNT, frameId))
 
-        listOf(
+        [
             FrameSizeAndPosition.FrameType.SecondaryLockscreen.Portrait(frameId),
             FrameSizeAndPosition.FrameType.SecondaryLockscreen.Landscape(frameId),
-        ).forEach { type ->
+        ].forEach { type ->
             context.frameSizeAndPosition.removeSizeForType(type)
             context.frameSizeAndPosition.removePositionForType(type)
         }

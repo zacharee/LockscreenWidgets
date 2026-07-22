@@ -1,12 +1,6 @@
 package tk.zwander.common.compose.hide
 
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.derivedStateOf
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.platform.LocalContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -21,7 +15,7 @@ internal fun items(
     val context = LocalContext.current
 
     var items by remember {
-        mutableStateOf<Set<BasicAppInfo>>(setOf())
+        mutableStateOf<Set<BasicAppInfo>>([])
     }
 
     LaunchedEffect(key1 = checked) {

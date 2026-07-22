@@ -33,23 +33,7 @@ import org.lsposed.hiddenapibypass.HiddenApiBypass
 import tk.zwander.common.activities.add.BaseBindWidgetActivity
 import tk.zwander.common.appwidget.WidgetStackMonitorService
 import tk.zwander.common.host.widgetHostCompat
-import tk.zwander.common.util.Event
-import tk.zwander.common.util.EventObserver
-import tk.zwander.common.util.GlobalExceptionHandler
-import tk.zwander.common.util.HandlerRegistry
-import tk.zwander.common.util.LSDisplayManager
-import tk.zwander.common.util.PrefManager
-import tk.zwander.common.util.WallpaperClient
-import tk.zwander.common.util.appWidgetManager
-import tk.zwander.common.util.eventManager
-import tk.zwander.common.util.globalState
-import tk.zwander.common.util.handler
-import tk.zwander.common.util.isDebug
-import tk.zwander.common.util.isOrHasDeadObject
-import tk.zwander.common.util.logUtils
-import tk.zwander.common.util.mainHandler
-import tk.zwander.common.util.migrationManager
-import tk.zwander.common.util.prefManager
+import tk.zwander.common.util.*
 import tk.zwander.common.util.shizuku.shizukuManager
 import tk.zwander.lockscreenwidgets.activities.add.AddFrameWidgetActivity
 import tk.zwander.lockscreenwidgets.appwidget.WidgetStackProvider
@@ -157,7 +141,13 @@ class App : Application(), CoroutineScope by MainScope(), EventObserver {
                     }))
                 }
                 maxBreadcrumbs = 500
-                projectPackages = setOf("tk.zwander.lockscreenwidgets", "tk.zwander.widgetdrawer", "tk.zwander.common")
+                projectPackages = [
+                    "tk.zwander.lockscreenwidgets",
+                    "tk.zwander.widgetdrawer",
+                    "tk.zwander.common",
+                    "dev.zwander.lswwallpaper",
+                    "dev.zwander.lswinterconnect",
+                ]
             })
             BugsnagPerformance.start(PerformanceConfiguration.load(this).apply {
                 enabledMetrics.rendering = true

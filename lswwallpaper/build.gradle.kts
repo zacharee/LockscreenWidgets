@@ -58,7 +58,7 @@ kotlin {
     compilerOptions {
         jvmTarget.set(JvmTarget.fromTarget(jdkVersion))
         freeCompilerArgs.addAll(
-            "-Xcontext-parameters",
+            "-Xcollection-literals",
         )
     }
 }

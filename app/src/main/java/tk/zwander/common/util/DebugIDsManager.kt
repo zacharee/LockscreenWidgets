@@ -4,7 +4,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import tk.zwander.lockscreenwidgets.data.IDData
-import java.util.TreeSet
+import java.util.*
 
 object DebugIDsManager {
     private val oldItems = MutableStateFlow<Map<Int, List<String>>>(mapOf())
@@ -17,13 +17,13 @@ object DebugIDsManager {
     fun setItems(displayId: Int, newItems: Collection<String>) {
         val tempItems = newItems.toList()
 
-        if (tempItems.containsAll(oldItems.value[displayId] ?: listOf())
+        if (tempItems.containsAll(oldItems.value[displayId].orEmpty())
             && oldItems.value[displayId]?.containsAll(tempItems) == true)
             return
 
-        val removed = (oldItems.value[displayId] ?: listOf()) - tempItems.toSet()
-        val added = tempItems - (oldItems.value[displayId]?.toSet() ?: setOf())
-        val same = (oldItems.value[displayId] ?: listOf()) - removed.toSet() - added.toSet()
+        val removed = (oldItems.value[displayId].orEmpty()) - tempItems.toSet()
+        val added = tempItems - (oldItems.value[displayId]?.toSet().orEmpty())
+        val same = (oldItems.value[displayId].orEmpty()) - removed.toSet() - added.toSet()
 
         val newList = ArrayList<IDData>()
 

@@ -1,12 +1,7 @@
 package tk.zwander.common.util
 
 import android.annotation.SuppressLint
-import android.content.BroadcastReceiver
-import android.content.ComponentName
-import android.content.Context
-import android.content.Intent
-import android.content.IntentFilter
-import android.content.ServiceConnection
+import android.content.*
 import android.content.pm.PackageManager
 import android.os.IBinder
 import androidx.core.content.ContextCompat
@@ -76,7 +71,7 @@ class WallpaperClient private constructor(private val context: Context) {
             context,
             companionInstallReceiver,
             IntentFilter().apply {
-                listOf(
+                [
                     Intent.ACTION_PACKAGE_REPLACED,
                     Intent.ACTION_PACKAGE_ADDED,
                     Intent.ACTION_PACKAGE_CHANGED,
@@ -84,7 +79,7 @@ class WallpaperClient private constructor(private val context: Context) {
                     Intent.ACTION_PACKAGE_UNSTOPPED,
                     Intent.ACTION_PACKAGE_UNSUSPENDED_MANUALLY,
                     Intent.ACTION_PACKAGE_RESTARTED,
-                ).forEach { addAction(it) }
+                ].forEach { addAction(it) }
             },
             ContextCompat.RECEIVER_EXPORTED,
         )

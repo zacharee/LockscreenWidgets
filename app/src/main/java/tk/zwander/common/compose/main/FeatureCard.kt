@@ -4,31 +4,11 @@ import android.content.ComponentName
 import android.content.Intent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxWithConstraints
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRow
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.*
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.derivedStateOf
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberUpdatedState
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
@@ -50,14 +30,7 @@ import tk.zwander.common.compose.data.EnabledInfo
 import tk.zwander.common.compose.data.FeatureCardInfo
 import tk.zwander.common.compose.util.rememberBooleanPreferenceState
 import tk.zwander.common.data.MainPageButton
-import tk.zwander.common.util.Event
-import tk.zwander.common.util.EventObserverEffect
-import tk.zwander.common.util.LifecycleEffect
-import tk.zwander.common.util.PrefManager
-import tk.zwander.common.util.appWidgetManager
-import tk.zwander.common.util.eventManager
-import tk.zwander.common.util.isOneUI
-import tk.zwander.common.util.prefManager
+import tk.zwander.common.util.*
 import tk.zwander.lockscreenwidgets.BuildConfig
 import tk.zwander.lockscreenwidgets.R
 import tk.zwander.lockscreenwidgets.activities.ComposeFrameSettingsActivity
@@ -77,7 +50,7 @@ fun rememberFeatureCards(): Map<String, List<FeatureCardInfo>> {
     }
 
     var widgetStackIds by remember {
-        mutableStateOf<List<Int>>(listOf())
+        mutableStateOf<List<Int>>([])
     }
 
     LifecycleEffect(Lifecycle.State.RESUMED) {
@@ -104,7 +77,7 @@ fun rememberFeatureCards(): Map<String, List<FeatureCardInfo>> {
         derivedStateOf {
             val map = mutableMapOf<String, List<FeatureCardInfo>>()
 
-            map["MainFeatures"] = listOf(
+            map["MainFeatures"] = [
                 FeatureCardInfo(
                     title = R.string.lock_screen_widgets,
                     description = R.string.lock_screen_widgets_desc,
@@ -115,7 +88,7 @@ fun rememberFeatureCards(): Map<String, List<FeatureCardInfo>> {
                         isEnabled = { context.prefManager.widgetFrameEnabled },
                         onEnabledChanged = { context.prefManager.widgetFrameEnabled = it },
                     ),
-                    buttons = listOf(
+                    buttons = [
                         MainPageButton(
                             icon = R.drawable.ic_baseline_preview_24,
                             title = R.string.preview,
@@ -135,7 +108,7 @@ fun rememberFeatureCards(): Map<String, List<FeatureCardInfo>> {
                         ) {
                             context.startActivity(Intent(context, ComposeFrameSettingsActivity::class.java))
                         },
-                    ),
+                    ],
                     action = ActionInfo(
                         label = R.string.add_widget,
                         icon = R.drawable.ic_baseline_add_24,
@@ -159,7 +132,7 @@ fun rememberFeatureCards(): Map<String, List<FeatureCardInfo>> {
                         isEnabled = { context.prefManager.drawerEnabled },
                         onEnabledChanged = { context.prefManager.drawerEnabled = it },
                     ),
-                    buttons = listOf(
+                    buttons = [
                         MainPageButton(
                             icon = R.drawable.ic_baseline_open_in_new_24,
                             title = R.string.open_drawer,
@@ -172,8 +145,8 @@ fun rememberFeatureCards(): Map<String, List<FeatureCardInfo>> {
                             title = R.string.settings,
                         ) {
                             context.startActivity(Intent(context, ComposeDrawerSettingsActivity::class.java))
-                        }
-                    ),
+                        },
+                    ],
                     action = ActionInfo(
                         label = R.string.add_widget,
                         icon = R.drawable.ic_baseline_add_24,
@@ -183,9 +156,9 @@ fun rememberFeatureCards(): Map<String, List<FeatureCardInfo>> {
                         )
                     },
                 ),
-            )
+            ]
 
-            map["ExtraFeatures"] = listOfNotNull(
+            map["ExtraFeatures"] = [
                 FeatureCardInfo(
                     title = R.string.widget_stacks,
                     description = if (updatedWidgetStackIds.isEmpty()) {
@@ -214,7 +187,7 @@ fun rememberFeatureCards(): Map<String, List<FeatureCardInfo>> {
                 } else {
                     null
                 },
-            )
+            ].filterNotNull()
 
             map
         }

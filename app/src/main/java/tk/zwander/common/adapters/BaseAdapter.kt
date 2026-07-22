@@ -14,26 +14,11 @@ import androidx.annotation.CallSuper
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.systemGestureExclusion
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardColors
-import androidx.compose.material3.Icon
-import androidx.compose.material3.LocalTextStyle
-import androidx.compose.material3.Text
-import androidx.compose.material3.ripple
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
@@ -72,27 +57,12 @@ import tk.zwander.common.data.WidgetType
 import tk.zwander.common.data.provider.IRowColumProvider
 import tk.zwander.common.host.widgetHostCompat
 import tk.zwander.common.listeners.WidgetResizeListener
-import tk.zwander.common.util.BaseDelegate
-import tk.zwander.common.util.BrokenAppsRegistry
-import tk.zwander.common.util.Event
-import tk.zwander.common.util.EventObserver
-import tk.zwander.common.util.LSDisplay
-import tk.zwander.common.util.UserHandleCompat
-import tk.zwander.common.util.andRemoveFromParent
-import tk.zwander.common.util.appWidgetManager
-import tk.zwander.common.util.createWidgetErrorView
-import tk.zwander.common.util.eventManager
-import tk.zwander.common.util.getAllInstalledWidgetProviders
-import tk.zwander.common.util.logUtils
-import tk.zwander.common.util.mainHandler
+import tk.zwander.common.util.*
 import tk.zwander.common.util.mitigations.SafeContextWrapper
-import tk.zwander.common.util.prefManager
-import tk.zwander.common.util.setThemedContent
-import tk.zwander.common.util.themedLayoutInflater
 import tk.zwander.common.views.remote.ComposeAdapterView
 import tk.zwander.lockscreenwidgets.R
 import tk.zwander.lockscreenwidgets.databinding.ComposeViewHolderBinding
-import java.util.Collections
+import java.util.*
 import kotlin.math.min
 
 @Suppress("LeakingThis")
@@ -449,12 +419,12 @@ abstract class BaseAdapter<VM : BaseDelegate.BaseViewModel<*, *>>(
                                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                                         updateAppWidgetSize(
                                             manager.getAppWidgetOptions(appWidgetId),
-                                            listOf(
+                                            [
                                                 SizeF(
                                                     width + 2 * paddingValue,
                                                     height + 2 * paddingValue,
                                                 ),
-                                            ),
+                                            ],
                                         )
                                     } else {
                                         val adjustedWidth = width + 2 * paddingValue

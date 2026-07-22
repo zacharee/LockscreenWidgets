@@ -13,6 +13,6 @@ class SecondaryFrameToFrameWithDisplayMigration : Migration {
 
         context.prefManager.currentSecondaryFramesWithStringDisplay = HashMap(oldFrameData.associateWith { "${Display.DEFAULT_DISPLAY}" })
 
-        context.prefManager.currentSecondaryFrames = listOf()
+        context.prefManager.currentSecondaryFrames = []
     }
 }

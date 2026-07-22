@@ -1,11 +1,6 @@
 package tk.zwander.common.compose.main
 
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.*
 import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -32,7 +27,7 @@ fun rememberLinks(): List<MainPageLink> {
     val context = LocalContext.current
 
     return remember {
-        listOf(
+        [
             MainPageLink(
                 R.drawable.baseline_translate_24,
                 R.string.translate,
@@ -85,7 +80,7 @@ fun rememberLinks(): List<MainPageLink> {
                     .setView(SupporterView(context))
                     .show()
             },
-        )
+        ]
     }
 }
 

@@ -4,36 +4,12 @@ import android.os.Build
 import android.view.Display
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.border
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Card
-import androidx.compose.material3.Icon
-import androidx.compose.material3.LocalContentColor
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.derivedStateOf
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateMapOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
@@ -52,7 +28,7 @@ import tk.zwander.common.util.PrefManager
 import tk.zwander.common.util.prefManager
 import tk.zwander.lockscreenwidgets.R
 import tk.zwander.lockscreenwidgets.util.MainWidgetFrameDelegate
-import java.util.TreeSet
+import java.util.*
 import kotlin.math.absoluteValue
 
 @Composable
@@ -112,7 +88,7 @@ fun SelectDisplayDialog(
                 allFrames.filter { it.value == "${Display.DEFAULT_DISPLAY}" }
                     .keys.sorted()
             } else {
-                listOf()
+                []
             }
         }
     }
@@ -135,7 +111,7 @@ fun SelectDisplayDialog(
                 }
             } else {
                 // Dummy list to allow for selecting only displays (i.e. when adding frames).
-                map.putAll(displays.values.associateWith { mutableSetOf() })
+                map.putAll(displays.values.associateWith { [] })
             }
 
             map.toSortedMap { o1, o2 ->

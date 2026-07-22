@@ -20,12 +20,7 @@ import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.joaomgcd.taskerpluginlibrary.extensions.requestQuery
 import dev.zwander.lswinterconnect.safeApplicationContext
-import tk.zwander.common.data.SafePointF
-import tk.zwander.common.data.WidgetData
-import tk.zwander.common.data.WidgetListFilters
-import tk.zwander.common.data.WidgetSizeData
-import tk.zwander.common.data.WidgetStackStyle
-import tk.zwander.common.data.WidgetTileInfo
+import tk.zwander.common.data.*
 import tk.zwander.common.iconpacks.IconEntry
 import tk.zwander.lockscreenwidgets.R
 import tk.zwander.lockscreenwidgets.activities.TaskerIsAllowedToShowFrame
@@ -706,7 +701,7 @@ class PrefManager private constructor(private val context: Context) {
         }
 
     var hideFrameOnApps: Set<String>
-        get() = getStringSet(KEY_HIDE_FRAME_ON_APPS, setOf())
+        get() = getStringSet(KEY_HIDE_FRAME_ON_APPS, [])
         set(value) {
             putStringSet(KEY_HIDE_FRAME_ON_APPS, value)
         }
@@ -772,7 +767,7 @@ class PrefManager private constructor(private val context: Context) {
     @Deprecated("Doesn't support displays", ReplaceWith("PrefManager.currentSecondaryFramesWithDisplay"))
     @Suppress("DEPRECATION")
     var currentSecondaryFrames: List<Int>
-        get() = getStringSet(KEY_CURRENT_FRAMES, setOf()).map { it.toInt() }
+        get() = getStringSet(KEY_CURRENT_FRAMES, []).map { it.toInt() }
         set(value) {
             putStringSet(KEY_CURRENT_FRAMES, value.map { it.toString() }.toSet())
         }

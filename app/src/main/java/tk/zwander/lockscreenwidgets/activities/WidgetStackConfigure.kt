@@ -23,59 +23,15 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.FlowRow
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.WindowInsetsSides
-import androidx.compose.foundation.layout.add
-import androidx.compose.foundation.layout.asPaddingValues
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.heightIn
-import androidx.compose.foundation.layout.ime
-import androidx.compose.foundation.layout.minus
-import androidx.compose.foundation.layout.only
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.systemBars
-import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.layout.windowInsetsPadding
-import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.LocalMinimumInteractiveComponentSize
-import androidx.compose.material3.LocalTextStyle
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.material3.TextField
-import androidx.compose.material3.TextFieldDefaults
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.derivedStateOf
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -116,17 +72,7 @@ import tk.zwander.common.data.WidgetSizeData
 import tk.zwander.common.data.WidgetStackStyle
 import tk.zwander.common.host.WidgetHostCompat
 import tk.zwander.common.host.widgetHostCompat
-import tk.zwander.common.util.Event
-import tk.zwander.common.util.PrefManager
-import tk.zwander.common.util.UserHandleCompat
-import tk.zwander.common.util.appWidgetManager
-import tk.zwander.common.util.eventManager
-import tk.zwander.common.util.getAllInstalledWidgetProviders
-import tk.zwander.common.util.getAttrColor
-import tk.zwander.common.util.loadPreviewOrIconDrawable
-import tk.zwander.common.util.logUtils
-import tk.zwander.common.util.prefManager
-import tk.zwander.common.util.setThemedContent
+import tk.zwander.common.util.*
 import tk.zwander.lockscreenwidgets.R
 import tk.zwander.lockscreenwidgets.activities.add.AddWidgetStackWidgetActivity
 import tk.zwander.lockscreenwidgets.activities.add.WidgetStackReconfigureActivity
@@ -273,11 +219,11 @@ fun Content(
     }
 
     var localRemovedWidgets by remember {
-        mutableStateOf<List<WidgetData>>(listOf())
+        mutableStateOf<List<WidgetData>>([])
     }
 
     var localAddedWidgets by remember {
-        mutableStateOf<List<WidgetData>>(listOf())
+        mutableStateOf<List<WidgetData>>([])
     }
 
     var localWidgetList by remember {
@@ -970,7 +916,7 @@ fun ConfigurePreview() {
             autoChange = false to DEFAULT_CHANGE_DELAY_MS,
             widgetPadding = mapOf(),
             styles = WidgetStackStyle(),
-            widgets = listOf(
+            widgets = [
                 WidgetData.widget(
                     context = context,
                     id = 1,
@@ -1007,7 +953,7 @@ fun ConfigurePreview() {
                     size = WidgetSizeData(1, 1),
                     profile = UserHandleCompat.SYSTEM,
                 ),
-            ),
+            ],
         )
     }
 }

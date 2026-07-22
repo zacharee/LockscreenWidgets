@@ -33,13 +33,7 @@ import com.android.internal.widget.RecyclerView
 import tk.zwander.common.appwidget.RemoteViewsProxyService
 import tk.zwander.common.data.WidgetStackStyle
 import tk.zwander.common.host.widgetHostCompat
-import tk.zwander.common.util.Event
-import tk.zwander.common.util.eventManager
-import tk.zwander.common.util.getRemoteViewsToApplyCompat
-import tk.zwander.common.util.matches
-import tk.zwander.common.util.prefManager
-import tk.zwander.common.util.setProgressIndeterminateTintListCompat
-import tk.zwander.common.util.themedContext
+import tk.zwander.common.util.*
 import tk.zwander.lockscreenwidgets.App
 import tk.zwander.lockscreenwidgets.BuildConfig
 import tk.zwander.lockscreenwidgets.R
@@ -298,7 +292,7 @@ class WidgetStackProvider : AppWidgetProvider() {
             0,
         )
     }
-    
+
     private fun setBackgrounds(
         root: RemoteViews,
         style: WidgetStackStyle,
@@ -356,7 +350,7 @@ class WidgetStackProvider : AppWidgetProvider() {
             iconColor,
         )
     }
-    
+
     private fun setClickListeners(
         context: Context,
         root: RemoteViews,
@@ -407,7 +401,7 @@ class WidgetStackProvider : AppWidgetProvider() {
             )
         )
     }
-    
+
     private fun fillInFlipper(
         index: Int,
         stackSize: Int,
@@ -459,7 +453,7 @@ class WidgetStackProvider : AppWidgetProvider() {
 
         root.setDisplayedChild(R.id.widget_content, realRem)
     }
-    
+
     private fun fillInPageRow(
         context: Context,
         root: RemoteViews,
@@ -797,7 +791,7 @@ class WidgetStackProvider : AppWidgetProvider() {
                 val actionClassName = action::class.java.name
                 actionClassName.contains("SetRemoteCollectionItemListAdapterAction")
                         || actionClassName.contains("SetRemoteViewsAdapterIntent")
-            } ?: listOf())
+            }.orEmpty())
 
             val destActionsField = remoteViewsClass.getDeclaredField("mActions")
                 .apply { isAccessible = true }

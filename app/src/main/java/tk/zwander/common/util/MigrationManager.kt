@@ -3,14 +3,7 @@ package tk.zwander.common.util
 import android.annotation.SuppressLint
 import android.content.Context
 import dev.zwander.lswinterconnect.safeApplicationContext
-import tk.zwander.common.util.migrations.AddExtraWidgetInfoMigration
-import tk.zwander.common.util.migrations.CurrentFrameIndexMigration
-import tk.zwander.common.util.migrations.FrameDimAmountMigration
-import tk.zwander.common.util.migrations.FrameSizeAndPositionMigration
-import tk.zwander.common.util.migrations.SecondaryFrameToFrameWithDisplayMigration
-import tk.zwander.common.util.migrations.SecondaryFrameWithDisplayToStringDisplayMigration
-import tk.zwander.common.util.migrations.WidgetIconMigration
-import tk.zwander.common.util.migrations.WidgetSizeMigration
+import tk.zwander.common.util.migrations.*
 import tk.zwander.lockscreenwidgets.BuildConfig
 
 val Context.migrationManager: MigrationManager
@@ -29,7 +22,7 @@ class MigrationManager private constructor(private val context: Context) {
         }
     }
 
-    private val migrations = listOf(
+    private val migrations = [
         AddExtraWidgetInfoMigration(),
         WidgetSizeMigration(),
         FrameDimAmountMigration(),
@@ -38,7 +31,7 @@ class MigrationManager private constructor(private val context: Context) {
         SecondaryFrameWithDisplayToStringDisplayMigration(),
         WidgetIconMigration(),
         CurrentFrameIndexMigration(),
-    )
+    ]
 
     fun runMigrations() {
         val currentVersion = BuildConfig.DATABASE_VERSION

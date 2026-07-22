@@ -1,6 +1,6 @@
 
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
-import java.util.UUID
+import java.util.*
 
 plugins {
     alias(libs.plugins.android.application)
@@ -94,9 +94,13 @@ kotlin {
     compilerOptions {
         jvmTarget.set(JvmTarget.fromTarget(jdkVersion))
         freeCompilerArgs.addAll(
-            "-Xcontext-parameters",
+            "-Xcollection-literals",
         )
     }
+}
+
+bugsnag {
+    ndkRoot = project.androidComponents.sdkComponents.ndkDirectory.get().asFile
 }
 
 dependencies {

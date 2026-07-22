@@ -6,11 +6,7 @@ import android.content.Context
 import android.content.SharedPreferences
 import dev.zwander.lswinterconnect.peekLogUtils
 import kotlinx.atomicfu.atomic
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.MainScope
-import kotlinx.coroutines.cancel
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 
 class HandlerRegistry(setup: HandlerRegistry.() -> Unit) : SharedPreferences.OnSharedPreferenceChangeListener {
     private val items: HashMap<String, ItemHandler> = HashMap()
@@ -64,7 +60,7 @@ class HandlerRegistry(setup: HandlerRegistry.() -> Unit) : SharedPreferences.OnS
         val keys: List<String>,
         val action: suspend (String) -> Unit,
     ) {
-        constructor(key: String, action: suspend (String) -> Unit) : this(listOf(key), action)
+        constructor(key: String, action: suspend (String) -> Unit) : this([key], action)
     }
 }
 

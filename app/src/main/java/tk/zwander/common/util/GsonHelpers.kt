@@ -3,27 +3,17 @@ package tk.zwander.common.util
 import android.content.Intent
 import android.net.Uri
 import androidx.core.net.toUri
-import com.google.gson.ExclusionStrategy
-import com.google.gson.FieldAttributes
-import com.google.gson.Gson
-import com.google.gson.JsonDeserializationContext
-import com.google.gson.JsonDeserializer
-import com.google.gson.JsonElement
-import com.google.gson.JsonObject
-import com.google.gson.JsonPrimitive
-import com.google.gson.JsonSerializationContext
-import com.google.gson.JsonSerializer
-import com.google.gson.JsonSyntaxException
+import com.google.gson.*
 import com.google.gson.reflect.TypeToken
 import tk.zwander.common.data.SafePointF
 import java.lang.reflect.ParameterizedType
 import java.lang.reflect.Type
 
 class CrashFixExclusionStrategy : ExclusionStrategy {
-    private val fieldsToAvoid = setOf(
+    private val fieldsToAvoid: Set<String> = [
         "IS_ELASTIC_ENABLED",
         "isElasticEnabled"
-    )
+    ]
 
     override fun shouldSkipClass(clazz: Class<*>?): Boolean {
         return false

@@ -10,7 +10,7 @@ data class FeatureCardInfo(
     val title: Int,
     @StringRes
     val description: Int? = null,
-    val buttons: List<MainPageButton> = listOf(),
+    val buttons: List<MainPageButton> = [],
     val eventObserver: EventObserver? = null,
     val action: ActionInfo? = null,
     val enabled: EnabledInfo? = null,

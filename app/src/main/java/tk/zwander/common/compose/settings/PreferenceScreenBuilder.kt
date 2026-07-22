@@ -24,8 +24,7 @@ import tk.zwander.common.util.logUtils
 import tk.zwander.lockscreenwidgets.R
 import java.io.FileNotFoundException
 import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
+import java.util.*
 
 @Composable
 fun rememberPreferenceScreen(
@@ -47,7 +46,7 @@ inline fun Context.preferenceScreen(content: PreferenceScreenScope.() -> Unit): 
 }
 
 class PreferenceScreenScope(context: Context) : ContextWrapper(context) {
-    val categories: MutableList<PreferenceCategory> = mutableListOf()
+    val categories: MutableList<PreferenceCategory> = []
 
     fun category(
         key: String,
@@ -72,7 +71,7 @@ class PreferenceScreenScope(context: Context) : ContextWrapper(context) {
 }
 
 class PreferenceCategoryScope(context: Context) : ContextWrapper(context) {
-    val prefs: MutableList<BasePreference<*>> = mutableListOf()
+    val prefs: MutableList<BasePreference<*>> = []
 
     fun preference(pref: BasePreference<*>) {
         prefs.add(pref)
