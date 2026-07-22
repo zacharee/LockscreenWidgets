@@ -3,14 +3,15 @@ package tk.zwander.common.views
 import android.annotation.SuppressLint
 import android.content.Context
 import android.util.AttributeSet
+import android.util.Log
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewConfiguration
 import android.widget.AbsListView
 import androidx.core.view.NestedScrollingParent3
 import androidx.core.view.NestedScrollingParentHelper
-import androidx.core.view.ViewCompat
 import androidx.recyclerview.widget.RecyclerView
+import com.arasthel.spannedgridlayoutmanager.SpannedGridLayoutManager
 import tk.zwander.common.util.verticalScrollOffset
 import kotlin.math.absoluteValue
 
@@ -20,6 +21,9 @@ open class ScrollingItemTouchRecyclerView @JvmOverloads constructor(
     defStyleAttr: Int = 0,
 ) : RecyclerView(context, attrs, defStyleAttr), NestedScrollingParent3 {
     protected val parentHelper = NestedScrollingParentHelper(this)
+
+    protected val orientation: Int?
+        get() = (this.layoutManager as? SpannedGridLayoutManager)?.orientation
 
     /**
      * Set this wherever you have access to your item touch helper instance.
@@ -60,6 +64,13 @@ open class ScrollingItemTouchRecyclerView @JvmOverloads constructor(
         isNestedScrollingEnabled = true
     }
 
+    protected fun axesMatch(
+        axes: Int
+    ): Boolean {
+        return orientation == VERTICAL && axes and SCROLL_AXIS_VERTICAL != 0 ||
+            orientation == HORIZONTAL && axes and SCROLL_AXIS_HORIZONTAL != 0
+    }
+
     override fun dispatchTouchEvent(ev: MotionEvent): Boolean {
         if (ev.action == MotionEvent.ACTION_DOWN) {
             touchSlop = ViewConfiguration.get(context)
@@ -80,10 +91,14 @@ open class ScrollingItemTouchRecyclerView @JvmOverloads constructor(
         velocityX: Float,
         velocityY: Float,
         consumed: Boolean,
-    ) = super.onNestedFling(target, velocityX, velocityY, consumed).also {
+    ) = (consumed || fling(velocityX.toInt(), velocityY.toInt())).also {
         // If the nested fling wasn't consumed, then the touch helper can act.
         // Otherwise, disable it.
-        nestedScrollingListener?.invoke(it || consumed)
+        nestedScrollingListener?.invoke(!it)
+    }
+
+    override fun onNestedPreFling(target: View, velocityX: Float, velocityY: Float): Boolean {
+        return super.onNestedPreFling(target, velocityX, velocityY)
     }
 
     override fun getNestedScrollAxes(): Int {
@@ -101,7 +116,7 @@ open class ScrollingItemTouchRecyclerView @JvmOverloads constructor(
 
     override fun onStartNestedScroll(child: View, target: View, nestedScrollAxes: Int): Boolean {
         handleNestedTarget(target)
-        return nestedScrollAxes and ViewCompat.SCROLL_AXIS_VERTICAL != 0 && !selectedItem
+        return axesMatch(nestedScrollAxes) && !selectedItem
     }
 
     override fun onNestedScrollAccepted(
@@ -110,7 +125,7 @@ open class ScrollingItemTouchRecyclerView @JvmOverloads constructor(
         axes: Int,
         type: Int,
     ) {
-        if (axes and SCROLL_AXIS_VERTICAL != 0) {
+        if (axesMatch(axes)) {
             // A descendant started scrolling, so we'll observe it.
             setTarget(target)
         }
@@ -118,7 +133,7 @@ open class ScrollingItemTouchRecyclerView @JvmOverloads constructor(
     }
 
     override fun onNestedScrollAccepted(child: View, target: View, axes: Int) {
-        if (axes and SCROLL_AXIS_VERTICAL != 0) {
+        if (axesMatch(axes)) {
             // A descendant started scrolling, so we'll observe it.
             setTarget(target)
         }
@@ -164,6 +179,9 @@ open class ScrollingItemTouchRecyclerView @JvmOverloads constructor(
         type: Int,
         consumed: IntArray,
     ) {
+        consumed[0] = dxUnconsumed
+        consumed[1] = dyUnconsumed
+
         onNestedScroll(target, dxConsumed, dyConsumed, dxUnconsumed, dyUnconsumed, type)
     }
 
@@ -174,8 +192,24 @@ open class ScrollingItemTouchRecyclerView @JvmOverloads constructor(
         dxUnconsumed: Int,
         dyUnconsumed: Int,
     ) {
-        if ((dyConsumed + dyUnconsumed).absoluteValue > touchSlop) {
+        val scrollAmount = if (orientation == VERTICAL) {
+            (dyConsumed + dyUnconsumed).absoluteValue
+        } else {
+            (dxConsumed + dxUnconsumed).absoluteValue
+        }
+
+        if (scrollAmount > touchSlop) {
             nestedScrollingListener?.invoke(true)
+        }
+
+        Log.e("LSW", "$nestedScrollTarget $dxUnconsumed $dyUnconsumed")
+
+        if (target == nestedScrollTarget &&
+            (orientation == HORIZONTAL && dxConsumed != 0 ||
+                    orientation == VERTICAL && dyConsumed != 0)) {
+            nestedScrollTargetWasUnableToScroll = true
+
+//            scrollBy(dxConsumed, dyConsumed)
         }
     }
 
@@ -186,7 +220,7 @@ open class ScrollingItemTouchRecyclerView @JvmOverloads constructor(
         consumed: IntArray,
         type: Int,
     ) {
-        onNestedPreScroll(target, dx, dy, consumed)
+        super.onNestedPreScroll(target, dx, dy, consumed)
     }
 
     private fun setTarget(view: View?) {

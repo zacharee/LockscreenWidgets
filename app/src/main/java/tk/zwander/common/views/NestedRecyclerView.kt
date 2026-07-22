@@ -3,7 +3,6 @@ package tk.zwander.common.views
 import android.content.Context
 import android.util.AttributeSet
 import android.view.MotionEvent
-import android.view.View
 import kotlin.math.absoluteValue
 
 //https://stackoverflow.com/a/68318211/5496177
@@ -60,7 +59,7 @@ open class NestedRecyclerView @JvmOverloads constructor(
                     }
                 }
 
-                if (isNestedSwipe || overThreshold) {
+                if ((isNestedSwipe || overThreshold) && !nestedScrollTargetWasUnableToScroll) {
                     isNestedSwipe = true
 
                     requestDisallowInterceptTouchEvent(true)
@@ -72,10 +71,13 @@ open class NestedRecyclerView @JvmOverloads constructor(
                 dispatchPrevY = ev.rawY
             }
 
-            MotionEvent.ACTION_UP -> {
+            MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
                 requestDisallowInterceptTouchEvent(false)
                 nestedScrollingListener?.invoke(false)
                 isNestedSwipe = false
+                nestedScrollTargetWasUnableToScroll = false
+                super.dispatchTouchEvent(ev)
+                handled = false
             }
         }
 
@@ -85,24 +87,6 @@ open class NestedRecyclerView @JvmOverloads constructor(
         }
 
         return handled
-    }
-
-    override fun onNestedScroll(
-        target: View,
-        dxConsumed: Int,
-        dyConsumed: Int,
-        dxUnconsumed: Int,
-        dyUnconsumed: Int,
-    ) {
-        if (target === nestedScrollTarget && dyUnconsumed != 0) {
-            // The descendant could not fully consume the scroll. We remember that in order
-            // to allow the RecyclerView to take over scrolling.
-            nestedScrollTargetWasUnableToScroll = true
-            // Let the parent start to consume scroll events.
-            target.parent?.requestDisallowInterceptTouchEvent(false)
-        }
-
-        super.onNestedScroll(target, dxConsumed, dyConsumed, dxUnconsumed, dyUnconsumed)
     }
 
     companion object {
