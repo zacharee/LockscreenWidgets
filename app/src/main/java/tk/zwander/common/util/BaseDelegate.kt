@@ -9,12 +9,7 @@ import android.view.View
 import android.view.WindowManager
 import androidx.annotation.CallSuper
 import androidx.compose.ui.platform.compositionContext
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleRegistry
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.setViewTreeLifecycleOwner
-import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.*
 import androidx.recyclerview.widget.FixedItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import androidx.savedstate.SavedStateRegistry
@@ -107,6 +102,9 @@ abstract class BaseDelegate<State : Any>(
         get() = rootView.isAttachedToWindow
 
     protected fun setUpTouchHelper() {
+        globalState.itemIsActive.value = false
+        onItemSelected(selected = false, highlighted = false)
+        recyclerView.cancelNestedScroll()
         itemTouchHelper?.attachToRecyclerView(null)
         itemTouchHelper = FixedItemTouchHelper(touchHelperCallback)
         itemTouchHelper?.attachToRecyclerView(recyclerView)
@@ -121,16 +119,7 @@ abstract class BaseDelegate<State : Any>(
         }
 
         override fun onViewDetachedFromWindow(v: View) {
-            recyclerView.onTouchEvent(
-                MotionEvent.obtain(
-                    System.currentTimeMillis(),
-                    System.currentTimeMillis(),
-                    MotionEvent.ACTION_CANCEL,
-                    0f,
-                    0f,
-                    0,
-                ),
-            )
+            itemTouchHelper?.attachToRecyclerView(null)
             lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_PAUSE)
         }
     }

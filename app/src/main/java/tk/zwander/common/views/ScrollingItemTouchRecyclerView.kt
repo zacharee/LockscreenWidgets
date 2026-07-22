@@ -125,6 +125,13 @@ open class ScrollingItemTouchRecyclerView @JvmOverloads constructor(
         parentHelper.onNestedScrollAccepted(child, target, axes)
     }
 
+    fun cancelNestedScroll() {
+        nestedScrollTarget?.let {
+            onStopNestedScroll(it)
+        }
+        setTarget(null)
+    }
+
     override fun onStopNestedScroll(target: View, type: Int) {
         // The descendant finished scrolling. Clean up!
         setTarget(null)
