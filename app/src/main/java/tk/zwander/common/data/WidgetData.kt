@@ -11,15 +11,9 @@ import androidx.compose.ui.unit.dp
 import kotlinx.parcelize.IgnoredOnParcel
 import kotlinx.parcelize.Parcelize
 import tk.zwander.common.iconpacks.iconPackManager
-import tk.zwander.common.util.UserHandleCompat
-import tk.zwander.common.util.base64ToBitmap
-import tk.zwander.common.util.density
-import tk.zwander.common.util.getRemoteDrawable
-import tk.zwander.common.util.logUtils
-import tk.zwander.common.util.prefManager
-import tk.zwander.common.util.toSafeBitmap
+import tk.zwander.common.util.*
 import tk.zwander.lockscreenwidgets.util.IconPrefs
-import java.util.Objects
+import java.util.*
 
 /**
  * Persistent data for a widget added to the frame.
@@ -132,13 +126,14 @@ data class WidgetData(
                     (profile == null && other.profile == UserHandleCompat.SYSTEM) ||
                     (profile == UserHandleCompat.SYSTEM && other.profile == null)
                 )
+                && size == other.size
     }
 
     override fun hashCode(): Int {
         return if (safeType != WidgetType.WIDGET) {
-            Objects.hash(id, safeType)
+            Objects.hash(id, safeType, size)
         } else {
-            Objects.hash(id, safeType, widgetProviderComponent, (profile ?: UserHandleCompat.SYSTEM))
+            Objects.hash(id, safeType, widgetProviderComponent, (profile ?: UserHandleCompat.SYSTEM), size)
         }
     }
 

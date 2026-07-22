@@ -295,7 +295,7 @@ abstract class BaseAdapter<VM : BaseDelegate.BaseViewModel<*, *>>(
 
             view.disposeComposition()
             this@WidgetVH.view.setThemedContent {
-                val currentEditingPosition by viewModel.currentEditingInterfacePosition.collectAsState()
+                val currentEditingId by viewModel.currentEditingInterfaceId.collectAsState()
                 val nestedScrollConnection = rememberNestedScrollInteropConnection()
 
                 viewModel.WidgetItemLayout(
@@ -354,7 +354,7 @@ abstract class BaseAdapter<VM : BaseDelegate.BaseViewModel<*, *>>(
                     },
                     rowCount = rowCount,
                     colCount = colCount,
-                    isEditing = currentEditingPosition == bindingAdapterPosition,
+                    isEditing = currentEditingId == bindingAdapterPosition,
                     modifier = Modifier.fillMaxSize().layoutId("widget_${data.id}")
                         .nestedScroll(
                             connection = nestedScrollConnection,

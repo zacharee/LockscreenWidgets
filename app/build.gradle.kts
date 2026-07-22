@@ -161,7 +161,11 @@ dependencies {
     implementation(libs.reorderable)
     implementation(libs.miui.autostart)
 
+    implementation(libs.composereorderable)
+
     implementation(project(":lswinterconnect"))
 
     coreLibraryDesugaring(libs.desugar.jdk.libs)
+
+    testImplementation(libs.junit)
 }

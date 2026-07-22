@@ -86,13 +86,13 @@ fun createTouchHelperCallback(
                     //The user has long-pressed a widget. Show the editing UI on that widget.
                     //If the UI is already shown on it, hide it.
                     val adapterPos = viewHolder?.bindingAdapterPosition ?: RecyclerView.NO_POSITION
-                    viewModel.currentEditingInterfacePosition.value =
-                        if (viewModel.currentEditingInterfacePosition.value == adapterPos) RecyclerView.NO_POSITION else adapterPos
+                    viewModel.currentEditingInterfaceId.value =
+                        if (viewModel.currentEditingInterfaceId.value == adapterPos) RecyclerView.NO_POSITION else adapterPos
                 }
 
                 onItemSelected(
                     actionState == ItemTouchHelper.ACTION_STATE_DRAG,
-                    viewModel.currentEditingInterfacePosition.value != RecyclerView.NO_POSITION,
+                    viewModel.currentEditingInterfaceId.value != RecyclerView.NO_POSITION,
                 )
             }
 
@@ -109,7 +109,7 @@ fun createTouchHelperCallback(
                 onItemActive(false)
                 onItemSelected(
                     false,
-                    viewModel.currentEditingInterfacePosition.value != RecyclerView.NO_POSITION,
+                    viewModel.currentEditingInterfaceId.value != RecyclerView.NO_POSITION,
                 )
 
                 viewHolder.itemView.alpha = 1.0f

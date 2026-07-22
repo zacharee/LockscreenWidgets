@@ -12,9 +12,16 @@ import android.view.ViewConfiguration
 import android.view.WindowManager
 import android.view.animation.AccelerateInterpolator
 import android.view.animation.DecelerateInterpolator
-import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.*
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.compositionContext
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.setViewTreeLifecycleOwner
@@ -29,37 +36,19 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import tk.zwander.common.activities.DismissOrUnlockActivity
+import tk.zwander.common.activities.SelectIconPackActivity
+import tk.zwander.common.compose.WidgetGrid
 import tk.zwander.common.compose.components.DrawerHandle
 import tk.zwander.common.compose.util.createComposeViewHolder
 import tk.zwander.common.compose.util.findAccessibility
+import tk.zwander.common.compose.util.rememberPreferenceState
 import tk.zwander.common.data.provider.IDrawerProvider
-import tk.zwander.common.util.BaseDelegate
-import tk.zwander.common.util.DrawerOrFrame
-import tk.zwander.common.util.Event
-import tk.zwander.common.util.HandlerRegistry
-import tk.zwander.common.util.PrefManager
-import tk.zwander.common.util.eventManager
-import tk.zwander.common.util.fadeIn
-import tk.zwander.common.util.fadeOut
-import tk.zwander.common.util.globalState
-import tk.zwander.common.util.handler
-import tk.zwander.common.util.hideNavBarsForGestureExclusion
-import tk.zwander.common.util.logUtils
-import tk.zwander.common.util.lsDisplayManager
-import tk.zwander.common.util.mainHandler
-import tk.zwander.common.util.prefManager
-import tk.zwander.common.util.remove
-import tk.zwander.common.util.safeAddView
-import tk.zwander.common.util.safeCurrentState
-import tk.zwander.common.util.safeRemoveView
-import tk.zwander.common.util.safeUpdateViewLayout
-import tk.zwander.common.util.set
-import tk.zwander.common.util.themedContext
+import tk.zwander.common.listeners.WidgetResizeListener
+import tk.zwander.common.util.*
 import tk.zwander.lockscreenwidgets.R
 import tk.zwander.widgetdrawer.activities.TaskerIsShowingDrawer
-import tk.zwander.widgetdrawer.adapters.DrawerAdapter
+import tk.zwander.widgetdrawer.activities.add.ReconfigureDrawerWidgetActivity
 import tk.zwander.widgetdrawer.compose.DrawerLayout
-import tk.zwander.widgetdrawer.views.DrawerRecycler
 import kotlin.math.absoluteValue
 import kotlin.math.sign
 
@@ -132,8 +121,6 @@ class DrawerDelegate private constructor(context: Context, displayId: String) :
     }
     override val rootView: View
         get() = drawer
-    override val recyclerView: DrawerRecycler
-        get() = widgetGrid
 
     private val handleParams by lazy {
         WindowManager.LayoutParams().apply {
@@ -151,15 +138,88 @@ class DrawerDelegate private constructor(context: Context, displayId: String) :
         }
     }
 
-    private val widgetGrid by lazy {
-        DrawerRecycler(themedContext)
-    }
-
     private val drawer by lazy {
         viewModel.createComposeViewHolder {
+            val cutoutPadding = WindowInsets.displayCutout
+
+            val drawerSidePadding by rememberPreferenceState(
+                key = PrefManager.KEY_DRAWER_SIDE_PADDING,
+                value = {
+                    context.prefManager.drawerSidePadding.dp
+                },
+            )
+            val closeOnTap by rememberPreferenceState(
+                key = PrefManager.KEY_CLOSE_DRAWER_ON_EMPTY_TAP,
+            ) {
+                prefManager.closeOnEmptyTap
+            }
+
+            val combinedPadding = cutoutPadding.add(
+                WindowInsets(left = drawerSidePadding, right = drawerSidePadding),
+            )
+
             DrawerLayout(
-                widgetGrid = widgetGrid,
-                modifier = Modifier.fillMaxSize(),
+                widgetGrid = { modifier ->
+                    val rowCount = remember(viewModel.display) {
+                        viewModel.display.orDefault(context).rotatedRealSize.y / resources.getDimensionPixelSize(R.dimen.drawer_row_height)
+                    }
+                    val columnCount by rememberPreferenceState(
+                        key = PrefManager.KEY_DRAWER_COL_COUNT,
+                    ) {
+                        prefManager.drawerColCount
+                    }
+                    var currentWidgetsState by rememberPreferenceState(
+                        key = PrefManager.KEY_DRAWER_WIDGETS,
+                        value = { currentWidgets.toList() },
+                        onChanged = { _, value -> currentWidgets = value.toSet() },
+                    )
+
+                    WidgetGrid(
+                        currentWidgets = currentWidgetsState,
+                        onWidgetsChanged = { widgets ->
+                            currentWidgetsState = widgets
+                        },
+                        orientation = Orientation.Vertical,
+                        columnCount = columnCount,
+                        rowCount = rowCount,
+                        resizeThresholdPx = { which ->
+                            if (which == WidgetResizeListener.Which.LEFT || which == WidgetResizeListener.Which.RIGHT) {
+                                viewModel.display.orDefault(context).rotatedRealSize.x / colCount
+                            } else {
+                                resources.getDimensionPixelSize(R.dimen.drawer_row_height)
+                            }
+                        },
+                        launchAddActivity = {
+                            eventManager.sendEvent(Event.CloseDrawer)
+                            eventManager.sendEvent(Event.LaunchAddDrawerWidget(true))
+                        },
+                        launchReconfigure = { id, providerInfo ->
+                            eventManager.sendEvent(Event.CloseDrawer)
+                            ReconfigureDrawerWidgetActivity.launch(context, id, providerInfo)
+                        },
+                        launchShortcutIconOverride = {
+                            eventManager.sendEvent(Event.CloseDrawer)
+                            SelectIconPackActivity.launchForOverride(context, holderId, true)
+                        },
+                        modifier = modifier,
+                        rowSpanForAddButton = 1,
+                        enableSnapping = false,
+                        contentPadding = combinedPadding.asPaddingValues(),
+                    )
+                },
+                modifier = Modifier.fillMaxSize()
+                    .then(
+                        if (closeOnTap) {
+                            Modifier.clickable(
+                                enabled = true,
+                                onClick = {
+                                    eventManager.sendEvent(Event.CloseDrawer)
+                                },
+                                interactionSource = remember { MutableInteractionSource() },
+                                indication = null,
+                            )
+                        } else { Modifier },
+                    ),
             )
         }.apply {
             addOnAttachStateChangeListener(
@@ -199,9 +259,6 @@ class DrawerDelegate private constructor(context: Context, displayId: String) :
         }
     }
 
-    override val adapter by lazy {
-        DrawerAdapter(context, viewModel)
-    }
     override val prefsHandler = HandlerRegistry {
         handler(PrefManager.KEY_DRAWER_ENABLED) {
             if (prefManager.drawerEnabled) {
@@ -217,19 +274,8 @@ class DrawerDelegate private constructor(context: Context, displayId: String) :
                 hideHandle()
             }
         }
-        handler(PrefManager.KEY_DRAWER_WIDGETS) {
-            if (!commonState.updatedForMoveOrRemove) {
-                //Only run the update if it wasn't generated by a reorder event
-                adapter.updateWidgets(currentWidgets)
-            } else {
-                updateCommonState { it.copy(updatedForMoveOrRemove = false) }
-            }
-        }
-        handler(PrefManager.KEY_DRAWER_COL_COUNT) {
-            updateCounts()
-        }
         handler(PrefManager.KEY_LOCK_WIDGET_DRAWER) {
-            viewModel.currentEditingInterfacePosition.value = RecyclerView.NO_POSITION
+            viewModel.currentEditingInterfaceId.value = RecyclerView.NO_POSITION
         }
         handler(PrefManager.KEY_SHOW_DRAWER_HANDLE_ONLY_WHEN_LOCKED) {
             if (!prefManager.showDrawerHandleOnlyWhenLocked) {
@@ -239,8 +285,6 @@ class DrawerDelegate private constructor(context: Context, displayId: String) :
             }
         }
     }
-
-    override val gridLayoutManager = SpannedLayoutManager()
 
     override val viewModel = DrawerViewModel(this)
 
@@ -277,7 +321,6 @@ class DrawerDelegate private constructor(context: Context, displayId: String) :
             }
 
             Event.DrawerShown -> {
-                adapter.updateViews()
                 hideHandle()
             }
 
@@ -297,12 +340,6 @@ class DrawerDelegate private constructor(context: Context, displayId: String) :
                 TaskerIsShowingDrawer::class.java.requestQuery(this)
                 if (event.attached) {
                     if (!viewModel.scrollingOpen.value) {
-                        mainHandler.postDelayed({
-                            if (prefManager.drawerForceWidgetReload) {
-                                adapter.updateViews()
-                            }
-                        }, 50)
-
                         drawer.fadeIn(DrawerOrFrame.DRAWER)
                         eventManager.sendEvent(Event.DrawerShown)
                         viewModel.drawerAnimationState.value = AnimationState.IDLE
@@ -382,7 +419,7 @@ class DrawerDelegate private constructor(context: Context, displayId: String) :
     }
 
     override fun onWidgetClick(trigger: Boolean): Boolean {
-        return if (!commonState.isItemHighlighted && !globalState.itemIsActive.value) {
+        return if (!globalState.itemIsActive.value) {
             if (trigger && prefManager.requestUnlockDrawer && prefManager.drawerDirectlyCheckForActivity) {
                 DismissOrUnlockActivity.launch(this)
                 eventManager.sendEvent(Event.CloseDrawer)
@@ -414,9 +451,6 @@ class DrawerDelegate private constructor(context: Context, displayId: String) :
             tryShowHandle()
         }
 
-        gridLayoutManager.customHeight =
-            resources.getDimensionPixelSize(R.dimen.drawer_row_height).toDouble()
-
         viewModel.viewModelScope.launch(Dispatchers.Main) {
             lsDisplayManager.displayPowerStates
                 .map { it.displayStates[this@DrawerDelegate.display?.uniqueIdCompat] == true }
@@ -439,11 +473,6 @@ class DrawerDelegate private constructor(context: Context, displayId: String) :
         super.onDestroy()
 
         invalidateInstance()
-    }
-
-    override fun onItemSelected(selected: Boolean, highlighted: Boolean) {
-        super.onItemSelected(selected, highlighted)
-        globalState.handlingClick.remove(ID)
     }
 
     override fun isLocked(): Boolean {
@@ -525,25 +554,13 @@ class DrawerDelegate private constructor(context: Context, displayId: String) :
             if (drawer.isAttachedToWindow && viewModel.drawerAnimationState.value != AnimationState.REMOVING) {
                 viewModel.drawerAnimationState.value = AnimationState.REMOVING
                 globalState.handlingClick.remove(ID)
-                viewModel.currentEditingInterfacePosition.value = RecyclerView.NO_POSITION
+                viewModel.currentEditingInterfaceId.value = RecyclerView.NO_POSITION
 
                 drawer.fadeOut(DrawerOrFrame.DRAWER)
                 wm?.safeRemoveView(drawer)
                 viewModel.drawerAnimationState.value = AnimationState.IDLE
                 if (callListener) eventManager.sendEvent(Event.DrawerHidden)
             }
-        }
-    }
-
-    inner class SpannedLayoutManager : LayoutManager(
-        this@DrawerDelegate,
-        RecyclerView.VERTICAL,
-        1,
-        prefManager.drawerColCount,
-    ) {
-        override fun canScrollVertically(): Boolean {
-            return (viewModel.currentEditingInterfacePosition.value == RecyclerView.NO_POSITION ||
-                    commonState.isHoldingItem) && super.canScrollVertically()
         }
     }
 
