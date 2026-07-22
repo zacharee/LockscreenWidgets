@@ -104,7 +104,7 @@ abstract class BaseDelegate<State : Any>(
     protected fun setUpTouchHelper() {
         globalState.itemIsActive.value = false
         onItemSelected(selected = false, highlighted = false)
-        recyclerView.cancelNestedScroll()
+//        recyclerView.cancelNestedScroll()
         itemTouchHelper?.attachToRecyclerView(null)
         itemTouchHelper = FixedItemTouchHelper(touchHelperCallback)
         itemTouchHelper?.attachToRecyclerView(recyclerView)

@@ -2,6 +2,7 @@ package tk.zwander.common.views.remote
 
 import android.content.Context
 import android.util.AttributeSet
+import android.view.MotionEvent
 import android.widget.ListView
 import androidx.core.view.NestedScrollingChild3
 import androidx.core.view.NestedScrollingChildHelper
@@ -49,6 +50,19 @@ class CatchingListView(
         } catch (e: ArrayIndexOutOfBoundsException) {
             BugsnagUtils.notify(e)
         }
+    }
+
+    override fun onTouchEvent(ev: MotionEvent?): Boolean {
+        if (ev?.action == MotionEvent.ACTION_CANCEL || ev?.action == MotionEvent.ACTION_UP) {
+            helper.stopNestedScroll()
+        }
+
+        return super.onTouchEvent(ev)
+    }
+
+    override fun onDetachedFromWindow() {
+        super.onDetachedFromWindow()
+        helper.onDetachedFromWindow()
     }
 
     private fun safeViewIdName(): String? {

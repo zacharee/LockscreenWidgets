@@ -73,10 +73,10 @@ open class NestedRecyclerView @JvmOverloads constructor(
 
             MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
                 requestDisallowInterceptTouchEvent(false)
+                nestedScrollTarget = null
                 nestedScrollingListener?.invoke(false)
                 isNestedSwipe = false
                 nestedScrollTargetWasUnableToScroll = false
-                super.dispatchTouchEvent(ev)
                 handled = false
             }
         }
