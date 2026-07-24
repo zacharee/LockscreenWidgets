@@ -195,9 +195,32 @@ internal fun measureSpannedGrid(
             state.visitedIndicesScratch.fill(false, 0, itemCount)
         }
         val visitedIndices = state.visitedIndicesScratch
+
+        // Widen the rendered-line range (only for building the render set below — NOT
+        // firstVisibleLine/lastVisibleLine themselves, which stay viewport-accurate for scroll
+        // position/prefetch-direction math) to always cover the currently-dragged item's own
+        // lines, however far autoscroll has carried the viewport past them. Otherwise, once
+        // autoscrolling drags it further than a page away, it drops out of the naturally-visible
+        // set entirely and its LazyLayout composition slot gets torn down and recreated — which
+        // re-fires ReorderableItem's `LaunchedEffect(isDragging)` in WidgetGrid.kt on the fresh
+        // instance, and since that effect *toggles* `currentEditingId` (on the assumption
+        // isDragging can only turn true once per drag), the second firing flips it back to
+        // NO_POSITION. That immediately un-gates `interceptUnclaimedDrags`'s own guard against
+        // stealing an in-progress reorder drag's touch, which then does exactly that on the next
+        // qualifying move — and the reorder library sees its tracked pointer consumed elsewhere
+        // and cancels the drag. Confirmed via logcat: the drag's onDragCanceled always landed in
+        // the same frame the item left the natural window, every time, across repeated drags.
+        val draggedLineRange =
+            state.suppressPlacementAnimationKey?.let { key ->
+                val index = itemProvider.getIndex(key)
+                if (index >= 0) placementResult.placements.getOrNull(index) else null
+            }?.let { placement -> placement.row..(placement.row + placement.rowSpan - 1) }
+        val renderFirstLine = if (draggedLineRange != null) minOf(firstVisibleLine, draggedLineRange.first) else firstVisibleLine
+        val renderLastLine = if (draggedLineRange != null) maxOf(lastVisibleLine, draggedLineRange.last) else lastVisibleLine
+
         val naturalVisibleIndices = ArrayList<Int>()
         if (placementResult.totalRowCount > 0) {
-            for (line in firstVisibleLine..lastVisibleLine) {
+            for (line in renderFirstLine..renderLastLine) {
                 for (index in placementResult.rowToItemIndices[line]) {
                     if (!visitedIndices[index]) {
                         visitedIndices[index] = true
@@ -307,11 +330,19 @@ internal fun measureSpannedGrid(
             graphicsContext = graphicsContext,
         )
 
+        // Excludes the currently-dragged key (if any): its own placement animation is never
+        // rendered anyway (see skipPlacementAnimation above), so whether the animator personally
+        // considers *it* still in progress is irrelevant to "let the last move's cascade settle
+        // before confirming another" — only other items' (visible) animations matter for that.
+        // Including it needlessly extended how long ReorderableLazySpannedGridState.chooseDropItem
+        // stayed blocked, making the drop-target debounce miss more often on a normal-speed drag.
+        val suppressedKey = state.suppressPlacementAnimationKey
         state.hasActiveAnimations =
             positionedItems.fastAny { item ->
-                item.placeables.indices.any { placeableIndex ->
-                    state.itemAnimator.getAnimation(item.key, placeableIndex)?.isPlacementAnimationInProgress == true
-                }
+                item.key != suppressedKey &&
+                    item.placeables.indices.any { placeableIndex ->
+                        state.itemAnimator.getAnimation(item.key, placeableIndex)?.isPlacementAnimationInProgress == true
+                    }
             }
 
         val cellWidthPx = if (isVertical) crossAxisLineSizePx else mainAxisLineSizePx

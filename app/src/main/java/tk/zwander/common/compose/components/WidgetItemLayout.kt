@@ -3,36 +3,16 @@ package tk.zwander.common.compose.components
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.*
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.gestures.rememberScrollableState
 import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.LocalContentColor
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.AbsoluteAlignment
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -53,11 +33,7 @@ import tk.zwander.common.compose.util.rememberPreferenceState
 import tk.zwander.common.data.WidgetData
 import tk.zwander.common.data.WidgetType
 import tk.zwander.common.listeners.WidgetResizeListener.Which
-import tk.zwander.common.util.BaseDelegate
-import tk.zwander.common.util.Event
-import tk.zwander.common.util.eventManager
-import tk.zwander.common.util.logUtils
-import tk.zwander.common.util.prefManager
+import tk.zwander.common.util.*
 import tk.zwander.lockscreenwidgets.R
 import kotlin.math.absoluteValue
 import kotlin.math.sign
@@ -79,6 +55,7 @@ fun BaseDelegate.BaseViewModel<*, *>.WidgetItemLayout(
     rowCount: Int,
     colCount: Int,
     isEditing: Boolean,
+    onEditingDismissed: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val context = LocalContext.current
@@ -281,6 +258,23 @@ fun BaseDelegate.BaseViewModel<*, *>.WidgetItemLayout(
                                         viewModel = this@WidgetItemLayout,
                                     ),
                             )
+                        }
+
+                        Row(
+                            modifier = Modifier.align(Alignment.TopStart)
+                                .padding(8.dp),
+                        ) {
+                            IconButton(
+                                onClick = {
+                                    onEditingDismissed()
+                                },
+                                modifier = Modifier.size(32.dp),
+                            ) {
+                                Icon(
+                                    painter = painterResource(R.drawable.close_24px),
+                                    contentDescription = stringResource(R.string.close),
+                                )
+                            }
                         }
 
                         Row(

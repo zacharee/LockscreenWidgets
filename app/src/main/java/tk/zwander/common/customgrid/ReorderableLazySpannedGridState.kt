@@ -7,6 +7,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -88,16 +89,38 @@ fun rememberReorderableLazySpannedGridState(
             val itemEnd = itemStart + (if (isVertical) info.size.height else info.size.width)
             val intoStartMargin = edgeScrollMarginPx - itemStart
             val intoEndMargin = itemEnd - (viewportSize - edgeScrollMarginPx)
+            // For an item whose own main-axis extent is at least comparable to the viewport (e.g.
+            // a widget that's both full-width *and* multi-row), intoStartMargin and intoEndMargin
+            // can both be positive at once — the item is "into" both margins simply by being that
+            // big, independent of which edge it's actually being dragged towards. Picking whichever
+            // is larger (rather than always preferring start) resolves that ambiguity by margin,
+            // instead of scrolling in a fixed direction almost continuously for such items.
+            //
             // gridState.scrollBy's delta is added to its scroll offset (see
             // LazySpannedGridState.internalScrollableState), so decreasing the offset — scrolling
             // towards the start, for the top/left margin — takes a negative delta, and increasing
             // it — scrolling towards the end — takes a positive one.
             val scroll = when {
-                intoStartMargin > 0f -> -intoStartMargin.coerceAtMost(maxScrollPx)
-                intoEndMargin > 0f -> intoEndMargin.coerceAtMost(maxScrollPx)
-                else -> 0f
+                intoStartMargin <= 0f && intoEndMargin <= 0f -> 0f
+                intoStartMargin >= intoEndMargin -> -intoStartMargin.coerceAtMost(maxScrollPx)
+                else -> intoEndMargin.coerceAtMost(maxScrollPx)
             }
-            if (scroll != 0f) gridState.scrollBy(scroll)
+            if (scroll != 0f) {
+                try {
+                    gridState.scrollBy(scroll)
+                } catch (e: CancellationException) {
+                    // gridState.scrollBy runs at the default MutatePriority, so a real,
+                    // higher-priority (MutatePriority.UserInput) scroll gesture taking over — e.g.
+                    // interceptUnclaimedDrags' own scroll{} transaction winning the same pointer —
+                    // cancels *this* call via ScrollableState's MutatorMutex. Left uncaught, that
+                    // exception would propagate out of this while loop and kill this whole
+                    // LaunchedEffect for the rest of the composable's lifetime (it's keyed on
+                    // `state`, which doesn't change across drags, so it never gets relaunched) —
+                    // permanently disabling autoscroll for every subsequent drag, not just this
+                    // frame. Swallowing it here just skips this one frame's scroll and lets the
+                    // loop try again next frame once the real scroll has settled.
+                }
+            }
         }
     }
     return state
@@ -163,7 +186,17 @@ class ReorderableLazySpannedGridState(
         get() = size.height
 
     override suspend fun scrollToItem(index: Int, offset: Int) {
-        gridState.scrollToItem(index, offset)
+        try {
+            gridState.scrollToItem(index, offset)
+        } catch (e: CancellationException) {
+            // ReorderableState.onDrag calls this (via its own `scope.launch { onMove(...);
+            // scrollToItem(...) }`, taken whenever the move involves the first visible item)
+            // completely independently of our own autoscroll loop — both compete for the same
+            // gridState scroll mutex. Same reasoning as that loop's own catch: left uncaught, this
+            // would propagate out of the *library's* scope.launch and cancel `scope` itself (a
+            // plain rememberCoroutineScope, not a supervisor) — silently disabling every future
+            // onMove routed through that same branch for the rest of the composition.
+        }
     }
 
     // The base implementation admits any candidate whose *rect* overlaps the dragged item's own

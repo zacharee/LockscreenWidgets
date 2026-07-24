@@ -116,6 +116,29 @@ fun <VM : BaseDelegate.BaseViewModel<*, *>> VM.WidgetGrid(
         gridState = lazyGridState,
     )
 
+    // Sets currentEditingId directly from reorderableState.draggingItemKey via snapshotFlow rather
+    // than a per-item LaunchedEffect(isDragging) inside each ReorderableItem — that per-item
+    // version only fires once *that specific composable* recomposes and notices isDragging
+    // changed, which lags behind reorderableState.draggingItemIndex's own (synchronous) update.
+    // Confirmed via logcat: dragging a widget could show currentEditingId still at NO_POSITION for
+    // the *entire* drag — every interceptUnclaimedDrags slop-check during it saw editingId=-1,
+    // never once catching up to the dragged widget's id — so interceptUnclaimedDrags' guard
+    // against stealing an in-progress reorder drag's touch (it only declines while
+    // currentEditingId != NO_POSITION) never actually engaged, and it stole the touch on the very
+    // next qualifying move. snapshotFlow reacts to the state write itself, not to a specific
+    // composable's recomposition, so there's no such lag.
+    //
+    // Deliberately one-directional — only *sets* currentEditingId when a drag starts, never clears
+    // it back to NO_POSITION when draggingItemKey goes null on drag end. The editing interface
+    // (resize handles etc., gated on currentEditingId elsewhere) is meant to stay up after a drag
+    // ends regardless of whether the widget's position actually changed; it's dismissed by
+    // dedicated code elsewhere (tapping outside, closing the frame — see currentEditingInterfaceId
+    // writes in BaseDelegate/MainWidgetFrameDelegate/DrawerDelegate), not implicitly by this.
+    LaunchedEffect(reorderableState) {
+        snapshotFlow { reorderableState.draggingItemKey }
+            .collect { key -> (key as? Int)?.let { currentEditingId = it } }
+    }
+
     val updatedMinColSpan by rememberUpdatedState(minColSpan)
     val updatedMinRowSpan by rememberUpdatedState(minRowSpan)
     val updatedRowCount by rememberUpdatedState(rowCount)
@@ -344,18 +367,6 @@ private fun <VM: BaseDelegate.BaseViewModel<*, *>> LazySpannedGridScope.widgetIt
                     null
                 }
 
-                LaunchedEffect(isDragging) {
-                    if (isDragging) {
-                        onCurrentEditingIdChanged(
-                            if (currentEditingId == updatedData.id) {
-                                RecyclerView.NO_POSITION
-                            } else {
-                                updatedData.id
-                            },
-                        )
-                    }
-                }
-
                 WidgetItemLayout(
                     needsReconfigure = widgetInfo == null,
                     widgetData = updatedData,
@@ -408,6 +419,9 @@ private fun <VM: BaseDelegate.BaseViewModel<*, *>> LazySpannedGridScope.widgetIt
                     rowCount = rowCount,
                     colCount = columnCount,
                     isEditing = currentEditingId == updatedData.id,
+                    onEditingDismissed = {
+                        onCurrentEditingIdChanged(RecyclerView.NO_POSITION)
+                    },
                     modifier = Modifier.fillMaxSize()
                         .scale(scale)
                         .alpha(alpha)
