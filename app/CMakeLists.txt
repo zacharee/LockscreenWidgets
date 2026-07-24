@@ -36,3 +36,5 @@ find_package(bugsnag-plugin-android-ndk REQUIRED CONFIG)
 target_link_libraries(${CMAKE_PROJECT_NAME} android log bugsnag-plugin-android-ndk::bugsnag-ndk)
 
 add_link_options("-Wl,--build-id=none")
+set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,--build-id=none")
+target_link_options(lockscreenwidgets PUBLIC "-Wl,--build-id=none")
