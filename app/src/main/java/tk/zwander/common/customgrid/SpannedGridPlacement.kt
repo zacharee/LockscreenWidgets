@@ -107,9 +107,8 @@ fun computeSpannedGridPlacement(
 
 /**
  * Derives [SpannedGridPlacementResult.totalRowCount]/[SpannedGridPlacementResult.rowToItemIndices]
- * from an already-decided [placements] list. Shared by [computeSpannedGridPlacement] and by
- * [measureSpannedGrid]'s frozen-geometry path, which reuses a prior drag's placements verbatim
- * instead of re-running the greedy scan.
+ * from an already-decided [placements] list. Used by [computeSpannedGridPlacement] to finish
+ * building its result once the greedy scan has placed every item.
  */
 fun buildPlacementResult(
     placements: List<SpannedGridItemPlacement>,

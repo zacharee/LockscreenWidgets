@@ -217,7 +217,10 @@ internal fun measureSpannedGrid(
             state.fadeOutAlphas[key] = alpha
             state.coroutineScope.launch {
                 alpha.animateTo(0f, fadeOutSpec)
-                state.fadeOutAlphas.remove(key)
+                // Only clear if nothing re-started this key's fade-out in the meantime (e.g. it
+                // scrolled back into view and back out again before this animation finished) —
+                // otherwise this would remove the newer Animatable's entry out from under it.
+                if (state.fadeOutAlphas[key] === alpha) state.fadeOutAlphas.remove(key)
             }
         }
 
