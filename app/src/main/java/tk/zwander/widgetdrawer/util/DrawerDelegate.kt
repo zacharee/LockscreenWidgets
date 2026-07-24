@@ -202,9 +202,10 @@ class DrawerDelegate private constructor(context: Context, displayId: String) :
                             SelectIconPackActivity.launchForOverride(context, holderId, true)
                         },
                         modifier = modifier,
-                        rowSpanForAddButton = 1,
+                        rowSpanForAddButton = 20,
                         enableSnapping = false,
                         contentPadding = combinedPadding.asPaddingValues(),
+                        minRowSpan = 5,
                     )
                 },
                 modifier = Modifier.fillMaxSize()
