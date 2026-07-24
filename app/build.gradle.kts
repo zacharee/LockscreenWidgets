@@ -123,7 +123,6 @@ dependencies {
     implementation(libs.material)
     implementation(libs.byte.buddy.android)
     implementation(libs.patreonSupportersRetrieval)
-    implementation(libs.spannedGridLayoutManager)
     implementation(libs.composeIntroSlider)
 
     implementation(platform(libs.compose.bom))
@@ -161,7 +160,11 @@ dependencies {
     implementation(libs.reorderable)
     implementation(libs.miui.autostart)
 
+    implementation(libs.composereorderable)
+
     implementation(project(":lswinterconnect"))
 
     coreLibraryDesugaring(libs.desugar.jdk.libs)
+
+    testImplementation(libs.junit)
 }

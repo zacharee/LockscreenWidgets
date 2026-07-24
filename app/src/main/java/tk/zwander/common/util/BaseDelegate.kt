@@ -10,13 +10,11 @@ import android.view.WindowManager
 import androidx.annotation.CallSuper
 import androidx.compose.ui.platform.compositionContext
 import androidx.lifecycle.*
-import androidx.recyclerview.widget.FixedItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import androidx.savedstate.SavedStateRegistry
 import androidx.savedstate.SavedStateRegistryController
 import androidx.savedstate.SavedStateRegistryOwner
 import androidx.savedstate.setViewTreeSavedStateRegistryOwner
-import com.arasthel.spannedgridlayoutmanager.SpannedGridLayoutManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -25,7 +23,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import tk.zwander.common.adapters.BaseAdapter
 import tk.zwander.common.data.WidgetData
 import tk.zwander.common.data.WidgetType
 import tk.zwander.common.data.provider.ICurrentWidgetsProvider
@@ -33,8 +30,6 @@ import tk.zwander.common.data.provider.IRowColumProvider
 import tk.zwander.common.host.WidgetHostCompat
 import tk.zwander.common.host.widgetHostCompat
 import tk.zwander.common.util.mitigations.SafeContextWrapper
-import tk.zwander.common.views.ScrollingItemTouchRecyclerView
-import java.util.concurrent.ConcurrentLinkedDeque
 
 @Suppress("MemberVisibilityCanBePrivate")
 abstract class BaseDelegate<State : Any>(
@@ -73,53 +68,23 @@ abstract class BaseDelegate<State : Any>(
         protected set
 
     protected abstract val prefsHandler: HandlerRegistry
-    protected abstract val adapter: BaseAdapter<*>
-    abstract val gridLayoutManager: LayoutManager
     protected abstract val params: WindowManager.LayoutParams
     protected abstract val rootView: View
-    protected abstract val recyclerView: ScrollingItemTouchRecyclerView
 
     protected val lifecycleRegistry by lazy { LifecycleRegistry(this) }
     protected val savedStateRegistryController by lazy { SavedStateRegistryController.create(this) }
     override val lifecycle: Lifecycle = lifecycleRegistry
     override val savedStateRegistry: SavedStateRegistry by lazy { savedStateRegistryController.savedStateRegistry }
 
-    private val touchHelperCallback by lazy {
-        createTouchHelperCallback(
-            adapter = adapter,
-            widgetMoved = this::onWidgetMoved,
-            onItemSelected = this::onItemSelected,
-            frameLocked = this::isLocked,
-            onItemActive = {
-                globalState.itemIsActive.value = it
-            },
-            viewModel = viewModel,
-        )
-    }
-    protected var itemTouchHelper: FixedItemTouchHelper? = null
-
     val isAttached: Boolean
         get() = rootView.isAttachedToWindow
-
-    protected fun setUpTouchHelper() {
-        globalState.itemIsActive.value = false
-        onItemSelected(selected = false, highlighted = false)
-//        recyclerView.cancelNestedScroll()
-        itemTouchHelper?.attachToRecyclerView(null)
-        itemTouchHelper = FixedItemTouchHelper(touchHelperCallback)
-        itemTouchHelper?.attachToRecyclerView(recyclerView)
-    }
 
     protected open val rootViewAttachmentStateListener = object : View.OnAttachStateChangeListener {
         override fun onViewAttachedToWindow(v: View) {
             lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_RESUME)
-            rootView.post {
-                setUpTouchHelper()
-            }
         }
 
         override fun onViewDetachedFromWindow(v: View) {
-            itemTouchHelper?.attachToRecyclerView(null)
             lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_PAUSE)
         }
     }
@@ -150,26 +115,7 @@ abstract class BaseDelegate<State : Any>(
         prefsHandler.register(this)
         eventManager.addObserver(this)
         widgetHost.addOnClickCallback(this)
-        gridLayoutManager.spanSizeLookup = adapter.spanSizeLookup
-        recyclerView.setHasFixedSize(true)
-        recyclerView.adapter = adapter
-        recyclerView.layoutManager = gridLayoutManager
-
-        setUpTouchHelper()
-        recyclerView.nestedScrollingListener = {
-            itemTouchHelper?.attachToRecyclerView(
-                if (it) {
-                    null
-                } else {
-                    recyclerView
-                },
-            )
-        }
         rootView.addOnAttachStateChangeListener(rootViewAttachmentStateListener)
-
-        adapter.updateWidgets(currentWidgets)
-
-        updateCounts()
 
         viewModel.viewModelScope.launch {
             displayFlow.collect {
@@ -196,7 +142,7 @@ abstract class BaseDelegate<State : Any>(
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
             @SuppressLint("ClickableViewAccessibility")
-            recyclerView.setOnTouchListener { _, event ->
+            rootView.setOnTouchListener { _, event ->
                 gestureDetector.onTouchEvent(event)
                 false
             }
@@ -210,12 +156,10 @@ abstract class BaseDelegate<State : Any>(
         eventManager.removeObserver(this)
         prefsHandler.unregister(this)
         widgetHost.removeOnClickCallback(this)
-        itemTouchHelper?.attachToRecyclerView(null)
 
         rootView.removeOnAttachStateChangeListener(rootViewAttachmentStateListener)
         recomposer.cancel()
 
-        currentWidgets = adapter.widgets.toMutableSet()
         if (lifecycle.currentState > Lifecycle.State.INITIALIZED) {
             lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_DESTROY)
         }
@@ -230,11 +174,7 @@ abstract class BaseDelegate<State : Any>(
     override suspend fun onEvent(event: Event) {
         when (event) {
             is Event.RemoveWidgetConfirmed -> {
-                val position = currentWidgets.indexOf(event.item)
-
                 if (event.remove && currentWidgets.contains(event.item)) {
-                    updateCommonState { it.copy(updatedForMoveOrRemove = true) }
-
                     val newWidgets = currentWidgets.toMutableSet().apply {
                         remove(event.item)
                         when (event.item?.safeType) {
@@ -247,17 +187,9 @@ abstract class BaseDelegate<State : Any>(
                         }
                     }
 
-                    viewModel.currentEditingInterfacePosition.value = RecyclerView.NO_POSITION
-                    adapter.updateWidgets(newWidgets)
-                    gridLayoutManager.doOnLayoutCompleted {
-                        if (!recyclerView.isComputingLayout) {
-                            adapter.notifyDataSetChanged()
-                        }
-                    }
+                    viewModel.currentEditingInterfaceId.value = RecyclerView.NO_POSITION
                     currentWidgets = newWidgets
                 }
-
-                widgetRemovalConfirmed(event, position)
             }
 
             else -> {}
@@ -288,27 +220,6 @@ abstract class BaseDelegate<State : Any>(
         commonState = newState
     }
 
-    @CallSuper
-    protected open fun onWidgetMoved(moved: Boolean) {
-        if (moved) {
-            updateCommonState { it.copy(updatedForMoveOrRemove = true) }
-            currentWidgets = adapter.widgets.toMutableSet()
-            viewModel.currentEditingInterfacePosition.value = RecyclerView.NO_POSITION
-        }
-    }
-
-    /**
-     * Make sure the number of rows/columns in the frame/drawer reflects the user-selected value.
-     */
-    protected fun updateCounts() {
-        val counts = gridSize
-
-        gridLayoutManager.apply {
-            counts.width.let { columnCount = it }
-            counts.height.let { rowCount = it }
-        }
-    }
-
     /**
      * Force the display to remain on, or remove that force.
      *
@@ -326,15 +237,7 @@ abstract class BaseDelegate<State : Any>(
         }
     }
 
-    @CallSuper
-    protected open fun onItemSelected(selected: Boolean, highlighted: Boolean) {
-        recyclerView.selectedItem = selected || highlighted
-        updateCommonState { it.copy(isHoldingItem = selected, isItemHighlighted = highlighted) }
-    }
-
     protected abstract fun isLocked(): Boolean
-
-    protected open fun widgetRemovalConfirmed(event: Event.RemoveWidgetConfirmed, position: Int) {}
 
     protected abstract suspend fun updateWindow()
 
@@ -344,53 +247,7 @@ abstract class BaseDelegate<State : Any>(
         }
     }
 
-    data class BaseState(
-        val isHoldingItem: Boolean = false,
-        val isItemHighlighted: Boolean = false,
-        val updatedForMoveOrRemove: Boolean = false,
-    )
-
-    abstract class LayoutManager(
-        private val context: Context,
-        orientation: Int,
-        rowCount: Int,
-        colCount: Int,
-    ) : SpannedGridLayoutManager(
-        context = context,
-        orientation = orientation,
-        _rowCount = rowCount,
-        _columnCount = colCount,
-    ) {
-        private val onLayoutCompletedCallbacks = ConcurrentLinkedDeque<() -> Unit>()
-
-        override fun makeAndAddView(
-            position: Int,
-            direction: Direction,
-            recycler: RecyclerView.Recycler,
-        ): View {
-            return try {
-                super.makeAndAddView(position, direction, recycler)
-            } catch (e: Throwable) {
-                context.logUtils.normalLog("Error laying out widget view at $position.", e)
-                context.createWidgetErrorView()
-            }
-        }
-
-        override fun onLayoutCompleted(state: RecyclerView.State?) {
-            super.onLayoutCompleted(state)
-
-            onLayoutCompletedCallbacks.removeAll {
-                mainHandler.post {
-                    it()
-                }
-                true
-            }
-        }
-
-        fun doOnLayoutCompleted(callback: () -> Unit) {
-            onLayoutCompletedCallbacks.add(callback)
-        }
-    }
+    class BaseState
 
     @SuppressLint("StaticFieldLeak")
     abstract class BaseViewModel<State : Any, Delegate : BaseDelegate<State>>(
@@ -398,7 +255,7 @@ abstract class BaseDelegate<State : Any>(
     ) : ViewModel(), IRowColumProvider, ICurrentWidgetsProvider {
         val itemToRemove = MutableStateFlow<WidgetData?>(null)
         val isResizingItem = MutableStateFlow(false)
-        val currentEditingInterfacePosition = MutableStateFlow(RecyclerView.NO_POSITION)
+        val currentEditingInterfaceId = MutableStateFlow(RecyclerView.NO_POSITION)
 
         val params: WindowManager.LayoutParams
             get() = delegate.params

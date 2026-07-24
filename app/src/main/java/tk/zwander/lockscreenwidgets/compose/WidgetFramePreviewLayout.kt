@@ -2,12 +2,13 @@ package tk.zwander.lockscreenwidgets.compose
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewConfiguration
 import android.view.WindowManager
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -18,26 +19,24 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.compose.LocalLifecycleOwner
-import androidx.recyclerview.widget.RecyclerView
 import androidx.savedstate.SavedStateRegistry
 import androidx.savedstate.SavedStateRegistryOwner
 import androidx.savedstate.compose.LocalSavedStateRegistryOwner
+import tk.zwander.common.compose.WidgetGrid
 import tk.zwander.common.compose.util.rememberPreferenceState
 import tk.zwander.common.data.provider.IFrameProvider
 import tk.zwander.common.host.widgetHostCompat
 import tk.zwander.common.util.*
 import tk.zwander.common.util.BaseDelegate.BaseState
-import tk.zwander.common.views.SnappyRecyclerView
-import tk.zwander.lockscreenwidgets.adapters.WidgetFrameAdapter
-import tk.zwander.lockscreenwidgets.databinding.WidgetGridHolderBinding
+import tk.zwander.lockscreenwidgets.util.FramePrefs
 import tk.zwander.lockscreenwidgets.util.FrameSpecificPreferences
 import tk.zwander.lockscreenwidgets.util.MainWidgetFrameDelegate
 
@@ -56,12 +55,6 @@ fun WidgetFramePreviewLayout(
         val lifecycleOwner = LocalLifecycleOwner.current
         val savedStateRegistryOwner = LocalSavedStateRegistryOwner.current
 
-        val widgetGridView = remember {
-            WidgetGridHolderBinding.inflate(
-                LayoutInflater.from(context.themedContext),
-            ).root
-        }
-
         val frameSize = remember(frameId) {
             FrameSizeAndPosition.getInstance(context).getSizeForType(
                 type = FrameSizeAndPosition.FrameType.SecondaryLockscreen.Portrait(frameId),
@@ -75,8 +68,15 @@ fun WidgetFramePreviewLayout(
             }
         }
 
-        var dummyDelegate by remember(frameId) {
-            mutableStateOf<PreviewDelegate?>(null)
+        val dummyDelegate = remember(frameId) {
+            PreviewDelegate(
+                themedContext = context.themedContext,
+                targetDisplayId = display.uniqueIdCompat,
+                lifecycleOwner = lifecycleOwner,
+                frameId = frameId,
+                view = view,
+                savedStateRegistryOwner = savedStateRegistryOwner,
+            )
         }
 
         val framePrefs = remember(frameId) {
@@ -92,18 +92,6 @@ fun WidgetFramePreviewLayout(
             value = { Color(framePrefs.backgroundColor) },
         )
         val animatedBackgroundColor by animateColorAsState(backgroundColor)
-
-        LifecycleEffect(Lifecycle.State.RESUMED) {
-            dummyDelegate = PreviewDelegate(
-                themedContext = context.themedContext,
-                targetDisplayId = display.uniqueIdCompat,
-                lifecycleOwner = lifecycleOwner,
-                frameId = frameId,
-                view = view,
-                widgetGridView = widgetGridView,
-                savedStateRegistryOwner = savedStateRegistryOwner,
-            )
-        }
 
         DisposableEffect(frameId) {
             val listener = "$frameId-preview-layout"
@@ -131,35 +119,46 @@ fun WidgetFramePreviewLayout(
                     value = { context.prefManager.pageIndicatorBehavior },
                 )
 
-                AndroidView(
-                    factory = {
-                        widgetGridView.andRemoveFromParent()
-                    },
-                    update = {
-                        it.layoutManager = dummyDelegate?.gridLayoutManager
-                        it.adapter = dummyDelegate?.widgetGridAdapter
-                        dummyDelegate?.widgetGridAdapter?.updateWidgets(dummyDelegate?.currentWidgets.orEmpty())
+                val rowCount by rememberPreferenceState(
+                    key = framePrefs.keyFor(FramePrefs.KEY_FRAME_ROW_COUNT),
+                ) {
+                    framePrefs.rowCount
+                }
+                val columnCount by rememberPreferenceState(
+                    key = framePrefs.keyFor(FramePrefs.KEY_FRAME_COL_COUNT),
+                ) {
+                    framePrefs.colCount
+                }
 
-                        it.scaleX = scale
-                        it.scaleY = scale
-
-                        it.isHorizontalScrollBarEnabled =
-                            pageIndicatorBehavior != PrefManager.VALUE_PAGE_INDICATOR_BEHAVIOR_HIDDEN
-                        it.isScrollbarFadingEnabled =
-                            pageIndicatorBehavior == PrefManager.VALUE_PAGE_INDICATOR_BEHAVIOR_AUTO_HIDE
-                        it.scrollBarFadeDuration =
-                            if (pageIndicatorBehavior == PrefManager.VALUE_PAGE_INDICATOR_BEHAVIOR_AUTO_HIDE) {
-                                ViewConfiguration.getScrollBarFadeDuration()
-                            } else {
-                                0
-                            }
-                    },
-                    modifier = Modifier.fillMaxSize()
-                        .requiredSize(
-                            width = frameSize.x.dp,
-                            height = frameSize.y.dp,
-                        ),
+                var currentWidgetsState by rememberPreferenceState(
+                    key = FramePrefs.generateCurrentWidgetsKey(frameId),
+                    value = { framePrefs.currentWidgets.toList() },
+                    onChanged = { _, value -> framePrefs.currentWidgets = value.toSet() },
                 )
+
+                Box(
+                    modifier = Modifier.requiredSize(
+                        width = frameSize.x.dp,
+                        height = frameSize.y.dp,
+                    ),
+                ) {
+                    dummyDelegate.viewModel.WidgetGrid(
+                        currentWidgets = currentWidgetsState,
+                        onWidgetsChanged = { widgets ->
+                            currentWidgetsState = widgets
+                        },
+                        orientation = Orientation.Horizontal,
+                        columnCount = columnCount,
+                        rowCount = rowCount,
+                        resizeThresholdPx = { 0 },
+                        launchAddActivity = {},
+                        launchReconfigure = { _, _ -> },
+                        launchShortcutIconOverride = {},
+                        modifier = Modifier.scale(scale),
+                        rowSpanForAddButton = 1,
+                        enableSnapping = true,
+                    )
+                }
 
                 Box(
                     modifier = Modifier.clickable(
@@ -178,7 +177,6 @@ class PreviewDelegate(
     themedContext: Context,
     targetDisplayId: String,
     view: View,
-    widgetGridView: SnappyRecyclerView,
     private val lifecycleOwner: LifecycleOwner,
     private val savedStateRegistryOwner: SavedStateRegistryOwner,
     private val frameId: Int,
@@ -197,49 +195,11 @@ class PreviewDelegate(
 
     override val viewModel
         get() = PreviewViewModel()
-    val widgetGridAdapter = WidgetFrameAdapter(
-        context = themedContext,
-        viewModel = viewModel,
-    )
 
     override var state: BaseState = BaseState()
     override val prefsHandler: HandlerRegistry = HandlerRegistry {}
-    override val adapter = widgetGridAdapter
-    override val gridLayoutManager: LayoutManager = object : LayoutManager(
-        themedContext,
-        RecyclerView.HORIZONTAL,
-        framePrefs.rowCount,
-        framePrefs.colCount,
-    ), ISnappyLayoutManager {
-        override fun canScrollHorizontally(): Boolean {
-            return false
-        }
-
-        override fun getPositionForVelocity(
-            velocityX: Int,
-            velocityY: Int,
-        ): Int {
-            return 0
-        }
-
-        override fun getFixScrollPos(
-            velocityX: Int,
-            velocityY: Int,
-        ): Int {
-            return 0
-        }
-
-        override fun canSnap(): Boolean {
-            return false
-        }
-    }
     override val params: WindowManager.LayoutParams = WindowManager.LayoutParams()
     override val rootView: View = view
-    override val recyclerView: SnappyRecyclerView = widgetGridView
-
-    init {
-        gridLayoutManager.spanSizeLookup = adapter.spanSizeLookup
-    }
 
     override fun isLocked(): Boolean {
         return false

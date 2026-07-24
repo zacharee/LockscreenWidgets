@@ -1,20 +1,15 @@
 package tk.zwander.lockscreenwidgets.util
 
 import android.content.Context
-import android.graphics.Bitmap
-import android.graphics.Matrix
-import android.graphics.PixelFormat
-import android.graphics.Point
-import android.graphics.PointF
+import android.graphics.*
 import android.graphics.drawable.Drawable
-import android.view.Display
-import android.view.Gravity
-import android.view.LayoutInflater
-import android.view.Surface
-import android.view.View
-import android.view.WindowManager
+import android.view.*
+import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.core.graphics.component1
@@ -31,42 +26,19 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import tk.zwander.common.activities.DismissOrUnlockActivity
+import tk.zwander.common.activities.SelectIconPackActivity
+import tk.zwander.common.compose.WidgetGrid
 import tk.zwander.common.compose.util.createComposeViewHolder
 import tk.zwander.common.compose.util.findAccessibility
+import tk.zwander.common.compose.util.rememberPreferenceState
+import tk.zwander.common.customgrid.rememberLazySpannedGridState
 import tk.zwander.common.data.provider.IFramePrefsProvider
 import tk.zwander.common.data.provider.IFrameProvider
-import tk.zwander.common.util.BaseDelegate
-import tk.zwander.common.util.DrawerOrFrame
-import tk.zwander.common.util.Event
-import tk.zwander.common.util.FrameSizeAndPosition
-import tk.zwander.common.util.GlobalState
-import tk.zwander.common.util.HandlerRegistry
-import tk.zwander.common.util.ISnappyLayoutManager
-import tk.zwander.common.util.PrefManager
-import tk.zwander.common.util.eventManager
-import tk.zwander.common.util.fadeAndScaleIn
-import tk.zwander.common.util.fadeAndScaleOut
-import tk.zwander.common.util.frameSizeAndPosition
-import tk.zwander.common.util.globalState
-import tk.zwander.common.util.handler
-import tk.zwander.common.util.logUtils
-import tk.zwander.common.util.lsDisplayManager
-import tk.zwander.common.util.mainHandler
-import tk.zwander.common.util.prefManager
-import tk.zwander.common.util.remove
-import tk.zwander.common.util.safeAddView
-import tk.zwander.common.util.safeRemoveView
-import tk.zwander.common.util.set
-import tk.zwander.common.util.themedContext
-import tk.zwander.common.util.wallpaperClient
-import tk.zwander.common.util.wallpaperUtils
-import tk.zwander.common.views.SnappyRecyclerView
-import tk.zwander.lockscreenwidgets.adapters.WidgetFrameAdapter
+import tk.zwander.common.listeners.WidgetResizeListener
+import tk.zwander.common.util.*
+import tk.zwander.lockscreenwidgets.activities.add.ReconfigureFrameWidgetActivity
 import tk.zwander.lockscreenwidgets.compose.WidgetFrameLayout
 import tk.zwander.lockscreenwidgets.data.Mode
-import tk.zwander.lockscreenwidgets.databinding.WidgetGridHolderBinding
-import kotlin.math.ceil
-import kotlin.math.floor
 
 /**
  * Handle most of the logic involving the widget frame.
@@ -231,58 +203,93 @@ open class MainWidgetFrameDelegate protected constructor(
         }
     }
 
-    private val widgetGrid by lazy {
-        WidgetGridHolderBinding.inflate(
-            LayoutInflater.from(themedContext),
-        ).root
-    }
-
     private val frame by lazy {
         viewModel.createComposeViewHolder {
             WidgetFrameLayout(
-                widgetGrid = widgetGrid,
+                widgetGrid = { modifier ->
+                    val gridState = rememberLazySpannedGridState()
+                    val rowCount by rememberPreferenceState(
+                        key = framePrefs.keyFor(FramePrefs.KEY_FRAME_ROW_COUNT),
+                    ) {
+                        framePrefs.rowCount
+                    }
+                    val columnCount by rememberPreferenceState(
+                        key = framePrefs.keyFor(FramePrefs.KEY_FRAME_COL_COUNT),
+                    ) {
+                        framePrefs.colCount
+                    }
+                    var currentWidgetsState by rememberPreferenceState(
+                        key = FramePrefs.generateCurrentWidgetsKey(id),
+                        value = { currentWidgets.toList() },
+                        onChanged = { _, value -> currentWidgets = value.toSet() },
+                    )
+
+                    val rememberFramePosition by rememberPreferenceState(
+                        key = PrefManager.KEY_FRAME_REMEMBER_POSITION,
+                    ) {
+                        prefManager.rememberFramePosition
+                    }
+                    var storedPosition by rememberPreferenceState(
+                        key = framePrefs.keyFor(PrefManager.KEY_CURRENT_PAGE),
+                        value = { framePrefs.currentIndex },
+                        onChanged = { _, value ->
+                            framePrefs.currentIndex = value
+                        },
+                    )
+
+                    LaunchedEffect(null) {
+                        if (rememberFramePosition) {
+                            gridState.scrollToLine(storedPosition)
+                        }
+                    }
+
+                    LaunchedEffect(gridState.firstVisibleLine) {
+                        storedPosition = gridState.firstVisibleLine
+                    }
+
+                    WidgetGrid(
+                        currentWidgets = currentWidgetsState,
+                        onWidgetsChanged = { widgets ->
+                            currentWidgetsState = widgets
+                        },
+                        orientation = Orientation.Horizontal,
+                        columnCount = columnCount,
+                        rowCount = rowCount,
+                        resizeThresholdPx = { which ->
+                            val display = viewModel.display.orDefault(context)
+                            val frameSize = frameSizeAndPosition.getSizeForType(viewModel.saveMode, display)
+                            if (which == WidgetResizeListener.Which.LEFT || which == WidgetResizeListener.Which.RIGHT) {
+                                display.dpToPx(frameSize.x.toInt()) / colCount
+                            } else {
+                                display.dpToPx(frameSize.y.toInt()) / rowCount
+                            }
+                        },
+                        launchAddActivity = {
+                            context.eventManager.sendEvent(Event.LaunchAddWidget(holderId))
+                        },
+                        launchReconfigure = { id, providerInfo ->
+                            ReconfigureFrameWidgetActivity.launch(context, id, holderId, providerInfo)
+                        },
+                        launchShortcutIconOverride = {
+                            SelectIconPackActivity.launchForOverride(context, id)
+                        },
+                        modifier = modifier,
+                        rowSpanForAddButton = 1,
+                        enableSnapping = true,
+                        lazyGridState = gridState,
+                    )
+                },
                 modifier = Modifier.fillMaxSize(),
             )
         }.also { it.setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed) }
     }
 
-    override val gridLayoutManager = SpannedLayoutManager()
-
     override val rootView: View
         get() = frame
-    override val recyclerView: SnappyRecyclerView
-        get() = widgetGrid
 
     override val viewModel = WidgetFrameViewModel(this)
 
-    override val adapter by lazy {
-        WidgetFrameAdapter(
-            context = context,
-            viewModel = viewModel,
-        )
-    }
-
     override val prefsHandler = HandlerRegistry {
-        handler(FramePrefs.generateCurrentWidgetsKey(id)) {
-            //Make sure the adapter knows of any changes to the widget list
-            if (!commonState.updatedForMoveOrRemove) {
-                //Only run the update if it wasn't generated by a reorder event
-                adapter.updateWidgets(currentWidgets)
-
-                mainHandler.postDelayed({
-                    scrollToStoredPosition(true)
-                }, 50)
-            } else {
-                updateCommonState { it.copy(updatedForMoveOrRemove = false) }
-            }
-        }
-        handler(
-            FramePrefs.generatePrefKey(FramePrefs.KEY_FRAME_ROW_COUNT, id),
-            FramePrefs.generatePrefKey(FramePrefs.KEY_FRAME_COL_COUNT, id),
-        ) {
-            updateCounts()
-            adapter.updateViews()
-        }
         handler(framePrefs.keyFor(PrefManager.KEY_FRAME_MASKED_MODE)) {
             updateWallpaperLayerIfNeeded()
         }
@@ -292,7 +299,7 @@ open class MainWidgetFrameDelegate protected constructor(
         handler(
             PrefManager.KEY_LOCK_WIDGET_FRAME,
         ) {
-            viewModel.currentEditingInterfacePosition.value = RecyclerView.NO_POSITION
+            viewModel.currentEditingInterfaceId.value = RecyclerView.NO_POSITION
         }
         handler(PrefManager.KEY_WIDGET_FRAME_ENABLED) {
             lifecycleScope.launch {
@@ -373,10 +380,6 @@ open class MainWidgetFrameDelegate protected constructor(
                 }
             }
 
-            Event.NightModeUpdate -> {
-                adapter.updateViews()
-            }
-
             is Event.CenterFrameHorizontally -> {
                 if (event.frameId == id) {
                     this@MainWidgetFrameDelegate.display?.let { display ->
@@ -447,7 +450,6 @@ open class MainWidgetFrameDelegate protected constructor(
                     if (event.isUp) {
                         eventManager.sendEvent(Event.FrameResizeFinished(id))
                         updateWallpaperLayerIfNeeded()
-                        adapter.updateViews()
                     }
                 }
             }
@@ -488,7 +490,7 @@ open class MainWidgetFrameDelegate protected constructor(
     }
 
     override fun onWidgetClick(trigger: Boolean): Boolean {
-        val ignoreTouches = framePrefs.ignoreWidgetTouches || commonState.isItemHighlighted || globalState.itemIsActive.value
+        val ignoreTouches = framePrefs.ignoreWidgetTouches || globalState.itemIsActive.value
 
         if (!ignoreTouches) {
             if (trigger && prefManager.requestUnlock && prefManager.frameDirectlyCheckForActivity) {
@@ -510,8 +512,6 @@ open class MainWidgetFrameDelegate protected constructor(
         if (created) {
             return
         }
-
-        scrollToStoredPosition(false)
 
         viewModel.viewModelScope.launch(Dispatchers.Main) {
             lsDisplayManager.displayPowerStates
@@ -595,19 +595,6 @@ open class MainWidgetFrameDelegate protected constructor(
         updateWindowState(updateAccessibility)
     }
 
-    override fun widgetRemovalConfirmed(event: Event.RemoveWidgetConfirmed, position: Int) {
-        if (event.remove) {
-            widgetGrid.post {
-                val pos = when (val pos = gridLayoutManager.firstVisiblePosition) {
-                    RecyclerView.NO_POSITION -> (position - 1).coerceAtLeast(0)
-                    else -> pos
-                }
-
-                widgetGrid.scrollToPosition(pos)
-            }
-        }
-    }
-
     private suspend fun addWindow() {
         logUtils.debugLog("Adding overlay", null)
 
@@ -638,7 +625,7 @@ open class MainWidgetFrameDelegate protected constructor(
         }
 
         withContext(Dispatchers.Main + NonCancellable) {
-            viewModel.currentEditingInterfacePosition.value = RecyclerView.NO_POSITION
+            viewModel.currentEditingInterfaceId.value = RecyclerView.NO_POSITION
 
             globalState.handlingClick.remove(id)
             forceWakelock(on = false, updateOverlay = false)
@@ -674,14 +661,6 @@ open class MainWidgetFrameDelegate protected constructor(
         try {
             if (attached) {
                 updateWallpaperLayerIfNeeded()
-                //Even with the startListening() call above,
-                //it doesn't seem like pending updates always get
-                //dispatched. Rebinding all the widgets forces
-                //them to update.
-                if (prefManager.frameForceWidgetReload) {
-                    adapter.updateViews()
-                }
-                scrollToStoredPosition(false)
             }
         } catch (e: NullPointerException) {
             //The stupid "Attempt to read from field 'com.android.server.appwidget.AppWidgetServiceImpl$ProviderId
@@ -960,8 +939,6 @@ open class MainWidgetFrameDelegate protected constructor(
 
             updateOverlay()
             updateWallpaperLayerIfNeeded()
-            adapter.updateViews()
-            scrollToStoredPosition(true)
         }
     }
 
@@ -972,57 +949,6 @@ open class MainWidgetFrameDelegate protected constructor(
             params.flags and WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE.inv()
         }
         updateOverlay()
-    }
-
-    private fun scrollToStoredPosition(override: Boolean = false) {
-        try {
-            gridLayoutManager.scrollToPosition(if (override || prefManager.rememberFramePosition) framePrefs.currentIndex else 0)
-        } catch (e: Throwable) {
-            logUtils.debugLog("Error scrolling to stored position ${framePrefs.currentIndex}, " +
-                    "override=$override, " +
-                    "remember=${prefManager.rememberFramePosition}", e)
-        }
-    }
-
-    //Parts based on https://stackoverflow.com/a/26445064/5496177
-    inner class SpannedLayoutManager : LayoutManager(
-        this@MainWidgetFrameDelegate,
-        RecyclerView.HORIZONTAL,
-        framePrefs.rowCount,
-        framePrefs.colCount,
-    ), ISnappyLayoutManager {
-        override fun canScrollHorizontally(): Boolean {
-            return (viewModel.currentEditingInterfacePosition.value == RecyclerView.NO_POSITION ||
-                    commonState.isHoldingItem) && super.canScrollHorizontally()
-        }
-
-        override fun getFixScrollPos(velocityX: Int, velocityY: Int): Int {
-            return getPositionForVelocity(-velocityX, -velocityY)
-        }
-
-        override fun getPositionForVelocity(velocityX: Int, velocityY: Int): Int {
-            if (childCount == 0) return 0
-
-            return if (velocityX > 0) {
-                val targetRow = (ceil(
-                    rectsHelper.getRowIndexForItemPosition(lastVisiblePosition)
-                        .toDouble() / columnCount
-                ) * columnCount).toInt()
-                rectsHelper.rows[targetRow]?.lastOrNull() ?: lastVisiblePosition
-            } else {
-                val targetRow = (floor(
-                    rectsHelper.getRowIndexForItemPosition(firstVisiblePosition)
-                        .toDouble() / columnCount
-                ) * columnCount).toInt()
-                rectsHelper.rows[targetRow]?.firstOrNull() ?: firstVisiblePosition
-            }.also {
-                framePrefs.currentIndex = it
-            }.run { if (this == RecyclerView.NO_POSITION) 0 else this }
-        }
-
-        override fun canSnap(): Boolean {
-            return viewModel.currentEditingInterfacePosition.value == RecyclerView.NO_POSITION
-        }
     }
 
     data class State(

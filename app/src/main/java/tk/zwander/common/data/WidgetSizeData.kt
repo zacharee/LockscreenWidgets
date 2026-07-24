@@ -1,6 +1,7 @@
 package tk.zwander.common.data
 
 import android.os.Parcelable
+import androidx.compose.ui.unit.IntSize
 import kotlinx.parcelize.Parcelize
 import kotlin.math.max
 
@@ -23,6 +24,10 @@ data class WidgetSizeData(
      */
     val safeWidgetHeightSpan: Int
         get() = max(widgetHeightSpan, 1)
+
+    fun toIntSize(): IntSize {
+        return IntSize(safeWidgetWidthSpan, safeWidgetHeightSpan)
+    }
 
     fun safeCopy(
         widgetWidthSpan: Int = safeWidgetWidthSpan,
