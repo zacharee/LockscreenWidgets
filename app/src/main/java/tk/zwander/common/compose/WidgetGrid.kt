@@ -1,6 +1,7 @@
 package tk.zwander.common.compose
 
 import android.annotation.SuppressLint
+import android.appwidget.AppWidgetManager
 import android.appwidget.AppWidgetProviderInfo
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -135,10 +136,109 @@ fun <VM : BaseDelegate.BaseViewModel<*, *>> VM.WidgetGrid(
             }
         }
     }
+    val updatedSpans by rememberUpdatedState(spans)
+    val updatedRowSpanForAddButton by rememberUpdatedState(rowSpanForAddButton)
 
-    val currentWidgetsList = updatedCurrentWidgets
+    val flingBehavior = if (enableSnapping) {
+        rememberSpannedGridSnapFlingBehavior(lazyGridState)
+    } else {
+        null
+    }
 
-    val scopeContent: LazySpannedGridScope.() -> Unit = {
+    val layoutDirection = LocalLayoutDirection.current
+    val coroutineScope = rememberCoroutineScope()
+    val rootView = LocalView.current
+
+    LaunchedEffect(currentEditingId) {
+        globalState.handlingClick.remove(holderId)
+        globalState.itemIsActive.value = currentEditingId != RecyclerView.NO_POSITION
+    }
+
+    if (orientation == Orientation.Vertical) {
+        LazyVerticalSpannedGrid(
+            columnCount = columnCount,
+            rowCount = rowCount,
+            state = reorderableState.gridState,
+            flingBehavior = flingBehavior,
+            modifier = modifier
+                .interceptUnclaimedDrags(lazyGridState, orientation, layoutDirection, coroutineScope, rootView, currentEditingId, flingBehavior)
+                .reorderable(reorderableState)
+                .detectReorderAfterLongPress(reorderableState),
+            contentPadding = contentPadding,
+        ) {
+            widgetItems(
+                currentWidgetsList = updatedCurrentWidgets,
+                columnCount = updatedColumnCount,
+                rowCount = updatedRowCount,
+                rowSpanForAddButton = updatedRowSpanForAddButton,
+                launchAddActivity = launchAddActivity,
+                launchReconfigure = launchReconfigure,
+                launchShortcutIconOverride = launchShortcutIconOverride,
+                spans = updatedSpans,
+                reorderableState = reorderableState,
+                manager = manager,
+                currentEditingId = currentEditingId,
+                onCurrentEditingIdChanged = {
+                    currentEditingId = it
+                },
+                onWidgetsChanged = onWidgetsChanged,
+                resizeThresholdPx = resizeThresholdPx,
+                viewModel = this@WidgetGrid,
+            )
+        }
+    } else {
+        LazyHorizontalSpannedGrid(
+            columnCount = columnCount,
+            rowCount = rowCount,
+            state = reorderableState.gridState,
+            flingBehavior = flingBehavior,
+            modifier = modifier
+                .interceptUnclaimedDrags(lazyGridState, orientation, layoutDirection, coroutineScope, rootView, currentEditingId, flingBehavior)
+                .reorderable(reorderableState)
+                .detectReorderAfterLongPress(reorderableState),
+            contentPadding = contentPadding,
+        ) {
+            widgetItems(
+                currentWidgetsList = updatedCurrentWidgets,
+                columnCount = updatedColumnCount,
+                rowCount = updatedRowCount,
+                rowSpanForAddButton = updatedRowSpanForAddButton,
+                launchAddActivity = launchAddActivity,
+                launchReconfigure = launchReconfigure,
+                launchShortcutIconOverride = launchShortcutIconOverride,
+                spans = updatedSpans,
+                reorderableState = reorderableState,
+                manager = manager,
+                currentEditingId = currentEditingId,
+                onCurrentEditingIdChanged = {
+                    currentEditingId = it
+                },
+                onWidgetsChanged = onWidgetsChanged,
+                resizeThresholdPx = resizeThresholdPx,
+                viewModel = this@WidgetGrid,
+            )
+        }
+    }
+}
+
+private fun <VM: BaseDelegate.BaseViewModel<*, *>> LazySpannedGridScope.widgetItems(
+    currentWidgetsList: List<WidgetData>,
+    columnCount: Int,
+    rowCount: Int,
+    rowSpanForAddButton: Int,
+    launchAddActivity: () -> Unit,
+    launchReconfigure: (id: Int, providerInfo: AppWidgetProviderInfo) -> Unit,
+    launchShortcutIconOverride: (id: Int) -> Unit,
+    spans: List<IntSize>,
+    reorderableState: ReorderableLazySpannedGridState,
+    manager: AppWidgetManager,
+    currentEditingId: Int,
+    onCurrentEditingIdChanged: (Int) -> Unit,
+    onWidgetsChanged: (List<WidgetData>) -> Unit,
+    resizeThresholdPx: (which: WidgetResizeListener.Which) -> Int,
+    viewModel: VM,
+) {
+    with(viewModel) {
         if (currentWidgetsList.isEmpty()) {
             item(key = "ADD", span = SpannedGridItemSpan(columnCount, rowSpanForAddButton)) {
                 MeasuredComposable(name = "AddWidgetLayout") {
@@ -246,11 +346,13 @@ fun <VM : BaseDelegate.BaseViewModel<*, *>> VM.WidgetGrid(
 
                 LaunchedEffect(isDragging) {
                     if (isDragging) {
-                        currentEditingId = if (currentEditingId == updatedData.id) {
-                            RecyclerView.NO_POSITION
-                        } else {
-                            updatedData.id
-                        }
+                        onCurrentEditingIdChanged(
+                            if (currentEditingId == updatedData.id) {
+                                RecyclerView.NO_POSITION
+                            } else {
+                                updatedData.id
+                            },
+                        )
                     }
                 }
 
@@ -315,51 +417,6 @@ fun <VM : BaseDelegate.BaseViewModel<*, *>> VM.WidgetGrid(
                     doubleTapTurnOffKey = doubleTapTurnOffDisplayKey,
                 )
             }
-        }
-    }
-
-    val flingBehavior = if (enableSnapping) {
-        rememberSpannedGridSnapFlingBehavior(lazyGridState)
-    } else {
-        null
-    }
-
-    val layoutDirection = LocalLayoutDirection.current
-    val coroutineScope = rememberCoroutineScope()
-    val rootView = LocalView.current
-
-    LaunchedEffect(currentEditingId) {
-        globalState.handlingClick.remove(holderId)
-        globalState.itemIsActive.value = currentEditingId != RecyclerView.NO_POSITION
-    }
-
-    if (orientation == Orientation.Vertical) {
-        LazyVerticalSpannedGrid(
-            columnCount = columnCount,
-            rowCount = rowCount,
-            state = reorderableState.gridState,
-            flingBehavior = flingBehavior,
-            modifier = modifier
-                .interceptUnclaimedDrags(lazyGridState, orientation, layoutDirection, coroutineScope, rootView, currentEditingId, flingBehavior)
-                .reorderable(reorderableState)
-                .detectReorderAfterLongPress(reorderableState),
-            contentPadding = contentPadding,
-        ) {
-            scopeContent()
-        }
-    } else {
-        LazyHorizontalSpannedGrid(
-            columnCount = columnCount,
-            rowCount = rowCount,
-            state = reorderableState.gridState,
-            flingBehavior = flingBehavior,
-            modifier = modifier
-                .interceptUnclaimedDrags(lazyGridState, orientation, layoutDirection, coroutineScope, rootView, currentEditingId, flingBehavior)
-                .reorderable(reorderableState)
-                .detectReorderAfterLongPress(reorderableState),
-            contentPadding = contentPadding,
-        ) {
-            scopeContent()
         }
     }
 }
@@ -501,10 +558,11 @@ private fun <VM : BaseDelegate.BaseViewModel<*, *>> VM.WidgetContents(
             factory = { FrameLayout(it) },
             modifier = Modifier.fillMaxSize(),
             update = {
+                it.removeAllViews()
                 widgetView?.let { v ->
                     it.addView(v.andRemoveFromParent())
                 }
-            },
+            }
         )
     }
 }
