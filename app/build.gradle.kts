@@ -123,7 +123,6 @@ dependencies {
     implementation(libs.material)
     implementation(libs.byte.buddy.android)
     implementation(libs.patreonSupportersRetrieval)
-    implementation(libs.spannedGridLayoutManager)
     implementation(libs.composeIntroSlider)
 
     implementation(platform(libs.compose.bom))

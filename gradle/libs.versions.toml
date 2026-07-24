@@ -32,7 +32,6 @@ recyclerview = "1.4.0"
 relinker = "1.4.5"
 reorderable = "3.1.0"
 shizuku = "13.1.5"
-spannedgridlayoutmanager = "1.0.3"
 storage = "2.3.0"
 taskerpluginlibrary = "0.4.10"
 
@@ -82,7 +81,6 @@ reorderable = { module = "sh.calvin.reorderable:reorderable", version.ref = "reo
 relinker = { module = "com.getkeepsafe.relinker:relinker", version.ref = "relinker" }
 shizuku-api = { module = "dev.rikka.shizuku:api", version.ref = "shizuku" }
 shizuku-provider = { module = "dev.rikka.shizuku:provider", version.ref = "shizuku" }
-spannedGridLayoutManager = { module = "dev.zwander:spannedgridlayoutmanager", version.ref = "spannedgridlayoutmanager" }
 storage = { module = "com.anggrayudi:storage", version.ref = "storage" }
 taskerpluginlibrary = { module = "com.joaomgcd:taskerpluginlibrary", version.ref = "taskerpluginlibrary" }
 
