@@ -1,17 +1,15 @@
+@file:Suppress("INVISIBLE_MEMBER", "INVISIBLE_REFERENCE")
+
 package tk.zwander.common.customgrid
 
-import androidx.compose.animation.core.Animatable
-import androidx.compose.animation.core.AnimationVector1D
-import androidx.compose.animation.core.AnimationVector2D
-import androidx.compose.animation.core.FiniteAnimationSpec
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.MutatePriority
 import androidx.compose.foundation.gestures.ScrollScope
 import androidx.compose.foundation.gestures.ScrollableState
 import androidx.compose.foundation.gestures.animateScrollBy
+import androidx.compose.foundation.lazy.layout.LazyLayoutItemAnimator
 import androidx.compose.foundation.lazy.layout.LazyLayoutPrefetchState
 import androidx.compose.runtime.*
-import androidx.compose.ui.unit.IntOffset
 import kotlinx.coroutines.CoroutineScope
 import kotlin.math.roundToInt
 
@@ -24,12 +22,6 @@ fun rememberLazySpannedGridState(
     val coroutineScope = rememberCoroutineScope()
     return remember { LazySpannedGridState(coroutineScope, initialFirstVisibleLine, initialScrollOffset) }
 }
-
-/** The [FiniteAnimationSpec]s an item last registered via [LazySpannedGridItemScope.animateItem]. */
-internal data class ItemAnimationSpecs(
-    val placementSpec: FiniteAnimationSpec<IntOffset>?,
-    val fadeOutSpec: FiniteAnimationSpec<Float>?,
-)
 
 /**
  * State of a [LazyVerticalSpannedGrid] or [LazyHorizontalSpannedGrid], tracking the scroll
@@ -44,7 +36,7 @@ internal data class ItemAnimationSpecs(
  * are derived from it using the line size discovered during the last measure pass (mirroring how
  * `LazyGridState` derives its item-based position from pixel offsets known only after measuring).
  *
- * [coroutineScope] drives the placement/fade-out animations started by
+ * [coroutineScope] drives the [itemAnimator]'s placement/fade-in/fade-out animations, started by
  * [LazySpannedGridItemScope.animateItem] (see [measureSpannedGrid]) — it's cancelled, and any
  * in-flight animations with it, once the grid leaves composition.
  */
@@ -69,28 +61,36 @@ class LazySpannedGridState(
     var layoutInfo: LazySpannedGridLayoutInfo by mutableStateOf(LazySpannedGridLayoutInfo.Empty)
         internal set
 
-    /** The [FiniteAnimationSpec]s each item (by key) last registered via `animateItem`. */
-    internal val itemAnimationSpecs = mutableMapOf<Any, ItemAnimationSpecs>()
-
-    /** Items (by key) currently animating from their previous grid position to a new one. */
-    internal val animatedOffsets = mutableStateMapOf<Any, Animatable<IntOffset, AnimationVector2D>>()
-
-    /** Items (by key) currently fading out after scrolling outside the visible viewport. */
-    internal val fadeOutAlphas = mutableStateMapOf<Any, Animatable<Float, AnimationVector1D>>()
+    /**
+     * Drives every `animateItem()` fade-in/placement/fade-out animation — see [measureSpannedGrid].
+     * The same internal class `LazyGridState`/`LazyListState` use, so items removed from the
+     * underlying data (not just scrolled out of view) get a real disappearance animation too,
+     * via a retained [androidx.compose.ui.graphics.layer.GraphicsLayer] snapshot of their last
+     * rendered frame — something not reproducible from outside `androidx.compose.foundation`.
+     */
+    internal val itemAnimator = LazyLayoutItemAnimator<SpannedGridMeasuredItem>()
 
     /**
-     * The target (un-animated) *content-relative* position of each visible item (by key) from the
-     * last measure pass — i.e. before the scroll offset is subtracted. Deliberately not the final
-     * screen position: comparing screen-relative targets across measure passes would make every
-     * item look like it moved on every single scroll frame (since scrolling shifts everyone's
-     * screen position), spuriously re-triggering the `animateItem()` placement animation and
-     * making scrolling permanently lag behind the finger instead of tracking it immediately. See
-     * the comment in [measureSpannedGrid] where this is compared against the new target.
+     * Whether any visible item currently has an in-progress `animateItem()` placement animation,
+     * per the last measure pass. Used by [ReorderableLazySpannedGridState.chooseDropItem] to hold
+     * off confirming another reorder until a previous cascade's animations have settled.
      */
-    internal var lastPlacedTargets: Map<Any, IntOffset> = emptyMap()
+    internal var hasActiveAnimations: Boolean by mutableStateOf(false)
 
-    /** The keys naturally visible (i.e. not force-included for a fade-out) in the last measure pass. */
-    internal var lastVisibleKeys: Set<Any> = emptySet()
+    /**
+     * The key of the item currently being drag-reordered (see
+     * [ReorderableLazySpannedGridState]/`rememberReorderableLazySpannedGridState`'s
+     * `draggingItemKey` observer), or null when nothing is being dragged. [measureSpannedGrid]
+     * uses this to skip the `animateItem()` placement *animation* for exactly this key while it's
+     * set — org.burnoutcrew.reorderable's own `ReorderableItem` draws the dragged item with a
+     * `graphicsLayer` translation computed as (finger delta) − (this item's *current, unanimated*
+     * grid slot position); if that slot position instead lags behind on a spring — which is what
+     * `animateItem()` would otherwise do the moment a drag-triggered repack changes its target —
+     * the two disagree for the length of the spring, and the dragged item visibly lurches back
+     * towards its old slot before catching up to the pointer again. Only this one key's animation
+     * is skipped; every other item that shifts to make room for the drag still animates normally.
+     */
+    internal var suppressPlacementAnimationKey: Any? by mutableStateOf(null)
 
     /**
      * The full (not just currently-visible) item placement from the last measure pass, used by
@@ -114,7 +114,11 @@ class LazySpannedGridState(
     @OptIn(ExperimentalFoundationApi::class)
     internal var prefetchHandles: List<LazyLayoutPrefetchState.PrefetchHandle> = emptyList()
 
-    /** [currentScrollOffsetPx] as of the last measure pass, used to derive scroll direction for prefetching between passes. */
+    /**
+     * [currentScrollOffsetPx] as of the last measure pass. Used to derive scroll direction for
+     * prefetching between passes, and — read *before* [measureSpannedGrid]'s `schedulePrefetch`
+     * call updates it — to compute [LazyLayoutItemAnimator.onMeasured]'s `consumedScroll`.
+     */
     internal var lastScrollOffsetPxForPrefetch: Float = 0f
 
     /** Scratch buffer reused across measure passes instead of allocating a fresh `BooleanArray(itemCount)` every scroll frame — see [measureSpannedGrid]. */

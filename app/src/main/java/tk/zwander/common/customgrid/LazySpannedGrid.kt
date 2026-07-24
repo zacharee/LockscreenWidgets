@@ -1,3 +1,5 @@
+@file:Suppress("INVISIBLE_MEMBER", "INVISIBLE_REFERENCE")
+
 package tk.zwander.common.customgrid
 
 import androidx.compose.foundation.gestures.FlingBehavior
@@ -7,9 +9,11 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.lazy.layout.LazyLayout
 import androidx.compose.foundation.lazy.layout.LazyLayoutMeasurePolicy
 import androidx.compose.foundation.lazy.layout.LazyLayoutPrefetchState
+import androidx.compose.foundation.lazy.layout.lazyLayoutItemAnimator
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalGraphicsContext
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.dp
 
@@ -30,9 +34,10 @@ fun LazySpannedGrid(
     val placementCache = remember { SpannedGridPlacementCache() }
     val prefetchState = remember { LazyLayoutPrefetchState() }
     state.prefetchState = prefetchState
+    val graphicsContext = LocalGraphicsContext.current
 
     val measurePolicy =
-        remember(mainAxisCount, crossAxisCount, contentPadding, layoutDirection, state) {
+        remember(mainAxisCount, crossAxisCount, contentPadding, layoutDirection, state, graphicsContext) {
             LazyLayoutMeasurePolicy { constraints ->
                 measureSpannedGrid(
                     measureScope = this,
@@ -45,6 +50,7 @@ fun LazySpannedGrid(
                     layoutDirection = layoutDirection,
                     constraints = constraints,
                     placementCache = placementCache,
+                    graphicsContext = graphicsContext,
                 )
             }
         }
@@ -52,13 +58,15 @@ fun LazySpannedGrid(
     LazyLayout(
         itemProvider = itemProviderLambda,
         modifier =
-            modifier.scrollable(
-                state = state,
-                orientation = Orientation.Vertical,
-                enabled = userScrollEnabled,
-                reverseDirection = false,
-                flingBehavior = flingBehavior,
-            ),
+            modifier
+                .lazyLayoutItemAnimator(state.itemAnimator)
+                .scrollable(
+                    state = state,
+                    orientation = Orientation.Vertical,
+                    enabled = userScrollEnabled,
+                    reverseDirection = false,
+                    flingBehavior = flingBehavior,
+                ),
         prefetchState = prefetchState,
         measurePolicy = measurePolicy,
     )

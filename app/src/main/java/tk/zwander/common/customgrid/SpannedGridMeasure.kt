@@ -1,7 +1,7 @@
+@file:Suppress("INVISIBLE_MEMBER", "INVISIBLE_REFERENCE")
+
 package tk.zwander.common.customgrid
 
-import androidx.compose.animation.core.Animatable
-import androidx.compose.animation.core.VectorConverter
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.layout.PaddingValues
@@ -9,13 +9,15 @@ import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.lazy.layout.LazyLayoutMeasureScope
 import androidx.compose.foundation.lazy.layout.LazyLayoutPrefetchState
+import androidx.compose.ui.graphics.GraphicsContext
 import androidx.compose.ui.layout.MeasureResult
-import androidx.compose.ui.layout.Placeable
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.LayoutDirection
-import kotlinx.coroutines.launch
+import androidx.compose.ui.util.fastAny
+import androidx.compose.ui.util.fastForEach
+import kotlin.math.roundToInt
 
 /**
  * Caches the last [SpannedGridPlacementResult] so pure scrolling never re-runs the bin-packer.
@@ -85,13 +87,12 @@ internal class SpannedGridPlacementCache {
  * visual rows/columns; for a horizontal grid, cross axis = visual rows and main axis = visual
  * columns, so item spans and the resulting placement are swapped going in and coming out.
  *
- * Also orchestrates the animations started by [LazySpannedGridItemScope.animateItem]: items
- * whose grid position changed since the last pass animate their offset (via
- * [LazySpannedGridState.animatedOffsets]), and items that scrolled outside the naturally visible
- * window — while still present in the data — are kept in the render set and faded out (via
- * [LazySpannedGridState.fadeOutAlphas]) instead of disappearing immediately. See the KDoc on
- * [LazySpannedGridItemScope.animateItem] for why items actually removed from the data can't be
- * animated this way.
+ * Also drives [LazySpannedGridState.itemAnimator] (the same internal
+ * `androidx.compose.foundation.lazy.layout.LazyLayoutItemAnimator` stock `LazyGrid`/`LazyList`
+ * use) so items whose grid position changed since the last pass animate their offset, newly
+ * appearing items fade in, and items no longer naturally visible — whether they scrolled out or
+ * were actually removed from the data — fade out via a retained `GraphicsLayer` snapshot of their
+ * last rendered frame. See the KDoc on [LazySpannedGridItemScope.animateItem].
  *
  * @param crossAxisCount fixed number of lanes perpendicular to the scroll direction (columns for
  *   vertical, rows for horizontal).
@@ -110,6 +111,7 @@ internal fun measureSpannedGrid(
     layoutDirection: LayoutDirection,
     constraints: Constraints,
     placementCache: SpannedGridPlacementCache,
+    graphicsContext: GraphicsContext,
 ): MeasureResult =
     with(measureScope) {
         val isVertical = orientation == Orientation.Vertical
@@ -131,6 +133,9 @@ internal fun measureSpannedGrid(
         val viewportCrossAxisPx = if (isVertical) constraints.maxWidth else constraints.maxHeight
         val availableMainAxisPx = (viewportMainAxisPx - mainAxisStartPad - mainAxisEndPad).coerceAtLeast(0)
         val availableCrossAxisPx = (viewportCrossAxisPx - crossAxisStartPad - crossAxisEndPad).coerceAtLeast(0)
+
+        val viewportWidthPx = if (isVertical) viewportCrossAxisPx else viewportMainAxisPx
+        val viewportHeightPx = if (isVertical) viewportMainAxisPx else viewportCrossAxisPx
 
         val crossAxisLineSizePx = availableCrossAxisPx / crossAxisCount
         val mainAxisLineSizePx = availableMainAxisPx / mainAxisLineCount
@@ -163,6 +168,9 @@ internal fun measureSpannedGrid(
             contentMainAxisPx = contentMainAxisPx,
         )
 
+        // Read before schedulePrefetch (below) overwrites it — both it and the itemAnimator's
+        // consumedScroll want "the scroll offset as of the last measure pass".
+        val previousScrollOffsetPx = state.lastScrollOffsetPxForPrefetch
         val scrollOffsetPx = state.currentScrollOffsetPx.toInt()
 
         val firstVisibleLine =
@@ -199,47 +207,10 @@ internal fun measureSpannedGrid(
             }
         }
 
-        // --- animateItem orchestration: fade-out ---
-        // Figure out which items just left the naturally-visible window, and start fading out
-        // any of them that registered a fadeOutSpec and are still present in the data (see the
-        // limitation documented on LazySpannedGridItemScope.animateItem).
-        val naturalVisibleKeys = HashSet<Any>(naturalVisibleIndices.size)
-        for (index in naturalVisibleIndices) naturalVisibleKeys.add(itemProvider.getKey(index))
-
-        // An item that became visible again (e.g. the user scrolled back) shouldn't keep fading.
-        for (key in naturalVisibleKeys) state.fadeOutAlphas.remove(key)
-
-        for (key in state.lastVisibleKeys) {
-            if (key in naturalVisibleKeys || key in state.fadeOutAlphas) continue
-            val fadeOutSpec = state.itemAnimationSpecs[key]?.fadeOutSpec ?: continue
-            if (itemProvider.getIndex(key) < 0) continue // actually removed; can't keep composing it.
-            val alpha = Animatable(1f)
-            state.fadeOutAlphas[key] = alpha
-            state.coroutineScope.launch {
-                alpha.animateTo(0f, fadeOutSpec)
-                // Only clear if nothing re-started this key's fade-out in the meantime (e.g. it
-                // scrolled back into view and back out again before this animation finished) —
-                // otherwise this would remove the newer Animatable's entry out from under it.
-                if (state.fadeOutAlphas[key] === alpha) state.fadeOutAlphas.remove(key)
-            }
-        }
-
-        // Force-include still-fading items in the render set, resolving their (possibly shifted)
-        // current index by key.
-        val renderIndices = LinkedHashSet<Int>(naturalVisibleIndices)
-        for (key in state.fadeOutAlphas.keys.toList()) {
-            val index = itemProvider.getIndex(key)
-            if (index < 0) {
-                state.fadeOutAlphas.remove(key)
-            } else {
-                renderIndices.add(index)
-            }
-        }
-
         schedulePrefetch(
             state = state,
             placementResult = placementResult,
-            renderIndices = renderIndices,
+            renderIndices = naturalVisibleIndices.toHashSet(),
             firstVisibleLine = firstVisibleLine,
             lastVisibleLine = lastVisibleLine,
             mainAxisLineSizePx = mainAxisLineSizePx,
@@ -247,13 +218,12 @@ internal fun measureSpannedGrid(
             isVertical = isVertical,
         )
 
-        data class PlacedChild(val placeable: Placeable, val offset: IntOffset, val alpha: Float)
+        val measuredItemProvider = SpannedGridMeasuredItemProvider(itemProvider, measureScope, state.itemAnimator)
 
-        val placedChildren = ArrayList<PlacedChild>(renderIndices.size)
-        val visibleItemsInfo = ArrayList<LazySpannedGridItemInfo>(renderIndices.size)
-        val newPlacedTargets = HashMap<Any, IntOffset>(renderIndices.size)
+        val positionedItems = ArrayList<SpannedGridMeasuredItem>(naturalVisibleIndices.size)
+        val visibleItemsInfo = ArrayList<LazySpannedGridItemInfo>(naturalVisibleIndices.size)
 
-        for (index in renderIndices) {
+        for (index in naturalVisibleIndices) {
             val placement = placementResult.placements[index]
 
             // placement.column/row are always the bounded cross-axis / unbounded main-axis
@@ -271,7 +241,6 @@ internal fun measureSpannedGrid(
             val itemMainAxisSizePx = mainAxisLineSizePx * mainAxisSpan
             val itemCrossAxisSizePx = crossAxisLineSizePx * crossAxisSpan
 
-            // Deliberately *not* scroll-adjusted — see below.
             val mainAxisContentPos = mainAxisStartPad + mainAxisIndex * mainAxisLineSizePx
             val crossAxisPos = crossAxisStartPad + crossAxisIndex * crossAxisLineSizePx
 
@@ -280,61 +249,25 @@ internal fun measureSpannedGrid(
             val itemWidthPx = if (isVertical) itemCrossAxisSizePx else itemMainAxisSizePx
             val itemHeightPx = if (isVertical) itemMainAxisSizePx else itemCrossAxisSizePx
 
+            // Final, screen-relative position — scroll is applied directly here (never itself
+            // animated); the itemAnimator is told about this via consumedScroll below, so a pure
+            // scroll never triggers its placement animation.
+            val finalX = if (isVertical) contentX else contentX - scrollOffsetPx
+            val finalY = if (isVertical) contentY - scrollOffsetPx else contentY
+
             val key = itemProvider.getKey(index)
-            // Content-relative (i.e. with the scroll offset *not* subtracted yet) target, used
-            // only to decide/drive the animateItem() placement animation. This has to exclude the
-            // scroll offset: a screen-relative target changes on literally every scroll frame
-            // (every visible item's screen position shifts as scrollOffsetPx changes), which —
-            // when compared against the previous frame's screen-relative target — looked
-            // indistinguishable from a genuine reorder and restarted the (deliberately gentle,
-            // MediumLow-stiffness) placement spring every single frame. Since each restart chases
-            // a target that's already moved on by the next frame, the rendered position could
-            // never catch up to the finger during an active drag — not jank, a real, cumulative
-            // lag. Comparing content-relative targets means a pure scroll (grid cell unchanged)
-            // never triggers the animation at all, and the scroll offset is instead applied
-            // immediately, additively, below — including on top of a genuine reorder animation
-            // still in flight, so scrolling stays 1:1 even while an item is mid-animation.
-            val contentTargetOffset = IntOffset(contentX, contentY)
-            newPlacedTargets[key] = contentTargetOffset
-
-            // --- animateItem orchestration: placement ---
-            val placementSpec = state.itemAnimationSpecs[key]?.placementSpec
-            val previousContentTarget = state.lastPlacedTargets[key]
-            val contentRenderOffset: IntOffset
-            if (placementSpec != null) {
-                if (previousContentTarget != null && previousContentTarget != contentTargetOffset) {
-                    val animatable =
-                        state.animatedOffsets.getOrPut(key) {
-                            Animatable(previousContentTarget, IntOffset.VectorConverter)
-                        }
-                    state.coroutineScope.launch {
-                        animatable.animateTo(contentTargetOffset, placementSpec)
-                        // Only clear if nothing re-targeted it again in the meantime.
-                        if (animatable.value == contentTargetOffset) state.animatedOffsets.remove(key)
-                    }
-                }
-                contentRenderOffset = state.animatedOffsets[key]?.value ?: contentTargetOffset
-            } else {
-                state.animatedOffsets.remove(key)
-                contentRenderOffset = contentTargetOffset
-            }
-
-            // Scroll is applied here, immediately, after the animation decision above — never
-            // itself animated.
-            val renderOffset =
-                if (isVertical) {
-                    IntOffset(contentRenderOffset.x, contentRenderOffset.y - scrollOffsetPx)
-                } else {
-                    IntOffset(contentRenderOffset.x - scrollOffsetPx, contentRenderOffset.y)
-                }
-
-            val alpha = state.fadeOutAlphas[key]?.value ?: 1f
-
             val itemConstraints = Constraints.fixed(itemWidthPx, itemHeightPx)
+            val item =
+                measuredItemProvider.getAndMeasure(
+                    index = index,
+                    lane = crossAxisIndex,
+                    span = crossAxisSpan,
+                    constraints = itemConstraints,
+                )
+            item.position(finalX, finalY, viewportWidthPx, viewportHeightPx)
+            item.skipPlacementAnimation = key == state.suppressPlacementAnimationKey
+            positionedItems.add(item)
 
-            for (measurable in compose(index)) {
-                placedChildren.add(PlacedChild(measurable.measure(itemConstraints), renderOffset, alpha))
-            }
             visibleItemsInfo.add(
                 LazySpannedGridItemInfo(
                     index = index,
@@ -343,17 +276,44 @@ internal fun measureSpannedGrid(
                     column = visualColumn,
                     rowSpan = visualRowSpan,
                     columnSpan = visualColumnSpan,
-                    offset = renderOffset,
+                    offset = IntOffset(finalX, finalY),
                     size = IntSize(itemWidthPx, itemHeightPx),
                 ),
             )
         }
 
-        state.lastVisibleKeys = naturalVisibleKeys
-        state.lastPlacedTargets = newPlacedTargets
+        // See the derivation in the animateItem/itemAnimator KDoc above: screenOffset = contentOffset
+        // - scrollOffsetPx, so the screen-relative delta attributable to scrolling alone is the
+        // *negative* of the scroll delta.
+        val consumedScrollPx = (previousScrollOffsetPx - state.currentScrollOffsetPx).roundToInt()
 
-        val viewportWidthPx = if (isVertical) viewportCrossAxisPx else viewportMainAxisPx
-        val viewportHeightPx = if (isVertical) viewportMainAxisPx else viewportCrossAxisPx
+        // onMeasured may mutate positionedItems, appending items that just left the naturally
+        // visible window (whether by scrolling or removal) so they can keep animating away —
+        // resolved via keyIndexMap and re-measured at their last known constraints/lane/span.
+        state.itemAnimator.onMeasured(
+            consumedScroll = consumedScrollPx,
+            layoutWidth = viewportWidthPx,
+            layoutHeight = viewportHeightPx,
+            positionedItems = positionedItems,
+            keyIndexMap = itemProvider.keyIndexMap,
+            itemProvider = measuredItemProvider,
+            isVertical = isVertical,
+            isLookingAhead = false,
+            laneCount = crossAxisCount,
+            hasLookaheadOccurred = false,
+            layoutMinOffset = 0,
+            layoutMaxOffset = viewportMainAxisPx,
+            coroutineScope = state.coroutineScope,
+            graphicsContext = graphicsContext,
+        )
+
+        state.hasActiveAnimations =
+            positionedItems.fastAny { item ->
+                item.placeables.indices.any { placeableIndex ->
+                    state.itemAnimator.getAnimation(item.key, placeableIndex)?.isPlacementAnimationInProgress == true
+                }
+            }
+
         val cellWidthPx = if (isVertical) crossAxisLineSizePx else mainAxisLineSizePx
         val cellHeightPx = if (isVertical) mainAxisLineSizePx else crossAxisLineSizePx
 
@@ -367,13 +327,7 @@ internal fun measureSpannedGrid(
             )
 
         layout(viewportWidthPx, viewportHeightPx) {
-            placedChildren.forEach { (placeable, offset, alpha) ->
-                if (alpha >= 1f) {
-                    placeable.placeRelative(offset.x, offset.y)
-                } else {
-                    placeable.placeRelativeWithLayer(offset.x, offset.y) { this.alpha = alpha }
-                }
-            }
+            positionedItems.fastForEach { it.place(this, isLookingAhead = false) }
         }
     }
 

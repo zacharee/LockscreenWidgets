@@ -59,6 +59,15 @@ fun rememberReorderableLazySpannedGridState(
             .collect { dragging -> if (dragging) state.resetDropTargetDebounce() }
     }
 
+    // Suppress the dragged item's own animateItem() placement animation for as long as it's being
+    // dragged — see the KDoc on LazySpannedGridState.suppressPlacementAnimationKey for why a
+    // springing/lagging base position (instead of an instant one) breaks this library's own drag
+    // offset math and visibly lurches the dragged item back towards its old slot on every repack.
+    LaunchedEffect(state) {
+        snapshotFlow { state.draggingItemKey }
+            .collect { key -> gridState.suppressPlacementAnimationKey = key }
+    }
+
     // Autoscroll while the dragged item is within `edgeScrollMargin` of either end of the
     // viewport, not just once it's fully past it. ReorderableState's own built-in autoscroll
     // (driven by scrollChannel, which this deliberately never drains — trySend on it silently
@@ -219,10 +228,10 @@ class ReorderableLazySpannedGridState(
         // without this check a second move can confirm — and retarget those same animations
         // mid-flight — before the first one's springs have settled. That's what visually reads as
         // "jiggling": items sliding partway toward one spot, then snapping toward another. Holding
-        // off until gridState.animatedOffsets is empty lets each cascade finish before the next
+        // off until gridState.hasActiveAnimations is false lets each cascade finish before the next
         // one can start; pendingTargetKey is deliberately left untouched while held off, so once
         // unblocked, an unchanged candidate confirms immediately rather than re-debouncing.
-        if (gridState.animatedOffsets.isNotEmpty()) {
+        if (gridState.hasActiveAnimations) {
             return null
         }
         val candidate = items.firstOrNull()

@@ -11,6 +11,9 @@ import androidx.compose.runtime.rememberUpdatedState
 internal interface LazySpannedGridItemProvider : LazyLayoutItemProvider {
     /** The [SpannedGridItemSpan] declared for the item at [index]. */
     fun spanOf(index: Int): SpannedGridItemSpan
+
+    /** Used by [LazyLayoutItemAnimator] (see [measureSpannedGrid]) to resolve a moving-away item's current index by key. */
+    val keyIndexMap: LazyLayoutKeyIndexMap
 }
 
 @Composable
@@ -29,7 +32,7 @@ internal fun rememberLazySpannedGridItemProviderLambda(
                 val intervalContent = intervalContentState.value
                 val keyIndexMap =
                     LazyLayoutKeyIndexMap(0 until intervalContent.itemCount, intervalContent)
-                LazySpannedGridItemProviderImpl(intervalContent, keyIndexMap, state)
+                LazySpannedGridItemProviderImpl(intervalContent, keyIndexMap)
             }
         itemProviderState::value
     }
@@ -37,8 +40,7 @@ internal fun rememberLazySpannedGridItemProviderLambda(
 
 private class LazySpannedGridItemProviderImpl(
     private val intervalContent: LazySpannedGridIntervalContent,
-    private val keyIndexMap: LazyLayoutKeyIndexMap,
-    private val state: LazySpannedGridState,
+    override val keyIndexMap: LazyLayoutKeyIndexMap,
 ) : LazySpannedGridItemProvider {
     override val itemCount: Int
         get() = intervalContent.itemCount
@@ -55,7 +57,7 @@ private class LazySpannedGridItemProviderImpl(
     @Composable
     override fun Item(index: Int, key: Any) {
         intervalContent.withInterval(index) { localIndex, content ->
-            content.item(LazySpannedGridItemScopeImpl(key, state), localIndex)
+            content.item(LazySpannedGridItemScopeImpl, localIndex)
         }
     }
 

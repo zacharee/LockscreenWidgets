@@ -1,18 +1,15 @@
+@file:Suppress("INVISIBLE_MEMBER", "INVISIBLE_REFERENCE")
+
 package tk.zwander.common.customgrid
 
-import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.FiniteAnimationSpec
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.VisibilityThreshold
 import androidx.compose.animation.core.spring
+import androidx.compose.foundation.lazy.layout.LazyLayoutAnimateItemElement
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.Stable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.composed
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.IntOffset
 
 /** DSL marker preventing accidental nesting of unrelated lazy-layout scopes. */
@@ -22,26 +19,20 @@ import androidx.compose.ui.unit.IntOffset
 @Stable
 sealed interface LazySpannedGridItemScope {
     /**
-     * Animates this item's appearance (fade in), and its placement changes (e.g. from other items
-     * being added, removed, resized, or reordered) — mirroring stock `LazyGridItemScope.animateItem`.
+     * Animates this item's appearance (fade in), disappearance (fade out) and placement changes
+     * (such as an item reordering) — mirrors stock `LazyGridItemScope.animateItem` exactly, since
+     * it's backed by the same internal [androidx.compose.foundation.lazy.layout.LazyLayoutItemAnimator]
+     * (see [measureSpannedGrid]). Unlike a hand-rolled fade, this also animates an item's
+     * disappearance when it's genuinely removed from the underlying data, not just when it
+     * scrolls out of view.
      *
      * You should also provide a `key` via [LazySpannedGridScope.item]/[LazySpannedGridScope.items]
      * for this modifier to reliably track the item across measure passes.
      *
-     * **Fade-out limitation:** [fadeOutSpec] can only animate an item scrolling outside the
-     * visible viewport while it's still present in the grid's content — the grid keeps composing
-     * it briefly at its (still-valid) position while its alpha fades out. If the item is actually
-     * removed from the underlying data, it disappears immediately with no animation: Compose's own
-     * `animateItem` support for that case relies on `androidx.compose.foundation` internals with no
-     * public equivalent (it keeps the item's existing composition alive by key after its index is
-     * gone, which isn't achievable from outside the module). This mirrors the same limitation the
-     * pre-1.7 `Modifier.animateItemPlacement()` had.
-     *
      * @param fadeInSpec animation spec for the item's appearance. Null disables the fade-in.
      * @param placementSpec animation spec for the item's position changing. Null disables the
      *   placement animation — the item snaps directly to its new position.
-     * @param fadeOutSpec animation spec for the item scrolling out of view (see the limitation
-     *   above). Null disables the fade-out.
+     * @param fadeOutSpec animation spec for the item's disappearance. Null disables the fade-out.
      */
     fun Modifier.animateItem(
         fadeInSpec: FiniteAnimationSpec<Float>? = spring(stiffness = Spring.StiffnessMediumLow),
@@ -51,30 +42,16 @@ sealed interface LazySpannedGridItemScope {
     ): Modifier
 }
 
-internal class LazySpannedGridItemScopeImpl(
-    private val key: Any,
-    private val state: LazySpannedGridState,
-) : LazySpannedGridItemScope {
+internal object LazySpannedGridItemScopeImpl : LazySpannedGridItemScope {
     override fun Modifier.animateItem(
         fadeInSpec: FiniteAnimationSpec<Float>?,
         placementSpec: FiniteAnimationSpec<IntOffset>?,
         fadeOutSpec: FiniteAnimationSpec<Float>?,
     ): Modifier =
-        composed {
-            // Registered so measureSpannedGrid knows, once this item later disappears, whether
-            // (and how) to animate its placement/fade-out — decisions only the outer grid can make.
-            DisposableEffect(key, placementSpec, fadeOutSpec) {
-                state.itemAnimationSpecs[key] = ItemAnimationSpecs(placementSpec, fadeOutSpec)
-                onDispose { state.itemAnimationSpecs.remove(key) }
-            }
-
-            if (fadeInSpec == null) {
-                this@animateItem
-            } else {
-                val alpha = remember(key) { Animatable(0f) }
-                LaunchedEffect(key) { alpha.animateTo(1f, fadeInSpec) }
-                this@animateItem.graphicsLayer { this.alpha = alpha.value }
-            }
+        if (fadeInSpec == null && placementSpec == null && fadeOutSpec == null) {
+            this
+        } else {
+            this then LazyLayoutAnimateItemElement(fadeInSpec, placementSpec, fadeOutSpec)
         }
 }
 
