@@ -140,14 +140,17 @@ class LazySpannedGridState(
     internal val currentScrollOffsetPx: Float
         get() = scrollOffsetPx
 
-    // Mirrors androidx.compose.foundation.samples.LazyLayoutScrollableSample: a positive scroll
-    // delta (dragging towards the start) reduces how far forward we've scrolled, so it's
-    // subtracted from, not added to, the forward scroll offset.
+    // Modifier.scrollableArea() (see LazySpannedGrid.kt) already inverts+RTL-corrects the raw drag
+    // delta before it reaches here, so a positive delta simply means "scroll forward" (deeper into
+    // content) — it's added to, not subtracted from, the forward scroll offset. Every other place
+    // that manually feeds a delta into scrollBy()/scroll{} (ReorderableLazySpannedGridState's
+    // autoscroll, WidgetGrid's interceptUnclaimedDrags, SpannedGridSnapping) is written against
+    // this exact same convention — keep them all in sync if this ever changes again.
     private val internalScrollableState = ScrollableState { delta ->
         val oldOffset = scrollOffsetPx
-        val target = (oldOffset - delta).coerceIn(0f, maxScrollOffsetPx)
+        val target = (oldOffset + delta).coerceIn(0f, maxScrollOffsetPx)
         scrollOffsetPx = target
-        oldOffset - target
+        target - oldOffset
     }
 
     /**
@@ -166,14 +169,14 @@ class LazySpannedGridState(
 
     /** Instantly scrolls so that [line] is the first visible line, offset by [scrollOffset] pixels. */
     suspend fun scrollToLine(line: Int, scrollOffset: Int = 0) {
-        // scrollBy's delta is subtracted from scrollOffsetPx (see internalScrollableState), so to
-        // move scrollOffsetPx towards the target we pass the delta with the sign flipped.
-        scroll { scrollBy(scrollOffsetPx - targetOffsetPx(line, scrollOffset)) }
+        // scrollBy's delta is added to scrollOffsetPx (see internalScrollableState), so the delta
+        // that moves scrollOffsetPx towards the target is simply target minus current.
+        scroll { scrollBy(targetOffsetPx(line, scrollOffset) - scrollOffsetPx) }
     }
 
     /** Animates the scroll position so that [line] becomes the first visible line. */
     suspend fun animateScrollToLine(line: Int, scrollOffset: Int = 0) {
-        animateScrollBy(scrollOffsetPx - targetOffsetPx(line, scrollOffset))
+        animateScrollBy(targetOffsetPx(line, scrollOffset) - scrollOffsetPx)
     }
 
     /**

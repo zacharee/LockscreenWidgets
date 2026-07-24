@@ -4,8 +4,8 @@ package tk.zwander.common.customgrid
 
 import androidx.compose.foundation.gestures.FlingBehavior
 import androidx.compose.foundation.gestures.Orientation
-import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.scrollableArea
 import androidx.compose.foundation.lazy.layout.LazyLayout
 import androidx.compose.foundation.lazy.layout.LazyLayoutMeasurePolicy
 import androidx.compose.foundation.lazy.layout.LazyLayoutPrefetchState
@@ -60,11 +60,11 @@ fun LazySpannedGrid(
         modifier =
             modifier
                 .lazyLayoutItemAnimator(state.itemAnimator)
-                .scrollable(
+                .scrollableArea(
                     state = state,
-                    orientation = Orientation.Vertical,
+                    orientation = orientation,
                     enabled = userScrollEnabled,
-                    reverseDirection = false,
+                    reverseScrolling = false,
                     flingBehavior = flingBehavior,
                 ),
         prefetchState = prefetchState,

@@ -88,13 +88,13 @@ fun rememberReorderableLazySpannedGridState(
             val itemEnd = itemStart + (if (isVertical) info.size.height else info.size.width)
             val intoStartMargin = edgeScrollMarginPx - itemStart
             val intoEndMargin = itemEnd - (viewportSize - edgeScrollMarginPx)
-            // gridState.scrollBy's delta is subtracted from its scroll offset (see
+            // gridState.scrollBy's delta is added to its scroll offset (see
             // LazySpannedGridState.internalScrollableState), so decreasing the offset — scrolling
-            // towards the start, for the top/left margin — takes a positive delta, and increasing
-            // it — scrolling towards the end — takes a negative one.
+            // towards the start, for the top/left margin — takes a negative delta, and increasing
+            // it — scrolling towards the end — takes a positive one.
             val scroll = when {
-                intoStartMargin > 0f -> intoStartMargin.coerceAtMost(maxScrollPx)
-                intoEndMargin > 0f -> -intoEndMargin.coerceAtMost(maxScrollPx)
+                intoStartMargin > 0f -> -intoStartMargin.coerceAtMost(maxScrollPx)
+                intoEndMargin > 0f -> intoEndMargin.coerceAtMost(maxScrollPx)
                 else -> 0f
             }
             if (scroll != 0f) gridState.scrollBy(scroll)

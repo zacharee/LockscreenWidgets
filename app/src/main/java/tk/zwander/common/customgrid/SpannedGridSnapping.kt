@@ -51,24 +51,22 @@ fun SnapLayoutInfoProvider(
             val pageSizePx = pageSizePx
             if (pageSizePx <= 0) return 0f
 
-            // LazySpannedGridState.internalScrollableState is deliberately inverted from the
-            // naive scrollBy convention (see its own doc comment): a *positive* delta — and
-            // therefore a *positive* fling velocity, measured in the same units — moves the
-            // scroll offset *backward*, towards the start. So a positive velocity here means
-            // "continue toward the start", not "toward the next item" the way most Compose snap
-            // providers assume; these are named plainly (not "next"/"previous") so that inversion
-            // can't be missed on a future read.
+            // LazySpannedGridState.internalScrollableState's delta is added to the scroll offset,
+            // so a *positive* delta — and therefore a *positive* fling velocity, measured in the
+            // same units — moves the scroll offset *forward*, towards later content, matching the
+            // usual convention most Compose snap providers assume (named plainly, not
+            // "next"/"previous", just because that used to not be true here — see git history).
             val scrollOffsetPx = gridState.firstVisibleLine * gridState.lineSizePx + gridState.firstVisibleLineScrollOffset
             val r = (scrollOffsetPx % pageSizePx).toFloat() // how far into the current page we are
-            val backwardDelta = r // scrollBy delta that aligns to the current page's start
-            val forwardDelta = r - pageSizePx // scrollBy delta that aligns to the next page's start
+            val backwardDelta = -r // scrollBy delta that aligns to the current page's start
+            val forwardDelta = pageSizePx - r // scrollBy delta that aligns to the next page's start
 
             val minFlingVelocityPx = with(density) { MinFlingVelocity.toPx() }
             return when {
                 velocity.absoluteValue < minFlingVelocityPx ->
                     if (backwardDelta.absoluteValue <= forwardDelta.absoluteValue) backwardDelta else forwardDelta
-                velocity > 0 -> backwardDelta
-                else -> forwardDelta
+                velocity > 0 -> forwardDelta
+                else -> backwardDelta
             }
         }
     }

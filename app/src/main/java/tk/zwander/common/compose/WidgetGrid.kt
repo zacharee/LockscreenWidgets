@@ -780,14 +780,14 @@ private fun Modifier.interceptUnclaimedDrags(
                             val axisDelta = if (isVertical) delta.y else delta.x
                             change.consume()
 
-                            // LazySpannedGridState.scrollBy's delta is subtracted from the scroll
-                            // offset (see its own doc comment), so a positive delta moves it
-                            // backward — exactly what a finger moving down/right (revealing
-                            // earlier content) should do, with no sign flip needed outside of
-                            // RTL, which reverses which physical direction is logically
-                            // "backward" (mirroring LazyHorizontalSpannedGrid's own
-                            // reverseDirection handling).
-                            val signedDelta = if (negateForRtl) -axisDelta else axisDelta
+                            // LazySpannedGridState.scrollBy's delta is added to the scroll offset
+                            // (see its own doc comment), so a positive delta moves it forward — a
+                            // finger moving down/right (revealing earlier content) should move it
+                            // backward, i.e. take a *negative* delta, with that base flipped back
+                            // again for RTL, which reverses which physical direction is logically
+                            // "backward" (mirroring what Modifier.scrollableArea's own built-in RTL
+                            // handling does for LazySpannedGrid's native, non-intercepted gesture path).
+                            val signedDelta = if (negateForRtl) axisDelta else -axisDelta
                             scrollChannel?.trySend(signedDelta)
                         } else {
                             val totalDelta = change.position - downPosition
@@ -834,7 +834,7 @@ private fun Modifier.interceptUnclaimedDrags(
                         val rawVelocity = velocityTracker.calculateVelocity()
                         val axisVelocity = if (isVertical) rawVelocity.y else rawVelocity.x
                         // Same sign convention as the per-move scrollBy delta above.
-                        flingVelocity = if (negateForRtl) -axisVelocity else axisVelocity
+                        flingVelocity = if (negateForRtl) axisVelocity else -axisVelocity
                     }
                     // Closing (rather than cancelling) lets the scroll{} transaction above drain
                     // any already-buffered deltas — and then run the fling above — instead of
