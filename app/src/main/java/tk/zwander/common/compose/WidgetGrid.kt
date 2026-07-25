@@ -7,7 +7,6 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Rect
 import android.os.Build
-import android.util.Log
 import android.util.SizeF
 import android.view.MotionEvent
 import android.view.View
@@ -505,7 +504,6 @@ private fun <VM : BaseDelegate.BaseViewModel<*, *>> VM.WidgetContents(
                             }
 
                             this@WidgetContents.display?.let { display ->
-                                Log.e("LSW", "${width.value} ${height.value}")
                                 // Workaround to fix the One UI 5.1 battery grid widget on some devices.
                                 if (widgetInfo.provider.packageName == "com.android.settings.intelligence") {
                                     updateAppWidgetOptions(
