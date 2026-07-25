@@ -7,7 +7,6 @@ import android.view.*
 import androidx.compose.animation.*
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.layout.BoxWithConstraints
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.LocalContentColor
@@ -540,7 +539,7 @@ open class MainWidgetFrameDelegate protected constructor(
                             (event.show == Event.PreviewFrames.ShowMode.TOGGLE && !it.isPreview)
                     it.copy(
                         isPreview = isPreview,
-                        isTempHide = if (isPreview) false else it.isTempHide,
+                        isTempHide = !isPreview && it.isTempHide,
                     )
                 }
             }
@@ -565,7 +564,6 @@ open class MainWidgetFrameDelegate protected constructor(
         return !ignoreTouches
     }
 
-    @OptIn(ExperimentalLayoutApi::class)
     override fun onCreate() {
         super.onCreate()
 
