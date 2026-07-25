@@ -174,9 +174,9 @@ abstract class BaseDelegate<State : Any>(
     override suspend fun onEvent(event: Event) {
         when (event) {
             is Event.RemoveWidgetConfirmed -> {
-                if (event.remove && currentWidgets.contains(event.item)) {
+                if (event.remove && currentWidgets.any { it.id == event.item?.id }) {
                     val newWidgets = currentWidgets.toMutableSet().apply {
-                        remove(event.item)
+                        removeIf { it.id == event.item?.id }
                         when (event.item?.safeType) {
                             WidgetType.WIDGET -> widgetHost.deleteAppWidgetId(event.item.id)
                             WidgetType.SHORTCUT,
