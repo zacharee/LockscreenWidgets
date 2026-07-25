@@ -161,6 +161,7 @@ dependencies {
     implementation(libs.miui.autostart)
 
     implementation(libs.composereorderable)
+    implementation(libs.pagerindicator)
 
     implementation(project(":lswinterconnect"))
 

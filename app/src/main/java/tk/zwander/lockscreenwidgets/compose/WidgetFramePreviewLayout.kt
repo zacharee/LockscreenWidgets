@@ -2,8 +2,6 @@ package tk.zwander.lockscreenwidgets.compose
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.util.Log
-import android.view.LayoutInflater
 import android.view.View
 import android.view.WindowManager
 import androidx.compose.animation.animateColorAsState
@@ -114,11 +112,6 @@ fun WidgetFramePreviewLayout(
             Box(
                 modifier = Modifier,
             ) {
-                val pageIndicatorBehavior by rememberPreferenceState(
-                    key = PrefManager.KEY_PAGE_INDICATOR_BEHAVIOR,
-                    value = { context.prefManager.pageIndicatorBehavior },
-                )
-
                 val rowCount by rememberPreferenceState(
                     key = framePrefs.keyFor(FramePrefs.KEY_FRAME_ROW_COUNT),
                 ) {

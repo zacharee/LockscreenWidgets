@@ -241,33 +241,6 @@ fun MainWidgetFrameDelegate.WidgetFrameViewModel.WidgetFrameLayout(
                 exit = fadeOut(),
                 visible = !firstViewing,
             ) {
-                val pageIndicatorBehavior by rememberPreferenceState(
-                    key = PrefManager.KEY_PAGE_INDICATOR_BEHAVIOR,
-                    value = { context.prefManager.pageIndicatorBehavior },
-                )
-
-//                AndroidView(
-//                    factory = {
-//                        widgetGrid.andRemoveFromParent().also {
-//                            ViewCompat.setNestedScrollingEnabled(it, true)
-//                        }
-//                    },
-//                    update = {
-//                        it.isHorizontalScrollBarEnabled =
-//                            pageIndicatorBehavior != PrefManager.VALUE_PAGE_INDICATOR_BEHAVIOR_HIDDEN
-//                        it.isScrollbarFadingEnabled =
-//                            pageIndicatorBehavior == PrefManager.VALUE_PAGE_INDICATOR_BEHAVIOR_AUTO_HIDE
-//                        it.scrollBarFadeDuration =
-//                            if (pageIndicatorBehavior == PrefManager.VALUE_PAGE_INDICATOR_BEHAVIOR_AUTO_HIDE) {
-//                                ViewConfiguration.getScrollBarFadeDuration()
-//                            } else {
-//                                0
-//                            }
-//                    },
-//                    modifier = Modifier
-//                        .fillMaxSize(),
-//                )
-
                 widgetGrid(Modifier.fillMaxSize())
             }
 

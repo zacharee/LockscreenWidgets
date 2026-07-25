@@ -55,7 +55,7 @@ class LazySpannedGridState(
     internal var mainAxisLineCount by mutableIntStateOf(1)
     internal var crossAxisLineCount by mutableIntStateOf(1)
 
-    internal var lineSizePx: Int = 0
+    internal var lineSizePx: Int by mutableIntStateOf(0)
         private set
 
     var layoutInfo: LazySpannedGridLayoutInfo by mutableStateOf(LazySpannedGridLayoutInfo.Empty)

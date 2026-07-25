@@ -4,27 +4,29 @@ import android.content.Context
 import android.graphics.*
 import android.graphics.drawable.Drawable
 import android.view.*
+import androidx.compose.animation.*
 import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.LocalContentColor
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ViewCompositionStrategy
+import androidx.compose.ui.unit.dp
 import androidx.core.graphics.component1
 import androidx.core.graphics.component2
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.viewModelScope
 import androidx.recyclerview.widget.RecyclerView
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.NonCancellable
+import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
+import mx.platacard.pagerindicator.PagerWormIndicator
 import tk.zwander.common.activities.DismissOrUnlockActivity
 import tk.zwander.common.activities.SelectIconPackActivity
 import tk.zwander.common.compose.WidgetGrid
@@ -39,6 +41,7 @@ import tk.zwander.common.util.*
 import tk.zwander.lockscreenwidgets.activities.add.ReconfigureFrameWidgetActivity
 import tk.zwander.lockscreenwidgets.compose.WidgetFrameLayout
 import tk.zwander.lockscreenwidgets.data.Mode
+import kotlin.time.Duration.Companion.milliseconds
 
 /**
  * Handle most of the logic involving the widget frame.
@@ -207,77 +210,133 @@ open class MainWidgetFrameDelegate protected constructor(
         viewModel.createComposeViewHolder {
             WidgetFrameLayout(
                 widgetGrid = { modifier ->
-                    val gridState = rememberLazySpannedGridState()
-                    val rowCount by rememberPreferenceState(
-                        key = framePrefs.keyFor(FramePrefs.KEY_FRAME_ROW_COUNT),
+                    BoxWithConstraints(
+                        modifier = modifier,
                     ) {
-                        framePrefs.rowCount
-                    }
-                    val columnCount by rememberPreferenceState(
-                        key = framePrefs.keyFor(FramePrefs.KEY_FRAME_COL_COUNT),
-                    ) {
-                        framePrefs.colCount
-                    }
-                    var currentWidgetsState by rememberPreferenceState(
-                        key = FramePrefs.generateCurrentWidgetsKey(id),
-                        value = { currentWidgets.toList() },
-                        onChanged = { _, value -> currentWidgets = value.toSet() },
-                    )
+                        val constraints = constraints
+                        val gridState = rememberLazySpannedGridState()
+                        val rowCount by rememberPreferenceState(
+                            key = framePrefs.keyFor(FramePrefs.KEY_FRAME_ROW_COUNT),
+                        ) {
+                            framePrefs.rowCount
+                        }
+                        val columnCount by rememberPreferenceState(
+                            key = framePrefs.keyFor(FramePrefs.KEY_FRAME_COL_COUNT),
+                        ) {
+                            framePrefs.colCount
+                        }
+                        var currentWidgetsState by rememberPreferenceState(
+                            key = FramePrefs.generateCurrentWidgetsKey(id),
+                            value = { currentWidgets.toList() },
+                            onChanged = { _, value -> currentWidgets = value.toSet() },
+                        )
 
-                    val rememberFramePosition by rememberPreferenceState(
-                        key = PrefManager.KEY_FRAME_REMEMBER_POSITION,
-                    ) {
-                        prefManager.rememberFramePosition
-                    }
-                    var storedPosition by rememberPreferenceState(
-                        key = framePrefs.keyFor(PrefManager.KEY_CURRENT_PAGE),
-                        value = { framePrefs.currentIndex },
-                        onChanged = { _, value ->
-                            framePrefs.currentIndex = value
-                        },
-                    )
+                        val rememberFramePosition by rememberPreferenceState(
+                            key = PrefManager.KEY_FRAME_REMEMBER_POSITION,
+                        ) {
+                            prefManager.rememberFramePosition
+                        }
+                        var storedPosition by rememberPreferenceState(
+                            key = framePrefs.keyFor(PrefManager.KEY_CURRENT_PAGE),
+                            value = { framePrefs.currentIndex },
+                            onChanged = { _, value ->
+                                framePrefs.currentIndex = value
+                            },
+                        )
+                        val pageIndicatorBehavior by rememberPreferenceState(
+                            key = PrefManager.KEY_PAGE_INDICATOR_BEHAVIOR,
+                            value = { context.prefManager.pageIndicatorBehavior },
+                        )
+                        var showingPager by remember(pageIndicatorBehavior) {
+                            mutableStateOf(
+                                pageIndicatorBehavior != PrefManager.VALUE_PAGE_INDICATOR_BEHAVIOR_HIDDEN,
+                            )
+                        }
+                        val pageInfo by remember(pageIndicatorBehavior) {
+                            derivedStateOf {
+                                val pageSizePx = gridState.lineSizePx * gridState.mainAxisLineCount.coerceAtLeast(1)
+                                val scrollOffsetPx = gridState.firstVisibleLine * gridState.lineSizePx + gridState.firstVisibleLineScrollOffset
+                                val pageOffset = (scrollOffsetPx % pageSizePx.coerceAtLeast(1)) / constraints.maxWidth.toFloat().coerceAtLeast(1f)
+                                val page = (scrollOffsetPx / pageSizePx.coerceAtLeast(1))
 
-                    LaunchedEffect(null) {
-                        if (rememberFramePosition) {
-                            gridState.scrollToLine(storedPosition)
+                                val pageCount = gridState.layoutInfo.totalLineCount / columnCount
+
+                                (page + pageOffset) to (pageCount)
+                            }
+                        }
+
+                        LaunchedEffect(pageInfo) {
+                            showingPager = pageIndicatorBehavior != PrefManager.VALUE_PAGE_INDICATOR_BEHAVIOR_HIDDEN
+                        }
+
+                        LaunchedEffect(showingPager, pageInfo) {
+                            if (showingPager && pageIndicatorBehavior == PrefManager.VALUE_PAGE_INDICATOR_BEHAVIOR_AUTO_HIDE) {
+                                delay(2000.milliseconds)
+                                showingPager = false
+                            }
+                        }
+
+                        LaunchedEffect(null) {
+                            if (rememberFramePosition) {
+                                gridState.scrollToLine(storedPosition)
+                            }
+                        }
+
+                        LaunchedEffect(gridState.firstVisibleLine) {
+                            storedPosition = gridState.firstVisibleLine
+                        }
+
+                        WidgetGrid(
+                            currentWidgets = currentWidgetsState,
+                            onWidgetsChanged = { widgets ->
+                                currentWidgetsState = widgets
+                            },
+                            orientation = Orientation.Horizontal,
+                            columnCount = columnCount,
+                            rowCount = rowCount,
+                            resizeThresholdPx = { which ->
+                                val display = viewModel.display.orDefault(context)
+                                val frameSize = frameSizeAndPosition.getSizeForType(viewModel.saveMode, display)
+                                if (which == WidgetResizeListener.Which.LEFT || which == WidgetResizeListener.Which.RIGHT) {
+                                    display.dpToPx(frameSize.x.toInt()) / colCount
+                                } else {
+                                    display.dpToPx(frameSize.y.toInt()) / rowCount
+                                }
+                            },
+                            launchAddActivity = {
+                                context.eventManager.sendEvent(Event.LaunchAddWidget(holderId))
+                            },
+                            launchReconfigure = { id, providerInfo ->
+                                ReconfigureFrameWidgetActivity.launch(context, id, holderId, providerInfo)
+                            },
+                            launchShortcutIconOverride = {
+                                SelectIconPackActivity.launchForOverride(context, id)
+                            },
+                            modifier = Modifier.fillMaxSize(),
+                            rowSpanForAddButton = 1,
+                            enableSnapping = true,
+                            lazyGridState = gridState,
+                        )
+
+                        AnimatedVisibility(
+                            visible = showingPager,
+                            enter = fadeIn() + slideInVertically(initialOffsetY = { it }),
+                            exit = fadeOut() + slideOutVertically(targetOffsetY = { it }),
+                            modifier = Modifier.align(Alignment.BottomCenter)
+                                .padding(bottom = 8.dp),
+                        ) {
+                            PagerWormIndicator(
+                                pageCount = pageInfo.second,
+                                currentPageFraction = remember {
+                                    derivedStateOf {
+                                        pageInfo.first
+                                    }
+                                },
+                                activeDotColor = LocalContentColor.current,
+                                dotColor = LocalContentColor.current.copy(alpha = 0.5f),
+                            )
                         }
                     }
-
-                    LaunchedEffect(gridState.firstVisibleLine) {
-                        storedPosition = gridState.firstVisibleLine
-                    }
-
-                    WidgetGrid(
-                        currentWidgets = currentWidgetsState,
-                        onWidgetsChanged = { widgets ->
-                            currentWidgetsState = widgets
-                        },
-                        orientation = Orientation.Horizontal,
-                        columnCount = columnCount,
-                        rowCount = rowCount,
-                        resizeThresholdPx = { which ->
-                            val display = viewModel.display.orDefault(context)
-                            val frameSize = frameSizeAndPosition.getSizeForType(viewModel.saveMode, display)
-                            if (which == WidgetResizeListener.Which.LEFT || which == WidgetResizeListener.Which.RIGHT) {
-                                display.dpToPx(frameSize.x.toInt()) / colCount
-                            } else {
-                                display.dpToPx(frameSize.y.toInt()) / rowCount
-                            }
-                        },
-                        launchAddActivity = {
-                            context.eventManager.sendEvent(Event.LaunchAddWidget(holderId))
-                        },
-                        launchReconfigure = { id, providerInfo ->
-                            ReconfigureFrameWidgetActivity.launch(context, id, holderId, providerInfo)
-                        },
-                        launchShortcutIconOverride = {
-                            SelectIconPackActivity.launchForOverride(context, id)
-                        },
-                        modifier = modifier,
-                        rowSpanForAddButton = 1,
-                        enableSnapping = true,
-                        lazyGridState = gridState,
-                    )
                 },
                 modifier = Modifier.fillMaxSize(),
             )
@@ -344,24 +403,25 @@ open class MainWidgetFrameDelegate protected constructor(
                 (globalState.showingNotificationsPanel.value[this@MainWidgetFrameDelegate.display?.displayId] == false ||
                         framePrefs.hideOnNotificationShade)
 
-    override val rootViewAttachmentStateListener: View.OnAttachStateChangeListener = object : View.OnAttachStateChangeListener {
-        val superObj = super@MainWidgetFrameDelegate.rootViewAttachmentStateListener
+    override val rootViewAttachmentStateListener: View.OnAttachStateChangeListener =
+        object : View.OnAttachStateChangeListener {
+            val superObj = super@MainWidgetFrameDelegate.rootViewAttachmentStateListener
 
-        override fun onViewAttachedToWindow(v: View) {
-            superObj.onViewAttachedToWindow(v)
-            v.post {
-                onFrameAttachmentStateChanged(true)
+            override fun onViewAttachedToWindow(v: View) {
+                superObj.onViewAttachedToWindow(v)
+                v.post {
+                    onFrameAttachmentStateChanged(true)
+                }
+            }
+
+            override fun onViewDetachedFromWindow(v: View) {
+                viewModel.isEditing.value = false
+                viewModel.isRemoving.value = false
+
+                superObj.onViewDetachedFromWindow(v)
+                onFrameAttachmentStateChanged(false)
             }
         }
-
-        override fun onViewDetachedFromWindow(v: View) {
-            viewModel.isEditing.value = false
-            viewModel.isRemoving.value = false
-
-            superObj.onViewDetachedFromWindow(v)
-            onFrameAttachmentStateChanged(false)
-        }
-    }
 
     override suspend fun onEvent(event: Event) {
         super.onEvent(event)
@@ -753,13 +813,13 @@ open class MainWidgetFrameDelegate protected constructor(
                     && (framePrefs.showOnMainLockScreen || !framePrefs.showInNotificationShade)
                     && (!framePrefs.hideOnFaceWidgets || globalState.isOnFaceWidgets.value[this@MainWidgetFrameDelegate.display?.displayId] != true)
                     && ((globalState.currentAppLayer.value[this@MainWidgetFrameDelegate.display?.displayId] ?: 0) < 0 &&
-                            globalState.currentAppPackage.value[this@MainWidgetFrameDelegate.display?.displayId] == null)
+                    globalState.currentAppPackage.value[this@MainWidgetFrameDelegate.display?.displayId] == null)
                     && (globalState.isOnEdgePanel.value[this@MainWidgetFrameDelegate.display?.displayId] != true || !framePrefs.hideOnEdgePanel)
                     && globalState.isOnScreenOffMemo.value[this@MainWidgetFrameDelegate.display?.displayId] != true
                     && (globalState.showingNotificationsPanel.value[this@MainWidgetFrameDelegate.display?.displayId] != true ||
-                            !framePrefs.hideOnNotificationShade)
+                    !framePrefs.hideOnNotificationShade)
                     && (globalState.showingSecurityInput.value[this@MainWidgetFrameDelegate.display?.displayId] != true ||
-                            !framePrefs.hideOnSecurityPage)
+                    !framePrefs.hideOnSecurityPage)
                     && (globalState.notificationCount.value == 0 || !framePrefs.hideOnNotifications)
                     && globalState.hidingForPresentApp.value[this@MainWidgetFrameDelegate.display?.displayId] != true
                     && globalState.showingPowerMenu.value[this@MainWidgetFrameDelegate.display?.displayId] != true
