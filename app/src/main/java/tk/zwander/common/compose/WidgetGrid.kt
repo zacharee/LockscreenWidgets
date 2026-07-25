@@ -395,8 +395,19 @@ private fun <VM: BaseDelegate.BaseViewModel<*, *>> LazySpannedGridScope.widgetIt
                     launchIconOverride = {
                         launchShortcutIconOverride(updatedData.id)
                     },
-                    launchReconfigure = {
-                        launchReconfigure(updatedData.id, widgetInfo!!)
+                    launchReconfigure = launchReconfigure@{
+                        val providerInfo = manager.getAppWidgetInfo(updatedData.id)
+                            ?: (context.getAllInstalledWidgetProviders(updatedData.packageName)[updatedData.profile ?: UserHandleCompat.SYSTEM]
+                                ?.find { info -> info.provider == updatedData.widgetProviderComponent })
+
+                        if (providerInfo == null) {
+                            Toast.makeText(context, R.string.error_reconfiguring_widget, Toast.LENGTH_SHORT)
+                                .show()
+                            context.logUtils.normalLog("Unable to reconfigure widget ${updatedData.widgetProviderComponent}: provider info is null.", null)
+                            return@launchReconfigure
+                        }
+
+                        launchReconfigure(updatedData.id, providerInfo)
                     },
                     remove = {
                         itemToRemove.value = updatedData
