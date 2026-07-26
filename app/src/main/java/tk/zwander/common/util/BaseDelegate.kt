@@ -65,8 +65,7 @@ abstract class BaseDelegate<State : Any>(
 
     abstract val viewModel: BaseViewModel<out State, out BaseDelegate<State>>
 
-    abstract var state: State
-        protected set
+    abstract val state: MutableStateFlow<State>
 
     protected abstract val prefsHandler: HandlerRegistry
     protected abstract val params: WindowManager.LayoutParams
@@ -203,13 +202,13 @@ abstract class BaseDelegate<State : Any>(
     }
 
     open fun updateState(transform: (State) -> State) {
-        val newState = transform(state)
+        val newState = transform(state.value)
 
         if (newState != state) {
             logUtils.debugLog("Updating state from\n$state\nto\n$newState", null)
         }
 
-        state = newState
+        state.value = newState
     }
 
     fun updateCommonState(transform: (BaseState) -> BaseState) {
@@ -263,7 +262,7 @@ abstract class BaseDelegate<State : Any>(
         val wm: WindowManager?
             get() = delegate.wm
 
-        val state: State
+        val state: MutableStateFlow<State>
             get() = delegate.state
 
         override val holderId: Int

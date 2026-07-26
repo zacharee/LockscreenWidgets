@@ -43,6 +43,7 @@ import tk.zwander.common.compose.WidgetGrid
 import tk.zwander.common.compose.components.DrawerHandle
 import tk.zwander.common.compose.util.createComposeViewHolder
 import tk.zwander.common.compose.util.findAccessibility
+import tk.zwander.common.compose.util.rememberBooleanPreferenceState
 import tk.zwander.common.compose.util.rememberPreferenceState
 import tk.zwander.common.data.provider.IDrawerProvider
 import tk.zwander.common.listeners.WidgetResizeListener
@@ -98,13 +99,7 @@ class DrawerDelegate private constructor(context: Context, displayId: String) :
     override val holderId: Int
         get() = ID
 
-    override var state = State()
-        set(value) {
-            field = value
-            lifecycleScope.launch(Dispatchers.Main) {
-                updateWindow()
-            }
-        }
+    override val state = MutableStateFlow(State())
 
     override val params by lazy {
         WindowManager.LayoutParams().apply {
@@ -177,6 +172,9 @@ class DrawerDelegate private constructor(context: Context, displayId: String) :
                         value = { currentWidgets.toList() },
                         onChanged = { _, value -> currentWidgets = value.toSet() },
                     )
+                    val drawerLocked by rememberBooleanPreferenceState(
+                        key = PrefManager.KEY_LOCK_WIDGET_DRAWER,
+                    )
 
                     WidgetGrid(
                         currentWidgets = currentWidgetsState,
@@ -210,7 +208,7 @@ class DrawerDelegate private constructor(context: Context, displayId: String) :
                         enableSnapping = false,
                         contentPadding = combinedPadding.asPaddingValues(),
                         minRowSpan = 5,
-                        lockedKey = PrefManager.KEY_LOCK_WIDGET_DRAWER,
+                        locked = drawerLocked,
                         itemSpacingKey = PrefManager.KEY_DRAWER_ITEM_SPACING,
                     )
                 },
@@ -456,6 +454,14 @@ class DrawerDelegate private constructor(context: Context, displayId: String) :
 
         viewModel.viewModelScope.launch(Dispatchers.Main) {
             tryShowHandle()
+        }
+
+        viewModel.viewModelScope.launch(Dispatchers.Main) {
+            state.collect {
+                lifecycleScope.launch(Dispatchers.Main) {
+                    updateWindow()
+                }
+            }
         }
 
         viewModel.viewModelScope.launch(Dispatchers.Main) {

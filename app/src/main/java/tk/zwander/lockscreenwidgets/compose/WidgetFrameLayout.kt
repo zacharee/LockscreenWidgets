@@ -134,7 +134,7 @@ fun MainWidgetFrameDelegate.WidgetFrameViewModel.WidgetFrameLayout(
                             }.orEmpty()
 
                             if (interestingThirdChanges.size < 3) {
-                                isInEditingMode = !isInEditingMode && !frameLocked
+                                isInEditingMode = !isInEditingMode && (!frameLocked || state.value.isPreview)
                                 if (acknowledgedTwoFingerTap == null) {
                                     acknowledgedTwoFingerTap = false
                                 } else if (acknowledgedTwoFingerTap == false) {

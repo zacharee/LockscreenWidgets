@@ -64,7 +64,6 @@ import tk.zwander.common.activities.DismissOrUnlockActivity
 import tk.zwander.common.activities.PermissionIntentLaunchActivity
 import tk.zwander.common.compose.components.ShortcutItemLayout
 import tk.zwander.common.compose.components.WidgetItemLayout
-import tk.zwander.common.compose.util.rememberBooleanPreferenceState
 import tk.zwander.common.compose.util.rememberPreferenceState
 import tk.zwander.common.compose.util.widgetViewCacheRegistry
 import tk.zwander.common.data.WidgetData
@@ -89,7 +88,7 @@ fun <VM : BaseDelegate.BaseViewModel<*, *>> VM.WidgetGrid(
     launchAddActivity: () -> Unit,
     launchReconfigure: (id: Int, providerInfo: AppWidgetProviderInfo) -> Unit,
     launchShortcutIconOverride: (id: Int) -> Unit,
-    lockedKey: String,
+    locked: Boolean,
     itemSpacingKey: String,
     modifier: Modifier = Modifier,
     rowSpanForAddButton: Int = 1,
@@ -115,7 +114,7 @@ fun <VM : BaseDelegate.BaseViewModel<*, *>> VM.WidgetGrid(
         edgeScrollMargin = 16.dp,
     )
 
-    val gridLocked by rememberBooleanPreferenceState(key = lockedKey)
+    val gridLocked by rememberUpdatedState(locked)
     val itemSpacing by rememberPreferenceState(
         key = itemSpacingKey,
         preferences = preferences,

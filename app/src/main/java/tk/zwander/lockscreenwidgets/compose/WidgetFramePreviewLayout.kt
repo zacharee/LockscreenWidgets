@@ -29,6 +29,7 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.savedstate.SavedStateRegistry
 import androidx.savedstate.SavedStateRegistryOwner
 import androidx.savedstate.compose.LocalSavedStateRegistryOwner
+import kotlinx.coroutines.flow.MutableStateFlow
 import tk.zwander.common.compose.WidgetGrid
 import tk.zwander.common.compose.util.rememberPreferenceState
 import tk.zwander.common.data.provider.IFrameProvider
@@ -154,9 +155,9 @@ fun WidgetFramePreviewLayout(
                         modifier = Modifier.scale(scale),
                         rowSpanForAddButton = 1,
                         enableSnapping = true,
-                        lockedKey = PrefManager.KEY_LOCK_WIDGET_FRAME,
                         itemSpacingKey = PrefManager.KEY_FRAME_ITEM_SPACING,
                         preferences = framePrefs.framePreferences,
+                        locked = false,
                     )
                 }
 
@@ -196,7 +197,7 @@ class PreviewDelegate(
     override val viewModel
         get() = PreviewViewModel()
 
-    override var state: BaseState = BaseState()
+    override var state = MutableStateFlow(BaseState())
     override val prefsHandler: HandlerRegistry = HandlerRegistry {}
     override val params: WindowManager.LayoutParams = WindowManager.LayoutParams()
     override val rootView: View = view

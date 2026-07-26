@@ -33,6 +33,7 @@ import tk.zwander.common.activities.SelectIconPackActivity
 import tk.zwander.common.compose.WidgetGrid
 import tk.zwander.common.compose.util.createComposeViewHolder
 import tk.zwander.common.compose.util.findAccessibility
+import tk.zwander.common.compose.util.rememberBooleanPreferenceState
 import tk.zwander.common.compose.util.rememberPreferenceState
 import tk.zwander.common.data.provider.IFramePrefsProvider
 import tk.zwander.common.data.provider.IFrameProvider
@@ -98,50 +99,13 @@ open class MainWidgetFrameDelegate protected constructor(
 
     override var commonState: BaseState = BaseState()
 
-    override var state: State = State()
-        set(newState) {
-            var actualNewState = newState
-            val oldState = field
-
-            if (actualNewState.isTempHide != oldState.isTempHide && actualNewState.isTempHide) {
-                actualNewState = actualNewState.copy(isPreview = false)
-            }
-
-            if (actualNewState.screenOrientation != oldState.screenOrientation) {
-                actualNewState =
-                    actualNewState.copy(isPendingOrientationStateChange = true, isPreview = false)
-            }
-
-            // ------------ //
-
-            field = actualNewState
-
-            if (actualNewState.isPreview != oldState.isPreview) {
-                lifecycleScope.launch(Dispatchers.Main) {
-                    if (actualNewState.isPreview) {
-                        if (canShow()) {
-                            addWindow()
-                        }
-                    } else {
-                        if (!canShow()) {
-                            removeWindow()
-                        }
-                    }
-                }
-            }
-
-            if (actualNewState.ignoreAllTouches != oldState.ignoreAllTouches) {
-                lifecycleScope.launch(Dispatchers.Main) {
-                    updateIgnoreAllTouches()
-                }
-            }
-        }
+    override var state = MutableStateFlow(State())
 
     private val saveMode: FrameSizeAndPosition.FrameType
         get() {
             val isLandscape = prefManager.separateFrameLayoutForLandscape &&
-                    (state.screenOrientation == Surface.ROTATION_90 ||
-                            state.screenOrientation == Surface.ROTATION_270)
+                    (state.value.screenOrientation == Surface.ROTATION_90 ||
+                            state.value.screenOrientation == Surface.ROTATION_270)
             val isMainFrame = id == ID
 
             return when {
@@ -267,6 +231,10 @@ open class MainWidgetFrameDelegate protected constructor(
                                 (page + pageOffset) to (pageCount)
                             }
                         }
+                        val frameLocked by rememberBooleanPreferenceState(
+                            key = PrefManager.KEY_LOCK_WIDGET_FRAME,
+                        )
+                        val state by state.collectAsState()
 
                         LaunchedEffect(pageInfo) {
                             showingPager = pageIndicatorBehavior != PrefManager.VALUE_PAGE_INDICATOR_BEHAVIOR_HIDDEN
@@ -319,7 +287,7 @@ open class MainWidgetFrameDelegate protected constructor(
                             rowSpanForAddButton = 1,
                             enableSnapping = true,
                             lazyGridState = gridState,
-                            lockedKey = PrefManager.KEY_LOCK_WIDGET_FRAME,
+                            locked = frameLocked && !state.isPreview,
                             itemSpacingKey = PrefManager.KEY_FRAME_ITEM_SPACING,
                             preferences = framePrefs.framePreferences,
                         )
@@ -402,7 +370,7 @@ open class MainWidgetFrameDelegate protected constructor(
     }
 
     private val showWallpaperLayerCondition: Boolean
-        get() = !state.isPreview &&
+        get() = !state.value.isPreview &&
                 framePrefs.maskedMode &&
                 (globalState.notificationsPanelFullyExpanded.value[this@MainWidgetFrameDelegate.display?.displayId] == false ||
                         !framePrefs.showInNotificationShade) &&
@@ -609,6 +577,47 @@ open class MainWidgetFrameDelegate protected constructor(
         }
 
         viewModel.viewModelScope.launch(Dispatchers.Main) {
+            var oldState = state.value
+            state.collect { newState ->
+                var actualNewState = newState
+
+                if (actualNewState.isTempHide != oldState.isTempHide && actualNewState.isTempHide) {
+                    actualNewState = actualNewState.copy(isPreview = false)
+                }
+
+                if (actualNewState.screenOrientation != oldState.screenOrientation) {
+                    actualNewState =
+                        actualNewState.copy(isPendingOrientationStateChange = true, isPreview = false)
+                }
+
+                // ------------ //
+
+                if (actualNewState.isPreview != oldState.isPreview) {
+                    lifecycleScope.launch(Dispatchers.Main) {
+                        if (actualNewState.isPreview) {
+                            if (canShow()) {
+                                addWindow()
+                            }
+                        } else {
+                            if (!canShow()) {
+                                removeWindow()
+                            }
+                        }
+                    }
+                }
+
+                if (actualNewState.ignoreAllTouches != oldState.ignoreAllTouches) {
+                    lifecycleScope.launch(Dispatchers.Main) {
+                        updateIgnoreAllTouches()
+                    }
+                }
+
+                oldState = actualNewState
+                state.value = actualNewState
+            }
+        }
+
+        viewModel.viewModelScope.launch(Dispatchers.Main) {
             globalState.notificationsPanelFullyExpanded.collect {
                 updateState { it.copy(isPendingNotificationStateChange = true, isPreview = false) }
             }
@@ -785,16 +794,16 @@ open class MainWidgetFrameDelegate protected constructor(
      */
     private fun canShow(): Boolean {
         fun forPreview(): Boolean {
-            return state.isPreview && !state.isTempHide && prefManager.widgetFrameEnabled
+            return state.value.isPreview && !state.value.isTempHide && prefManager.widgetFrameEnabled
         }
 
         fun forCommon(): Boolean {
             return lsDisplayManager.displayPowerStates.value.displayStates[this@MainWidgetFrameDelegate.display?.uniqueIdCompat] == true
-                    && !state.isTempHide
+                    && !state.value.isTempHide
                     && globalState.hideForPresentIds.value[this@MainWidgetFrameDelegate.display?.displayId] != true
                     && globalState.hideForNonPresentIds.value[this@MainWidgetFrameDelegate.display?.displayId] != true
                     && prefManager.widgetFrameEnabled
-                    && (!prefManager.hideInLandscape || state.screenOrientation == Surface.ROTATION_0 || state.screenOrientation == Surface.ROTATION_180)
+                    && (!prefManager.hideInLandscape || state.value.screenOrientation == Surface.ROTATION_0 || state.value.screenOrientation == Surface.ROTATION_180)
                     && prefManager.canShowFrameFromTasker
                     && (!framePrefs.hideWhenKeyboardShown || globalState.showingKeyboard.value[this@MainWidgetFrameDelegate.display?.displayId] != true)
         }
@@ -931,7 +940,7 @@ open class MainWidgetFrameDelegate protected constructor(
      */
     private suspend fun updateAccessibilityPass() {
         if (viewModel.animationState.value == AnimationState.STATE_IDLE) {
-            if (state.isPendingNotificationStateChange || state.isPendingOrientationStateChange) {
+            if (state.value.isPendingNotificationStateChange || state.value.isPendingOrientationStateChange) {
                 updateWindow()
                 updateState {
                     it.copy(
@@ -1004,7 +1013,7 @@ open class MainWidgetFrameDelegate protected constructor(
     }
 
     private suspend fun updateIgnoreAllTouches() {
-        params.flags = if (state.ignoreAllTouches) {
+        params.flags = if (state.value.ignoreAllTouches && !state.value.isPreview) {
             params.flags or WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE
         } else {
             params.flags and WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE.inv()

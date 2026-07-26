@@ -74,7 +74,7 @@ class Accessibility : AccessibilityService(), CoroutineScope by MainScope(), Eve
                 )
                 newFrame.onCreate()
                 currentFrames.values.firstOrNull()?.let { referenceFrame ->
-                    newFrame.updateState { referenceFrame.state }
+                    newFrame.updateState { referenceFrame.state.value }
                     newFrame.updateCommonState { referenceFrame.commonState }
                 }
                 currentFrames[id] = newFrame
