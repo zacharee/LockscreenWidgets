@@ -185,7 +185,15 @@ fun <VM : BaseDelegate.BaseViewModel<*, *>> VM.WidgetGrid(
             state = reorderableState.gridState,
             flingBehavior = flingBehavior,
             modifier = modifier
-                .interceptUnclaimedDrags(lazyGridState, orientation, layoutDirection, coroutineScope, rootView, currentEditingId, flingBehavior)
+                .interceptUnclaimedDrags(
+                    gridState = lazyGridState,
+                    orientation = orientation,
+                    layoutDirection = layoutDirection,
+                    scope = coroutineScope,
+                    rootView = rootView,
+                    currentEditingId = currentEditingId,
+                    flingBehavior = flingBehavior,
+                )
                 .then(
                     if (gridLocked) {
                         Modifier
@@ -223,7 +231,15 @@ fun <VM : BaseDelegate.BaseViewModel<*, *>> VM.WidgetGrid(
             state = reorderableState.gridState,
             flingBehavior = flingBehavior,
             modifier = modifier
-                .interceptUnclaimedDrags(lazyGridState, orientation, layoutDirection, coroutineScope, rootView, currentEditingId, flingBehavior)
+                .interceptUnclaimedDrags(
+                    gridState = lazyGridState,
+                    orientation = orientation,
+                    layoutDirection = layoutDirection,
+                    scope = coroutineScope,
+                    rootView = rootView,
+                    currentEditingId = currentEditingId,
+                    flingBehavior = flingBehavior,
+                )
                 .then(
                     if (gridLocked) {
                         Modifier
@@ -276,75 +292,10 @@ private fun <VM: BaseDelegate.BaseViewModel<*, *>> LazySpannedGridScope.widgetIt
     with(viewModel) {
         if (currentWidgetsList.isEmpty()) {
             item(key = "ADD", span = SpannedGridItemSpan(columnCount, rowSpanForAddButton)) {
-                MeasuredComposable(name = "AddWidgetLayout") {
-                    val resources = LocalResources.current
-                    val widgetCornerRadius by rememberPreferenceState(
-                        key = widgetCornerRadiusKey,
-                        value = {
-                            (context.prefManager.getInt(
-                                it,
-                                resources.getInteger(R.integer.def_corner_radius_dp_scaled_10x),
-                            ) / 10f).dp
-                        },
-                    )
-
-                    Card(
-                        modifier = Modifier.fillMaxSize(),
-                        colors = CardColors(
-                            containerColor = Color.Transparent,
-                            contentColor = Color.White,
-                            disabledContentColor = Color.White,
-                            disabledContainerColor = Color.Transparent,
-                        ),
-                        shape = RoundedCornerShape(widgetCornerRadius),
-                    ) {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .clickable(
-                                    enabled = true,
-                                    interactionSource = remember { MutableInteractionSource() },
-                                    onClick = { launchAddActivity() },
-                                    indication = ripple(
-                                        color = Color.Black,
-                                    ),
-                                ),
-                            contentAlignment = Alignment.Center,
-                        ) {
-                            Column(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalAlignment = Alignment.CenterHorizontally,
-                            ) {
-                                Icon(
-                                    painter = painterResource(R.drawable.ic_baseline_add_24),
-                                    contentDescription = stringResource(R.string.add_widget),
-                                    tint = Color.White,
-                                    modifier = Modifier
-                                        .size(48.dp)
-                                        .background(
-                                            brush = Brush.radialGradient(
-                                                0f to Color.Black.copy(alpha = 0.5f),
-                                                1f to Color.Transparent,
-                                            ),
-                                        ),
-                                )
-
-                                Text(
-                                    text = stringResource(R.string.add_widget),
-                                    fontWeight = FontWeight.Bold,
-                                    style = LocalTextStyle.current.copy(
-                                        shadow = Shadow(
-                                            color = Color.Black,
-                                            offset = Offset(3f, 3f),
-                                            blurRadius = 5f,
-                                        ),
-                                    ),
-                                    fontSize = 20.sp,
-                                )
-                            }
-                        }
-                    }
-                }
+                AddItem(
+                    launchAddActivity = launchAddActivity,
+                    modifier = Modifier.animateItem(),
+                )
             }
         }
 
@@ -374,6 +325,82 @@ private fun <VM: BaseDelegate.BaseViewModel<*, *>> LazySpannedGridScope.widgetIt
                     currentEditingId = currentEditingId,
                     modifier = Modifier,
                 )
+            }
+        }
+    }
+}
+
+@Composable
+private fun <VM : BaseDelegate.BaseViewModel<*, *>> VM.AddItem(
+    launchAddActivity: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    MeasuredComposable(name = "AddWidgetLayout") {
+        val resources = LocalResources.current
+        val widgetCornerRadius by rememberPreferenceState(
+            key = widgetCornerRadiusKey,
+            value = {
+                (context.prefManager.getInt(
+                    it,
+                    resources.getInteger(R.integer.def_corner_radius_dp_scaled_10x),
+                ) / 10f).dp
+            },
+        )
+
+        Card(
+            modifier = modifier.fillMaxSize(),
+            colors = CardColors(
+                containerColor = Color.Transparent,
+                contentColor = Color.White,
+                disabledContentColor = Color.White,
+                disabledContainerColor = Color.Transparent,
+            ),
+            shape = RoundedCornerShape(widgetCornerRadius),
+        ) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .clickable(
+                        enabled = true,
+                        interactionSource = remember { MutableInteractionSource() },
+                        onClick = { launchAddActivity() },
+                        indication = ripple(
+                            color = Color.Black,
+                        ),
+                    ),
+                contentAlignment = Alignment.Center,
+            ) {
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                ) {
+                    Icon(
+                        painter = painterResource(R.drawable.ic_baseline_add_24),
+                        contentDescription = stringResource(R.string.add_widget),
+                        tint = Color.White,
+                        modifier = Modifier
+                            .size(48.dp)
+                            .background(
+                                brush = Brush.radialGradient(
+                                    0f to Color.Black.copy(alpha = 0.5f),
+                                    1f to Color.Transparent,
+                                ),
+                            ),
+                    )
+
+                    Text(
+                        text = stringResource(R.string.add_widget),
+                        fontWeight = FontWeight.Bold,
+                        style = LocalTextStyle.current.copy(
+                            shadow = Shadow(
+                                color = Color.Black,
+                                offset = Offset(3f, 3f),
+                                blurRadius = 5f,
+                            ),
+                        ),
+                        fontSize = 20.sp,
+                    )
+                }
             }
         }
     }
