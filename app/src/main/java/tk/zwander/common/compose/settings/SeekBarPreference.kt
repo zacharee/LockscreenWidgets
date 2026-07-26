@@ -4,47 +4,16 @@ import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.*
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsDraggedAsState
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.IntrinsicSize
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.heightIn
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.LocalTextStyle
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.SheetValue
-import androidx.compose.material3.Slider
-import androidx.compose.material3.SliderDefaults
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.material3.rememberBottomSheetState
-import androidx.compose.material3.ripple
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -88,6 +57,7 @@ open class SeekBarPreference(
     val increment: @Composable () -> Int = { 1 },
     enabled: @Composable () -> Boolean = { true },
     visible: @Composable () -> Boolean = { true },
+    badge: (@Composable () -> Unit)? = null,
 ) : BasePreference<Int>(
     title = title,
     summary = summary,
@@ -98,6 +68,7 @@ open class SeekBarPreference(
     defaultValue = defaultValue,
     enabled = enabled,
     visible = visible,
+    badge = badge,
 ) {
     @Composable
     override fun Render(modifier: Modifier) {
@@ -114,6 +85,7 @@ open class SeekBarPreference(
             unit = unit(),
             increment = increment(),
             enabled = enabled(),
+            badge = badge,
         )
     }
 }
@@ -132,6 +104,7 @@ fun SeekBarPreference(
     unit: String? = null,
     increment: Int = 1,
     enabled: Boolean = true,
+    badge: (@Composable () -> Unit)? = null,
 ) {
     val context = LocalContext.current
     var value by rememberPreferenceState(
@@ -154,6 +127,7 @@ fun SeekBarPreference(
         scale = scale,
         increment = increment,
         enabled = enabled,
+        badge = badge,
     )
 }
 
@@ -172,6 +146,7 @@ fun SeekBarPreference(
     increment: Int = 1,
     scale: Double = 1.0,
     enabled: Boolean = true,
+    badge: (@Composable () -> Unit)? = null,
 ) {
     BasePreferenceLayout(
         title = title,
@@ -194,6 +169,7 @@ fun SeekBarPreference(
             )
         },
         enabled = enabled,
+        badge = badge,
     )
 }
 

@@ -5,9 +5,7 @@ import android.content.Context
 import android.os.Build
 import android.os.Bundle
 import android.view.Display
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
+import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
@@ -84,6 +82,16 @@ class ComposeFrameSettingsActivity : BaseActivity() {
 
             var pendingMovedFrameId by remember {
                 mutableStateOf<Int?>(null)
+            }
+
+            val globalBadge: @Composable () -> Unit = remember {
+                {
+                    Badge(
+                        containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                    ) {
+                        Text(text = stringResource(R.string.applies_to_all_frames))
+                    }
+                }
             }
 
             val commonSection = createCommonSection(BackupRestoreManager.Which.FRAME)
@@ -322,6 +330,7 @@ class ComposeFrameSettingsActivity : BaseActivity() {
                         minValue = { 0 },
                         maxValue = { 640 },
                         unit = { "dp" },
+                        badge = globalBadge,
                     )
 
                     seekBarPreference(
@@ -334,6 +343,7 @@ class ComposeFrameSettingsActivity : BaseActivity() {
                         minValue = { 0 },
                         maxValue = { 640 },
                         unit = { "dp" },
+                        badge = globalBadge,
                     )
                 }
 
@@ -399,6 +409,7 @@ class ComposeFrameSettingsActivity : BaseActivity() {
                         summary = { stringResource(R.string.settings_screen_lock_widget_frame_desc) },
                         key = { PrefManager.KEY_LOCK_WIDGET_FRAME },
                         icon = { painterResource(R.drawable.ic_baseline_lock_24) },
+                        badge = globalBadge,
                     )
 
                     switchPreference(
@@ -427,6 +438,7 @@ class ComposeFrameSettingsActivity : BaseActivity() {
                         summary = { stringResource(R.string.settings_screen_separate_layout_desc) },
                         key = { PrefManager.KEY_SEPARATE_LAYOUT_FOR_LANDSCAPE },
                         icon = { painterResource(R.drawable.baseline_screen_rotation_24) },
+                        badge = globalBadge,
                     )
                 }
 
@@ -500,6 +512,7 @@ class ComposeFrameSettingsActivity : BaseActivity() {
                         summary = { stringResource(R.string.settings_screen_hide_in_landscape_desc) },
                         key = { PrefManager.KEY_HIDE_IN_LANDSCAPE },
                         icon = { painterResource(R.drawable.ic_baseline_crop_landscape_24) },
+                        badge = globalBadge,
                     )
 
                     switchPreference(
@@ -614,6 +627,7 @@ class ComposeFrameSettingsActivity : BaseActivity() {
                         key = { PrefManager.KEY_FRAME_REMEMBER_POSITION },
                         icon = { painterResource(R.drawable.swap) },
                         defaultValue = { true },
+                        badge = globalBadge,
                     )
 
                     switchPreference(
@@ -622,6 +636,7 @@ class ComposeFrameSettingsActivity : BaseActivity() {
                         key = { PrefManager.KEY_FRAME_FORCE_RELOAD_WIDGETS },
                         icon = { painterResource(R.drawable.baseline_refresh_24) },
                         defaultValue = { true },
+                        badge = globalBadge,
                     )
 
                     switchPreference(
@@ -630,6 +645,7 @@ class ComposeFrameSettingsActivity : BaseActivity() {
                         key = { PrefManager.KEY_ANIMATE_SHOW_HIDE },
                         icon = { painterResource(R.drawable.ic_baseline_animation_24) },
                         defaultValue = { true },
+                        badge = globalBadge,
                     )
 
                     seekBarPreference(
@@ -643,6 +659,7 @@ class ComposeFrameSettingsActivity : BaseActivity() {
                         maxValue = { 2000 },
                         unit = { "ms" },
                         scale = { 1.0 },
+                        badge = globalBadge,
                     )
 
                     listPreference(
@@ -659,6 +676,7 @@ class ComposeFrameSettingsActivity : BaseActivity() {
                             }
                         },
                         summary = { null },
+                        badge = globalBadge,
                     )
 
                     seekBarPreference(
@@ -671,6 +689,7 @@ class ComposeFrameSettingsActivity : BaseActivity() {
                         maxValue = { 5000 },
                         unit = { "ms" },
                         scale = { 1.0 },
+                        badge = globalBadge,
                     )
                 }
 
@@ -685,6 +704,7 @@ class ComposeFrameSettingsActivity : BaseActivity() {
                         key = { PrefManager.KEY_DOUBLE_TAP_EMPTY_FRAME_SPACE_TURN_OFF_DISPLAY },
                         defaultValue = { false },
                         visible = { Build.VERSION.SDK_INT >= Build.VERSION_CODES.P },
+                        badge = globalBadge,
                     )
 
                     switchPreference(
@@ -693,6 +713,7 @@ class ComposeFrameSettingsActivity : BaseActivity() {
                         icon = { painterResource(R.drawable.ic_baseline_block_24) },
                         key = { PrefManager.KEY_TOUCH_PROTECTION },
                         defaultValue = { false },
+                        badge = globalBadge,
                     )
 
                     switchPreference(
@@ -727,6 +748,7 @@ class ComposeFrameSettingsActivity : BaseActivity() {
                         key = { PrefManager.KEY_REQUEST_UNLOCK },
                         icon = { painterResource(R.drawable.ic_baseline_launch_24) },
                         defaultValue = { true },
+                        badge = globalBadge,
                     )
 
                     switchPreference(
@@ -736,6 +758,7 @@ class ComposeFrameSettingsActivity : BaseActivity() {
                         enabled = booleanPreferenceDependency(PrefManager.KEY_REQUEST_UNLOCK),
                         icon = { painterResource(R.drawable.baseline_compare_24) },
                         defaultValue = { true },
+                        badge = globalBadge,
                     )
                 }
             }

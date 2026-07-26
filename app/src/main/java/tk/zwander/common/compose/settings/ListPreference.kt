@@ -32,6 +32,7 @@ class ListPreference(
     icon: @Composable () -> Painter? = { null },
     enabled: @Composable () -> Boolean = { true },
     visible: @Composable () -> Boolean = { true },
+    badge: (@Composable () -> Unit)? = null,
 ) : BasePreference<String?>(
     title = title,
     summary = summary,
@@ -40,6 +41,7 @@ class ListPreference(
     icon = icon,
     enabled = enabled,
     visible = visible,
+    badge = badge,
 ) {
     @Composable
     override fun Render(modifier: Modifier) {
@@ -52,6 +54,7 @@ class ListPreference(
             modifier = modifier,
             icon = icon(),
             enabled = enabled(),
+            badge = badge,
         )
     }
 }
@@ -66,6 +69,7 @@ fun ListPreference(
     modifier: Modifier = Modifier,
     icon: Painter? = null,
     enabled: Boolean = true,
+    badge: (@Composable () -> Unit)? = null,
 ) {
     val context = LocalContext.current
     var value by rememberPreferenceState(
@@ -83,6 +87,7 @@ fun ListPreference(
         modifier = modifier,
         icon = icon,
         enabled = enabled,
+        badge = badge,
     )
 }
 
@@ -97,6 +102,7 @@ fun ListPreference(
     modifier: Modifier = Modifier,
     icon: Painter? = null,
     enabled: Boolean = true,
+    badge: (@Composable () -> Unit)? = null,
 ) {
     var showingDialog by remember {
         mutableStateOf(false)
@@ -125,6 +131,7 @@ fun ListPreference(
         onClick = {
             showingDialog = true
         },
+        badge = badge,
     )
 
     ListPickerDialog(

@@ -18,6 +18,7 @@ open class SwitchPreference(
     enabled: @Composable () -> Boolean = { true },
     visible: @Composable () -> Boolean = { true },
     val canChange: (Boolean) -> Boolean = { true },
+    badge: (@Composable () -> Unit)? = null,
 ) : BasePreference<Boolean>(
     title = title,
     summary = summary,
@@ -26,6 +27,7 @@ open class SwitchPreference(
     icon = icon,
     enabled = enabled,
     visible = visible,
+    badge = badge,
 ) {
     @Composable
     override fun Render(modifier: Modifier) {
@@ -38,6 +40,7 @@ open class SwitchPreference(
             defaultValue = defaultValue(),
             enabled = enabled(),
             canChange = canChange,
+            badge = badge,
         )
     }
 }
@@ -51,7 +54,8 @@ fun SwitchPreference(
     icon: Painter? = null,
     defaultValue: Boolean = false,
     enabled: Boolean = true,
-    canChange: (Boolean) -> Boolean = { true }
+    canChange: (Boolean) -> Boolean = { true },
+    badge: (@Composable () -> Unit)? = null,
 ) {
     var value by rememberBooleanPreferenceState(
         key = key,
@@ -67,6 +71,7 @@ fun SwitchPreference(
         onCheckedChange = { value = it },
         enabled = enabled,
         canChange = canChange,
+        badge = badge,
     )
 }
 
@@ -79,7 +84,8 @@ fun SwitchPreference(
     modifier: Modifier = Modifier,
     icon: Painter? = null,
     enabled: Boolean = true,
-    canChange: (Boolean) -> Boolean = { true }
+    canChange: (Boolean) -> Boolean = { true },
+    badge: (@Composable () -> Unit)? = null,
 ) {
     val onCheckedChangeProxy = remember(canChange) {
         { newValue: Boolean ->
@@ -103,5 +109,6 @@ fun SwitchPreference(
             )
         },
         enabled = enabled,
+        badge = badge,
     )
 }

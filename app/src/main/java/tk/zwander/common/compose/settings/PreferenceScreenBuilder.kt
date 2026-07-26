@@ -88,6 +88,7 @@ class PreferenceCategoryScope(context: Context) : ContextWrapper(context) {
         widgetPosition: @Composable () -> WidgetPosition = { WidgetPosition.END },
         enabled: @Composable () -> Boolean = { true },
         visible: @Composable () -> Boolean = { true },
+        badge: (@Composable () -> Unit)? = null,
     ) {
         preference(
             BasePreference(
@@ -101,6 +102,7 @@ class PreferenceCategoryScope(context: Context) : ContextWrapper(context) {
                 widgetPosition = widgetPosition,
                 enabled = enabled,
                 visible = visible,
+                badge = badge,
             ),
         )
     }
@@ -114,6 +116,7 @@ class PreferenceCategoryScope(context: Context) : ContextWrapper(context) {
         enabled: @Composable () -> Boolean = { true },
         visible: @Composable () -> Boolean = { true },
         canChange: (Boolean) -> Boolean = { true },
+        badge: (@Composable () -> Unit)? = null,
     ) {
         preference(
             SwitchPreference(
@@ -125,6 +128,7 @@ class PreferenceCategoryScope(context: Context) : ContextWrapper(context) {
                 enabled = enabled,
                 visible = visible,
                 canChange = canChange,
+                badge = badge,
             ),
         )
     }
@@ -142,6 +146,7 @@ class PreferenceCategoryScope(context: Context) : ContextWrapper(context) {
         increment: @Composable () -> Int = { 1 },
         enabled: @Composable () -> Boolean = { true },
         visible: @Composable () -> Boolean = { true },
+        badge: (@Composable () -> Unit)? = null,
     ) {
         preference(
             SeekBarPreference(
@@ -157,6 +162,7 @@ class PreferenceCategoryScope(context: Context) : ContextWrapper(context) {
                 increment = increment,
                 enabled = enabled,
                 visible = visible,
+                badge = badge,
             ),
         )
     }
@@ -169,6 +175,7 @@ class PreferenceCategoryScope(context: Context) : ContextWrapper(context) {
         icon: @Composable () -> Painter? = { null },
         enabled: @Composable () -> Boolean = { true },
         visible: @Composable () -> Boolean = { true },
+        badge: (@Composable () -> Unit)? = null,
     ) {
         preference(
             ColorPickerPreference(
@@ -179,6 +186,7 @@ class PreferenceCategoryScope(context: Context) : ContextWrapper(context) {
                 icon = icon,
                 enabled = enabled,
                 visible = visible,
+                badge = badge,
             ),
         )
     }
@@ -192,6 +200,7 @@ class PreferenceCategoryScope(context: Context) : ContextWrapper(context) {
         icon: @Composable () -> Painter? = { null },
         enabled: @Composable () -> Boolean = { true },
         visible: @Composable () -> Boolean = { true },
+        badge: (@Composable () -> Unit)? = null,
     ) {
         preference(
             ListPreference(
@@ -203,6 +212,7 @@ class PreferenceCategoryScope(context: Context) : ContextWrapper(context) {
                 icon = icon,
                 enabled = enabled,
                 visible = visible,
+                badge = badge,
             ),
         )
     }

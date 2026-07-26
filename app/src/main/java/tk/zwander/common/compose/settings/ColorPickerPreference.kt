@@ -36,6 +36,7 @@ class ColorPickerPreference(
     icon: @Composable () -> Painter? = { null },
     enabled: @Composable () -> Boolean = { true },
     visible: @Composable () -> Boolean = { true },
+    badge: (@Composable () -> Unit)? = null,
 ) : BasePreference<Int>(
     title = title,
     summary = summary,
@@ -44,6 +45,7 @@ class ColorPickerPreference(
     icon = icon,
     enabled = enabled,
     visible = visible,
+    badge = badge,
 ) {
     @Composable
     override fun Render(modifier: Modifier) {
@@ -55,6 +57,7 @@ class ColorPickerPreference(
             modifier = modifier,
             icon = icon(),
             enabled = enabled(),
+            badge = badge,
         )
     }
 }
@@ -68,6 +71,7 @@ fun ColorPickerPreference(
     modifier: Modifier = Modifier,
     icon: Painter? = null,
     enabled: Boolean = true,
+    badge: (@Composable () -> Unit)? = null,
 ) {
     val context = LocalContext.current
     var value by rememberPreferenceState(
@@ -85,10 +89,10 @@ fun ColorPickerPreference(
         icon = icon,
         enabled = enabled,
         defaultValue = defaultValue,
+        badge = badge,
     )
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ColorPickerPreference(
     title: String,
@@ -99,6 +103,7 @@ fun ColorPickerPreference(
     modifier: Modifier = Modifier,
     icon: Painter? = null,
     enabled: Boolean = true,
+    badge: (@Composable () -> Unit)? = null,
 ) {
     var showingPickerDialog by remember {
         mutableStateOf(false)
@@ -120,6 +125,7 @@ fun ColorPickerPreference(
             onClick = { showingPickerDialog = true },
             widget = colorPreview,
             enabled = enabled,
+            badge = badge,
         )
     }
 }

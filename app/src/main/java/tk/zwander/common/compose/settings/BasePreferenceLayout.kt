@@ -1,31 +1,14 @@
 package tk.zwander.common.compose.settings
 
-import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.*
 import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.expandVertically
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.*
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -46,6 +29,7 @@ open class BasePreference<ValueType>(
     val widgetPosition: @Composable () -> WidgetPosition = { WidgetPosition.END },
     val enabled: @Composable () -> Boolean = { true },
     val visible: @Composable () -> Boolean = { true },
+    val badge: (@Composable () -> Unit)? = null,
 ) {
     @Composable
     open fun Render(modifier: Modifier) {
@@ -58,6 +42,7 @@ open class BasePreference<ValueType>(
             widget = widget,
             widgetPosition = widgetPosition(),
             enabled = enabled(),
+            badge = badge,
         )
     }
 }
@@ -74,92 +59,104 @@ fun BasePreferenceLayout(
     summaryMaxLines: Int = Int.MAX_VALUE,
     enabled: Boolean = true,
     titleTextColor: Color = Color.Unspecified,
+    badge: (@Composable () -> Unit)? = null,
 ) {
     val animatedAlpha by animateFloatAsState(if (enabled) 1f else 0.7f)
 
     Surface(
         modifier = modifier,
     ) {
-        Column(
-            modifier = Modifier
-                .alpha(animatedAlpha)
-                .then(
-                    if (onClick != null) {
-                        Modifier.clickable(onClick = onClick, enabled = enabled)
-                    } else {
-                        Modifier
-                    },
-                )
-                .padding(vertical = 16.dp, horizontal = 8.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(16.dp),
-        ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(16.dp),
-            ) {
-                Box(
-                    modifier = Modifier.width(48.dp),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    icon?.let {
-                        Icon(
-                            painter = icon,
-                            contentDescription = null,
-                            modifier = Modifier.size(24.dp),
-                        )
-                    }
-                }
-
-                Column(
-                    modifier = Modifier
-                        .weight(1f),
-                ) {
-                    Text(
-                        text = title,
-                        style = MaterialTheme.typography.bodyLarge,
-                        fontWeight = FontWeight.Bold,
-                        color = titleTextColor,
+        Box {
+            Column(
+                modifier = Modifier
+                    .alpha(animatedAlpha)
+                    .then(
+                        if (onClick != null) {
+                            Modifier.clickable(onClick = onClick, enabled = enabled)
+                        } else {
+                            Modifier
+                        },
                     )
-
-                    AnimatedVisibility(
-                        visible = summary != null,
-                        enter = fadeIn() + expandVertically(expandFrom = Alignment.Top),
-                        exit = fadeOut() + shrinkVertically(shrinkTowards = Alignment.Top),
+                    .padding(vertical = 16.dp, horizontal = 8.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(16.dp),
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(16.dp),
+                ) {
+                    Box(
+                        modifier = Modifier.width(48.dp),
+                        contentAlignment = Alignment.Center,
                     ) {
-                        Spacer(modifier = Modifier.size(8.dp))
+                        icon?.let {
+                            Icon(
+                                painter = icon,
+                                contentDescription = null,
+                                modifier = Modifier.size(24.dp),
+                            )
+                        }
+                    }
 
-                        var tempSummary by remember { mutableStateOf(summary ?: "") }
+                    Column(
+                        modifier = Modifier
+                            .weight(1f),
+                    ) {
+                        Text(
+                            text = title,
+                            style = MaterialTheme.typography.bodyLarge,
+                            fontWeight = FontWeight.Bold,
+                            color = titleTextColor,
+                        )
 
-                        LaunchedEffect(summary) {
-                            if (summary != null) {
-                                tempSummary = summary
+                        AnimatedVisibility(
+                            visible = summary != null,
+                            enter = fadeIn() + expandVertically(expandFrom = Alignment.Top),
+                            exit = fadeOut() + shrinkVertically(shrinkTowards = Alignment.Top),
+                        ) {
+                            Spacer(modifier = Modifier.size(8.dp))
+
+                            var tempSummary by remember { mutableStateOf(summary ?: "") }
+
+                            LaunchedEffect(summary) {
+                                if (summary != null) {
+                                    tempSummary = summary
+                                }
                             }
+
+                            Text(
+                                text = tempSummary,
+                                maxLines = summaryMaxLines,
+                                overflow = TextOverflow.Ellipsis,
+                                style = MaterialTheme.typography.bodyMedium,
+                            )
                         }
 
-                        Text(
-                            text = tempSummary,
-                            maxLines = summaryMaxLines,
-                            overflow = TextOverflow.Ellipsis,
-                            style = MaterialTheme.typography.bodyMedium,
-                        )
+                        if (widgetPosition == WidgetPosition.BOTTOM_INLINE) {
+                            Spacer(modifier = Modifier.size(8.dp))
+
+                            widget?.invoke(Modifier)
+                        }
                     }
 
-                    if (widgetPosition == WidgetPosition.BOTTOM_INLINE) {
-                        Spacer(modifier = Modifier.size(8.dp))
-
+                    if (widgetPosition == WidgetPosition.END) {
                         widget?.invoke(Modifier)
                     }
                 }
 
-                if (widgetPosition == WidgetPosition.END) {
+                if (widgetPosition == WidgetPosition.BOTTOM) {
                     widget?.invoke(Modifier)
                 }
             }
 
-            if (widgetPosition == WidgetPosition.BOTTOM) {
-                widget?.invoke(Modifier)
+            badge?.let {
+                Box(
+                    modifier = Modifier.align(Alignment.TopEnd)
+                        .padding(top = 8.dp, end = 8.dp),
+                ) {
+                    it()
+                }
             }
         }
     }
