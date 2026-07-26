@@ -237,8 +237,6 @@ abstract class BaseDelegate<State : Any>(
         }
     }
 
-    protected abstract fun isLocked(): Boolean
-
     protected abstract suspend fun updateWindow()
 
     protected suspend fun updateOverlay() {
@@ -268,9 +266,6 @@ abstract class BaseDelegate<State : Any>(
 
         override val holderId: Int
             get() = delegate.holderId
-
-        val isLocked: Boolean
-            get() = delegate.isLocked()
 
         override val display: LSDisplay?
             get() = delegate.display

@@ -80,6 +80,10 @@ fun MainWidgetFrameDelegate.WidgetFrameViewModel.WidgetFrameLayout(
     var removing by isRemoving.collectAsMutableState()
     var isAdjustingMask by this.isAdjustingMask.collectAsMutableState()
 
+    val frameLocked by rememberBooleanPreferenceState(
+        PrefManager.KEY_LOCK_WIDGET_FRAME,
+    )
+
     var maskAdjustment by rememberPreferenceState(
         key = PrefManager.KEY_MASKED_MODE_ADJUSTMENT_FOR_DISPLAY,
         value = {
@@ -126,7 +130,7 @@ fun MainWidgetFrameDelegate.WidgetFrameViewModel.WidgetFrameLayout(
                             }.orEmpty()
 
                             if (interestingThirdChanges.size < 3) {
-                                isInEditingMode = !isInEditingMode && !isLocked
+                                isInEditingMode = !isInEditingMode && !frameLocked
                                 if (acknowledgedTwoFingerTap == null) {
                                     acknowledgedTwoFingerTap = false
                                 } else if (acknowledgedTwoFingerTap == false) {

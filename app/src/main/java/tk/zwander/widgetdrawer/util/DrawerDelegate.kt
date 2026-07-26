@@ -206,6 +206,7 @@ class DrawerDelegate private constructor(context: Context, displayId: String) :
                         enableSnapping = false,
                         contentPadding = combinedPadding.asPaddingValues(),
                         minRowSpan = 5,
+                        lockedKey = PrefManager.KEY_LOCK_WIDGET_DRAWER,
                     )
                 },
                 modifier = Modifier.fillMaxSize()
@@ -474,10 +475,6 @@ class DrawerDelegate private constructor(context: Context, displayId: String) :
         super.onDestroy()
 
         invalidateInstance()
-    }
-
-    override fun isLocked(): Boolean {
-        return prefManager.lockWidgetDrawer
     }
 
     private suspend fun hideAll() {

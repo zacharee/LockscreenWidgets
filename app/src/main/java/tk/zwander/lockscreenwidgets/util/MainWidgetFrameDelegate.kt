@@ -315,6 +315,7 @@ open class MainWidgetFrameDelegate protected constructor(
                             rowSpanForAddButton = 1,
                             enableSnapping = true,
                             lazyGridState = gridState,
+                            lockedKey = PrefManager.KEY_LOCK_WIDGET_FRAME,
                         )
 
                         AnimatedVisibility(
@@ -637,10 +638,6 @@ open class MainWidgetFrameDelegate protected constructor(
         if (id == ID) {
             invalidateInstance()
         }
-    }
-
-    override fun isLocked(): Boolean {
-        return prefManager.lockWidgetFrame
     }
 
     suspend fun updateStateAndWindowState(

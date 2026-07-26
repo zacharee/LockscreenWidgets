@@ -1,7 +1,6 @@
 package tk.zwander.common.compose
 
 import android.annotation.SuppressLint
-import android.appwidget.AppWidgetManager
 import android.appwidget.AppWidgetProviderInfo
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -38,10 +37,7 @@ import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.input.pointer.util.VelocityTracker
-import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.platform.LocalLayoutDirection
-import androidx.compose.ui.platform.LocalResources
-import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.platform.*
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -71,6 +67,7 @@ import tk.zwander.common.activities.DismissOrUnlockActivity
 import tk.zwander.common.activities.PermissionIntentLaunchActivity
 import tk.zwander.common.compose.components.ShortcutItemLayout
 import tk.zwander.common.compose.components.WidgetItemLayout
+import tk.zwander.common.compose.util.rememberBooleanPreferenceState
 import tk.zwander.common.compose.util.rememberPreferenceState
 import tk.zwander.common.compose.util.widgetViewCacheRegistry
 import tk.zwander.common.data.WidgetData
@@ -95,6 +92,7 @@ fun <VM : BaseDelegate.BaseViewModel<*, *>> VM.WidgetGrid(
     launchAddActivity: () -> Unit,
     launchReconfigure: (id: Int, providerInfo: AppWidgetProviderInfo) -> Unit,
     launchShortcutIconOverride: (id: Int) -> Unit,
+    lockedKey: String,
     modifier: Modifier = Modifier,
     rowSpanForAddButton: Int = 1,
     minColSpan: Int = 1,
@@ -103,7 +101,6 @@ fun <VM : BaseDelegate.BaseViewModel<*, *>> VM.WidgetGrid(
     contentPadding: PaddingValues = PaddingValues.Zero,
     lazyGridState: LazySpannedGridState = rememberLazySpannedGridState(),
 ) {
-    val manager = remember { context.appWidgetManager }
     var currentEditingId by currentEditingInterfaceId.collectAsMutableState()
 
     val updatedCurrentWidgets by rememberUpdatedState(currentWidgets)
@@ -117,6 +114,8 @@ fun <VM : BaseDelegate.BaseViewModel<*, *>> VM.WidgetGrid(
         },
         gridState = lazyGridState,
     )
+
+    val gridLocked by rememberBooleanPreferenceState(key = lockedKey)
 
     // Sets currentEditingId directly from reorderableState.draggingItemKey via snapshotFlow rather
     // than a per-item LaunchedEffect(isDragging) inside each ReorderableItem — that per-item
@@ -187,8 +186,15 @@ fun <VM : BaseDelegate.BaseViewModel<*, *>> VM.WidgetGrid(
             flingBehavior = flingBehavior,
             modifier = modifier
                 .interceptUnclaimedDrags(lazyGridState, orientation, layoutDirection, coroutineScope, rootView, currentEditingId, flingBehavior)
-                .reorderable(reorderableState)
-                .detectReorderAfterLongPress(reorderableState),
+                .then(
+                    if (gridLocked) {
+                        Modifier
+                    } else {
+                        Modifier
+                            .reorderable(reorderableState)
+                            .detectReorderAfterLongPress(reorderableState)
+                    },
+                ),
             contentPadding = contentPadding,
         ) {
             widgetItems(
@@ -201,7 +207,6 @@ fun <VM : BaseDelegate.BaseViewModel<*, *>> VM.WidgetGrid(
                 launchShortcutIconOverride = launchShortcutIconOverride,
                 spans = updatedSpans,
                 reorderableState = reorderableState,
-                manager = manager,
                 currentEditingId = currentEditingId,
                 onCurrentEditingIdChanged = {
                     currentEditingId = it
@@ -219,8 +224,15 @@ fun <VM : BaseDelegate.BaseViewModel<*, *>> VM.WidgetGrid(
             flingBehavior = flingBehavior,
             modifier = modifier
                 .interceptUnclaimedDrags(lazyGridState, orientation, layoutDirection, coroutineScope, rootView, currentEditingId, flingBehavior)
-                .reorderable(reorderableState)
-                .detectReorderAfterLongPress(reorderableState),
+                .then(
+                    if (gridLocked) {
+                        Modifier
+                    } else {
+                        Modifier
+                            .reorderable(reorderableState)
+                            .detectReorderAfterLongPress(reorderableState)
+                    },
+                ),
             contentPadding = contentPadding,
         ) {
             widgetItems(
@@ -233,7 +245,6 @@ fun <VM : BaseDelegate.BaseViewModel<*, *>> VM.WidgetGrid(
                 launchShortcutIconOverride = launchShortcutIconOverride,
                 spans = updatedSpans,
                 reorderableState = reorderableState,
-                manager = manager,
                 currentEditingId = currentEditingId,
                 onCurrentEditingIdChanged = {
                     currentEditingId = it
@@ -256,7 +267,6 @@ private fun <VM: BaseDelegate.BaseViewModel<*, *>> LazySpannedGridScope.widgetIt
     launchShortcutIconOverride: (id: Int) -> Unit,
     spans: List<IntSize>,
     reorderableState: ReorderableLazySpannedGridState,
-    manager: AppWidgetManager,
     currentEditingId: Int,
     onCurrentEditingIdChanged: (Int) -> Unit,
     onWidgetsChanged: (List<WidgetData>) -> Unit,
@@ -343,109 +353,145 @@ private fun <VM: BaseDelegate.BaseViewModel<*, *>> LazySpannedGridScope.widgetIt
             span = { index, _ -> SpannedGridItemSpan(spans[index]) },
             key = { _, data -> data.id },
         ) { index, data ->
-            val updatedData by rememberUpdatedState(data)
-
             ReorderableItem(
                 state = reorderableState,
-                key = updatedData.id,
+                key = data.id,
                 orientationLocked = false,
                 modifier = Modifier.animateItem(),
             ) { isDragging ->
-                val elevation by animateDpAsState(if (isDragging) 16.dp else 0.dp)
-                val scale by animateFloatAsState(if (isDragging) 1.08f else 1f)
-                val alpha by animateFloatAsState(if (isDragging) 0.7f else 1f)
-
-                val widgetInfo = if (updatedData.type == WidgetType.WIDGET) {
-                    try {
-                        manager.getAppWidgetInfo(updatedData.id)
-                    } catch (e: PackageManager.NameNotFoundException) {
-                        context.logUtils.debugLog(
-                            "Unable to retrieve widget info for ${updatedData.id} ${data.widgetProviderComponent}",
-                            e,
-                        )
-                        null
-                    }
-                } else {
-                    null
-                }
-
-                WidgetItemLayout(
-                    needsReconfigure = widgetInfo == null,
-                    widgetData = updatedData,
-                    widgetContents = { modifier ->
-                        when (updatedData.safeType) {
-                            WidgetType.WIDGET -> widgetInfo?.let {
-                                WidgetContents(
-                                    data = updatedData,
-                                    widgetInfo = widgetInfo,
-                                    modifier = modifier,
-                                    currentWidgets = currentWidgetsList,
-                                    onWidgetsChanged = onWidgetsChanged,
-                                )
-                            }
-                            WidgetType.SHORTCUT, WidgetType.LAUNCHER_SHORTCUT -> {
-                                ShortcutContent(data = updatedData, modifier = modifier)
-                            }
-                            WidgetType.LAUNCHER_ITEM -> LauncherIconContent(
-                                data = updatedData,
-                                modifier = modifier,
-                            )
-                            WidgetType.HEADER -> {}
-                        }
-                    },
-                    cornerRadiusKey = widgetCornerRadiusKey,
-                    launchIconOverride = {
-                        launchShortcutIconOverride(updatedData.id)
-                    },
-                    launchReconfigure = launchReconfigure@{
-                        val providerInfo = manager.getAppWidgetInfo(updatedData.id)
-                            ?: (context.getAllInstalledWidgetProviders(updatedData.packageName)[updatedData.profile ?: UserHandleCompat.SYSTEM]
-                                ?.find { info -> info.provider == updatedData.widgetProviderComponent })
-
-                        if (providerInfo == null) {
-                            Toast.makeText(context, R.string.error_reconfiguring_widget, Toast.LENGTH_SHORT)
-                                .show()
-                            context.logUtils.normalLog("Unable to reconfigure widget ${updatedData.widgetProviderComponent}: provider info is null.", null)
-                            return@launchReconfigure
-                        }
-
-                        launchReconfigure(updatedData.id, providerInfo)
-                    },
-                    remove = {
-                        itemToRemove.value = updatedData
-                    },
-                    getResizeThresholdPx = resizeThresholdPx,
-                    onResize = { overThreshold, step, amount, direction, vertical ->
-                        handleResize(
-                            currentData = updatedData,
-                            overThreshold = overThreshold,
-                            step = step,
-                            amount = amount,
-                            direction = direction,
-                            vertical = vertical,
-                            index = index,
-                            currentWidgets = currentWidgetsList,
-                            onWidgetsChanged = onWidgetsChanged,
-                        )
-                    },
-                    liftCallback = {},
+                WidgetItem(
+                    data = data,
+                    isDragging = isDragging,
+                    currentWidgets = currentWidgetsList,
+                    onWidgetsChanged = onWidgetsChanged,
+                    launchShortcutIconOverride = launchShortcutIconOverride,
+                    launchReconfigure = launchReconfigure,
+                    resizeThresholdPx = resizeThresholdPx,
+                    onCurrentEditingIdChanged = onCurrentEditingIdChanged,
+                    index = index,
+                    columnCount = columnCount,
                     rowCount = rowCount,
-                    colCount = columnCount,
-                    isEditing = currentEditingId == updatedData.id,
-                    onEditingDismissed = {
-                        onCurrentEditingIdChanged(RecyclerView.NO_POSITION)
-                    },
-                    modifier = Modifier.fillMaxSize()
-                        .scale(scale)
-                        .alpha(alpha)
-                        .shadow(elevation)
-                        .systemGestureExclusion(),
-                    ignoreTouchesKey = ignoreWidgetTouchesKey,
-                    doubleTapTurnOffKey = doubleTapTurnOffDisplayKey,
+                    currentEditingId = currentEditingId,
+                    modifier = Modifier,
                 )
             }
         }
     }
+}
+
+@Composable
+private fun <VM : BaseDelegate.BaseViewModel<*, *>> VM.WidgetItem(
+    data: WidgetData,
+    isDragging: Boolean,
+    currentWidgets: List<WidgetData>,
+    onWidgetsChanged: (List<WidgetData>) -> Unit,
+    launchShortcutIconOverride: (id: Int) -> Unit,
+    launchReconfigure: (id: Int, providerInfo: AppWidgetProviderInfo) -> Unit,
+    resizeThresholdPx: (which: WidgetResizeListener.Which) -> Int,
+    onCurrentEditingIdChanged: (Int) -> Unit,
+    index: Int,
+    columnCount: Int,
+    rowCount: Int,
+    currentEditingId: Int,
+    modifier: Modifier = Modifier,
+) {
+    val context = LocalContext.current
+    val manager = remember { context.appWidgetManager }
+    val updatedData by rememberUpdatedState(data)
+    val elevation by animateDpAsState(if (isDragging) 16.dp else 0.dp)
+    val scale by animateFloatAsState(if (isDragging) 1.08f else 1f)
+    val alpha by animateFloatAsState(if (isDragging) 0.7f else 1f)
+    val currentWidgetsList by rememberUpdatedState(currentWidgets)
+    val updatedIndex by rememberUpdatedState(index)
+
+    val widgetInfo = if (updatedData.type == WidgetType.WIDGET) {
+        try {
+            manager.getAppWidgetInfo(updatedData.id)
+        } catch (e: PackageManager.NameNotFoundException) {
+            context.logUtils.debugLog(
+                "Unable to retrieve widget info for ${updatedData.id} ${data.widgetProviderComponent}",
+                e,
+            )
+            null
+        }
+    } else {
+        null
+    }
+
+    WidgetItemLayout(
+        needsReconfigure = widgetInfo == null,
+        widgetData = updatedData,
+        widgetContents = { modifier ->
+            when (updatedData.safeType) {
+                WidgetType.WIDGET -> widgetInfo?.let {
+                    WidgetContents(
+                        data = updatedData,
+                        widgetInfo = widgetInfo,
+                        modifier = modifier,
+                        currentWidgets = currentWidgetsList,
+                        onWidgetsChanged = onWidgetsChanged,
+                    )
+                }
+                WidgetType.SHORTCUT, WidgetType.LAUNCHER_SHORTCUT -> {
+                    ShortcutContent(data = updatedData, modifier = modifier)
+                }
+                WidgetType.LAUNCHER_ITEM -> LauncherIconContent(
+                    data = updatedData,
+                    modifier = modifier,
+                )
+                WidgetType.HEADER -> {}
+            }
+        },
+        cornerRadiusKey = widgetCornerRadiusKey,
+        launchIconOverride = {
+            launchShortcutIconOverride(updatedData.id)
+        },
+        launchReconfigure = launchReconfigure@{
+            val providerInfo = manager.getAppWidgetInfo(updatedData.id)
+                ?: (context.getAllInstalledWidgetProviders(updatedData.packageName)[updatedData.profile ?: UserHandleCompat.SYSTEM]
+                    ?.find { info -> info.provider == updatedData.widgetProviderComponent })
+
+            if (providerInfo == null) {
+                Toast.makeText(context, R.string.error_reconfiguring_widget, Toast.LENGTH_SHORT)
+                    .show()
+                context.logUtils.normalLog("Unable to reconfigure widget ${updatedData.widgetProviderComponent}: provider info is null.", null)
+                return@launchReconfigure
+            }
+
+            launchReconfigure(updatedData.id, providerInfo)
+        },
+        remove = {
+            itemToRemove.value = updatedData
+        },
+        getResizeThresholdPx = resizeThresholdPx,
+        onResize = { overThreshold, step, amount, direction, vertical ->
+            handleResize(
+                currentData = updatedData,
+                overThreshold = overThreshold,
+                step = step,
+                amount = amount,
+                direction = direction,
+                vertical = vertical,
+                index = updatedIndex,
+                currentWidgets = currentWidgetsList,
+                onWidgetsChanged = onWidgetsChanged,
+            )
+        },
+        liftCallback = {},
+        rowCount = rowCount,
+        colCount = columnCount,
+        isEditing = currentEditingId == updatedData.id,
+        onEditingDismissed = {
+            onCurrentEditingIdChanged(RecyclerView.NO_POSITION)
+        },
+        modifier = modifier.fillMaxSize()
+            .scale(scale)
+            .alpha(alpha)
+            .shadow(elevation)
+            .systemGestureExclusion(),
+        ignoreTouchesKey = ignoreWidgetTouchesKey,
+        doubleTapTurnOffKey = doubleTapTurnOffDisplayKey,
+    )
 }
 
 @Composable

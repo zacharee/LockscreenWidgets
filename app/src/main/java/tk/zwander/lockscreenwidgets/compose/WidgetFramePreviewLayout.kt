@@ -150,6 +150,7 @@ fun WidgetFramePreviewLayout(
                         modifier = Modifier.scale(scale),
                         rowSpanForAddButton = 1,
                         enableSnapping = true,
+                        lockedKey = PrefManager.KEY_LOCK_WIDGET_FRAME,
                     )
                 }
 
@@ -193,10 +194,6 @@ class PreviewDelegate(
     override val prefsHandler: HandlerRegistry = HandlerRegistry {}
     override val params: WindowManager.LayoutParams = WindowManager.LayoutParams()
     override val rootView: View = view
-
-    override fun isLocked(): Boolean {
-        return false
-    }
 
     override suspend fun updateWindow() {}
 
