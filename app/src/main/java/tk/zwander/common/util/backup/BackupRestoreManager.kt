@@ -6,11 +6,7 @@ import android.view.Display
 import dev.zwander.lswinterconnect.safeApplicationContext
 import tk.zwander.common.data.WidgetData
 import tk.zwander.common.host.widgetHostCompat
-import tk.zwander.common.util.PrefManager
-import tk.zwander.common.util.logUtils
-import tk.zwander.common.util.mapFromJson
-import tk.zwander.common.util.prefManager
-import tk.zwander.common.util.safeFromJson
+import tk.zwander.common.util.*
 import tk.zwander.lockscreenwidgets.util.FramePrefs
 
 val Context.backupRestoreManager: BackupRestoreManager
@@ -136,7 +132,7 @@ class BackupRestoreManager private constructor(private val context: Context) {
             // match the device's current displays.
             secondaryFramesNew?.let {
                 context.prefManager.currentSecondaryFramesWithStringDisplay = HashMap(
-                    it.map { (key, _) ->
+                    it.map { (key) ->
                         key to "${Display.DEFAULT_DISPLAY}"
                     }.toMap(),
                 )
@@ -145,24 +141,24 @@ class BackupRestoreManager private constructor(private val context: Context) {
             // match the device's current displays.
             secondaryFramesNewest?.let {
                 context.prefManager.currentSecondaryFramesWithStringDisplay = HashMap(
-                    it.map { (key, _) ->
+                    it.map { (key) ->
                         key to "${Display.DEFAULT_DISPLAY}"
                     }.toMap(),
                 )
             }
 
-            frameWidgetsMap?.forEach { (id, widgets) ->
+            frameWidgetsMap?.forEach { [id, widgets] ->
                 FramePrefs.setWidgetsForFrame(context, id, widgets)
             }
-            frameWidgetsMapNew?.forEach { (frame, widgets) ->
+            frameWidgetsMapNew?.forEach { [frame, widgets] ->
                 FramePrefs.setWidgetsForFrame(context, frame.first, widgets)
             }
 
-            frameGridsMap?.forEach { (id, grid) ->
+            frameGridsMap?.forEach { [id, grid] ->
                 FramePrefs.setRowCountForFrame(context, id, grid.first)
                 FramePrefs.setColCountForFrame(context, id, grid.second)
             }
-            frameGridsMapNew?.forEach { (frame, grid) ->
+            frameGridsMapNew?.forEach { [frame, grid] ->
                 FramePrefs.setRowCountForFrame(context, frame.first, grid.first)
                 FramePrefs.setColCountForFrame(context, frame.first, grid.second)
             }

@@ -1,29 +1,15 @@
 package tk.zwander.common.util.shizuku
 
 import android.annotation.SuppressLint
-import android.content.BroadcastReceiver
-import android.content.ComponentName
-import android.content.Context
-import android.content.Intent
-import android.content.IntentFilter
-import android.content.ServiceConnection
+import android.content.*
 import android.content.pm.PackageManager
 import android.os.IBinder
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.State
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.Lifecycle
 import dev.zwander.lswinterconnect.safeApplicationContext
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlinx.coroutines.*
 import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.withContext
 import rikka.shizuku.Shizuku
 import rikka.shizuku.ShizukuProvider
 import tk.zwander.common.util.LifecycleEffect
@@ -149,7 +135,7 @@ class ShizukuManager private constructor(private val context: Context) : Corouti
                 field = value
 
                 if (value != null) {
-                    queuedCommands.forEach { (context, command) ->
+                    queuedCommands.forEach { [context, command] ->
                         launch(context) {
                             value.command()
                         }

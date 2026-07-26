@@ -98,7 +98,7 @@ fun SelectDisplayDialog(
             val map = hashMapOf<LSDisplay, MutableSet<Int>>()
 
             if (onDisplaySelected == null) {
-                allFrames.forEach { (frameId, displayId) ->
+                allFrames.forEach { [frameId, displayId] ->
                     displays.values.firstOrNull {
                         it.uniqueIdCompat == displayId
                     }?.let { displayForId ->
@@ -186,7 +186,7 @@ fun SelectDisplayDialog(
                         }
                     }
 
-                    displaysToFramesMap.forEach { (display, frameIds) ->
+                    displaysToFramesMap.forEach { [display, frameIds] ->
                         item(key = display.uniqueIdCompat) {
                             DisplayCard(
                                 labelText = "${display.display.name} (${
@@ -195,7 +195,7 @@ fun SelectDisplayDialog(
                                     )
                                 })",
                                 accessory = {
-                                    val (width, height) = remember(display.uniqueIdCompat) {
+                                    val [width, height] = remember(display.uniqueIdCompat) {
                                         with(density) {
                                             val screenSize = display.realSize
                                             val screenWidth = screenSize.x
@@ -360,7 +360,7 @@ private fun FrameItem(
     }
 
 
-    val (width, height) = remember(density) {
+    val [width, height] = remember(density) {
         with(density) {
             val screenWidth = size.x
             val screenHeight = size.y

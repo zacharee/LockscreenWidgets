@@ -9,27 +9,10 @@ import android.view.WindowManager
 import android.view.accessibility.AccessibilityEvent
 import android.view.accessibility.AccessibilityWindowInfo
 import android.view.inputmethod.InputMethodManager
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.MainScope
-import kotlinx.coroutines.cancel
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
+import tk.zwander.common.util.*
 import tk.zwander.common.util.AccessibilityUtils.runAccessibilityJob
 import tk.zwander.common.util.AccessibilityUtils.runWindowOperation
-import tk.zwander.common.util.Event
-import tk.zwander.common.util.EventObserver
-import tk.zwander.common.util.HandlerRegistry
-import tk.zwander.common.util.LSDisplayManager
-import tk.zwander.common.util.PrefManager
-import tk.zwander.common.util.copyCompat
-import tk.zwander.common.util.eventManager
-import tk.zwander.common.util.globalState
-import tk.zwander.common.util.handler
-import tk.zwander.common.util.keyguardManager
-import tk.zwander.common.util.logUtils
-import tk.zwander.common.util.prefManager
-import tk.zwander.common.util.wallpaperClient
 import tk.zwander.lockscreenwidgets.App
 import tk.zwander.lockscreenwidgets.appwidget.IDListProvider
 import tk.zwander.lockscreenwidgets.util.FramePrefs
@@ -74,16 +57,16 @@ class Accessibility : AccessibilityService(), CoroutineScope by MainScope(), Eve
             val newFrameIds = prefManager.currentSecondaryFramesWithStringDisplay
             val currentFrames = secondaryFrameDelegates
 
-            val removedFrames = currentFrames.filter { (id, _) -> !newFrameIds.contains(id) }
+            val removedFrames = currentFrames.filter { [id] -> !newFrameIds.contains(id) }
             val addedFrameIds = newFrameIds.filter { !currentFrames.containsKey(it.key) }
 
-            removedFrames.forEach { (id, frame) ->
+            removedFrames.forEach { [id, frame] ->
                 frame.onDestroy()
                 FramePrefs.removeFrame(this@Accessibility, id)
                 currentFrames.remove(id)
             }
 
-            addedFrameIds.forEach { (id, displayId) ->
+            addedFrameIds.forEach { [id, displayId] ->
                 val newFrame = SecondaryWidgetFrameDelegate(
                     context = this@Accessibility,
                     id = id,
@@ -139,7 +122,7 @@ class Accessibility : AccessibilityService(), CoroutineScope by MainScope(), Eve
 
         App.instance.updateWidgetStackMonitor()
 
-        prefManager.currentSecondaryFramesWithStringDisplay.forEach { (secondaryId, secondaryDisplay) ->
+        prefManager.currentSecondaryFramesWithStringDisplay.forEach { [secondaryId, secondaryDisplay] ->
             secondaryFrameDelegates[secondaryId] = SecondaryWidgetFrameDelegate(this, secondaryId, secondaryDisplay).also {
                 it.onCreate()
             }
@@ -216,7 +199,7 @@ class Accessibility : AccessibilityService(), CoroutineScope by MainScope(), Eve
         App.instance.launch {
             frameDelegate.onDestroy()
             drawerDelegate.onDestroy()
-            secondaryFrameDelegates.forEach { (_, delegate) ->
+            secondaryFrameDelegates.forEach { (val delegate = value) ->
                 delegate.onDestroy()
             }
 

@@ -106,7 +106,7 @@ class GsonPairHandler : JsonSerializer<Pair<*, *>?>, JsonDeserializer<Pair<*, *>
             val bType = realType.actualTypeArguments[1]
             val stripped = obj.replace("(", "")
                 .replace(")", "")
-            val (a, b) = stripped.split(", ")
+            val [a, b] = stripped.split(", ")
 
             return Pair(
                 context.deserialize<Any>(JsonPrimitive(a), aType),

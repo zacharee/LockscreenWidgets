@@ -48,7 +48,7 @@ fun AddWidgetLayout(
         },
     )
 
-    val (items, filteredItems) = items(
+    val [items, filteredItems] = items(
         filter = filter,
         showShortcuts = showShortcuts,
         showWidgetStackWidget = showWidgetStackWidget,

@@ -4,13 +4,7 @@ import android.annotation.SuppressLint
 import android.content.ComponentName
 import android.content.Intent
 import android.content.pm.PackageManager
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.derivedStateOf
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.*
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
@@ -21,20 +15,12 @@ import tk.zwander.common.compose.util.matchesFilter
 import tk.zwander.common.data.AppInfo
 import tk.zwander.common.data.WidgetListFilters
 import tk.zwander.common.iconpacks.iconPackManager
-import tk.zwander.common.util.BrokenAppsRegistry
-import tk.zwander.common.util.componentInfoCompat
-import tk.zwander.common.util.componentNameCompat
-import tk.zwander.common.util.density
-import tk.zwander.common.util.getAllInstalledWidgetProviders
-import tk.zwander.common.util.getApplicationInfoCompat
-import tk.zwander.common.util.logUtils
-import tk.zwander.common.util.queryIntentActivitiesCompat
-import tk.zwander.common.util.toSafeBitmap
+import tk.zwander.common.util.*
 import tk.zwander.lockscreenwidgets.appwidget.WidgetStackProvider
 import tk.zwander.lockscreenwidgets.data.list.LauncherItemListInfo
 import tk.zwander.lockscreenwidgets.data.list.ShortcutListInfo
 import tk.zwander.lockscreenwidgets.data.list.WidgetListInfo
-import java.util.TreeSet
+import java.util.*
 
 @SuppressLint("RestrictedApi")
 @Composable
@@ -56,7 +42,7 @@ internal fun items(
             val apps = HashMap<String, AppInfo>()
             val packageManager = context.packageManager
 
-            context.getAllInstalledWidgetProviders().forEach { (profile, infos) ->
+            context.getAllInstalledWidgetProviders().forEach { [profile, infos] ->
                 infos.forEach {
                     if (BrokenAppsRegistry.isBroken(it)) {
                         context.logUtils.debugLog("Hiding broken widget ${it.provider}.")

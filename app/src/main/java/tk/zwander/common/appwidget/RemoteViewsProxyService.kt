@@ -254,7 +254,7 @@ class RemoteViewsProxyService : RemoteViewsService() {
     }
 
     override fun onDestroy() {
-        sFactories.forEach { (_, factory) ->
+        sFactories.forEach { [_, factory] ->
             try {
                 unbindService(factory.connection)
             } catch (_: IllegalArgumentException) {}

@@ -13,12 +13,7 @@ import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.dp
 import dev.zwander.lswinterconnect.safeApplicationContext
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.*
 import tk.zwander.lockscreenwidgets.App
 import tk.zwander.lockscreenwidgets.services.Accessibility
 import kotlin.math.roundToInt
@@ -75,8 +70,8 @@ class LSDisplayManager private constructor(context: Context) : ContextWrapper(co
     val displayAndWmCache = MutableStateFlow<Map<String, DisplayAndWindowManager>>(mapOf())
 
     val displayPowerStates: StateFlow<DisplayPowerStates> = availableDisplays.map { currentDisplays ->
-        val states = currentDisplays.entries.associate { (_, display) -> display.uniqueIdCompat to display.isOn }
-        val anyOn = states.any { (_, value) -> value }
+        val states = currentDisplays.entries.associate { (val display = value) -> display.uniqueIdCompat to display.isOn }
+        val anyOn = states.any { (value) -> value }
 
         DisplayPowerStates(
             displayStates = states,

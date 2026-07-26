@@ -17,13 +17,7 @@ import net.bytebuddy.ByteBuddy
 import net.bytebuddy.android.AndroidClassLoadingStrategy
 import net.bytebuddy.implementation.MethodDelegation
 import tk.zwander.common.compose.util.widgetViewCacheRegistry
-import tk.zwander.common.util.HandlerRegistry
-import tk.zwander.common.util.PrefManager
-import tk.zwander.common.util.appWidgetManager
-import tk.zwander.common.util.globalState
-import tk.zwander.common.util.handler
-import tk.zwander.common.util.logUtils
-import tk.zwander.common.util.prefManager
+import tk.zwander.common.util.*
 import tk.zwander.common.views.ZeroPaddingAppWidgetHostView
 import tk.zwander.lockscreenwidgets.util.IconPrefs
 import java.lang.reflect.InvocationHandler
@@ -101,7 +95,7 @@ class WidgetHostCompat(
 
     private val prefsHandler = HandlerRegistry {
         handler(PrefManager.KEY_WIDGET_STACK_WIDGETS) {
-            context.prefManager.widgetStackWidgets.forEach { (stackId, widgets) ->
+            context.prefManager.widgetStackWidgets.forEach { [stackId, widgets] ->
                 widgets.forEach { widget ->
                     // Allows listening to events from original/wrapped widget providers on older
                     // Android versions.

@@ -19,13 +19,7 @@ import dev.zwander.lswinterconnect.LogUtils
 import dev.zwander.lswinterconnect.peekLogUtils
 import kotlinx.atomicfu.AtomicBoolean
 import kotlinx.atomicfu.atomic
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Deferred
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
-import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 import tk.zwander.common.activities.DismissOrUnlockActivity
 import tk.zwander.common.data.window.WindowInfo
 import tk.zwander.common.data.window.WindowRootPair
@@ -457,7 +451,7 @@ object AccessibilityUtils {
                     logUtils.debugLog("Got windows for display $displayId: $windowInfo", null)
                 }
 
-                val relevantFrameDelegates = frameDelegates.filter { (_, frame) -> frame.display?.displayId == displayId }
+                val relevantFrameDelegates = frameDelegates.filter { (val frame = value) -> frame.display?.displayId == displayId }
 
                 windowInfo.sysUiWindowViewIds.let { sysUiWindowViewIds ->
                     logUtils.debugLog("Found IDs on display $displayId\n${sysUiWindowViewIds.joinToString("\n")}", null)
@@ -516,7 +510,7 @@ object AccessibilityUtils {
                 globalState.hideForPresentIds[displayId] = windowInfo.nodeState.hideForPresentIds.value
                 globalState.hideForNonPresentIds[displayId] = windowInfo.nodeState.hideForNonPresentIds.value
 
-                relevantFrameDelegates.forEach { (_, frameDelegate) ->
+                relevantFrameDelegates.forEach { (val frameDelegate = value) ->
                     frameDelegate.updateWindowState(
                         updateAccessibility = true,
                     )
@@ -583,7 +577,7 @@ object AccessibilityUtils {
             logUtils.debugLog("Running accessibility job")
 
             if (lsDisplayManager.multiDisplaySupported) {
-                lsDisplayManager.displayAndWmCache.value.values.forEach { (dis, wm) ->
+                lsDisplayManager.displayAndWmCache.value.values.forEach { [dis, wm] ->
                     globalState.showingKeyboard[dis?.displayId ?: Display.DEFAULT_DISPLAY] =
                         wm?.currentWindowMetrics
                         ?.windowInsets?.getInsets(WindowInsets.Type.ime())
@@ -643,7 +637,7 @@ object AccessibilityUtils {
             )
 
             if (prefManager.widgetFrameEnabled) {
-                frameDelegates.forEach { (_, frameDelegate) ->
+                frameDelegates.forEach { (val frameDelegate = value) ->
                     frameDelegate.updateStateAndWindowState(
                         updateAccessibility = true,
                         transform = {
@@ -710,7 +704,7 @@ object AccessibilityUtils {
             }
 
             if (prefManager.widgetFrameEnabled) {
-                frameDelegates.forEach { (_, frameDelegate) ->
+                frameDelegates.forEach { (val frameDelegate = value) ->
                     frameDelegate.updateStateAndWindowState(true)
                 }
             }

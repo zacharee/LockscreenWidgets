@@ -198,7 +198,7 @@ class App : Application(), CoroutineScope by MainScope(), EventObserver {
                             },
                             "stacks" to try {
                                 prefManager.gson.toJson(
-                                    prefManager.widgetStackWidgets.map { (id, widgets) ->
+                                    prefManager.widgetStackWidgets.map { [id, widgets] ->
                                         id to widgets.map { widget -> widget.copy(icon = null, iconRes = null) }
                                     },
                                 )
@@ -206,7 +206,7 @@ class App : Application(), CoroutineScope by MainScope(), EventObserver {
                                 "Too large to parse."
                             },
                         ).apply {
-                            prefManager.currentSecondaryFramesWithStringDisplay.forEach { (frameId, frameDisplay) ->
+                            prefManager.currentSecondaryFramesWithStringDisplay.forEach { [frameId, frameDisplay] ->
                                 put(
                                     "secondaryFrame${frameId},${frameDisplay}Widgets",
                                     try {
@@ -279,7 +279,7 @@ class App : Application(), CoroutineScope by MainScope(), EventObserver {
         launch(Dispatchers.IO) {
             val widgetsToDelete = mutableSetOf<Int>()
             prefManager.widgetStackWidgets = HashMap(
-                prefManager.widgetStackWidgets.mapNotNull { (stackId, widgets) ->
+                prefManager.widgetStackWidgets.mapNotNull { [stackId, widgets] ->
                     val hasStackInfo = appWidgetManager.getAppWidgetInfo(stackId) != null
 
                     if (!hasStackInfo) {
@@ -307,7 +307,7 @@ class App : Application(), CoroutineScope by MainScope(), EventObserver {
                     return@forEach
                 }
 
-                if (prefManager.currentSecondaryFramesWithStringDisplay.any { (frameId) ->
+                if (prefManager.currentSecondaryFramesWithStringDisplay.any { [frameId] ->
                         FramePrefs.getWidgetsForFrame(this@App, frameId).any { it.id == id }
                     }) {
                     return@forEach
@@ -334,7 +334,7 @@ class App : Application(), CoroutineScope by MainScope(), EventObserver {
             }
         }
 
-        prefManager.widgetStackWidgets.forEach { (stackId) ->
+        prefManager.widgetStackWidgets.forEach { [stackId] ->
             WidgetStackProvider.update(this, intArrayOf(stackId))
         }
         updateWidgetStackMonitor()
@@ -395,7 +395,7 @@ class App : Application(), CoroutineScope by MainScope(), EventObserver {
         }
     }
 
-    override fun getApplicationContext(): Context? {
+    override fun getApplicationContext(): Context {
         return this
     }
 

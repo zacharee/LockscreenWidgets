@@ -954,8 +954,8 @@ open class MainWidgetFrameDelegate protected constructor(
             null
         )
 
-        val (newX, newY) = frameSizeAndPosition.getPositionForType(saveMode, display)
-        val (newW, newH) = frameSizeAndPosition.getSizeForType(saveMode, display).run {
+        val [newX, newY] = frameSizeAndPosition.getPositionForType(saveMode, display)
+        val [newW, newH] = frameSizeAndPosition.getSizeForType(saveMode, display).run {
             Point(display.dpToPx(x), display.dpToPx(y))
         }
 

@@ -38,6 +38,7 @@ kotlin {
         jvmTarget.set(JvmTarget.fromTarget(jdkVersion))
         freeCompilerArgs.addAll(
             "-Xcollection-literals",
+            "-Xname-based-destructuring=complete",
         )
     }
 }

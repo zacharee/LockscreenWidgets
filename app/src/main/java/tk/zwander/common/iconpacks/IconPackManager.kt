@@ -87,7 +87,7 @@ class IconPackManager private constructor(private val context: Context) : Corout
             context.packageManager.queryIntentActivities(it, 0)
         }.associateBy {
             it.activityInfo.packageName
-        }.mapTo(mutableSetOf()) { (_, info) ->
+        }.mapTo(mutableSetOf()) { [_, info] ->
             LoadedIconPack(
                 label = info.activityInfo.applicationInfo.loadLabel(context.packageManager).toString(),
                 packageName = info.activityInfo.packageName,
@@ -109,7 +109,7 @@ class IconPackManager private constructor(private val context: Context) : Corout
         val allEntries = packMap.getAllEntries()
 
         return TreeSet(
-            allEntries.map { (component, entry) ->
+            allEntries.map { (val component = key, val entry = value) ->
                 IconPackIcon(
                     name = entry.name,
                     component = component,
@@ -174,7 +174,7 @@ class IconPackManager private constructor(private val context: Context) : Corout
                     }
                 }
             }
-            componentMap.forEach { (componentName, iconEntry) ->
+            componentMap.forEach { (val componentName = key, val iconEntry = value) ->
                 if (clockMetadata.containsKey(iconEntry)) {
                     clockMap[componentName] = iconEntry
                 }
