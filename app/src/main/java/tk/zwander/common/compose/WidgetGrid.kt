@@ -178,101 +178,53 @@ fun <VM : BaseDelegate.BaseViewModel<*, *>> VM.WidgetGrid(
         globalState.itemIsActive.value = currentEditingId != RecyclerView.NO_POSITION
     }
 
-    if (orientation == Orientation.Vertical) {
-        LazyVerticalSpannedGrid(
-            columnCount = columnCount,
-            rowCount = rowCount,
-            state = reorderableState.gridState,
+    LazySpannedGrid(
+        mainAxisCount = if (orientation == Orientation.Vertical) rowCount else columnCount,
+        crossAxisCount = if (orientation == Orientation.Vertical) columnCount else rowCount,
+        orientation = orientation,
+        state = lazyGridState,
+        flingBehavior = flingBehavior,
+        contentPadding = contentPadding,
+        modifier = modifier.interceptUnclaimedDrags(
+            gridState = lazyGridState,
+            orientation = orientation,
+            layoutDirection = layoutDirection,
+            scope = coroutineScope,
+            rootView = rootView,
+            currentEditingId = currentEditingId,
             flingBehavior = flingBehavior,
-            modifier = modifier
-                .interceptUnclaimedDrags(
-                    gridState = lazyGridState,
-                    orientation = orientation,
-                    layoutDirection = layoutDirection,
-                    scope = coroutineScope,
-                    rootView = rootView,
-                    currentEditingId = currentEditingId,
-                    flingBehavior = flingBehavior,
-                )
-                .then(
-                    if (gridLocked) {
-                        Modifier
-                    } else {
-                        Modifier
-                            .reorderable(reorderableState)
-                            .detectReorderAfterLongPress(reorderableState)
-                    },
-                ),
-            contentPadding = contentPadding,
-        ) {
-            widgetItems(
-                currentWidgetsList = updatedCurrentWidgets,
-                columnCount = updatedColumnCount,
-                rowCount = updatedRowCount,
-                rowSpanForAddButton = updatedRowSpanForAddButton,
-                launchAddActivity = launchAddActivity,
-                launchReconfigure = launchReconfigure,
-                launchShortcutIconOverride = launchShortcutIconOverride,
-                spans = updatedSpans,
-                reorderableState = reorderableState,
-                currentEditingId = currentEditingId,
-                onCurrentEditingIdChanged = {
-                    currentEditingId = it
+        )
+            .then(
+                if (gridLocked) {
+                    Modifier
+                } else {
+                    Modifier
+                        .reorderable(reorderableState)
+                        .detectReorderAfterLongPress(reorderableState)
                 },
-                onWidgetsChanged = onWidgetsChanged,
-                resizeThresholdPx = resizeThresholdPx,
-                viewModel = this@WidgetGrid,
-            )
-        }
-    } else {
-        LazyHorizontalSpannedGrid(
-            columnCount = columnCount,
-            rowCount = rowCount,
-            state = reorderableState.gridState,
-            flingBehavior = flingBehavior,
-            modifier = modifier
-                .interceptUnclaimedDrags(
-                    gridState = lazyGridState,
-                    orientation = orientation,
-                    layoutDirection = layoutDirection,
-                    scope = coroutineScope,
-                    rootView = rootView,
-                    currentEditingId = currentEditingId,
-                    flingBehavior = flingBehavior,
-                )
-                .then(
-                    if (gridLocked) {
-                        Modifier
-                    } else {
-                        Modifier
-                            .reorderable(reorderableState)
-                            .detectReorderAfterLongPress(reorderableState)
-                    },
-                ),
-            contentPadding = contentPadding,
-        ) {
-            widgetItems(
-                currentWidgetsList = updatedCurrentWidgets,
-                columnCount = updatedColumnCount,
-                rowCount = updatedRowCount,
-                rowSpanForAddButton = updatedRowSpanForAddButton,
-                launchAddActivity = launchAddActivity,
-                launchReconfigure = launchReconfigure,
-                launchShortcutIconOverride = launchShortcutIconOverride,
-                spans = updatedSpans,
-                reorderableState = reorderableState,
-                currentEditingId = currentEditingId,
-                onCurrentEditingIdChanged = {
-                    currentEditingId = it
-                },
-                onWidgetsChanged = onWidgetsChanged,
-                resizeThresholdPx = resizeThresholdPx,
-                viewModel = this@WidgetGrid,
-            )
-        }
+            ),
+    ) {
+        widgetItems(
+            currentWidgetsList = updatedCurrentWidgets,
+            columnCount = updatedColumnCount,
+            rowCount = updatedRowCount,
+            rowSpanForAddButton = updatedRowSpanForAddButton,
+            launchAddActivity = launchAddActivity,
+            launchReconfigure = launchReconfigure,
+            launchShortcutIconOverride = launchShortcutIconOverride,
+            spans = updatedSpans,
+            reorderableState = reorderableState,
+            currentEditingId = currentEditingId,
+            onCurrentEditingIdChanged = {
+                currentEditingId = it
+            },
+            onWidgetsChanged = onWidgetsChanged,
+            resizeThresholdPx = resizeThresholdPx,
+        )
     }
 }
 
+context(viewModel: VM)
 private fun <VM: BaseDelegate.BaseViewModel<*, *>> LazySpannedGridScope.widgetItems(
     currentWidgetsList: List<WidgetData>,
     columnCount: Int,
@@ -287,7 +239,6 @@ private fun <VM: BaseDelegate.BaseViewModel<*, *>> LazySpannedGridScope.widgetIt
     onCurrentEditingIdChanged: (Int) -> Unit,
     onWidgetsChanged: (List<WidgetData>) -> Unit,
     resizeThresholdPx: (which: WidgetResizeListener.Which) -> Int,
-    viewModel: VM,
 ) {
     with(viewModel) {
         if (currentWidgetsList.isEmpty()) {
