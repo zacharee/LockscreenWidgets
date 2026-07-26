@@ -135,6 +135,12 @@ class FrameSpecificPreferences(
             putInt(PrefManager.KEY_CURRENT_PAGE, value)
         }
 
+    var itemSpacingDp: Float
+        get() = getInt(FramePrefs.KEY_FRAME_ITEM_SPACING, 0) / 10f
+        set(value) {
+            putInt(FramePrefs.KEY_FRAME_ITEM_SPACING, (value * 10f).toInt())
+        }
+
     private fun getInt(baseKey: String, def: Int): Int {
         return context.prefManager.getInt(keyFor(baseKey), def)
     }
@@ -174,6 +180,7 @@ object FramePrefs {
     private const val KEY_FRAME_WIDGETS = "FRAME_WIDGETS_FOR_FRAME_"
     const val KEY_FRAME_ROW_COUNT = "FRAME_ROW_COUNT_FOR_FRAME_"
     const val KEY_FRAME_COL_COUNT = "FRAME_COL_COUNT_FOR_FRAME_"
+    const val KEY_FRAME_ITEM_SPACING = "FRAME_ITEM_SPACING_"
 
     fun getWidgetsForFrame(context: Context, frameId: Int): Set<WidgetData> {
         if (frameId == MainWidgetFrameDelegate.ID) {

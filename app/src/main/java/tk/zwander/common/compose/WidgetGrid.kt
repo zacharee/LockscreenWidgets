@@ -89,6 +89,7 @@ fun <VM : BaseDelegate.BaseViewModel<*, *>> VM.WidgetGrid(
     launchReconfigure: (id: Int, providerInfo: AppWidgetProviderInfo) -> Unit,
     launchShortcutIconOverride: (id: Int) -> Unit,
     lockedKey: String,
+    itemSpacingKey: String,
     modifier: Modifier = Modifier,
     rowSpanForAddButton: Int = 1,
     minColSpan: Int = 1,
@@ -113,6 +114,11 @@ fun <VM : BaseDelegate.BaseViewModel<*, *>> VM.WidgetGrid(
     )
 
     val gridLocked by rememberBooleanPreferenceState(key = lockedKey)
+    val itemSpacing by rememberPreferenceState(
+        key = itemSpacingKey,
+    ) {
+        (context.prefManager.getInt(itemSpacingKey, 0) / 10f).dp
+    }
 
     // Sets currentEditingId directly from reorderableState.draggingItemKey via snapshotFlow rather
     // than a per-item LaunchedEffect(isDragging) inside each ReorderableItem — that per-item
@@ -175,13 +181,18 @@ fun <VM : BaseDelegate.BaseViewModel<*, *>> VM.WidgetGrid(
         globalState.itemIsActive.value = currentEditingId != RecyclerView.NO_POSITION
     }
 
+    val mainAxisCount = if (orientation == Orientation.Vertical) rowCount else columnCount
+    val crossAxisCount = if (orientation == Orientation.Vertical) columnCount else rowCount
+
     LazySpannedGrid(
-        mainAxisCount = if (orientation == Orientation.Vertical) rowCount else columnCount,
-        crossAxisCount = if (orientation == Orientation.Vertical) columnCount else rowCount,
+        mainAxisCount = mainAxisCount,
+        crossAxisCount = crossAxisCount,
         orientation = orientation,
         state = lazyGridState,
         flingBehavior = flingBehavior,
         contentPadding = contentPadding,
+        mainAxisSpacing = itemSpacing,
+        crossAxisSpacing = itemSpacing,
         modifier = modifier.interceptUnclaimedDrags(
             gridState = lazyGridState,
             orientation = orientation,

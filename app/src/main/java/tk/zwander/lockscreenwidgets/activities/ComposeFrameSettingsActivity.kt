@@ -8,13 +8,7 @@ import android.view.Display
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberUpdatedState
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringArrayResource
@@ -25,25 +19,10 @@ import tk.zwander.common.activities.HideForIDsActivity
 import tk.zwander.common.activities.HideOnAppsChooserActivity
 import tk.zwander.common.activities.OnboardingActivity
 import tk.zwander.common.compose.LocalLSDisplayManager
-import tk.zwander.common.compose.settings.ListPreferenceEntry
-import tk.zwander.common.compose.settings.PreferenceScreen
-import tk.zwander.common.compose.settings.booleanPreferenceDependency
-import tk.zwander.common.compose.settings.createCommonSection
-import tk.zwander.common.compose.settings.rememberBooleanPreferenceDependency
-import tk.zwander.common.compose.settings.rememberPreferenceScreen
+import tk.zwander.common.compose.settings.*
 import tk.zwander.common.compose.util.rememberPreferenceState
-import tk.zwander.common.util.LifecycleEffect
-import tk.zwander.common.util.PrefManager
+import tk.zwander.common.util.*
 import tk.zwander.common.util.backup.BackupRestoreManager
-import tk.zwander.common.util.canReadWallpaper
-import tk.zwander.common.util.isLikelyRazr
-import tk.zwander.common.util.isOneUI
-import tk.zwander.common.util.isPixelUI
-import tk.zwander.common.util.isTouchWiz
-import tk.zwander.common.util.launchUrl
-import tk.zwander.common.util.prefManager
-import tk.zwander.common.util.setThemedContent
-import tk.zwander.common.util.wallpaperClient
 import tk.zwander.lockscreenwidgets.BuildConfig
 import tk.zwander.lockscreenwidgets.R
 import tk.zwander.lockscreenwidgets.compose.SelectDisplayDialog
@@ -362,15 +341,19 @@ class ComposeFrameSettingsActivity : BaseActivity() {
                     key = "frame_grid_settings",
                     title = resources.getString(R.string.settings_screen_category_grid),
                 ) {
+                    val colCountKey = FramePrefs.generatePrefKey(
+                        FramePrefs.KEY_FRAME_COL_COUNT,
+                        selectedFrame,
+                    )
+                    val rowCountKey = FramePrefs.generatePrefKey(
+                        FramePrefs.KEY_FRAME_ROW_COUNT,
+                        selectedFrame,
+                    )
+
                     seekBarPreference(
                         title = { stringResource(R.string.settings_screen_frame_col_count) },
                         summary = { null },
-                        key = {
-                            FramePrefs.generatePrefKey(
-                                FramePrefs.KEY_FRAME_COL_COUNT,
-                                selectedFrame,
-                            )
-                        },
+                        key = { colCountKey },
                         defaultValue = { 1 },
                         minValue = { 1 },
                         maxValue = { 20 },
@@ -381,17 +364,29 @@ class ComposeFrameSettingsActivity : BaseActivity() {
                     seekBarPreference(
                         title = { stringResource(R.string.settings_screen_frame_row_count) },
                         summary = { null },
-                        key = {
-                            FramePrefs.generatePrefKey(
-                                FramePrefs.KEY_FRAME_ROW_COUNT,
-                                selectedFrame,
-                            )
-                        },
+                        key = { rowCountKey },
                         defaultValue = { 1 },
                         minValue = { 1 },
                         maxValue = { 20 },
                         scale = { 1.0 },
                         icon = { painterResource(R.drawable.ic_baseline_view_row_24) },
+                    )
+
+                    seekBarPreference(
+                        title = { stringResource(R.string.item_spacing) },
+                        summary = { stringResource(R.string.item_spacing_desc) },
+                        key = {
+                            FramePrefs.generatePrefKey(
+                                FramePrefs.KEY_FRAME_ITEM_SPACING,
+                                selectedFrame,
+                            )
+                        },
+                        defaultValue = { 0 },
+                        minValue = { 0 },
+                        maxValue = { 160 },
+                        scale = { 0.1 },
+                        unit = { "dp" },
+                        icon = { painterResource(R.drawable.grid_3x3_24px) },
                     )
                 }
 

@@ -207,6 +207,7 @@ class DrawerDelegate private constructor(context: Context, displayId: String) :
                         contentPadding = combinedPadding.asPaddingValues(),
                         minRowSpan = 5,
                         lockedKey = PrefManager.KEY_LOCK_WIDGET_DRAWER,
+                        itemSpacingKey = PrefManager.KEY_DRAWER_ITEM_SPACING,
                     )
                 },
                 modifier = Modifier.fillMaxSize()

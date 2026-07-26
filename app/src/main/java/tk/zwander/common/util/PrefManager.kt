@@ -147,6 +147,7 @@ class PrefManager private constructor(private val context: Context) {
         const val KEY_WIDGET_STACK_STYLE_OPTIONS = "widget_stack_style_options"
         const val KEY_WIDGET_LIST_CURRENT_FILTERS = "widget_list_current_filters"
         const val KEY_FRAME_IGNORE_TOUCHES = "frame_ignore_touches"
+        const val KEY_DRAWER_ITEM_SPACING = "drawer_item_spacing"
 
         const val VALUE_PAGE_INDICATOR_BEHAVIOR_HIDDEN = 0
         const val VALUE_PAGE_INDICATOR_BEHAVIOR_AUTO_HIDE = 1
@@ -869,6 +870,12 @@ class PrefManager private constructor(private val context: Context) {
             ?: WidgetListFilters()
         set(value) {
             putString(KEY_WIDGET_LIST_CURRENT_FILTERS, gson.toJson(value))
+        }
+
+    var drawerItemSpacing: Float
+        get() = getInt(KEY_DRAWER_ITEM_SPACING, 0) / 10f
+        set(value) {
+            putInt(KEY_DRAWER_ITEM_SPACING, (value * 10f).toInt())
         }
 
     @Suppress("DEPRECATION")

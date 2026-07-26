@@ -203,6 +203,20 @@ class ComposeDrawerSettingsActivity : BaseActivity() {
                     )
 
                     seekBarPreference(
+                        title = { stringResource(R.string.item_spacing) },
+                        summary = { stringResource(R.string.item_spacing_desc) },
+                        key = {
+                            PrefManager.KEY_DRAWER_ITEM_SPACING
+                        },
+                        defaultValue = { 0 },
+                        minValue = { 0 },
+                        maxValue = { 160 },
+                        scale = { 0.1 },
+                        unit = { "dp" },
+                        icon = { painterResource(R.drawable.grid_3x3_24px) },
+                    )
+
+                    seekBarPreference(
                         title = { stringResource(R.string.drawer_side_padding) },
                         summary = { stringResource(R.string.drawer_side_padding_desc) },
                         defaultValue = { 0 },

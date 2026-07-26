@@ -316,6 +316,7 @@ open class MainWidgetFrameDelegate protected constructor(
                             enableSnapping = true,
                             lazyGridState = gridState,
                             lockedKey = PrefManager.KEY_LOCK_WIDGET_FRAME,
+                            itemSpacingKey = framePrefs.keyFor(FramePrefs.KEY_FRAME_ITEM_SPACING),
                         )
 
                         AnimatedVisibility(
