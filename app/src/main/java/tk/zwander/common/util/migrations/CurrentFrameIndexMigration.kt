@@ -12,10 +12,7 @@ class CurrentFrameIndexMigration : Migration {
 
     override fun run(context: Context) {
         if (context.prefManager.contains(PrefManager.KEY_CURRENT_PAGE)) {
-            FrameSpecificPreferences(
-                frameId = MainWidgetFrameDelegate.ID,
-                context = context,
-            ).currentIndex = context.prefManager.currentPage
+            FrameSpecificPreferences[MainWidgetFrameDelegate.ID].currentIndex = context.prefManager.currentPage
 
             context.prefManager.remove(PrefManager.KEY_CURRENT_PAGE)
         }

@@ -3,6 +3,7 @@ package tk.zwander.common.compose.settings
 import android.content.Context
 import android.content.ContextWrapper
 import android.content.Intent
+import android.content.SharedPreferences
 import android.graphics.drawable.Drawable
 import android.widget.Toast
 import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
@@ -89,6 +90,7 @@ class PreferenceCategoryScope(context: Context) : ContextWrapper(context) {
         enabled: @Composable () -> Boolean = { true },
         visible: @Composable () -> Boolean = { true },
         badge: (@Composable () -> Unit)? = null,
+        preferences: SharedPreferences? = null,
     ) {
         preference(
             BasePreference(
@@ -103,6 +105,7 @@ class PreferenceCategoryScope(context: Context) : ContextWrapper(context) {
                 enabled = enabled,
                 visible = visible,
                 badge = badge,
+                preferences = preferences,
             ),
         )
     }
@@ -117,6 +120,7 @@ class PreferenceCategoryScope(context: Context) : ContextWrapper(context) {
         visible: @Composable () -> Boolean = { true },
         canChange: (Boolean) -> Boolean = { true },
         badge: (@Composable () -> Unit)? = null,
+        preferences: SharedPreferences? = null,
     ) {
         preference(
             SwitchPreference(
@@ -129,6 +133,7 @@ class PreferenceCategoryScope(context: Context) : ContextWrapper(context) {
                 visible = visible,
                 canChange = canChange,
                 badge = badge,
+                preferences = preferences,
             ),
         )
     }
@@ -147,6 +152,7 @@ class PreferenceCategoryScope(context: Context) : ContextWrapper(context) {
         enabled: @Composable () -> Boolean = { true },
         visible: @Composable () -> Boolean = { true },
         badge: (@Composable () -> Unit)? = null,
+        preferences: SharedPreferences? = null,
     ) {
         preference(
             SeekBarPreference(
@@ -163,6 +169,7 @@ class PreferenceCategoryScope(context: Context) : ContextWrapper(context) {
                 enabled = enabled,
                 visible = visible,
                 badge = badge,
+                preferences = preferences,
             ),
         )
     }
@@ -176,6 +183,7 @@ class PreferenceCategoryScope(context: Context) : ContextWrapper(context) {
         enabled: @Composable () -> Boolean = { true },
         visible: @Composable () -> Boolean = { true },
         badge: (@Composable () -> Unit)? = null,
+        preferences: SharedPreferences? = null,
     ) {
         preference(
             ColorPickerPreference(
@@ -187,6 +195,7 @@ class PreferenceCategoryScope(context: Context) : ContextWrapper(context) {
                 enabled = enabled,
                 visible = visible,
                 badge = badge,
+                preferences = preferences,
             ),
         )
     }
@@ -201,6 +210,7 @@ class PreferenceCategoryScope(context: Context) : ContextWrapper(context) {
         enabled: @Composable () -> Boolean = { true },
         visible: @Composable () -> Boolean = { true },
         badge: (@Composable () -> Unit)? = null,
+        preferences: SharedPreferences? = null,
     ) {
         preference(
             ListPreference(
@@ -213,6 +223,7 @@ class PreferenceCategoryScope(context: Context) : ContextWrapper(context) {
                 enabled = enabled,
                 visible = visible,
                 badge = badge,
+                preferences = preferences,
             ),
         )
     }

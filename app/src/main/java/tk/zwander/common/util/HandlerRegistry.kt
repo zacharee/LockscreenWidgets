@@ -7,6 +7,7 @@ import android.content.SharedPreferences
 import dev.zwander.lswinterconnect.peekLogUtils
 import kotlinx.atomicfu.atomic
 import kotlinx.coroutines.*
+import tk.zwander.lockscreenwidgets.util.FrameSpecificPreferences
 
 class HandlerRegistry(setup: HandlerRegistry.() -> Unit) : SharedPreferences.OnSharedPreferenceChangeListener {
     private val items: HashMap<String, ItemHandler> = HashMap()
@@ -46,14 +47,20 @@ class HandlerRegistry(setup: HandlerRegistry.() -> Unit) : SharedPreferences.OnS
         key?.let { handle(key) }
     }
 
-    fun register(context: Context) {
+    fun register(context: Context, frameId: Int? = null) {
         scope.value = MainScope()
         context.prefManager.registerOnSharedPreferenceChangeListener(this)
+        frameId?.let {
+            FrameSpecificPreferences[frameId].framePreferences.registerOnSharedPreferenceChangeListener(this)
+        }
     }
 
-    fun unregister(context: Context) {
+    fun unregister(context: Context, frameId: Int? = null) {
         scope.getAndSet(null)?.cancel()
         context.prefManager.unregisterOnSharedPreferenceChangeListener(this)
+        frameId?.let {
+            FrameSpecificPreferences[frameId].framePreferences.unregisterOnSharedPreferenceChangeListener(this)
+        }
     }
 
     data class ItemHandler(

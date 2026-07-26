@@ -1,5 +1,6 @@
 package tk.zwander.common.compose.settings
 
+import android.content.SharedPreferences
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.clickable
@@ -15,6 +16,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.core.content.edit
 import tk.zwander.common.compose.components.AnimatedBottomSheet
 import tk.zwander.common.compose.util.rememberPreferenceState
 import tk.zwander.common.data.ListPickerEntry
@@ -33,6 +35,7 @@ class ListPreference(
     enabled: @Composable () -> Boolean = { true },
     visible: @Composable () -> Boolean = { true },
     badge: (@Composable () -> Unit)? = null,
+    preferences: SharedPreferences? = null,
 ) : BasePreference<String?>(
     title = title,
     summary = summary,
@@ -42,6 +45,7 @@ class ListPreference(
     enabled = enabled,
     visible = visible,
     badge = badge,
+    preferences = preferences,
 ) {
     @Composable
     override fun Render(modifier: Modifier) {
@@ -55,6 +59,7 @@ class ListPreference(
             icon = icon(),
             enabled = enabled(),
             badge = badge,
+            preferences = preferences,
         )
     }
 }
@@ -70,12 +75,17 @@ fun ListPreference(
     icon: Painter? = null,
     enabled: Boolean = true,
     badge: (@Composable () -> Unit)? = null,
+    preferences: SharedPreferences? = null,
 ) {
     val context = LocalContext.current
     var value by rememberPreferenceState(
         key = key,
-        value = { context.prefManager.getString(it, defaultValue) },
-        onChanged = { k, v -> context.prefManager.putString(k, v) },
+        value = { (preferences ?: context.prefManager.prefs).getString(it, defaultValue) },
+        onChanged = { k, v ->
+            (preferences ?: context.prefManager.prefs).edit {
+                putString(k, v)
+            }
+        },
     )
 
     ListPreference(
@@ -167,7 +177,8 @@ fun <V, T : ListPickerEntry<V>> ListPickerDialog(
         ) {
             items(items = entries, key = { it.getKey() }) { entry ->
                 Row(
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier
+                        .fillMaxWidth()
                         .heightIn(min = 64.dp)
                         .clickable { onEntrySelected(entry) }
                         .padding(horizontal = 16.dp),
@@ -179,7 +190,9 @@ fun <V, T : ListPickerEntry<V>> ListPickerDialog(
                     )
 
                     Box(
-                        modifier = Modifier.width(48.dp).heightIn(min = 36.dp),
+                        modifier = Modifier
+                            .width(48.dp)
+                            .heightIn(min = 36.dp),
                         contentAlignment = Alignment.Center,
                     ) {
                         androidx.compose.animation.AnimatedVisibility(

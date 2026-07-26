@@ -31,6 +31,7 @@ class MigrationManager private constructor(private val context: Context) {
         SecondaryFrameWithDisplayToStringDisplayMigration(),
         WidgetIconMigration(),
         CurrentFrameIndexMigration(),
+        FramePrefsMigration(),
     ]
 
     fun runMigrations() {

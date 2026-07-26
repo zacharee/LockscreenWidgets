@@ -1,5 +1,6 @@
 package tk.zwander.common.compose.settings
 
+import android.content.SharedPreferences
 import androidx.annotation.ColorInt
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -21,6 +22,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.core.content.edit
 import androidx.core.graphics.toColorInt
 import com.github.skydoves.colorpicker.compose.*
 import tk.zwander.common.compose.components.AnimatedBottomSheet
@@ -37,6 +39,7 @@ class ColorPickerPreference(
     enabled: @Composable () -> Boolean = { true },
     visible: @Composable () -> Boolean = { true },
     badge: (@Composable () -> Unit)? = null,
+    preferences: SharedPreferences? = null,
 ) : BasePreference<Int>(
     title = title,
     summary = summary,
@@ -46,6 +49,7 @@ class ColorPickerPreference(
     enabled = enabled,
     visible = visible,
     badge = badge,
+    preferences = preferences,
 ) {
     @Composable
     override fun Render(modifier: Modifier) {
@@ -58,6 +62,7 @@ class ColorPickerPreference(
             icon = icon(),
             enabled = enabled(),
             badge = badge,
+            preferences = preferences,
         )
     }
 }
@@ -72,12 +77,17 @@ fun ColorPickerPreference(
     icon: Painter? = null,
     enabled: Boolean = true,
     badge: (@Composable () -> Unit)? = null,
+    preferences: SharedPreferences? = null,
 ) {
     val context = LocalContext.current
     var value by rememberPreferenceState(
         key = key,
-        value = { Color(context.prefManager.getInt(it, defaultValue.toArgb())) },
-        onChanged = { k, v -> context.prefManager.putInt(k, v.toArgb()) },
+        value = { Color((preferences ?: context.prefManager.prefs).getInt(it, defaultValue.toArgb())) },
+        onChanged = { k, v ->
+            (preferences ?: context.prefManager.prefs).edit {
+                putInt(k, v.toArgb())
+            }
+        },
     )
 
     ColorPickerPreference(

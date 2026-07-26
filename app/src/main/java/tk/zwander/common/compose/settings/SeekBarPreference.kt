@@ -1,5 +1,6 @@
 package tk.zwander.common.compose.settings
 
+import android.content.SharedPreferences
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
@@ -32,6 +33,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.core.content.edit
 import tk.zwander.common.compose.components.AnimatedBottomSheet
 import tk.zwander.common.compose.util.rememberPreferenceState
 import tk.zwander.common.util.prefManager
@@ -58,6 +60,7 @@ open class SeekBarPreference(
     enabled: @Composable () -> Boolean = { true },
     visible: @Composable () -> Boolean = { true },
     badge: (@Composable () -> Unit)? = null,
+    preferences: SharedPreferences? = null,
 ) : BasePreference<Int>(
     title = title,
     summary = summary,
@@ -69,6 +72,7 @@ open class SeekBarPreference(
     enabled = enabled,
     visible = visible,
     badge = badge,
+    preferences = preferences,
 ) {
     @Composable
     override fun Render(modifier: Modifier) {
@@ -86,6 +90,7 @@ open class SeekBarPreference(
             increment = increment(),
             enabled = enabled(),
             badge = badge,
+            preferences = preferences,
         )
     }
 }
@@ -105,12 +110,15 @@ fun SeekBarPreference(
     increment: Int = 1,
     enabled: Boolean = true,
     badge: (@Composable () -> Unit)? = null,
+    preferences: SharedPreferences? = null,
 ) {
     val context = LocalContext.current
     var value by rememberPreferenceState(
         key = key,
-        value = { context.prefManager.getInt(key, defaultValue) },
-        onChanged = { k, v -> context.prefManager.putInt(k, v) },
+        value = { (preferences ?: context.prefManager.prefs).getInt(key, defaultValue) },
+        onChanged = { k, v -> (preferences ?: context.prefManager.prefs).edit {
+            putInt(k, v) }
+        },
     )
 
     SeekBarPreference(

@@ -1,5 +1,6 @@
 package tk.zwander.common.compose.settings
 
+import android.content.SharedPreferences
 import androidx.compose.material3.Switch
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -7,7 +8,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.platform.LocalContext
 import tk.zwander.common.compose.util.rememberBooleanPreferenceState
+import tk.zwander.common.util.prefManager
 
 open class SwitchPreference(
     title: @Composable () -> String,
@@ -19,6 +22,7 @@ open class SwitchPreference(
     visible: @Composable () -> Boolean = { true },
     val canChange: (Boolean) -> Boolean = { true },
     badge: (@Composable () -> Unit)? = null,
+    preferences: SharedPreferences? = null,
 ) : BasePreference<Boolean>(
     title = title,
     summary = summary,
@@ -28,6 +32,7 @@ open class SwitchPreference(
     enabled = enabled,
     visible = visible,
     badge = badge,
+    preferences = preferences,
 ) {
     @Composable
     override fun Render(modifier: Modifier) {
@@ -41,6 +46,7 @@ open class SwitchPreference(
             enabled = enabled(),
             canChange = canChange,
             badge = badge,
+            preferences = preferences,
         )
     }
 }
@@ -56,10 +62,13 @@ fun SwitchPreference(
     enabled: Boolean = true,
     canChange: (Boolean) -> Boolean = { true },
     badge: (@Composable () -> Unit)? = null,
+    preferences: SharedPreferences? = null,
 ) {
+    val context = LocalContext.current
     var value by rememberBooleanPreferenceState(
         key = key,
         defaultValue = defaultValue,
+        preferences = preferences ?: context.prefManager.prefs,
     )
 
     SwitchPreference(

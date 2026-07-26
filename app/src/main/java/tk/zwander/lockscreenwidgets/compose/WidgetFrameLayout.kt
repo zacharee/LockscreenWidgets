@@ -14,7 +14,10 @@ import androidx.compose.foundation.gestures.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
@@ -55,8 +58,9 @@ fun MainWidgetFrameDelegate.WidgetFrameViewModel.WidgetFrameLayout(
         value = { context.prefManager.cornerRadiusDp.dp },
     )
     val backgroundColor by rememberPreferenceState(
-        key = framePrefs.keyFor(PrefManager.KEY_FRAME_BACKGROUND_COLOR),
+        key = PrefManager.KEY_FRAME_BACKGROUND_COLOR,
         value = { Color(framePrefs.backgroundColor) },
+        preferences = framePrefs.framePreferences,
     )
     val firstViewing by rememberPreferenceState(
         key = PrefManager.KEY_FIRST_VIEWING,
@@ -193,20 +197,17 @@ fun MainWidgetFrameDelegate.WidgetFrameViewModel.WidgetFrameLayout(
                 modifier = Modifier
                     .fillMaxSize()
                     .zIndex(-1f),
-                blurKey = remember {
-                    framePrefs.keyFor(PrefManager.KEY_BLUR_BACKGROUND)
-                },
-                blurAmountKey = remember {
-                    framePrefs.keyFor(PrefManager.KEY_BLUR_BACKGROUND_AMOUNT)
-                },
+                blurKey = PrefManager.KEY_BLUR_BACKGROUND to framePrefs.framePreferences,
+                blurAmountKey = PrefManager.KEY_BLUR_BACKGROUND_AMOUNT to framePrefs.framePreferences,
                 cornerRadiusKey = PrefManager.KEY_FRAME_CORNER_RADIUS,
             )
 
             wallpaper?.let { wallpaper ->
                 wallpaper.drawable?.mutate()?.let { drawable ->
                     val maskedModeDimAmount by rememberPreferenceState(
-                        key = framePrefs.keyFor(PrefManager.KEY_MASKED_MODE_DIM_AMOUNT),
+                        key = PrefManager.KEY_MASKED_MODE_DIM_AMOUNT,
                         value = { framePrefs.maskedModeDimAmount },
+                        preferences = framePrefs.framePreferences,
                     )
 
                     AndroidView(

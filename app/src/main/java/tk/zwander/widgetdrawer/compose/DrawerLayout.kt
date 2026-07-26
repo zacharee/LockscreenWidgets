@@ -114,8 +114,8 @@ fun DrawerDelegate.DrawerViewModel.DrawerLayout(
                     ),
             ) {
                 BlurView(
-                    blurKey = PrefManager.KEY_BLUR_DRAWER_BACKGROUND,
-                    blurAmountKey = PrefManager.KEY_BLUR_DRAWER_BACKGROUND_AMOUNT,
+                    blurKey = PrefManager.KEY_BLUR_DRAWER_BACKGROUND to context.prefManager.prefs,
+                    blurAmountKey = PrefManager.KEY_BLUR_DRAWER_BACKGROUND_AMOUNT to context.prefManager.prefs,
                     modifier = Modifier
                         .fillMaxSize()
                         .zIndex(-1f),

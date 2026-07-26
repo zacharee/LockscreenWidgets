@@ -2,6 +2,7 @@ package tk.zwander.lockscreenwidgets.compose
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.content.SharedPreferences
 import android.view.View
 import android.view.WindowManager
 import androidx.compose.animation.animateColorAsState
@@ -78,7 +79,7 @@ fun WidgetFramePreviewLayout(
         }
 
         val framePrefs = remember(frameId) {
-            FrameSpecificPreferences(frameId = frameId, context = context)
+            FrameSpecificPreferences[frameId]
         }
 
         val frameCornerRadius by rememberPreferenceState(
@@ -86,8 +87,9 @@ fun WidgetFramePreviewLayout(
             value = { context.prefManager.cornerRadiusDp.dp },
         )
         val backgroundColor by rememberPreferenceState(
-            key = framePrefs.keyFor(PrefManager.KEY_FRAME_BACKGROUND_COLOR),
+            key = PrefManager.KEY_FRAME_BACKGROUND_COLOR,
             value = { Color(framePrefs.backgroundColor) },
+            preferences = framePrefs.framePreferences,
         )
         val animatedBackgroundColor by animateColorAsState(backgroundColor)
 
@@ -113,12 +115,14 @@ fun WidgetFramePreviewLayout(
                 modifier = Modifier,
             ) {
                 val rowCount by rememberPreferenceState(
-                    key = framePrefs.keyFor(FramePrefs.KEY_FRAME_ROW_COUNT),
+                    key = PrefManager.KEY_FRAME_ROW_COUNT,
+                    preferences = framePrefs.framePreferences,
                 ) {
                     framePrefs.rowCount
                 }
                 val columnCount by rememberPreferenceState(
-                    key = framePrefs.keyFor(FramePrefs.KEY_FRAME_COL_COUNT),
+                    key = PrefManager.KEY_FRAME_COL_COUNT,
+                    preferences = framePrefs.framePreferences,
                 ) {
                     framePrefs.colCount
                 }
@@ -151,7 +155,8 @@ fun WidgetFramePreviewLayout(
                         rowSpanForAddButton = 1,
                         enableSnapping = true,
                         lockedKey = PrefManager.KEY_LOCK_WIDGET_FRAME,
-                        itemSpacingKey = framePrefs.keyFor(FramePrefs.KEY_FRAME_ITEM_SPACING),
+                        itemSpacingKey = PrefManager.KEY_FRAME_ITEM_SPACING,
+                        preferences = framePrefs.framePreferences,
                     )
                 }
 
@@ -211,7 +216,7 @@ class PreviewDelegate(
             PrefManager.KEY_FRAME_CORNER_RADIUS
         override val widgetCornerRadiusKey: String =
             PrefManager.KEY_FRAME_WIDGET_CORNER_RADIUS
-        override val ignoreWidgetTouchesKey: String? = null
+        override val ignoreWidgetTouchesKey: Pair<String, SharedPreferences>? = null
         override val doubleTapTurnOffDisplayKey: String? = null
 
         override val saveMode: FrameSizeAndPosition.FrameType

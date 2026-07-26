@@ -35,7 +35,7 @@ interface IWidthHeightProvider : IBaseProvider {
 
 interface IFramePrefsProvider : IBaseProvider {
     val framePrefs: FrameSpecificPreferences
-        get() = FrameSpecificPreferences(frameId = holderId, context = context)
+        get() = FrameSpecificPreferences[holderId]
 }
 
 interface IFrameProvider : IRowColumProvider, ICurrentWidgetsProvider, IWidthHeightProvider, IFramePrefsProvider {

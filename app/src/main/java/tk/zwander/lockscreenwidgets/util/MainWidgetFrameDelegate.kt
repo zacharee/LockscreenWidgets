@@ -1,6 +1,7 @@
 package tk.zwander.lockscreenwidgets.util
 
 import android.content.Context
+import android.content.SharedPreferences
 import android.graphics.*
 import android.graphics.drawable.Drawable
 import android.view.*
@@ -215,12 +216,14 @@ open class MainWidgetFrameDelegate protected constructor(
                         val constraints = constraints
                         val gridState = rememberLazySpannedGridState()
                         val rowCount by rememberPreferenceState(
-                            key = framePrefs.keyFor(FramePrefs.KEY_FRAME_ROW_COUNT),
+                            key = PrefManager.KEY_FRAME_ROW_COUNT,
+                            preferences = framePrefs.framePreferences,
                         ) {
                             framePrefs.rowCount
                         }
                         val columnCount by rememberPreferenceState(
-                            key = framePrefs.keyFor(FramePrefs.KEY_FRAME_COL_COUNT),
+                            key = PrefManager.KEY_FRAME_COL_COUNT,
+                            preferences = framePrefs.framePreferences,
                         ) {
                             framePrefs.colCount
                         }
@@ -236,11 +239,12 @@ open class MainWidgetFrameDelegate protected constructor(
                             prefManager.rememberFramePosition
                         }
                         var storedPosition by rememberPreferenceState(
-                            key = framePrefs.keyFor(PrefManager.KEY_CURRENT_PAGE),
+                            key = PrefManager.KEY_CURRENT_PAGE,
                             value = { framePrefs.currentIndex },
                             onChanged = { _, value ->
                                 framePrefs.currentIndex = value
                             },
+                            preferences = framePrefs.framePreferences,
                         )
                         val pageIndicatorBehavior by rememberPreferenceState(
                             key = PrefManager.KEY_PAGE_INDICATOR_BEHAVIOR,
@@ -316,7 +320,8 @@ open class MainWidgetFrameDelegate protected constructor(
                             enableSnapping = true,
                             lazyGridState = gridState,
                             lockedKey = PrefManager.KEY_LOCK_WIDGET_FRAME,
-                            itemSpacingKey = framePrefs.keyFor(FramePrefs.KEY_FRAME_ITEM_SPACING),
+                            itemSpacingKey = PrefManager.KEY_FRAME_ITEM_SPACING,
+                            preferences = framePrefs.framePreferences,
                         )
 
                         AnimatedVisibility(
@@ -350,10 +355,10 @@ open class MainWidgetFrameDelegate protected constructor(
     override val viewModel = WidgetFrameViewModel(this)
 
     override val prefsHandler = HandlerRegistry {
-        handler(framePrefs.keyFor(PrefManager.KEY_FRAME_MASKED_MODE)) {
+        handler(PrefManager.KEY_FRAME_MASKED_MODE) {
             updateWallpaperLayerIfNeeded()
         }
-        handler(framePrefs.keyFor(PrefManager.KEY_SHOW_IN_NOTIFICATION_CENTER)) {
+        handler(PrefManager.KEY_SHOW_IN_NOTIFICATION_CENTER) {
             updateState { it.copy(isPendingNotificationStateChange = true) }
         }
         handler(
@@ -384,12 +389,12 @@ open class MainWidgetFrameDelegate protected constructor(
                 addWindow()
             }
         }
-        handler(FrameSpecificPreferences.keyFor(id, PrefManager.KEY_FRAME_IGNORE_TOUCHES)) {
+        handler(PrefManager.KEY_FRAME_IGNORE_TOUCHES) {
             updateState {
                 it.copy(ignoreAllTouches = framePrefs.ignoreAllTouches)
             }
         }
-        handler(FrameSpecificPreferences.keyFor(id, PrefManager.KEY_FRAME_MASKED_MODE)) {
+        handler(PrefManager.KEY_FRAME_MASKED_MODE) {
             if (framePrefs.maskedMode) {
                 wallpaperClient.tryBindService()
             }
@@ -1041,8 +1046,8 @@ open class MainWidgetFrameDelegate protected constructor(
 
         override val containerCornerRadiusKey: String = PrefManager.KEY_FRAME_CORNER_RADIUS
         override val widgetCornerRadiusKey: String = PrefManager.KEY_FRAME_WIDGET_CORNER_RADIUS
-        override val ignoreWidgetTouchesKey: String?
-            get() = delegate.framePrefs.keyFor(PrefManager.KEY_FRAME_IGNORE_WIDGET_TOUCHES)
+        override val ignoreWidgetTouchesKey: Pair<String, SharedPreferences>
+            get() = PrefManager.KEY_FRAME_IGNORE_WIDGET_TOUCHES to framePrefs.framePreferences
         override val doubleTapTurnOffDisplayKey: String =
             PrefManager.KEY_DOUBLE_TAP_EMPTY_FRAME_SPACE_TURN_OFF_DISPLAY
 

@@ -3,6 +3,7 @@ package tk.zwander.common.compose
 import android.annotation.SuppressLint
 import android.appwidget.AppWidgetProviderInfo
 import android.content.Intent
+import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.graphics.Rect
 import android.os.Build
@@ -97,6 +98,7 @@ fun <VM : BaseDelegate.BaseViewModel<*, *>> VM.WidgetGrid(
     enableSnapping: Boolean = false,
     contentPadding: PaddingValues = PaddingValues.Zero,
     lazyGridState: LazySpannedGridState = rememberLazySpannedGridState(),
+    preferences: SharedPreferences = LocalContext.current.prefManager.prefs,
 ) {
     var currentEditingId by currentEditingInterfaceId.collectAsMutableState()
 
@@ -116,8 +118,9 @@ fun <VM : BaseDelegate.BaseViewModel<*, *>> VM.WidgetGrid(
     val gridLocked by rememberBooleanPreferenceState(key = lockedKey)
     val itemSpacing by rememberPreferenceState(
         key = itemSpacingKey,
+        preferences = preferences,
     ) {
-        (context.prefManager.getInt(itemSpacingKey, 0) / 10f).dp
+        (preferences.getInt(itemSpacingKey, 0) / 10f).dp
     }
 
     // Sets currentEditingId directly from reorderableState.draggingItemKey via snapshotFlow rather
@@ -317,6 +320,7 @@ private fun <VM : BaseDelegate.BaseViewModel<*, *>> VM.AddItem(
         val widgetCornerRadius by rememberPreferenceState(
             key = widgetCornerRadiusKey,
             value = {
+                // Currently applies to all frames.
                 (context.prefManager.getInt(
                     it,
                     resources.getInteger(R.integer.def_corner_radius_dp_scaled_10x),

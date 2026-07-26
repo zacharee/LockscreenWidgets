@@ -8,6 +8,7 @@ import tk.zwander.common.data.WidgetData
 import tk.zwander.common.host.widgetHostCompat
 import tk.zwander.common.util.*
 import tk.zwander.lockscreenwidgets.util.FramePrefs
+import tk.zwander.lockscreenwidgets.util.FrameSpecificPreferences
 
 val Context.backupRestoreManager: BackupRestoreManager
     get() = BackupRestoreManager.getInstance(this)
@@ -48,7 +49,9 @@ class BackupRestoreManager private constructor(private val context: Context) {
         val frameWidgetsMap =
             secondaryFrames?.entries?.associate { it.toPair() to FramePrefs.getWidgetsForFrame(context, it.key) }
         val frameGridsMap = secondaryFrames?.entries?.associate {
-            it.toPair() to FramePrefs.getGridSizeForFrame(context, it.key)
+            it.toPair() to FrameSpecificPreferences[it.key].let { prefs ->
+                prefs.rowCount to prefs.colCount
+            }
         }
 
         val data = HashMap<String, String?>()
@@ -155,12 +158,16 @@ class BackupRestoreManager private constructor(private val context: Context) {
             }
 
             frameGridsMap?.forEach { [id, grid] ->
-                FramePrefs.setRowCountForFrame(context, id, grid.first)
-                FramePrefs.setColCountForFrame(context, id, grid.second)
+                FrameSpecificPreferences[id].apply {
+                    rowCount = grid.first
+                    colCount = grid.second
+                }
             }
             frameGridsMapNew?.forEach { [frame, grid] ->
-                FramePrefs.setRowCountForFrame(context, frame.first, grid.first)
-                FramePrefs.setColCountForFrame(context, frame.first, grid.second)
+                FrameSpecificPreferences[frame.first].apply {
+                    rowCount = grid.first
+                    colCount = grid.second
+                }
             }
         }
 

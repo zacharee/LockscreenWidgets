@@ -3,15 +3,20 @@
 package tk.zwander.lockscreenwidgets.util
 
 import android.content.Context
+import android.content.SharedPreferences
 import android.graphics.Color
+import androidx.core.content.edit
 import tk.zwander.common.data.WidgetData
 import tk.zwander.common.host.widgetHostCompat
 import tk.zwander.common.util.*
+import tk.zwander.lockscreenwidgets.App
 
-class FrameSpecificPreferences(
+class FrameSpecificPreferences private constructor(
     val frameId: Int,
     private val context: Context,
 ) {
+    val framePreferences: SharedPreferences = context.getSharedPreferences("frame_prefs_${frameId}", Context.MODE_PRIVATE)
+
     var currentWidgets: Set<WidgetData>
         get() = FramePrefs.getWidgetsForFrame(context, frameId)
         set(value) {
@@ -19,19 +24,16 @@ class FrameSpecificPreferences(
         }
 
     var rowCount: Int
-        get() = FramePrefs.getRowCountForFrame(context, frameId)
+        get() = getInt(PrefManager.KEY_FRAME_ROW_COUNT, 1)
         set(value) {
-            FramePrefs.setRowCountForFrame(context, frameId, value)
+            putInt(PrefManager.KEY_FRAME_ROW_COUNT, value)
         }
 
     var colCount: Int
-        get() = FramePrefs.getColCountForFrame(context, frameId)
+        get() = getInt(PrefManager.KEY_FRAME_COL_COUNT, 1)
         set(value) {
-            FramePrefs.setColCountForFrame(context, frameId, value)
+            putInt(PrefManager.KEY_FRAME_COL_COUNT, value)
         }
-
-    val gridSize: Pair<Int, Int>
-        get() = FramePrefs.getGridSizeForFrame(context, frameId)
 
     var backgroundColor: Int
         get() = getInt(PrefManager.KEY_FRAME_BACKGROUND_COLOR, Color.TRANSPARENT)
@@ -136,30 +138,49 @@ class FrameSpecificPreferences(
         }
 
     var itemSpacingDp: Float
-        get() = getInt(FramePrefs.KEY_FRAME_ITEM_SPACING, 0) / 10f
+        get() = getInt(PrefManager.KEY_FRAME_ITEM_SPACING, 0) / 10f
         set(value) {
-            putInt(FramePrefs.KEY_FRAME_ITEM_SPACING, (value * 10f).toInt())
+            putInt(PrefManager.KEY_FRAME_ITEM_SPACING, (value * 10f).toInt())
         }
 
-    private fun getInt(baseKey: String, def: Int): Int {
-        return context.prefManager.getInt(keyFor(baseKey), def)
-    }
-    private fun putInt(baseKey: String, value: Int) {
-        context.prefManager.putInt(keyFor(baseKey), value)
-    }
+    fun getString(key: String, def: String? = null): String? = framePreferences.getString(key, def)
+    fun getFloat(key: String, def: Float): Float = framePreferences.getFloat(key, def)
+    fun getInt(key: String, def: Int): Int = framePreferences.getInt(key, def)
+    fun getBoolean(key: String, def: Boolean): Boolean = framePreferences.getBoolean(key, def)
+    fun getStringSet(key: String, def: Set<String>): Set<String> = framePreferences.getStringSet(key, def)?.toSet() ?: def
 
-    private fun getBoolean(baseKey: String, def: Boolean): Boolean {
-        return context.prefManager.getBoolean(keyFor(baseKey), def)
-    }
-    private fun putBoolean(baseKey: String, value: Boolean) {
-        context.prefManager.putBoolean(keyFor(baseKey), value)
-    }
+    fun putString(key: String, value: String?) = framePreferences.edit(true) { putString(key, value) }
+    fun putFloat(key: String, value: Float) = framePreferences.edit(true) { putFloat(key, value) }
+    fun putInt(key: String, value: Int) = framePreferences.edit(true) { putInt(key, value) }
+    fun putBoolean(key: String, value: Boolean) = framePreferences.edit(true) { putBoolean(key, value) }
+    fun putStringSet(key: String, value: Set<String>) = framePreferences.edit(true) { putStringSet(key, value) }
 
-    fun keyFor(baseKey: String): String {
-        return keyFor(frameId, baseKey)
+    fun clear() {
+        framePreferences.edit { clear() }
     }
 
     companion object {
+        private val instances = mutableMapOf<Int, FrameSpecificPreferences>()
+
+        operator fun get(frameId: Int): FrameSpecificPreferences {
+            val context = App.instance
+
+            return instances[frameId] ?: FrameSpecificPreferences(frameId, context).also {
+                instances[frameId] = it
+            }
+        }
+
+        fun all(context: Context): List<FrameSpecificPreferences> {
+            return ([MainWidgetFrameDelegate.ID] + context.prefManager.currentSecondaryFramesWithStringDisplay.map { it.key }).map { frameId ->
+                FrameSpecificPreferences[frameId]
+            }
+        }
+
+        internal fun remove(frameId: Int): FrameSpecificPreferences? {
+            return instances.remove(frameId)
+        }
+
+        @Deprecated("Frames have their own preference files now. This should only be used by the migration function.")
         fun keyFor(frameId: Int, baseKey: String): String {
             return FramePrefs.generatePrefKey(baseKey, frameId)
         }
@@ -169,8 +190,8 @@ class FrameSpecificPreferences(
             baseKey: String,
             def: Boolean = false,
         ): Boolean {
-            return ([MainWidgetFrameDelegate.ID] + context.prefManager.currentSecondaryFramesWithStringDisplay.map { it.key }).any { frameId ->
-                context.prefManager.getBoolean(keyFor(frameId, baseKey), def)
+            return all(context).any {
+                it.getBoolean(baseKey, def)
             }
         }
     }
@@ -178,9 +199,10 @@ class FrameSpecificPreferences(
 
 object FramePrefs {
     private const val KEY_FRAME_WIDGETS = "FRAME_WIDGETS_FOR_FRAME_"
+    @Deprecated("Use PrefManager version")
     const val KEY_FRAME_ROW_COUNT = "FRAME_ROW_COUNT_FOR_FRAME_"
+    @Deprecated("Use PrefManager version")
     const val KEY_FRAME_COL_COUNT = "FRAME_COL_COUNT_FOR_FRAME_"
-    const val KEY_FRAME_ITEM_SPACING = "FRAME_ITEM_SPACING_"
 
     fun getWidgetsForFrame(context: Context, frameId: Int): Set<WidgetData> {
         if (frameId == MainWidgetFrameDelegate.ID) {
@@ -211,44 +233,6 @@ object FramePrefs {
         )
     }
 
-    fun getGridSizeForFrame(context: Context, frameId: Int): Pair<Int, Int> {
-        return getRowCountForFrame(context, frameId) to getColCountForFrame(context, frameId)
-    }
-
-    fun getRowCountForFrame(context: Context, frameId: Int): Int {
-        return if (frameId == MainWidgetFrameDelegate.ID) {
-            context.prefManager.frameRowCount
-        } else {
-            context.prefManager.getInt(generatePrefKey(KEY_FRAME_ROW_COUNT, frameId), 1)
-        }
-    }
-
-    fun getColCountForFrame(context: Context, frameId: Int): Int {
-        return if (frameId == MainWidgetFrameDelegate.ID) {
-            context.prefManager.frameColCount
-        } else {
-            context.prefManager.getInt(generatePrefKey(KEY_FRAME_COL_COUNT, frameId), 1)
-        }
-    }
-
-    fun setRowCountForFrame(context: Context, frameId: Int, rowCount: Int) {
-        if (frameId == MainWidgetFrameDelegate.ID) {
-            context.prefManager.frameRowCount = rowCount
-            return
-        }
-
-        context.prefManager.putInt(generatePrefKey(KEY_FRAME_ROW_COUNT, frameId), rowCount)
-    }
-
-    fun setColCountForFrame(context: Context, frameId: Int, colCount: Int) {
-        if (frameId == MainWidgetFrameDelegate.ID) {
-            context.prefManager.frameColCount = colCount
-            return
-        }
-
-        context.prefManager.putInt(generatePrefKey(KEY_FRAME_COL_COUNT, frameId), colCount)
-    }
-
     fun removeFrame(context: Context, frameId: Int) {
         if (frameId == MainWidgetFrameDelegate.ID) {
             return
@@ -262,8 +246,6 @@ object FramePrefs {
             context.widgetHostCompat.deleteAppWidgetId(data.id)
         }
         context.prefManager.remove(generatePrefKey(KEY_FRAME_WIDGETS, frameId))
-        context.prefManager.remove(generatePrefKey(KEY_FRAME_ROW_COUNT, frameId))
-        context.prefManager.remove(generatePrefKey(KEY_FRAME_COL_COUNT, frameId))
 
         [
             FrameSizeAndPosition.FrameType.SecondaryLockscreen.Portrait(frameId),
@@ -272,6 +254,9 @@ object FramePrefs {
             context.frameSizeAndPosition.removeSizeForType(type)
             context.frameSizeAndPosition.removePositionForType(type)
         }
+
+        FrameSpecificPreferences[frameId].clear()
+        // We shouldn't need to remove any frame preference instances since they don't hold their own state.
     }
 
     fun generateCurrentWidgetsKey(id: Int): String {
@@ -282,6 +267,7 @@ object FramePrefs {
         return "${KEY_FRAME_WIDGETS}_${id}"
     }
 
+    @Deprecated("Frames have their own preference files now.")
     fun generatePrefKey(baseKey: String, id: Int): String {
         if (id == MainWidgetFrameDelegate.ID) {
             return when (baseKey) {

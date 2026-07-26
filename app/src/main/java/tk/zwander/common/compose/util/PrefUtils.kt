@@ -3,6 +3,7 @@ package tk.zwander.common.compose.util
 import android.content.SharedPreferences
 import androidx.compose.runtime.*
 import androidx.compose.ui.platform.LocalContext
+import androidx.core.content.edit
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import tk.zwander.common.util.prefManager
@@ -10,11 +11,13 @@ import tk.zwander.common.util.prefManager
 @Composable
 fun <T> rememberPreferenceState(
     key: String,
+    preferences: SharedPreferences = LocalContext.current.prefManager.prefs,
     value: (String) -> T,
 ): State<T> {
     return rememberPreferenceState(
         key = key,
         value = value,
+        preferences = preferences,
         onChanged = { _, _ -> },
     )
 }
@@ -23,9 +26,9 @@ fun <T> rememberPreferenceState(
 fun <T> rememberPreferenceState(
     key: String,
     value: (String) -> T,
+    preferences: SharedPreferences = LocalContext.current.prefManager.prefs,
     onChanged: suspend (String, T) -> Unit,
 ): MutableState<T> {
-    val context = LocalContext.current
     val state = remember(key) {
         mutableStateOf(value(key))
     }
@@ -46,10 +49,10 @@ fun <T> rememberPreferenceState(
             }
         }
 
-        context.prefManager.registerOnSharedPreferenceChangeListener(listener)
+        preferences.registerOnSharedPreferenceChangeListener(listener)
 
         onDispose {
-            context.prefManager.unregisterOnSharedPreferenceChangeListener(listener)
+            preferences.unregisterOnSharedPreferenceChangeListener(listener)
         }
     }
 
@@ -60,18 +63,22 @@ fun <T> rememberPreferenceState(
 fun rememberBooleanPreferenceState(
     key: String,
     defaultValue: Boolean = false,
+    preferences: SharedPreferences = LocalContext.current.prefManager.prefs,
     enabled: (String) -> Boolean = run {
-        val context = LocalContext.current
-        { context.prefManager.getBoolean(it, defaultValue) }
+        { preferences.getBoolean(it, defaultValue) }
     },
     onEnabledChanged: (String, Boolean) -> Unit = run {
-        val context = LocalContext.current
-        { k, v -> context.prefManager.putBoolean(k, v) }
+        { k, v ->
+            preferences.edit {
+                putBoolean(k, v)
+            }
+        }
     },
 ): MutableState<Boolean> {
     return rememberPreferenceState(
         key = key,
         value = enabled,
-        onChanged = onEnabledChanged
+        onChanged = onEnabledChanged,
+        preferences = preferences,
     )
 }

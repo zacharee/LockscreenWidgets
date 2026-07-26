@@ -1,5 +1,6 @@
 package tk.zwander.common.compose.settings
 
+import android.content.SharedPreferences
 import androidx.compose.animation.*
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.clickable
@@ -30,6 +31,7 @@ open class BasePreference<ValueType>(
     val enabled: @Composable () -> Boolean = { true },
     val visible: @Composable () -> Boolean = { true },
     val badge: (@Composable () -> Unit)? = null,
+    val preferences: SharedPreferences? = null,
 ) {
     @Composable
     open fun Render(modifier: Modifier) {

@@ -1,5 +1,6 @@
 package tk.zwander.common.compose.components
 
+import android.content.SharedPreferences
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -44,7 +45,7 @@ fun BaseDelegate.BaseViewModel<*, *>.WidgetItemLayout(
     widgetData: WidgetData,
     widgetContents: @Composable (Modifier) -> Unit,
     cornerRadiusKey: String,
-    ignoreTouchesKey: String?,
+    ignoreTouchesKey: Pair<String, SharedPreferences>?,
     doubleTapTurnOffKey: String?,
     launchIconOverride: () -> Unit,
     launchReconfigure: () -> Unit,
@@ -70,7 +71,7 @@ fun BaseDelegate.BaseViewModel<*, *>.WidgetItemLayout(
         },
     )
     val animatedCornerRadius by animateDpAsState(widgetCornerRadius)
-    val ignoreTouches by ignoreTouchesKey?.let { rememberBooleanPreferenceState(ignoreTouchesKey) }
+    val ignoreTouches by ignoreTouchesKey?.let { rememberBooleanPreferenceState(ignoreTouchesKey.first, preferences = ignoreTouchesKey.second) }
         ?: remember { mutableStateOf(false) }
     val doubleTapTurnOffDisplay by doubleTapTurnOffKey?.let { rememberBooleanPreferenceState(doubleTapTurnOffKey) }
         ?: remember { mutableStateOf(false) }

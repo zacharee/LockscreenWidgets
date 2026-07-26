@@ -1,16 +1,10 @@
 package tk.zwander.common.compose.components
 
+import android.content.SharedPreferences
 import android.os.Build
 import android.view.WindowManager
 import androidx.compose.foundation.Image
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableFloatStateOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
@@ -27,8 +21,8 @@ import java.util.function.Consumer
 
 @Composable
 fun BaseDelegate.BaseViewModel<*, *>.BlurView(
-    blurKey: String,
-    blurAmountKey: String,
+    blurKey: Pair<String, SharedPreferences>,
+    blurAmountKey: Pair<String, SharedPreferences>,
     modifier: Modifier = Modifier,
     cornerRadiusKey: String? = null,
 ) {
@@ -49,12 +43,14 @@ fun BaseDelegate.BaseViewModel<*, *>.BlurView(
     }
 
     val shouldBlur by rememberBooleanPreferenceState(
-        key = blurKey,
+        key = blurKey.first,
+        preferences = blurKey.second,
     )
     val blurAmount by rememberPreferenceState(
-        key = blurAmountKey,
-        value = { context.prefManager.getInt(blurAmountKey, 100) },
+        key = blurAmountKey.first,
+        value = { blurKey.second.getInt(blurAmountKey.first, 100) },
         onChanged = { _, _ -> },
+        preferences = blurKey.second,
     )
     val cornerRadiusPx by if (cornerRadiusKey != null) {
         rememberPreferenceState(

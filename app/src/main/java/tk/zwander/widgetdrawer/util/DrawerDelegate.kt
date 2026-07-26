@@ -5,6 +5,7 @@ import android.animation.AnimatorListenerAdapter
 import android.animation.ValueAnimator
 import android.annotation.SuppressLint
 import android.content.Context
+import android.content.SharedPreferences
 import android.graphics.PixelFormat
 import android.view.Gravity
 import android.view.View
@@ -574,7 +575,7 @@ class DrawerDelegate private constructor(context: Context, displayId: String) :
 
         override val containerCornerRadiusKey: String? = null
         override val widgetCornerRadiusKey: String = PrefManager.KEY_DRAWER_WIDGET_CORNER_RADIUS
-        override val ignoreWidgetTouchesKey: String? = null
+        override val ignoreWidgetTouchesKey: Pair<String, SharedPreferences>? = null
         override val doubleTapTurnOffDisplayKey: String = PrefManager.KEY_DOUBLE_TAP_EMPTY_DRAWER_SPACE_TURN_OFF_DISPLAY
     }
 }

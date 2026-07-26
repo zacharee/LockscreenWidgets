@@ -2,6 +2,7 @@ package tk.zwander.common.util
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.content.SharedPreferences
 import android.os.Build
 import android.view.GestureDetector
 import android.view.MotionEvent
@@ -112,7 +113,8 @@ abstract class BaseDelegate<State : Any>(
         rootView.setViewTreeSavedStateRegistryOwner(this)
         rootView.compositionContext = recomposer
 
-        prefsHandler.register(this)
+        // Will listen for frame prefs with ID -2 because of the drawer delegate.
+        prefsHandler.register(this, holderId)
         eventManager.addObserver(this)
         widgetHost.addOnClickCallback(this)
         rootView.addOnAttachStateChangeListener(rootViewAttachmentStateListener)
@@ -154,7 +156,7 @@ abstract class BaseDelegate<State : Any>(
         logUtils.debugLog("Destroying ${this::class.java}", null)
 
         eventManager.removeObserver(this)
-        prefsHandler.unregister(this)
+        prefsHandler.unregister(this, holderId)
         widgetHost.removeOnClickCallback(this)
 
         rootView.removeOnAttachStateChangeListener(rootViewAttachmentStateListener)
@@ -287,7 +289,7 @@ abstract class BaseDelegate<State : Any>(
         abstract val widgetCornerRadiusKey: String
         abstract val containerCornerRadiusKey: String?
 
-        abstract val ignoreWidgetTouchesKey: String?
+        abstract val ignoreWidgetTouchesKey: Pair<String, SharedPreferences>?
         abstract val doubleTapTurnOffDisplayKey: String?
 
         suspend fun updateWindow() {
