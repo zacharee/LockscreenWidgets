@@ -21,6 +21,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.viewModelScope
 import androidx.recyclerview.widget.RecyclerView
+import dev.zwander.lazyspannedgrid.rememberLazySpannedGridState
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -32,7 +33,6 @@ import tk.zwander.common.compose.WidgetGrid
 import tk.zwander.common.compose.util.createComposeViewHolder
 import tk.zwander.common.compose.util.findAccessibility
 import tk.zwander.common.compose.util.rememberPreferenceState
-import tk.zwander.common.customgrid.rememberLazySpannedGridState
 import tk.zwander.common.data.provider.IFramePrefsProvider
 import tk.zwander.common.data.provider.IFrameProvider
 import tk.zwander.common.listeners.WidgetResizeListener

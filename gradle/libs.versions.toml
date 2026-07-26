@@ -22,6 +22,7 @@ gson = "2.14.0"
 hiddenapibypass = "6.1"
 junit = "4.13.2"
 kotlin = "2.4.20-Beta2"
+lazyspannedgrid = "1.0.2"
 lifecycle = "2.11.0"
 material = "1.14.0"
 miui-autostart = "v1.3"
@@ -68,6 +69,8 @@ kotlin-stdlib = { module = "org.jetbrains.kotlin:kotlin-stdlib", version.ref = "
 kotlin-reflect = { module = "org.jetbrains.kotlin:kotlin-reflect", version.ref = "kotlin" }
 kotlinx-coroutines-android = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version.ref = "coroutines" }
 kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "coroutines" }
+lazyspannedgrid = { module = "dev.zwander:lazyspannedgrid", version.ref = "lazyspannedgrid" }
+lazyspannedgrid-reorderable = { module = "dev.zwander:lazyspannedgrid-reorderable", version.ref = "lazyspannedgrid" }
 lifecycle-runtime-compose = { module = "androidx.lifecycle:lifecycle-runtime-compose", version.ref = "lifecycle" }
 lifecycle-runtime-ktx = { module = "androidx.lifecycle:lifecycle-runtime-ktx", version.ref = "lifecycle" }
 lifecycle-service = { module = "androidx.lifecycle:lifecycle-service", version.ref = "lifecycle" }

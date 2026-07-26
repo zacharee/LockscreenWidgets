@@ -163,6 +163,9 @@ dependencies {
     implementation(libs.composereorderable)
     implementation(libs.pagerindicator)
 
+    implementation(libs.lazyspannedgrid)
+    implementation(libs.lazyspannedgrid.reorderable)
+
     implementation(project(":lswinterconnect"))
 
     coreLibraryDesugaring(libs.desugar.jdk.libs)

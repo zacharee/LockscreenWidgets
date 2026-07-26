@@ -55,6 +55,9 @@ import androidx.core.view.NestedScrollingChild
 import androidx.core.view.forEach
 import androidx.recyclerview.widget.RecyclerView
 import com.bugsnag.android.performance.compose.MeasuredComposable
+import dev.zwander.lazyspannedgrid.*
+import dev.zwander.lazyspannedgrid.reorderable.ReorderableLazySpannedGridState
+import dev.zwander.lazyspannedgrid.reorderable.rememberReorderableLazySpannedGridState
 import dev.zwander.lswinterconnect.peekLogUtils
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -70,7 +73,6 @@ import tk.zwander.common.compose.components.ShortcutItemLayout
 import tk.zwander.common.compose.components.WidgetItemLayout
 import tk.zwander.common.compose.util.rememberPreferenceState
 import tk.zwander.common.compose.util.widgetViewCacheRegistry
-import tk.zwander.common.customgrid.*
 import tk.zwander.common.data.WidgetData
 import tk.zwander.common.data.WidgetType
 import tk.zwander.common.host.widgetHostCompat
