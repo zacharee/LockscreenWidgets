@@ -12,7 +12,7 @@ import tk.zwander.common.util.toBase64
 import tk.zwander.lockscreenwidgets.util.IconPrefs
 
 class AddExtraWidgetInfoMigration : Migration {
-    override val runOnOrBelowDatabaseVersion: Int
+    override val runBelowDatabaseVersion: Int
         get() = 1
 
     override fun run(context: Context) {

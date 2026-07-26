@@ -5,7 +5,7 @@ import android.view.Display
 import tk.zwander.common.util.prefManager
 
 class SecondaryFrameToFrameWithDisplayMigration : Migration {
-    override val runOnOrBelowDatabaseVersion: Int = 7
+    override val runBelowDatabaseVersion: Int = 7
 
     @Suppress("DEPRECATION")
     override fun run(context: Context) {

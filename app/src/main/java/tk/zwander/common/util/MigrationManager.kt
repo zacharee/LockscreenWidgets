@@ -40,7 +40,7 @@ class MigrationManager private constructor(private val context: Context) {
 
         if (currentVersion >= storedVersion) {
             migrations.forEach { migration ->
-                if (migration.runOnOrBelowDatabaseVersion >= storedVersion) {
+                if (migration.runBelowDatabaseVersion > storedVersion) {
                     migration.run(context)
                 }
             }

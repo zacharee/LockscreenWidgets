@@ -5,7 +5,7 @@ import tk.zwander.common.data.WidgetSizeData
 import tk.zwander.common.util.prefManager
 
 class WidgetSizeMigration : Migration {
-    override val runOnOrBelowDatabaseVersion: Int
+    override val runBelowDatabaseVersion: Int
         get() = 2
 
     override fun run(context: Context) {

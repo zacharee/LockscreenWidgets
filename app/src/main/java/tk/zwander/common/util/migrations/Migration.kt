@@ -3,7 +3,7 @@ package tk.zwander.common.util.migrations
 import android.content.Context
 
 interface Migration {
-    val runOnOrBelowDatabaseVersion: Int
+    val runBelowDatabaseVersion: Int
 
     fun run(context: Context)
 }

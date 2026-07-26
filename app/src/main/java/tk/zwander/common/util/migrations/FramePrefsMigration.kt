@@ -8,7 +8,7 @@ import tk.zwander.lockscreenwidgets.util.FramePrefs
 import tk.zwander.lockscreenwidgets.util.FrameSpecificPreferences
 
 class FramePrefsMigration : Migration {
-    override val runOnOrBelowDatabaseVersion: Int = 10
+    override val runBelowDatabaseVersion: Int = 10
 
     private fun createKeys(context: Context): List<FrameMigrationInfo> {
         return (context.prefManager.currentSecondaryFramesWithStringDisplay.keys + -1).map { frameId ->

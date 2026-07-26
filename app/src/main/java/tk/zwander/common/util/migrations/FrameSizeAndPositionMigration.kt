@@ -10,7 +10,7 @@ import tk.zwander.lockscreenwidgets.data.Mode
 
 @Suppress("DEPRECATION")
 class FrameSizeAndPositionMigration : Migration {
-    override val runOnOrBelowDatabaseVersion: Int
+    override val runBelowDatabaseVersion: Int
         get() = 4
 
     override fun run(context: Context) {
