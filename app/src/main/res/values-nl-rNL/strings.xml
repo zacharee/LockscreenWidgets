@@ -336,4 +336,7 @@
     <string name="one_ui_widget_tiles_title">One UI Tile Widgets</string>
     <string name="one_ui_widget_tiles_desc">Display home screen widgets in the expanded view of quick settings tiles in the notification center. Get started by adding a \"Widgets Anywhere\" QS tile.</string>
     <string name="bugsnag_user_id">Bugsnag User ID</string>
+    <string name="item_spacing">Item Spacing</string>
+    <string name="item_spacing_desc">Add padding (in dp) between items. This doesn\'t add padding before the first line or after the last.</string>
+    <string name="applies_to_all_frames">All Frames</string>
 </resources>
