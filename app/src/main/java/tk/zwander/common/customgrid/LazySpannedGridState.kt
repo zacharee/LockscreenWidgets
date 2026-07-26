@@ -32,7 +32,7 @@ fun rememberLazySpannedGridState(
  * know whether that maps to rows or columns. Both grids share the exact same state and measure
  * logic (see [measureSpannedGrid]).
  *
- * Scroll position is stored internally in pixels; [firstVisibleLine]/[firstVisibleLineScrollOffset]
+ * Scroll position is stored internally in pixels; [firstVisibleLine] and [firstVisibleLineScrollOffset]
  * are derived from it using the line size discovered during the last measure pass (mirroring how
  * `LazyGridState` derives its item-based position from pixel offsets known only after measuring).
  *
@@ -58,12 +58,15 @@ class LazySpannedGridState(
     internal var lineSizePx: Int by mutableIntStateOf(0)
         private set
 
+    /**
+     * General information about the current layout of the grid and the items contained.
+     */
     var layoutInfo: LazySpannedGridLayoutInfo by mutableStateOf(LazySpannedGridLayoutInfo.Empty)
         internal set
 
     /**
      * Drives every `animateItem()` fade-in/placement/fade-out animation — see [measureSpannedGrid].
-     * The same internal class `LazyGridState`/`LazyListState` use, so items removed from the
+     * The same internal class `LazyGridState` and `LazyListState` use is used here, so items removed from the
      * underlying data (not just scrolled out of view) get a real disappearance animation too,
      * via a retained [androidx.compose.ui.graphics.layer.GraphicsLayer] snapshot of their last
      * rendered frame — something not reproducible from outside `androidx.compose.foundation`.
@@ -128,7 +131,7 @@ class LazySpannedGridState(
     val firstVisibleLine: Int
         get() = if (lineSizePx <= 0) 0 else (scrollOffsetPx / lineSizePx).toInt()
 
-    /** Scroll offset, in pixels, of [firstVisibleLine] past the start of the viewport. */
+    /** Scroll offset, in pixels, of [firstVisibleLine] relative to the start of the viewport. */
     val firstVisibleLineScrollOffset: Int
         get() =
             if (lineSizePx <= 0) {

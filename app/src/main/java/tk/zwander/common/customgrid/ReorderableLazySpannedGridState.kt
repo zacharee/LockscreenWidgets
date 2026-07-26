@@ -46,14 +46,10 @@ fun rememberReorderableLazySpannedGridState(
     // drag start, so it doesn't carry state over from a previous drag. draggingItemIndex is
     // public, unlike onDragStart/onDragCanceled, so this is observed rather than overridden.
     //
-    // NOTE: a packed-geometry freeze (reusing each index's pre-drag row/column/span while
-    // dragging, only repacking on drop) used to live here to stop a live reorder's repack from
-    // cascading and causing jitter. It's gone for good this time, not just removed to isolate
-    // another fix: with heterogeneous item spans, freezing by index means whichever item now
+    // NOTE: with heterogeneous item spans, freezing by index means whichever item now
     // occupies index i after a reorder renders at index i's *frozen* span, not its own — items
     // visibly inherit the size of whatever used to be in the slot they moved into. A valid tiling
-    // after a reorder fundamentally requires a real repack; see chooseDropItem below for how
-    // cascading jitter is instead addressed without freezing geometry.
+    // after a reorder fundamentally requires a real repack.
     LaunchedEffect(state) {
         snapshotFlow { state.draggingItemIndex != null }
             .distinctUntilChanged()
@@ -108,10 +104,10 @@ fun rememberReorderableLazySpannedGridState(
             if (scroll != 0f) {
                 try {
                     gridState.scrollBy(scroll)
-                } catch (e: CancellationException) {
+                } catch (_: CancellationException) {
                     // gridState.scrollBy runs at the default MutatePriority, so a real,
                     // higher-priority (MutatePriority.UserInput) scroll gesture taking over — e.g.
-                    // interceptUnclaimedDrags' own scroll{} transaction winning the same pointer —
+                    // interceptUnclaimedDrags' own scroll {} transaction winning the same pointer —
                     // cancels *this* call via ScrollableState's MutatorMutex. Left uncaught, that
                     // exception would propagate out of this while loop and kill this whole
                     // LaunchedEffect for the rest of the composable's lifetime (it's keyed on

@@ -2,6 +2,9 @@ package tk.zwander.common.customgrid
 
 /** Where a single item landed after [computeSpannedGridPlacement] has run. */
 data class SpannedGridItemPlacement(
+    /**
+     * The index of the item in the overall list.
+     */
     val index: Int,
     val row: Int,
     val column: Int,

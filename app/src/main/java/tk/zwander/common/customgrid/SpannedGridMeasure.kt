@@ -83,12 +83,12 @@ internal class SpannedGridPlacementCache {
  * [LazyHorizontalSpannedGrid].
  *
  * Internally, [computeSpannedGridPlacement] always thinks in terms of a bounded "column" (cross)
- * axis and an unbounded, scrollable "row" (main) axis. For a vertical grid that maps 1:1 onto
+ * axis and an unbounded, scrollable "row" (main) axis. A vertical grid maps 1:1 onto
  * visual rows/columns; for a horizontal grid, cross axis = visual rows and main axis = visual
  * columns, so item spans and the resulting placement are swapped going in and coming out.
  *
  * Also drives [LazySpannedGridState.itemAnimator] (the same internal
- * `androidx.compose.foundation.lazy.layout.LazyLayoutItemAnimator` stock `LazyGrid`/`LazyList`
+ * `androidx.compose.foundation.lazy.layout.LazyLayoutItemAnimator` stock `LazyGrid` and `LazyList`
  * use) so items whose grid position changed since the last pass animate their offset, newly
  * appearing items fade in, and items no longer naturally visible — whether they scrolled out or
  * were actually removed from the data — fade out via a retained `GraphicsLayer` snapshot of their
@@ -116,9 +116,9 @@ internal fun measureSpannedGrid(
     with(measureScope) {
         val isVertical = orientation == Orientation.Vertical
 
-        // "logical" horizontal padding — start is the left edge in LTR, right edge in RTL. This
-        // is intentional: item x-positions below are placed with placeRelative, which itself
-        // mirrors logical positions for RTL, so padding must stay in the same logical space.
+        // "logical" horizontal padding — start is the left edge in LTR, right edge in RTL. Item
+        // x-positions below are placed with placeRelative, which itself mirrors logical positions
+        // for RTL, so padding must stay in the same logical space.
         val logicalStartPaddingPx = contentPadding.calculateStartPadding(layoutDirection).roundToPx()
         val logicalEndPaddingPx = contentPadding.calculateEndPadding(layoutDirection).roundToPx()
         val topPaddingPx = contentPadding.calculateTopPadding().roundToPx()

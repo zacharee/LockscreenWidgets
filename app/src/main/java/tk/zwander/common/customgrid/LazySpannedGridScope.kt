@@ -23,7 +23,7 @@ sealed interface LazySpannedGridItemScope {
      * (such as an item reordering) — mirrors stock `LazyGridItemScope.animateItem` exactly, since
      * it's backed by the same internal [androidx.compose.foundation.lazy.layout.LazyLayoutItemAnimator]
      * (see [measureSpannedGrid]). Unlike a hand-rolled fade, this also animates an item's
-     * disappearance when it's genuinely removed from the underlying data, not just when it
+     * disappearance when it's removed from the underlying data, not just when it
      * scrolls out of view.
      *
      * You should also provide a `key` via [LazySpannedGridScope.item]/[LazySpannedGridScope.items]

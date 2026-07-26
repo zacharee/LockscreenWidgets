@@ -21,6 +21,9 @@ import androidx.compose.ui.util.fastForEachIndexed
  * `placeRelative*`), the same way the rest of this grid's placement always has.
  */
 internal class SpannedGridMeasuredItem(
+    /**
+     * Index of the item in the overall list.
+     */
     override val index: Int,
     override val key: Any,
     override val placeables: List<Placeable>,
