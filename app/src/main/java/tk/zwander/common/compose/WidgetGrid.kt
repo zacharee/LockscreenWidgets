@@ -11,8 +11,7 @@ import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
-import androidx.compose.animation.core.animateDpAsState
-import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.*
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.FlingBehavior
@@ -42,10 +41,7 @@ import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.IntSize
-import androidx.compose.ui.unit.LayoutDirection
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+import androidx.compose.ui.unit.*
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.view.NestedScrollingChild
 import androidx.core.view.forEach
@@ -113,6 +109,7 @@ fun <VM : BaseDelegate.BaseViewModel<*, *>> VM.WidgetGrid(
             )
         },
         gridState = lazyGridState,
+        edgeScrollMargin = 16.dp,
     )
 
     val gridLocked by rememberBooleanPreferenceState(key = lockedKey)
@@ -255,11 +252,29 @@ private fun <VM: BaseDelegate.BaseViewModel<*, *>> LazySpannedGridScope.widgetIt
             span = { index, _ -> SpannedGridItemSpan(spans[index]) },
             key = { _, data -> data.id },
         ) { index, data ->
+            // While a drag is in progress, other items can be reflowed by a full repack on every
+            // cell the dragged item passes over (this grid's bin-packing placement is
+            // order-dependent, so a single move can cascade well beyond the two items being
+            // swapped). The library's default placementSpec (Spring.StiffnessMediumLow) is tuned
+            // for occasional, isolated moves — during a drag, its ReorderableLazySpannedGridState
+            // deliberately holds off confirming the *next* drop target until that spring settles
+            // (see its chooseDropItem KDoc), so a slow spring reads as the whole grid lagging and
+            // struggling to keep up with the drag. A much stiffer spring settles in tens of
+            // milliseconds instead of hundreds, keeping the reflow visible (unlike suppressing the
+            // animation outright, which read as items instantly teleporting/disappearing) while
+            // barely blocking the next target confirmation.
+            val isReordering = reorderableState.draggingItemKey != null
             ReorderableItem(
                 state = reorderableState,
                 key = data.id,
                 orientationLocked = false,
-                modifier = Modifier.animateItem(),
+                modifier = Modifier.animateItem(
+                    placementSpec = if (isReordering) {
+                        spring(stiffness = Spring.StiffnessHigh, visibilityThreshold = IntOffset.VisibilityThreshold)
+                    } else {
+                        spring(stiffness = Spring.StiffnessMediumLow, visibilityThreshold = IntOffset.VisibilityThreshold)
+                    },
+                ),
             ) { isDragging ->
                 WidgetItem(
                     data = data,
