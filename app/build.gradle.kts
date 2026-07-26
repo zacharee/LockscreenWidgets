@@ -123,7 +123,6 @@ dependencies {
     implementation(libs.material)
     implementation(libs.byte.buddy.android)
     implementation(libs.patreonSupportersRetrieval)
-    implementation(libs.spannedGridLayoutManager)
     implementation(libs.composeIntroSlider)
 
     implementation(platform(libs.compose.bom))
@@ -160,6 +159,12 @@ dependencies {
     implementation(libs.colorpicker.compose)
     implementation(libs.reorderable)
     implementation(libs.miui.autostart)
+
+    implementation(libs.composereorderable)
+    implementation(libs.pagerindicator)
+
+    implementation(libs.lazyspannedgrid)
+    implementation(libs.lazyspannedgrid.reorderable)
 
     implementation(project(":lswinterconnect"))
 

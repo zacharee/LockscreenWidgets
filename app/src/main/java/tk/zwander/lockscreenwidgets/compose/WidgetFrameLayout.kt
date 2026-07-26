@@ -4,7 +4,6 @@ import android.graphics.Matrix
 import android.graphics.PorterDuff
 import android.graphics.PorterDuffColorFilter
 import android.view.MotionEvent
-import android.view.ViewConfiguration
 import android.widget.ImageView
 import androidx.appcompat.widget.AppCompatImageView
 import androidx.compose.animation.animateColorAsState
@@ -33,7 +32,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.zIndex
-import androidx.core.view.ViewCompat
 import com.bugsnag.android.performance.compose.MeasuredComposable
 import tk.zwander.common.compose.components.BlurView
 import tk.zwander.common.compose.components.ConfirmFrameRemovalLayout
@@ -42,13 +40,12 @@ import tk.zwander.common.compose.components.FrameEditWrapperLayout
 import tk.zwander.common.compose.util.rememberBooleanPreferenceState
 import tk.zwander.common.compose.util.rememberPreferenceState
 import tk.zwander.common.util.*
-import tk.zwander.common.views.SnappyRecyclerView
 import tk.zwander.lockscreenwidgets.R
 import tk.zwander.lockscreenwidgets.util.MainWidgetFrameDelegate
 
 @Composable
 fun MainWidgetFrameDelegate.WidgetFrameViewModel.WidgetFrameLayout(
-    widgetGrid: SnappyRecyclerView,
+    widgetGrid: @Composable (Modifier) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val context = LocalContext.current
@@ -82,6 +79,10 @@ fun MainWidgetFrameDelegate.WidgetFrameViewModel.WidgetFrameLayout(
     var isInEditingMode by isEditing.collectAsMutableState()
     var removing by isRemoving.collectAsMutableState()
     var isAdjustingMask by this.isAdjustingMask.collectAsMutableState()
+
+    val frameLocked by rememberBooleanPreferenceState(
+        PrefManager.KEY_LOCK_WIDGET_FRAME,
+    )
 
     var maskAdjustment by rememberPreferenceState(
         key = PrefManager.KEY_MASKED_MODE_ADJUSTMENT_FOR_DISPLAY,
@@ -129,7 +130,7 @@ fun MainWidgetFrameDelegate.WidgetFrameViewModel.WidgetFrameLayout(
                             }.orEmpty()
 
                             if (interestingThirdChanges.size < 3) {
-                                isInEditingMode = !isInEditingMode && !isLocked
+                                isInEditingMode = !isInEditingMode && !frameLocked
                                 if (acknowledgedTwoFingerTap == null) {
                                     acknowledgedTwoFingerTap = false
                                 } else if (acknowledgedTwoFingerTap == false) {
@@ -244,32 +245,7 @@ fun MainWidgetFrameDelegate.WidgetFrameViewModel.WidgetFrameLayout(
                 exit = fadeOut(),
                 visible = !firstViewing,
             ) {
-                val pageIndicatorBehavior by rememberPreferenceState(
-                    key = PrefManager.KEY_PAGE_INDICATOR_BEHAVIOR,
-                    value = { context.prefManager.pageIndicatorBehavior },
-                )
-
-                AndroidView(
-                    factory = {
-                        widgetGrid.andRemoveFromParent().also {
-                            ViewCompat.setNestedScrollingEnabled(it, true)
-                        }
-                    },
-                    update = {
-                        it.isHorizontalScrollBarEnabled =
-                            pageIndicatorBehavior != PrefManager.VALUE_PAGE_INDICATOR_BEHAVIOR_HIDDEN
-                        it.isScrollbarFadingEnabled =
-                            pageIndicatorBehavior == PrefManager.VALUE_PAGE_INDICATOR_BEHAVIOR_AUTO_HIDE
-                        it.scrollBarFadeDuration =
-                            if (pageIndicatorBehavior == PrefManager.VALUE_PAGE_INDICATOR_BEHAVIOR_AUTO_HIDE) {
-                                ViewConfiguration.getScrollBarFadeDuration()
-                            } else {
-                                0
-                            }
-                    },
-                    modifier = Modifier
-                        .fillMaxSize(),
-                )
+                widgetGrid(Modifier.fillMaxSize())
             }
 
             HintIntroLayout(

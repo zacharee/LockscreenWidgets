@@ -22,115 +22,12 @@ import androidx.compose.ui.platform.AbstractComposeView
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.unit.Density
 import androidx.core.view.LayoutInflaterCompat
-import androidx.recyclerview.widget.ItemTouchHelper
-import androidx.recyclerview.widget.RecyclerView
 import dev.zwander.lswinterconnect.safeApplicationContext
-import tk.zwander.common.adapters.BaseAdapter
 import tk.zwander.common.compose.AppTheme
-import tk.zwander.common.data.WidgetType
 import tk.zwander.common.util.compat.LayoutInflaterFactory2Compat
 import tk.zwander.lockscreenwidgets.R
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
-import kotlin.math.roundToInt
-import kotlin.math.sign
-
-fun createTouchHelperCallback(
-    adapter: BaseAdapter<*>,
-    widgetMoved: (moved: Boolean) -> Unit,
-    onItemSelected: (selected: Boolean, highlighted: Boolean) -> Unit,
-    onItemActive: (Boolean) -> Unit,
-    frameLocked: () -> Boolean,
-    viewModel: BaseDelegate.BaseViewModel<*, *>,
-): ItemTouchHelper.SimpleCallback {
-    return object : ItemTouchHelper.SimpleCallback(
-        ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT or ItemTouchHelper.UP or ItemTouchHelper.DOWN,
-        0,
-    ) {
-        override fun onMove(
-            recyclerView: RecyclerView,
-            viewHolder: RecyclerView.ViewHolder,
-            target: RecyclerView.ViewHolder,
-        ): Boolean {
-            return adapter.onMove(viewHolder.bindingAdapterPosition, target.bindingAdapterPosition)
-                .also { moved ->
-                    widgetMoved(moved)
-                }
-        }
-
-        override fun getDragDirs(
-            recyclerView: RecyclerView,
-            viewHolder: RecyclerView.ViewHolder,
-        ): Int {
-            return if (viewHolder is BaseAdapter<*>.AddWidgetVH || frameLocked() || viewModel.isResizingItem.value) 0
-            else super.getDragDirs(recyclerView, viewHolder)
-        }
-
-        override fun getMovementFlags(
-            recyclerView: RecyclerView,
-            viewHolder: RecyclerView.ViewHolder
-        ): Int {
-            return if (viewHolder.itemViewType != WidgetType.HEADER.ordinal) super.getMovementFlags(
-                recyclerView,
-                viewHolder
-            )
-            else 0
-        }
-
-        override fun onSelectedChanged(viewHolder: RecyclerView.ViewHolder?, actionState: Int) {
-            onItemActive(true)
-            if (!viewModel.isResizingItem.value) {
-                if (actionState != ItemTouchHelper.ACTION_STATE_IDLE) {
-                    viewHolder?.itemView?.alpha = 0.5f
-
-                    //The user has long-pressed a widget. Show the editing UI on that widget.
-                    //If the UI is already shown on it, hide it.
-                    val adapterPos = viewHolder?.bindingAdapterPosition ?: RecyclerView.NO_POSITION
-                    viewModel.currentEditingInterfacePosition.value =
-                        if (viewModel.currentEditingInterfacePosition.value == adapterPos) RecyclerView.NO_POSITION else adapterPos
-                }
-
-                onItemSelected(
-                    actionState == ItemTouchHelper.ACTION_STATE_DRAG,
-                    viewModel.currentEditingInterfacePosition.value != RecyclerView.NO_POSITION,
-                )
-            }
-
-            super.onSelectedChanged(viewHolder, actionState)
-        }
-
-        override fun clearView(
-            recyclerView: RecyclerView,
-            viewHolder: RecyclerView.ViewHolder,
-        ) {
-            super.clearView(recyclerView, viewHolder)
-
-            if (!viewModel.isResizingItem.value) {
-                onItemActive(false)
-                onItemSelected(
-                    false,
-                    viewModel.currentEditingInterfacePosition.value != RecyclerView.NO_POSITION,
-                )
-
-                viewHolder.itemView.alpha = 1.0f
-            }
-        }
-
-        override fun interpolateOutOfBoundsScroll(
-            recyclerView: RecyclerView,
-            viewSize: Int,
-            viewSizeOutOfBounds: Int,
-            totalSize: Int,
-            msSinceStartScroll: Long,
-        ): Int {
-            //The default scrolling speed is *way* too fast. Slow it down a bit.
-            val direction = sign(viewSizeOutOfBounds.toFloat()).toInt()
-            return (viewSize * 0.01f * direction).roundToInt()
-        }
-
-        override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {}
-    }
-}
 
 enum class DrawerOrFrame {
     DRAWER {
