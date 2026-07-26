@@ -20,7 +20,6 @@ coroutines = "1.11.0"
 desugar_jdk_libs = "2.1.5"
 gson = "2.14.0"
 hiddenapibypass = "6.1"
-junit = "4.13.2"
 kotlin = "2.4.20-Beta2"
 lazyspannedgrid = "1.0.2"
 lifecycle = "2.11.0"
@@ -64,7 +63,6 @@ core-remoteviews = { module = "androidx.core:core-remoteviews", version.ref = "c
 desugar_jdk_libs = { module = "com.android.tools:desugar_jdk_libs", version.ref = "desugar_jdk_libs" }
 gson = { module = "com.google.code.gson:gson", version.ref = "gson" }
 hiddenapibypass = { module = "org.lsposed.hiddenapibypass:hiddenapibypass", version.ref = "hiddenapibypass" }
-junit = { module = "junit:junit", version.ref = "junit" }
 kotlin-stdlib = { module = "org.jetbrains.kotlin:kotlin-stdlib", version.ref = "kotlin" }
 kotlin-reflect = { module = "org.jetbrains.kotlin:kotlin-reflect", version.ref = "kotlin" }
 kotlinx-coroutines-android = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version.ref = "coroutines" }

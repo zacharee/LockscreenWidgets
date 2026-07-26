@@ -169,6 +169,4 @@ dependencies {
     implementation(project(":lswinterconnect"))
 
     coreLibraryDesugaring(libs.desugar.jdk.libs)
-
-    testImplementation(libs.junit)
 }
