@@ -26,6 +26,7 @@
     <string name="search">Поиск</string>
     <string name="preview">Предпросмотр</string>
     <string name="close_app">Закрыть приложение</string>
+    <string name="close">Close</string>
     <string name="privacy_policy">Политика конфиденциальности</string>
     <string name="shortcut">Ярлык</string>
     <string name="enabled">Активировано</string>
