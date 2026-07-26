@@ -21,6 +21,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.compositionContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
@@ -141,7 +142,9 @@ class DrawerDelegate private constructor(context: Context, displayId: String) :
 
     private val drawer by lazy {
         viewModel.createComposeViewHolder {
-            val cutoutPadding = WindowInsets.displayCutout
+            val density = LocalDensity.current
+            val cutoutPadding = WindowInsets.displayCutout.only(WindowInsetsSides.Top)
+                .takeIf { it.getTop(density) > 0 } ?: WindowInsets(top = context.statusBarHeight)
 
             val drawerSidePadding by rememberPreferenceState(
                 key = PrefManager.KEY_DRAWER_SIDE_PADDING,

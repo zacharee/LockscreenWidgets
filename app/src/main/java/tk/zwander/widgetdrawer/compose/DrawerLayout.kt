@@ -7,7 +7,6 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -16,8 +15,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.motionEventSpy
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.platform.LocalLayoutDirection
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import tk.zwander.common.compose.components.BlurView
 import tk.zwander.common.compose.components.ConfirmWidgetRemovalLayout
@@ -34,7 +31,6 @@ fun DrawerDelegate.DrawerViewModel.DrawerLayout(
 ) {
     val context = LocalContext.current
     val density = LocalDensity.current
-    val layoutDirection = LocalLayoutDirection.current
     val backgroundColor by rememberPreferenceState(
         key = PrefManager.KEY_DRAWER_BACKGROUND_COLOR,
         value = { Color(context.prefManager.drawerBackgroundColor) },
@@ -46,30 +42,10 @@ fun DrawerDelegate.DrawerViewModel.DrawerLayout(
         it.getTop(density) > 0
     } ?: WindowInsets(top = context.statusBarHeight)
 
-    val drawerSidePadding by rememberPreferenceState(
-        key = PrefManager.KEY_DRAWER_SIDE_PADDING,
-        value = {
-            context.prefManager.drawerSidePadding.dp
-        },
-    )
-
     val backgroundOverStatusBar by rememberBooleanPreferenceState(
         key = PrefManager.KEY_DRAWER_BACKGROUND_OVER_STATUS_BAR,
         defaultValue = true,
     )
-
-    LaunchedEffect(drawerSidePadding, cutoutPadding, layoutDirection, statusBarPadding) {
-        val combinedPadding = cutoutPadding.add(
-            WindowInsets(left = drawerSidePadding, right = drawerSidePadding),
-        )
-
-//        widgetGrid.updatePadding(
-//            left = combinedPadding.getLeft(density, layoutDirection),
-//            top = statusBarPadding.getTop(density),
-//            right = combinedPadding.getRight(density, layoutDirection),
-//            bottom = combinedPadding.getBottom(density),
-//        )
-    }
 
     Box(
         modifier = modifier.motionEventSpy { event ->
