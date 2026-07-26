@@ -419,7 +419,7 @@ private fun <VM : BaseDelegate.BaseViewModel<*, *>> VM.WidgetItem(
     }
 
     WidgetItemLayout(
-        needsReconfigure = widgetInfo == null,
+        needsReconfigure = widgetInfo == null && updatedData.safeType == WidgetType.WIDGET,
         widgetData = updatedData,
         widgetContents = { modifier ->
             when (updatedData.safeType) {
