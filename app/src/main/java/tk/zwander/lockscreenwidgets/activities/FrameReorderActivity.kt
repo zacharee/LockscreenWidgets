@@ -6,8 +6,10 @@ import android.content.SharedPreferences
 import android.os.Bundle
 import android.view.View
 import android.view.WindowManager
+import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.layout.*
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.getValue
@@ -18,6 +20,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import dev.zwander.lazyspannedgrid.rememberLazySpannedGridState
 import kotlinx.coroutines.CoroutineScope
@@ -86,17 +89,26 @@ class FrameReorderActivity : BaseActivity(), CoroutineScope by App.instance {
             ) {
                 Column(
                     modifier = Modifier.fillMaxSize(),
-                    verticalArrangement = Arrangement.spacedBy(16.dp),
+                    verticalArrangement = object : Arrangement.Vertical by Arrangement.SpaceAround {
+                        override val spacing: Dp = 16.dp
+                    },
                 ) {
-                    Text(
-                        text = stringResource(R.string.edit_layout_desc),
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier.fillMaxWidth(),
-                    )
+                    Box(
+                        modifier = Modifier.fillMaxWidth()
+                            .weight(0.25f),
+                        contentAlignment = Alignment.BottomCenter,
+                    ) {
+                        Text(
+                            text = stringResource(R.string.edit_layout_desc),
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier.fillMaxWidth(),
+                        )
+                    }
 
                     Box(
-                        modifier = Modifier.weight(1f),
-                        contentAlignment = Alignment.Center,
+                        modifier = Modifier.fillMaxWidth()
+                            .weight(0.75f),
+                        contentAlignment = Alignment.TopCenter,
                     ) {
                         delegate.viewModel.WidgetGrid(
                             currentWidgets = currentWidgetsState,
@@ -118,7 +130,9 @@ class FrameReorderActivity : BaseActivity(), CoroutineScope by App.instance {
                             },
                             locked = false,
                             itemSpacingKey = PrefManager.KEY_FRAME_ITEM_SPACING,
-                            modifier = Modifier.fillMaxWidth().aspectRatio(1f),
+                            modifier = Modifier.fillMaxWidth().aspectRatio(1f)
+                                .background(MaterialTheme.colorScheme.surfaceDim)
+                                .padding(vertical = 8.dp),
                             rowSpanForAddButton = 1,
                             minColSpan = 1,
                             minRowSpan = 1,
