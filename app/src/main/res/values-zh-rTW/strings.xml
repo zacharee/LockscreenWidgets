@@ -340,4 +340,6 @@
     <string name="applies_to_all_frames">All Frames</string>
     <string name="more_settings">More Settings</string>
     <string name="more">More</string>
+    <string name="edit_layout">Edit Layout</string>
+    <string name="edit_layout_desc">Use this screen to reorder and resize your frame widgets with more room to interact.</string>
 </resources>
