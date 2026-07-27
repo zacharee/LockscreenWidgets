@@ -7,40 +7,22 @@ import android.widget.ListView
 import androidx.core.view.NestedScrollingChild3
 import androidx.core.view.NestedScrollingChildHelper
 import dev.zwander.lswinterconnect.BugsnagUtils
-import tk.zwander.common.util.appWidgetManager
-import tk.zwander.common.util.logUtils
 
 class CatchingListView(
     context: Context,
     attrs: AttributeSet,
     private val widgetId: Int,
-) : ListView(context, attrs), NestedScrollingChild3 {
+) : ListView(context, attrs), NestedScrollingChild3, BaseListView by BaseListViewClass(widgetId) {
     private val helper = NestedScrollingChildHelper(this)
 
     init {
+        init(this)
         helper.isNestedScrollingEnabled = true
     }
 
     override fun layoutChildren() {
-        if (!isAttachedToWindow) {
-            context.logUtils.debugLog(
-                message = "ListView ${safeViewIdName()} not attached to window so not laying out.\n" +
-                        "Widget ID: $widgetId.\n" +
-                        "Widget provider: ${findAppWidgetProvider()}.",
-            )
+        if (!shouldLayout()) {
             return
-        }
-
-        adapter?.let { adapter ->
-            if (count != adapter.count) {
-                context.logUtils.debugLog(
-                    message = "Mismatch in listview count ($count) and adapter count (${adapter.count}) " +
-                            "for ListView with ID name ${safeViewIdName()}.\n" +
-                            "Widget ID: $widgetId.\n" +
-                            "Widget provider: ${findAppWidgetProvider()}.",
-                    throwable = null,
-                )
-            }
         }
 
         try {
@@ -63,23 +45,6 @@ class CatchingListView(
     override fun onDetachedFromWindow() {
         super.onDetachedFromWindow()
         helper.onDetachedFromWindow()
-    }
-
-    private fun safeViewIdName(): String? {
-        return try {
-            context.resources.getResourceName(id)
-        } catch (_: Throwable) {
-            id.toString()
-        }
-    }
-
-    private fun findAppWidgetProvider(): String? {
-        return try {
-            context.appWidgetManager.getAppWidgetInfo(widgetId)
-                ?.provider?.flattenToString()
-        } catch (_: Throwable) {
-            null
-        }
     }
 
     override fun startNestedScroll(p0: Int, p1: Int): Boolean {

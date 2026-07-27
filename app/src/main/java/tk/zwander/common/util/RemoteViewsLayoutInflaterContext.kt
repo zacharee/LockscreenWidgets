@@ -7,7 +7,7 @@ import android.view.LayoutInflater
 import android.view.View
 import tk.zwander.common.views.remote.CatchingListView
 import tk.zwander.common.views.remote.CatchingTextClock
-import tk.zwander.common.views.remote.NestedGridView
+import tk.zwander.common.views.remote.CatchingGridView
 
 class RemoteViewsLayoutInflaterContext(
     context: Context,
@@ -25,7 +25,7 @@ class RemoteViewsLayoutInflaterContext(
                 return when (name) {
                     "ListView" -> CatchingListView(context, attrs, widgetId)
                     "TextClock" -> CatchingTextClock(context, attrs)
-                    "GridView" -> NestedGridView(context, attrs)
+                    "GridView" -> CatchingGridView(context, attrs)
                     else -> null
                 }
             }

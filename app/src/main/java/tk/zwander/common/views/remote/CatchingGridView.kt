@@ -2,15 +2,49 @@ package tk.zwander.common.views.remote
 
 import android.content.Context
 import android.util.AttributeSet
+import android.view.MotionEvent
 import android.widget.GridView
 import androidx.core.view.NestedScrollingChild3
 import androidx.core.view.NestedScrollingChildHelper
+import dev.zwander.lswinterconnect.BugsnagUtils
 
-class NestedGridView(context: Context, attrs: AttributeSet) : GridView(context, attrs), NestedScrollingChild3 {
+class CatchingGridView(
+    context: Context,
+    attrs: AttributeSet,
+    private val widgetId: Int,
+) : GridView(context, attrs), NestedScrollingChild3, BaseListView by BaseListViewClass(widgetId) {
     private val helper = NestedScrollingChildHelper(this)
 
     init {
+        init(this)
         helper.isNestedScrollingEnabled = true
+    }
+
+    override fun layoutChildren() {
+        if (!shouldLayout()) {
+            return
+        }
+
+        try {
+            super.layoutChildren()
+        } catch (e: IllegalStateException) {
+            BugsnagUtils.notify(e)
+        } catch (e: ArrayIndexOutOfBoundsException) {
+            BugsnagUtils.notify(e)
+        }
+    }
+
+    override fun onTouchEvent(ev: MotionEvent?): Boolean {
+        if (ev?.action == MotionEvent.ACTION_CANCEL || ev?.action == MotionEvent.ACTION_UP) {
+            helper.stopNestedScroll()
+        }
+
+        return super.onTouchEvent(ev)
+    }
+
+    override fun onDetachedFromWindow() {
+        super.onDetachedFromWindow()
+        helper.onDetachedFromWindow()
     }
 
     override fun startNestedScroll(p0: Int, p1: Int): Boolean {
