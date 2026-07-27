@@ -6,8 +6,6 @@ import android.os.Build
 import android.os.Bundle
 import com.android.internal.widget.RecyclerView
 import tk.zwander.common.activities.DismissOrUnlockActivity
-import tk.zwander.common.data.WidgetData
-import tk.zwander.common.data.WidgetSizeData
 import tk.zwander.common.host.WidgetHostCompat
 import tk.zwander.common.util.appWidgetManager
 import tk.zwander.common.util.logUtils
@@ -70,16 +68,7 @@ abstract class ReconfigureWidgetActivity : BaseBindWidgetActivity() {
     override fun addNewWidget(id: Int, provider: AppWidgetProviderInfo) {
         val newSet = currentWidgets.toMutableList()
 
-        val oldWidgetIndex = newSet.indexOf(
-            WidgetData.widget(
-                this,
-                prevId,
-                provider.provider,
-                "", null,
-                WidgetSizeData(1, 1),
-                provider.profile,
-            )
-        )
+        val oldWidgetIndex = newSet.indexOfFirst { it.id == prevId }
 
         val oldWidget = if (oldWidgetIndex != RecyclerView.NO_POSITION) newSet.removeAt(oldWidgetIndex) else null
 

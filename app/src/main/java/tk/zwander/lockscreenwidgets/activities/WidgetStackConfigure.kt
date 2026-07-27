@@ -259,7 +259,7 @@ fun Content(
         }
 
     LaunchedEffect(widgets) {
-        localWidgetList = widgets.filterNot { localRemovedWidgets.contains(it) }
+        localWidgetList = widgets.filterNot { w -> localRemovedWidgets.any { it.id == w.id } }
     }
 
     DisposableEffect(widgetId) {
@@ -785,7 +785,7 @@ fun Content(
                 TextButton(
                     onClick = {
                         val newWidgets = localWidgetList.toMutableList()
-                        newWidgets.remove(pendingRemoval)
+                        newWidgets.removeAll { it.id == pendingRemoval.id }
                         localRemovedWidgets = localRemovedWidgets + pendingRemoval
 
                         localWidgetList = newWidgets
