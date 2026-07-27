@@ -12,6 +12,7 @@ import android.util.AttributeSet
 import android.view.View
 import android.widget.AdapterView
 import android.widget.RemoteViews
+import androidx.core.view.updateLayoutParams
 import tk.zwander.common.host.widgetHostCompat
 import tk.zwander.common.util.RemoteViewsLayoutInflaterContext
 import tk.zwander.common.util.appWidgetManager
@@ -134,6 +135,17 @@ class ZeroPaddingAppWidgetHostView(
 
         findWidgetStackId()?.let {
             WidgetStackProvider.updateOptions(App.instance, intArrayOf(it), options)
+        }
+    }
+
+    override fun prepareView(view: View?) {
+        super.prepareView(view)
+
+        if (view?.layoutParams?.width == 0 || view?.layoutParams?.height == 0) {
+            view.updateLayoutParams {
+                width = LayoutParams.MATCH_PARENT
+                height = LayoutParams.MATCH_PARENT
+            }
         }
     }
 

@@ -7,7 +7,6 @@ import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.graphics.Rect
 import android.os.Build
-import android.util.Log
 import android.util.SizeF
 import android.view.MotionEvent
 import android.view.View
@@ -681,7 +680,11 @@ private fun <VM : BaseDelegate.BaseViewModel<*, *>> VM.WidgetContents(
                 it.removeAllViews()
                 widgetView?.let { v ->
                     it.postOnAnimationDelayed({
-                        it.addView(v.andRemoveFromParent())
+                        it.addView(
+                            v.andRemoveFromParent(),
+                            ViewGroup.LayoutParams.MATCH_PARENT,
+                            ViewGroup.LayoutParams.MATCH_PARENT,
+                        )
                     }, 10)
                 }
             },
