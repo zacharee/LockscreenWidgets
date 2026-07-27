@@ -1,8 +1,7 @@
 package tk.zwander.common.compose.main
 
 import android.content.ClipData
-import android.content.Context
-import android.net.Uri
+import android.content.Intent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -16,30 +15,20 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ClipEntry
 import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import com.bugsnag.android.Bugsnag
 import kotlinx.coroutines.launch
-import tk.zwander.common.compose.components.ClearFrameDataCard
+import tk.zwander.common.activities.settings.CommonSettingsActivity
 import tk.zwander.common.compose.components.ClickableCard
 import tk.zwander.common.compose.components.ContentCard
 import tk.zwander.common.compose.components.PreferenceSwitch
 import tk.zwander.common.compose.util.rememberBooleanPreferenceState
 import tk.zwander.common.util.PrefManager
-import tk.zwander.common.util.contracts.rememberCreateDocumentLauncherWithDownloadFallback
-import tk.zwander.common.util.logUtils
 import tk.zwander.lockscreenwidgets.BuildConfig
 import tk.zwander.lockscreenwidgets.R
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
-
-private fun Context.writeLog(uri: Uri?) {
-    if (uri != null) {
-        contentResolver.openOutputStream(uri)?.let { logUtils.exportLog(it) }
-    }
-}
 
 @Preview
 @Composable
@@ -50,54 +39,14 @@ fun DebugCard(
     val context = LocalContext.current
     val clipboard = LocalClipboard.current
 
-    val debugExportLauncher = rememberCreateDocumentLauncherWithDownloadFallback(
-        mimeType = "text/plain",
-    ) { uri: Uri? ->
-        context.writeLog(uri)
-    }
-
     ContentCard(
         modifier = modifier.fillMaxWidth(),
-        expandedContent = {
-            PreferenceSwitch(
-                key = PrefManager.KEY_DEBUG_LOG,
-                title = stringResource(id = R.string.settings_screen_debug_log),
-                summary = stringResource(id = R.string.settings_screen_debug_log_desc),
-            )
-
-            PreferenceSwitch(
-                key = PrefManager.KEY_SHOW_DEBUG_ID_VIEW,
-                title = stringResource(id = R.string.settings_screen_show_debug_id_view),
-                summary = stringResource(id = R.string.settings_screen_show_debug_id_view_desc),
-            )
-
-            ClickableCard(
-                title = stringResource(id = R.string.settings_screen_export_debug_log),
-                summary = stringResource(id = R.string.settings_screen_export_debug_log_desc),
-                onClick = {
-                    val formatter = SimpleDateFormat("yyyy-MM-dd_HH:mm:ss", Locale.getDefault())
-                    val fileName = "lockscreen_widgets_debug_${formatter.format(Date())}.txt"
-
-                    debugExportLauncher.launch(fileName)
-                },
-            )
-
-            ClickableCard(
-                title = stringResource(id = R.string.settings_screen_clear_debug_log),
-                summary = stringResource(id = R.string.settings_screen_clear_debug_log_desc),
-                onClick = {
-                    context.logUtils.resetDebugLog()
-                },
-            )
-
-            ClearFrameDataCard()
-        },
     ) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Text(
-                text = stringResource(id = R.string.category_debug),
+                text = stringResource(id = R.string.more),
                 textAlign = TextAlign.Center,
                 style = MaterialTheme.typography.headlineLarge,
                 color = MaterialTheme.colorScheme.onSurface,
@@ -139,7 +88,17 @@ fun DebugCard(
                         )
                     }
                 },
+                endIcon = painterResource(R.drawable.copy_all_24px),
             )
         }
+
+        ClickableCard(
+            title = stringResource(R.string.more_settings),
+            summary = null,
+            onClick = {
+                context.startActivity(Intent(context, CommonSettingsActivity::class.java))
+            },
+            endIcon = painterResource(R.drawable.chevron_right_24px),
+        )
     }
 }

@@ -279,6 +279,11 @@
             android:windowSoftInputMode="adjustResize"
             android:theme="@style/AppTheme.NoActionBar"
             />
+        <activity android:name="tk.zwander.common.activities.settings.CommonSettingsActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize"
+            android:theme="@style/AppTheme.NoActionBar"
+            />
         <activity android:name="tk.zwander.common.activities.WidgetStackListActivity"
             android:exported="true"
             android:windowSoftInputMode="adjustResize"
@@ -481,7 +486,7 @@
                 <action android:name="com.twofortyfouram.locale.intent.action.FIRE_SETTING" />
             </intent-filter>
         </service>
-        
+
         <service android:name="com.joaomgcd.taskerpluginlibrary.condition.IntentServiceCondition"
             android:exported="true"
             tools:ignore="ExportedService">

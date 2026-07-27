@@ -4,6 +4,7 @@ import android.content.Context
 import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
+import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.core.content.res.ResourcesCompat
@@ -29,6 +30,7 @@ class ComposeDrawerSettingsActivity : BaseActivity() {
         super.onCreate(savedInstanceState)
 
         setThemedContent {
+            val resources = LocalResources.current
             val commonSection = createCommonSection(BackupRestoreManager.Which.DRAWER)
             val prefs = rememberPreferenceScreen {
                 commonSection.addToPreferenceScreen(this)

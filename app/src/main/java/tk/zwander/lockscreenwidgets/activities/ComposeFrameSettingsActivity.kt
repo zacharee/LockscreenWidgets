@@ -7,6 +7,7 @@ import android.os.Bundle
 import android.view.Display
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringArrayResource
@@ -25,7 +26,6 @@ import tk.zwander.lockscreenwidgets.BuildConfig
 import tk.zwander.lockscreenwidgets.R
 import tk.zwander.lockscreenwidgets.compose.SelectDisplayDialog
 import tk.zwander.lockscreenwidgets.services.isNotificationListenerActive
-import tk.zwander.lockscreenwidgets.util.FramePrefs
 import tk.zwander.lockscreenwidgets.util.FrameSpecificPreferences
 import tk.zwander.lockscreenwidgets.util.MainWidgetFrameDelegate
 
@@ -44,6 +44,7 @@ class ComposeFrameSettingsActivity : BaseActivity() {
             isOneUI || (isPixelUI && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S)
 
         setThemedContent {
+            val resources = LocalResources.current
             val isLikelyRazr = remember {
                 isLikelyRazr
             }
@@ -605,19 +606,6 @@ class ComposeFrameSettingsActivity : BaseActivity() {
                             }
                         },
                         summary = { null },
-                        badge = globalBadge,
-                    )
-
-                    seekBarPreference(
-                        title = { stringResource(R.string.settings_screen_accessibility_event_delay) },
-                        summary = { stringResource(R.string.settings_screen_accessibility_event_delay_desc) },
-                        icon = { painterResource(R.drawable.ic_baseline_timer_24) },
-                        key = { PrefManager.KEY_ACCESSIBILITY_EVENT_DELAY },
-                        defaultValue = { 50 },
-                        minValue = { 0 },
-                        maxValue = { 5000 },
-                        unit = { "ms" },
-                        scale = { 1.0 },
                         badge = globalBadge,
                     )
                 }

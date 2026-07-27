@@ -292,11 +292,7 @@ class WidgetHostCompat(
                     // Open Drawer widget is tapped.
                     if (pendingIntent.creatorPackage != context.packageName) {
                         onClickCallbacks.all { callback ->
-                            if (callback.hasWidgetId(widgetId)) {
-                                callback.onWidgetClick(triggerUnlockOrDismiss)
-                            } else {
-                                true
-                            }
+                            !callback.hasWidgetId(widgetId) || callback.onWidgetClick(triggerUnlockOrDismiss)
                         }
                     } else {
                         true
