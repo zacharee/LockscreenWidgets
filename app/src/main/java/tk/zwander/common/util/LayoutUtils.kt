@@ -10,11 +10,8 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.content.ContextWrapper
 import android.os.Build
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewTreeObserver
-import android.view.WindowInsets
-import android.view.WindowInsetsController
+import android.util.Log
+import android.view.*
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.appcompat.view.ContextThemeWrapper
@@ -28,7 +25,7 @@ import kotlinx.coroutines.suspendCancellableCoroutine
 import tk.zwander.common.compose.AppTheme
 import tk.zwander.common.util.compat.LayoutInflaterFactory2Compat
 import tk.zwander.lockscreenwidgets.R
-import java.util.WeakHashMap
+import java.util.*
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
@@ -93,6 +90,8 @@ suspend fun View.awaitNextDraw() {
 suspend fun View.fadeAndScaleOut(drawerOrFrame: DrawerOrFrame) {
     cancelRunningFadeAnimator()
 
+    Log.e("LSW", "Fade out")
+
     val animator = AnimatorSet().apply {
         playTogether(
             ObjectAnimator.ofFloat(this@fadeAndScaleOut, "scaleX", scaleX, 0.95f),
@@ -109,6 +108,8 @@ suspend fun View.fadeAndScaleOut(drawerOrFrame: DrawerOrFrame) {
                 if (runningFadeAnimators[this@fadeAndScaleOut] === animator) {
                     runningFadeAnimators.remove(this@fadeAndScaleOut)
                 }
+
+                Log.e("LSW", "End")
 
                 scaleX = 0.95f
                 scaleY = 0.95f

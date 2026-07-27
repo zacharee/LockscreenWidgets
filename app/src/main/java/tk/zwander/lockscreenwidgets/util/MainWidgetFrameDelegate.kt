@@ -222,8 +222,11 @@ open class MainWidgetFrameDelegate protected constructor(
                         val pageInfo by remember(pageIndicatorBehavior) {
                             derivedStateOf {
                                 val pageSizePx = gridState.lineSizePx * gridState.mainAxisLineCount.coerceAtLeast(1)
-                                val scrollOffsetPx = gridState.firstVisibleLine * gridState.lineSizePx + gridState.firstVisibleLineScrollOffset
-                                val pageOffset = (scrollOffsetPx % pageSizePx.coerceAtLeast(1)) / constraints.maxWidth.toFloat().coerceAtLeast(1f)
+                                val scrollOffsetPx =
+                                    gridState.firstVisibleLine * gridState.lineSizePx + gridState.firstVisibleLineScrollOffset
+                                val pageOffset =
+                                    (scrollOffsetPx % pageSizePx.coerceAtLeast(1)) / constraints.maxWidth.toFloat()
+                                        .coerceAtLeast(1f)
                                 val page = (scrollOffsetPx / pageSizePx.coerceAtLeast(1))
 
                                 val pageCount = gridState.layoutInfo.totalLineCount / columnCount
@@ -296,7 +299,8 @@ open class MainWidgetFrameDelegate protected constructor(
                             visible = showingPager,
                             enter = fadeIn() + slideInVertically(initialOffsetY = { it }),
                             exit = fadeOut() + slideOutVertically(targetOffsetY = { it }),
-                            modifier = Modifier.align(Alignment.BottomCenter)
+                            modifier = Modifier
+                                .align(Alignment.BottomCenter)
                                 .padding(bottom = 8.dp),
                         ) {
                             PagerWormIndicator(
@@ -694,16 +698,16 @@ open class MainWidgetFrameDelegate protected constructor(
             logUtils.debugLog("Removing overlay")
         }
 
-        withContext(Dispatchers.Main + NonCancellable) {
-            viewModel.currentEditingInterfaceId.value = RecyclerView.NO_POSITION
+        if (frame.isAttachedToWindow && viewModel.animationState.value != AnimationState.STATE_REMOVING) {
+            viewModel.animationState.value = AnimationState.STATE_REMOVING
 
-            globalState.handlingClick.remove(id)
-            forceWakelock(on = false, updateOverlay = false)
+            withContext(Dispatchers.Main + NonCancellable) {
+                viewModel.currentEditingInterfaceId.value = RecyclerView.NO_POSITION
 
-            logUtils.debugLog("Trying to remove overlay ${viewModel.animationState.value}", null)
+                globalState.handlingClick.remove(id)
+                forceWakelock(on = false, updateOverlay = false)
 
-            if (frame.isAttachedToWindow && viewModel.animationState.value != AnimationState.STATE_REMOVING) {
-                viewModel.animationState.value = AnimationState.STATE_REMOVING
+                logUtils.debugLog("Trying to remove overlay ${viewModel.animationState.value}", null)
 
                 logUtils.debugLog("Pre-animation removal", null)
 
@@ -714,11 +718,11 @@ open class MainWidgetFrameDelegate protected constructor(
                 wm?.safeRemoveView(frame)
 
                 logUtils.debugLog("Posted removal", null)
-            } else if (!frame.isAttachedToWindow) {
-                wm?.safeRemoveView(frame, false)
             }
 
             viewModel.animationState.value = AnimationState.STATE_IDLE
+        } else if (!frame.isAttachedToWindow) {
+            wm?.safeRemoveView(frame, false)
         }
     }
 
