@@ -340,4 +340,6 @@
     <string name="item_spacing">Item Spacing</string>
     <string name="item_spacing_desc">Add padding (in dp) between items. This doesn\'t add padding before the first line or after the last.</string>
     <string name="applies_to_all_frames">All Frames</string>
+    <string name="more_settings">More Settings</string>
+    <string name="more">More</string>
 </resources>
