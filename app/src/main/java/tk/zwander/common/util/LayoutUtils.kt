@@ -10,7 +10,6 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.content.ContextWrapper
 import android.os.Build
-import android.util.Log
 import android.view.*
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -90,8 +89,6 @@ suspend fun View.awaitNextDraw() {
 suspend fun View.fadeAndScaleOut(drawerOrFrame: DrawerOrFrame) {
     cancelRunningFadeAnimator()
 
-    Log.e("LSW", "Fade out")
-
     val animator = AnimatorSet().apply {
         playTogether(
             ObjectAnimator.ofFloat(this@fadeAndScaleOut, "scaleX", scaleX, 0.95f),
@@ -108,8 +105,6 @@ suspend fun View.fadeAndScaleOut(drawerOrFrame: DrawerOrFrame) {
                 if (runningFadeAnimators[this@fadeAndScaleOut] === animator) {
                     runningFadeAnimators.remove(this@fadeAndScaleOut)
                 }
-
-                Log.e("LSW", "End")
 
                 scaleX = 0.95f
                 scaleY = 0.95f
