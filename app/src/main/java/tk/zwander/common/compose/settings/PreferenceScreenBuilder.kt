@@ -239,7 +239,12 @@ fun createCommonSection(which: BackupRestoreManager.Which): CommonSectionInfo {
     ) { uri ->
         uri?.let {
             context.contentResolver.openOutputStream(uri)?.bufferedWriter()?.use { output ->
-                output.write(context.backupRestoreManager.createBackupString(which))
+                output.write(
+                    when (which) {
+                        BackupRestoreManager.Which.DRAWER -> context.backupRestoreManager.createDrawerBackupString()
+                        BackupRestoreManager.Which.FRAME -> context.backupRestoreManager.createFrameBackupString()
+                    },
+                )
             }
         }
     }
@@ -248,7 +253,7 @@ fun createCommonSection(which: BackupRestoreManager.Which): CommonSectionInfo {
             try {
                 val input = context.contentResolver.openInputStream(uri)?.bufferedReader()?.readText()
 
-                if (!context.backupRestoreManager.restoreBackupString(input, which)) {
+                if (!context.backupRestoreManager.restoreBackup(input.orEmpty(), which)) {
                     Toast.makeText(context, R.string.unable_to_restore_widgets, Toast.LENGTH_LONG).show()
                     context.logUtils.normalLog("Unable to restore widgets")
                 } else {
