@@ -7,6 +7,7 @@ import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.graphics.Rect
 import android.os.Build
+import android.util.Log
 import android.util.SizeF
 import android.view.MotionEvent
 import android.view.View
@@ -98,6 +99,7 @@ fun <VM : BaseDelegate.BaseViewModel<*, *>> VM.WidgetGrid(
     contentPadding: PaddingValues = PaddingValues.Zero,
     lazyGridState: LazySpannedGridState = rememberLazySpannedGridState(),
     preferences: SharedPreferences = LocalContext.current.prefManager.prefs,
+    blockIndividualWidgetTouches: Boolean = false,
 ) {
     var currentEditingId by currentEditingInterfaceId.collectAsMutableState()
 
@@ -230,6 +232,7 @@ fun <VM : BaseDelegate.BaseViewModel<*, *>> VM.WidgetGrid(
             },
             onWidgetsChanged = onWidgetsChanged,
             resizeThresholdPx = resizeThresholdPx,
+            blockIndividualWidgetTouches = blockIndividualWidgetTouches,
         )
     }
 }
@@ -249,14 +252,31 @@ private fun <VM: BaseDelegate.BaseViewModel<*, *>> LazySpannedGridScope.widgetIt
     onCurrentEditingIdChanged: (Int) -> Unit,
     onWidgetsChanged: (List<WidgetData>) -> Unit,
     resizeThresholdPx: (which: WidgetResizeListener.Which) -> Int,
+    blockIndividualWidgetTouches: Boolean,
 ) {
     with(viewModel) {
         if (currentWidgetsList.isEmpty()) {
             item(key = "ADD", span = SpannedGridItemSpan(columnCount, rowSpanForAddButton)) {
-                AddItem(
-                    launchAddActivity = launchAddActivity,
-                    modifier = Modifier.animateItem(),
-                )
+                Box(
+                    modifier = Modifier.fillMaxSize().animateItem(),
+                ) {
+                    AddItem(
+                        launchAddActivity = launchAddActivity,
+                        modifier = Modifier.fillMaxSize(),
+                    )
+
+                    if (blockIndividualWidgetTouches) {
+                        Box(
+                            modifier = Modifier.fillMaxSize()
+                                .clickable(
+                                    enabled = true,
+                                    indication = null,
+                                    interactionSource = remember { MutableInteractionSource() },
+                                    onClick = {},
+                                ),
+                        )
+                    }
+                }
             }
         }
 
@@ -303,6 +323,7 @@ private fun <VM: BaseDelegate.BaseViewModel<*, *>> LazySpannedGridScope.widgetIt
                     rowCount = rowCount,
                     currentEditingId = currentEditingId,
                     modifier = Modifier,
+                    blockIndividualWidgetTouches = blockIndividualWidgetTouches,
                 )
             }
         }
@@ -400,6 +421,7 @@ private fun <VM : BaseDelegate.BaseViewModel<*, *>> VM.WidgetItem(
     columnCount: Int,
     rowCount: Int,
     currentEditingId: Int,
+    blockIndividualWidgetTouches: Boolean,
     modifier: Modifier = Modifier,
 ) {
     val context = LocalContext.current
@@ -411,42 +433,60 @@ private fun <VM : BaseDelegate.BaseViewModel<*, *>> VM.WidgetItem(
     val currentWidgetsList by rememberUpdatedState(currentWidgets)
     val updatedIndex by rememberUpdatedState(index)
 
-    val widgetInfo = if (updatedData.type == WidgetType.WIDGET) {
-        try {
-            manager.getAppWidgetInfo(updatedData.id)
-        } catch (e: PackageManager.NameNotFoundException) {
-            context.logUtils.debugLog(
-                "Unable to retrieve widget info for ${updatedData.id} ${data.widgetProviderComponent}",
-                e,
-            )
+    val widgetInfo by rememberUpdatedState(
+        if (updatedData.type == WidgetType.WIDGET) {
+            try {
+                manager.getAppWidgetInfo(updatedData.id)
+            } catch (e: PackageManager.NameNotFoundException) {
+                context.logUtils.debugLog(
+                    "Unable to retrieve widget info for ${updatedData.id} ${data.widgetProviderComponent}",
+                    e,
+                )
+                null
+            }
+        } else {
             null
         }
-    } else {
-        null
-    }
+    )
 
     WidgetItemLayout(
         needsReconfigure = widgetInfo == null && updatedData.safeType == WidgetType.WIDGET,
         widgetData = updatedData,
         widgetContents = { modifier ->
-            when (updatedData.safeType) {
-                WidgetType.WIDGET -> widgetInfo?.let {
-                    WidgetContents(
+            Box(
+                modifier = modifier,
+            ) {
+                when (updatedData.safeType) {
+                    WidgetType.WIDGET -> widgetInfo?.let {
+                        WidgetContents(
+                            data = updatedData,
+                            widgetInfo = it,
+                            modifier = Modifier.fillMaxSize(),
+                            currentWidgets = currentWidgetsList,
+                            onWidgetsChanged = onWidgetsChanged,
+                        )
+                    }
+                    WidgetType.SHORTCUT, WidgetType.LAUNCHER_SHORTCUT -> {
+                        ShortcutContent(data = updatedData, modifier = Modifier.fillMaxSize())
+                    }
+                    WidgetType.LAUNCHER_ITEM -> LauncherIconContent(
                         data = updatedData,
-                        widgetInfo = widgetInfo,
-                        modifier = modifier,
-                        currentWidgets = currentWidgetsList,
-                        onWidgetsChanged = onWidgetsChanged,
+                        modifier = Modifier.fillMaxSize(),
+                    )
+                    WidgetType.HEADER -> {}
+                }
+
+                if (blockIndividualWidgetTouches) {
+                    Box(
+                        modifier = Modifier.fillMaxSize()
+                            .clickable(
+                                enabled = true,
+                                indication = null,
+                                interactionSource = remember { MutableInteractionSource() },
+                                onClick = {},
+                            ),
                     )
                 }
-                WidgetType.SHORTCUT, WidgetType.LAUNCHER_SHORTCUT -> {
-                    ShortcutContent(data = updatedData, modifier = modifier)
-                }
-                WidgetType.LAUNCHER_ITEM -> LauncherIconContent(
-                    data = updatedData,
-                    modifier = modifier,
-                )
-                WidgetType.HEADER -> {}
             }
         },
         cornerRadiusKey = widgetCornerRadiusKey,
@@ -640,9 +680,11 @@ private fun <VM : BaseDelegate.BaseViewModel<*, *>> VM.WidgetContents(
             update = {
                 it.removeAllViews()
                 widgetView?.let { v ->
-                    it.addView(v.andRemoveFromParent())
+                    it.postOnAnimationDelayed({
+                        it.addView(v.andRemoveFromParent())
+                    }, 10)
                 }
-            }
+            },
         )
     }
 }

@@ -199,9 +199,9 @@ class DrawerDelegate private constructor(context: Context, displayId: String) :
                             eventManager.sendEvent(Event.CloseDrawer)
                             ReconfigureDrawerWidgetActivity.launch(context, id, providerInfo)
                         },
-                        launchShortcutIconOverride = {
+                        launchShortcutIconOverride = { id ->
                             eventManager.sendEvent(Event.CloseDrawer)
-                            SelectIconPackActivity.launchForOverride(context, holderId, true)
+                            SelectIconPackActivity.launchForOverride(context, id, true)
                         },
                         modifier = modifier,
                         rowSpanForAddButton = 20,

@@ -283,7 +283,7 @@ open class MainWidgetFrameDelegate protected constructor(
                             launchReconfigure = { id, providerInfo ->
                                 ReconfigureFrameWidgetActivity.launch(context, id, holderId, providerInfo)
                             },
-                            launchShortcutIconOverride = {
+                            launchShortcutIconOverride = { id ->
                                 SelectIconPackActivity.launchForOverride(context, id)
                             },
                             modifier = Modifier.fillMaxSize(),

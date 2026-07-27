@@ -30,6 +30,7 @@ import tk.zwander.common.util.PrefManager
 import tk.zwander.common.util.eventManager
 import tk.zwander.common.util.prefManager
 import tk.zwander.lockscreenwidgets.R
+import tk.zwander.lockscreenwidgets.activities.FrameReorderActivity
 import tk.zwander.lockscreenwidgets.util.FrameSpecificPreferences
 import tk.zwander.lockscreenwidgets.util.MainWidgetFrameDelegate
 
@@ -131,6 +132,19 @@ fun MainWidgetFrameDelegate.WidgetFrameViewModel.FrameEditWrapperLayout(
                                 modifier = Modifier.size(32.dp),
                             )
                         }
+                    }
+
+                    IconButton(
+                        onClick = {
+                            FrameReorderActivity.start(context, frameId)
+                        },
+                    ) {
+                        Icon(
+                            painter = painterResource(R.drawable.edit_24px),
+                            contentDescription = stringResource(R.string.edit_layout),
+                            modifier = Modifier.size(32.dp),
+                            tint = Color.White,
+                        )
                     }
 
                     if (maskedModeEnabled) {
