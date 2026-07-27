@@ -180,6 +180,13 @@ class BackupRestoreManager private constructor(private val context: Context) {
     }
 
     fun handleIndividualFrameRestore(data: FrameBackupHolder) {
+        if (data.frameId != MainWidgetFrameDelegate.ID) {
+            context.prefManager.currentSecondaryFramesWithStringDisplay = context.prefManager.currentSecondaryFramesWithStringDisplay.apply {
+                this[data.frameId] = this[data.frameId] ?:
+                        (context.lsDisplayManager.availableDisplays.value.values.firstOrNull()?.uniqueIdCompat
+                            ?: Display.DEFAULT_DISPLAY.toString())
+            }
+        }
         val framePrefs = FrameSpecificPreferences[data.frameId]
         framePrefs.currentWidgets = data.data.widgets
 
