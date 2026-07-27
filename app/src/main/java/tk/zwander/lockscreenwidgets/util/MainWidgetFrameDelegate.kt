@@ -715,14 +715,14 @@ open class MainWidgetFrameDelegate protected constructor(
 
                 logUtils.debugLog("Post-animation removal", null)
 
-                wm?.safeRemoveView(frame)
+                wm?.safeRemoveViewImmediate(frame)
 
                 logUtils.debugLog("Posted removal", null)
             }
 
             viewModel.animationState.value = AnimationState.STATE_IDLE
         } else if (!frame.isAttachedToWindow) {
-            wm?.safeRemoveView(frame, false)
+            wm?.safeRemoveViewImmediate(frame, false)
         }
     }
 
