@@ -5,9 +5,9 @@ import android.content.ContextWrapper
 import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.view.View
+import tk.zwander.common.views.remote.CatchingGridView
 import tk.zwander.common.views.remote.CatchingListView
 import tk.zwander.common.views.remote.CatchingTextClock
-import tk.zwander.common.views.remote.CatchingGridView
 
 class RemoteViewsLayoutInflaterContext(
     context: Context,
@@ -25,7 +25,7 @@ class RemoteViewsLayoutInflaterContext(
                 return when (name) {
                     "ListView" -> CatchingListView(context, attrs, widgetId)
                     "TextClock" -> CatchingTextClock(context, attrs)
-                    "GridView" -> CatchingGridView(context, attrs)
+                    "GridView" -> CatchingGridView(context, attrs, widgetId)
                     else -> null
                 }
             }
