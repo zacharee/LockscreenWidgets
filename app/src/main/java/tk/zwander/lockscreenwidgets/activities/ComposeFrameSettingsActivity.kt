@@ -150,6 +150,17 @@ class ComposeFrameSettingsActivity : BaseActivity() {
                     )
 
                     preference(
+                        title = { stringResource(R.string.edit_layout) },
+                        summary = { null },
+                        key = { "edit_frame_layout" },
+                        defaultValue = {},
+                        icon = { painterResource(R.drawable.flex_wrap_24px) },
+                        onClick = {
+                            FrameReorderActivity.start(this@ComposeFrameSettingsActivity, selectedFrame)
+                        },
+                    )
+
+                    preference(
                         title = { stringResource(R.string.intro_moto_razr_allow_secondary_display_access) },
                         summary = { null },
                         key = { "allow_secondary_frame_access" },
