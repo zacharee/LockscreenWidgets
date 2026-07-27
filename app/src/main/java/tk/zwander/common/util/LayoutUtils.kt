@@ -12,6 +12,7 @@ import android.content.ContextWrapper
 import android.os.Build
 import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewTreeObserver
 import android.view.WindowInsets
 import android.view.WindowInsetsController
 import androidx.activity.ComponentActivity
@@ -23,9 +24,11 @@ import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.unit.Density
 import androidx.core.view.LayoutInflaterCompat
 import dev.zwander.lswinterconnect.safeApplicationContext
+import kotlinx.coroutines.suspendCancellableCoroutine
 import tk.zwander.common.compose.AppTheme
 import tk.zwander.common.util.compat.LayoutInflaterFactory2Compat
 import tk.zwander.lockscreenwidgets.R
+import java.util.WeakHashMap
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
@@ -44,9 +47,51 @@ enum class DrawerOrFrame {
     abstract fun Context.duration(): Long
 }
 
+// Tracks the in-flight fade/scale animator per View. A new fade call cancels whatever's
+// still running instead of letting two AnimatorSets fight over the same properties, which
+// is how a queued draw can end up racing a WindowManager.removeView() teardown of the
+// view's Surface (native "getFrame() called on a context with no surface!" abort).
+private val runningFadeAnimators = WeakHashMap<View, AnimatorSet>()
+
+private fun View.cancelRunningFadeAnimator() {
+    runningFadeAnimators.remove(this)?.cancel()
+}
+
+/**
+ * Suspend until the next real draw pass of this View completes. Called after fading a view
+ * out and before removing its window, so the window isn't torn down while the fade's final
+ * frame is still queued on RenderThread.
+ */
+suspend fun View.awaitNextDraw() {
+    val vto = viewTreeObserver
+    if (!isAttachedToWindow || !vto.isAlive) return
+
+    suspendCancellableCoroutine { cont ->
+        lateinit var listener: ViewTreeObserver.OnDrawListener
+        listener = ViewTreeObserver.OnDrawListener {
+            post {
+                if (vto.isAlive) {
+                    vto.removeOnDrawListener(listener)
+                }
+            }
+            if (cont.isActive) {
+                cont.resume(Unit)
+            }
+        }
+
+        vto.addOnDrawListener(listener)
+
+        cont.invokeOnCancellation {
+            if (vto.isAlive) {
+                vto.removeOnDrawListener(listener)
+            }
+        }
+    }
+}
+
 //Fade a View to 0% alpha and 95% scale. Used when hiding the widget frame.
 suspend fun View.fadeAndScaleOut(drawerOrFrame: DrawerOrFrame) {
-    clearAnimation()
+    cancelRunningFadeAnimator()
 
     val animator = AnimatorSet().apply {
         playTogether(
@@ -56,45 +101,60 @@ suspend fun View.fadeAndScaleOut(drawerOrFrame: DrawerOrFrame) {
         )
         duration = with(drawerOrFrame) { context.duration() }
     }
+    runningFadeAnimators[this] = animator
+
     suspendCoroutine { continuation ->
         animator.addListener(object : AnimatorListenerAdapter() {
             override fun onAnimationEnd(animation: Animator) {
+                if (runningFadeAnimators[this@fadeAndScaleOut] === animator) {
+                    runningFadeAnimators.remove(this@fadeAndScaleOut)
+                }
+
                 scaleX = 0.95f
                 scaleY = 0.95f
                 alpha = 0f
 
-                clearAnimation()
                 continuation.resume(Unit)
             }
         })
         animator.start()
     }
+
+    awaitNextDraw()
 }
 
 suspend fun View.fadeOut(drawerOrFrame: DrawerOrFrame) {
-    clearAnimation()
+    cancelRunningFadeAnimator()
 
-    val alphaAnimation = ObjectAnimator.ofFloat(this, "alpha", alpha, 0f)
-    alphaAnimation.duration = with(drawerOrFrame) { context.duration() }
+    val animator = AnimatorSet().apply {
+        playTogether(ObjectAnimator.ofFloat(this@fadeOut, "alpha", alpha, 0f))
+        duration = with(drawerOrFrame) { context.duration() }
+    }
+    runningFadeAnimators[this] = animator
+
     suspendCoroutine { continuation ->
-        alphaAnimation.addListener(
+        animator.addListener(
             object : AnimatorListenerAdapter() {
                 override fun onAnimationEnd(animation: Animator) {
-                    alpha = 0f
+                    if (runningFadeAnimators[this@fadeOut] === animator) {
+                        runningFadeAnimators.remove(this@fadeOut)
+                    }
 
-                    clearAnimation()
+                    alpha = 0f
 
                     continuation.resume(Unit)
                 }
             },
         )
-        alphaAnimation.start()
+        animator.start()
     }
+
+    awaitNextDraw()
 }
 
 //Fade a View to 100% alpha and 100% scale. Used when showing the widget frame.
 suspend fun View.fadeAndScaleIn(drawerOrFrame: DrawerOrFrame) {
-    clearAnimation()
+    cancelRunningFadeAnimator()
 
     val animator = AnimatorSet().apply {
         playTogether(
@@ -104,15 +164,19 @@ suspend fun View.fadeAndScaleIn(drawerOrFrame: DrawerOrFrame) {
         )
         duration = with(drawerOrFrame) { context.duration() }
     }
+    runningFadeAnimators[this] = animator
 
     suspendCoroutine { continuation ->
         animator.addListener(object : AnimatorListenerAdapter() {
             override fun onAnimationEnd(animation: Animator) {
+                if (runningFadeAnimators[this@fadeAndScaleIn] === animator) {
+                    runningFadeAnimators.remove(this@fadeAndScaleIn)
+                }
+
                 scaleX = 1f
                 scaleY = 1f
                 alpha = 1f
 
-                clearAnimation()
                 continuation.resume(Unit)
             }
         })
@@ -121,7 +185,7 @@ suspend fun View.fadeAndScaleIn(drawerOrFrame: DrawerOrFrame) {
 }
 
 suspend fun View.fadeIn(drawerOrFrame: DrawerOrFrame) {
-    clearAnimation()
+    cancelRunningFadeAnimator()
 
     val animator = AnimatorSet().apply {
         playTogether(
@@ -129,12 +193,17 @@ suspend fun View.fadeIn(drawerOrFrame: DrawerOrFrame) {
         )
         duration = with(drawerOrFrame) { context.duration() }
     }
+    runningFadeAnimators[this] = animator
+
     suspendCoroutine { continuation ->
         animator.addListener(object : AnimatorListenerAdapter() {
             override fun onAnimationEnd(animation: Animator) {
+                if (runningFadeAnimators[this@fadeIn] === animator) {
+                    runningFadeAnimators.remove(this@fadeIn)
+                }
+
                 alpha = 1f
 
-                clearAnimation()
                 continuation.resume(Unit)
             }
         })
