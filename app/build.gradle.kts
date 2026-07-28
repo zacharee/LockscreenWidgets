@@ -40,6 +40,10 @@ android {
                 cppFlags += ""
                 arguments.add("-DANDROID_WEAK_API_DEFS=ON")
             }
+
+            ndkBuild {
+                arguments.add("LOCAL_LDFLAGS+=-Wl,--build-id=none")
+            }
         }
     }
 
