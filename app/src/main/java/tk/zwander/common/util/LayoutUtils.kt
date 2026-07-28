@@ -21,12 +21,14 @@ import androidx.compose.ui.unit.Density
 import androidx.core.view.LayoutInflaterCompat
 import dev.zwander.lswinterconnect.safeApplicationContext
 import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlinx.coroutines.withTimeoutOrNull
 import tk.zwander.common.compose.AppTheme
 import tk.zwander.common.util.compat.LayoutInflaterFactory2Compat
 import tk.zwander.lockscreenwidgets.R
 import java.util.*
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
+import kotlin.time.Duration.Companion.milliseconds
 
 enum class DrawerOrFrame {
     DRAWER {
@@ -53,6 +55,11 @@ private fun View.cancelRunningFadeAnimator() {
     runningFadeAnimators.remove(this)?.cancel()
 }
 
+// Upper bound on how long awaitNextDraw() will wait for a draw pass. Just a safety net so a
+// window that stops receiving traversals for some unrelated reason doesn't hang around
+// indefinitely; a real draw normally arrives within a frame or two of being requested.
+private const val AWAIT_DRAW_TIMEOUT_MS = 50L
+
 /**
  * Suspend until the next real draw pass of this View completes. Called after fading a view
  * out and before removing its window, so the window isn't torn down while the fade's final
@@ -62,24 +69,33 @@ suspend fun View.awaitNextDraw() {
     val vto = viewTreeObserver
     if (!isAttachedToWindow || !vto.isAlive) return
 
-    suspendCancellableCoroutine { cont ->
-        lateinit var listener: ViewTreeObserver.OnDrawListener
-        listener = ViewTreeObserver.OnDrawListener {
-            post {
+    // The animator's last frame may already have landed exactly on the end value, making
+    // the explicit property assignment in onAnimationEnd a no-op that doesn't invalidate.
+    // Force a traversal so the OnDrawListener below fires promptly instead of waiting on
+    // whatever unrelated draw happens to come next.
+    forceLayout()
+    invalidate()
+
+    withTimeoutOrNull(AWAIT_DRAW_TIMEOUT_MS.milliseconds) {
+        suspendCancellableCoroutine { cont ->
+            lateinit var listener: ViewTreeObserver.OnDrawListener
+            listener = ViewTreeObserver.OnDrawListener {
+                post {
+                    if (vto.isAlive) {
+                        vto.removeOnDrawListener(listener)
+                    }
+                }
+                if (cont.isActive) {
+                    cont.resume(Unit)
+                }
+            }
+
+            vto.addOnDrawListener(listener)
+
+            cont.invokeOnCancellation {
                 if (vto.isAlive) {
                     vto.removeOnDrawListener(listener)
                 }
-            }
-            if (cont.isActive) {
-                cont.resume(Unit)
-            }
-        }
-
-        vto.addOnDrawListener(listener)
-
-        cont.invokeOnCancellation {
-            if (vto.isAlive) {
-                vto.removeOnDrawListener(listener)
             }
         }
     }

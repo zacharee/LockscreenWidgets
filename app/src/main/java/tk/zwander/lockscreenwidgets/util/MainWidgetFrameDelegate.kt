@@ -701,6 +701,8 @@ open class MainWidgetFrameDelegate protected constructor(
         if (frame.isAttachedToWindow && viewModel.animationState.value != AnimationState.STATE_REMOVING) {
             viewModel.animationState.value = AnimationState.STATE_REMOVING
 
+            updateIgnoreAllTouches(true)
+
             withContext(Dispatchers.Main + NonCancellable) {
                 viewModel.currentEditingInterfaceId.value = RecyclerView.NO_POSITION
 
@@ -719,6 +721,8 @@ open class MainWidgetFrameDelegate protected constructor(
 
                 logUtils.debugLog("Posted removal", null)
             }
+
+            updateIgnoreAllTouches()
 
             viewModel.animationState.value = AnimationState.STATE_IDLE
         } else if (!frame.isAttachedToWindow) {
@@ -1016,8 +1020,8 @@ open class MainWidgetFrameDelegate protected constructor(
         }
     }
 
-    private suspend fun updateIgnoreAllTouches() {
-        params.flags = if (state.value.ignoreAllTouches && !state.value.isPreview) {
+    private suspend fun updateIgnoreAllTouches(override: Boolean = false) {
+        params.flags = if ((state.value.ignoreAllTouches && !state.value.isPreview) || override) {
             params.flags or WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE
         } else {
             params.flags and WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE.inv()

@@ -518,7 +518,11 @@ class DrawerDelegate private constructor(context: Context, displayId: String) :
             }
 
             if (handle.isAttachedToWindow && viewModel.handleAnimationState.value != AnimationState.REMOVING) {
+                updateIgnoreHandleTouches(true)
+
                 handle.fadeOut(DrawerOrFrame.DRAWER)
+
+                updateIgnoreHandleTouches(false)
                 viewModel.handleAnimationState.value = AnimationState.IDLE
                 wm?.safeRemoveView(handle)
             }
@@ -565,12 +569,34 @@ class DrawerDelegate private constructor(context: Context, displayId: String) :
                 globalState.handlingClick.remove(ID)
                 viewModel.currentEditingInterfaceId.value = RecyclerView.NO_POSITION
 
+                updateIgnoreDrawerTouches(true)
+
                 drawer.fadeOut(DrawerOrFrame.DRAWER)
                 wm?.safeRemoveView(drawer)
+
+                updateIgnoreDrawerTouches(false)
                 viewModel.drawerAnimationState.value = AnimationState.IDLE
                 if (callListener) eventManager.sendEvent(Event.DrawerHidden)
             }
         }
+    }
+
+    private suspend fun updateIgnoreDrawerTouches(ignore: Boolean) {
+        params.flags = if (ignore) {
+            params.flags or WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE
+        } else {
+            params.flags and WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE.inv()
+        }
+        updateOverlay()
+    }
+
+    private fun updateIgnoreHandleTouches(ignore: Boolean) {
+        handleParams.flags = if (ignore) {
+            handleParams.flags or WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE
+        } else {
+            handleParams.flags and WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE.inv()
+        }
+        wm?.safeUpdateViewLayout(handle, handleParams)
     }
 
     class State
