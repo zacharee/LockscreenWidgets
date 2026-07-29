@@ -252,7 +252,7 @@
     <string name="drawer_blur_status_bar_area_desc">Zeige den Trübungseffekt über der Statusleiste.</string>
     <string name="drawer_background_over_status_bar">Hintergrundfarbe über der Statusleiste anzeigen</string>
     <string name="drawer_background_over_status_bar_desc">Zeige die Hintergrundfarbe der Leiste oben in der Statusleiste. Wenn du eine undurchsichtige Hintergrundfarbe hast, solltest du diese Option ausschalten.</string>
-    <string name="show_only_when_locked">Nur anzeigen, wenn gesperrt</string>
+    <string name="show_only_when_locked">Show handle only when Locked</string>
     <string name="show_only_when_locked_desc">Zeige den Griff der Leiste nur an, wenn sich das Gerät auf dem Sperrbildschirm befindet.</string>
     <string name="debug_enable_bugsnag">Bugsnag aktivieren</string>
     <string name="debug_enable_bugsnag_desc">Widgets Anywhere uses Bugsnag to collect anonymous crash reports. Not that to fully disable collection, you\'ll have to force stop and reopen Widgets Anywhere.</string>
@@ -299,7 +299,10 @@
     <string name="cancel">Abbrechen</string>
     <string name="apply">Anwenden</string>
     <string name="select_frame">Wähle Rahmen</string>
+    <string name="select_frames">Select Frames</string>
     <string name="selected_frame">Ausgewählter Rahmen: %s</string>
+    <string name="frame_ids">Frame IDs</string>
+    <string name="select_frames_tasker_instruction">To always apply to all frames, keep them all unselected.</string>
     <string name="settings_screen_category_grid">Gitter</string>
     <plurals name="frame_count_info">
         <item quantity="one">%s Rahmen hinzugefügt</item>
