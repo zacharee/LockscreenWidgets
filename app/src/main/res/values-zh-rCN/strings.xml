@@ -252,7 +252,7 @@
     <string name="drawer_blur_status_bar_area_desc">在状态栏区域上显示模糊效果。</string>
     <string name="drawer_background_over_status_bar">在状态栏上显示背景颜色</string>
     <string name="drawer_background_over_status_bar_desc">在状态栏顶部显示抽屉背景颜色。 如果您有不透明的背景颜色，您可以考虑关闭此颜色。</string>
-    <string name="show_only_when_locked">仅在锁定时显示</string>
+    <string name="show_only_when_locked">Show handle only when Locked</string>
     <string name="show_only_when_locked_desc">仅在设备在锁屏界面上显示抽屉。</string>
     <string name="debug_enable_bugsnag">启用 Bugsnag</string>
     <string name="debug_enable_bugsnag_desc">Widgets Anywhere uses Bugsnag to collect anonymous crash reports. Not that to fully disable collection, you\'ll have to force stop and reopen Widgets Anywhere.</string>
@@ -299,7 +299,10 @@
     <string name="cancel">取消</string>
     <string name="apply">应用</string>
     <string name="select_frame">选择帧</string>
+    <string name="select_frames">Select Frames</string>
     <string name="selected_frame">选定帧： %s</string>
+    <string name="frame_ids">Frame IDs</string>
+    <string name="select_frames_tasker_instruction">To always apply to all frames, keep them all unselected.</string>
     <string name="settings_screen_category_grid">网格</string>
     <plurals name="frame_count_info">
         <item quantity="other">%s 帧已添加</item>
