@@ -92,6 +92,10 @@ open class MainWidgetFrameDelegate protected constructor(
         fun invalidateInstance() {
             instance.value = null
         }
+
+        fun allIds(context: Context): List<Int> {
+            return [ID] + context.prefManager.currentSecondaryFramesWithStringDisplay.keys
+        }
     }
 
     override val holderId: Int
@@ -812,7 +816,7 @@ open class MainWidgetFrameDelegate protected constructor(
                     && globalState.hideForNonPresentIds.value[this@MainWidgetFrameDelegate.display?.displayId] != true
                     && prefManager.widgetFrameEnabled
                     && (!prefManager.hideInLandscape || state.value.screenOrientation == Surface.ROTATION_0 || state.value.screenOrientation == Surface.ROTATION_180)
-                    && prefManager.canShowFrameFromTasker
+                    && framePrefs.canShowFromTasker
                     && (!framePrefs.hideWhenKeyboardShown || globalState.showingKeyboard.value[this@MainWidgetFrameDelegate.display?.displayId] != true)
         }
 
@@ -845,7 +849,7 @@ open class MainWidgetFrameDelegate protected constructor(
         }
 
         fun forced(): Boolean {
-            return prefManager.widgetFrameEnabled && prefManager.forceShowFrame
+            return prefManager.widgetFrameEnabled && framePrefs.forceShow
         }
 
         return (forced() || forSecondaryDisplay() || forPreview() || forNotificationCenter() || forLockscreen()).also {
@@ -863,8 +867,8 @@ open class MainWidgetFrameDelegate protected constructor(
                         "hideInLandscape: ${prefManager.hideInLandscape}\n" +
                         "showInNotificationCenter: ${framePrefs.showInNotificationShade}\n" +
                         "hideOnEdgePanel: ${framePrefs.hideOnEdgePanel}\n" +
-                        "canShowFrameFromTasker: ${prefManager.canShowFrameFromTasker}\n" +
-                        "forceShowFrame: ${prefManager.forceShowFrame}\n" +
+                        "canShowFrameFromTasker: ${framePrefs.canShowFromTasker}\n" +
+                        "forceShowFrame: ${framePrefs.forceShow}\n" +
                         "hideOnFaceWidgets: ${framePrefs.hideOnFaceWidgets}\n" +
                         "hideWhenKeyboardShown: ${framePrefs.hideWhenKeyboardShown}\n" +
                         "displayPower: ${lsDisplayManager.displayPowerStates.value.displayStates[this@MainWidgetFrameDelegate.display?.uniqueIdCompat]}\n" +

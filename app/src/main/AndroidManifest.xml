@@ -169,7 +169,7 @@
         <activity android:name=".activities.TaskerCanShowActivity"
             android:exported="true"
             android:label="@string/allow_show_frame"
-            android:theme="@style/AppTheme.Null">
+            android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
                 <action android:name="com.twofortyfouram.locale.intent.action.EDIT_SETTING" />
             </intent-filter>
@@ -177,7 +177,7 @@
         <activity android:name=".activities.TaskerCanNotShowActivity"
             android:exported="true"
             android:label="@string/disallow_show_frame"
-            android:theme="@style/AppTheme.Null">
+            android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
                 <action android:name="com.twofortyfouram.locale.intent.action.EDIT_SETTING" />
             </intent-filter>
@@ -193,7 +193,7 @@
         <activity android:name=".activities.TaskerUnForceShowActivity"
             android:exported="true"
             android:label="@string/unforce_show_frame"
-            android:theme="@style/AppTheme.Null">
+            android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
                 <action android:name="com.twofortyfouram.locale.intent.action.EDIT_SETTING" />
             </intent-filter>
@@ -201,7 +201,7 @@
         <activity android:name=".activities.TaskerIsAllowedToShowFrame"
             android:exported="true"
             android:label="@string/frame_allowed_to_show"
-            android:theme="@style/AppTheme.Null">
+            android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
                 <action android:name="com.twofortyfouram.locale.intent.action.EDIT_CONDITION" />
             </intent-filter>
@@ -209,7 +209,7 @@
         <activity android:name=".activities.TaskerIsShowingFrame"
             android:exported="true"
             android:label="@string/is_showing_frame"
-            android:theme="@style/AppTheme.Null">
+            android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
                 <action android:name="com.twofortyfouram.locale.intent.action.EDIT_CONDITION" />
             </intent-filter>
@@ -217,7 +217,7 @@
         <activity android:name=".activities.TaskerIsForceShowingFrame"
             android:exported="true"
             android:label="@string/frame_forced_to_show"
-            android:theme="@style/AppTheme.Null">
+            android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
                 <action android:name="com.twofortyfouram.locale.intent.action.EDIT_CONDITION" />
             </intent-filter>

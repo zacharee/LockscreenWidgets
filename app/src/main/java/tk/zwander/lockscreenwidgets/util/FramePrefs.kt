@@ -143,6 +143,18 @@ class FrameSpecificPreferences private constructor(
             putInt(PrefManager.KEY_FRAME_ITEM_SPACING, (value * 10f).toInt())
         }
 
+    var forceShow: Boolean
+        get() = getBoolean(PrefManager.KEY_FORCE_SHOW_FRAME, false)
+        set(value) {
+            putBoolean(PrefManager.KEY_FORCE_SHOW_FRAME, value)
+        }
+
+    var canShowFromTasker: Boolean
+        get() = getBoolean(PrefManager.KEY_CAN_SHOW_FRAME_FROM_TASKER, false)
+        set(value) {
+            putBoolean(PrefManager.KEY_CAN_SHOW_FRAME_FROM_TASKER, value)
+        }
+
     fun getString(key: String, def: String? = null): String? = framePreferences.getString(key, def)
     fun getFloat(key: String, def: Float): Float = framePreferences.getFloat(key, def)
     fun getInt(key: String, def: Int): Int = framePreferences.getInt(key, def)

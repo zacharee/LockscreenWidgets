@@ -3,6 +3,7 @@ package tk.zwander.lockscreenwidgets.compose
 import android.os.Build
 import android.view.Display
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -13,12 +14,14 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import tk.zwander.common.compose.LocalLSDisplayManager
 import tk.zwander.common.compose.util.rememberPreferenceState
@@ -177,7 +180,7 @@ fun SelectDisplayDialog(
                                 FrameItem(
                                     display = defaultDisplay,
                                     frameId = it,
-                                    onSelected = {
+                                    onSelected = { _ ->
                                         onFrameSelected.invoke(it)
                                     },
                                     modifier = Modifier.animateItem()
@@ -255,7 +258,7 @@ fun SelectDisplayDialog(
                                 FrameItem(
                                     display = display,
                                     frameId = it,
-                                    onSelected = {
+                                    onSelected = { _ ->
                                         onFrameSelected.invoke(it)
                                     },
                                     modifier = Modifier.animateItem(),
@@ -341,11 +344,13 @@ private fun DisplayCard(
 }
 
 @Composable
-private fun FrameItem(
+fun FrameItem(
     display: LSDisplay,
     frameId: Int,
-    onSelected: () -> Unit,
+    onSelected: (checked: Boolean?) -> Unit,
     modifier: Modifier = Modifier,
+    paddingStart: Dp = 16.dp,
+    checked: Boolean? = null,
 ) {
     val context = LocalContext.current
     val density = LocalDensity.current
@@ -358,7 +363,6 @@ private fun FrameItem(
             display = display,
         )
     }
-
 
     val [width, height] = remember(density) {
         with(density) {
@@ -377,26 +381,34 @@ private fun FrameItem(
     }
 
     Box(
-        modifier = modifier.padding(start = 16.dp),
+        modifier = modifier.padding(start = paddingStart),
     ) {
         Card(
-            onClick = onSelected,
+            onClick = {
+                onSelected(checked)
+            },
         ) {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
+                    .background(
+                        if (checked == true) {
+                            MaterialTheme.colorScheme.secondaryContainer
+                        } else {
+                            Color.Unspecified
+                        },
+                    )
                     .heightIn(min = 56.dp)
                     .padding(8.dp),
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween,
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 Text(
                     text = "$frameId",
                     style = MaterialTheme.typography.bodyLarge,
                     fontWeight = FontWeight.Bold,
+                    modifier = Modifier.weight(1f),
                 )
-
-                Spacer(modifier = Modifier.size(8.dp))
 
                 Box(
                     contentAlignment = Alignment.Center,
@@ -417,6 +429,13 @@ private fun FrameItem(
                             display = display,
                         )
                     }
+                }
+
+                if (checked != null) {
+                    Checkbox(
+                        checked = checked,
+                        onCheckedChange = null,
+                    )
                 }
             }
         }

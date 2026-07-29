@@ -409,7 +409,11 @@
     <string name="apply">Apply</string>
 
     <string name="select_frame">Select Frame</string>
+    <string name="select_frames">Select Frames</string>
     <string name="selected_frame">Selected frame: %s</string>
+    <string name="frame_ids">Frame IDs</string>
+
+    <string name="select_frames_tasker_instruction">To always apply to all frames, keep them all unselected.</string>
 
     <string name="settings_screen_category_grid">Grid</string>
     <plurals name="frame_count_info">

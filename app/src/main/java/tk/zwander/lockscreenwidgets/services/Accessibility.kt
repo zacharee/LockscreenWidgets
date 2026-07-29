@@ -41,7 +41,6 @@ class Accessibility : AccessibilityService(), CoroutineScope by MainScope(), Eve
         get() = MainWidgetFrameDelegate.getInstance(this, "${Display.DEFAULT_DISPLAY}")
     private val drawerDelegate: DrawerDelegate
         get() = DrawerDelegate.getInstance(this, "${Display.DEFAULT_DISPLAY}")
-    private val secondaryFrameDelegates = hashMapOf<Int, SecondaryWidgetFrameDelegate>()
 
     private val sharedPreferencesChangeHandler = HandlerRegistry {
         handler(PrefManager.KEY_ACCESSIBILITY_EVENT_DELAY) {
@@ -55,7 +54,7 @@ class Accessibility : AccessibilityService(), CoroutineScope by MainScope(), Eve
         }
         handler(PrefManager.KEY_CURRENT_FRAMES_WITH_STRING_DISPLAY) {
             val newFrameIds = prefManager.currentSecondaryFramesWithStringDisplay
-            val currentFrames = secondaryFrameDelegates
+            val currentFrames = FrameInstances.secondaryFrameDelegates
 
             val removedFrames = currentFrames.filter { [id] -> !newFrameIds.contains(id) }
             val addedFrameIds = newFrameIds.filter { !currentFrames.containsKey(it.key) }
@@ -123,7 +122,7 @@ class Accessibility : AccessibilityService(), CoroutineScope by MainScope(), Eve
         App.instance.updateWidgetStackMonitor()
 
         prefManager.currentSecondaryFramesWithStringDisplay.forEach { [secondaryId, secondaryDisplay] ->
-            secondaryFrameDelegates[secondaryId] = SecondaryWidgetFrameDelegate(this, secondaryId, secondaryDisplay).also {
+            FrameInstances.secondaryFrameDelegates[secondaryId] = SecondaryWidgetFrameDelegate(this, secondaryId, secondaryDisplay).also {
                 it.onCreate()
             }
         }
@@ -138,7 +137,7 @@ class Accessibility : AccessibilityService(), CoroutineScope by MainScope(), Eve
             globalState.wasOnKeyguard.value = kgm.isKeyguardLocked
 
             runWindowOperation(
-                frameDelegates = secondaryFrameDelegates + (MainWidgetFrameDelegate.ID to frameDelegate),
+                frameDelegates = FrameInstances.secondaryFrameDelegates + (MainWidgetFrameDelegate.ID to frameDelegate),
                 drawerDelegate = drawerDelegate,
                 getWindows = ::getWindowsSafely,
                 initialRun = true,
@@ -158,7 +157,7 @@ class Accessibility : AccessibilityService(), CoroutineScope by MainScope(), Eve
                 accessibilityJob = runAccessibilityJob(
                     context = this@Accessibility,
                     event = eventCopy,
-                    frameDelegates = secondaryFrameDelegates + (MainWidgetFrameDelegate.ID to frameDelegate),
+                    frameDelegates = FrameInstances.secondaryFrameDelegates + (MainWidgetFrameDelegate.ID to frameDelegate),
                     drawerDelegate = drawerDelegate,
                     kgm = kgm,
                     imm = imm,
@@ -199,9 +198,10 @@ class Accessibility : AccessibilityService(), CoroutineScope by MainScope(), Eve
         App.instance.launch {
             frameDelegate.onDestroy()
             drawerDelegate.onDestroy()
-            secondaryFrameDelegates.forEach { (val delegate = value) ->
+            FrameInstances.secondaryFrameDelegates.forEach { (val delegate = value) ->
                 delegate.onDestroy()
             }
+            FrameInstances.secondaryFrameDelegates.clear()
 
             App.instance.updateWidgetStackMonitor()
 
