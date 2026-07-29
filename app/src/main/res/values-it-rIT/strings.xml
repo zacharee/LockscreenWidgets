@@ -252,7 +252,7 @@
     <string name="drawer_blur_status_bar_area_desc">Mostra l\'effetto sfocatura sopra l\'area della barra di stato.</string>
     <string name="drawer_background_over_status_bar">Mostra colore di sfondo sopra la barra di stato</string>
     <string name="drawer_background_over_status_bar_desc">Mostra il colore di sfondo del cassetto sopra la barra di stato. Se hai un colore di sfondo opaco, sarebbe ideale disattivare questa opzione.</string>
-    <string name="show_only_when_locked">Mostra solo quando bloccato</string>
+    <string name="show_only_when_locked">Show handle only when Locked</string>
     <string name="show_only_when_locked_desc">Mostra la maniglia del cassetto solo nella schermata di blocco.</string>
     <string name="debug_enable_bugsnag">Attiva Bugsnag</string>
     <string name="debug_enable_bugsnag_desc">Widgets Anywhere uses Bugsnag to collect anonymous crash reports. Not that to fully disable collection, you\'ll have to force stop and reopen Widgets Anywhere.</string>
@@ -299,7 +299,10 @@
     <string name="cancel">Annulla</string>
     <string name="apply">Applica</string>
     <string name="select_frame">Seleziona riquadro</string>
+    <string name="select_frames">Select Frames</string>
     <string name="selected_frame">Riquadro selezionato: %s</string>
+    <string name="frame_ids">Frame IDs</string>
+    <string name="select_frames_tasker_instruction">To always apply to all frames, keep them all unselected.</string>
     <string name="settings_screen_category_grid">Griglia</string>
     <plurals name="frame_count_info">
         <item quantity="one">%s riquadro aggiunto</item>
