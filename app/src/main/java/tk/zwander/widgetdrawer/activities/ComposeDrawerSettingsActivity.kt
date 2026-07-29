@@ -36,103 +36,9 @@ class ComposeDrawerSettingsActivity : BaseActivity() {
                 commonSection.addToPreferenceScreen(this)
 
                 category(
-                    title = resources.getString(R.string.general),
-                    key = "general_options",
+                    title = resources.getString(R.string.category_appearance),
+                    key = "settings_appearance_category_drawer",
                 ) {
-                    switchPreference(
-                        title = { stringResource(R.string.settings_screen_animate_show_hide) },
-                        summary = { stringResource(R.string.settings_screen_animate_show_hide_desc) },
-                        key = { PrefManager.KEY_ANIMATE_DRAWER_SHOW_HIDE },
-                        icon = { painterResource(R.drawable.ic_baseline_animation_24) },
-                        defaultValue = { true },
-                    )
-
-                    seekBarPreference(
-                        title = { stringResource(R.string.settings_screen_animation_duration) },
-                        summary = { stringResource(R.string.settings_screen_animation_duration_desc) },
-                        key = { PrefManager.KEY_DRAWER_ANIMATION_DURATION },
-                        icon = { painterResource(R.drawable.ic_baseline_timer_24) },
-                        defaultValue = { 300 },
-                        enabled = booleanPreferenceDependency(PrefManager.KEY_ANIMATE_DRAWER_SHOW_HIDE),
-                        minValue = { 0 },
-                        maxValue = { 2000 },
-                        unit = { "ms" },
-                        scale = { 1.0 },
-                    )
-                }
-
-                category(
-                    title = resources.getString(R.string.drawer),
-                    key = "drawer_options",
-                ) {
-                    switchPreference(
-                        title = { stringResource(R.string.close_on_empty_tap) },
-                        summary = { stringResource(R.string.close_on_empty_tap_desc) },
-                        key = { PrefManager.KEY_CLOSE_DRAWER_ON_EMPTY_TAP },
-                        defaultValue = { false },
-                        icon = { painterResource(R.drawable.tap) },
-                    )
-
-                    switchPreference(
-                        title = { stringResource(R.string.settings_screen_double_tap_turn_off_screen) },
-                        summary = { stringResource(R.string.settings_screen_double_tap_turn_off_screen_drawer) },
-                        key = { PrefManager.KEY_DOUBLE_TAP_EMPTY_DRAWER_SPACE_TURN_OFF_DISPLAY },
-                        defaultValue = { false },
-                        icon = { painterResource(R.drawable.touch_double_24px) },
-                        visible = { Build.VERSION.SDK_INT >= Build.VERSION_CODES.P },
-                    )
-
-                    switchPreference(
-                        title = { stringResource(R.string.settings_screen_lock_widget_drawer) },
-                        summary = { stringResource(R.string.settings_screen_lock_widget_drawer_desc) },
-                        key = { PrefManager.KEY_LOCK_WIDGET_DRAWER },
-                        defaultValue = { false },
-                        icon = {
-                            painterResource(R.drawable.ic_baseline_lock_24)
-                        },
-                    )
-
-                    switchPreference(
-                        title = { stringResource(R.string.settings_screen_request_unlock) },
-                        summary = { stringResource(R.string.settings_screen_request_unlock_desc) },
-                        key = { PrefManager.KEY_REQUEST_UNLOCK_DRAWER },
-                        defaultValue = { false },
-                        icon = {
-                            painterResource(R.drawable.ic_baseline_launch_24)
-                        },
-                    )
-
-                    switchPreference(
-                        title = { stringResource(R.string.directly_check_for_activity) },
-                        summary = { stringResource(R.string.directly_check_for_activity_desc) },
-                        key = { PrefManager.KEY_DRAWER_DIRECTLY_CHECK_FOR_ACTIVITY },
-                        defaultValue = { true },
-                        icon = {
-                            painterResource(R.drawable.baseline_compare_24)
-                        },
-                        enabled = booleanPreferenceDependency(PrefManager.KEY_REQUEST_UNLOCK_DRAWER),
-                    )
-
-                    switchPreference(
-                        title = { stringResource(R.string.settings_screen_force_widget_update) },
-                        summary = { stringResource(R.string.settings_screen_force_widget_update_desc) },
-                        key = { PrefManager.KEY_DRAWER_FORCE_RELOAD_WIDGETS },
-                        defaultValue = { false },
-                        icon = {
-                            painterResource(R.drawable.baseline_refresh_24)
-                        },
-                    )
-
-                    switchPreference(
-                        title = { stringResource(R.string.drawer_hide_when_notification_panel_expanded) },
-                        summary = { stringResource(R.string.drawer_hide_when_notification_panel_expanded_desc) },
-                        key = { PrefManager.KEY_DRAWER_HIDE_WHEN_NOTIFICATION_PANEL_OPEN },
-                        defaultValue = { false },
-                        icon = {
-                            painterResource(R.drawable.ic_baseline_visibility_off_24)
-                        },
-                    )
-
                     switchPreference(
                         title = { stringResource(R.string.settings_screen_blur_background) },
                         summary = { stringResource(R.string.settings_screen_blur_drawer_background_desc) },
@@ -192,30 +98,17 @@ class ComposeDrawerSettingsActivity : BaseActivity() {
                     )
 
                     seekBarPreference(
-                        title = { stringResource(R.string.drawer_column_count) },
-                        summary = { stringResource(R.string.drawer_column_count_desc) },
-                        defaultValue = { 2 },
-                        key = { PrefManager.KEY_DRAWER_COL_COUNT },
+                        title = { stringResource(R.string.settings_screen_widget_corner_radius) },
+                        summary = { stringResource(R.string.settings_screen_widget_corner_radius_desc) },
+                        key = { PrefManager.KEY_DRAWER_WIDGET_CORNER_RADIUS },
                         icon = {
-                            painterResource(R.drawable.ic_baseline_view_column_24)
+                            painterResource(R.drawable.ic_baseline_rounded_corner_24)
                         },
-                        minValue = { 1 },
-                        maxValue = { 20 },
-                        scale = { 1.0 },
-                    )
-
-                    seekBarPreference(
-                        title = { stringResource(R.string.item_spacing) },
-                        summary = { stringResource(R.string.item_spacing_desc) },
-                        key = {
-                            PrefManager.KEY_DRAWER_ITEM_SPACING
-                        },
-                        defaultValue = { 0 },
-                        minValue = { 0 },
-                        maxValue = { 160 },
+                        defaultValue = { 20 },
                         scale = { 0.1 },
+                        minValue = { 0 },
+                        maxValue = { 640 },
                         unit = { "dp" },
-                        icon = { painterResource(R.drawable.grid_3x3_24px) },
                     )
 
                     seekBarPreference(
@@ -232,72 +125,12 @@ class ComposeDrawerSettingsActivity : BaseActivity() {
                         scale = { 0.1 },
                     )
 
-                    seekBarPreference(
-                        title = { stringResource(R.string.settings_screen_widget_corner_radius) },
-                        summary = { stringResource(R.string.settings_screen_widget_corner_radius_desc) },
-                        key = { PrefManager.KEY_DRAWER_WIDGET_CORNER_RADIUS },
-                        icon = {
-                            painterResource(R.drawable.ic_baseline_rounded_corner_24)
-                        },
-                        defaultValue = { 20 },
-                        scale = { 0.1 },
-                        minValue = { 0 },
-                        maxValue = { 640 },
-                        unit = { "dp" },
-                    )
-                }
-
-                category(
-                    title = resources.getString(R.string.handle),
-                    key = "handle_options",
-                ) {
-                    switchPreference(
-                        title = { stringResource(R.string.show_drawer_handle) },
-                        summary = { stringResource(R.string.show_drawer_handle_desc) },
-                        key = { PrefManager.KEY_SHOW_DRAWER_HANDLE },
-                        defaultValue = { true },
-                        icon = {
-                            painterResource(R.drawable.border_right)
-                        },
-                    )
-
-                    switchPreference(
-                        title = { stringResource(R.string.show_only_when_locked) },
-                        summary = { stringResource(R.string.show_only_when_locked_desc) },
-                        key = { PrefManager.KEY_SHOW_DRAWER_HANDLE_ONLY_WHEN_LOCKED },
-                        defaultValue = { false },
-                        icon = {
-                            painterResource(R.drawable.ic_baseline_visibility_24)
-                        },
-                        enabled = booleanPreferenceDependency(PrefManager.KEY_SHOW_DRAWER_HANDLE),
-                    )
-
                     switchPreference(
                         title = { stringResource(R.string.show_drawer_handle_shadow) },
                         summary = { stringResource(R.string.show_drawer_handle_shadow_desc) },
                         key = { PrefManager.KEY_SHOW_DRAWER_HANDLE_SHADOW },
                         defaultValue = { true },
                         icon = { painterResource(R.drawable.shadow) },
-                        enabled = booleanPreferenceDependency(PrefManager.KEY_SHOW_DRAWER_HANDLE),
-                    )
-
-                    switchPreference(
-                        title = { stringResource(R.string.drawer_handle_tap_to_open) },
-                        summary = { stringResource(R.string.drawer_handle_tap_to_open_desc) },
-                        key = { PrefManager.KEY_DRAWER_HANDLE_TAP_TO_OPEN },
-                        defaultValue = { false },
-                        icon = { painterResource(R.drawable.tap) },
-                        enabled = booleanPreferenceDependency(PrefManager.KEY_SHOW_DRAWER_HANDLE),
-                    )
-
-                    switchPreference(
-                        title = { stringResource(R.string.drawer_handle_lock_position) },
-                        summary = { stringResource(R.string.drawer_handle_lock_position_desc) },
-                        key = { PrefManager.KEY_DRAWER_HANDLE_LOCK_POSITION },
-                        defaultValue = { false },
-                        icon = {
-                            painterResource(R.drawable.ic_baseline_lock_24)
-                        },
                         enabled = booleanPreferenceDependency(PrefManager.KEY_SHOW_DRAWER_HANDLE),
                     )
 
@@ -336,6 +169,183 @@ class ComposeDrawerSettingsActivity : BaseActivity() {
                         defaultValue = { Color.WHITE },
                         icon = {
                             painterResource(R.drawable.ic_baseline_color_lens_24)
+                        },
+                        enabled = booleanPreferenceDependency(PrefManager.KEY_SHOW_DRAWER_HANDLE),
+                    )
+                }
+
+                category(
+                    title = resources.getString(R.string.category_layout),
+                    key = "settings_layout_category_drawer",
+                ) {
+                    switchPreference(
+                        title = { stringResource(R.string.settings_screen_lock_widget_drawer) },
+                        summary = { stringResource(R.string.settings_screen_lock_widget_drawer_desc) },
+                        key = { PrefManager.KEY_LOCK_WIDGET_DRAWER },
+                        defaultValue = { false },
+                        icon = {
+                            painterResource(R.drawable.ic_baseline_lock_24)
+                        },
+                    )
+
+                    seekBarPreference(
+                        title = { stringResource(R.string.drawer_column_count) },
+                        summary = { stringResource(R.string.drawer_column_count_desc) },
+                        defaultValue = { 2 },
+                        key = { PrefManager.KEY_DRAWER_COL_COUNT },
+                        icon = {
+                            painterResource(R.drawable.ic_baseline_view_column_24)
+                        },
+                        minValue = { 1 },
+                        maxValue = { 20 },
+                        scale = { 1.0 },
+                    )
+
+                    seekBarPreference(
+                        title = { stringResource(R.string.item_spacing) },
+                        summary = { stringResource(R.string.item_spacing_desc) },
+                        key = {
+                            PrefManager.KEY_DRAWER_ITEM_SPACING
+                        },
+                        defaultValue = { 0 },
+                        minValue = { 0 },
+                        maxValue = { 160 },
+                        scale = { 0.1 },
+                        unit = { "dp" },
+                        icon = { painterResource(R.drawable.grid_3x3_24px) },
+                    )
+                }
+
+                category(
+                    title = resources.getString(R.string.category_visibility),
+                    key = "settings_visibility_category_drawer",
+                ) {
+                    switchPreference(
+                        title = { stringResource(R.string.drawer_hide_when_notification_panel_expanded) },
+                        summary = { stringResource(R.string.drawer_hide_when_notification_panel_expanded_desc) },
+                        key = { PrefManager.KEY_DRAWER_HIDE_WHEN_NOTIFICATION_PANEL_OPEN },
+                        defaultValue = { false },
+                        icon = {
+                            painterResource(R.drawable.ic_baseline_visibility_off_24)
+                        },
+                    )
+
+                    switchPreference(
+                        title = { stringResource(R.string.show_drawer_handle) },
+                        summary = { stringResource(R.string.show_drawer_handle_desc) },
+                        key = { PrefManager.KEY_SHOW_DRAWER_HANDLE },
+                        defaultValue = { true },
+                        icon = {
+                            painterResource(R.drawable.border_right)
+                        },
+                    )
+
+                    switchPreference(
+                        title = { stringResource(R.string.show_only_when_locked) },
+                        summary = { stringResource(R.string.show_only_when_locked_desc) },
+                        key = { PrefManager.KEY_SHOW_DRAWER_HANDLE_ONLY_WHEN_LOCKED },
+                        defaultValue = { false },
+                        icon = {
+                            painterResource(R.drawable.ic_baseline_visibility_24)
+                        },
+                        enabled = booleanPreferenceDependency(PrefManager.KEY_SHOW_DRAWER_HANDLE),
+                    )
+                }
+
+                category(
+                    title = resources.getString(R.string.category_behavior),
+                    key = "settings_behavior_category_drawer",
+                ) {
+                    switchPreference(
+                        title = { stringResource(R.string.settings_screen_animate_show_hide) },
+                        summary = { stringResource(R.string.settings_screen_animate_show_hide_desc) },
+                        key = { PrefManager.KEY_ANIMATE_DRAWER_SHOW_HIDE },
+                        icon = { painterResource(R.drawable.ic_baseline_animation_24) },
+                        defaultValue = { true },
+                    )
+
+                    seekBarPreference(
+                        title = { stringResource(R.string.settings_screen_animation_duration) },
+                        summary = { stringResource(R.string.settings_screen_animation_duration_desc) },
+                        key = { PrefManager.KEY_DRAWER_ANIMATION_DURATION },
+                        icon = { painterResource(R.drawable.ic_baseline_timer_24) },
+                        defaultValue = { 300 },
+                        enabled = booleanPreferenceDependency(PrefManager.KEY_ANIMATE_DRAWER_SHOW_HIDE),
+                        minValue = { 0 },
+                        maxValue = { 2000 },
+                        unit = { "ms" },
+                        scale = { 1.0 },
+                    )
+
+                    switchPreference(
+                        title = { stringResource(R.string.settings_screen_force_widget_update) },
+                        summary = { stringResource(R.string.settings_screen_force_widget_update_desc) },
+                        key = { PrefManager.KEY_DRAWER_FORCE_RELOAD_WIDGETS },
+                        defaultValue = { false },
+                        icon = {
+                            painterResource(R.drawable.baseline_refresh_24)
+                        },
+                    )
+
+                    switchPreference(
+                        title = { stringResource(R.string.settings_screen_request_unlock) },
+                        summary = { stringResource(R.string.settings_screen_request_unlock_desc) },
+                        key = { PrefManager.KEY_REQUEST_UNLOCK_DRAWER },
+                        defaultValue = { false },
+                        icon = {
+                            painterResource(R.drawable.ic_baseline_launch_24)
+                        },
+                    )
+
+                    switchPreference(
+                        title = { stringResource(R.string.directly_check_for_activity) },
+                        summary = { stringResource(R.string.directly_check_for_activity_desc) },
+                        key = { PrefManager.KEY_DRAWER_DIRECTLY_CHECK_FOR_ACTIVITY },
+                        defaultValue = { true },
+                        icon = {
+                            painterResource(R.drawable.baseline_compare_24)
+                        },
+                        enabled = booleanPreferenceDependency(PrefManager.KEY_REQUEST_UNLOCK_DRAWER),
+                    )
+                }
+
+                category(
+                    title = resources.getString(R.string.category_interaction),
+                    key = "settings_interaction_category_drawer",
+                ) {
+                    switchPreference(
+                        title = { stringResource(R.string.close_on_empty_tap) },
+                        summary = { stringResource(R.string.close_on_empty_tap_desc) },
+                        key = { PrefManager.KEY_CLOSE_DRAWER_ON_EMPTY_TAP },
+                        defaultValue = { false },
+                        icon = { painterResource(R.drawable.tap) },
+                    )
+
+                    switchPreference(
+                        title = { stringResource(R.string.settings_screen_double_tap_turn_off_screen) },
+                        summary = { stringResource(R.string.settings_screen_double_tap_turn_off_screen_drawer) },
+                        key = { PrefManager.KEY_DOUBLE_TAP_EMPTY_DRAWER_SPACE_TURN_OFF_DISPLAY },
+                        defaultValue = { false },
+                        icon = { painterResource(R.drawable.touch_double_24px) },
+                        visible = { Build.VERSION.SDK_INT >= Build.VERSION_CODES.P },
+                    )
+
+                    switchPreference(
+                        title = { stringResource(R.string.drawer_handle_tap_to_open) },
+                        summary = { stringResource(R.string.drawer_handle_tap_to_open_desc) },
+                        key = { PrefManager.KEY_DRAWER_HANDLE_TAP_TO_OPEN },
+                        defaultValue = { false },
+                        icon = { painterResource(R.drawable.tap) },
+                        enabled = booleanPreferenceDependency(PrefManager.KEY_SHOW_DRAWER_HANDLE),
+                    )
+
+                    switchPreference(
+                        title = { stringResource(R.string.drawer_handle_lock_position) },
+                        summary = { stringResource(R.string.drawer_handle_lock_position_desc) },
+                        key = { PrefManager.KEY_DRAWER_HANDLE_LOCK_POSITION },
+                        defaultValue = { false },
+                        icon = {
+                            painterResource(R.drawable.ic_baseline_lock_24)
                         },
                         enabled = booleanPreferenceDependency(PrefManager.KEY_SHOW_DRAWER_HANDLE),
                     )
