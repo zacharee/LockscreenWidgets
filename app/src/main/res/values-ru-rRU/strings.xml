@@ -252,8 +252,8 @@
     <string name="drawer_blur_status_bar_area_desc">Показывать эффект размытия в области строки состояния.</string>
     <string name="drawer_background_over_status_bar">Показывать цвет фона панели поверх строки состояния</string>
     <string name="drawer_background_over_status_bar_desc">Показывать цвет фона панели поверх строки состояния. Если у вас непрозрачный цвет фона, имеет смысл отключить эту опцию.</string>
-    <string name="show_only_when_locked">Show handle only when Locked</string>
-    <string name="show_only_when_locked_desc">Показывать триггер панели только тогда, когда устройство находится на экране блокировки.</string>
+    <string name="show_handle_only_when_locked">Show handle only when Locked</string>
+    <string name="show_handle_only_when_locked_desc">Показывать триггер панели только тогда, когда устройство находится на экране блокировки.</string>
     <string name="debug_enable_bugsnag">Включить BugSnag</string>
     <string name="debug_enable_bugsnag_desc">Widgets Anywhere uses Bugsnag to collect anonymous crash reports. Not that to fully disable collection, you\'ll have to force stop and reopen Widgets Anywhere.</string>
     <string name="icon_pack">Набор значков</string>

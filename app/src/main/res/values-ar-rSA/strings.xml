@@ -252,8 +252,8 @@
     <string name="drawer_blur_status_bar_area_desc">اعرض تأثير الضبابية فوق منطقة شريط الحالة.</string>
     <string name="drawer_background_over_status_bar">عرض لون الخلفية فوق شريط الحالة</string>
     <string name="drawer_background_over_status_bar_desc">اعرض لون خلفية الدرج أعلى شريط الحالة. إذا كان لديك لون خلفية معتم، قد تحتاج للتفكير في إيقاف هذا الخيار.</string>
-    <string name="show_only_when_locked">Show handle only when Locked</string>
-    <string name="show_only_when_locked_desc">إظهار شريط الدرج فقط عندما يكون الجهاز على شاشة القفل.</string>
+    <string name="show_handle_only_when_locked">Show handle only when Locked</string>
+    <string name="show_handle_only_when_locked_desc">إظهار شريط الدرج فقط عندما يكون الجهاز على شاشة القفل.</string>
     <string name="debug_enable_bugsnag">تفعيل Bugsnag</string>
     <string name="debug_enable_bugsnag_desc">Widgets Anywhere uses Bugsnag to collect anonymous crash reports. Not that to fully disable collection, you\'ll have to force stop and reopen Widgets Anywhere.</string>
     <string name="icon_pack">حزمة أيقونات</string>

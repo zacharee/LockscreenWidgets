@@ -252,8 +252,8 @@
     <string name="drawer_blur_status_bar_area_desc">Durum çubuğu alanı üzerinde bulanıklık efektini göster.</string>
     <string name="drawer_background_over_status_bar">Durum Çubuğu Üzerinde Arkaplan Rengi Göster</string>
     <string name="drawer_background_over_status_bar_desc">Durum çubuğunun üstünde çekmecenin arka plan rengini göster. Arka plan rengin opaksa, bu özelliği kapatmayı düşünebilirsin.</string>
-    <string name="show_only_when_locked">Show handle only when Locked</string>
-    <string name="show_only_when_locked_desc">Çekmece tutamaçını yalnızca cihaz kilit ekranındayken göster.</string>
+    <string name="show_handle_only_when_locked">Show handle only when Locked</string>
+    <string name="show_handle_only_when_locked_desc">Çekmece tutamaçını yalnızca cihaz kilit ekranındayken göster.</string>
     <string name="debug_enable_bugsnag">Bugsnag\'ı Etkinleştir</string>
     <string name="debug_enable_bugsnag_desc">Widgets Anywhere uses Bugsnag to collect anonymous crash reports. Not that to fully disable collection, you\'ll have to force stop and reopen Widgets Anywhere.</string>
     <string name="icon_pack">Simge Paketi</string>

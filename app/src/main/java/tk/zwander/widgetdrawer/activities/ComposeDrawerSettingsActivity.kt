@@ -241,8 +241,8 @@ class ComposeDrawerSettingsActivity : BaseActivity() {
                     )
 
                     switchPreference(
-                        title = { stringResource(R.string.show_only_when_locked) },
-                        summary = { stringResource(R.string.show_only_when_locked_desc) },
+                        title = { stringResource(R.string.show_handle_only_when_locked) },
+                        summary = { stringResource(R.string.show_handle_only_when_locked_desc) },
                         key = { PrefManager.KEY_SHOW_DRAWER_HANDLE_ONLY_WHEN_LOCKED },
                         defaultValue = { false },
                         icon = {

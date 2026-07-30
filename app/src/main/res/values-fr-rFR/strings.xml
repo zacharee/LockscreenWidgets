@@ -252,8 +252,8 @@
     <string name="drawer_blur_status_bar_area_desc">Show the blur effect over the status bar area.</string>
     <string name="drawer_background_over_status_bar">Show Background Color Over Status Bar</string>
     <string name="drawer_background_over_status_bar_desc">Show the drawer\'s background color on top of the status bar. If you have an opaque background color, you may want to consider turning this off.</string>
-    <string name="show_only_when_locked">Show handle only when Locked</string>
-    <string name="show_only_when_locked_desc">Ne montrer la poignée du tiroir que lorsque l\'appareil est sur l\'écran de verrouillage.</string>
+    <string name="show_handle_only_when_locked">Show handle only when Locked</string>
+    <string name="show_handle_only_when_locked_desc">Ne montrer la poignée du tiroir que lorsque l\'appareil est sur l\'écran de verrouillage.</string>
     <string name="debug_enable_bugsnag">Enable Bugsnag</string>
     <string name="debug_enable_bugsnag_desc">Widgets Anywhere uses Bugsnag to collect anonymous crash reports. Not that to fully disable collection, you\'ll have to force stop and reopen Widgets Anywhere.</string>
     <string name="icon_pack">Pack d\'icônes</string>
