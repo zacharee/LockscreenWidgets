@@ -25,6 +25,7 @@ import tk.zwander.lockscreenwidgets.util.MainWidgetFrameDelegate
 
 @TaskerInputRoot
 data class FrameIDs @JvmOverloads constructor(
+    // If no IDs are selected, all frames are included.
     @field:TaskerInputField("ids", labelResIdName = "frame_ids")
     var ids: ArrayList<String> = arrayListOf(),
 )
@@ -39,7 +40,6 @@ abstract class BaseTaskerFrameActivity : BaseActivity(), TaskerPluginConfig<Fram
         get() = TaskerInput(FrameIDs(ids = ArrayList(selectedIds.map { it.toString() })))
 
     override fun assignFromInput(input: TaskerInput<FrameIDs>) {
-        Log.e("LSW", "Assigning ${input.regular}")
         selectedIds = input.regular.ids.mapNotNull { it.toIntOrNull() }
     }
 
@@ -64,12 +64,6 @@ abstract class BaseTaskerFrameActivity : BaseActivity(), TaskerPluginConfig<Fram
                 modifier = Modifier.fillMaxSize(),
             )
         }
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-
-        Log.e("LSW", "Destroying ${selectedIds}")
     }
 }
 
