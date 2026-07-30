@@ -150,7 +150,7 @@ class FrameSpecificPreferences private constructor(
         }
 
     var canShowFromTasker: Boolean
-        get() = getBoolean(PrefManager.KEY_CAN_SHOW_FRAME_FROM_TASKER, false)
+        get() = getBoolean(PrefManager.KEY_CAN_SHOW_FRAME_FROM_TASKER, true)
         set(value) {
             putBoolean(PrefManager.KEY_CAN_SHOW_FRAME_FROM_TASKER, value)
         }
