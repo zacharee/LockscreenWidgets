@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <string name="lock_screen_widgets">Lock Screen Widgets</string>
+    <string name="lock_screen_widgets">锁屏小组件</string>
     <string name="version_template">%s版</string>
     <string name="edit_gesture_hint">用两个手指点击小部件框架来移动和调整大小。</string>
     <string name="edit_gesture_hint_2">太棒了！用两个手指点击来隐藏编辑界面。</string>
