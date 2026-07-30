@@ -19,8 +19,8 @@ import androidx.compose.ui.zIndex
 import tk.zwander.common.compose.components.BlurView
 import tk.zwander.common.compose.components.ConfirmWidgetRemovalLayout
 import tk.zwander.common.compose.components.DrawerToolbar
-import tk.zwander.common.compose.util.rememberBooleanPreferenceState
 import tk.zwander.common.compose.util.rememberPreferenceState
+import tk.zwander.common.compose.util.rememberBooleanPreferenceState
 import tk.zwander.common.util.*
 import tk.zwander.widgetdrawer.util.DrawerDelegate
 

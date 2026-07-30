@@ -33,9 +33,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.core.content.edit
 import tk.zwander.common.compose.components.AnimatedBottomSheet
-import tk.zwander.common.compose.util.rememberPreferenceState
+import tk.zwander.common.compose.util.rememberIntPreferenceState
 import tk.zwander.common.util.prefManager
 import tk.zwander.lockscreenwidgets.R
 import java.math.BigDecimal
@@ -113,12 +112,10 @@ fun SeekBarPreference(
     preferences: SharedPreferences? = null,
 ) {
     val context = LocalContext.current
-    var value by rememberPreferenceState(
+    var value by rememberIntPreferenceState(
         key = key,
-        value = { (preferences ?: context.prefManager.prefs).getInt(key, defaultValue) },
-        onChanged = { k, v -> (preferences ?: context.prefManager.prefs).edit {
-            putInt(k, v) }
-        },
+        defaultValue = defaultValue,
+        preferences = preferences ?: context.prefManager.prefs,
     )
 
     SeekBarPreference(

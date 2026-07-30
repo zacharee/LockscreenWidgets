@@ -214,6 +214,9 @@ open class MainWidgetFrameDelegate protected constructor(
                             },
                             preferences = framePrefs.framePreferences,
                         )
+                        val derivedStoredPosition by remember {
+                            derivedStateOf { storedPosition }
+                        }
                         val pageIndicatorBehavior by rememberPreferenceState(
                             key = PrefManager.KEY_PAGE_INDICATOR_BEHAVIOR,
                             value = { context.prefManager.pageIndicatorBehavior },
@@ -255,13 +258,16 @@ open class MainWidgetFrameDelegate protected constructor(
                         }
 
                         LaunchedEffect(null) {
-                            if (rememberFramePosition) {
-                                gridState.scrollToLine(storedPosition)
+                            if (rememberFramePosition && gridState.layoutInfo.totalLineCount > 1) {
+                                gridState.scrollToLine(derivedStoredPosition)
                             }
                         }
 
                         LaunchedEffect(gridState.firstVisibleLine) {
-                            storedPosition = gridState.firstVisibleLine
+                            val newLine = gridState.firstVisibleLine
+                            if (newLine != derivedStoredPosition && !gridState.isScrollInProgress) {
+                                storedPosition = newLine
+                            }
                         }
 
                         WidgetGrid(

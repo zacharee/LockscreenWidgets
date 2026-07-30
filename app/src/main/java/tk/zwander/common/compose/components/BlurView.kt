@@ -12,6 +12,7 @@ import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.unit.dp
 import com.google.accompanist.drawablepainter.rememberDrawablePainter
 import tk.zwander.common.compose.util.rememberBooleanPreferenceState
+import tk.zwander.common.compose.util.rememberIntPreferenceState
 import tk.zwander.common.compose.util.rememberPreferenceState
 import tk.zwander.common.drawable.BackgroundBlurDrawableCompat
 import tk.zwander.common.util.BaseDelegate
@@ -34,11 +35,7 @@ fun BaseDelegate.BaseViewModel<*, *>.BlurView(
     }
     var crossBlurEnabled by remember {
         mutableStateOf(
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                wm?.isCrossWindowBlurEnabled == true
-            } else {
-                false
-            },
+            Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && wm?.isCrossWindowBlurEnabled == true,
         )
     }
 
@@ -46,17 +43,15 @@ fun BaseDelegate.BaseViewModel<*, *>.BlurView(
         key = blurKey.first,
         preferences = blurKey.second,
     )
-    val blurAmount by rememberPreferenceState(
+    val blurAmount by rememberIntPreferenceState(
         key = blurAmountKey.first,
-        value = { blurKey.second.getInt(blurAmountKey.first, 100) },
-        onChanged = { _, _ -> },
         preferences = blurKey.second,
+        defaultValue = 100,
     )
     val cornerRadiusPx by if (cornerRadiusKey != null) {
         rememberPreferenceState(
             key = cornerRadiusKey,
             value = { context.prefManager.getInt(cornerRadiusKey, 20) / 10f },
-            onChanged = { _, _ -> },
         )
     } else {
         remember { mutableFloatStateOf(0f) }

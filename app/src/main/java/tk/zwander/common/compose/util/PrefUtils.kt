@@ -1,5 +1,6 @@
 package tk.zwander.common.compose.util
 
+import android.annotation.SuppressLint
 import android.content.SharedPreferences
 import androidx.compose.runtime.*
 import androidx.compose.ui.platform.LocalContext
@@ -12,22 +13,8 @@ import tk.zwander.common.util.prefManager
 fun <T> rememberPreferenceState(
     key: String,
     preferences: SharedPreferences = LocalContext.current.prefManager.prefs,
+    onChanged: suspend (String, T) -> Unit = { _, _ -> },
     value: (String) -> T,
-): State<T> {
-    return rememberPreferenceState(
-        key = key,
-        value = value,
-        preferences = preferences,
-        onChanged = { _, _ -> },
-    )
-}
-
-@Composable
-fun <T> rememberPreferenceState(
-    key: String,
-    value: (String) -> T,
-    preferences: SharedPreferences = LocalContext.current.prefManager.prefs,
-    onChanged: suspend (String, T) -> Unit,
 ): MutableState<T> {
     val state = remember(key) {
         mutableStateOf(value(key))
@@ -56,7 +43,24 @@ fun <T> rememberPreferenceState(
         }
     }
 
-    return state
+    @SuppressLint("UnrememberedMutableState")
+    return object : MutableState<T> {
+        override var value: T
+            get() = derivedStateOf { state.value }.value
+            set(value) {
+                state.value = value
+            }
+
+        override fun component1(): T {
+            return this.value
+        }
+
+        override fun component2(): (T) -> Unit {
+            return {
+                this.value = it
+            }
+        }
+    }
 }
 
 @Composable
@@ -64,14 +68,10 @@ fun rememberBooleanPreferenceState(
     key: String,
     defaultValue: Boolean = false,
     preferences: SharedPreferences = LocalContext.current.prefManager.prefs,
-    enabled: (String) -> Boolean = run {
-        { preferences.getBoolean(it, defaultValue) }
-    },
-    onEnabledChanged: (String, Boolean) -> Unit = run {
-        { k, v ->
-            preferences.edit {
-                putBoolean(k, v)
-            }
+    enabled: (String) -> Boolean = { preferences.getBoolean(it, defaultValue) },
+    onEnabledChanged: (String, Boolean) -> Unit = { k, v ->
+        preferences.edit {
+            putBoolean(k, v)
         }
     },
 ): MutableState<Boolean> {
@@ -80,5 +80,105 @@ fun rememberBooleanPreferenceState(
         value = enabled,
         onChanged = onEnabledChanged,
         preferences = preferences,
+    )
+}
+
+@Composable
+fun rememberIntPreferenceState(
+    key: String,
+    defaultValue: Int,
+    preferences: SharedPreferences = LocalContext.current.prefManager.prefs,
+    value: (String) -> Int = {
+        preferences.getInt(key, defaultValue)
+    },
+    onChanged: (String, Int) -> Unit = { k, v ->
+        preferences.edit { putInt(k, v) }
+    },
+): MutableState<Int> {
+    return rememberPreferenceState(
+        key = key,
+        preferences = preferences,
+        onChanged = onChanged,
+        value = value,
+    )
+}
+
+@Composable
+fun rememberLongPreferenceState(
+    key: String,
+    defaultValue: Long,
+    preferences: SharedPreferences = LocalContext.current.prefManager.prefs,
+    value: (String) -> Long = {
+        preferences.getLong(key, defaultValue)
+    },
+    onChanged: (String, Long) -> Unit = { k, v ->
+        preferences.edit { putLong(k, v) }
+    },
+): MutableState<Long> {
+    return rememberPreferenceState(
+        key = key,
+        preferences = preferences,
+        onChanged = onChanged,
+        value = value,
+    )
+}
+
+@Composable
+fun rememberFloatPreferenceState(
+    key: String,
+    defaultValue: Float,
+    preferences: SharedPreferences = LocalContext.current.prefManager.prefs,
+    value: (String) -> Float = {
+        preferences.getFloat(key, defaultValue)
+    },
+    onChanged: (String, Float) -> Unit = { k, v ->
+        preferences.edit { putFloat(k, v) }
+    },
+): MutableState<Float> {
+    return rememberPreferenceState(
+        key = key,
+        preferences = preferences,
+        onChanged = onChanged,
+        value = value,
+    )
+}
+
+@Composable
+fun rememberStringPreferenceState(
+    key: String,
+    defaultValue: String?,
+    preferences: SharedPreferences = LocalContext.current.prefManager.prefs,
+    value: (String) -> String? = {
+        preferences.getString(key, defaultValue)
+    },
+    onChanged: (String, String?) -> Unit = { k, v ->
+        preferences.edit { putString(k, v) }
+    },
+): MutableState<String?> {
+    return rememberPreferenceState(
+        key = key,
+        preferences = preferences,
+        onChanged = onChanged,
+        value = value,
+    )
+}
+
+@Composable
+fun rememberStringSetPreferenceState(
+    key: String,
+    defaultValue: Set<String>?,
+    preferences: SharedPreferences = LocalContext.current.prefManager.prefs,
+    value: (String) -> Set<String>? = {
+        preferences.getStringSet(key, defaultValue)
+    },
+    onChanged: (String, Set<String>?) -> Unit = { k, v ->
+        preferences.edit { putStringSet(k, v) }
+    },
+): MutableState<Set<String>?> {
+    return rememberPreferenceState(
+        key = key,
+        preferences = preferences,
+        onChanged = onChanged,
+        value = value,
     )
 }

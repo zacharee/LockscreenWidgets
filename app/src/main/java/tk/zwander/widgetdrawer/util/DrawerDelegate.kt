@@ -43,8 +43,8 @@ import tk.zwander.common.compose.WidgetGrid
 import tk.zwander.common.compose.components.DrawerHandle
 import tk.zwander.common.compose.util.createComposeViewHolder
 import tk.zwander.common.compose.util.findAccessibility
-import tk.zwander.common.compose.util.rememberBooleanPreferenceState
 import tk.zwander.common.compose.util.rememberPreferenceState
+import tk.zwander.common.compose.util.rememberBooleanPreferenceState
 import tk.zwander.common.data.provider.IDrawerProvider
 import tk.zwander.common.listeners.WidgetResizeListener
 import tk.zwander.common.util.*

@@ -1,5 +1,6 @@
 package tk.zwander.common.util
 
+import android.annotation.SuppressLint
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
@@ -22,6 +23,7 @@ class MutableStateAdapter<T>(
     override fun component2(): (T) -> Unit = { value = it }
 }
 
+@SuppressLint("UnrememberedMutableState")
 @Composable
 fun <T> MutableStateFlow<T>.collectAsMutableState(
     context: CoroutineContext = EmptyCoroutineContext,

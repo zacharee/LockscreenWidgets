@@ -40,8 +40,8 @@ import tk.zwander.common.compose.components.BlurView
 import tk.zwander.common.compose.components.ConfirmFrameRemovalLayout
 import tk.zwander.common.compose.components.ConfirmWidgetRemovalLayout
 import tk.zwander.common.compose.components.FrameEditWrapperLayout
-import tk.zwander.common.compose.util.rememberBooleanPreferenceState
 import tk.zwander.common.compose.util.rememberPreferenceState
+import tk.zwander.common.compose.util.rememberBooleanPreferenceState
 import tk.zwander.common.util.*
 import tk.zwander.lockscreenwidgets.R
 import tk.zwander.lockscreenwidgets.util.MainWidgetFrameDelegate
