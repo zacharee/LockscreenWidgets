@@ -861,7 +861,7 @@ open class MainWidgetFrameDelegate protected constructor(
         return (forced() || forSecondaryDisplay() || forPreview() || forNotificationCenter() || forLockscreen()).also {
             logUtils.debugLog(
                 "canShow $id: $it\n" +
-                        "state: $state\n" +
+                        "state: ${state.value}\n" +
                         "globalState: $globalState\n" +
                         "showOnMainLockScreen: ${framePrefs.showOnMainLockScreen}\n" +
                         "widgetFrameEnabled: ${prefManager.widgetFrameEnabled}\n" +
