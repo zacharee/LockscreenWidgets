@@ -106,6 +106,7 @@ kotlin {
 
 bugsnag {
     ndkRoot = project.androidComponents.sdkComponents.ndkDirectory.get().asFile
+    buildUuid = project.android.defaultConfig.manifestPlaceholders["build_uuid"].toString()
 }
 
 dependencies {

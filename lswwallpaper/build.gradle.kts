@@ -1,8 +1,9 @@
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
-import java.util.UUID
+import java.util.*
 
 plugins {
     alias(libs.plugins.android.application)
+    alias(libs.plugins.bugsnag)
 }
 
 val jdkVersion = project.findProperty("jdk.version").toString()
@@ -62,6 +63,10 @@ kotlin {
             "-Xname-based-destructuring=complete",
         )
     }
+}
+
+bugsnag {
+    buildUuid = project.android.defaultConfig.manifestPlaceholders["build_uuid"].toString()
 }
 
 dependencies {
