@@ -44,6 +44,7 @@ object AccessibilityUtils {
         val onFaceWidgets: AtomicBoolean = atomic(false),
         val hasNotificationsShowing: AtomicBoolean = atomic(false),
         val showingPowerMenu: AtomicBoolean = atomic(false),
+        val showingEdgePanel: AtomicBoolean = atomic(false),
     )
 
     data object IDMaps {
@@ -102,6 +103,16 @@ object AccessibilityUtils {
 
         val powerMenuIds = unitMapOf(
             "com.android.systemui:id/sec_global_actions_icon",
+        )
+
+        val edgePanelIds = unitMapOf(
+            "com.sec.android.daemonapp:id/edge_panel",
+        )
+
+        val sysUiPackageNames = unitMapOf(
+            "com.android.systemui",
+            "miui.systemui.plugin",
+            "com.sec.android.app.launcher",
         )
     }
 
@@ -196,6 +207,14 @@ object AccessibilityUtils {
                 nodeState.showingPowerMenu.value = true
             }
         }
+
+        if (!nodeState.showingEdgePanel.value) {
+            if (
+                node.hasVisibleIds(IDMaps.edgePanelIds)
+            ) {
+                nodeState.showingEdgePanel.value = true
+            }
+        }
     }
 
     /**
@@ -236,8 +255,8 @@ object AccessibilityUtils {
                 logUtils.debugLog("Error getting window root", e)
                 null
             }
-            val isSysUi = safeRoot?.packageName == "com.android.systemui" ||
-                    safeRoot?.packageName == "miui.systemui.plugin"
+            val isSysUi = safeRoot != null &&
+                    IDMaps.sysUiPackageNames[safeRoot.packageName] != null
             val window = WindowRootPair(rawWindow, safeRoot, index)
 
             if (isSysUi) {
@@ -480,7 +499,7 @@ object AccessibilityUtils {
                 //However, it's not an Application-type window for some reason, so it won't hide with the
                 //currentAppLayer check. Explicitly check for its existence here.
                 globalState.isOnScreenOffMemo[displayId] = isOnKeyguard && windowInfo.hasScreenOffMemoWindow
-                globalState.isOnEdgePanel[displayId] = windowInfo.hasEdgePanelWindow
+                globalState.isOnEdgePanel[displayId] = windowInfo.hasEdgePanelWindow || windowInfo.nodeState.showingEdgePanel.value
                 globalState.isOnFaceWidgets[displayId] = windowInfo.hasFaceWidgetsWindow
                         || windowInfo.nodeState.onFaceWidgets.value
                 //Generate "layer" values for the System UI window and for the topmost app window, if
