@@ -491,48 +491,10 @@ class PrefManager private constructor(private val context: Context) {
             putString(KEY_PAGE_INDICATOR_BEHAVIOR, value.toString())
         }
 
-    var blurDrawerBackground: Boolean
-        get() = getBoolean(KEY_BLUR_DRAWER_BACKGROUND, false)
-        set(value) {
-            putBoolean(KEY_BLUR_DRAWER_BACKGROUND, value)
-        }
-
-    var blurDrawerStatusBarArea: Boolean
-        get() = getBoolean(KEY_BLUR_DRAWER_STATUS_BAR_AREA, true)
-        set(value) {
-            putBoolean(KEY_BLUR_DRAWER_STATUS_BAR_AREA, value)
-        }
-
-    var drawerBackgroundOverStatusBar: Boolean
-        get() = getBoolean(KEY_DRAWER_BACKGROUND_OVER_STATUS_BAR, true)
-        set(value) {
-            putBoolean(KEY_DRAWER_BACKGROUND_OVER_STATUS_BAR, value)
-        }
-
-    //How many columns of widgets should be shown per page.
-    var frameColCount: Int
-        get() = getInt(KEY_FRAME_COL_COUNT, 1)
-        set(value) {
-            putInt(KEY_FRAME_COL_COUNT, value)
-        }
-
     var drawerColCount: Int
         get() = getInt(KEY_DRAWER_COL_COUNT, 2)
         set(value) {
             putInt(KEY_FRAME_COL_COUNT, value)
-        }
-
-    //How many rows of widgets should be shown per page.
-    var frameRowCount: Int
-        get() = getInt(KEY_FRAME_ROW_COUNT, 1)
-        set(value) {
-            putInt(KEY_FRAME_ROW_COUNT, value)
-        }
-
-    var drawerBackgroundBlurAmount: Int
-        get() = getInt(KEY_BLUR_DRAWER_BACKGROUND_AMOUNT, 100)
-        set(value) {
-            putInt(KEY_BLUR_DRAWER_BACKGROUND_AMOUNT, value)
         }
 
     //How much to dim the masked mode wallpaper (in percent)
@@ -549,18 +511,6 @@ class PrefManager private constructor(private val context: Context) {
         get() = getInt(KEY_FRAME_CORNER_RADIUS, context.resources.getInteger(R.integer.def_corner_radius_dp_scaled_10x)) / 10f
         set(value) {
             putInt(KEY_FRAME_CORNER_RADIUS, (value * 10f).toInt())
-        }
-
-    var frameWidgetCornerRadiusDp: Float
-        get() = getInt(KEY_FRAME_WIDGET_CORNER_RADIUS, context.resources.getInteger(R.integer.def_corner_radius_dp_scaled_10x)) / 10f
-        set(value) {
-            putInt(KEY_FRAME_WIDGET_CORNER_RADIUS, (value * 10f).toInt())
-        }
-
-    var drawerWidgetCornerRadiusDp: Float
-        get() = getInt(KEY_DRAWER_WIDGET_CORNER_RADIUS, context.resources.getInteger(R.integer.def_corner_radius_dp_scaled_10x)) / 10f
-        set(value) {
-            putInt(KEY_DRAWER_WIDGET_CORNER_RADIUS, (value * 10f).toInt())
         }
 
     //Whether to enable touch protection
@@ -592,19 +542,6 @@ class PrefManager private constructor(private val context: Context) {
         get() = getBoolean(KEY_HIDE_IN_LANDSCAPE, false)
         set(value) {
             putBoolean(KEY_HIDE_IN_LANDSCAPE, value)
-        }
-
-    //Whether to lock the frame layout and position.
-    var lockWidgetFrame: Boolean
-        get() = getBoolean(KEY_LOCK_WIDGET_FRAME, false)
-        set(value) {
-            putBoolean(KEY_LOCK_WIDGET_FRAME, value)
-        }
-
-    var lockWidgetDrawer: Boolean
-        get() = getBoolean(KEY_LOCK_WIDGET_DRAWER, false)
-        set(value) {
-            putBoolean(KEY_LOCK_WIDGET_DRAWER, value)
         }
 
     //The duration of the fade-in/out animation.
@@ -710,20 +647,6 @@ class PrefManager private constructor(private val context: Context) {
         get() = getBoolean(KEY_SEPARATE_LAYOUT_FOR_LANDSCAPE, false)
         set(value) {
             putBoolean(KEY_SEPARATE_LAYOUT_FOR_LANDSCAPE, value)
-        }
-
-    var canShowFrameFromTasker: Boolean
-        get() = getBoolean(KEY_CAN_SHOW_FRAME_FROM_TASKER, true)
-        set(value) {
-            putBoolean(KEY_CAN_SHOW_FRAME_FROM_TASKER, value)
-            TaskerIsAllowedToShowFrame::class.java.requestQuery(context)
-        }
-
-    var forceShowFrame: Boolean
-        get() = getBoolean(KEY_FORCE_SHOW_FRAME, false)
-        set(value) {
-            putBoolean(KEY_FORCE_SHOW_FRAME, value)
-            TaskerIsForceShowingFrame::class.java.requestQuery(context)
         }
 
     var drawerHideWhenNotificationPanelOpen: Boolean
@@ -857,12 +780,6 @@ class PrefManager private constructor(private val context: Context) {
             ?: WidgetListFilters()
         set(value) {
             putString(KEY_WIDGET_LIST_CURRENT_FILTERS, gson.toJson(value))
-        }
-
-    var drawerItemSpacing: Float
-        get() = getInt(KEY_DRAWER_ITEM_SPACING, 0) / 10f
-        set(value) {
-            putInt(KEY_DRAWER_ITEM_SPACING, (value * 10f).toInt())
         }
 
     @Suppress("DEPRECATION")

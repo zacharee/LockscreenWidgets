@@ -601,7 +601,11 @@ class ComposeFrameSettingsActivity : BaseActivity() {
                         defaultValue = { "1" },
                         entries = {
                             val labels = stringArrayResource(R.array.page_indicator_behavior_names)
-                            val values = stringArrayResource(R.array.page_indicator_behavior_values)
+                            val values = [
+                                PrefManager.VALUE_PAGE_INDICATOR_BEHAVIOR_HIDDEN.toString(),
+                                PrefManager.VALUE_PAGE_INDICATOR_BEHAVIOR_AUTO_HIDE.toString(),
+                                PrefManager.VALUE_PAGE_INDICATOR_BEHAVIOR_SHOWN.toString(),
+                            ]
 
                             labels.zip(values) { label, value ->
                                 ListPreferenceEntry(label, value)
