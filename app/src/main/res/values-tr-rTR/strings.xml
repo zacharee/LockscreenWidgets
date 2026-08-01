@@ -322,6 +322,8 @@
     <string name="auto_cycle">Otomatik Döngü</string>
     <string name="delay">Gecikme</string>
     <string name="unit_milliseconds">ms</string>
+    <string name="unit_dp">dp</string>
+    <string name="unit_percent">%</string>
     <string name="widget_padding">Widget\'in İç Boşluğu</string>
     <string name="manage_widget_stacks">Widget Yığınlarını Yönet</string>
     <string name="widget_stacks">Widget Yığınları</string>
