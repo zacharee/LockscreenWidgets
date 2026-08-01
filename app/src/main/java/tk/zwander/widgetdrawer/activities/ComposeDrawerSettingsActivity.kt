@@ -278,16 +278,6 @@ class ComposeDrawerSettingsActivity : BaseActivity() {
                     )
 
                     switchPreference(
-                        title = { stringResource(R.string.settings_screen_force_widget_update) },
-                        summary = { stringResource(R.string.settings_screen_force_widget_update_desc) },
-                        key = { PrefManager.KEY_DRAWER_FORCE_RELOAD_WIDGETS },
-                        defaultValue = { false },
-                        icon = {
-                            painterResource(R.drawable.baseline_refresh_24)
-                        },
-                    )
-
-                    switchPreference(
                         title = { stringResource(R.string.settings_screen_request_unlock) },
                         summary = { stringResource(R.string.settings_screen_request_unlock_desc) },
                         key = { PrefManager.KEY_REQUEST_UNLOCK_DRAWER },

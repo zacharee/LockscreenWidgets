@@ -117,8 +117,6 @@ class PrefManager private constructor(private val context: Context) {
         const val KEY_SEPARATE_LAYOUT_FOR_LANDSCAPE = "frame_separate_layout_for_landscape"
         const val KEY_CAN_SHOW_FRAME_FROM_TASKER = "can_show_frame_from_tasker"
         const val KEY_FORCE_SHOW_FRAME = "force_show_frame"
-        const val KEY_FRAME_FORCE_RELOAD_WIDGETS = "frame_force_reload_widgets"
-        const val KEY_DRAWER_FORCE_RELOAD_WIDGETS = "drawer_force_reload_widgets"
         const val KEY_SHOW_DRAWER_HANDLE_ONLY_WHEN_LOCKED = "show_drawer_handle_only_when_locked"
         const val KEY_FRAME_HIDE_WHEN_KEYBOARD_SHOWN = "hide_frame_when_keyboard_shown"
         const val KEY_FRAME_IGNORE_WIDGET_TOUCHES = "frame_ignore_widget_touches"
@@ -726,18 +724,6 @@ class PrefManager private constructor(private val context: Context) {
         set(value) {
             putBoolean(KEY_FORCE_SHOW_FRAME, value)
             TaskerIsForceShowingFrame::class.java.requestQuery(context)
-        }
-
-    var frameForceWidgetReload: Boolean
-        get() = getBoolean(KEY_FRAME_FORCE_RELOAD_WIDGETS, true)
-        set(value) {
-            putBoolean(KEY_FRAME_FORCE_RELOAD_WIDGETS, value)
-        }
-
-    var drawerForceWidgetReload: Boolean
-        get() = getBoolean(KEY_DRAWER_FORCE_RELOAD_WIDGETS, true)
-        set(value) {
-            putBoolean(KEY_DRAWER_FORCE_RELOAD_WIDGETS, value)
         }
 
     var drawerHideWhenNotificationPanelOpen: Boolean

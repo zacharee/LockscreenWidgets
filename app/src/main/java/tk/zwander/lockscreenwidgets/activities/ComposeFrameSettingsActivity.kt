@@ -572,15 +572,6 @@ class ComposeFrameSettingsActivity : BaseActivity() {
                     )
 
                     switchPreference(
-                        title = { stringResource(R.string.settings_screen_force_widget_update) },
-                        summary = { stringResource(R.string.settings_screen_force_widget_update_desc) },
-                        key = { PrefManager.KEY_FRAME_FORCE_RELOAD_WIDGETS },
-                        icon = { painterResource(R.drawable.baseline_refresh_24) },
-                        defaultValue = { true },
-                        badge = globalBadge,
-                    )
-
-                    switchPreference(
                         title = { stringResource(R.string.settings_screen_animate_show_hide) },
                         summary = { stringResource(R.string.settings_screen_animate_show_hide_desc) },
                         key = { PrefManager.KEY_ANIMATE_SHOW_HIDE },
