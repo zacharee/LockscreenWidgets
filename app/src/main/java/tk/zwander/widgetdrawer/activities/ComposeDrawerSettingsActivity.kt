@@ -108,7 +108,7 @@ class ComposeDrawerSettingsActivity : BaseActivity() {
                         scale = { 0.1 },
                         minValue = { 0 },
                         maxValue = { 640 },
-                        unit = { "dp" },
+                        unit = { stringResource(R.string.unit_dp) },
                     )
 
                     seekBarPreference(
@@ -119,7 +119,7 @@ class ComposeDrawerSettingsActivity : BaseActivity() {
                         icon = {
                             painterResource(R.drawable.expand_horiz)
                         },
-                        unit = { "dp" },
+                        unit = { stringResource(R.string.unit_dp) },
                         minValue = { 0 },
                         maxValue = { 640 },
                         scale = { 0.1 },
@@ -142,7 +142,7 @@ class ComposeDrawerSettingsActivity : BaseActivity() {
                         icon = { painterResource(R.drawable.expand_vert) },
                         minValue = { 64 },
                         maxValue = { 500 },
-                        unit = { "dp" },
+                        unit = { stringResource(R.string.unit_dp) },
                         scale = { 1.0 },
                         enabled = booleanPreferenceDependency(PrefManager.KEY_SHOW_DRAWER_HANDLE),
                     )
@@ -157,7 +157,7 @@ class ComposeDrawerSettingsActivity : BaseActivity() {
                         },
                         minValue = { 1 },
                         maxValue = { 64 },
-                        unit = { "dp" },
+                        unit = { stringResource(R.string.unit_dp) },
                         scale = { 1.0 },
                         enabled = booleanPreferenceDependency(PrefManager.KEY_SHOW_DRAWER_HANDLE),
                     )
@@ -211,7 +211,7 @@ class ComposeDrawerSettingsActivity : BaseActivity() {
                         minValue = { 0 },
                         maxValue = { 160 },
                         scale = { 0.1 },
-                        unit = { "dp" },
+                        unit = { stringResource(R.string.unit_dp) },
                         icon = { painterResource(R.drawable.grid_3x3_24px) },
                     )
                 }
@@ -273,7 +273,7 @@ class ComposeDrawerSettingsActivity : BaseActivity() {
                         enabled = booleanPreferenceDependency(PrefManager.KEY_ANIMATE_DRAWER_SHOW_HIDE),
                         minValue = { 0 },
                         maxValue = { 2000 },
-                        unit = { "ms" },
+                        unit = { stringResource(R.string.unit_milliseconds) },
                         scale = { 1.0 },
                     )
 

@@ -308,7 +308,7 @@ class ComposeFrameSettingsActivity : BaseActivity() {
                         minValue = { 0 },
                         maxValue = { 10000 },
                         scale = { 0.01 },
-                        unit = { "%" },
+                        unit = { stringResource(R.string.unit_percent) },
                         preferences = framePrefs.framePreferences,
                     )
 
@@ -321,7 +321,7 @@ class ComposeFrameSettingsActivity : BaseActivity() {
                         scale = { 0.1 },
                         minValue = { 0 },
                         maxValue = { 640 },
-                        unit = { "dp" },
+                        unit = { stringResource(R.string.unit_dp) },
                         badge = globalBadge,
                     )
 
@@ -334,7 +334,7 @@ class ComposeFrameSettingsActivity : BaseActivity() {
                         scale = { 0.1 },
                         minValue = { 0 },
                         maxValue = { 640 },
-                        unit = { "dp" },
+                        unit = { stringResource(R.string.unit_dp) },
                         badge = globalBadge,
                     )
                 }
@@ -375,7 +375,7 @@ class ComposeFrameSettingsActivity : BaseActivity() {
                         minValue = { 0 },
                         maxValue = { 160 },
                         scale = { 0.1 },
-                        unit = { "dp" },
+                        unit = { stringResource(R.string.unit_dp) },
                         icon = { painterResource(R.drawable.grid_3x3_24px) },
                         preferences = framePrefs.framePreferences,
                     )
@@ -589,7 +589,7 @@ class ComposeFrameSettingsActivity : BaseActivity() {
                         enabled = booleanPreferenceDependency(PrefManager.KEY_ANIMATE_SHOW_HIDE),
                         minValue = { 0 },
                         maxValue = { 2000 },
-                        unit = { "ms" },
+                        unit = { stringResource(R.string.unit_milliseconds) },
                         scale = { 1.0 },
                         badge = globalBadge,
                     )

@@ -64,7 +64,7 @@ class CommonSettingsActivity : BaseActivity() {
                         defaultValue = { 50 },
                         minValue = { 0 },
                         maxValue = { 5000 },
-                        unit = { "ms" },
+                        unit = { stringResource(R.string.unit_milliseconds) },
                         scale = { 1.0 },
                     )
                 }
