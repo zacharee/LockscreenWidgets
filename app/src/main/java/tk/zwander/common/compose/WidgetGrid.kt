@@ -1,6 +1,7 @@
 package tk.zwander.common.compose
 
 import android.annotation.SuppressLint
+import android.appwidget.AppWidgetHostView
 import android.appwidget.AppWidgetProviderInfo
 import android.content.Intent
 import android.content.SharedPreferences
@@ -52,11 +53,8 @@ import dev.zwander.lazyspannedgrid.*
 import dev.zwander.lazyspannedgrid.reorderable.ReorderableLazySpannedGridState
 import dev.zwander.lazyspannedgrid.reorderable.rememberReorderableLazySpannedGridState
 import dev.zwander.lswinterconnect.peekLogUtils
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import org.burnoutcrew.reorderable.ReorderableItem
 import org.burnoutcrew.reorderable.detectReorderAfterLongPress
 import org.burnoutcrew.reorderable.reorderable
@@ -196,15 +194,16 @@ fun <VM : BaseDelegate.BaseViewModel<*, *>> VM.WidgetGrid(
         contentPadding = contentPadding,
         mainAxisSpacing = itemSpacing,
         crossAxisSpacing = itemSpacing,
-        modifier = modifier.interceptUnclaimedDrags(
-            gridState = lazyGridState,
-            orientation = orientation,
-            layoutDirection = layoutDirection,
-            scope = coroutineScope,
-            rootView = rootView,
-            currentEditingId = currentEditingId,
-            flingBehavior = flingBehavior,
-        )
+        modifier = modifier
+            .interceptUnclaimedDrags(
+                gridState = lazyGridState,
+                orientation = orientation,
+                layoutDirection = layoutDirection,
+                scope = coroutineScope,
+                rootView = rootView,
+                currentEditingId = currentEditingId,
+                flingBehavior = flingBehavior,
+            )
             .then(
                 if (gridLocked) {
                     Modifier
@@ -237,7 +236,7 @@ fun <VM : BaseDelegate.BaseViewModel<*, *>> VM.WidgetGrid(
 }
 
 context(viewModel: VM)
-private fun <VM: BaseDelegate.BaseViewModel<*, *>> LazySpannedGridScope.widgetItems(
+private fun <VM : BaseDelegate.BaseViewModel<*, *>> LazySpannedGridScope.widgetItems(
     currentWidgetsList: List<WidgetData>,
     columnCount: Int,
     rowCount: Int,
@@ -257,7 +256,9 @@ private fun <VM: BaseDelegate.BaseViewModel<*, *>> LazySpannedGridScope.widgetIt
         if (currentWidgetsList.isEmpty()) {
             item(key = "ADD", span = SpannedGridItemSpan(columnCount, rowSpanForAddButton)) {
                 Box(
-                    modifier = Modifier.fillMaxSize().animateItem(),
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .animateItem(),
                 ) {
                     AddItem(
                         launchAddActivity = launchAddActivity,
@@ -266,7 +267,8 @@ private fun <VM: BaseDelegate.BaseViewModel<*, *>> LazySpannedGridScope.widgetIt
 
                     if (blockIndividualWidgetTouches) {
                         Box(
-                            modifier = Modifier.fillMaxSize()
+                            modifier = Modifier
+                                .fillMaxSize()
                                 .clickable(
                                     enabled = true,
                                     indication = null,
@@ -304,7 +306,10 @@ private fun <VM: BaseDelegate.BaseViewModel<*, *>> LazySpannedGridScope.widgetIt
                     placementSpec = if (isReordering) {
                         spring(stiffness = Spring.StiffnessHigh, visibilityThreshold = IntOffset.VisibilityThreshold)
                     } else {
-                        spring(stiffness = Spring.StiffnessMediumLow, visibilityThreshold = IntOffset.VisibilityThreshold)
+                        spring(
+                            stiffness = Spring.StiffnessMediumLow,
+                            visibilityThreshold = IntOffset.VisibilityThreshold
+                        )
                     },
                 ),
             ) { isDragging ->
@@ -465,19 +470,23 @@ private fun <VM : BaseDelegate.BaseViewModel<*, *>> VM.WidgetItem(
                             onWidgetsChanged = onWidgetsChanged,
                         )
                     }
+
                     WidgetType.SHORTCUT, WidgetType.LAUNCHER_SHORTCUT -> {
                         ShortcutContent(data = updatedData, modifier = Modifier.fillMaxSize())
                     }
+
                     WidgetType.LAUNCHER_ITEM -> LauncherIconContent(
                         data = updatedData,
                         modifier = Modifier.fillMaxSize(),
                     )
+
                     WidgetType.HEADER -> {}
                 }
 
                 if (blockIndividualWidgetTouches) {
                     Box(
-                        modifier = Modifier.fillMaxSize()
+                        modifier = Modifier
+                            .fillMaxSize()
                             .clickable(
                                 enabled = true,
                                 indication = null,
@@ -494,13 +503,17 @@ private fun <VM : BaseDelegate.BaseViewModel<*, *>> VM.WidgetItem(
         },
         launchReconfigure = launchReconfigure@{
             val providerInfo = manager.getAppWidgetInfo(updatedData.id)
-                ?: (context.getAllInstalledWidgetProviders(updatedData.packageName)[updatedData.profile ?: UserHandleCompat.SYSTEM]
+                ?: (context.getAllInstalledWidgetProviders(updatedData.packageName)[updatedData.profile
+                    ?: UserHandleCompat.SYSTEM]
                     ?.find { info -> info.provider == updatedData.widgetProviderComponent })
 
             if (providerInfo == null) {
                 Toast.makeText(context, R.string.error_reconfiguring_widget, Toast.LENGTH_SHORT)
                     .show()
-                context.logUtils.normalLog("Unable to reconfigure widget ${updatedData.widgetProviderComponent}: provider info is null.", null)
+                context.logUtils.normalLog(
+                    "Unable to reconfigure widget ${updatedData.widgetProviderComponent}: provider info is null.",
+                    null
+                )
                 return@launchReconfigure
             }
 
@@ -530,7 +543,8 @@ private fun <VM : BaseDelegate.BaseViewModel<*, *>> VM.WidgetItem(
         onEditingDismissed = {
             onCurrentEditingIdChanged(RecyclerView.NO_POSITION)
         },
-        modifier = modifier.fillMaxSize()
+        modifier = modifier
+            .fillMaxSize()
             .scale(scale)
             .alpha(alpha)
             .shadow(elevation)
@@ -592,53 +606,15 @@ private fun <VM : BaseDelegate.BaseViewModel<*, *>> VM.WidgetContents(
                             SafeContextWrapper(context),
                             data.id,
                             widgetInfo,
-                        ).apply hostView@{
-                            findScrollableViewsInHierarchy(this).forEach { list ->
-                                list.isNestedScrollingEnabled = true
-                            }
-
-                            this@WidgetContents.display?.let { display ->
-                                // Workaround to fix the One UI 5.1 battery grid widget on some devices.
-                                if (widgetInfo.provider.packageName == "com.android.settings.intelligence") {
-                                    updateAppWidgetOptions(
-                                        manager.getAppWidgetOptions(appWidgetId).apply {
-                                            putBoolean("hsIsHorizontalIcon", false)
-                                            putInt("semAppWidgetRowSpan", 1)
-                                            putInt("displayId", display.displayId)
-                                        })
-                                }
-
-                                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                                    updateAppWidgetSize(
-                                        manager.getAppWidgetOptions(appWidgetId),
-                                        [
-                                            SizeF(
-                                                width.value + 2 * paddingValue.value,
-                                                height.value + 2 * paddingValue.value,
-                                            ),
-                                        ],
-                                    )
-                                } else {
-                                    val adjustedWidth = width.value + 2 * paddingValue.value
-                                    val adjustedHeight = height.value + 2 * paddingValue.value
-
-                                    @Suppress("DEPRECATION")
-                                    updateAppWidgetSize(
-                                        manager.getAppWidgetOptions(appWidgetId),
-                                        adjustedWidth.toInt(),
-                                        adjustedHeight.toInt(),
-                                        adjustedWidth.toInt(),
-                                        adjustedHeight.toInt(),
-                                    )
-                                }
-                            }
-                        }
+                        )
                     }
                 } catch (e: Throwable) {
-                    context.logUtils.normalLog(
-                        "Unable to bind widget view ${widgetInfo.provider}",
-                        e
-                    )
+                    if (e !is CancellationException) {
+                        context.logUtils.normalLog(
+                            "Unable to bind widget view ${widgetInfo.provider}",
+                            e,
+                        )
+                    }
 
                     if (e is SecurityException) {
                         Toast.makeText(
@@ -670,6 +646,55 @@ private fun <VM : BaseDelegate.BaseViewModel<*, *>> VM.WidgetContents(
                         host.deleteAppWidgetId(data.id)
                     },
                 )
+            }
+        }
+
+        LaunchedEffect(widgetView, data.id) {
+            (widgetView as? AppWidgetHostView)?.apply {
+                findScrollableViewsInHierarchy(this).forEach { list ->
+                    list.isNestedScrollingEnabled = true
+                }
+
+                this@WidgetContents.display?.let { display ->
+                    // Workaround to fix the One UI 5.1 battery grid widget on some devices.
+                    if (widgetInfo.provider.packageName == "com.android.settings.intelligence") {
+                        updateAppWidgetOptions(
+                            manager.getAppWidgetOptions(appWidgetId).apply {
+                                putBoolean("hsIsHorizontalIcon", false)
+                                putInt("semAppWidgetRowSpan", 1)
+                                putInt("displayId", display.displayId)
+                            },
+                        )
+                    }
+                }
+            }
+        }
+
+        LaunchedEffect(widgetView, width, height, data.id, data.safeSize) {
+            (widgetView as? AppWidgetHostView)?.apply {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                    updateAppWidgetSize(
+                        manager.getAppWidgetOptions(appWidgetId),
+                        [
+                            SizeF(
+                                width.value + 2 * paddingValue.value,
+                                height.value + 2 * paddingValue.value,
+                            ),
+                        ],
+                    )
+                } else {
+                    val adjustedWidth = width.value + 2 * paddingValue.value
+                    val adjustedHeight = height.value + 2 * paddingValue.value
+
+                    @Suppress("DEPRECATION")
+                    updateAppWidgetSize(
+                        manager.getAppWidgetOptions(appWidgetId),
+                        adjustedWidth.toInt(),
+                        adjustedHeight.toInt(),
+                        adjustedWidth.toInt(),
+                        adjustedHeight.toInt(),
+                    )
+                }
             }
         }
 
@@ -767,10 +792,10 @@ private fun findScrollableViewsInHierarchy(root: View): List<View> {
  */
 private fun View.isNestedScrollCapable(): Boolean {
     return this is AbsListView ||
-        this is ScrollView ||
-        this is HorizontalScrollView ||
-        this is RecyclerView ||
-        this is NestedScrollingChild
+            this is ScrollView ||
+            this is HorizontalScrollView ||
+            this is RecyclerView ||
+            this is NestedScrollingChild
 }
 
 /**
@@ -783,7 +808,12 @@ private fun View.isNestedScrollCapable(): Boolean {
  * everything else (its plain background, or a list that's already scrolled to its own limit in
  * this direction) — both of which should fall through to the outer grid instead.
  */
-private fun View.hasScrollableDescendantAt(screenX: Float, screenY: Float, isVertical: Boolean, direction: Int): Boolean {
+private fun View.hasScrollableDescendantAt(
+    screenX: Float,
+    screenY: Float,
+    isVertical: Boolean,
+    direction: Int
+): Boolean {
     if (this is ViewGroup) {
         val rect = Rect()
         // Reverse order to match touch dispatch/draw order: the topmost (last-drawn) child wins.
@@ -792,7 +822,8 @@ private fun View.hasScrollableDescendantAt(screenX: Float, screenY: Float, isVer
             if (child.visibility != View.VISIBLE) continue
             if (!child.getGlobalVisibleRect(rect) || !rect.contains(screenX.toInt(), screenY.toInt())) continue
 
-            val canScroll = if (isVertical) child.canScrollVertically(direction) else child.canScrollHorizontally(direction)
+            val canScroll =
+                if (isVertical) child.canScrollVertically(direction) else child.canScrollHorizontally(direction)
             if (child.isNestedScrollCapable() && canScroll) return true
             if (child.hasScrollableDescendantAt(screenX, screenY, isVertical, direction)) return true
         }
@@ -929,7 +960,12 @@ private fun Modifier.interceptUnclaimedDrags(
                                 val direction = if (axisDistance < 0) 1 else -1
                                 val rawEvent = event.motionEvent ?: downMotionEvent
                                 val hasScrollableDescendant = rawEvent != null &&
-                                    rootView.hasScrollableDescendantAt(rawEvent.rawX, rawEvent.rawY, isVertical, direction)
+                                        rootView.hasScrollableDescendantAt(
+                                            rawEvent.rawX,
+                                            rawEvent.rawY,
+                                            isVertical,
+                                            direction
+                                        )
 
                                 if (!hasScrollableDescendant && updatedEditingId == RecyclerView.NO_POSITION) {
                                     committed = true

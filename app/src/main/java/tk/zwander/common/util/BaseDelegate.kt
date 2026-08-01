@@ -4,11 +4,10 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.content.SharedPreferences
 import android.os.Build
-import android.view.GestureDetector
-import android.view.MotionEvent
-import android.view.View
-import android.view.WindowManager
+import android.view.*
 import androidx.annotation.CallSuper
+import androidx.compose.ui.platform.AbstractComposeView
+import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.platform.compositionContext
 import androidx.lifecycle.*
 import androidx.recyclerview.widget.RecyclerView
@@ -60,16 +59,13 @@ abstract class BaseDelegate<State : Any>(
     val screenOrientation: Int?
         get() = this@BaseDelegate.display?.screenOrientation
 
-    open var commonState: BaseState = BaseState()
-        protected set
-
     abstract val viewModel: BaseViewModel<out State, out BaseDelegate<State>>
 
     abstract val state: MutableStateFlow<State>
 
     protected abstract val prefsHandler: HandlerRegistry
     protected abstract val params: WindowManager.LayoutParams
-    protected abstract val rootView: View
+    protected abstract val rootView: ViewGroup
 
     protected val lifecycleRegistry by lazy { LifecycleRegistry(this) }
     protected val savedStateRegistryController by lazy { SavedStateRegistryController.create(this) }
@@ -79,13 +75,13 @@ abstract class BaseDelegate<State : Any>(
     val isAttached: Boolean
         get() = rootView.isAttachedToWindow
 
-    protected open val rootViewAttachmentStateListener = object : View.OnAttachStateChangeListener {
+    private val rootViewAttachmentStateListener = object : View.OnAttachStateChangeListener {
         override fun onViewAttachedToWindow(v: View) {
-            lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_RESUME)
+            onRootViewAttached()
         }
 
         override fun onViewDetachedFromWindow(v: View) {
-            lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_PAUSE)
+            onRootViewDetached()
         }
     }
 
@@ -111,6 +107,8 @@ abstract class BaseDelegate<State : Any>(
         rootView.setViewTreeLifecycleOwner(this)
         rootView.setViewTreeSavedStateRegistryOwner(this)
         rootView.compositionContext = recomposer
+        (rootView as? AbstractComposeView)
+            ?.setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
 
         // Will listen for frame prefs with ID -2 because of the drawer delegate.
         prefsHandler.register(this, holderId)
@@ -211,16 +209,6 @@ abstract class BaseDelegate<State : Any>(
         state.value = newState
     }
 
-    fun updateCommonState(transform: (BaseState) -> BaseState) {
-        val newState = transform(commonState)
-
-        if (newState != commonState) {
-            logUtils.debugLog("Updating common state from\n$commonState\nto\n$newState", null)
-        }
-
-        commonState = newState
-    }
-
     /**
      * Force the display to remain on, or remove that force.
      *
@@ -246,7 +234,15 @@ abstract class BaseDelegate<State : Any>(
         }
     }
 
-    class BaseState
+    @CallSuper
+    protected open fun onRootViewAttached() {
+        lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_RESUME)
+    }
+
+    @CallSuper
+    protected open fun onRootViewDetached() {
+        lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_PAUSE)
+    }
 
     @SuppressLint("StaticFieldLeak")
     abstract class BaseViewModel<State : Any, Delegate : BaseDelegate<State>>(

@@ -5,7 +5,7 @@ import android.content.Intent
 import android.content.SharedPreferences
 import android.os.Bundle
 import android.view.Display
-import android.view.View
+import android.view.ViewGroup
 import android.view.WindowManager
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.Orientation
@@ -153,7 +153,7 @@ class FrameReorderActivity : BaseActivity(), CoroutineScope by App.instance {
     inner class ReorderDelegate(
         context: Context,
         targetDisplayId: String,
-        override val rootView: View,
+        override val rootView: ViewGroup,
     ) : BaseDelegate<Unit>(context, targetDisplayId) {
         override val viewModel by lazy {
             ReorderViewModel(this)

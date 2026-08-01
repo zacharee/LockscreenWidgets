@@ -4,7 +4,10 @@ import android.content.Context
 import android.content.SharedPreferences
 import android.graphics.*
 import android.graphics.drawable.Drawable
-import android.view.*
+import android.view.Display
+import android.view.Gravity
+import android.view.Surface
+import android.view.WindowManager
 import androidx.compose.animation.*
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -101,8 +104,6 @@ open class MainWidgetFrameDelegate protected constructor(
     override val holderId: Int
         get() = id
 
-    override var commonState: BaseState = BaseState()
-
     override var state = MutableStateFlow(State())
 
     private val saveMode: FrameSizeAndPosition.FrameType
@@ -174,7 +175,7 @@ open class MainWidgetFrameDelegate protected constructor(
         }
     }
 
-    private val frame by lazy {
+    override val rootView by lazy {
         viewModel.createComposeViewHolder {
             WidgetFrameLayout(
                 widgetGrid = { modifier ->
@@ -331,9 +332,6 @@ open class MainWidgetFrameDelegate protected constructor(
         }.also { it.setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed) }
     }
 
-    override val rootView: View
-        get() = frame
-
     override val viewModel = WidgetFrameViewModel(this)
 
     override val prefsHandler = HandlerRegistry {
@@ -390,26 +388,6 @@ open class MainWidgetFrameDelegate protected constructor(
                         !framePrefs.showInNotificationShade) &&
                 (globalState.showingNotificationsPanel.value[this@MainWidgetFrameDelegate.display?.displayId] == false ||
                         framePrefs.hideOnNotificationShade)
-
-    override val rootViewAttachmentStateListener: View.OnAttachStateChangeListener =
-        object : View.OnAttachStateChangeListener {
-            val superObj = super@MainWidgetFrameDelegate.rootViewAttachmentStateListener
-
-            override fun onViewAttachedToWindow(v: View) {
-                superObj.onViewAttachedToWindow(v)
-                v.post {
-                    onFrameAttachmentStateChanged(true)
-                }
-            }
-
-            override fun onViewDetachedFromWindow(v: View) {
-                viewModel.isEditing.value = false
-                viewModel.isRemoving.value = false
-
-                superObj.onViewDetachedFromWindow(v)
-                onFrameAttachmentStateChanged(false)
-            }
-        }
 
     override suspend fun onEvent(event: Event) {
         super.onEvent(event)
@@ -672,10 +650,8 @@ open class MainWidgetFrameDelegate protected constructor(
     suspend fun updateStateAndWindowState(
         updateAccessibility: Boolean = false,
         transform: (State) -> State = { it },
-        commonTransform: (BaseState) -> BaseState = { it },
     ) {
         updateState(transform)
-        updateCommonState(commonTransform)
         updateWindowState(updateAccessibility)
     }
 
@@ -683,19 +659,19 @@ open class MainWidgetFrameDelegate protected constructor(
         logUtils.debugLog("Adding overlay", null)
 
         withContext(Dispatchers.Main) {
-            if (!frame.isAttachedToWindow) {
+            if (!rootView.isAttachedToWindow) {
                 updateWindow()
             }
 
             logUtils.debugLog("Trying to add overlay ${viewModel.animationState.value}", null)
 
-            if (!frame.isAttachedToWindow && viewModel.animationState.value != AnimationState.STATE_ADDING) {
+            if (!rootView.isAttachedToWindow && viewModel.animationState.value != AnimationState.STATE_ADDING) {
                 logUtils.debugLog("Actually adding overlay", null)
 
                 viewModel.animationState.value = AnimationState.STATE_ADDING
 
-                if (wm?.safeAddView(frame, params) == true) {
-                    frame.fadeAndScaleIn(DrawerOrFrame.FRAME)
+                if (wm?.safeAddView(rootView, params) == true) {
+                    rootView.fadeAndScaleIn(DrawerOrFrame.FRAME)
                 }
 
                 viewModel.animationState.value = AnimationState.STATE_IDLE
@@ -708,7 +684,7 @@ open class MainWidgetFrameDelegate protected constructor(
             logUtils.debugLog("Removing overlay")
         }
 
-        if (frame.isAttachedToWindow && viewModel.animationState.value != AnimationState.STATE_REMOVING) {
+        if (rootView.isAttachedToWindow && viewModel.animationState.value != AnimationState.STATE_REMOVING) {
             viewModel.animationState.value = AnimationState.STATE_REMOVING
 
             updateIgnoreAllTouches(true)
@@ -723,11 +699,11 @@ open class MainWidgetFrameDelegate protected constructor(
 
                 logUtils.debugLog("Pre-animation removal", null)
 
-                frame.fadeAndScaleOut(DrawerOrFrame.FRAME)
+                rootView.fadeAndScaleOut(DrawerOrFrame.FRAME)
 
                 logUtils.debugLog("Post-animation removal", null)
 
-                wm?.safeRemoveViewImmediate(frame)
+                wm?.safeRemoveViewImmediate(rootView)
 
                 logUtils.debugLog("Posted removal", null)
             }
@@ -735,8 +711,8 @@ open class MainWidgetFrameDelegate protected constructor(
             updateIgnoreAllTouches()
 
             viewModel.animationState.value = AnimationState.STATE_IDLE
-        } else if (!frame.isAttachedToWindow) {
-            wm?.safeRemoveViewImmediate(frame, false)
+        } else if (!rootView.isAttachedToWindow) {
+            wm?.safeRemoveViewImmediate(rootView, false)
         }
     }
 
@@ -921,7 +897,7 @@ open class MainWidgetFrameDelegate protected constructor(
                     logUtils.debugLog("Setting wallpaper drawable.", null)
 
                     val realSize = display.rotatedRealSize
-                    val loc = frame.locationOnScreen ?: intArrayOf(0, 0)
+                    val loc = rootView.locationOnScreen ?: intArrayOf(0, 0)
 
                     val dWidth: Int = it.intrinsicWidth
                     val dHeight: Int = it.intrinsicHeight
@@ -1029,6 +1005,23 @@ open class MainWidgetFrameDelegate protected constructor(
             updateOverlay()
             updateWallpaperLayerIfNeeded()
         }
+    }
+
+    override fun onRootViewAttached() {
+        super.onRootViewAttached()
+
+        rootView.post {
+            onFrameAttachmentStateChanged(true)
+        }
+    }
+
+    override fun onRootViewDetached() {
+        viewModel.isEditing.value = false
+        viewModel.isRemoving.value = false
+
+        super.onRootViewDetached()
+
+        onFrameAttachmentStateChanged(false)
     }
 
     private suspend fun updateIgnoreAllTouches(override: Boolean = false) {

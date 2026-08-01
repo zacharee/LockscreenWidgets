@@ -10,7 +10,6 @@ import android.appwidget.AppWidgetHostView
 import android.appwidget.AppWidgetProviderInfo
 import android.content.Context
 import android.content.Intent
-import android.os.Build
 import android.view.View
 import android.widget.RemoteViews
 import net.bytebuddy.ByteBuddy
@@ -128,13 +127,9 @@ class WidgetHostCompat(
                     .defineMethod("onClickHandler", Boolean::class.java)
                     .withParameters(View::class.java, PendingIntent::class.java, Intent::class.java)
                     .intercept(MethodDelegation.to(clickHandler))
-                    .apply {
-                        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.M) {
-                            defineMethod("onClickHandler", Boolean::class.java)
-                                .withParameters(View::class.java, PendingIntent::class.java, Intent::class.java, Int::class.java)
-                                .intercept(MethodDelegation.to(clickHandler))
-                        }
-                    }
+                    .defineMethod("onClickHandler", Boolean::class.java)
+                    .withParameters(View::class.java, PendingIntent::class.java, Intent::class.java, Int::class.java)
+                    .intercept(MethodDelegation.to(clickHandler))
                     .make()
                     .load(WidgetHostCompat::class.java.classLoader, AndroidClassLoadingStrategy.Wrapping(context.cacheDir))
                     .loaded
@@ -333,11 +328,8 @@ class WidgetHostCompat(
                     getLaunchOptions.invoke(response, view) as? android.util.Pair<Intent, ActivityOptions>
                 }
 
-                return if (checkPendingIntent(context, pi, widgetId, onClickCallbacks)) {
-                    startPendingIntent.invoke(null, view, pi, launchOptions) as Boolean
-                } else {
-                    false
-                }
+                return checkPendingIntent(context, pi, widgetId, onClickCallbacks)
+                        && startPendingIntent.invoke(null, view, pi, launchOptions) as Boolean
             }
         }
 
@@ -359,12 +351,9 @@ class WidgetHostCompat(
                 pendingIntent: PendingIntent,
                 fillInIntent: Intent,
             ): Boolean {
-                return if (checkPendingIntent(context, pendingIntent, widgetId, onClickCallbacks)) {
-                    clickHandlerClass.getMethod("onClickHandler", View::class.java, PendingIntent::class.java, Intent::class.java)
-                        .invoke(defaultHandler, view, pendingIntent, fillInIntent) as Boolean
-                } else {
-                    false
-                }
+                return checkPendingIntent(context, pendingIntent, widgetId, onClickCallbacks)
+                        && clickHandlerClass.getMethod("onClickHandler", View::class.java, PendingIntent::class.java, Intent::class.java)
+                            .invoke(defaultHandler, view, pendingIntent, fillInIntent) as Boolean
             }
 
             @Suppress("unused")
@@ -374,12 +363,9 @@ class WidgetHostCompat(
                 fillInIntent: Intent,
                 windowingMode: Int,
             ): Boolean {
-                return if (checkPendingIntent(context, pendingIntent, widgetId, onClickCallbacks)) {
-                    clickHandlerClass.getMethod("onClickHandler", View::class.java, PendingIntent::class.java, Intent::class.java, Int::class.java)
-                        .invoke(defaultHandler, view, pendingIntent, fillInIntent, windowingMode) as Boolean
-                } else {
-                    false
-                }
+                return checkPendingIntent(context, pendingIntent, widgetId, onClickCallbacks) &&
+                        clickHandlerClass.getMethod("onClickHandler", View::class.java, PendingIntent::class.java, Intent::class.java, Int::class.java)
+                            .invoke(defaultHandler, view, pendingIntent, fillInIntent, windowingMode) as Boolean
             }
         }
 

@@ -3,7 +3,7 @@ package tk.zwander.lockscreenwidgets.compose
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.SharedPreferences
-import android.view.View
+import android.view.ViewGroup
 import android.view.WindowManager
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.clickable
@@ -35,7 +35,6 @@ import tk.zwander.common.compose.util.rememberPreferenceState
 import tk.zwander.common.data.provider.IFrameProvider
 import tk.zwander.common.host.widgetHostCompat
 import tk.zwander.common.util.*
-import tk.zwander.common.util.BaseDelegate.BaseState
 import tk.zwander.lockscreenwidgets.util.FramePrefs
 import tk.zwander.lockscreenwidgets.util.FrameSpecificPreferences
 import tk.zwander.lockscreenwidgets.util.MainWidgetFrameDelegate
@@ -51,7 +50,7 @@ fun WidgetFramePreviewLayout(
     ) {
         val constraints = this
         val context = LocalContext.current
-        val view = LocalView.current
+        val view = LocalView.current as ViewGroup
         val lifecycleOwner = LocalLifecycleOwner.current
         val savedStateRegistryOwner = LocalSavedStateRegistryOwner.current
 
@@ -177,11 +176,11 @@ fun WidgetFramePreviewLayout(
 class PreviewDelegate(
     themedContext: Context,
     targetDisplayId: String,
-    view: View,
+    view: ViewGroup,
     private val lifecycleOwner: LifecycleOwner,
     private val savedStateRegistryOwner: SavedStateRegistryOwner,
     private val frameId: Int,
-) : BaseDelegate<BaseState>(
+) : BaseDelegate<Unit>(
     context = themedContext,
     targetDisplayId = targetDisplayId,
 ), IFrameProvider {
@@ -197,10 +196,10 @@ class PreviewDelegate(
     override val viewModel
         get() = PreviewViewModel()
 
-    override var state = MutableStateFlow(BaseState())
+    override var state = MutableStateFlow(Unit)
     override val prefsHandler: HandlerRegistry = HandlerRegistry {}
     override val params: WindowManager.LayoutParams = WindowManager.LayoutParams()
-    override val rootView: View = view
+    override val rootView: ViewGroup = view
 
     override suspend fun updateWindow() {}
 
@@ -210,8 +209,8 @@ class PreviewDelegate(
 
     @SuppressLint("StaticFieldLeak")
     inner class PreviewViewModel : MainWidgetFrameDelegate.IWidgetFrameViewModel<
-            BaseState,
-            BaseDelegate<BaseState>,
+            Unit,
+            BaseDelegate<Unit>,
             >(this) {
         override val containerCornerRadiusKey: String =
             PrefManager.KEY_FRAME_CORNER_RADIUS

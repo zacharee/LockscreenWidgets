@@ -43,8 +43,8 @@ import tk.zwander.common.compose.WidgetGrid
 import tk.zwander.common.compose.components.DrawerHandle
 import tk.zwander.common.compose.util.createComposeViewHolder
 import tk.zwander.common.compose.util.findAccessibility
-import tk.zwander.common.compose.util.rememberPreferenceState
 import tk.zwander.common.compose.util.rememberBooleanPreferenceState
+import tk.zwander.common.compose.util.rememberPreferenceState
 import tk.zwander.common.data.provider.IDrawerProvider
 import tk.zwander.common.listeners.WidgetResizeListener
 import tk.zwander.common.util.*
@@ -116,26 +116,7 @@ class DrawerDelegate private constructor(context: Context, displayId: String) :
             gravity = Gravity.TOP or Gravity.CENTER
         }
     }
-    override val rootView: View
-        get() = drawer
-
-    private val handleParams by lazy {
-        WindowManager.LayoutParams().apply {
-            type = WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY
-            flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
-
-            this@DrawerDelegate.display?.let { display ->
-                width = display.dpToPx(context.prefManager.drawerHandleWidth)
-                height = display.dpToPx(context.prefManager.drawerHandleHeight)
-            }
-
-            gravity = Gravity.TOP or context.prefManager.drawerHandleSide
-            y = context.prefManager.drawerHandleYPosition
-            format = PixelFormat.RGBA_8888
-        }
-    }
-
-    private val drawer by lazy {
+    override val rootView by lazy {
         viewModel.createComposeViewHolder {
             val density = LocalDensity.current
             val cutoutPadding = WindowInsets.displayCutout.only(WindowInsetsSides.Top)
@@ -226,20 +207,25 @@ class DrawerDelegate private constructor(context: Context, displayId: String) :
                         } else { Modifier },
                     ),
             )
-        }.apply {
-            addOnAttachStateChangeListener(
-                object : View.OnAttachStateChangeListener {
-                    override fun onViewAttachedToWindow(v: View) {
-                        v.hideNavBarsForGestureExclusion()
-                    }
-
-                    override fun onViewDetachedFromWindow(v: View) {
-                        eventManager.sendEvent(Event.DrawerAttachmentState(false))
-                    }
-                },
-            )
         }
     }
+
+    private val handleParams by lazy {
+        WindowManager.LayoutParams().apply {
+            type = WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY
+            flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
+
+            this@DrawerDelegate.display?.let { display ->
+                width = display.dpToPx(context.prefManager.drawerHandleWidth)
+                height = display.dpToPx(context.prefManager.drawerHandleHeight)
+            }
+
+            gravity = Gravity.TOP or context.prefManager.drawerHandleSide
+            y = context.prefManager.drawerHandleYPosition
+            format = PixelFormat.RGBA_8888
+        }
+    }
+
     private val handle by lazy {
         viewModel.createComposeViewHolder {
             DrawerHandle(
@@ -293,20 +279,6 @@ class DrawerDelegate private constructor(context: Context, displayId: String) :
 
     override val viewModel = DrawerViewModel(this)
 
-    override val rootViewAttachmentStateListener = object : View.OnAttachStateChangeListener {
-        val superObj = super@DrawerDelegate.rootViewAttachmentStateListener
-
-        override fun onViewAttachedToWindow(v: View) {
-            superObj.onViewAttachedToWindow(v)
-        }
-
-        override fun onViewDetachedFromWindow(v: View) {
-            if (!drawer.isAttachedToWindow && !handle.isAttachedToWindow) {
-                superObj.onViewDetachedFromWindow(v)
-            }
-        }
-    }
-
     @SuppressLint("RtlHardcoded")
     override suspend fun onEvent(event: Event) {
         super.onEvent(event)
@@ -345,11 +317,11 @@ class DrawerDelegate private constructor(context: Context, displayId: String) :
                 TaskerIsShowingDrawer::class.java.requestQuery(this)
                 if (event.attached) {
                     if (!viewModel.scrollingOpen.value) {
-                        drawer.fadeIn(DrawerOrFrame.DRAWER)
+                        rootView.fadeIn(DrawerOrFrame.DRAWER)
                         eventManager.sendEvent(Event.DrawerShown)
                         viewModel.drawerAnimationState.value = AnimationState.IDLE
                     } else {
-                        drawer.alpha = 1f
+                        rootView.alpha = 1f
                     }
                 }
             }
@@ -488,6 +460,20 @@ class DrawerDelegate private constructor(context: Context, displayId: String) :
         invalidateInstance()
     }
 
+    override fun onRootViewAttached() {
+        super.onRootViewAttached()
+
+        rootView.hideNavBarsForGestureExclusion()
+    }
+
+    override fun onRootViewDetached() {
+        if (!rootView.isAttachedToWindow && !handle.isAttachedToWindow) {
+            super.onRootViewDetached()
+        }
+
+        eventManager.sendEvent(Event.DrawerAttachmentState(false))
+    }
+
     private suspend fun hideAll() {
         hideDrawer(false)
         hideHandle()
@@ -513,7 +499,7 @@ class DrawerDelegate private constructor(context: Context, displayId: String) :
     private suspend fun hideHandle() {
         withContext(Dispatchers.Main) {
             logUtils.debugLog("Trying to hide handle", null)
-            if (!drawer.isAttachedToWindow) {
+            if (!rootView.isAttachedToWindow) {
                 lifecycleRegistry.safeCurrentState = Lifecycle.State.STARTED
             }
 
@@ -532,11 +518,11 @@ class DrawerDelegate private constructor(context: Context, displayId: String) :
     private suspend fun showDrawer(hideHandle: Boolean = true) {
         withContext(Dispatchers.Main) {
             logUtils.debugLog("Trying to show drawer", null)
-            if (!drawer.isAttachedToWindow && viewModel.drawerAnimationState.value != AnimationState.ADDING) {
+            if (!rootView.isAttachedToWindow && viewModel.drawerAnimationState.value != AnimationState.ADDING) {
                 eventManager.sendEvent(Event.DrawerAttachmentState(true))
                 viewModel.drawerAnimationState.value = AnimationState.ADDING
-                drawer.alpha = 0f
-                wm?.safeAddView(drawer, params)
+                rootView.alpha = 0f
+                wm?.safeAddView(rootView, params)
                 if (hideHandle) {
                     hideHandle()
                 }
@@ -555,8 +541,8 @@ class DrawerDelegate private constructor(context: Context, displayId: String) :
             }
 
             if (isAttached) {
-                drawer.hideNavBarsForGestureExclusion()
-                wm?.safeUpdateViewLayout(drawer, params)
+                rootView.hideNavBarsForGestureExclusion()
+                wm?.safeUpdateViewLayout(rootView, params)
             }
         }
     }
@@ -564,15 +550,15 @@ class DrawerDelegate private constructor(context: Context, displayId: String) :
     private suspend fun hideDrawer(callListener: Boolean = true) {
         withContext(Dispatchers.Main) {
             logUtils.debugLog("Trying to hide drawer, $callListener", null)
-            if (drawer.isAttachedToWindow && viewModel.drawerAnimationState.value != AnimationState.REMOVING) {
+            if (rootView.isAttachedToWindow && viewModel.drawerAnimationState.value != AnimationState.REMOVING) {
                 viewModel.drawerAnimationState.value = AnimationState.REMOVING
                 globalState.handlingClick.remove(ID)
                 viewModel.currentEditingInterfaceId.value = RecyclerView.NO_POSITION
 
                 updateIgnoreDrawerTouches(true)
 
-                drawer.fadeOut(DrawerOrFrame.DRAWER)
-                wm?.safeRemoveView(drawer)
+                rootView.fadeOut(DrawerOrFrame.DRAWER)
+                wm?.safeRemoveView(rootView)
 
                 updateIgnoreDrawerTouches(false)
                 viewModel.drawerAnimationState.value = AnimationState.IDLE
