@@ -598,7 +598,7 @@ class ComposeFrameSettingsActivity : BaseActivity() {
                         title = { stringResource(R.string.settings_screen_page_indicator_behavior) },
                         key = { PrefManager.KEY_PAGE_INDICATOR_BEHAVIOR },
                         icon = { painterResource(R.drawable.ic_baseline_visibility_24) },
-                        defaultValue = { "1" },
+                        defaultValue = { PrefManager.VALUE_PAGE_INDICATOR_BEHAVIOR_AUTO_HIDE.toString() },
                         entries = {
                             val labels = stringArrayResource(R.array.page_indicator_behavior_names)
                             val values = [
