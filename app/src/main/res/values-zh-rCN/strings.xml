@@ -321,6 +321,8 @@
     <string name="auto_cycle">自动循环</string>
     <string name="delay">延迟</string>
     <string name="unit_milliseconds">毫秒</string>
+    <string name="unit_dp">dp</string>
+    <string name="unit_percent">%</string>
     <string name="widget_padding">小部件间填充</string>
     <string name="manage_widget_stacks">管理小部件应用</string>
     <string name="widget_stacks">部件栈</string>
