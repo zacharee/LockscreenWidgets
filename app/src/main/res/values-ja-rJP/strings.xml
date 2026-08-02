@@ -321,6 +321,8 @@
     <string name="auto_cycle">Automatically Cycle</string>
     <string name="delay">Delay</string>
     <string name="unit_milliseconds">ms</string>
+    <string name="unit_dp">dp</string>
+    <string name="unit_percent">%</string>
     <string name="widget_padding">Widget Padding</string>
     <string name="manage_widget_stacks">Manage Widget Stacks</string>
     <string name="widget_stacks">Widget Stacks</string>
