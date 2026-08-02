@@ -489,6 +489,7 @@ class DrawerDelegate private constructor(context: Context, displayId: String) :
 
             if (!handle.isAttachedToWindow && viewModel.handleAnimationState.value != AnimationState.ADDING) {
                 wm?.safeAddView(handle, handleParams)
+                handle.awaitNextDraw()
                 handle.alpha = 0f
                 handle.fadeIn(DrawerOrFrame.DRAWER)
                 viewModel.handleAnimationState.value = AnimationState.IDLE

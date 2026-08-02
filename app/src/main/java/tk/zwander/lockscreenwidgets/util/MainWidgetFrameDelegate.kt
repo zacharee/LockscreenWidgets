@@ -671,6 +671,7 @@ open class MainWidgetFrameDelegate protected constructor(
                 viewModel.animationState.value = AnimationState.STATE_ADDING
 
                 if (wm?.safeAddView(rootView, params) == true) {
+                    rootView.awaitNextDraw()
                     rootView.fadeAndScaleIn(DrawerOrFrame.FRAME)
                 }
 
