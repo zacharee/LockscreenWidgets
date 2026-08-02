@@ -8,6 +8,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -19,8 +20,8 @@ import androidx.compose.ui.zIndex
 import tk.zwander.common.compose.components.BlurView
 import tk.zwander.common.compose.components.ConfirmWidgetRemovalLayout
 import tk.zwander.common.compose.components.DrawerToolbar
-import tk.zwander.common.compose.util.rememberPreferenceState
 import tk.zwander.common.compose.util.rememberBooleanPreferenceState
+import tk.zwander.common.compose.util.rememberPreferenceState
 import tk.zwander.common.util.*
 import tk.zwander.widgetdrawer.util.DrawerDelegate
 
@@ -38,9 +39,12 @@ fun DrawerDelegate.DrawerViewModel.DrawerLayout(
 
     var itemToRemove by this.itemToRemove.collectAsMutableState()
     val cutoutPadding = WindowInsets.displayCutout
+    val statusBarHeight = rememberSaveable {
+        context.statusBarHeight
+    }
     val statusBarPadding = cutoutPadding.only(WindowInsetsSides.Top).takeIf {
         it.getTop(density) > 0
-    } ?: WindowInsets(top = context.statusBarHeight)
+    } ?: WindowInsets(top = statusBarHeight)
 
     val backgroundOverStatusBar by rememberBooleanPreferenceState(
         key = PrefManager.KEY_DRAWER_BACKGROUND_OVER_STATUS_BAR,

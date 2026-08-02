@@ -31,24 +31,24 @@ class WidgetViewCacheRegistry private constructor(@Suppress("unused") private va
     private val cachedViews = HashMap<Int, AppWidgetHostView>()
 
     fun getOrCreateView(context: Context, appWidgetId: Int, appWidget: AppWidgetProviderInfo): AppWidgetHostView {
-        val widgetContext = try {
-            RemoteViewsLayoutInflaterContext(
-                context.safeApplicationContext.createContextAsUser(
-                    appWidget.profile,
-                    CONTEXT_INCLUDE_CODE or Context.CONTEXT_IGNORE_SECURITY,
-                ).themedContext.createApplicationContext(
-                    appWidget.providerInfo.applicationInfo,
-                    CONTEXT_INCLUDE_CODE or Context.CONTEXT_IGNORE_SECURITY,
-                ),
-                appWidgetId,
-            )
-        } catch (e: Throwable) {
-            context.logUtils.debugLog("Unable to create application context for " +
-                    "${appWidget.providerInfo.applicationInfo.packageName}", e)
-            null
-        }
-
         return cachedViews.getOrPut(appWidgetId) {
+            val widgetContext = try {
+                RemoteViewsLayoutInflaterContext(
+                    context.safeApplicationContext.createContextAsUser(
+                        appWidget.profile,
+                        CONTEXT_INCLUDE_CODE or Context.CONTEXT_IGNORE_SECURITY,
+                    ).themedContext.createApplicationContext(
+                        appWidget.providerInfo.applicationInfo,
+                        CONTEXT_INCLUDE_CODE or Context.CONTEXT_IGNORE_SECURITY,
+                    ),
+                    appWidgetId,
+                )
+            } catch (e: Throwable) {
+                context.logUtils.debugLog("Unable to create application context for " +
+                        "${appWidget.providerInfo.applicationInfo.packageName}", e)
+                null
+            }
+
             context.widgetHostCompat.createView(
                 widgetContext ?: context, appWidgetId, appWidget,
             )

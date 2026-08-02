@@ -53,8 +53,11 @@ import dev.zwander.lazyspannedgrid.*
 import dev.zwander.lazyspannedgrid.reorderable.ReorderableLazySpannedGridState
 import dev.zwander.lazyspannedgrid.reorderable.rememberReorderableLazySpannedGridState
 import dev.zwander.lswinterconnect.peekLogUtils
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.launch
 import org.burnoutcrew.reorderable.ReorderableItem
 import org.burnoutcrew.reorderable.detectReorderAfterLongPress
 import org.burnoutcrew.reorderable.reorderable
@@ -601,7 +604,7 @@ private fun <VM : BaseDelegate.BaseViewModel<*, *>> VM.WidgetContents(
         LaunchedEffect(width, height, data.id, data.safeSize) {
             if (!BrokenAppsRegistry.isBroken(widgetInfo)) {
                 try {
-                    withContext(Dispatchers.Main) {
+                    launch(Dispatchers.Main) {
                         widgetView = viewCacheRegistry.getOrCreateView(
                             SafeContextWrapper(context),
                             data.id,

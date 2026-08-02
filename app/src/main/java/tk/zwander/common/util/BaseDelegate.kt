@@ -15,14 +15,13 @@ import androidx.savedstate.SavedStateRegistry
 import androidx.savedstate.SavedStateRegistryController
 import androidx.savedstate.SavedStateRegistryOwner
 import androidx.savedstate.setViewTreeSavedStateRegistryOwner
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.cancel
+import dev.zwander.lswinterconnect.safeApplicationContext
+import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
+import tk.zwander.common.compose.util.widgetViewCacheRegistry
 import tk.zwander.common.data.WidgetData
 import tk.zwander.common.data.WidgetType
 import tk.zwander.common.data.provider.ICurrentWidgetsProvider
@@ -30,6 +29,7 @@ import tk.zwander.common.data.provider.IRowColumProvider
 import tk.zwander.common.host.WidgetHostCompat
 import tk.zwander.common.host.widgetHostCompat
 import tk.zwander.common.util.mitigations.SafeContextWrapper
+import kotlin.math.min
 
 @Suppress("MemberVisibilityCanBePrivate")
 abstract class BaseDelegate<State : Any>(
@@ -122,6 +122,9 @@ abstract class BaseDelegate<State : Any>(
                     updateWindow()
                 }
             }
+        }
+        viewModel.viewModelScope.launch {
+            preloadViews()
         }
 
         val gestureDetector = GestureDetector(
@@ -242,6 +245,48 @@ abstract class BaseDelegate<State : Any>(
     @CallSuper
     protected open fun onRootViewDetached() {
         lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_PAUSE)
+    }
+
+    protected suspend fun preloadViews() = coroutineScope {
+        launch(Dispatchers.IO) {
+            val currentWidgets = currentWidgets.toList()
+            val viewCacheRegistry = context.widgetViewCacheRegistry
+            val widgetManager = appWidgetManager
+
+            val maxPerPage = rowCount * colCount
+            var countDown = maxPerPage
+            var perPage = 0
+
+            for (i in 0 until min(currentWidgets.size, maxPerPage)) {
+                val size = currentWidgets[i].safeSize
+                val takesUp = size.safeWidgetHeightSpan * size.safeWidgetWidthSpan
+
+                countDown -= takesUp
+                perPage++
+
+                if (countDown < 0) {
+                    break
+                }
+            }
+
+            currentWidgets.take(perPage).forEach { widget ->
+                val providerInfo = try {
+                    widgetManager.getAppWidgetInfo(widget.id)
+                } catch (_: Throwable) {
+                    null
+                }
+
+                providerInfo?.let {
+                    launch(Dispatchers.Main) {
+                        viewCacheRegistry.getOrCreateView(
+                            context = SafeContextWrapper(context = safeApplicationContext),
+                            appWidgetId = widget.id,
+                            appWidget = it,
+                        )
+                    }
+                }
+            }
+        }
     }
 
     @SuppressLint("StaticFieldLeak")
