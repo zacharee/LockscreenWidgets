@@ -78,15 +78,16 @@ suspend fun View.awaitNextDraw() {
 
     withTimeoutOrNull(AWAIT_DRAW_TIMEOUT_MS.milliseconds) {
         suspendCancellableCoroutine { cont ->
-            lateinit var listener: ViewTreeObserver.OnDrawListener
-            listener = ViewTreeObserver.OnDrawListener {
-                post {
-                    if (vto.isAlive) {
-                        vto.removeOnDrawListener(listener)
+            val listener = object : ViewTreeObserver.OnDrawListener {
+                override fun onDraw() {
+                    post {
+                        if (vto.isAlive) {
+                            vto.removeOnDrawListener(this)
+                        }
                     }
-                }
-                if (cont.isActive) {
-                    cont.resume(Unit)
+                    if (cont.isActive) {
+                        cont.resume(Unit)
+                    }
                 }
             }
 
