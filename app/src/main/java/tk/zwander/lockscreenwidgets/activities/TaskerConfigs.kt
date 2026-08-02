@@ -2,7 +2,6 @@ package tk.zwander.lockscreenwidgets.activities
 
 import android.content.Context
 import android.os.Bundle
-import android.util.Log
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -54,7 +53,6 @@ abstract class BaseTaskerFrameActivity : BaseActivity(), TaskerPluginConfig<Fram
             ChooseFrameIDsLayout(
                 initialSelectedIds = selectedIds,
                 onSave = {
-                    Log.e("LSW", "onSave")
                     selectedIds = it
                     helper.finishForTasker()
                 },
