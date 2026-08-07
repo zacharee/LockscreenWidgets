@@ -30,6 +30,8 @@ import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import mx.platacard.pagerindicator.PagerWormIndicator
 import tk.zwander.common.activities.DismissOrUnlockActivity
 import tk.zwander.common.activities.SelectIconPackActivity
@@ -174,6 +176,8 @@ open class MainWidgetFrameDelegate protected constructor(
             format = PixelFormat.RGBA_8888
         }
     }
+
+    private val animationMutex = Mutex()
 
     override val rootView by lazy {
         viewModel.createComposeViewHolder {
@@ -670,9 +674,11 @@ open class MainWidgetFrameDelegate protected constructor(
 
                 viewModel.animationState.value = AnimationState.STATE_ADDING
 
-                if (wm?.safeAddView(rootView, params) == true) {
-                    rootView.awaitNextDraw()
-                    rootView.fadeAndScaleIn(DrawerOrFrame.FRAME)
+                animationMutex.withLock {
+                    if (wm?.safeAddView(rootView, params) == true) {
+                        rootView.awaitNextDraw()
+                        rootView.fadeAndScaleIn(DrawerOrFrame.FRAME)
+                    }
                 }
 
                 viewModel.animationState.value = AnimationState.STATE_IDLE
@@ -700,13 +706,15 @@ open class MainWidgetFrameDelegate protected constructor(
 
                 logUtils.debugLog("Pre-animation removal", null)
 
-                rootView.fadeAndScaleOut(DrawerOrFrame.FRAME)
+                animationMutex.withLock {
+                    rootView.fadeAndScaleOut(DrawerOrFrame.FRAME)
 
-                logUtils.debugLog("Post-animation removal", null)
+                    logUtils.debugLog("Post-animation removal", null)
 
-                wm?.safeRemoveViewImmediate(rootView)
+                    wm?.safeRemoveViewImmediate(rootView)
 
-                logUtils.debugLog("Posted removal", null)
+                    logUtils.debugLog("Posted removal", null)
+                }
             }
 
             updateIgnoreAllTouches()
