@@ -660,25 +660,42 @@ open class MainWidgetFrameDelegate protected constructor(
     }
 
     private suspend fun addWindow() {
-        logUtils.debugLog("Adding overlay", null)
+        logUtils.debugLog("Adding overlay", extras = mapOf("frameId" to id, "rootAttachedBefore" to rootView.isAttachedToWindow))
 
         withContext(Dispatchers.Main) {
             if (!rootView.isAttachedToWindow) {
                 updateWindow()
             }
 
-            logUtils.debugLog("Trying to add overlay ${viewModel.animationState.value}", null)
+            logUtils.debugLog("Trying to add overlay ${viewModel.animationState.value}", extras = mapOf(
+                "frameId" to id,
+                "rootAttachedBefore" to rootView.isAttachedToWindow,
+                "animState" to viewModel.animationState.toString(),
+            ))
 
             if (!rootView.isAttachedToWindow && viewModel.animationState.value != AnimationState.STATE_ADDING) {
-                logUtils.debugLog("Actually adding overlay", null)
+                logUtils.debugLog("Actually adding overlay", extras = mapOf(
+                    "frameId" to id,
+                    "displayId" to this@MainWidgetFrameDelegate.display?.uniqueIdCompat,
+                    "paramsWidth" to params.width,
+                    "paramsHeight" to params.height,
+                ))
 
                 viewModel.animationState.value = AnimationState.STATE_ADDING
 
-                animationMutex.withLock {
-                    if (wm?.safeAddView(rootView, params) == true) {
-                        rootView.awaitNextDraw()
-                        rootView.fadeAndScaleIn(DrawerOrFrame.FRAME)
-                    }
+                val addSuccess = animationMutex.withLock {
+                    wm?.safeAddView(rootView, params) == true
+                }
+
+                if (addSuccess) {
+                    logUtils.debugLog("Overlay added successfully", extras = mapOf("frameId" to id))
+                    rootView.awaitNextDraw()
+                    rootView.fadeAndScaleIn(DrawerOrFrame.FRAME)
+                } else {
+                    logUtils.debugLog("Adding overlay failed", extras = mapOf(
+                        "frameId" to id,
+                        "animState" to viewModel.animationState.toString(),
+                    ))
                 }
 
                 viewModel.animationState.value = AnimationState.STATE_IDLE
@@ -688,39 +705,49 @@ open class MainWidgetFrameDelegate protected constructor(
 
     private suspend fun removeWindow() {
         if (isAttached) {
-            logUtils.debugLog("Removing overlay")
+            logUtils.debugLog("Removing overlay", extras = mapOf("frameId" to id, "rootAttachedBefore" to rootView.isAttachedToWindow))
         }
 
         if (rootView.isAttachedToWindow && viewModel.animationState.value != AnimationState.STATE_REMOVING) {
+            logUtils.debugLog("Trying to remove overlay ${viewModel.animationState.value}", extras = mapOf(
+                "frameId" to id,
+                "rootAttachedBefore" to rootView.isAttachedToWindow,
+                "animState" to viewModel.animationState.toString(),
+            ))
+
+            if (!rootView.isAttachedToWindow) {
+                logUtils.debugLog("Root view already detached during removeWindow", extras = mapOf("frameId" to id))
+                return
+            }
+
             viewModel.animationState.value = AnimationState.STATE_REMOVING
 
             updateIgnoreAllTouches(true)
 
             withContext(Dispatchers.Main + NonCancellable) {
+                logUtils.debugLog("Actually removing overlay", extras = mapOf(
+                    "frameId" to id,
+                    "displayId" to this@MainWidgetFrameDelegate.display?.uniqueIdCompat,
+                ))
+
                 viewModel.currentEditingInterfaceId.value = RecyclerView.NO_POSITION
 
                 globalState.handlingClick.remove(id)
                 forceWakelock(on = false, updateOverlay = false)
 
-                logUtils.debugLog("Trying to remove overlay ${viewModel.animationState.value}", null)
-
-                logUtils.debugLog("Pre-animation removal", null)
-
                 animationMutex.withLock {
                     rootView.fadeAndScaleOut(DrawerOrFrame.FRAME)
-
-                    logUtils.debugLog("Post-animation removal", null)
-
                     wm?.safeRemoveViewImmediate(rootView)
-
-                    logUtils.debugLog("Posted removal", null)
                 }
+
+                logUtils.debugLog("Overlay removed successfully", extras = mapOf("frameId" to id))
             }
 
             updateIgnoreAllTouches()
 
             viewModel.animationState.value = AnimationState.STATE_IDLE
         } else if (!rootView.isAttachedToWindow) {
+            logUtils.debugLog("Attempting emergency removeViewImmediate", extras = mapOf("frameId" to id))
             wm?.safeRemoveViewImmediate(rootView, false)
         }
     }

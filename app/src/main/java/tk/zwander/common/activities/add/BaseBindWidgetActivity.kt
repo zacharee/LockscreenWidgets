@@ -90,6 +90,7 @@ abstract class BaseBindWidgetActivity : BaseActivity(), IConfigureActivity {
                     } else {
                         //The user has granted permission for Lockscreen Widgets
                         //so retry binding the widget
+                        logUtils.debugLog("Widget binding permission granted for $id, retrying bind", null)
                         tryBindWidget(widgetInfo)
                     }
                 } else {

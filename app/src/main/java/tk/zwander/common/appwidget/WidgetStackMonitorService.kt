@@ -11,6 +11,7 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.app.PendingIntentCompat
 import androidx.core.graphics.drawable.IconCompat
+import tk.zwander.common.util.logUtils
 import tk.zwander.common.util.getAttrColor
 import tk.zwander.lockscreenwidgets.R
 
@@ -23,6 +24,7 @@ class WidgetStackMonitorService : Service() {
     }
 
     override fun onCreate() {
+        logUtils.debugLog("WidgetStackMonitorService created", null)
         super.onCreate()
 
         nm.createNotificationChannel(
@@ -37,6 +39,7 @@ class WidgetStackMonitorService : Service() {
 
     @SuppressLint("InlinedApi")
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        logUtils.debugLog("WidgetStackMonitorService started", null)
         val color = getAttrColor(android.R.attr.textColorPrimary)
 
         startForeground(
@@ -75,6 +78,11 @@ class WidgetStackMonitorService : Service() {
         )
 
         return START_STICKY
+    }
+
+    override fun onDestroy() {
+        logUtils.debugLog("WidgetStackMonitorService destroyed", null)
+        super.onDestroy()
     }
 
     companion object {

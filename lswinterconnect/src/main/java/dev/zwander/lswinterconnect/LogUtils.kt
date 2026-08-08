@@ -9,8 +9,7 @@ import java.io.File
 import java.io.FileOutputStream
 import java.io.OutputStream
 import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
+import java.util.*
 
 val peekLogUtils: LogUtils?
     get() = LogUtils.peekInstance()
@@ -89,11 +88,11 @@ class LogUtils private constructor(
 
     private fun createLogFileWriter(): BufferedWriter = FileOutputStream(logFile, true).bufferedWriter()
 
-    fun debugLog(message: String, throwable: Throwable? = DefaultException(), leaveBreadcrumb: Boolean = true) {
+    fun debugLog(message: String, throwable: Throwable? = DefaultException(), leaveBreadcrumb: Boolean = true, extras: Map<String, Any?> = mapOf()) {
         if (leaveBreadcrumb) {
             BugsnagUtils.leaveBreadcrumb(
                 message,
-                throwable?.takeIf { it !is DefaultException }?.let { mapOf("error" to throwable.stringify()) } ?: mapOf(),
+                (throwable?.takeIf { it !is DefaultException }?.let { mapOf("error" to throwable.stringify()) } ?: mapOf()) + extras,
                 BreadcrumbType.LOG,
             )
         }

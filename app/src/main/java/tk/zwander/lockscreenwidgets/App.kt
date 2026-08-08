@@ -65,6 +65,7 @@ class App : Application(), CoroutineScope by MainScope(), EventObserver {
         override fun onReceive(context: Context?, intent: Intent?) {
             when (intent?.action) {
                 Intent.ACTION_CLOSE_SYSTEM_DIALOGS -> {
+                    logUtils.debugLog("Received close system dialogs", null)
                     eventManager.sendEvent(Event.CloseSystemDialogs)
                 }
             }
@@ -77,6 +78,7 @@ class App : Application(), CoroutineScope by MainScope(), EventObserver {
         override fun onChange(selfChange: Boolean, uri: Uri?) {
             when (uri) {
                 Settings.Secure.getUriFor(Settings.Secure.UI_NIGHT_MODE) -> {
+                    logUtils.debugLog("Night mode changed", null)
                     eventManager.sendEvent(Event.NightModeUpdate)
                 }
             }
@@ -90,8 +92,13 @@ class App : Application(), CoroutineScope by MainScope(), EventObserver {
 
         override fun onSensorChanged(event: SensorEvent) {
             val dist = event.values[0]
+            val tooClose = dist < event.sensor.maximumRange
 
-            globalState.proxTooClose.value = dist < event.sensor.maximumRange
+            if (tooClose != globalState.proxTooClose.value) {
+                logUtils.debugLog("Proximity sensor: ${if (tooClose) "too close" else "not close"}, dist=$dist", null)
+            }
+
+            globalState.proxTooClose.value = tooClose
         }
     }
 
@@ -119,6 +126,7 @@ class App : Application(), CoroutineScope by MainScope(), EventObserver {
 
     override fun onTrimMemory(level: Int) {
         super.onTrimMemory(level)
+        logUtils.debugLog("Received trim memory, level: $level", null)
         eventManager.sendEvent(Event.TrimMemory(level))
     }
 
