@@ -17,10 +17,7 @@ import androidx.savedstate.SavedStateRegistryOwner
 import androidx.savedstate.setViewTreeSavedStateRegistryOwner
 import dev.zwander.lswinterconnect.safeApplicationContext
 import kotlinx.coroutines.*
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.*
 import tk.zwander.common.compose.util.widgetViewCacheRegistry
 import tk.zwander.common.data.WidgetData
 import tk.zwander.common.data.WidgetType
@@ -34,7 +31,7 @@ import kotlin.math.min
 @Suppress("MemberVisibilityCanBePrivate")
 abstract class BaseDelegate<State : Any>(
     context: Context,
-    open val targetDisplayId: String,
+    open val targetDisplayId: StateFlow<String>,
 ) : SafeContextWrapper(context = context),
     EventObserver, WidgetHostCompat.OnClickCallback, SavedStateRegistryOwner,
     ICurrentWidgetsProvider, IRowColumProvider {
@@ -48,11 +45,14 @@ abstract class BaseDelegate<State : Any>(
     override val context: Context
         get() = this
 
+    @OptIn(ExperimentalCoroutinesApi::class)
     protected val displayFlow: StateFlow<LSDisplay?> by lazy {
-        lsDisplayManager.collectDisplay(targetDisplayId).stateIn(
+        targetDisplayId.flatMapLatest {
+            lsDisplayManager.collectDisplay(it)
+        }.stateIn(
             scope = lifecycleScope,
             started = SharingStarted.Eagerly,
-            initialValue = lsDisplayManager.findDisplayByStringId(targetDisplayId),
+            initialValue = lsDisplayManager.findDisplayByStringId(targetDisplayId.value),
         )
     }
 

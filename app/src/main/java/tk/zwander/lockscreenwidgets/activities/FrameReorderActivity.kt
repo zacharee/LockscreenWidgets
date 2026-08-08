@@ -154,7 +154,7 @@ class FrameReorderActivity : BaseActivity(), CoroutineScope by App.instance {
         context: Context,
         targetDisplayId: String,
         override val rootView: ViewGroup,
-    ) : BaseDelegate<Unit>(context, targetDisplayId) {
+    ) : BaseDelegate<Unit>(context, MutableStateFlow(targetDisplayId)) {
         override val viewModel by lazy {
             ReorderViewModel(this)
         }

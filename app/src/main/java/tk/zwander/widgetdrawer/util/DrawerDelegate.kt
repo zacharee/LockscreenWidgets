@@ -56,7 +56,8 @@ import kotlin.math.absoluteValue
 import kotlin.math.sign
 
 class DrawerDelegate private constructor(context: Context, displayId: String) :
-    BaseDelegate<DrawerDelegate.State>(context = context, targetDisplayId = displayId), IDrawerProvider {
+    BaseDelegate<DrawerDelegate.State>(context = context, targetDisplayId = MutableStateFlow(displayId)),
+    IDrawerProvider {
     companion object {
         const val ID = -2
 

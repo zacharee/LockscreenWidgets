@@ -55,7 +55,8 @@ import kotlin.time.Duration.Companion.milliseconds
 open class MainWidgetFrameDelegate protected constructor(
     context: Context,
     protected val id: Int = ID,
-    override var targetDisplayId: String,
+    initialDisplayId: String,
+    override val targetDisplayId: MutableStateFlow<String> = MutableStateFlow(initialDisplayId)
 ) : BaseDelegate<MainWidgetFrameDelegate.State>(
     context = context,
     targetDisplayId = targetDisplayId,
@@ -86,7 +87,7 @@ open class MainWidgetFrameDelegate protected constructor(
                 if (accessibilityContext == null) {
                     throw IllegalStateException("Delegate can only be initialized by Accessibility Service!")
                 } else {
-                    MainWidgetFrameDelegate(accessibilityContext, targetDisplayId = displayId).also {
+                    MainWidgetFrameDelegate(accessibilityContext, initialDisplayId = displayId).also {
                         instance.value = it
                     }
                 }
@@ -365,7 +366,7 @@ open class MainWidgetFrameDelegate protected constructor(
         }
         handler(PrefManager.KEY_PRIMARY_FRAME_DISPLAY) {
             val display = prefManager.primaryFrameDisplay
-            targetDisplayId = display
+            targetDisplayId.value = display
 
             removeWindow()
 

@@ -182,7 +182,7 @@ class PreviewDelegate(
     private val frameId: Int,
 ) : BaseDelegate<Unit>(
     context = themedContext,
-    targetDisplayId = targetDisplayId,
+    targetDisplayId = MutableStateFlow(targetDisplayId),
 ), IFrameProvider {
     override val holderId: Int
         get() = frameId
