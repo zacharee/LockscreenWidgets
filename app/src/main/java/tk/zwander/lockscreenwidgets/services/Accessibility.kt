@@ -58,7 +58,7 @@ class Accessibility : AccessibilityService(), CoroutineScope by MainScope(), Eve
 
             val removedFrames = currentFrames.filter { [id] -> !newFrameIds.contains(id) }
             val addedFrameIds = newFrameIds.filter { !currentFrames.containsKey(it.key) }
-            val existingFrames = newFrameIds.filter { currentFrames.containsKey(it.key) }
+            val existingFrames = newFrameIds.mapNotNull { id -> currentFrames[id.key]?.let { id.value to it } }
 
             removedFrames.forEach { [id, frame] ->
                 frame.onDestroy()
@@ -79,8 +79,8 @@ class Accessibility : AccessibilityService(), CoroutineScope by MainScope(), Eve
                 currentFrames[id] = newFrame
             }
 
-            existingFrames.forEach { [id, displayId] ->
-                currentFrames[id]?.targetDisplayId?.value = displayId
+            existingFrames.forEach { [displayId, frame] ->
+                frame.targetDisplayId.value = displayId
             }
         }
     }
