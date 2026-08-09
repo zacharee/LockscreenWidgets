@@ -26,20 +26,7 @@ import tk.zwander.common.data.WidgetData
 import tk.zwander.common.data.WidgetSizeData
 import tk.zwander.common.host.WidgetHostCompat
 import tk.zwander.common.host.widgetHostCompat
-import tk.zwander.common.util.ConfigureLauncher
-import tk.zwander.common.util.LSDisplay
-import tk.zwander.common.util.appWidgetManager
-import tk.zwander.common.util.componentNameCompat
-import tk.zwander.common.util.createPersistablePreviewBitmap
-import tk.zwander.common.util.density
-import tk.zwander.common.util.getCellHeightCompat
-import tk.zwander.common.util.getCellWidthCompat
-import tk.zwander.common.util.getRemoteDrawable
-import tk.zwander.common.util.hasConfiguration
-import tk.zwander.common.util.logUtils
-import tk.zwander.common.util.prefManager
-import tk.zwander.common.util.shortcutIdManager
-import tk.zwander.common.util.toSafeBitmap
+import tk.zwander.common.util.*
 import tk.zwander.lockscreenwidgets.R
 import tk.zwander.lockscreenwidgets.data.list.ShortcutListInfo
 
@@ -128,7 +115,7 @@ abstract class BaseBindWidgetActivity : BaseActivity(), IConfigureActivity {
 
                             val shortcut = WidgetData.shortcut(
                                 context = this,
-                                id = shortcutIdManager.allocateShortcutId(),
+                                id = idManager.allocateAndSaveShortcutId(),
                                 label = name,
                                 icon = iconBmp,
                                 iconRes = null,
@@ -200,7 +187,7 @@ abstract class BaseBindWidgetActivity : BaseActivity(), IConfigureActivity {
                             } else {
                                 val shortcut = WidgetData.shortcut(
                                     this,
-                                    shortcutIdManager.allocateShortcutId(),
+                                    idManager.allocateAndSaveShortcutId(),
                                     name, icon, null, intent,
                                     WidgetSizeData(1, 1),
                                 )
@@ -269,7 +256,7 @@ abstract class BaseBindWidgetActivity : BaseActivity(), IConfigureActivity {
      */
     protected open fun tryBindWidget(
         info: AppWidgetProviderInfo,
-        id: Int = widgetHost.allocateAppWidgetId(),
+        id: Int = idManager.allocateId(),
     ) {
         val canBind = appWidgetManager.bindAppWidgetIdIfAllowed(
             id,

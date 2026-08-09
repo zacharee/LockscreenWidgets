@@ -287,7 +287,9 @@ private fun <VM : BaseDelegate.BaseViewModel<*, *>> LazySpannedGridScope.widgetI
         itemsIndexed(
             items = currentWidgetsList,
             span = { index, _ -> SpannedGridItemSpan(spans[index]) },
-            key = { _, data -> data.id },
+            // Ideally, IDs should be fully unique, but there was a bug where data of different types
+            // could be assigned the same ID.
+            key = { _, data -> "${data.id}_${data.type}" },
         ) { index, data ->
             // While a drag is in progress, other items can be reflowed by a full repack on every
             // cell the dragged item passes over (this grid's bin-packing placement is

@@ -309,33 +309,15 @@ class App : Application(), CoroutineScope by MainScope(), EventObserver {
                 }.toMap(),
             )
 
+            val currentIds = idManager.collectAllIds()
             @SuppressLint("NewApi")
-            widgetHostCompat.appWidgetIds.forEach { id ->
-                if (prefManager.currentWidgets.any { it.id == id }) {
-                    return@forEach
+            widgetsToDelete.addAll(
+                widgetHostCompat.appWidgetIds.filterNot { id ->
+                    currentIds.contains(id)
                 }
+            )
 
-                if (prefManager.currentSecondaryFramesWithStringDisplay.any { [frameId] ->
-                        FramePrefs.getWidgetsForFrame(this@App, frameId).any { it.id == id }
-                    }) {
-                    return@forEach
-                }
-
-                if (prefManager.drawerWidgets.any { it.id == id }) {
-                    return@forEach
-                }
-
-                if (prefManager.widgetStackWidgets.any {
-                        it.key == id ||
-                                it.value.any { widget -> widget.id == id }
-                    }) {
-                    return@forEach
-                }
-
-                logUtils.debugLog("Found widget $id not in any widget lists", null)
-
-                widgetsToDelete.add(id)
-            }
+            logUtils.debugLog("Found widgets $widgetsToDelete not in any widget lists", null)
 
             widgetsToDelete.forEach {
                 widgetHostCompat.deleteAppWidgetId(it)

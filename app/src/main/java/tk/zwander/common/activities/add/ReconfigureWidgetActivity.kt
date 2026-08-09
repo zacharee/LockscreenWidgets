@@ -8,6 +8,7 @@ import com.android.internal.widget.RecyclerView
 import tk.zwander.common.activities.DismissOrUnlockActivity
 import tk.zwander.common.host.WidgetHostCompat
 import tk.zwander.common.util.appWidgetManager
+import tk.zwander.common.util.idManager
 import tk.zwander.common.util.logUtils
 
 abstract class ReconfigureWidgetActivity : BaseBindWidgetActivity() {
@@ -42,7 +43,7 @@ abstract class ReconfigureWidgetActivity : BaseBindWidgetActivity() {
         if (appWidgetManager.getAppWidgetInfo(prevId)?.provider == providerInfo.provider) {
             configureWidget(prevId, providerInfo)
         } else {
-            tryBindWidget(providerInfo, widgetHost.allocateAppWidgetId())
+            tryBindWidget(providerInfo, idManager.allocateId())
         }
     }
 
