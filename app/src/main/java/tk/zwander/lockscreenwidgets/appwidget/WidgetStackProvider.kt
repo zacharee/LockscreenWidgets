@@ -56,18 +56,45 @@ class WidgetStackProvider : AppWidgetProvider() {
     override fun onReceive(context: Context, intent: Intent) {
         fromChild = intent.getBooleanExtra(FROM_CHILD, false)
         refresh = intent.getBooleanExtra(EXTRA_REFRESH, false)
+        val widgetIds = intent.getIntArrayExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS)
         this.intent = intent
+
+        context.logUtils.debugLog(
+            message = "onReceive widget stack",
+            throwable = null,
+            extras = mapOf(
+                "fromChild" to fromChild,
+                "refresh" to refresh,
+                "ids" to widgetIds?.contentToString(),
+            ),
+        )
 
         if (intent.action == ACTION_SWAP_INDEX) {
             isSwap = true
             val autoSwap = intent.getBooleanExtra(EXTRA_AUTO_SWAP, false)
             val targetIndex = intent.getIntExtra(EXTRA_SWAP_INDEX, RecyclerView.NO_POSITION)
-
             val backward = intent.getBooleanExtra(EXTRA_BACKWARD, false)
-            val widgetIds = intent.getIntArrayExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS)
+
+            context.logUtils.debugLog(
+                message = "ACTION_SWAP_INDEX",
+                throwable = null,
+                extras = mapOf(
+                    "autoSwap" to autoSwap,
+                    "targetIndex" to targetIndex,
+                    "backward" to backward,
+                    "ids" to widgetIds?.contentToString(),
+                ),
+            )
 
             widgetIds?.forEach { widgetId ->
                 if (autoSwap && context.prefManager.widgetStackAutoChange[widgetId]?.first != true) {
+                    context.logUtils.debugLog(
+                        message = "Received autoswap for stack that doesn't auto-swap",
+                        throwable = null,
+                        extras = mapOf(
+                            "widgetId" to widgetId,
+                        ),
+                    )
                     return@forEach
                 }
 
@@ -101,6 +128,16 @@ class WidgetStackProvider : AppWidgetProvider() {
                 context.prefManager.widgetStackIndices = context.prefManager.widgetStackIndices.apply {
                     this[widgetId] = newIndex
                 }
+
+                context.logUtils.debugLog(
+                    message = "Updated swap index",
+                    throwable = null,
+                    extras = mapOf(
+                        "widgetId" to widgetId,
+                        "newIndex" to newIndex,
+                        "previousIndex" to index,
+                    ),
+                )
             }
 
             onReceive(context, intent.setAction(AppWidgetManager.ACTION_APPWIDGET_UPDATE))
@@ -114,13 +151,31 @@ class WidgetStackProvider : AppWidgetProvider() {
         appWidgetManager: AppWidgetManager,
         appWidgetIds: IntArray,
     ) {
+        context.logUtils.debugLog(
+            message = "onUpdate widget stack",
+            throwable = null,
+            extras = mapOf(
+                "appWidgetIds" to appWidgetIds.contentToString(),
+            ),
+        )
+
         appWidgetIds.forEach { appWidgetId ->
             val root = RemoteViews(context.packageName, R.layout.widget_stack)
             val stackedWidgets = (context.prefManager.widgetStackWidgets[appWidgetId] ?: LinkedHashSet()).toList()
             val index = (context.prefManager.widgetStackIndices[appWidgetId] ?: 0)
                 .coerceAtMost(stackedWidgets.lastIndex)
                 .coerceAtLeast(0)
+
             val widgetData = stackedWidgets.getOrNull(index)
+
+            context.logUtils.debugLog(
+                message = "Current index $index for widget stack $appWidgetId",
+                throwable = null,
+                extras = mapOf(
+                    "widgetData" to widgetData,
+                ),
+            )
+
             val widgetView =
                 widgetData?.let {
                     context.widgetHostCompat.cachedRemoteViews[it.id]?.let { cached ->
@@ -128,8 +183,20 @@ class WidgetStackProvider : AppWidgetProvider() {
                             RemoteViews(cached)
                         } else {
                             cached
+                        }.also {
+                            context.logUtils.debugLog(
+                                message = "Using cached widget view for widget ${widgetData.id} in stack $appWidgetId",
+                                throwable = null,
+                            )
                         }
-                    } ?: appWidgetService.getAppWidgetViews(context.packageName, it.id)
+                    } ?: appWidgetService.getAppWidgetViews(context.packageName, it.id).also { view ->
+                        context.widgetHostCompat.cachedRemoteViews[widgetData.id] = view
+
+                        context.logUtils.debugLog(
+                            message = "Creating widget view for widget ${widgetData.id} in stack $appWidgetId",
+                            throwable = null,
+                        )
+                    }
                 }
 
             root.setViewVisibility(
@@ -165,6 +232,10 @@ class WidgetStackProvider : AppWidgetProvider() {
                     stackSize = stackedWidgets.size,
                 )
             } else {
+                context.logUtils.debugLog(
+                    message = "No widgets in stack $appWidgetId or view failed to inflate",
+                    throwable = null,
+                )
                 root.setOnClickPendingIntent(
                     R.id.add_widget,
                     PendingIntentCompat.getActivity(
@@ -180,7 +251,11 @@ class WidgetStackProvider : AppWidgetProvider() {
 
             App.instance.updateAutoChangeForStack(appWidgetId)
             App.instance.updateWidgetStackMonitor()
-            appWidgetManager.updateAppWidget(appWidgetId, root)
+            try {
+                appWidgetManager.updateAppWidget(appWidgetId, root)
+            } catch (e: SecurityException) {
+                context.logUtils.normalLog("Error updating widget stack widget", e)
+            }
             context.eventManager.sendEvent(Event.StackUpdateComplete(appWidgetId))
         }
     }
@@ -209,6 +284,23 @@ class WidgetStackProvider : AppWidgetProvider() {
             }
         }
 
+        context.logUtils.debugLog(
+            message = "fillInWidgetViews",
+            throwable = null,
+            extras = mapOf(
+                "stackId" to stackId,
+                "innerWidgetId" to innerWidgetId,
+                "index" to index,
+                "stackSize" to stackSize,
+                "style" to style,
+                "realSize" to realSize,
+                "options" to options.keySet().associateWith {
+                    @Suppress("DEPRECATION")
+                    options.get(it)
+                },
+            ),
+        )
+
         setClickListeners(
             context = context,
             root = root,
@@ -236,6 +328,14 @@ class WidgetStackProvider : AppWidgetProvider() {
         )
 
         if (options?.matches(appWidgetManager.getAppWidgetOptions(innerWidgetId)) != true) {
+            context.logUtils.debugLog(
+                message = "Options don't match, updating",
+                throwable = null,
+                extras = mapOf(
+                    "stackId" to stackId,
+                    "innerWidgetId" to innerWidgetId,
+                ),
+            )
             appWidgetManager.updateAppWidgetOptions(innerWidgetId, options)
         }
 
