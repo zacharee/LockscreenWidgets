@@ -385,10 +385,23 @@ class App : Application(), CoroutineScope by MainScope(), EventObserver {
     }
 
     private fun updateProxListener() {
-        if (prefManager.touchProtection) {
+        val touchProtectionEnabled = prefManager.touchProtection
+        val anyDisplayOn = lsDisplayManager.displayPowerStates.value.anyOn
+
+        if (touchProtectionEnabled && anyDisplayOn) {
+            logUtils.debugLog("Registering proximity listener", null)
             registerProxListener()
         } else {
+            logUtils.debugLog(
+                message = "Unregistering proximity listener and setting proxTooClose (currently ${globalState.proxTooClose}) to false",
+                throwable = null,
+                extras = mapOf(
+                    "touchProtectionEnabled" to touchProtectionEnabled,
+                    "anyDisplayOn" to anyDisplayOn,
+                ),
+            )
             unregisterProxListener()
+            globalState.proxTooClose.value = false
         }
     }
 
@@ -402,12 +415,16 @@ class App : Application(), CoroutineScope by MainScope(), EventObserver {
                     1 * 50 * 1000, /* 50ms */
                 )
             }
-        } catch (_: Throwable) {}
+        } catch (e: Throwable) {
+            logUtils.debugLog("Unable to register proximity listener", e)
+        }
     }
 
     private fun unregisterProxListener() {
         try {
             sensorManager.unregisterListener(proximityListener)
-        } catch (_: Throwable) {}
+        } catch (e: Throwable) {
+            logUtils.debugLog("Error unregistering proximity listener", e)
+        }
     }
 }

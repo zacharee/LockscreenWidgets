@@ -70,8 +70,10 @@ class LSDisplayManager private constructor(context: Context) : ContextWrapper(co
     val displayAndWmCache = MutableStateFlow<Map<String, DisplayAndWindowManager>>(mapOf())
 
     val displayPowerStates: StateFlow<DisplayPowerStates> = availableDisplays.map { currentDisplays ->
-        val states = currentDisplays.entries.associate { (val display = value) -> display.uniqueIdCompat to display.isOn }
-        val anyOn = states.any { (value) -> value }
+        var anyOn = false
+        val states = currentDisplays.entries.associate { (val display = value) ->
+            display.uniqueIdCompat to display.isOn.also { anyOn = anyOn || it }
+        }
 
         DisplayPowerStates(
             displayStates = states,
