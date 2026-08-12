@@ -1,6 +1,7 @@
 package tk.zwander.lockscreenwidgets.appwidget
 
 import android.annotation.SuppressLint
+import android.app.AlarmManager
 import android.appwidget.AppWidgetManager
 import android.appwidget.AppWidgetProvider
 import android.content.Context
@@ -19,6 +20,7 @@ import androidx.annotation.ColorInt
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.dp
 import androidx.core.app.PendingIntentCompat
+import androidx.core.content.ContextCompat
 import androidx.core.net.toUri
 import androidx.core.os.BundleCompat
 import androidx.core.util.forEach
@@ -30,14 +32,16 @@ import androidx.core.widget.RemoteViewsCompat.setViewBackgroundColor
 import androidx.core.widget.RemoteViewsCompat.setViewBackgroundResource
 import com.android.internal.appwidget.IAppWidgetService
 import com.android.internal.widget.RecyclerView
+import dev.zwander.lswinterconnect.safeApplicationContext
 import tk.zwander.common.appwidget.RemoteViewsProxyService
+import tk.zwander.common.appwidget.WidgetStackMonitorService
 import tk.zwander.common.data.WidgetStackStyle
 import tk.zwander.common.host.widgetHostCompat
 import tk.zwander.common.util.*
-import tk.zwander.lockscreenwidgets.App
 import tk.zwander.lockscreenwidgets.BuildConfig
 import tk.zwander.lockscreenwidgets.R
 import tk.zwander.lockscreenwidgets.activities.WidgetStackConfigure
+import tk.zwander.lockscreenwidgets.util.MainWidgetFrameDelegate
 import kotlin.math.floor
 import kotlin.math.roundToInt
 
@@ -249,8 +253,8 @@ class WidgetStackProvider : AppWidgetProvider() {
                 )
             }
 
-            App.instance.updateAutoChangeForStack(appWidgetId)
-            App.instance.updateWidgetStackMonitor()
+            updateAutoChangeForStack(context.safeApplicationContext, appWidgetId)
+            updateWidgetStackMonitor(context)
             try {
                 appWidgetManager.updateAppWidget(appWidgetId, root)
             } catch (e: SecurityException) {
@@ -357,6 +361,7 @@ class WidgetStackProvider : AppWidgetProvider() {
         )
 
         fillInFlipper(
+            context = context,
             index = index,
             stackSize = stackSize,
             stackId = stackId,
@@ -503,6 +508,7 @@ class WidgetStackProvider : AppWidgetProvider() {
     }
 
     private fun fillInFlipper(
+        context: Context,
         index: Int,
         stackSize: Int,
         stackId: Int,
@@ -531,7 +537,7 @@ class WidgetStackProvider : AppWidgetProvider() {
             root.removeAllViews(R.id.widget_content_odd)
             root.removeAllViews(R.id.widget_content_third)
         } else {
-            App.instance.scheduleWidgetRefresh(stackId)
+            scheduleWidgetRefresh(context, stackId)
         }
 
         when (realRem) {
@@ -689,6 +695,45 @@ class WidgetStackProvider : AppWidgetProvider() {
         }
     }
 
+    private fun updateAutoChangeForStack(context: Context, stackId: Int) {
+        val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+        val changeInfo = context.prefManager.widgetStackAutoChange[stackId]
+
+        val pi = PendingIntentCompat.getBroadcast(
+            context,
+            stackId + 50000,
+            createSwapIntent(
+                context = context,
+                ids = intArrayOf(stackId),
+                backward = false,
+                autoSwap = true,
+            ),
+            0,
+            true,
+        )!!
+
+        if (changeInfo?.first == true) {
+            alarmManager.set(
+                AlarmManager.RTC,
+                System.currentTimeMillis() + changeInfo.second,
+                pi,
+            )
+        } else {
+            alarmManager.cancel(pi)
+        }
+    }
+
+    private fun scheduleWidgetRefresh(context: Context, id: Int) {
+        mainHandler.postDelayed({
+            update(
+                context = context.safeApplicationContext,
+                ids = intArrayOf(id),
+                fromChild = false,
+                refresh = true,
+            )
+        }, 300)
+    }
+
     override fun onAppWidgetOptionsChanged(
         context: Context,
         appWidgetManager: AppWidgetManager,
@@ -780,6 +825,24 @@ class WidgetStackProvider : AppWidgetProvider() {
                 (baseSize.first - horizontalPaddingDp),
                     (baseSize.second - bottomBarHeightDp - verticalPaddingDp),
             )
+        }
+
+        fun updateWidgetStackMonitor(context: Context) {
+            val appContext = context.safeApplicationContext
+            val shouldRun = appContext.prefManager.widgetStackWidgets.isNotEmpty() &&
+                    MainWidgetFrameDelegate.peekInstance(appContext) == null
+
+            val serviceIntent = Intent(appContext, WidgetStackMonitorService::class.java)
+
+            if (shouldRun) {
+                try {
+                    ContextCompat.startForegroundService(appContext, serviceIntent)
+                } catch (e: Exception) {
+                    appContext.logUtils.debugLog("Couldn't start foreground service", e)
+                }
+            } else {
+                appContext.stopService(serviceIntent)
+            }
         }
 
         private fun createBaseIntent(context: Context, ids: IntArray): Intent {

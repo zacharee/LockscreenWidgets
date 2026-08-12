@@ -15,6 +15,7 @@ import tk.zwander.common.util.AccessibilityUtils.runAccessibilityJob
 import tk.zwander.common.util.AccessibilityUtils.runWindowOperation
 import tk.zwander.lockscreenwidgets.App
 import tk.zwander.lockscreenwidgets.appwidget.IDListProvider
+import tk.zwander.lockscreenwidgets.appwidget.WidgetStackProvider
 import tk.zwander.lockscreenwidgets.util.FramePrefs
 import tk.zwander.lockscreenwidgets.util.FrameSpecificPreferences
 import tk.zwander.lockscreenwidgets.util.MainWidgetFrameDelegate
@@ -93,7 +94,7 @@ class Accessibility : AccessibilityService(), CoroutineScope by MainScope(), Eve
 
         logUtils.debugLog("Accessibility service created.", null)
 
-        App.instance.updateWidgetStackMonitor()
+        WidgetStackProvider.updateWidgetStackMonitor(this)
 
         launch(Dispatchers.Main) {
             lsDisplayManager.displayPowerStates.collect {
@@ -123,7 +124,7 @@ class Accessibility : AccessibilityService(), CoroutineScope by MainScope(), Eve
         frameDelegate.onCreate()
         drawerDelegate.onCreate()
 
-        App.instance.updateWidgetStackMonitor()
+        WidgetStackProvider.updateWidgetStackMonitor(this)
 
         prefManager.currentSecondaryFramesWithStringDisplay.forEach { [secondaryId, secondaryDisplay] ->
             FrameInstances.secondaryFrameDelegates[secondaryId] = SecondaryWidgetFrameDelegate(this, secondaryId, secondaryDisplay).also {
@@ -207,7 +208,7 @@ class Accessibility : AccessibilityService(), CoroutineScope by MainScope(), Eve
             }
             FrameInstances.secondaryFrameDelegates.clear()
 
-            App.instance.updateWidgetStackMonitor()
+            WidgetStackProvider.updateWidgetStackMonitor(App.instance)
 
             logUtils.debugLog("Accessibility destroy work completed", null)
         }

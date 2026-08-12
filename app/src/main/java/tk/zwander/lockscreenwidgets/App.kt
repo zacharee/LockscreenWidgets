@@ -1,7 +1,6 @@
 package tk.zwander.lockscreenwidgets
 
 import android.annotation.SuppressLint
-import android.app.AlarmManager
 import android.app.Application
 import android.content.BroadcastReceiver
 import android.content.Context
@@ -15,7 +14,6 @@ import android.hardware.SensorManager
 import android.net.Uri
 import android.os.Build
 import android.provider.Settings
-import androidx.core.app.PendingIntentCompat
 import androidx.core.content.ContextCompat
 import com.bugsnag.android.Bugsnag
 import com.bugsnag.android.BugsnagExitInfoPlugin
@@ -31,14 +29,12 @@ import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
 import org.lsposed.hiddenapibypass.HiddenApiBypass
 import tk.zwander.common.activities.add.BaseBindWidgetActivity
-import tk.zwander.common.appwidget.WidgetStackMonitorService
 import tk.zwander.common.host.widgetHostCompat
 import tk.zwander.common.util.*
 import tk.zwander.common.util.shizuku.shizukuManager
 import tk.zwander.lockscreenwidgets.activities.add.AddFrameWidgetActivity
 import tk.zwander.lockscreenwidgets.appwidget.WidgetStackProvider
 import tk.zwander.lockscreenwidgets.util.FramePrefs
-import tk.zwander.lockscreenwidgets.util.MainWidgetFrameDelegate
 import tk.zwander.widgetdrawer.activities.add.AddDrawerWidgetActivity
 
 /**
@@ -103,7 +99,6 @@ class App : Application(), CoroutineScope by MainScope(), EventObserver {
     }
 
     private val sensorManager by lazy { getSystemService(SENSOR_SERVICE) as SensorManager }
-    private val alarmManager by lazy { getSystemService(ALARM_SERVICE) as AlarmManager }
     private val lsDisplayManager by lazy { LSDisplayManager.getInstance(this) }
 
     private val prefsHandler by lazy {
@@ -113,7 +108,7 @@ class App : Application(), CoroutineScope by MainScope(), EventObserver {
             }
 
             handler(PrefManager.KEY_WIDGET_STACK_WIDGETS) {
-                updateWidgetStackMonitor()
+                WidgetStackProvider.updateWidgetStackMonitor(this@App)
             }
         }
     }
@@ -327,7 +322,7 @@ class App : Application(), CoroutineScope by MainScope(), EventObserver {
         prefManager.widgetStackWidgets.forEach { [stackId] ->
             WidgetStackProvider.update(this, intArrayOf(stackId))
         }
-        updateWidgetStackMonitor()
+        WidgetStackProvider.updateWidgetStackMonitor(this)
 
         prefsHandler.register(this)
         migrationManager.runMigrations()
@@ -395,61 +390,6 @@ class App : Application(), CoroutineScope by MainScope(), EventObserver {
         } else {
             unregisterProxListener()
         }
-    }
-
-    fun updateWidgetStackMonitor() {
-        val shouldRun = prefManager.widgetStackWidgets.isNotEmpty() &&
-                MainWidgetFrameDelegate.peekInstance(this) == null
-
-        val serviceIntent = Intent(this, WidgetStackMonitorService::class.java)
-
-        if (shouldRun) {
-            try {
-                ContextCompat.startForegroundService(this, serviceIntent)
-            } catch (e: Exception) {
-                logUtils.debugLog("Couldn't start foreground service", e)
-            }
-        } else {
-            stopService(serviceIntent)
-        }
-    }
-
-    fun updateAutoChangeForStack(stackId: Int) {
-        val changeInfo = prefManager.widgetStackAutoChange[stackId]
-
-        val pi = PendingIntentCompat.getBroadcast(
-            this,
-            stackId + 50000,
-            WidgetStackProvider.createSwapIntent(
-                context = this,
-                ids = intArrayOf(stackId),
-                backward = false,
-                autoSwap = true,
-            ),
-            0,
-            true,
-        )!!
-
-        if (changeInfo?.first == true) {
-            alarmManager.set(
-                AlarmManager.RTC,
-                System.currentTimeMillis() + changeInfo.second,
-                pi,
-            )
-        } else {
-            alarmManager.cancel(pi)
-        }
-    }
-
-    fun scheduleWidgetRefresh(id: Int) {
-        mainHandler.postDelayed({
-            WidgetStackProvider.update(
-                context = this,
-                ids = intArrayOf(id),
-                fromChild = false,
-                refresh = true,
-            )
-        }, 300)
     }
 
     private fun registerProxListener() {
