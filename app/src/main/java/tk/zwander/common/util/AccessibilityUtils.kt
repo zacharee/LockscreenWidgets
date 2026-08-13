@@ -106,7 +106,8 @@ object AccessibilityUtils {
         )
 
         val edgePanelIds = unitMapOf(
-            "com.sec.android.daemonapp:id/edge_panel",
+            "com.sec.android.app.launcher:id/panel_rootview",
+            "com.sec.android.app.launcher:id/panel_root_view",
         )
 
         val sysUiPackageNames = unitMapOf(
