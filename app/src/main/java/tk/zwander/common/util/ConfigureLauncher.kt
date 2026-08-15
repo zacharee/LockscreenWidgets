@@ -34,7 +34,7 @@ class ConfigureLauncher(
         activity.registerForActivityResult(ActivityResultContracts.StartIntentSenderForResult()) { result ->
             onActivityResult(CONFIGURE_REQ, result.resultCode, result.data)
         }
-    private val samsungConfigLauncher =
+    private val intentConfigLauncher =
         activity.registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
             onActivityResult(CONFIGURE_REQ, result.resultCode, result.data)
         }
@@ -58,7 +58,7 @@ class ConfigureLauncher(
                 launchIntent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, id)
 
                 currentConfigId = id
-                samsungConfigLauncher.launch(launchIntent)
+                intentConfigLauncher.launch(launchIntent)
                 return true
             } catch (e: Throwable) {
                 activity.logUtils.normalLog("Error launching $tag component $component", e)
