@@ -4,8 +4,10 @@ import android.annotation.SuppressLint
 import android.app.ActivityOptions
 import android.appwidget.AppWidgetManager
 import android.appwidget.AppWidgetProviderInfo
+import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
+import android.content.IntentSender
 import android.os.Build
 import android.os.ServiceManager
 import androidx.activity.ComponentActivity
@@ -39,36 +41,32 @@ class ConfigureLauncher(
 
     private val widgetHost by lazy { activity.widgetHostCompat }
 
-    @SuppressLint("NewApi")
-    fun launch(id: Int): Boolean {
-        try {
-            val samsungConfigComponent = activity.appWidgetManager.getAppWidgetInfo(id)
-                ?.getSamsungConfigureComponent(activity)
+    @SuppressLint("InlinedApi")
+    private fun tryLaunch(
+        tag: String,
+        intentSender: IntentSender?,
+        component: ComponentName?,
+        id: Int,
+    ): Boolean {
+        activity.logUtils.debugLog("Got $tag intent sender $intentSender")
+        activity.logUtils.debugLog("Got $tag component $component", null)
 
-            activity.logUtils.debugLog("Found Samsung config component $samsungConfigComponent for $id.")
-
-            if (samsungConfigComponent != null) {
+        if (component != null) {
+            try {
                 val launchIntent = Intent(AppWidgetManager.ACTION_APPWIDGET_CONFIGURE)
-                launchIntent.component = samsungConfigComponent
+                launchIntent.component = component
                 launchIntent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, id)
 
                 currentConfigId = id
                 samsungConfigLauncher.launch(launchIntent)
                 return true
+            } catch (e: Throwable) {
+                activity.logUtils.normalLog("Error launching $tag component $component", e)
             }
-        } catch (e: Throwable) {
-            activity.logUtils.normalLog("Error configuring Samsung widget", e)
         }
 
-        //Use the system API instead of ACTION_APPWIDGET_CONFIGURE to try to avoid some permissions issues
-        try {
-            val intentSender =
-                IAppWidgetService.Stub.asInterface(ServiceManager.getService(Context.APPWIDGET_SERVICE))
-                    .createAppWidgetConfigIntentSender(activity.opPackageName, id, 0)
-
-            activity.logUtils.debugLog("Intent sender is $intentSender")
-
-            if (intentSender != null) {
+        if (intentSender != null) {
+            try {
                 configLauncher.launch(
                     IntentSenderRequest.Builder(intentSender)
                         .build(),
@@ -86,12 +84,80 @@ class ConfigureLauncher(
                 )
                 currentConfigId = id
                 return true
+            } catch (e: Throwable) {
+                activity.logUtils.normalLog("Error launching $tag intent sender $intentSender", e)
+            }
+        }
+
+        return false
+    }
+
+    @SuppressLint("NewApi")
+    fun launch(id: Int): Boolean {
+        val appWidgetService = IAppWidgetService.Stub.asInterface(ServiceManager.getService(Context.APPWIDGET_SERVICE))
+
+        try {
+            val samsungConfigComponent = activity.appWidgetManager.getAppWidgetInfo(id)
+                ?.getSamsungConfigureComponent(activity)
+
+            val samsungIntentSender = try {
+                IAppWidgetService::class.java.getMethod(
+                    "semCreateAppWidgetConfigIntentSender",
+                    String::class.java,
+                    Int::class.java,
+                    Int::class.java,
+                ).invoke(
+                    appWidgetService,
+                    activity.opPackageName,
+                    id,
+                    0,
+                ) as IntentSender?
+            } catch (e: Throwable) {
+                activity.logUtils.normalLog("Error retrieving Samsung intent sender for $id", e)
+                null
+            }
+
+            if (
+                tryLaunch(
+                    tag = "Samsung",
+                    intentSender = samsungIntentSender,
+                    component = samsungConfigComponent,
+                    id = id,
+                )
+            ) {
+                return true
             }
         } catch (e: Throwable) {
-            activity.logUtils.normalLog("Unable to launch widget config IntentSender", e)
+            activity.logUtils.normalLog("Error configuring Samsung widget for $id", e)
+        }
+
+        //Use the system API instead of ACTION_APPWIDGET_CONFIGURE to try to avoid some permissions issues
+        try {
+            val intentSender = appWidgetService.createAppWidgetConfigIntentSender(activity.opPackageName, id, 0)
+            val component = try {
+                appWidgetService.getAppWidgetInfo(activity.opPackageName, id)
+                    .configure
+            } catch (e: Throwable) {
+                activity.logUtils.normalLog("Error retrieving normal config component for $id", e)
+                null
+            }
+
+            if (
+                tryLaunch(
+                    tag = "Normal",
+                    component = component,
+                    intentSender = intentSender,
+                    id = id,
+                )
+            ) {
+                return true
+            }
+        } catch (e: Throwable) {
+            activity.logUtils.normalLog("Error configuring normal widget for $id", e)
         }
 
         try {
+            activity.logUtils.debugLog("Trying plain system API for normal config for $id", null)
             currentConfigId = id
             widgetHost.startAppWidgetConfigureActivityForResult(
                 activity,
@@ -112,7 +178,7 @@ class ConfigureLauncher(
             )
             return true
         } catch (e: Throwable) {
-            activity.logUtils.normalLog("Unable to startAppWidgetConfigureActivityForResult", e)
+            activity.logUtils.normalLog("Unable to startAppWidgetConfigureActivityForResult for id $id", e)
         }
 
         return false
