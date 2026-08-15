@@ -110,6 +110,9 @@ data class WidgetData(
     val safeType: WidgetType
         get() = type ?: WidgetType.WIDGET
 
+    val gridId: String
+        get() = "${id}_$safeType"
+
     @IgnoredOnParcel
     val widgetProviderComponent: ComponentName? =
         widgetProvider?.let { ComponentName.unflattenFromString(it) }

@@ -24,7 +24,6 @@ import androidx.core.graphics.component2
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.viewModelScope
-import androidx.recyclerview.widget.RecyclerView
 import dev.zwander.lazyspannedgrid.rememberLazySpannedGridState
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -349,7 +348,7 @@ open class MainWidgetFrameDelegate protected constructor(
         handler(
             PrefManager.KEY_LOCK_WIDGET_FRAME,
         ) {
-            viewModel.currentEditingInterfaceId.value = RecyclerView.NO_POSITION
+            viewModel.currentEditingInterfaceId.value = null
         }
         handler(PrefManager.KEY_WIDGET_FRAME_ENABLED) {
             lifecycleScope.launch {
@@ -731,7 +730,7 @@ open class MainWidgetFrameDelegate protected constructor(
                     "displayId" to this@MainWidgetFrameDelegate.display?.uniqueIdCompat,
                 ))
 
-                viewModel.currentEditingInterfaceId.value = RecyclerView.NO_POSITION
+                viewModel.currentEditingInterfaceId.value = null
 
                 globalState.handlingClick.remove(id)
                 forceWakelock(on = false, updateOverlay = false)

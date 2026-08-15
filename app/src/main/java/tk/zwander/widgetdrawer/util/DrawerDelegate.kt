@@ -28,7 +28,6 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.setViewTreeLifecycleOwner
 import androidx.lifecycle.viewModelScope
-import androidx.recyclerview.widget.RecyclerView
 import androidx.savedstate.setViewTreeSavedStateRegistryOwner
 import com.joaomgcd.taskerpluginlibrary.extensions.requestQuery
 import kotlinx.coroutines.Dispatchers
@@ -267,7 +266,7 @@ class DrawerDelegate private constructor(context: Context, displayId: String) :
             }
         }
         handler(PrefManager.KEY_LOCK_WIDGET_DRAWER) {
-            viewModel.currentEditingInterfaceId.value = RecyclerView.NO_POSITION
+            viewModel.currentEditingInterfaceId.value = null
         }
         handler(PrefManager.KEY_SHOW_DRAWER_HANDLE_ONLY_WHEN_LOCKED) {
             if (!prefManager.showDrawerHandleOnlyWhenLocked) {
@@ -555,7 +554,7 @@ class DrawerDelegate private constructor(context: Context, displayId: String) :
             if (rootView.isAttachedToWindow && viewModel.drawerAnimationState.value != AnimationState.REMOVING) {
                 viewModel.drawerAnimationState.value = AnimationState.REMOVING
                 globalState.handlingClick.remove(ID)
-                viewModel.currentEditingInterfaceId.value = RecyclerView.NO_POSITION
+                viewModel.currentEditingInterfaceId.value = null
 
                 updateIgnoreDrawerTouches(true)
 

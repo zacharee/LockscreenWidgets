@@ -142,9 +142,13 @@ fun <VM : BaseDelegate.BaseViewModel<*, *>> VM.WidgetGrid(
     // ends regardless of whether the widget's position actually changed; it's dismissed by
     // dedicated code elsewhere (tapping outside, closing the frame — see currentEditingInterfaceId
     // writes in BaseDelegate/MainWidgetFrameDelegate/DrawerDelegate), not implicitly by this.
-    LaunchedEffect(reorderableState) {
+    LaunchedEffect(reorderableState.draggingItemKey) {
         snapshotFlow { reorderableState.draggingItemKey }
-            .collect { key -> (key as? Int)?.let { currentEditingId = it } }
+            .collect { key ->
+                (key as? String)?.let {
+                    currentEditingId = it
+                }
+            }
     }
 
     val updatedMinColSpan by rememberUpdatedState(minColSpan)
@@ -182,7 +186,7 @@ fun <VM : BaseDelegate.BaseViewModel<*, *>> VM.WidgetGrid(
 
     LaunchedEffect(currentEditingId) {
         globalState.handlingClick.remove(holderId)
-        globalState.itemIsActive.value = currentEditingId != RecyclerView.NO_POSITION
+        globalState.itemIsActive.value = currentEditingId != null
     }
 
     val mainAxisCount = if (orientation == Orientation.Vertical) rowCount else columnCount
@@ -249,8 +253,8 @@ private fun <VM : BaseDelegate.BaseViewModel<*, *>> LazySpannedGridScope.widgetI
     launchShortcutIconOverride: (id: Int) -> Unit,
     spans: List<IntSize>,
     reorderableState: ReorderableLazySpannedGridState,
-    currentEditingId: Int,
-    onCurrentEditingIdChanged: (Int) -> Unit,
+    currentEditingId: String?,
+    onCurrentEditingIdChanged: (String?) -> Unit,
     onWidgetsChanged: (List<WidgetData>) -> Unit,
     resizeThresholdPx: (which: WidgetResizeListener.Which) -> Int,
     blockIndividualWidgetTouches: Boolean,
@@ -289,7 +293,7 @@ private fun <VM : BaseDelegate.BaseViewModel<*, *>> LazySpannedGridScope.widgetI
             span = { index, _ -> SpannedGridItemSpan(spans[index]) },
             // Ideally, IDs should be fully unique, but there was a bug where data of different types
             // could be assigned the same ID.
-            key = { _, data -> "${data.id}_${data.type}" },
+            key = { _, data -> data.gridId },
         ) { index, data ->
             // While a drag is in progress, other items can be reflowed by a full repack on every
             // cell the dragged item passes over (this grid's bin-packing placement is
@@ -305,7 +309,7 @@ private fun <VM : BaseDelegate.BaseViewModel<*, *>> LazySpannedGridScope.widgetI
             val isReordering = reorderableState.draggingItemKey != null
             ReorderableItem(
                 state = reorderableState,
-                key = data.id,
+                key = data.gridId,
                 orientationLocked = false,
                 modifier = Modifier.animateItem(
                     placementSpec = if (isReordering) {
@@ -425,11 +429,11 @@ private fun <VM : BaseDelegate.BaseViewModel<*, *>> VM.WidgetItem(
     launchShortcutIconOverride: (id: Int) -> Unit,
     launchReconfigure: (id: Int, providerInfo: AppWidgetProviderInfo) -> Unit,
     resizeThresholdPx: (which: WidgetResizeListener.Which) -> Int,
-    onCurrentEditingIdChanged: (Int) -> Unit,
+    onCurrentEditingIdChanged: (String?) -> Unit,
     index: Int,
     columnCount: Int,
     rowCount: Int,
-    currentEditingId: Int,
+    currentEditingId: String?,
     blockIndividualWidgetTouches: Boolean,
     modifier: Modifier = Modifier,
 ) {
@@ -544,9 +548,9 @@ private fun <VM : BaseDelegate.BaseViewModel<*, *>> VM.WidgetItem(
         liftCallback = {},
         rowCount = rowCount,
         colCount = columnCount,
-        isEditing = currentEditingId == updatedData.id,
+        isEditing = currentEditingId == updatedData.gridId,
         onEditingDismissed = {
-            onCurrentEditingIdChanged(RecyclerView.NO_POSITION)
+            onCurrentEditingIdChanged(null)
         },
         modifier = modifier
             .fillMaxSize()
@@ -580,7 +584,7 @@ private fun <VM : BaseDelegate.BaseViewModel<*, *>> VM.WidgetContents(
     }
 
     LaunchedEffect(currentEditingId) {
-        if (currentEditingId == updatedData.id) {
+        if (currentEditingId == updatedData.gridId) {
             widgetView?.dispatchTouchEvent(
                 MotionEvent.obtain(
                     System.currentTimeMillis(),
@@ -875,7 +879,7 @@ private fun Modifier.interceptUnclaimedDrags(
     layoutDirection: LayoutDirection,
     scope: CoroutineScope,
     rootView: View,
-    currentEditingId: Int,
+    currentEditingId: String?,
     flingBehavior: FlingBehavior?,
 ): Modifier = composed {
     val updatedEditingId by rememberUpdatedState(currentEditingId)
@@ -972,7 +976,7 @@ private fun Modifier.interceptUnclaimedDrags(
                                             direction
                                         )
 
-                                if (!hasScrollableDescendant && updatedEditingId == RecyclerView.NO_POSITION) {
+                                if (!hasScrollableDescendant && updatedEditingId == null) {
                                     committed = true
                                     change.consume()
 

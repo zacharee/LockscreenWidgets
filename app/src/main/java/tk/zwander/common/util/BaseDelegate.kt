@@ -10,7 +10,6 @@ import androidx.compose.ui.platform.AbstractComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.platform.compositionContext
 import androidx.lifecycle.*
-import androidx.recyclerview.widget.RecyclerView
 import androidx.savedstate.SavedStateRegistry
 import androidx.savedstate.SavedStateRegistryController
 import androidx.savedstate.SavedStateRegistryOwner
@@ -189,7 +188,7 @@ abstract class BaseDelegate<State : Any>(
                         }
                     }
 
-                    viewModel.currentEditingInterfaceId.value = RecyclerView.NO_POSITION
+                    viewModel.currentEditingInterfaceId.value = null
                     currentWidgets = newWidgets
                 }
             }
@@ -295,7 +294,7 @@ abstract class BaseDelegate<State : Any>(
     ) : ViewModel(), IRowColumProvider, ICurrentWidgetsProvider {
         val itemToRemove = MutableStateFlow<WidgetData?>(null)
         val isResizingItem = MutableStateFlow(false)
-        val currentEditingInterfaceId = MutableStateFlow(RecyclerView.NO_POSITION)
+        val currentEditingInterfaceId = MutableStateFlow<String?>(null)
 
         val params: WindowManager.LayoutParams
             get() = delegate.params
