@@ -7,6 +7,7 @@ import android.database.ContentObserver
 import android.net.Uri
 import android.os.Build
 import android.provider.Settings
+import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.material3.AlertDialog
@@ -255,8 +256,20 @@ fun rememberIntroSlides(
                 extraContent = {
                     OutlinedButton(
                         onClick = {
-                            val notifIntent = Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS)
-                            context.startActivity(notifIntent)
+                            try {
+                                val notifIntent = Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS)
+                                context.startActivity(notifIntent)
+                            } catch (e: Throwable) {
+                                context.logUtils.normalLog("Unable to launch notification listener settings", e)
+
+                                try {
+                                    val generalIntent = Intent(Settings.ACTION_MANAGE_ALL_APPLICATIONS_SETTINGS)
+                                    context.startActivity(generalIntent)
+                                } catch (e2: Throwable) {
+                                    context.logUtils.normalLog("Unable to launch all applications settings", e2)
+                                    Toast.makeText(context, R.string.unable_to_launch, Toast.LENGTH_SHORT).show()
+                                }
+                            }
                         },
                         enabled = !hasNotificationAccess,
                     ) {
