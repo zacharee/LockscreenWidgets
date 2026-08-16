@@ -36,6 +36,7 @@
         rikka.shizuku.api,
         rikka.shizuku.shared,
         rikka.shizuku.aidl,
+        com.anggrayudi.storage,
         "
         />
 
