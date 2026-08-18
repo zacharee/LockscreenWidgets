@@ -98,7 +98,7 @@ class LogUtils private constructor(
         }
 
         if (isDebug()) {
-            val fullMessage = generateFullMessage(message, throwable)
+            val fullMessage = generateFullMessage(message, throwable, extras)
 
             Log.e(DEBUG_LOG_TAG, fullMessage)
 
@@ -108,15 +108,15 @@ class LogUtils private constructor(
         }
     }
 
-    fun normalLog(message: String, throwable: Throwable? = DefaultException(), leaveBreadcrumb: Boolean = true, logToFile: Boolean = false) {
-        val fullMessage = generateFullMessage(message, throwable)
+    fun normalLog(message: String, throwable: Throwable? = DefaultException(), leaveBreadcrumb: Boolean = true, logToFile: Boolean = false, extras: Map<String, Any?> = mapOf()) {
+        val fullMessage = generateFullMessage(message, throwable, extras)
 
         Log.e(NORMAL_LOG_TAG, fullMessage)
 
         if (leaveBreadcrumb) {
             BugsnagUtils.leaveBreadcrumb(
                 message,
-                throwable?.takeIf { it !is DefaultException }?.let { mapOf("error" to throwable.stringify()) } ?: mapOf(),
+                (throwable?.takeIf { it !is DefaultException }?.let { mapOf("error" to throwable.stringify()) } ?: mapOf()) + extras,
                 BreadcrumbType.ERROR,
             )
         }
@@ -149,10 +149,10 @@ class LogUtils private constructor(
         }
     }
 
-    private fun generateFullMessage(message: String, throwable: Throwable?): String {
+    private fun generateFullMessage(message: String, throwable: Throwable?, extras: Map<String, Any?>): String {
         val formatter = SimpleDateFormat("yyyy-MM-dd_HH:mm:ss", Locale.getDefault())
 
-        return "${formatter.format(Date())}\n${message}${throwable?.let { 
+        return "${formatter.format(Date())}\n${message}\n${extras}\n${throwable?.let { 
             "\n${Log.getStackTraceString(it)}"
         } ?: ""}"
     }
