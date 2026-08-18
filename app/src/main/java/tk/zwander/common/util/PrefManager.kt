@@ -18,13 +18,10 @@ import androidx.core.content.res.ResourcesCompat
 import androidx.preference.PreferenceManager
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
-import com.joaomgcd.taskerpluginlibrary.extensions.requestQuery
 import dev.zwander.lswinterconnect.safeApplicationContext
 import tk.zwander.common.data.*
 import tk.zwander.common.iconpacks.IconEntry
 import tk.zwander.lockscreenwidgets.R
-import tk.zwander.lockscreenwidgets.activities.TaskerIsAllowedToShowFrame
-import tk.zwander.lockscreenwidgets.activities.TaskerIsForceShowingFrame
 import tk.zwander.lockscreenwidgets.data.Mode
 
 //Convenience method for getting the preference store instance

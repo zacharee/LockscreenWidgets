@@ -2,6 +2,7 @@ package tk.zwander.lockscreenwidgets.appwidget
 
 import android.annotation.SuppressLint
 import android.app.AlarmManager
+import android.app.PendingIntent
 import android.appwidget.AppWidgetManager
 import android.appwidget.AppWidgetProvider
 import android.content.Context
@@ -54,6 +55,7 @@ class WidgetStackProvider : AppWidgetProvider() {
 
     private var fromChild = false
     private var isSwap = false
+    private var isBottomBarToggle = false
     private var refresh = false
     private lateinit var intent: Intent
 
@@ -70,81 +72,107 @@ class WidgetStackProvider : AppWidgetProvider() {
                 "fromChild" to fromChild,
                 "refresh" to refresh,
                 "ids" to widgetIds?.contentToString(),
+                "action" to intent.action,
             ),
         )
 
-        if (intent.action == ACTION_SWAP_INDEX) {
-            isSwap = true
-            val autoSwap = intent.getBooleanExtra(EXTRA_AUTO_SWAP, false)
-            val targetIndex = intent.getIntExtra(EXTRA_SWAP_INDEX, RecyclerView.NO_POSITION)
-            val backward = intent.getBooleanExtra(EXTRA_BACKWARD, false)
+        when (intent.action) {
+            ACTION_SWAP_INDEX -> {
+                isSwap = true
+                val autoSwap = intent.getBooleanExtra(EXTRA_AUTO_SWAP, false)
+                val targetIndex = intent.getIntExtra(EXTRA_SWAP_INDEX, RecyclerView.NO_POSITION)
+                val backward = intent.getBooleanExtra(EXTRA_BACKWARD, false)
 
-            context.logUtils.debugLog(
-                message = "ACTION_SWAP_INDEX",
-                throwable = null,
-                extras = mapOf(
-                    "autoSwap" to autoSwap,
-                    "targetIndex" to targetIndex,
-                    "backward" to backward,
-                    "ids" to widgetIds?.contentToString(),
-                ),
-            )
+                context.logUtils.debugLog(
+                    message = "ACTION_SWAP_INDEX",
+                    throwable = null,
+                    extras = mapOf(
+                        "autoSwap" to autoSwap,
+                        "targetIndex" to targetIndex,
+                        "backward" to backward,
+                        "ids" to widgetIds?.contentToString(),
+                    ),
+                )
 
-            widgetIds?.forEach { widgetId ->
-                if (autoSwap && context.prefManager.widgetStackAutoChange[widgetId]?.first != true) {
+                widgetIds?.forEach { widgetId ->
+                    if (autoSwap && context.prefManager.widgetStackAutoChange[widgetId]?.first != true) {
+                        context.logUtils.debugLog(
+                            message = "Received autoswap for stack that doesn't auto-swap",
+                            throwable = null,
+                            extras = mapOf(
+                                "widgetId" to widgetId,
+                            ),
+                        )
+                        return@forEach
+                    }
+
+                    val allStacks = context.prefManager.widgetStackWidgets
+                    val stackedWidgets = (allStacks[widgetId] ?: LinkedHashSet()).toList()
+
+                    val index = (context.prefManager.widgetStackIndices[widgetId] ?: 0)
+                        .coerceAtMost(stackedWidgets.lastIndex)
+
+                    val newIndex = if (targetIndex != RecyclerView.NO_POSITION) {
+                        targetIndex
+                    } else {
+                        if (backward) {
+                            if (index - 1 >= 0) {
+                                index - 1
+                            } else {
+                                stackedWidgets.lastIndex
+                            }
+                        } else {
+                            if (index + 1 <= stackedWidgets.lastIndex) {
+                                index + 1
+                            } else {
+                                0
+                            }
+                        }
+                    }
+
+                    intent.putExtra(EXTRA_SWAP_INDEX, newIndex)
+                    intent.putExtra(EXTRA_PREVIOUS_INDEX, index)
+
+                    context.prefManager.widgetStackIndices = context.prefManager.widgetStackIndices.apply {
+                        this[widgetId] = newIndex
+                    }
+
                     context.logUtils.debugLog(
-                        message = "Received autoswap for stack that doesn't auto-swap",
+                        message = "Updated swap index",
                         throwable = null,
                         extras = mapOf(
                             "widgetId" to widgetId,
+                            "newIndex" to newIndex,
+                            "previousIndex" to index,
                         ),
                     )
-                    return@forEach
                 }
 
-                val allStacks = context.prefManager.widgetStackWidgets
-                val stackedWidgets = (allStacks[widgetId] ?: LinkedHashSet()).toList()
+                onReceive(context, intent.setAction(AppWidgetManager.ACTION_APPWIDGET_UPDATE))
+            }
 
-                val index = (context.prefManager.widgetStackIndices[widgetId] ?: 0)
-                    .coerceAtMost(stackedWidgets.lastIndex)
+            ACTION_TOGGLE_BOTTOM_BAR -> {
+                isBottomBarToggle = true
+                context.logUtils.debugLog(
+                    message = "ACTION_TOGGLE_BOTTOM_BAR",
+                    throwable = null,
+                    extras = mapOf(
+                        "ids" to widgetIds?.contentToString(),
+                    ),
+                )
 
-                val newIndex = if (targetIndex != RecyclerView.NO_POSITION) {
-                    targetIndex
-                } else {
-                    if (backward) {
-                        if (index - 1 >= 0) {
-                            index - 1
-                        } else {
-                            stackedWidgets.lastIndex
-                        }
-                    } else {
-                        if (index + 1 <= stackedWidgets.lastIndex) {
-                            index + 1
-                        } else {
-                            0
+                widgetIds?.forEach { stackId ->
+                    context.prefManager.widgetStackStyle = context.prefManager.widgetStackStyle.apply {
+                        this[stackId] = (this[stackId] ?: WidgetStackStyle()).let {
+                            it.copy(
+                                showBottomBar = !it.showBottomBar,
+                            )
                         }
                     }
                 }
 
-                intent.putExtra(EXTRA_SWAP_INDEX, newIndex)
-                intent.putExtra(EXTRA_PREVIOUS_INDEX, index)
-
-                context.prefManager.widgetStackIndices = context.prefManager.widgetStackIndices.apply {
-                    this[widgetId] = newIndex
-                }
-
-                context.logUtils.debugLog(
-                    message = "Updated swap index",
-                    throwable = null,
-                    extras = mapOf(
-                        "widgetId" to widgetId,
-                        "newIndex" to newIndex,
-                        "previousIndex" to index,
-                    ),
-                )
+                onReceive(context, intent.setAction(AppWidgetManager.ACTION_APPWIDGET_UPDATE))
             }
-
-            onReceive(context, intent.setAction(AppWidgetManager.ACTION_APPWIDGET_UPDATE))
         }
 
         super.onReceive(context, intent)
@@ -169,6 +197,7 @@ class WidgetStackProvider : AppWidgetProvider() {
             val index = (context.prefManager.widgetStackIndices[appWidgetId] ?: 0)
                 .coerceAtMost(stackedWidgets.lastIndex)
                 .coerceAtLeast(0)
+            val widgetStyle = context.prefManager.widgetStackStyle[appWidgetId] ?: WidgetStackStyle()
 
             val widgetData = stackedWidgets.getOrNull(index)
 
@@ -235,6 +264,28 @@ class WidgetStackProvider : AppWidgetProvider() {
                     root = root,
                     stackSize = stackedWidgets.size,
                 )
+
+                root.setViewVisibility(
+                    R.id.bottom_bar,
+                    if (context.prefManager.widgetStackStyle[appWidgetId]?.showBottomBar == false) {
+                        View.GONE
+                    } else {
+                        View.VISIBLE
+                    },
+                )
+
+                root.setOnClickPendingIntent(
+                    R.id.bottom_bar_toggler,
+                    PendingIntent.getBroadcast(
+                        context,
+                        appWidgetId.hashCode(),
+                        createBottomBarToggleIntent(
+                            context = context,
+                            ids = [appWidgetId],
+                        ),
+                        PendingIntent.FLAG_IMMUTABLE,
+                    ),
+                )
             } else {
                 context.logUtils.debugLog(
                     message = "No widgets in stack $appWidgetId or view failed to inflate",
@@ -251,7 +302,20 @@ class WidgetStackProvider : AppWidgetProvider() {
                         false,
                     ),
                 )
+                root.setViewVisibility(
+                    R.id.bottom_bar,
+                    View.VISIBLE,
+                )
             }
+
+            root.setViewVisibility(
+                R.id.bottom_bar_toggler,
+                if (widgetStyle.showToggler && widgetData != null) {
+                    View.VISIBLE
+                } else {
+                    View.GONE
+                }
+            )
 
             updateAutoChangeForStack(context.safeApplicationContext, appWidgetId)
             updateWidgetStackMonitor(context)
@@ -360,14 +424,16 @@ class WidgetStackProvider : AppWidgetProvider() {
             outerView = root,
         )
 
-        fillInFlipper(
-            context = context,
-            index = index,
-            stackSize = stackSize,
-            stackId = stackId,
-            root = root,
-            viewsToApply = viewsToApply,
-        )
+        if (!isBottomBarToggle) {
+            fillInFlipper(
+                context = context,
+                index = index,
+                stackSize = stackSize,
+                stackId = stackId,
+                root = root,
+                viewsToApply = viewsToApply,
+            )
+        }
 
         applyPadding(
             context = context,
@@ -757,6 +823,7 @@ class WidgetStackProvider : AppWidgetProvider() {
 
     companion object {
         const val ACTION_SWAP_INDEX = "${BuildConfig.APPLICATION_ID}.intent.action.SWAP_INDEX"
+        const val ACTION_TOGGLE_BOTTOM_BAR = "${BuildConfig.APPLICATION_ID}.intent.action.TOGGLE_BOTTOM_BAR"
         const val FROM_CHILD = "from_child"
         const val EXTRA_BACKWARD = "backward"
         const val EXTRA_AUTO_SWAP = "auto_swap"
@@ -799,6 +866,14 @@ class WidgetStackProvider : AppWidgetProvider() {
                         putExtra(EXTRA_SWAP_INDEX, it)
                     }
                 }
+        }
+
+        fun createBottomBarToggleIntent(
+            context: Context,
+            ids: IntArray,
+        ): Intent {
+            return createBaseIntent(context, ids)
+                .setAction(ACTION_TOGGLE_BOTTOM_BAR)
         }
 
         fun extractSizeFromOptions(options: Bundle, applyPadding: Boolean): SizeF {
@@ -852,7 +927,7 @@ class WidgetStackProvider : AppWidgetProvider() {
         }
 
         @SuppressLint("PrivateApi")
-        @Suppress("UNCHECKED_CAST")
+        @Suppress("UNCHECKED_CAST", "DuplicatedCode")
         private fun hoistCollections(
             innerView: RemoteViews,
             rootWidgetViews: RemoteViews,

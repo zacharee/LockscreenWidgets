@@ -13,6 +13,8 @@ data class WidgetStackStyle(
     val roundedCorners: Boolean = true,
     @ColorInt
     val iconColor: Int? = null,
+    val showBottomBar: Boolean = true,
+    val showToggler: Boolean = false,
 ) : Parcelable {
     @ColorInt
     fun getIconColor(context: Context): Int {

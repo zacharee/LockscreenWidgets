@@ -43,39 +43,58 @@
         android:id="@+id/widget_content_wrapper"
         android:orientation="vertical"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:animateLayoutChanges="true">
 
-        <ViewFlipper
-            android:id="@+id/widget_content"
+        <FrameLayout
+            android:id="@+id/widget_content_frame"
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1">
 
-            <LinearLayout
-                android:id="@+id/widget_content_even"
+            <ViewFlipper
+                android:id="@+id/widget_content"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:gravity="center"
-                android:orientation="vertical"
+                android:layout_height="match_parent">
+
+                <LinearLayout
+                    android:id="@+id/widget_content_even"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:gravity="center"
+                    android:orientation="vertical"
                 />
 
-            <LinearLayout
-                android:id="@+id/widget_content_odd"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:gravity="center"
-                android:orientation="vertical"
+                <LinearLayout
+                    android:id="@+id/widget_content_odd"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:gravity="center"
+                    android:orientation="vertical"
                 />
 
-            <LinearLayout
-                android:id="@+id/widget_content_third"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:gravity="center"
-                android:orientation="vertical"
+                <LinearLayout
+                    android:id="@+id/widget_content_third"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:gravity="center"
+                    android:orientation="vertical"
                 />
 
-        </ViewFlipper>
+            </ViewFlipper>
+
+            <ImageView
+                android:id="@+id/bottom_bar_toggler"
+                android:layout_width="24dp"
+                android:layout_height="8dp"
+                android:src="@drawable/pill"
+                android:layout_gravity="bottom|center"
+                android:contentDescription="@string/toggle_controls"
+                android:tint="?android:textColorPrimary"
+                android:layout_marginBottom="2dp"
+                />
+
+        </FrameLayout>
 
         <LinearLayout
             android:id="@+id/bottom_bar"

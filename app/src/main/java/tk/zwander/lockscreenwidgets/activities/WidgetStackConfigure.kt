@@ -700,6 +700,20 @@ fun Content(
                                 )
                             }
                         }
+
+                        item {
+                            CardSwitch(
+                                enabled = localStyles.showToggler,
+                                onEnabledChanged = {
+                                    localStyles = localStyles.copy(
+                                        showToggler = it,
+                                    )
+                                },
+                                title = stringResource(R.string.show_bottom_bar_toggle_control),
+                                titleTextStyle = MaterialTheme.typography.titleMedium,
+                                summary = stringResource(R.string.show_bottom_bar_toggle_control_desc),
+                            )
+                        }
                     }
                 }
 
