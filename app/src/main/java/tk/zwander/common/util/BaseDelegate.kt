@@ -88,6 +88,10 @@ abstract class BaseDelegate<State : Any>(
         rootView.createAlwaysOnComposer(lifecycle = lifecycle)
     }
 
+    private val lifecycleObserver = LifecycleEventObserver { source, event ->
+        logUtils.debugLog("Lifecycle event in ${this::class.java.name}: $event from $source", null)
+    }
+
     var created = false
         protected set
 
@@ -102,6 +106,8 @@ abstract class BaseDelegate<State : Any>(
         savedStateRegistryController.performAttach()
         savedStateRegistryController.performRestore(null)
         lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_CREATE)
+
+        lifecycleRegistry.addObserver(lifecycleObserver)
 
         rootView.setViewTreeLifecycleOwner(this)
         rootView.setViewTreeSavedStateRegistryOwner(this)
@@ -160,6 +166,7 @@ abstract class BaseDelegate<State : Any>(
 
         rootView.removeOnAttachStateChangeListener(rootViewAttachmentStateListener)
         recomposer.cancel()
+        lifecycleRegistry.removeObserver(lifecycleObserver)
 
         if (lifecycle.currentState > Lifecycle.State.INITIALIZED) {
             lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_DESTROY)
