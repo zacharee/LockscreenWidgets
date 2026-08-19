@@ -7,8 +7,6 @@ import android.appwidget.AppWidgetProviderInfo
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
-import android.content.pm.PackageManager
-import android.content.res.Resources
 import android.graphics.drawable.Drawable
 import android.os.Build
 import android.os.Bundle
@@ -52,7 +50,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.content.IntentCompat
-import androidx.core.graphics.drawable.IconCompat
 import com.android.internal.appwidget.IAppWidgetService
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -484,7 +481,8 @@ fun Content(
 
             AnimatedVisibility(
                 visible = localWidgetList.isEmpty(),
-                modifier = Modifier.align(Alignment.Center)
+                modifier = Modifier
+                    .align(Alignment.Center)
                     .padding(horizontal = 32.dp),
             ) {
                 Text(
@@ -585,7 +583,8 @@ fun Content(
                     visible = showingBottomBarOptions,
                 ) {
                     LazyColumn(
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier
+                            .fillMaxWidth()
                             .padding(top = 4.dp),
                         contentPadding = PaddingValues(horizontal = 16.dp),
                         verticalArrangement = Arrangement.spacedBy(8.dp),
@@ -869,45 +868,19 @@ private fun icon(
         icon = withContext(Dispatchers.IO) {
             val previewOrIcon = info.loadPreviewOrIconDrawable(context)
 
-            previewOrIcon ?: try {
-                info.previewImage.run { if (this != 0) this else appInfo.icon }
-                    .let { iconResource ->
-                        try {
-                            IconCompat.createWithResource(
-                                appResources,
-                                appInfo.packageName,
-                                iconResource,
-                            )
-                        } catch (e: IllegalArgumentException) {
-                            context.logUtils.debugLog("Error creating icon", e)
-                            null
-                        }
-                    }?.loadDrawable(context)
-            } catch (e: PackageManager.NameNotFoundException) {
-                context.logUtils.normalLog(
-                    "Unable to load icon for ${appInfo.packageName}, ${key}.",
-                    e,
+            previewOrIcon
+                ?: appResources.iconCompatFromResource(
+                    resourceId = info.previewImage,
+                    fallbackResource = appInfo.icon,
+                    packageName = appInfo.packageName,
+                )?.safeLoadDrawable(
+                    context = context,
+                    key = key,
+                    fallback = {
+                        appInfo.loadIcon(context.packageManager)
+                    },
                 )
-                null
-            } catch (e: NullPointerException) {
-                context.logUtils.normalLog(
-                    "Unable to load icon for ${appInfo.packageName}, ${key}.",
-                    e,
-                )
-                null
-            } catch (e: OutOfMemoryError) {
-                context.logUtils.normalLog(
-                    "Unable to load icon for ${appInfo.packageName}, ${key}.",
-                    e,
-                )
-                null
-            } catch (e: Resources.NotFoundException) {
-                context.logUtils.normalLog(
-                    "Unable to load icon for ${appInfo.packageName}, ${key}.",
-                    e,
-                )
-                appInfo.loadIcon(context.packageManager)
-            } ?: appInfo.loadIcon(context.packageManager)
+                ?: appInfo.loadIcon(context.packageManager)
         }
     }
 

@@ -3,6 +3,7 @@ package tk.zwander.common.util
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.content.res.Resources
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
@@ -15,6 +16,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.core.content.res.ResourcesCompat
 import androidx.core.graphics.createBitmap
+import androidx.core.graphics.drawable.IconCompat
 import androidx.core.graphics.drawable.toBitmap
 import androidx.core.graphics.get
 import androidx.core.graphics.scale
@@ -187,4 +189,56 @@ fun String.textAsBitmap(textSize: Float, textColor: Int): Bitmap {
     val canvas = Canvas(image)
     canvas.drawText(this, 0f, baseline, paint)
     return image
+}
+
+@SuppressLint("RestrictedApi")
+fun Resources.iconCompatFromResource(
+    resourceId: Int,
+    fallbackResource: Int,
+    packageName: String,
+): IconCompat? {
+    resourceId.run { if (this != 0) this else fallbackResource }
+        .let { iconResource ->
+            try {
+                IconCompat.createWithResource(
+                    this,
+                    packageName,
+                    iconResource
+                )
+            } catch (e: IllegalArgumentException) {
+                peekLogUtils?.debugLog("Error creating icon", e)
+                null
+            }
+        }
+    return null
+}
+
+fun IconCompat.safeLoadDrawable(context: Context, key: Any?, fallback: () -> Drawable?): Drawable? {
+    return try {
+        loadDrawable(context)
+    } catch (e: PackageManager.NameNotFoundException) {
+        context.logUtils.normalLog(
+            "Unable to load icon for ${resPackage}, ${key}.",
+            e,
+        )
+        null
+    } catch (e: NullPointerException) {
+        context.logUtils.normalLog(
+            "Unable to load icon for ${resPackage}, ${key}.",
+            e,
+        )
+        null
+    } catch (e: OutOfMemoryError) {
+        context.logUtils.normalLog(
+            "Unable to load icon for ${resPackage}, ${key}.",
+            e,
+        )
+        null
+    } catch (e: Resources.NotFoundException) {
+        context.logUtils.normalLog(
+            "Unable to load icon for ${resPackage}, ${key}.",
+            e,
+        )
+        fallback()
+    }
 }

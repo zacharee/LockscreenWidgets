@@ -1,35 +1,16 @@
 package tk.zwander.common.compose.add
 
-import android.content.pm.PackageManager
-import android.content.res.Resources
 import android.graphics.drawable.Drawable
 import android.os.Build
 import android.view.LayoutInflater
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.add
-import androidx.compose.foundation.layout.asPaddingValues
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.heightIn
-import androidx.compose.foundation.layout.ime
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.systemBars
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Card
 import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.RectangleShape
@@ -42,11 +23,7 @@ import com.google.accompanist.drawablepainter.rememberDrawablePainter
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import tk.zwander.common.data.AppInfo
-import tk.zwander.common.util.componentNameCompat
-import tk.zwander.common.util.getCellHeightCompat
-import tk.zwander.common.util.getCellWidthCompat
-import tk.zwander.common.util.loadPreviewOrIconDrawable
-import tk.zwander.common.util.logUtils
+import tk.zwander.common.util.*
 import tk.zwander.lockscreenwidgets.R
 import tk.zwander.lockscreenwidgets.data.list.BaseListInfo
 import tk.zwander.lockscreenwidgets.data.list.WidgetListInfo
@@ -72,7 +49,9 @@ fun AddWidgetScroller(
             .asPaddingValues(),
     ) {
         items(items = filteredItems, key = { it.appInfo.packageName }) { app ->
-            Column(modifier = Modifier.fillMaxWidth().animateItem()) {
+            Column(modifier = Modifier
+                .fillMaxWidth()
+                .animateItem()) {
                 AppHeader(
                     app = app,
                     modifier = Modifier
@@ -97,7 +76,10 @@ fun AddWidgetScroller(
                             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                                 try {
                                     widget.itemInfo.previewLayout.takeIf { it != 0 }?.let {
-                                        val contextForProvider = context.createApplicationContext(widget.itemInfo.providerInfo.applicationInfo, 0)
+                                        val contextForProvider = context.createApplicationContext(
+                                            widget.itemInfo.providerInfo.applicationInfo,
+                                            0
+                                        )
 
                                         LayoutInflater.from(contextForProvider).inflate(it, null)
                                     }
@@ -255,33 +237,15 @@ private fun icon(
                 info.itemInfo.loadPreviewOrIconDrawable(context)
             } else null
 
-            previewOrIcon ?: try {
-                info.icon?.loadDrawable(context)
-            } catch (e: PackageManager.NameNotFoundException) {
-                context.logUtils.normalLog(
-                    "Unable to load icon for ${info.appInfo.appInfo.packageName}, ${key}.",
-                    e,
+            previewOrIcon
+                ?: info.icon?.safeLoadDrawable(
+                    context = context,
+                    key = key,
+                    fallback = {
+                        info.appInfo.appInfo.loadIcon(context.packageManager)
+                    },
                 )
-                null
-            } catch (e: NullPointerException) {
-                context.logUtils.normalLog(
-                    "Unable to load icon for ${info.appInfo.appInfo.packageName}, ${key}.",
-                    e,
-                )
-                null
-            } catch (e: OutOfMemoryError) {
-                context.logUtils.normalLog(
-                    "Unable to load icon for ${info.appInfo.appInfo.packageName}, ${key}.",
-                    e,
-                )
-                null
-            } catch (e: Resources.NotFoundException) {
-                context.logUtils.normalLog(
-                    "Unable to load icon for ${info.appInfo.appInfo.packageName}, ${key}.",
-                    e,
-                )
-                info.appInfo.appInfo.loadIcon(context.packageManager)
-            } ?: info.appInfo.appInfo.loadIcon(context.packageManager)
+                ?: info.appInfo.appInfo.loadIcon(context.packageManager)
         }
     }
 

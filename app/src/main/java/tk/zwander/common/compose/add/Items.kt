@@ -71,19 +71,11 @@ internal fun items(
                         app.widgets.add(
                             WidgetListInfo(
                                 widgetName = widgetName,
-                                previewImg = it.previewImage.run { if (this != 0) this else appInfo.icon }
-                                    .let { iconResource ->
-                                        try {
-                                            IconCompat.createWithResource(
-                                                appResources,
-                                                appInfo.packageName,
-                                                iconResource,
-                                            )
-                                        } catch (e: IllegalArgumentException) {
-                                            context.logUtils.debugLog("Error creating icon", e)
-                                            null
-                                        }
-                                    },
+                                previewImg = appResources.iconCompatFromResource(
+                                    resourceId = it.previewImage,
+                                    fallbackResource = appInfo.icon,
+                                    packageName = appInfo.packageName,
+                                ),
                                 appInfo = app,
                                 itemInfo = it,
                                 profileIcon = packageManager.getUserBadgeForDensity(
@@ -121,19 +113,11 @@ internal fun items(
                         app.shortcuts.add(
                             ShortcutListInfo(
                                 shortcutName.toString(),
-                                it.iconResource.run { if (this != 0) this else appInfo.icon }
-                                    .let { iconResource ->
-                                        try {
-                                            IconCompat.createWithResource(
-                                                appResources,
-                                                appInfo.packageName,
-                                                iconResource
-                                            )
-                                        } catch (e: IllegalArgumentException) {
-                                            context.logUtils.debugLog("Error creating icon", e)
-                                            null
-                                        }
-                                    },
+                                appResources.iconCompatFromResource(
+                                    resourceId = it.iconResource,
+                                    fallbackResource = appInfo.icon,
+                                    packageName = appInfo.packageName,
+                                ),
                                 app,
                                 it,
                             )
@@ -172,20 +156,12 @@ internal fun items(
                                     )
                                     ?.toSafeBitmap(context.density, maxSize = 128.dp)
                                     ?.let { IconCompat.createWithBitmap(it) } ?: (
-                                        launcherItem.iconResource.run { if (this != 0) this else appInfo.icon }
-                                            .let { iconResource ->
-                                                try {
-                                                    IconCompat.createWithResource(
-                                                        appResources,
-                                                        appInfo.packageName,
-                                                        iconResource
-                                                    )
-                                                } catch (e: IllegalArgumentException) {
-                                                    context.logUtils.debugLog("Error creating icon", e)
-                                                    null
-                                                }
-                                            }
-                                        ),
+                                        appResources.iconCompatFromResource(
+                                            resourceId = launcherItem.iconResource,
+                                            fallbackResource = appInfo.icon,
+                                            packageName = appInfo.packageName,
+                                        )
+                                    ),
                                 appInfo = appEntry,
                                 itemInfo = launcherItem,
                             ),
