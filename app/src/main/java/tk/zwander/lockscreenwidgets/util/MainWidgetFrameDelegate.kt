@@ -63,6 +63,10 @@ open class MainWidgetFrameDelegate protected constructor(
     companion object {
         const val ID = -1
 
+        // Used to prevent trying to add the window too quickly in a short period to try to avoid
+        // native Skia crashes.
+        private val WINDOW_ADD_DEBOUNCE_DELAY = 50.milliseconds
+
         private val instance = MutableStateFlow<MainWidgetFrameDelegate?>(null)
 
         val readOnlyInstance = instance.asStateFlow()
@@ -178,6 +182,8 @@ open class MainWidgetFrameDelegate protected constructor(
     }
 
     private val animationMutex = Mutex()
+
+    private var pendingShowJob: Job? = null
 
     override val rootView by lazy {
         viewModel.createComposeViewHolder {
@@ -771,15 +777,28 @@ open class MainWidgetFrameDelegate protected constructor(
     }
 
     suspend fun updateWindowState(updateAccessibility: Boolean = false) {
-        lifecycleScope.launch {
-            if (canShow()) {
-                if (updateAccessibility) updateAccessibilityPass()
-                addWindow()
-            } else {
+        if (canShow()) {
+            pendingShowJob?.cancel()
+
+            val job = lifecycleScope.launch {
+                delay(WINDOW_ADD_DEBOUNCE_DELAY)
+
+                // Make sure we can still show the frame.
+                if (canShow()) {
+                    if (updateAccessibility) updateAccessibilityPass()
+                    addWindow()
+                }
+            }
+            pendingShowJob = job
+            job.join()
+        } else {
+            pendingShowJob?.cancel()
+
+            lifecycleScope.launch {
                 removeWindow()
                 if (updateAccessibility) updateAccessibilityPass()
-            }
-        }.join()
+            }.join()
+        }
     }
 
     /**
