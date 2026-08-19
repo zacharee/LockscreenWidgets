@@ -302,6 +302,9 @@ open class MainWidgetFrameDelegate protected constructor(
                                 context.eventManager.sendEvent(Event.LaunchAddWidget(holderId))
                             },
                             launchReconfigure = { id, providerInfo ->
+                                updateState {
+                                    it.copy(isPreview = false)
+                                }
                                 ReconfigureFrameWidgetActivity.launch(context, id, holderId, providerInfo)
                             },
                             launchShortcutIconOverride = { id ->

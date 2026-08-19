@@ -313,31 +313,36 @@ abstract class BaseBindWidgetActivity : BaseActivity(), IConfigureActivity {
      * @param provider the current widget's provider
      */
     protected fun getWidgetPermission(id: Int, provider: ComponentName) {
-        try {
-            val intent = Intent(AppWidgetManager.ACTION_APPWIDGET_BIND)
-            intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, id)
-            intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_PROVIDER, provider)
+        mainHandler.postDelayed(
+            {
+                try {
+                    val intent = Intent(AppWidgetManager.ACTION_APPWIDGET_BIND)
+                    intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, id)
+                    intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_PROVIDER, provider)
 
-            currentRequestId = id
-            permRequest.launch(intent)
-        } catch (e: ActivityNotFoundException) {
-            logUtils.normalLog("Unable to launch widget permission request", e)
-            widgetHost.deleteAppWidgetId(id)
-            pendingErrors++
+                    currentRequestId = id
+                    permRequest.launch(intent)
+                } catch (e: ActivityNotFoundException) {
+                    logUtils.normalLog("Unable to launch widget permission request", e)
+                    widgetHost.deleteAppWidgetId(id)
+                    pendingErrors++
 
-            MaterialAlertDialogBuilder(this)
-                .setTitle(R.string.error)
-                .setMessage(
-                    resources.getString(
-                        R.string.bind_widget_error,
-                        provider,
-                    ),
-                )
-                .setPositiveButton(android.R.string.ok) { _, _ ->
-                    pendingErrors--
+                    MaterialAlertDialogBuilder(this)
+                        .setTitle(R.string.error)
+                        .setMessage(
+                            resources.getString(
+                                R.string.bind_widget_error,
+                                provider,
+                            ),
+                        )
+                        .setPositiveButton(android.R.string.ok) { _, _ ->
+                            pendingErrors--
+                        }
+                        .show()
                 }
-                .show()
-        }
+            },
+            100,
+        )
     }
 
     /**
