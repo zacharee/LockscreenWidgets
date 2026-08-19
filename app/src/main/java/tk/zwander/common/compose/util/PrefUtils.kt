@@ -1,49 +1,47 @@
 package tk.zwander.common.compose.util
 
-import android.annotation.SuppressLint
+import android.content.Context
 import android.content.SharedPreferences
 import androidx.compose.runtime.*
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.edit
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 import tk.zwander.common.util.prefManager
 
-@Composable
-fun <T> rememberPreferenceState(
+fun <T> Context.preferenceAsState(
     key: String,
-    preferences: SharedPreferences = LocalContext.current.prefManager.prefs,
+    scope: CoroutineScope,
+    preferences: SharedPreferences = prefManager.prefs,
     onChanged: suspend (String, T) -> Unit = { _, _ -> },
     value: (String) -> T,
 ): MutableState<T> {
-    val state = remember(key) {
-        mutableStateOf(value(key))
-    }
-    val scope = rememberCoroutineScope()
-
-    LaunchedEffect(key1 = state.value) {
-        launch(Dispatchers.IO) {
-            onChanged(key, state.value)
-        }
-    }
-
-    DisposableEffect(key1 = key) {
-        val listener = SharedPreferences.OnSharedPreferenceChangeListener { _, k ->
-            if (key == k) {
-                scope.launch(Dispatchers.IO) {
-                    state.value = value(key)
-                }
+    val state = mutableStateOf(value(key))
+    val listener = SharedPreferences.OnSharedPreferenceChangeListener { _, k ->
+        if (key == k) {
+            scope.launch(Dispatchers.IO) {
+                state.value = value(key)
             }
         }
+    }
 
+    scope.launch(Dispatchers.IO) {
+        snapshotFlow { state.value }.collect {
+            if (it != value(key)) {
+                onChanged(key, it)
+            }
+        }
+    }
+
+    scope.launch {
         preferences.registerOnSharedPreferenceChangeListener(listener)
 
-        onDispose {
+        try {
+            awaitCancellation()
+        } catch (_: CancellationException) {
             preferences.unregisterOnSharedPreferenceChangeListener(listener)
         }
     }
 
-    @SuppressLint("UnrememberedMutableState")
     return object : MutableState<T> {
         override var value: T
             get() = derivedStateOf { state.value }.value
@@ -61,6 +59,31 @@ fun <T> rememberPreferenceState(
             }
         }
     }
+}
+
+@Composable
+fun <T> rememberPreferenceState(
+    key: String,
+    preferences: SharedPreferences = LocalContext.current.prefManager.prefs,
+    onChanged: suspend (String, T) -> Unit = { _, _ -> },
+    value: (String) -> T,
+): MutableState<T> {
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+
+    val state by remember {
+        derivedStateOf {
+            context.preferenceAsState(
+                key = key,
+                preferences = preferences,
+                onChanged = onChanged,
+                value = value,
+                scope = scope,
+            )
+        }
+    }
+
+    return state
 }
 
 @Composable

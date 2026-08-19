@@ -75,7 +75,7 @@ fun DrawerDelegate.DrawerViewModel.DrawerLayout(
                             statusBarPadding.asPaddingValues()
                         },
                     )
-                    .background(backgroundColor)
+                    .background(backgroundColor),
             )
 
             val blurStatusBarArea by rememberBooleanPreferenceState(

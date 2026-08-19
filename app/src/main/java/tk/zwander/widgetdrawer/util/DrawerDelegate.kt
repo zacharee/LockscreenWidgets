@@ -16,14 +16,15 @@ import android.view.animation.DecelerateInterpolator
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.layout.*
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.add
+import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.compositionContext
 import androidx.compose.ui.unit.dp
+import androidx.core.view.ViewCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.setViewTreeLifecycleOwner
@@ -40,10 +41,7 @@ import tk.zwander.common.activities.DismissOrUnlockActivity
 import tk.zwander.common.activities.SelectIconPackActivity
 import tk.zwander.common.compose.WidgetGrid
 import tk.zwander.common.compose.components.DrawerHandle
-import tk.zwander.common.compose.util.createComposeViewHolder
-import tk.zwander.common.compose.util.findAccessibility
-import tk.zwander.common.compose.util.rememberBooleanPreferenceState
-import tk.zwander.common.compose.util.rememberPreferenceState
+import tk.zwander.common.compose.util.*
 import tk.zwander.common.data.provider.IDrawerProvider
 import tk.zwander.common.listeners.WidgetResizeListener
 import tk.zwander.common.util.*
@@ -117,10 +115,20 @@ class DrawerDelegate private constructor(context: Context, displayId: String) :
         }
     }
     override val rootView by lazy {
+        var previousNonZeroCutout by mutableIntStateOf(0)
+        var currentWidgetsState by preferenceAsState(
+            key = PrefManager.KEY_DRAWER_WIDGETS,
+            value = { currentWidgets.toList() },
+            onChanged = { _, value -> currentWidgets = value.toSet() },
+            scope = lifecycleScope,
+        )
+
         viewModel.createComposeViewHolder {
-            val density = LocalDensity.current
-            val cutoutPadding = WindowInsets.displayCutout.only(WindowInsetsSides.Top)
-                .takeIf { it.getTop(density) > 0 } ?: WindowInsets(top = context.statusBarHeight)
+            val cutoutPadding by remember {
+                derivedStateOf {
+                    WindowInsets(top = previousNonZeroCutout)
+                }
+            }
 
             val drawerSidePadding by rememberPreferenceState(
                 key = PrefManager.KEY_DRAWER_SIDE_PADDING,
@@ -148,11 +156,6 @@ class DrawerDelegate private constructor(context: Context, displayId: String) :
                     ) {
                         prefManager.drawerColCount
                     }
-                    var currentWidgetsState by rememberPreferenceState(
-                        key = PrefManager.KEY_DRAWER_WIDGETS,
-                        value = { currentWidgets.toList() },
-                        onChanged = { _, value -> currentWidgets = value.toSet() },
-                    )
                     val drawerLocked by rememberBooleanPreferenceState(
                         key = PrefManager.KEY_LOCK_WIDGET_DRAWER,
                     )
@@ -207,6 +210,15 @@ class DrawerDelegate private constructor(context: Context, displayId: String) :
                         } else { Modifier },
                     ),
             )
+        }.also {
+            it.addOnAttachStateChangeListener(object : View.OnAttachStateChangeListener {
+                override fun onViewAttachedToWindow(v: View) {
+                    previousNonZeroCutout = ViewCompat.getRootWindowInsets(v)
+                        ?.displayCutout?.safeInsetTop ?: 0
+                }
+
+                override fun onViewDetachedFromWindow(v: View) {}
+            })
         }
     }
 
@@ -241,10 +253,15 @@ class DrawerDelegate private constructor(context: Context, displayId: String) :
             addOnAttachStateChangeListener(
                 object : View.OnAttachStateChangeListener {
                     override fun onViewAttachedToWindow(v: View) {
+                        lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_RESUME)
                         v.hideNavBarsForGestureExclusion()
                     }
 
-                    override fun onViewDetachedFromWindow(v: View) {}
+                    override fun onViewDetachedFromWindow(v: View) {
+                        if (!rootView.isAttachedToWindow) {
+                            lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_PAUSE)
+                        }
+                    }
                 },
             )
         }
@@ -500,9 +517,6 @@ class DrawerDelegate private constructor(context: Context, displayId: String) :
     private suspend fun hideHandle() {
         withContext(Dispatchers.Main) {
             logUtils.debugLog("Trying to hide handle", null)
-            if (!rootView.isAttachedToWindow) {
-                lifecycleRegistry.safeCurrentState = Lifecycle.State.STARTED
-            }
 
             if (handle.isAttachedToWindow && viewModel.handleAnimationState.value != AnimationState.REMOVING) {
                 updateIgnoreHandleTouches(true)
