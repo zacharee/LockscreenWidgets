@@ -350,4 +350,7 @@
     <string name="more">More</string>
     <string name="edit_layout">Edit Layout</string>
     <string name="edit_layout_desc">Use this screen to reorder and resize your frame widgets with more room to interact.</string>
+    <string name="toggle_controls">Toggle Controls</string>
+    <string name="show_bottom_bar_toggle_control">Show controls toggle.</string>
+    <string name="show_bottom_bar_toggle_control_desc">When enabled, shows a small pill above the widget stack controls that can be tapped to hide them.</string>
 </resources>
