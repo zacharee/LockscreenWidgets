@@ -212,7 +212,7 @@ abstract class BaseDelegate<State : Any>(
         val newState = transform(state.value)
 
         if (newState != state) {
-            logUtils.debugLog("Updating state from\n$state\nto\n$newState", null)
+            logUtils.debugLog("Updating state from\n${state.value}\n to \n$newState", null)
         }
 
         state.value = newState
