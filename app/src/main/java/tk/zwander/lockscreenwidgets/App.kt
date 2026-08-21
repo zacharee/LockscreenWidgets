@@ -13,6 +13,7 @@ import android.hardware.SensorEventListener2
 import android.hardware.SensorManager
 import android.net.Uri
 import android.os.Build
+import android.os.DeadObjectException
 import android.provider.Settings
 import androidx.core.content.ContextCompat
 import com.bugsnag.android.Bugsnag
@@ -150,6 +151,9 @@ class App : Application(), CoroutineScope by MainScope(), EventObserver {
                     "tk.zwander.common",
                     "dev.zwander.lswwallpaper",
                     "dev.zwander.lswinterconnect",
+                ]
+                discardClasses = [
+                    Regex(".*?${DeadObjectException::class.java.name}").toPattern(),
                 ]
             })
             BugsnagPerformance.start(PerformanceConfiguration.load(this).apply {
