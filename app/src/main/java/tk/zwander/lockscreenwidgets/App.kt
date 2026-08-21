@@ -165,6 +165,13 @@ class App : Application(), CoroutineScope by MainScope(), EventObserver {
             Bugsnag.addOnError {
                 val error = it.originalError
 
+                logUtils.normalLog(
+                    message = "Bugsnag error",
+                    throwable = error,
+                    logToFile = true,
+                    leaveBreadcrumb = false,
+                )
+
                 if (error is ClassCastException && error.stackTrace.firstOrNull()?.className?.contains("PmsHookApplication") == true) {
                     return@addOnError false
                 }
