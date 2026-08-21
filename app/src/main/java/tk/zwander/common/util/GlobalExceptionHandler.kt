@@ -6,16 +6,16 @@ import kotlin.system.exitProcess
 
 class GlobalExceptionHandler(private val context: Context, private val previousHandler: Thread.UncaughtExceptionHandler?) : Thread.UncaughtExceptionHandler {
     override fun uncaughtException(t: Thread, e: Throwable) {
+        context.logUtils.normalLog(
+            message = "Uncaught Exception!",
+            throwable = e,
+            leaveBreadcrumb = false,
+            logToFile = true,
+        )
+
         if (e is DeadObjectException || e.hasDeadObjectExceptionCause()) {
             exitProcess(100)
         } else {
-            context.logUtils.normalLog(
-                message = "Uncaught Exception!",
-                throwable = e,
-                leaveBreadcrumb = false,
-                logToFile = true,
-            )
-
             previousHandler?.uncaughtException(t, e)
         }
     }
