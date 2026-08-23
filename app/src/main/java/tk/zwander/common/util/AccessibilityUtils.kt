@@ -103,6 +103,7 @@ object AccessibilityUtils {
 
         val powerMenuIds = unitMapOf(
             "com.android.systemui:id/sec_global_actions_icon",
+            "com.android.systemui:id/global_actions_container",
         )
 
         val edgePanelIds = unitMapOf(
