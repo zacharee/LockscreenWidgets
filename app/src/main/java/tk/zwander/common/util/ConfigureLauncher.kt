@@ -51,20 +51,6 @@ class ConfigureLauncher(
         activity.logUtils.debugLog("Got $tag intent sender $intentSender")
         activity.logUtils.debugLog("Got $tag component $component", null)
 
-        if (component != null) {
-            try {
-                val launchIntent = Intent(AppWidgetManager.ACTION_APPWIDGET_CONFIGURE)
-                launchIntent.component = component
-                launchIntent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, id)
-
-                currentConfigId = id
-                intentConfigLauncher.launch(launchIntent)
-                return true
-            } catch (e: Throwable) {
-                activity.logUtils.normalLog("Error launching $tag component $component", e)
-            }
-        }
-
         if (intentSender != null) {
             try {
                 configLauncher.launch(
@@ -86,6 +72,20 @@ class ConfigureLauncher(
                 return true
             } catch (e: Throwable) {
                 activity.logUtils.normalLog("Error launching $tag intent sender $intentSender", e)
+            }
+        }
+
+        if (component != null) {
+            try {
+                val launchIntent = Intent(AppWidgetManager.ACTION_APPWIDGET_CONFIGURE)
+                launchIntent.component = component
+                launchIntent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, id)
+
+                currentConfigId = id
+                intentConfigLauncher.launch(launchIntent)
+                return true
+            } catch (e: Throwable) {
+                activity.logUtils.normalLog("Error launching $tag component $component", e)
             }
         }
 
