@@ -1,7 +1,6 @@
 package tk.zwander.common.compose.components
 
 import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
@@ -15,7 +14,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import tk.zwander.lockscreenwidgets.R
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TitleBar(
     title: String,
