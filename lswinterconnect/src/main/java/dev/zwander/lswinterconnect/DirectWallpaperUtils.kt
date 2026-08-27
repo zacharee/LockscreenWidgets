@@ -9,14 +9,10 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.drawable.Drawable
-import android.os.Build
-import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
-import android.os.ParcelFileDescriptor
-import android.os.ServiceManager
+import android.os.*
 import androidx.annotation.RequiresApi
 import androidx.core.graphics.drawable.toDrawable
+import java.util.*
 
 val Context.directWallpaperUtils: DirectWallpaperUtils
     get() = DirectWallpaperUtils.getInstance(this)
@@ -58,9 +54,13 @@ class DirectWallpaperUtils private constructor(private val context: Context) {
         }
     }
     private val handler = Handler(Looper.getMainLooper())
-    private val wallpaperChangedListeners = mutableListOf<WallpaperChangedListener>()
+    private val wallpaperChangedListeners = Collections.synchronizedList(
+        mutableListOf<WallpaperChangedListener>(),
+    )
 
-    private var cachedWallpapers: MutableMap<Int, Bitmap?> = mutableMapOf()
+    private var cachedWallpapers: MutableMap<Int, Bitmap?> = Collections.synchronizedMap(
+        mutableMapOf(),
+    )
 
     init {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
@@ -83,17 +83,8 @@ class DirectWallpaperUtils private constructor(private val context: Context) {
     }
 
     fun getWallpaperBitmap(flag: Int): Bitmap? {
-        return when {
-            Build.VERSION.SDK_INT >= Build.VERSION_CODES.N -> {
-                @SuppressLint("MissingPermission")
-                peekWallpaperBitmap(flag) ?: wallpaper.bitmap
-            }
-
-            else -> {
-                @SuppressLint("MissingPermission")
-                wallpaper.bitmap
-            }
-        }
+        @SuppressLint("MissingPermission")
+        return peekWallpaperBitmap(flag) ?: wallpaper.bitmap
     }
 
     fun getWallpaperDrawable(flag: Int): Drawable? {
@@ -193,10 +184,8 @@ class DirectWallpaperUtils private constructor(private val context: Context) {
         return try {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
                 withFeature() ?: old() ?: preNougat()
-            } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                old() ?: preNougat()
             } else {
-                preNougat()
+                old() ?: preNougat()
             }
         } catch (e: Exception) {
             peekLogUtils?.debugLog("Error retrieving wallpaper", e)
