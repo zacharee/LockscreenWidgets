@@ -155,6 +155,12 @@ class FrameSpecificPreferences private constructor(
             putBoolean(PrefManager.KEY_CAN_SHOW_FRAME_FROM_TASKER, value)
         }
 
+    var showOverPowerMenu: Boolean
+        get() = getBoolean(PrefManager.KEY_FRAME_SHOW_OVER_POWER_MENU, false)
+        set(value) {
+            putBoolean(PrefManager.KEY_FRAME_SHOW_OVER_POWER_MENU, value)
+        }
+
     fun getString(key: String, def: String? = null): String? = framePreferences.getString(key, def)
     fun getFloat(key: String, def: Float): Float = framePreferences.getFloat(key, def)
     fun getInt(key: String, def: Int): Int = framePreferences.getInt(key, def)

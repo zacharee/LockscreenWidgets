@@ -492,6 +492,14 @@ class ComposeFrameSettingsActivity : BaseActivity() {
                         preferences = framePrefs.framePreferences,
                     )
 
+                    switchPreference(
+                        title = { stringResource(R.string.show_on_power_menu) },
+                        summary = { stringResource(R.string.show_on_power_menu_desc) },
+                        key = { PrefManager.KEY_FRAME_SHOW_OVER_POWER_MENU },
+                        icon = { painterResource(R.drawable.ic_baseline_power_settings_new_24) },
+                        preferences = framePrefs.framePreferences,
+                    )
+
                     preference(
                         title = { stringResource(R.string.settings_screen_present_ids) },
                         summary = { stringResource(R.string.settings_screen_present_ids_desc) },

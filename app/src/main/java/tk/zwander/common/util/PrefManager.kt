@@ -144,6 +144,7 @@ class PrefManager private constructor(private val context: Context) {
         const val KEY_FRAME_IGNORE_TOUCHES = "frame_ignore_touches"
         const val KEY_DRAWER_ITEM_SPACING = "drawer_item_spacing"
         const val KEY_FRAME_ITEM_SPACING = "frame_item_spacing"
+        const val KEY_FRAME_SHOW_OVER_POWER_MENU = "frame_show_over_power_menu"
 
         const val VALUE_PAGE_INDICATOR_BEHAVIOR_HIDDEN = 0
         const val VALUE_PAGE_INDICATOR_BEHAVIOR_AUTO_HIDE = 1

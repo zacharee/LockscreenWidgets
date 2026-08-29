@@ -884,7 +884,7 @@ open class MainWidgetFrameDelegate protected constructor(
                     !framePrefs.hideOnSecurityPage)
                     && (globalState.notificationCount.value == 0 || !framePrefs.hideOnNotifications)
                     && globalState.hidingForPresentApp.value[this@MainWidgetFrameDelegate.display?.displayId] != true
-                    && globalState.showingPowerMenu.value[this@MainWidgetFrameDelegate.display?.displayId] != true
+                    && (framePrefs.showOverPowerMenu || globalState.showingPowerMenu.value[this@MainWidgetFrameDelegate.display?.displayId] != true)
                     && forCommon()
         }
 
@@ -913,7 +913,8 @@ open class MainWidgetFrameDelegate protected constructor(
                         "hideOnFaceWidgets: ${framePrefs.hideOnFaceWidgets}\n" +
                         "hideWhenKeyboardShown: ${framePrefs.hideWhenKeyboardShown}\n" +
                         "displayPower: ${lsDisplayManager.displayPowerStates.value.displayStates[this@MainWidgetFrameDelegate.display?.uniqueIdCompat]}\n" +
-                        "showingPowerMenu: ${globalState.showingPowerMenu.value[this@MainWidgetFrameDelegate.display?.displayId]}\n",
+                        "showingPowerMenu: ${globalState.showingPowerMenu.value[this@MainWidgetFrameDelegate.display?.displayId]}\n" +
+                        "showOverPowerMenu: ${framePrefs.showOverPowerMenu}\n",
                 null,
             )
         }
