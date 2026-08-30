@@ -1,5 +1,6 @@
 package tk.zwander.common.util
 
+import android.annotation.SuppressLint
 import android.app.KeyguardManager
 import android.content.ComponentName
 import android.content.Context
@@ -23,6 +24,7 @@ import kotlinx.coroutines.*
 import tk.zwander.common.activities.DismissOrUnlockActivity
 import tk.zwander.common.data.window.WindowInfo
 import tk.zwander.common.data.window.WindowRootPair
+import tk.zwander.lockscreenwidgets.App
 import tk.zwander.lockscreenwidgets.R
 import tk.zwander.lockscreenwidgets.appwidget.IDListProvider
 import tk.zwander.lockscreenwidgets.services.Accessibility
@@ -47,6 +49,7 @@ object AccessibilityUtils {
         val showingEdgePanel: AtomicBoolean = atomic(false),
     )
 
+    @SuppressLint("DiscouragedApi")
     data object IDMaps {
         val mainLockScreenIds = unitMapOf(
             "com.android.systemui:id/notification_panel",
@@ -106,6 +109,12 @@ object AccessibilityUtils {
             "com.android.systemui:id/global_actions_container",
         )
 
+        val powerMenuTextIds by lazy {
+            unitMapOf(
+                App.instance.resources.getIdentifier("global_action_power_off", "string", "android"),
+            )
+        }
+
         val edgePanelIds = unitMapOf(
             "com.sec.android.app.launcher:id/panel_rootview",
             "com.sec.android.app.launcher:id/panel_root_view",
@@ -115,10 +124,12 @@ object AccessibilityUtils {
             "com.android.systemui",
             "miui.systemui.plugin",
             "com.sec.android.app.launcher",
+            "com.android.keyguard",
+            "android",
         )
     }
 
-    private fun processNode(
+    private fun Context.processNode(
         nodeState: NodeState,
         node: AccessibilityNodeInfo,
         presentIds: Map<String, Unit>,
@@ -130,6 +141,7 @@ object AccessibilityUtils {
                 !node.hasVisibleIds(
                     unitMapOf("com.samsung.android.app.aodservice:id/facewidget_clock_container"),
                 )) {
+                logUtils.debugLog("Found FaceWidgets ${node.sourceNodeId} ${node.viewIdResourceName}", null)
                 nodeState.onFaceWidgets.value = true
             }
         }
@@ -141,6 +153,7 @@ object AccessibilityUtils {
         //although this method isn't perfect.
         if (!nodeState.onMainLockscreen.value) {
             if (node.hasVisibleIds(IDMaps.mainLockScreenIds)) {
+                logUtils.debugLog("Found main lock screen ${node.sourceNodeId} ${node.viewIdResourceName}", null)
                 nodeState.onMainLockscreen.value = true
             }
         }
@@ -150,18 +163,21 @@ object AccessibilityUtils {
                 //Used for "Hide When Notification Shade Shown" so we know when it's actually expanded.
                 //Some devices don't even have left shortcuts, so also check for keyguard_indication_area.
                 //Just like the showingSecurityInput check, this is probably unreliable for some devices.
+                logUtils.debugLog("Found notifications panel ${node.sourceNodeId} ${node.viewIdResourceName}", null)
                 nodeState.showingNotificationsPanel.value = true
             }
         }
 
         if (!nodeState.showingSecurityInput.value) {
             if (node.hasVisibleIds(IDMaps.securityInputIds)) {
+                logUtils.debugLog("Found security input ${node.sourceNodeId} ${node.viewIdResourceName}", null)
                 nodeState.showingSecurityInput.value = true
             }
         }
 
         if (!nodeState.hasNotificationsShowing.value) {
             if (node.hasVisibleIds(IDMaps.notificationIds)) {
+                logUtils.debugLog("Found a notification ${node.sourceNodeId} ${node.viewIdResourceName}", null)
                 nodeState.hasNotificationsShowing.value = true
             }
         }
@@ -172,18 +188,21 @@ object AccessibilityUtils {
         //visible when the NC is fully expanded.
         if (!nodeState.hasMoreButton.value) {
             if (node.hasVisibleIds(IDMaps.moreButtonIds)) {
+                logUtils.debugLog("Found NC more button ${node.sourceNodeId} ${node.viewIdResourceName}", null)
                 nodeState.hasMoreButton.value = true
             }
         }
 
         if (!nodeState.hasSettingsContainerButton.value) {
             if (node.hasVisibleIds(IDMaps.settingsContainerButtonIds)) {
+                logUtils.debugLog("Found settings container ${node.sourceNodeId} $isPixelUI ${node.viewIdResourceName}", null)
                 nodeState.hasSettingsContainerButton.value = isPixelUI
             }
         }
 
         if (!nodeState.hasClearAllButton.value) {
             if (node.hasVisibleIds(IDMaps.clearAllButtonIds)) {
+                logUtils.debugLog("Found clear all button ${node.sourceNodeId} ${node.viewIdResourceName}", null)
                 nodeState.hasClearAllButton.value = true
             }
         }
@@ -192,6 +211,7 @@ object AccessibilityUtils {
         //If any are, the frame will be hidden.
         if (!nodeState.hideForPresentIds.value && presentIds.isNotEmpty()) {
             if (node.hasVisibleIds(presentIds)) {
+                logUtils.debugLog("Found present ID to hide for ${node.sourceNodeId} ${node.viewIdResourceName}", null)
                 nodeState.hideForPresentIds.value = true
             }
         }
@@ -200,20 +220,30 @@ object AccessibilityUtils {
         //(or are present but not visible). If any aren't, the frame will be hidden.
         if (!nodeState.hideForNonPresentIds.value && nonPresentIds.isNotEmpty()) {
             if (!node.hasVisibleIds(nonPresentIds)) {
+                logUtils.debugLog("Found non present ID to hide for ${node.sourceNodeId} ${node.viewIdResourceName}", null)
                 nodeState.hideForNonPresentIds.value = true
             }
         }
 
         if (!nodeState.showingPowerMenu.value) {
             if (node.hasVisibleIds(IDMaps.powerMenuIds)) {
+                logUtils.debugLog("Found power menu node ${node.sourceNodeId} ${node.viewIdResourceName}", null)
+                nodeState.showingPowerMenu.value = true
+            }
+
+            if (
+                node.parentNodeId != 0L &&
+                node.parentNodeId == globalState.powerMenuNodeId.value &&
+                node.isVisibleToUser
+            ) {
+                logUtils.debugLog("Found power menu node by global ID ${node.sourceNodeId} ${node.viewIdResourceName}", null)
                 nodeState.showingPowerMenu.value = true
             }
         }
 
         if (!nodeState.showingEdgePanel.value) {
-            if (
-                node.hasVisibleIds(IDMaps.edgePanelIds)
-            ) {
+            if (node.hasVisibleIds(IDMaps.edgePanelIds)) {
+                logUtils.debugLog("Found edge panel ${node.sourceNodeId} ${node.viewIdResourceName}", null)
                 nodeState.showingEdgePanel.value = true
             }
         }
@@ -596,6 +626,14 @@ object AccessibilityUtils {
     ) = async(Dispatchers.Main) {
         with(context) {
             logUtils.debugLog("Running accessibility job")
+
+            if (
+                event.packageName == "android" &&
+                event.text.any { IDMaps.powerMenuTextIds.map { id -> resources.getString(id.key) }.contains(it) }
+            ) {
+                logUtils.debugLog("Received power menu ID ${event.sourceNodeId}", null)
+                globalState.powerMenuNodeId.value = event.sourceNodeId
+            }
 
             if (lsDisplayManager.multiDisplaySupported) {
                 lsDisplayManager.displayAndWmCache.value.values.forEach { [dis, wm] ->

@@ -32,6 +32,7 @@ data class GlobalState private constructor(
     val proxTooClose: MutableStateFlow<Boolean> = MutableStateFlow(false),
     val accessibilitySeesNotificationsOnMainLockScreen: MutableStateFlow<Map<Int, Boolean>> = MutableStateFlow(mapOf()),
     val showingPowerMenu: MutableStateFlow<Map<Int, Boolean>> = MutableStateFlow(mapOf()),
+    val powerMenuNodeId: MutableStateFlow<Long> = MutableStateFlow(0),
 ) {
     companion object {
         private var instance: GlobalState? = null
