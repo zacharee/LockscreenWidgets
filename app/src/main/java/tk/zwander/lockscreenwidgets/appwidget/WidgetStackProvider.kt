@@ -62,6 +62,7 @@ class WidgetStackProvider : AppWidgetProvider() {
     override fun onReceive(context: Context, intent: Intent) {
         fromChild = intent.getBooleanExtra(FROM_CHILD, false)
         refresh = intent.getBooleanExtra(EXTRA_REFRESH, false)
+        isSwap = intent.action == ACTION_SWAP_INDEX
         val widgetIds = intent.getIntArrayExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS)
         this.intent = intent
 
@@ -78,7 +79,6 @@ class WidgetStackProvider : AppWidgetProvider() {
 
         when (intent.action) {
             ACTION_SWAP_INDEX -> {
-                isSwap = true
                 val autoSwap = intent.getBooleanExtra(EXTRA_AUTO_SWAP, false)
                 val targetIndex = intent.getIntExtra(EXTRA_SWAP_INDEX, RecyclerView.NO_POSITION)
                 val backward = intent.getBooleanExtra(EXTRA_BACKWARD, false)
@@ -192,6 +192,16 @@ class WidgetStackProvider : AppWidgetProvider() {
         )
 
         appWidgetIds.forEach { appWidgetId ->
+            if (!isSwap && !refresh) {
+                val lastUpdateTime = context.prefManager.widgetStackLastUpdates[appWidgetId] ?: 0
+
+                if (System.currentTimeMillis() - lastUpdateTime < 500) {
+                    return@forEach
+                }
+            }
+
+            context.prefManager.widgetStackLastUpdates[appWidgetId] = System.currentTimeMillis()
+
             val root = RemoteViews(context.packageName, R.layout.widget_stack)
             val stackedWidgets = (context.prefManager.widgetStackWidgets[appWidgetId] ?: LinkedHashSet()).toList()
             val index = (context.prefManager.widgetStackIndices[appWidgetId] ?: 0)

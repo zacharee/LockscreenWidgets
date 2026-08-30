@@ -137,6 +137,7 @@ class PrefManager private constructor(private val context: Context) {
         const val KEY_DOUBLE_TAP_EMPTY_DRAWER_SPACE_TURN_OFF_DISPLAY = "double_tap_empty_drawer_space_turn_off_display"
         const val KEY_WIDGET_STACK_WIDGETS = "widget_stack_widgets"
         const val KEY_WIDGET_STACK_INDICES = "widget_stack_indices"
+        const val KEY_WIDGET_STACK_LAST_UPDATES = "widget_stack_last_updates"
         const val KEY_WIDGET_STACK_AUTO_CHANGE = "widget_stack_auto_change"
         const val KEY_WIDGET_STACK_WIDGET_PADDING = "widget_stack_widget_padding_individual"
         const val KEY_WIDGET_STACK_STYLE_OPTIONS = "widget_stack_style_options"
@@ -743,10 +744,18 @@ class PrefManager private constructor(private val context: Context) {
 
     var widgetStackIndices: HashMap<Int, Int>
         get() = gson.mapFromJson(
-            getString(KEY_WIDGET_STACK_INDICES, "")
+            getString(KEY_WIDGET_STACK_INDICES, ""),
         )
         set(value) {
             putString(KEY_WIDGET_STACK_INDICES, gson.toJson(value))
+        }
+
+    var widgetStackLastUpdates: HashMap<Int, Long>
+        get() = gson.mapFromJson(
+            getString(KEY_WIDGET_STACK_LAST_UPDATES, ""),
+        )
+        set(value) {
+            putString(KEY_WIDGET_STACK_LAST_UPDATES, gson.toJson(value))
         }
 
     var widgetStackAutoChange: HashMap<Int, Pair<Boolean, Long>>
