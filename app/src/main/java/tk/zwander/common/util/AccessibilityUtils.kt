@@ -112,6 +112,7 @@ object AccessibilityUtils {
         val powerMenuTextIds by lazy {
             unitMapOf(
                 App.instance.resources.getIdentifier("global_action_power_off", "string", "android"),
+                App.instance.resources.getIdentifier("power_dialog", "string", "android"),
             )
         }
 
@@ -627,9 +628,12 @@ object AccessibilityUtils {
         with(context) {
             logUtils.debugLog("Running accessibility job")
 
+            val powerMenuTexts = IDMaps.powerMenuTextIds.map { id -> resources.getString(id.key) }
+
             if (
-                event.packageName == "android" &&
-                event.text.any { IDMaps.powerMenuTextIds.map { id -> resources.getString(id.key) }.contains(it) }
+                IDMaps.sysUiPackageNames.containsKey(event.packageName?.toString()) &&
+                (event.text.any { powerMenuTexts.contains(it) } ||
+                        event.source?.window?.title?.let { powerMenuTexts.contains(it) } == true)
             ) {
                 logUtils.debugLog("Received power menu ID ${event.sourceNodeId}", null)
                 globalState.powerMenuNodeId.value = event.sourceNodeId
