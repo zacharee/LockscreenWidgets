@@ -293,6 +293,11 @@ fun Content(
         mutableStateOf(false)
     }
 
+    val widgetStackIndex by rememberPreferenceState(
+        key = PrefManager.KEY_WIDGET_STACK_INDICES,
+        value = { context.prefManager.widgetStackIndices[widgetId] ?: 0 },
+    )
+
     Surface(
         modifier = Modifier
             .fillMaxSize()
@@ -316,6 +321,25 @@ fun Content(
                 localWidgetList = newWidgets
             }
 
+            val widgetAspectRatio by remember {
+                derivedStateOf {
+                    if (localInspectionMode) {
+                        16 / 9f
+                    } else {
+                        val options = iAppWidgetService.getAppWidgetOptions(
+                            context.packageName,
+                            widgets.getOrNull(widgetStackIndex)?.id
+                                ?: widgets.firstOrNull()?.id
+                                ?: widgetId,
+                        )
+                        val minWidth = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH)
+                        val maxHeight = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT)
+
+                        minWidth / maxHeight.toFloat()
+                    }
+                }
+            }
+
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),
                 contentPadding = WindowInsets.systemBars
@@ -336,7 +360,6 @@ fun Content(
                                 .shadow(elevation)
                                 .fillMaxWidth()
                                 .background(MaterialTheme.colorScheme.background)
-                                .heightIn(min = 56.dp)
                                 .padding(
                                     horizontal = 16.dp,
                                     vertical = 8.dp,
@@ -397,18 +420,10 @@ fun Content(
                                 Row(
                                     verticalAlignment = Alignment.CenterVertically,
                                     horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                    modifier = Modifier.height(IntrinsicSize.Min),
                                 ) {
-                                    var height by remember {
-                                        mutableStateOf(0.dp)
-                                    }
-
                                     Column(
-                                        modifier = Modifier.weight(1f)
-                                            .onSizeChanged {
-                                                height = with (density) {
-                                                    it.height.toDp()
-                                                }
-                                            },
+                                        modifier = Modifier.weight(1f),
                                         verticalArrangement = Arrangement.spacedBy(4.dp),
                                     ) {
                                         WidgetItem(
@@ -420,8 +435,8 @@ fun Content(
                                             label = null,
                                             subLabel = null,
                                             itemModifier = Modifier
-                                                .heightIn(min = 150.dp)
                                                 .fillMaxWidth()
+                                                .aspectRatio(widgetAspectRatio)
                                                 .padding(if (localWidgetPadding[widget.id] == true) 8.dp else 0.dp),
                                             cardShape = if (localStyles.roundedCorners) {
                                                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
@@ -436,6 +451,7 @@ fun Content(
                                             } else {
                                                 RectangleShape
                                             },
+                                            modifier = Modifier.height(IntrinsicSize.Min),
                                         )
 
                                         CompositionLocalProvider(
@@ -467,7 +483,7 @@ fun Content(
                                         },
                                         horizontalAlignment = Alignment.CenterHorizontally,
                                         modifier = Modifier
-                                            .heightIn(min = height),
+                                            .fillMaxHeight(),
                                     ) {
                                         IconButton(
                                             onClick = {
