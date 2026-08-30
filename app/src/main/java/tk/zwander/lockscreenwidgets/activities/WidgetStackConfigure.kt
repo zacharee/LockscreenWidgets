@@ -483,7 +483,8 @@ fun Content(
                                         },
                                         horizontalAlignment = Alignment.CenterHorizontally,
                                         modifier = Modifier
-                                            .fillMaxHeight(),
+                                            .fillMaxHeight()
+                                            .padding(vertical = 8.dp),
                                     ) {
                                         IconButton(
                                             onClick = {
