@@ -100,6 +100,7 @@ class Accessibility : AccessibilityService(), CoroutineScope by MainScope(), Eve
             lsDisplayManager.displayPowerStates.collect {
                 if (!it.anyOn) {
                     state.accessibilityJob?.cancel()
+                    globalState.powerMenuNodeId.value = 0L
                 }
             }
         }
