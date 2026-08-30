@@ -15,6 +15,7 @@ import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -35,6 +36,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.dropShadow
 import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.shadow.Shadow
@@ -48,6 +50,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.core.content.IntentCompat
 import com.android.internal.appwidget.IAppWidgetService
@@ -323,9 +326,12 @@ fun Content(
                     ReorderableItem(
                         state = reorderableListState,
                         key = widget.id,
-                    ) {
+                    ) { isDragging ->
+                        val elevation by animateDpAsState(if (isDragging) 16.dp else 0.dp)
+
                         Box(
                             modifier = Modifier
+                                .shadow(elevation)
                                 .fillMaxWidth()
                                 .background(MaterialTheme.colorScheme.background)
                                 .heightIn(min = 56.dp)
@@ -386,8 +392,17 @@ fun Content(
                                     verticalAlignment = Alignment.CenterVertically,
                                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                                 ) {
+                                    var height by remember {
+                                        mutableStateOf(0.dp)
+                                    }
+
                                     Column(
-                                        modifier = Modifier.weight(1f),
+                                        modifier = Modifier.weight(1f)
+                                            .onSizeChanged {
+                                                height = with (density) {
+                                                    it.height.toDp()
+                                                }
+                                            },
                                         verticalArrangement = Arrangement.spacedBy(4.dp),
                                     ) {
                                         WidgetItem(
@@ -441,8 +456,12 @@ fun Content(
                                     }
 
                                     Column(
-                                        verticalArrangement = Arrangement.spacedBy(8.dp),
+                                        verticalArrangement = object : Arrangement.Vertical by Arrangement.SpaceBetween {
+                                            override val spacing: Dp = 8.dp
+                                        },
                                         horizontalAlignment = Alignment.CenterHorizontally,
+                                        modifier = Modifier
+                                            .heightIn(min = height),
                                     ) {
                                         IconButton(
                                             onClick = {
@@ -455,11 +474,21 @@ fun Content(
                                             )
                                         }
 
-                                        Icon(
-                                            painter = painterResource(R.drawable.menu_24px),
-                                            contentDescription = stringResource(R.string.reorder_widget),
-                                            modifier = Modifier.draggableHandle(),
-                                        )
+                                        val interactionSource = remember { MutableInteractionSource() }
+
+                                        IconButton(
+                                            onClick = {},
+                                            interactionSource = interactionSource,
+                                        ) {
+                                            Icon(
+                                                painter = painterResource(R.drawable.menu_24px),
+                                                contentDescription = stringResource(R.string.reorder_widget),
+                                                modifier = Modifier
+                                                    .draggableHandle(
+                                                        interactionSource = interactionSource,
+                                                    ),
+                                            )
+                                        }
 
                                         IconButton(
                                             onClick = {

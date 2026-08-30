@@ -166,11 +166,11 @@ dependencies {
     implementation(libs.reorderable)
     implementation(libs.miui.autostart)
 
-    implementation(libs.composereorderable)
     implementation(libs.pagerindicator)
 
     implementation(libs.lazyspannedgrid)
     implementation(libs.lazyspannedgrid.reorderable)
+    implementation(libs.lazyspannedgrid.reorderable.calvin)
 
     implementation(project(":lswinterconnect"))
 

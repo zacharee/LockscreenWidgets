@@ -13,7 +13,8 @@ import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
-import androidx.compose.animation.core.*
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.FlingBehavior
@@ -43,24 +44,25 @@ import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.*
+import androidx.compose.ui.unit.IntSize
+import androidx.compose.ui.unit.LayoutDirection
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.view.NestedScrollingChild
 import androidx.core.view.forEach
 import androidx.recyclerview.widget.RecyclerView
 import com.bugsnag.android.performance.compose.MeasuredComposable
 import dev.zwander.lazyspannedgrid.*
-import dev.zwander.lazyspannedgrid.reorderable.ReorderableLazySpannedGridState
-import dev.zwander.lazyspannedgrid.reorderable.rememberReorderableLazySpannedGridState
+import dev.zwander.lazyspannedgrid.reorderable_calvin.ReorderableLazySpannedGridItem
+import dev.zwander.lazyspannedgrid.reorderable_calvin.ReorderableLazySpannedGridState
+import dev.zwander.lazyspannedgrid.reorderable_calvin.rememberReorderableLazySpannedGridState
 import dev.zwander.lswinterconnect.peekLogUtils
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.launch
-import org.burnoutcrew.reorderable.ReorderableItem
-import org.burnoutcrew.reorderable.detectReorderAfterLongPress
-import org.burnoutcrew.reorderable.reorderable
 import tk.zwander.common.activities.DismissOrUnlockActivity
 import tk.zwander.common.activities.PermissionIntentLaunchActivity
 import tk.zwander.common.compose.components.ShortcutItemLayout
@@ -113,7 +115,6 @@ fun <VM : BaseDelegate.BaseViewModel<*, *>> VM.WidgetGrid(
             )
         },
         gridState = lazyGridState,
-        edgeScrollMargin = 16.dp,
     )
 
     val gridLocked by rememberUpdatedState(locked)
@@ -122,33 +123,6 @@ fun <VM : BaseDelegate.BaseViewModel<*, *>> VM.WidgetGrid(
         preferences = preferences,
     ) {
         (preferences.getInt(itemSpacingKey, 0) / 10f).dp
-    }
-
-    // Sets currentEditingId directly from reorderableState.draggingItemKey via snapshotFlow rather
-    // than a per-item LaunchedEffect(isDragging) inside each ReorderableItem — that per-item
-    // version only fires once *that specific composable* recomposes and notices isDragging
-    // changed, which lags behind reorderableState.draggingItemIndex's own (synchronous) update.
-    // Confirmed via logcat: dragging a widget could show currentEditingId still at NO_POSITION for
-    // the *entire* drag — every interceptUnclaimedDrags slop-check during it saw editingId=-1,
-    // never once catching up to the dragged widget's id — so interceptUnclaimedDrags' guard
-    // against stealing an in-progress reorder drag's touch (it only declines while
-    // currentEditingId != NO_POSITION) never actually engaged, and it stole the touch on the very
-    // next qualifying move. snapshotFlow reacts to the state write itself, not to a specific
-    // composable's recomposition, so there's no such lag.
-    //
-    // Deliberately one-directional — only *sets* currentEditingId when a drag starts, never clears
-    // it back to NO_POSITION when draggingItemKey goes null on drag end. The editing interface
-    // (resize handles etc., gated on currentEditingId elsewhere) is meant to stay up after a drag
-    // ends regardless of whether the widget's position actually changed; it's dismissed by
-    // dedicated code elsewhere (tapping outside, closing the frame — see currentEditingInterfaceId
-    // writes in BaseDelegate/MainWidgetFrameDelegate/DrawerDelegate), not implicitly by this.
-    LaunchedEffect(reorderableState.draggingItemKey) {
-        snapshotFlow { reorderableState.draggingItemKey }
-            .collect { key ->
-                (key as? String)?.let {
-                    currentEditingId = it
-                }
-            }
     }
 
     val updatedMinColSpan by rememberUpdatedState(minColSpan)
@@ -216,8 +190,6 @@ fun <VM : BaseDelegate.BaseViewModel<*, *>> VM.WidgetGrid(
                     Modifier
                 } else {
                     Modifier
-                        .reorderable(reorderableState)
-                        .detectReorderAfterLongPress(reorderableState)
                 },
             ),
     ) {
@@ -306,21 +278,10 @@ private fun <VM : BaseDelegate.BaseViewModel<*, *>> LazySpannedGridScope.widgetI
             // milliseconds instead of hundreds, keeping the reflow visible (unlike suppressing the
             // animation outright, which read as items instantly teleporting/disappearing) while
             // barely blocking the next target confirmation.
-            val isReordering = reorderableState.draggingItemKey != null
-            ReorderableItem(
+            ReorderableLazySpannedGridItem(
                 state = reorderableState,
                 key = data.gridId,
-                orientationLocked = false,
-                modifier = Modifier.animateItem(
-                    placementSpec = if (isReordering) {
-                        spring(stiffness = Spring.StiffnessHigh, visibilityThreshold = IntOffset.VisibilityThreshold)
-                    } else {
-                        spring(
-                            stiffness = Spring.StiffnessMediumLow,
-                            visibilityThreshold = IntOffset.VisibilityThreshold
-                        )
-                    },
-                ),
+                modifier = Modifier.animateItem(),
             ) { isDragging ->
                 WidgetItem(
                     data = data,
@@ -335,7 +296,11 @@ private fun <VM : BaseDelegate.BaseViewModel<*, *>> LazySpannedGridScope.widgetI
                     columnCount = columnCount,
                     rowCount = rowCount,
                     currentEditingId = currentEditingId,
-                    modifier = Modifier,
+                    modifier = Modifier.longPressDraggableHandle(
+                        onDragStarted = {
+                            onCurrentEditingIdChanged(data.gridId)
+                        },
+                    ),
                     blockIndividualWidgetTouches = blockIndividualWidgetTouches,
                 )
             }

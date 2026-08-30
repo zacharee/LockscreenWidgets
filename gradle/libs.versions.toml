@@ -12,7 +12,6 @@ colorpickerCompose = "1.2.0"
 compose-material-icons-core = "1.7.8"
 composeBom = "2026.08.00"
 composeintroslider = "1.0.0"
-composereordable = "0.9.6"
 constraintlayout = "2.2.2"
 core-remoteviews = "1.1.0"
 coreKtx = "1.19.0"
@@ -21,7 +20,7 @@ desugar_jdk_libs = "2.1.5"
 gson = "2.14.0"
 hiddenapibypass = "6.1"
 kotlin = "2.4.20-RC"
-lazyspannedgrid = "1.1.1"
+lazyspannedgrid = "1.2.0"
 lifecycle = "2.11.0"
 material = "1.14.0"
 miui-autostart = "v1.3"
@@ -56,7 +55,6 @@ compose-material3 = { module = "androidx.compose.material3:material3" }
 compose-material-icons-core = { module = "androidx.compose.material:material-icons-core", version.ref = "compose-material-icons-core" }
 compose-ui-tooling = { module = "androidx.compose.ui:ui-tooling" }
 composeIntroSlider = { module = "dev.zwander:composeintroslider", version.ref = "composeintroslider" }
-composereorderable = { module = "org.burnoutcrew.composereorderable:reorderable", version.ref = "composereordable" }
 constraintlayout = { module = "androidx.constraintlayout:constraintlayout", version.ref = "constraintlayout" }
 core-ktx = { module = "androidx.core:core-ktx", version.ref = "coreKtx" }
 core-remoteviews = { module = "androidx.core:core-remoteviews", version.ref = "core-remoteviews" }
@@ -69,6 +67,7 @@ kotlinx-coroutines-android = { module = "org.jetbrains.kotlinx:kotlinx-coroutine
 kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "coroutines" }
 lazyspannedgrid = { module = "dev.zwander:lazyspannedgrid", version.ref = "lazyspannedgrid" }
 lazyspannedgrid-reorderable = { module = "dev.zwander:lazyspannedgrid-reorderable", version.ref = "lazyspannedgrid" }
+lazyspannedgrid-reorderable-calvin = { module = "dev.zwander:lazyspannedgrid-reorderable-calvin", version.ref = "lazyspannedgrid" }
 lifecycle-runtime-compose = { module = "androidx.lifecycle:lifecycle-runtime-compose", version.ref = "lifecycle" }
 lifecycle-runtime-ktx = { module = "androidx.lifecycle:lifecycle-runtime-ktx", version.ref = "lifecycle" }
 lifecycle-service = { module = "androidx.lifecycle:lifecycle-service", version.ref = "lifecycle" }
