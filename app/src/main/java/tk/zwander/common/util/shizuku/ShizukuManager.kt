@@ -24,7 +24,7 @@ import kotlin.coroutines.resume
 val Context.shizukuManager: ShizukuManager
     get() = ShizukuManager.getInstance(this)
 
-class ShizukuManager private constructor(private val context: Context) : CoroutineScope by App.instance {
+class ShizukuManager private constructor(private val context: Context) {
     companion object {
         val isShizukuRunning: Boolean
             get() = Shizuku.pingBinder()
@@ -136,7 +136,7 @@ class ShizukuManager private constructor(private val context: Context) : Corouti
 
                 if (value != null) {
                     queuedCommands.forEach { [context, command] ->
-                        launch(context) {
+                        App.scope.launch(context) {
                             value.command()
                         }
                     }
@@ -250,7 +250,7 @@ class ShizukuManager private constructor(private val context: Context) : Corouti
 
     private fun postShizukuCommand(context: CoroutineContext, command: IShizukuService.() -> Unit) {
         if (userService != null) {
-            launch(context) {
+            App.scope.launch(context) {
                 userService?.let(command) ?: synchronized(postMutex) {
                     queuedCommands.add(context to command)
                 }

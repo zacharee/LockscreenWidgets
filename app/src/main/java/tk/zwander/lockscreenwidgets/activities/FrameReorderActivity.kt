@@ -24,7 +24,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import dev.zwander.lazyspannedgrid.rememberLazySpannedGridState
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import tk.zwander.common.activities.BaseActivity
 import tk.zwander.common.activities.SelectIconPackActivity
@@ -32,14 +31,13 @@ import tk.zwander.common.compose.WidgetGrid
 import tk.zwander.common.compose.util.rememberPreferenceState
 import tk.zwander.common.data.WidgetData
 import tk.zwander.common.util.*
-import tk.zwander.lockscreenwidgets.App
 import tk.zwander.lockscreenwidgets.R
 import tk.zwander.lockscreenwidgets.activities.add.ReconfigureFrameWidgetActivity
 import tk.zwander.lockscreenwidgets.util.FramePrefs
 import tk.zwander.lockscreenwidgets.util.FrameSpecificPreferences
 import tk.zwander.lockscreenwidgets.util.MainWidgetFrameDelegate
 
-class FrameReorderActivity : BaseActivity(), CoroutineScope by App.instance {
+class FrameReorderActivity : BaseActivity() {
     companion object {
         private const val NO_FRAME = -2
         private const val FRAME_ID = "frameId"

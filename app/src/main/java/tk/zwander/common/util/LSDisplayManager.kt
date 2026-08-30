@@ -12,7 +12,6 @@ import android.view.WindowManager
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.dp
 import dev.zwander.lswinterconnect.safeApplicationContext
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.*
 import tk.zwander.lockscreenwidgets.App
 import tk.zwander.lockscreenwidgets.services.Accessibility
@@ -29,7 +28,7 @@ fun LSDisplay?.orDefault(context: Context): LSDisplay {
     }
 }
 
-class LSDisplayManager private constructor(context: Context) : ContextWrapper(context), CoroutineScope by App.instance {
+class LSDisplayManager private constructor(context: Context) : ContextWrapper(context) {
     companion object {
         @SuppressLint("StaticFieldLeak")
         private var instance: LSDisplayManager? = null
@@ -69,17 +68,19 @@ class LSDisplayManager private constructor(context: Context) : ContextWrapper(co
     val isLikelyRazr = context.isLikelyRazr
     val displayAndWmCache = MutableStateFlow<Map<String, DisplayAndWindowManager>>(mapOf())
 
-    val displayPowerStates: StateFlow<DisplayPowerStates> = availableDisplays.map { currentDisplays ->
-        var anyOn = false
-        val states = currentDisplays.entries.associate { (val display = value) ->
-            display.uniqueIdCompat to display.isOn.also { anyOn = anyOn || it }
-        }
+    val displayPowerStates: StateFlow<DisplayPowerStates> by lazy {
+        availableDisplays.map { currentDisplays ->
+            var anyOn = false
+            val states = currentDisplays.entries.associate { (val display = value) ->
+                display.uniqueIdCompat to display.isOn.also { anyOn = anyOn || it }
+            }
 
-        DisplayPowerStates(
-            displayStates = states,
-            anyOn = anyOn,
-        )
-    }.stateIn(scope = this, started = SharingStarted.Eagerly, initialValue = DisplayPowerStates())
+            DisplayPowerStates(
+                displayStates = states,
+                anyOn = anyOn,
+            )
+        }.stateIn(scope = App.scope, started = SharingStarted.Eagerly, initialValue = DisplayPowerStates())
+    }
 
     val isAnyDisplayOn: Boolean
         get() = displayPowerStates.value.anyOn

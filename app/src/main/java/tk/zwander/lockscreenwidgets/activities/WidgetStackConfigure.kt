@@ -44,6 +44,7 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -206,6 +207,7 @@ fun Content(
 ) {
     val context = LocalContext.current
     val density = LocalDensity.current
+    val localInspectionMode = LocalInspectionMode.current
     val iAppWidgetService = remember {
         IAppWidgetService.Stub.asInterface(ServiceManager.getService(Context.APPWIDGET_SERVICE))
     }
@@ -359,7 +361,11 @@ fun Content(
 
                                 val providerInfo: AppWidgetProviderInfo? by remember {
                                     derivedStateOf {
-                                        context.appWidgetManager.getAppWidgetInfo(widget.id)
+                                        if (localInspectionMode) {
+                                            null
+                                        } else {
+                                            context.appWidgetManager.getAppWidgetInfo(widget.id)
+                                        }
                                     }
                                 }
 

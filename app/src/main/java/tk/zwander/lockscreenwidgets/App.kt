@@ -48,10 +48,12 @@ import tk.zwander.widgetdrawer.activities.add.AddDrawerWidgetActivity
  * QS tile depending on whether the user is
  * running One UI or not.
  */
-class App : Application(), CoroutineScope by MainScope(), EventObserver {
+class App : Application(), CoroutineScope by scope, EventObserver {
     companion object {
         @SuppressLint("StaticFieldLeak")
         lateinit var instance: App
+
+        val scope = MainScope()
     }
 
     //Listen for the screen turning on and off.

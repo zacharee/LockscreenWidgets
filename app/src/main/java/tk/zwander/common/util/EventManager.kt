@@ -10,7 +10,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import dev.zwander.lswinterconnect.safeApplicationContext
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import tk.zwander.common.data.WidgetData
@@ -20,7 +19,7 @@ import java.util.concurrent.ConcurrentLinkedQueue
 val Context.eventManager: EventManager
     get() = EventManager.getInstance(this)
 
-class EventManager private constructor(private val context: Context) : CoroutineScope by App.instance {
+class EventManager private constructor(private val context: Context) {
     companion object {
         @SuppressLint("StaticFieldLeak")
         private var _instance: EventManager? = null
@@ -93,14 +92,14 @@ class EventManager private constructor(private val context: Context) : Coroutine
         context.logUtils.debugLog("Sending event $event", null)
 
         observers.forEach {
-            launch(Dispatchers.Main) {
+            App.scope.launch(Dispatchers.Main) {
                 it.onEvent(event)
             }
         }
 
         listeners.filter { it.listenerClass == event::class.java }
             .forEach {
-                launch(Dispatchers.Main) {
+                App.scope.launch(Dispatchers.Main) {
                     it.listener.invoke(event)
                 }
             }
