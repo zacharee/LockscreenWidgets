@@ -335,7 +335,8 @@ fun Content(
                         val minWidth = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH)
                         val maxHeight = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT)
 
-                        minWidth / maxHeight.toFloat()
+                        (minWidth / maxHeight.toFloat()).takeIf { !it.isNaN() }
+                            ?: (16 / 9f)
                     }
                 }
             }
@@ -424,7 +425,8 @@ fun Content(
                                 ) {
                                     Column(
                                         modifier = Modifier.weight(1f),
-                                        verticalArrangement = Arrangement.spacedBy(4.dp),
+                                        verticalArrangement = Arrangement.spacedBy(8.dp),
+                                        horizontalAlignment = Alignment.CenterHorizontally,
                                     ) {
                                         WidgetItem(
                                             image = icon(
@@ -435,8 +437,9 @@ fun Content(
                                             label = null,
                                             subLabel = null,
                                             itemModifier = Modifier
-                                                .fillMaxWidth()
+                                                .heightIn(max = 360.dp)
                                                 .aspectRatio(widgetAspectRatio)
+                                                .fillMaxWidth()
                                                 .padding(if (localWidgetPadding[widget.id] == true) 8.dp else 0.dp),
                                             cardShape = if (localStyles.roundedCorners) {
                                                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
