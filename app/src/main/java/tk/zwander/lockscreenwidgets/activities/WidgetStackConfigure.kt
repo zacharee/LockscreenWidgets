@@ -343,8 +343,12 @@ fun Content(
                             SizeF::class.java,
                         )?.firstOrNull()
 
-                        (minWidth / maxHeight.toFloat()).takeIf { !it.isNaN() }
-                            ?: firstSize?.let { it.width / it.height }?.takeIf { !it.isNaN() }
+                        maxHeight.takeIf { it != 0 }?.let { maxHeight ->
+                            (minWidth / maxHeight.toFloat())
+                        }?.takeIf { !it.isNaN() }
+                            ?: firstSize?.let { firstSize ->
+                                firstSize.height.takeIf { it != 0f }?.let { height -> firstSize.width / height }
+                            }?.takeIf { !it.isNaN() }
                             ?: (16 / 9f)
                     }
                 }
