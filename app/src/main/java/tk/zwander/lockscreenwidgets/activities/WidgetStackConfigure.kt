@@ -11,6 +11,7 @@ import android.graphics.drawable.Drawable
 import android.os.Build
 import android.os.Bundle
 import android.os.ServiceManager
+import android.util.SizeF
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -54,6 +55,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.core.content.IntentCompat
+import androidx.core.os.BundleCompat
 import com.android.internal.appwidget.IAppWidgetService
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -191,7 +193,7 @@ class WidgetStackConfigure : BaseActivity() {
     }
 }
 
-@SuppressLint("RestrictedApi")
+@SuppressLint("RestrictedApi", "InlinedApi")
 @Composable
 fun Content(
     widgetId: Int,
@@ -335,7 +337,14 @@ fun Content(
                         val minWidth = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH)
                         val maxHeight = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT)
 
+                        val firstSize = BundleCompat.getParcelableArrayList(
+                            options,
+                            AppWidgetManager.OPTION_APPWIDGET_SIZES,
+                            SizeF::class.java,
+                        )?.firstOrNull()
+
                         (minWidth / maxHeight.toFloat()).takeIf { !it.isNaN() }
+                            ?: firstSize?.let { it.width / it.height }?.takeIf { !it.isNaN() }
                             ?: (16 / 9f)
                     }
                 }
