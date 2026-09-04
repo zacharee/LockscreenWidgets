@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <string name="lock_screen_widgets">Lock Screen Widgets</string>
+    <string name="lock_screen_widgets">Widżety ekranu blokady</string>
     <string name="version_template">v%s</string>
     <string name="edit_gesture_hint">Dotknij ramki z widżetami dwoma palcami, aby ją przesunąć i zmienić jej rozmiar.</string>
     <string name="edit_gesture_hint_2">Dotknij dwoma palcami, aby ukryć edytowanie UI.</string>
     <string name="hide_gesture_hint">Dotknij ramki widżetu trzema palcami, aby tymczasowo ją ukryć. Pozostanie ona ukryta do momentu ponownego włączenia ekranu.</string>
     <string name="accessibility_service_desc">Widgets Anywhere requires an Accessibility Service to display widgets on the lock screen and in the notification center. No data is collected, and no actions will be performed on the device. This permission is optional if you are only using the home screen widget stacks.</string>
-    <string name="lock_screen_widgets_desc">Display your home screen widgets in one or more frames above the lock screen.</string>
+    <string name="lock_screen_widgets_desc">Wyświetlaj widżety ekranu głównego w jednej lub kilku klatkach nad ekranem blokady.</string>
     <string name="widget_drawer_desc">Display your home screen widgets in a drawer you can access from anywhere with a simple swipe.</string>
-    <string name="widget_stacks_desc">Display your home screen widgets in a paged stack in any launcher app.</string>
+    <string name="widget_stacks_desc">Wyświetlaj widżety ekranu głównego w stronicowanym stosie w dowolnej aplikacji launchera.</string>
     <string name="widget_stacks_desc_empty">Display your home screen widgets in a paged stack in any launcher app. Get started by adding the \"Widget Stack\" widget to your home screen.</string>
     <string name="add_widget">Dodaj widżet</string>
     <string name="grant">Przydziel dostęp</string>
@@ -44,7 +44,7 @@
     <string name="general">General</string>
     <string name="configure_widget">Configure Widget</string>
     <string name="reorder_widget">Reorder Widget</string>
-    <string name="refresh">Refresh</string>
+    <string name="refresh">Odśwież</string>
     <string name="next">Next</string>
     <string name="previous">Previous</string>
     <string name="drawer_enabled">Menu z widżetami włączone</string>
@@ -69,7 +69,7 @@
     <string name="shortcut_icon">Ikona skrótu</string>
     <string name="expand">Rozwiń</string>
     <string name="alert_remove_widget_confirm">Usunąć widżet?</string>
-    <string name="alert_remove_widget_confirm_desc">Are you sure you want to remove this item?</string>
+    <string name="alert_remove_widget_confirm_desc">Czy na pewno chcesz usunąć ten element?</string>
     <string name="main_screen_social_mastodon">Mastodon</string>
     <string name="main_screen_social_mastodon_desc">Obserwuj mnie na Mastodonie, by uzyskać informacje o moich innych aplikacjach, wraz z ciekawostkami związanych z ich tworzeniem.</string>
     <string name="main_screen_social_website">Strona internetowa</string>
