@@ -5,7 +5,7 @@
     <string name="edit_gesture_hint">二本指でタップして移動やリサイズします</string>
     <string name="edit_gesture_hint_2">二本指でタップして編集モードを終了します</string>
     <string name="hide_gesture_hint">三本指でタップして一時的に非表示にできます。画面をOFF→ONすることで再度表示されます</string>
-    <string name="accessibility_service_desc">Widgets Anywhere requires an Accessibility Service to display widgets on the lock screen and in the notification center. No data is collected, and no actions will be performed on the device. This permission is optional if you are only using the home screen widget stacks.</string>
+    <string name="accessibility_service_desc">Widgets Anywhereは、ロック画面や通知センターにウィジェットを表示するためにアクセシビリティサービスが必要です。 データは収集されず、デバイス上で動作は実行されません。 ホーム画面ウィジェットのスタックのみを使用している場合は、この権限は任意です。</string>
     <string name="lock_screen_widgets_desc">ホーム画面のウィジェットをロック画面に表示します。</string>
     <string name="widget_drawer_desc">簡単なスワイプでどこからでもアクセスできるホーム画面のウィジェットをドロワーに表示します。</string>
     <string name="widget_stacks_desc">ホーム画面のウィジェットを任意のランチャーアプリでページングスタックとして表示します。</string>
@@ -175,7 +175,7 @@
     <string name="intro_welcome_desc">Widgets Anywhere is an app focused on making widgets more accessible and providing extra features.</string>
     <string name="intro_usage_title">Basic Usage</string>
     <string name="intro_usage_desc">Tap the \"plus\" page to add a widget, press and hold to reorder/resize/remove widgets in the list, and tap anywhere on the frame with two fingers to move/resize the frame or add a widget. You can also tap with three fingers to hide the widget frame until the screen is turned off and on again.</string>
-    <string name="intro_accessibility_title">Accessibility</string>
+    <string name="intro_accessibility_title">ユーザー補助</string>
     <string name="intro_accessibility_desc">To be able to display on the lock screen, you\'ll need to activate Widgets Anywhere\'s Accessibility Service. This app doesn\'t collect any data from your screen.</string>
     <string name="intro_notification_listener_title">Notification Listener</string>
     <string name="intro_notification_listener_desc">Widgets Anywhere can hide the widget frame while there are notifications displayed. To do so, you\'ll need to enable the Notification Listener. You don\'t have to grant this right now.</string>
