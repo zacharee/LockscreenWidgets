@@ -256,8 +256,8 @@
     <string name="show_handle_only_when_locked_desc">Only show the drawer handle when the device is on the lock screen.</string>
     <string name="debug_enable_bugsnag">Enable Bugsnag</string>
     <string name="debug_enable_bugsnag_desc">Widgets Anywhere uses Bugsnag to collect anonymous crash reports. Not that to fully disable collection, you\'ll have to force stop and reopen Widgets Anywhere.</string>
-    <string name="icon_pack">Icon Pack</string>
-    <string name="icon_pack_desc">Choose an icon pack for shortcut icons. This applies to both the frame and the drawer.</string>
+    <string name="icon_pack">アイコンパック</string>
+    <string name="icon_pack_desc">ショートカットアイコンのアイコンパックを選択します。これはフレームとドロワーの両方に適用されます。</string>
     <string name="allow_show_frame">Allow Showing Frame</string>
     <string name="disallow_show_frame">Disallow Showing Frame</string>
     <string name="frame_allowed_to_show">Frame Allowed to Show</string>
@@ -279,10 +279,10 @@
     <string name="failed_to_add_shortcut">Unable to add shortcut.</string>
     <string name="directly_check_for_activity">Directly Check for Activity</string>
     <string name="directly_check_for_activity_desc">When enabled, Widgets Anywhere will use Android\'s API to check whether a widget tap is launching an Activity. This can be faster than Widgets Anywhere\'s built-in detection, but may cause false positives.</string>
-    <string name="translate">Translate</string>
-    <string name="translate_desc">Help translate Widgets Anywhere into your language.</string>
+    <string name="translate">翻訳</string>
+    <string name="translate_desc">Widgets Anywhere をあなたの言語に翻訳するのを手伝ってください。</string>
     <string name="error_reconfiguring_widget">Error reconfiguring widget</string>
-    <string name="system_icons">System Icons</string>
+    <string name="system_icons">システムアイコン</string>
     <string name="choose_icon_pack">Choose Icon Pack</string>
     <string name="choose_icon_override">Choose Icon Override</string>
     <string name="selected_pack">Currently selected icon pack</string>
@@ -296,8 +296,8 @@
     <string name="unable_to_open_settings">Unable to open Settings.</string>
     <string name="remove_frame_confirmation_message">Are you sure you want to remove this frame?</string>
     <string name="select">Select</string>
-    <string name="cancel">Cancel</string>
-    <string name="apply">Apply</string>
+    <string name="cancel">キャンセル</string>
+    <string name="apply">適用</string>
     <string name="select_frame">Select Frame</string>
     <string name="select_frames">Select Frames</string>
     <string name="selected_frame">Selected frame: %s</string>
@@ -318,8 +318,8 @@
     <string name="default_display_desc">On foldable devices, the default display generally switches between the internal and external display depending on whether the device is open or closed. On flip devices, it\'s generally always the internal display.</string>
     <string name="square">Square</string>
     <string name="tall">Tall</string>
-    <string name="auto_cycle">Automatically Cycle</string>
-    <string name="delay">Delay</string>
+    <string name="auto_cycle">自動サイクル</string>
+    <string name="delay">遅延</string>
     <string name="unit_milliseconds">ms</string>
     <string name="unit_dp">dp</string>
     <string name="unit_percent">%</string>
