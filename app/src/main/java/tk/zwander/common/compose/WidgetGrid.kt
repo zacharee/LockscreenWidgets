@@ -587,6 +587,7 @@ private fun <VM : BaseDelegate.BaseViewModel<*, *>> VM.WidgetContents(
     val density = LocalDensity.current
     val currentEditingId by currentEditingInterfaceId.collectAsState()
     val updatedData by rememberUpdatedState(data)
+    val isResizingItem by isResizingItem.collectAsState()
 
     var widgetView by remember {
         mutableStateOf<View?>(null, neverEqualPolicy())
@@ -617,53 +618,55 @@ private fun <VM : BaseDelegate.BaseViewModel<*, *>> VM.WidgetContents(
         val paddingValue = dimensionResource(R.dimen.app_widget_padding)
 
         LaunchedEffect(width, height, data.id, data.safeSize) {
-            if (!BrokenAppsRegistry.isBroken(widgetInfo)) {
-                try {
-                    launch(Dispatchers.Main) {
-                        widgetView = viewCacheRegistry.getOrCreateView(
-                            SafeContextWrapper(context),
-                            data.id,
-                            widgetInfo,
-                        )
-                    }
-                } catch (e: Throwable) {
-                    if (e !is CancellationException) {
-                        context.logUtils.normalLog(
-                            "Unable to bind widget view ${widgetInfo.provider}",
-                            e,
-                        )
-                    }
+            if (!isResizingItem) {
+                if (!BrokenAppsRegistry.isBroken(widgetInfo)) {
+                    try {
+                        launch(Dispatchers.Main) {
+                            widgetView = viewCacheRegistry.getOrCreateView(
+                                SafeContextWrapper(context),
+                                data.id,
+                                widgetInfo,
+                            )
+                        }
+                    } catch (e: Throwable) {
+                        if (e !is CancellationException) {
+                            context.logUtils.normalLog(
+                                "Unable to bind widget view ${widgetInfo.provider}",
+                                e,
+                            )
+                        }
 
-                    if (e is SecurityException) {
-                        Toast.makeText(
-                            context,
-                            resources.getString(
-                                R.string.bind_widget_error,
-                                widgetInfo.provider
-                            ),
-                            Toast.LENGTH_LONG,
-                        ).show()
-                        onWidgetsChanged(
-                            currentWidgets.toMutableList().apply {
-                                remove(data)
-                                host.deleteAppWidgetId(data.id)
-                            },
-                        )
-                    } else {
-                        widgetView = context.createWidgetErrorView()
+                        if (e is SecurityException) {
+                            Toast.makeText(
+                                context,
+                                resources.getString(
+                                    R.string.bind_widget_error,
+                                    widgetInfo.provider
+                                ),
+                                Toast.LENGTH_LONG,
+                            ).show()
+                            onWidgetsChanged(
+                                currentWidgets.toMutableList().apply {
+                                    remove(data)
+                                    host.deleteAppWidgetId(data.id)
+                                },
+                            )
+                        } else {
+                            widgetView = context.createWidgetErrorView()
+                        }
                     }
+                } else {
+                    context.logUtils.normalLog(
+                        "Broken app widget detected: ${widgetInfo.provider}. Removing from adapter list.",
+                        null,
+                    )
+                    onWidgetsChanged(
+                        currentWidgets.toMutableList().apply {
+                            remove(data)
+                            host.deleteAppWidgetId(data.id)
+                        },
+                    )
                 }
-            } else {
-                context.logUtils.normalLog(
-                    "Broken app widget detected: ${widgetInfo.provider}. Removing from adapter list.",
-                    null,
-                )
-                onWidgetsChanged(
-                    currentWidgets.toMutableList().apply {
-                        remove(data)
-                        host.deleteAppWidgetId(data.id)
-                    },
-                )
             }
         }
 
@@ -688,30 +691,32 @@ private fun <VM : BaseDelegate.BaseViewModel<*, *>> VM.WidgetContents(
             }
         }
 
-        LaunchedEffect(widgetView, width, height, data.id, data.safeSize) {
-            (widgetView as? AppWidgetHostView)?.apply {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                    updateAppWidgetSize(
-                        manager.getAppWidgetOptions(appWidgetId),
-                        [
-                            SizeF(
-                                width.value + 2 * paddingValue.value,
-                                height.value + 2 * paddingValue.value,
-                            ),
-                        ],
-                    )
-                } else {
-                    val adjustedWidth = width.value + 2 * paddingValue.value
-                    val adjustedHeight = height.value + 2 * paddingValue.value
+        LaunchedEffect(widgetView, width, height, data.id, data.safeSize, isResizingItem) {
+            if (!isResizingItem) {
+                (widgetView as? AppWidgetHostView)?.apply {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                        updateAppWidgetSize(
+                            manager.getAppWidgetOptions(appWidgetId),
+                            [
+                                SizeF(
+                                    width.value + 2 * paddingValue.value,
+                                    height.value + 2 * paddingValue.value,
+                                ),
+                            ],
+                        )
+                    } else {
+                        val adjustedWidth = width.value + 2 * paddingValue.value
+                        val adjustedHeight = height.value + 2 * paddingValue.value
 
-                    @Suppress("DEPRECATION")
-                    updateAppWidgetSize(
-                        manager.getAppWidgetOptions(appWidgetId),
-                        adjustedWidth.toInt(),
-                        adjustedHeight.toInt(),
-                        adjustedWidth.toInt(),
-                        adjustedHeight.toInt(),
-                    )
+                        @Suppress("DEPRECATION")
+                        updateAppWidgetSize(
+                            manager.getAppWidgetOptions(appWidgetId),
+                            adjustedWidth.toInt(),
+                            adjustedHeight.toInt(),
+                            adjustedWidth.toInt(),
+                            adjustedHeight.toInt(),
+                        )
+                    }
                 }
             }
         }
@@ -720,15 +725,17 @@ private fun <VM : BaseDelegate.BaseViewModel<*, *>> VM.WidgetContents(
             factory = { FrameLayout(it) },
             modifier = Modifier.fillMaxSize(),
             update = {
-                it.removeAllViews()
-                widgetView?.let { v ->
-                    it.postOnAnimationDelayed({
-                        it.addView(
-                            v.andRemoveFromParent(),
-                            ViewGroup.LayoutParams.MATCH_PARENT,
-                            ViewGroup.LayoutParams.MATCH_PARENT,
-                        )
-                    }, 10)
+                if (!isResizingItem) {
+                    it.removeAllViews()
+                    widgetView?.let { v ->
+                        it.postOnAnimationDelayed({
+                            it.addView(
+                                v.andRemoveFromParent(),
+                                ViewGroup.LayoutParams.MATCH_PARENT,
+                                ViewGroup.LayoutParams.MATCH_PARENT,
+                            )
+                        }, 10)
+                    }
                 }
             },
         )
