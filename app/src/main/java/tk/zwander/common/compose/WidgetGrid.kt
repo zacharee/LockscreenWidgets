@@ -12,7 +12,11 @@ import android.util.SizeF
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
-import android.widget.*
+import android.widget.AbsListView
+import android.widget.FrameLayout
+import android.widget.HorizontalScrollView
+import android.widget.ScrollView
+import android.widget.Toast
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
@@ -21,11 +25,32 @@ import androidx.compose.foundation.gestures.FlingBehavior
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.ScrollableDefaults
 import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.systemGestureExclusion
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardColors
+import androidx.compose.material3.Icon
+import androidx.compose.material3.LocalTextStyle
+import androidx.compose.material3.Text
+import androidx.compose.material3.ripple
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.neverEqualPolicy
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.composed
@@ -39,7 +64,11 @@ import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.input.pointer.util.VelocityTracker
-import androidx.compose.ui.platform.*
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.platform.LocalResources
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -53,7 +82,13 @@ import androidx.core.view.NestedScrollingChild
 import androidx.core.view.forEach
 import androidx.recyclerview.widget.RecyclerView
 import com.bugsnag.android.performance.compose.MeasuredComposable
-import dev.zwander.lazyspannedgrid.*
+import dev.zwander.lazyspannedgrid.LazySpannedGrid
+import dev.zwander.lazyspannedgrid.LazySpannedGridScope
+import dev.zwander.lazyspannedgrid.LazySpannedGridState
+import dev.zwander.lazyspannedgrid.SpannedGridItemSpan
+import dev.zwander.lazyspannedgrid.itemsIndexed
+import dev.zwander.lazyspannedgrid.rememberLazySpannedGridState
+import dev.zwander.lazyspannedgrid.rememberSpannedGridSnapFlingBehavior
 import dev.zwander.lazyspannedgrid.reorderable_calvin.ReorderableLazySpannedGridItem
 import dev.zwander.lazyspannedgrid.reorderable_calvin.ReorderableLazySpannedGridState
 import dev.zwander.lazyspannedgrid.reorderable_calvin.rememberReorderableLazySpannedGridState
@@ -73,8 +108,19 @@ import tk.zwander.common.data.WidgetData
 import tk.zwander.common.data.WidgetType
 import tk.zwander.common.host.widgetHostCompat
 import tk.zwander.common.listeners.WidgetResizeListener
-import tk.zwander.common.util.*
+import tk.zwander.common.util.BaseDelegate
+import tk.zwander.common.util.BrokenAppsRegistry
+import tk.zwander.common.util.UserHandleCompat
+import tk.zwander.common.util.andRemoveFromParent
+import tk.zwander.common.util.appWidgetManager
+import tk.zwander.common.util.collectAsMutableState
+import tk.zwander.common.util.createWidgetErrorView
+import tk.zwander.common.util.getAllInstalledWidgetProviders
+import tk.zwander.common.util.globalState
+import tk.zwander.common.util.logUtils
 import tk.zwander.common.util.mitigations.SafeContextWrapper
+import tk.zwander.common.util.prefManager
+import tk.zwander.common.util.remove
 import tk.zwander.common.views.remote.ComposeAdapterView
 import tk.zwander.lockscreenwidgets.R
 import kotlin.math.absoluteValue
@@ -184,13 +230,6 @@ fun <VM : BaseDelegate.BaseViewModel<*, *>> VM.WidgetGrid(
                 rootView = rootView,
                 currentEditingId = currentEditingId,
                 flingBehavior = flingBehavior,
-            )
-            .then(
-                if (gridLocked) {
-                    Modifier
-                } else {
-                    Modifier
-                },
             ),
     ) {
         widgetItems(
@@ -210,6 +249,7 @@ fun <VM : BaseDelegate.BaseViewModel<*, *>> VM.WidgetGrid(
             onWidgetsChanged = onWidgetsChanged,
             resizeThresholdPx = resizeThresholdPx,
             blockIndividualWidgetTouches = blockIndividualWidgetTouches,
+            locked = gridLocked,
         )
     }
 }
@@ -230,6 +270,7 @@ private fun <VM : BaseDelegate.BaseViewModel<*, *>> LazySpannedGridScope.widgetI
     onWidgetsChanged: (List<WidgetData>) -> Unit,
     resizeThresholdPx: (which: WidgetResizeListener.Which) -> Int,
     blockIndividualWidgetTouches: Boolean,
+    locked: Boolean,
 ) {
     with(viewModel) {
         if (currentWidgetsList.isEmpty()) {
@@ -296,11 +337,15 @@ private fun <VM : BaseDelegate.BaseViewModel<*, *>> LazySpannedGridScope.widgetI
                     columnCount = columnCount,
                     rowCount = rowCount,
                     currentEditingId = currentEditingId,
-                    modifier = Modifier.longPressDraggableHandle(
-                        onDragStarted = {
-                            onCurrentEditingIdChanged(data.gridId)
-                        },
-                    ),
+                    modifier = if (locked) {
+                        Modifier
+                    } else {
+                        Modifier.longPressDraggableHandle(
+                            onDragStarted = {
+                                onCurrentEditingIdChanged(data.gridId)
+                            },
+                        )
+                    },
                     blockIndividualWidgetTouches = blockIndividualWidgetTouches,
                 )
             }
