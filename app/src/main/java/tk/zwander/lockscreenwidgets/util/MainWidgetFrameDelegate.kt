@@ -2,19 +2,33 @@ package tk.zwander.lockscreenwidgets.util
 
 import android.content.Context
 import android.content.SharedPreferences
-import android.graphics.*
+import android.graphics.Bitmap
+import android.graphics.Matrix
+import android.graphics.PixelFormat
+import android.graphics.Point
+import android.graphics.PointF
 import android.graphics.drawable.Drawable
 import android.view.Display
 import android.view.Gravity
 import android.view.Surface
 import android.view.WindowManager
-import androidx.compose.animation.*
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.LocalContentColor
-import androidx.compose.runtime.*
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ViewCompositionStrategy
@@ -25,12 +39,17 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.viewModelScope
 import dev.zwander.lazyspannedgrid.rememberLazySpannedGridState
-import kotlinx.coroutines.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.NonCancellable
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.withContext
 import mx.platacard.pagerindicator.PagerWormIndicator
 import tk.zwander.common.activities.DismissOrUnlockActivity
 import tk.zwander.common.activities.SelectIconPackActivity
@@ -42,7 +61,30 @@ import tk.zwander.common.compose.util.rememberPreferenceState
 import tk.zwander.common.data.provider.IFramePrefsProvider
 import tk.zwander.common.data.provider.IFrameProvider
 import tk.zwander.common.listeners.WidgetResizeListener
-import tk.zwander.common.util.*
+import tk.zwander.common.util.BaseDelegate
+import tk.zwander.common.util.DrawerOrFrame
+import tk.zwander.common.util.Event
+import tk.zwander.common.util.FrameSizeAndPosition
+import tk.zwander.common.util.GlobalState
+import tk.zwander.common.util.HandlerRegistry
+import tk.zwander.common.util.PrefManager
+import tk.zwander.common.util.awaitNextDraw
+import tk.zwander.common.util.eventManager
+import tk.zwander.common.util.fadeAndScaleIn
+import tk.zwander.common.util.fadeAndScaleOut
+import tk.zwander.common.util.frameSizeAndPosition
+import tk.zwander.common.util.globalState
+import tk.zwander.common.util.handler
+import tk.zwander.common.util.logUtils
+import tk.zwander.common.util.lsDisplayManager
+import tk.zwander.common.util.orDefault
+import tk.zwander.common.util.prefManager
+import tk.zwander.common.util.remove
+import tk.zwander.common.util.safeAddView
+import tk.zwander.common.util.safeRemoveViewImmediate
+import tk.zwander.common.util.set
+import tk.zwander.common.util.wallpaperClient
+import tk.zwander.common.util.wallpaperUtils
 import tk.zwander.lockscreenwidgets.activities.add.ReconfigureFrameWidgetActivity
 import tk.zwander.lockscreenwidgets.compose.WidgetFrameLayout
 import tk.zwander.lockscreenwidgets.data.Mode
@@ -249,7 +291,7 @@ open class MainWidgetFrameDelegate protected constructor(
 
                                 val pageCount = gridState.layoutInfo.totalLineCount / columnCount
 
-                                (page + pageOffset) to (pageCount)
+                                (page + pageOffset) to pageCount
                             }
                         }
                         val frameLocked by rememberBooleanPreferenceState(
@@ -320,7 +362,7 @@ open class MainWidgetFrameDelegate protected constructor(
                         )
 
                         AnimatedVisibility(
-                            visible = showingPager,
+                            visible = showingPager && pageInfo.second > 1,
                             enter = fadeIn() + slideInVertically(initialOffsetY = { it }),
                             exit = fadeOut() + slideOutVertically(targetOffsetY = { it }),
                             modifier = Modifier
