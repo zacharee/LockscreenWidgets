@@ -9,7 +9,7 @@
     <string name="lock_screen_widgets_desc">Wyświetlaj widżety ekranu głównego w jednej lub kilku klatkach nad ekranem blokady.</string>
     <string name="widget_drawer_desc">Display your home screen widgets in a drawer you can access from anywhere with a simple swipe.</string>
     <string name="widget_stacks_desc">Wyświetlaj widżety ekranu głównego w stronicowanym stosie w dowolnej aplikacji launchera.</string>
-    <string name="widget_stacks_desc_empty">Polski</string>
+    <string name="widget_stacks_desc_empty">Display your home screen widgets in a paged stack in any launcher app. Get started by adding the \"Widget Stack\" widget to your home screen.</string>
     <string name="add_widget">Dodaj widżet</string>
     <string name="grant">Przydziel dostęp</string>
     <string name="granted">Przywileje</string>
