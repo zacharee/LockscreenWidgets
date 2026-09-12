@@ -555,7 +555,6 @@ private fun <VM : BaseDelegate.BaseViewModel<*, *>> VM.WidgetItem(
                 onWidgetsChanged = onWidgetsChanged,
             )
         },
-        liftCallback = {},
         rowCount = rowCount,
         colCount = columnCount,
         isEditing = currentEditingId == updatedData.gridId,
