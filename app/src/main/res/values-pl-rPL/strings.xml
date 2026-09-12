@@ -12,7 +12,7 @@
     <string name="widget_stacks_desc_empty">Display your home screen widgets in a paged stack in any launcher app. Get started by adding the \"Widget Stack\" widget to your home screen.</string>
     <string name="add_widget">Dodaj widżet</string>
     <string name="grant">Przydziel dostęp</string>
-    <string name="granted">Granted</string>
+    <string name="granted">Przywileje</string>
     <string name="settings">Ustawienia</string>
     <string name="yes">Tak</string>
     <string name="no">Nie</string>
@@ -26,7 +26,7 @@
     <string name="search">Wyszukaj</string>
     <string name="preview">Podgląd</string>
     <string name="close_app">Zamknij aplikację</string>
-    <string name="close">Close</string>
+    <string name="close">Wyjdz</string>
     <string name="privacy_policy">Polityka prywatności</string>
     <string name="shortcut">Skrót</string>
     <string name="enabled">Włączono</string>
@@ -36,7 +36,7 @@
     <string name="autostart">Autostart</string>
     <string name="back">Wróć</string>
     <string name="clear">Wyczyść</string>
-    <string name="launcher">Launcher</string>
+    <string name="launcher">Uruchom</string>
     <string name="reset">Reset</string>
     <string name="increase">Increase</string>
     <string name="decrease">Decrease</string>
