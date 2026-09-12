@@ -59,6 +59,7 @@ object AccessibilityUtils {
             "com.android.systemui:id/keyguard_carrier_text",
             "com.android.systemui:id/keyguard_owner_info",
             "com.android.systemui:id/footer_views",
+            "com.android.systemui:id/lock_clock_blur",
         )
 
         val securityInputIds = unitMapOf(
