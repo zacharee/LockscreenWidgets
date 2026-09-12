@@ -52,7 +52,6 @@ fun BaseDelegate.BaseViewModel<*, *>.WidgetItemLayout(
     remove: () -> Unit,
     getResizeThresholdPx: (Which) -> Int,
     onResize: (Boolean, Int, Int, Int, Boolean) -> Unit,
-    liftCallback: () -> Unit,
     rowCount: Int,
     colCount: Int,
     isEditing: Boolean,
@@ -190,7 +189,6 @@ fun BaseDelegate.BaseViewModel<*, *>.WidgetItemLayout(
                                                 false,
                                             )
                                         },
-                                        liftCallback = liftCallback,
                                         this@WidgetItemLayout,
                                     ),
                             )
@@ -211,7 +209,6 @@ fun BaseDelegate.BaseViewModel<*, *>.WidgetItemLayout(
                                                 false,
                                             )
                                         },
-                                        liftCallback = liftCallback,
                                         this@WidgetItemLayout,
                                     ),
                             )
@@ -234,7 +231,6 @@ fun BaseDelegate.BaseViewModel<*, *>.WidgetItemLayout(
                                                 true,
                                             )
                                         },
-                                        liftCallback = liftCallback,
                                         this@WidgetItemLayout,
                                     ),
                             )
@@ -255,7 +251,6 @@ fun BaseDelegate.BaseViewModel<*, *>.WidgetItemLayout(
                                                 true,
                                             )
                                         },
-                                        liftCallback = liftCallback,
                                         viewModel = this@WidgetItemLayout,
                                     ),
                             )
@@ -330,7 +325,6 @@ fun Modifier.dragDetection(
     getResizeThresholdPx: (which: Which) -> Int,
     which: Which,
     resizeCallback: (Boolean, Int, Int) -> Unit,
-    liftCallback: () -> Unit,
     viewModel: BaseDelegate.BaseViewModel<*, *>,
 ): Modifier {
     var totalDeltaX = remember { 0f }
@@ -347,11 +341,9 @@ fun Modifier.dragDetection(
             },
             onDragEnd = {
                 viewModel.isResizingItem.value = false
-                liftCallback()
             },
             onDragCancel = {
                 viewModel.isResizingItem.value = false
-                liftCallback()
             },
             onDrag = { _, offset ->
                 val deltaX = offset.x
