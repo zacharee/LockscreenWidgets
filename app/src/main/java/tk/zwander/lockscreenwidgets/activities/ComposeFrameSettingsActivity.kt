@@ -6,6 +6,8 @@ import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import android.view.Display
+import androidx.compose.animation.Crossfade
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.AlertDialog
@@ -22,6 +24,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.painterResource
@@ -166,39 +169,45 @@ class ComposeFrameSettingsActivity : BaseActivity() {
                         defaultValue = {},
                         visible = { frameCount > 1 },
                         widget = {
-                            if (!isSelectingFrame) {
-                                val density = LocalDensity.current
-                                val frameSizeAndPosition = remember {
-                                    FrameSizeAndPosition.getInstance(this@ComposeFrameSettingsActivity)
-                                }
-                                val size = remember {
-                                    frameSizeAndPosition.getSizeForType(
-                                        type = FrameSizeAndPosition.FrameType.SecondaryLockscreen.Portrait(selectedFrame),
+                            Crossfade(
+                                targetState = isSelectingFrame,
+                            ) { selecting ->
+                                if (selecting) {
+                                    Box(modifier = Modifier.height(48.dp))
+                                } else {
+                                    val density = LocalDensity.current
+                                    val frameSizeAndPosition = remember {
+                                        FrameSizeAndPosition.getInstance(this@ComposeFrameSettingsActivity)
+                                    }
+                                    val size = remember {
+                                        frameSizeAndPosition.getSizeForType(
+                                            type = FrameSizeAndPosition.FrameType.SecondaryLockscreen.Portrait(selectedFrame),
+                                            display = lsDisplay,
+                                        )
+                                    }
+
+                                    val [width, height] = remember(density) {
+                                        with(density) {
+                                            val screenWidth = size.x
+                                            val screenHeight = size.y
+
+                                            val desiredHeight = 48.dp
+                                            val actualHeight = screenHeight.toDp()
+
+                                            val heightRatio = desiredHeight / actualHeight
+
+                                            val scaledWidth = (screenWidth * heightRatio).toDp()
+
+                                            scaledWidth to desiredHeight
+                                        }
+                                    }
+
+                                    WidgetFramePreviewLayout(
+                                        modifier = it.width(width).height(height),
+                                        frameId = selectedFrame,
                                         display = lsDisplay,
                                     )
                                 }
-
-                                val [width, height] = remember(density) {
-                                    with(density) {
-                                        val screenWidth = size.x
-                                        val screenHeight = size.y
-
-                                        val desiredHeight = 48.dp
-                                        val actualHeight = screenHeight.toDp()
-
-                                        val heightRatio = desiredHeight / actualHeight
-
-                                        val scaledWidth = (screenWidth * heightRatio).toDp()
-
-                                        scaledWidth to desiredHeight
-                                    }
-                                }
-
-                                WidgetFramePreviewLayout(
-                                    modifier = it.width(width).height(height),
-                                    frameId = selectedFrame,
-                                    display = lsDisplay,
-                                )
                             }
                         },
                     )
