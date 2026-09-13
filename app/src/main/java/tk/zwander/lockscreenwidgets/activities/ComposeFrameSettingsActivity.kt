@@ -2,6 +2,7 @@ package tk.zwander.lockscreenwidgets.activities
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import android.view.Display
@@ -63,12 +64,18 @@ class ComposeFrameSettingsActivity : BaseActivity() {
                     (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && windowManager.isCrossWindowBlurEnabled)
         }
 
+    private var selectedFrame by mutableIntStateOf(MainWidgetFrameDelegate.ID)
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         @SuppressLint("ObsoleteSdkInt")
         val canShowNCOptions =
             isOneUI || (isPixelUI && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S)
+
+        intent.getIntExtra(INITIAL_FRAME_ID, MainWidgetFrameDelegate.ID).let {
+            selectedFrame = it
+        }
 
         setThemedContent {
             val resources = LocalResources.current
@@ -86,10 +93,6 @@ class ComposeFrameSettingsActivity : BaseActivity() {
 
             var pendingFrameId by remember {
                 mutableStateOf<Int?>(null)
-            }
-
-            var selectedFrame by remember {
-                mutableIntStateOf(MainWidgetFrameDelegate.ID)
             }
 
             val framePrefs by remember {
@@ -837,6 +840,18 @@ class ComposeFrameSettingsActivity : BaseActivity() {
                     },
                 )
             }
+        }
+    }
+
+    companion object {
+        private const val INITIAL_FRAME_ID = "initial_frame_id"
+
+        fun launch(context: Context, frameId: Int) {
+            val intent = Intent(context, ComposeFrameSettingsActivity::class.java)
+            intent.putExtra(INITIAL_FRAME_ID, frameId)
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+
+            context.startActivity(intent)
         }
     }
 }

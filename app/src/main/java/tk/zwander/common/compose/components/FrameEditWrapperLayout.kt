@@ -48,6 +48,7 @@ fun MainWidgetFrameDelegate.WidgetFrameViewModel.FrameEditWrapperLayout(
     frameId: Int,
     onRemovePressed: () -> Unit,
     onClose: () -> Unit,
+    onSettings: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val context = LocalContext.current
@@ -208,6 +209,17 @@ fun MainWidgetFrameDelegate.WidgetFrameViewModel.FrameEditWrapperLayout(
                         Icon(
                             painter = painterResource(R.drawable.close_24px),
                             contentDescription = stringResource(R.string.done),
+                            modifier = Modifier.rotate(90f).size(32.dp),
+                            tint = Color.White,
+                        )
+                    }
+
+                    IconButton(
+                        onClick = onSettings,
+                    ) {
+                        Icon(
+                            painter = painterResource(R.drawable.ic_baseline_settings_24),
+                            contentDescription = stringResource(R.string.settings),
                             modifier = Modifier.rotate(90f).size(32.dp),
                             tint = Color.White,
                         )

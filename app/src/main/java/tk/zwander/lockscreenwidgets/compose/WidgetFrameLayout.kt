@@ -63,6 +63,7 @@ import tk.zwander.common.util.globalState
 import tk.zwander.common.util.logUtils
 import tk.zwander.common.util.prefManager
 import tk.zwander.lockscreenwidgets.R
+import tk.zwander.lockscreenwidgets.activities.ComposeFrameSettingsActivity
 import tk.zwander.lockscreenwidgets.util.MainWidgetFrameDelegate
 
 @Composable
@@ -340,6 +341,9 @@ fun MainWidgetFrameDelegate.WidgetFrameViewModel.WidgetFrameLayout(
                         },
                         onClose = {
                             isInEditingMode = false
+                        },
+                        onSettings = {
+                            ComposeFrameSettingsActivity.launch(context, holderId)
                         },
                     )
                 }
