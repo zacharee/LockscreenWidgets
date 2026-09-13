@@ -784,7 +784,7 @@ class ComposeFrameSettingsActivity : BaseActivity() {
             }
 
             PreferenceScreen(
-                title = resources.getString(R.string.settings),
+                title = stringResource(R.string.frame_settings, selectedFrame.toString()),
                 categories = preferenceScreen,
             )
 

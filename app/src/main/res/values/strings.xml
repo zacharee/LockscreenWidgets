@@ -491,4 +491,6 @@
 
     <string name="show_bottom_bar">Show Bottom Controls</string>
     <string name="show_bottom_bar_desc">Adds a set of basic controls below your widgets in the frame. More controls can always be accessed by tapping the frame with two fingers.</string>
+
+    <string name="frame_settings">Frame %s Settings</string>
 </resources>
