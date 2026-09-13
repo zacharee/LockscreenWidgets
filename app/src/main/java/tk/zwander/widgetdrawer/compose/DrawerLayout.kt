@@ -5,7 +5,16 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.displayCutout
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.only
+import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -17,17 +26,23 @@ import androidx.compose.ui.input.pointer.motionEventSpy
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.zIndex
+import tk.zwander.common.compose.DrawerWidgetGridWrapper
 import tk.zwander.common.compose.components.BlurView
 import tk.zwander.common.compose.components.ConfirmWidgetRemovalLayout
 import tk.zwander.common.compose.components.DrawerToolbar
 import tk.zwander.common.compose.util.rememberBooleanPreferenceState
 import tk.zwander.common.compose.util.rememberPreferenceState
-import tk.zwander.common.util.*
+import tk.zwander.common.util.Event
+import tk.zwander.common.util.PrefManager
+import tk.zwander.common.util.collectAsMutableState
+import tk.zwander.common.util.eventManager
+import tk.zwander.common.util.prefManager
+import tk.zwander.common.util.statusBarHeight
 import tk.zwander.widgetdrawer.util.DrawerDelegate
 
 @Composable
 fun DrawerDelegate.DrawerViewModel.DrawerLayout(
-    widgetGrid: @Composable (Modifier) -> Unit,
+    previousNonZeroCutout: Int,
     modifier: Modifier = Modifier,
 ) {
     val context = LocalContext.current
@@ -102,18 +117,10 @@ fun DrawerDelegate.DrawerViewModel.DrawerLayout(
                 )
             }
 
-//            AndroidView(
-//                factory = {
-//                    widgetGrid.andRemoveFromParent().also {
-//                        ViewCompat.setNestedScrollingEnabled(it, true)
-//                    }
-//                },
-//                modifier = Modifier
-//                    .fillMaxSize()
-//                    .zIndex(0f),
-//            )
-
-            widgetGrid(Modifier.fillMaxSize().zIndex(0f))
+            DrawerWidgetGridWrapper(
+                previousNonZeroCutout = previousNonZeroCutout,
+                modifier = Modifier.fillMaxSize().zIndex(0f),
+            )
 
             DrawerToolbar(
                 addWidget = {

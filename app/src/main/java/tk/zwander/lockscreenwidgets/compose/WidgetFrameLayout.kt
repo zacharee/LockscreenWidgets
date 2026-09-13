@@ -49,6 +49,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.zIndex
 import com.bugsnag.android.performance.compose.MeasuredComposable
+import tk.zwander.common.compose.FrameWidgetGridWrapper
 import tk.zwander.common.compose.components.BlurView
 import tk.zwander.common.compose.components.ConfirmFrameRemovalLayout
 import tk.zwander.common.compose.components.ConfirmWidgetRemovalLayout
@@ -68,7 +69,6 @@ import tk.zwander.lockscreenwidgets.util.MainWidgetFrameDelegate
 
 @Composable
 fun MainWidgetFrameDelegate.WidgetFrameViewModel.WidgetFrameLayout(
-    widgetGrid: @Composable (Modifier) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val context = LocalContext.current
@@ -266,7 +266,7 @@ fun MainWidgetFrameDelegate.WidgetFrameViewModel.WidgetFrameLayout(
                 exit = fadeOut(),
                 visible = !firstViewing,
             ) {
-                widgetGrid(Modifier.fillMaxSize())
+                FrameWidgetGridWrapper(modifier = Modifier.fillMaxSize())
             }
 
             HintIntroLayout(
