@@ -158,8 +158,8 @@ class DrawerDelegate private constructor(context: Context, displayId: String) :
             it.addOnAttachStateChangeListener(object : View.OnAttachStateChangeListener {
                 @SuppressLint("WrongConstant")
                 override fun onViewAttachedToWindow(v: View) {
-                    previousNonZeroCutout = ViewCompat.getRootWindowInsets(v.rootView)
-                        ?.getInsets(0xFFFFFFFF.toInt())?.top ?: statusBarHeight
+                    previousNonZeroCutout = ViewCompat.getRootWindowInsets(v)
+                        ?.getInsets(0xFFFFFFFF.toInt())?.top?.takeIf { top -> top > 0 } ?: statusBarHeight
                 }
 
                 override fun onViewDetachedFromWindow(v: View) {}
