@@ -1,7 +1,15 @@
 package tk.zwander.common.compose.main
 
-import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.staggeredgrid.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.safeDrawing
+import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
+import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
+import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridItemSpan
+import androidx.compose.foundation.lazy.staggeredgrid.items
+import androidx.compose.foundation.lazy.staggeredgrid.rememberLazyStaggeredGridState
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -38,8 +46,7 @@ fun MainContent() {
         LazyVerticalStaggeredGrid(
             columns = StaggeredGridCells.Adaptive(400.dp),
             contentPadding = insetsContentPadding(
-                WindowInsets.systemBars,
-                WindowInsets.ime,
+                WindowInsets.safeDrawing,
                 extraPadding = PaddingValues(16.dp),
             ),
             verticalItemSpacing = 8.dp,
