@@ -211,11 +211,7 @@ class LSDisplay(
         get() = this@LSDisplay.display.rotation
 
     val uniqueIdCompat: String
-        get() = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            this@LSDisplay.display.uniqueId ?: this@LSDisplay.display.displayId.toString()
-        } else {
-            this@LSDisplay.display.displayId.toString()
-        }
+        get() = this@LSDisplay.display.uniqueIdCompat
 
     val loggingId: String
         get() = "$uniqueIdCompat,$displayId"
@@ -235,6 +231,15 @@ class LSDisplay(
         }
     }
 }
+
+val Display.uniqueIdCompat: String
+    get() {
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            uniqueId ?: displayId.toString()
+        } else {
+            displayId.toString()
+        }
+    }
 
 data class DisplayPowerStates(
     val displayStates: Map<String, Boolean> = mapOf(),

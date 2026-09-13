@@ -6,6 +6,8 @@ import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import android.view.Display
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.width
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Badge
 import androidx.compose.material3.MaterialTheme
@@ -20,11 +22,14 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.Lifecycle
 import tk.zwander.common.activities.BaseActivity
 import tk.zwander.common.activities.HideForIDsActivity
@@ -38,6 +43,7 @@ import tk.zwander.common.compose.settings.createCommonSection
 import tk.zwander.common.compose.settings.rememberBooleanPreferenceDependency
 import tk.zwander.common.compose.settings.rememberPreferenceScreen
 import tk.zwander.common.compose.util.rememberPreferenceState
+import tk.zwander.common.util.FrameSizeAndPosition
 import tk.zwander.common.util.LifecycleEffect
 import tk.zwander.common.util.PrefManager
 import tk.zwander.common.util.backup.BackupRestoreManager
@@ -47,12 +53,15 @@ import tk.zwander.common.util.isOneUI
 import tk.zwander.common.util.isPixelUI
 import tk.zwander.common.util.isTouchWiz
 import tk.zwander.common.util.launchUrl
+import tk.zwander.common.util.orDefault
 import tk.zwander.common.util.prefManager
 import tk.zwander.common.util.setThemedContent
+import tk.zwander.common.util.uniqueIdCompat
 import tk.zwander.common.util.wallpaperClient
 import tk.zwander.lockscreenwidgets.BuildConfig
 import tk.zwander.lockscreenwidgets.R
 import tk.zwander.lockscreenwidgets.compose.SelectDisplayDialog
+import tk.zwander.lockscreenwidgets.compose.WidgetFramePreviewLayout
 import tk.zwander.lockscreenwidgets.services.isNotificationListenerActive
 import tk.zwander.lockscreenwidgets.util.FrameSpecificPreferences
 import tk.zwander.lockscreenwidgets.util.MainWidgetFrameDelegate
@@ -77,6 +86,8 @@ class ComposeFrameSettingsActivity : BaseActivity() {
             selectedFrame = it
         }
 
+        val currentDisplayId = ContextCompat.getDisplayOrDefault(this).uniqueIdCompat
+
         setThemedContent {
             val resources = LocalResources.current
             val isLikelyRazr = remember {
@@ -90,6 +101,13 @@ class ComposeFrameSettingsActivity : BaseActivity() {
             val frameCount by rememberUpdatedState(secondaryFrames.size + 1)
             val displayManager = LocalLSDisplayManager.current
             val displays by displayManager.availableDisplays.collectAsState()
+
+            val lsDisplay by remember {
+                derivedStateOf {
+                    displayManager.findDisplayByStringId(currentDisplayId)
+                        .orDefault(this@ComposeFrameSettingsActivity)
+                }
+            }
 
             var pendingFrameId by remember {
                 mutableStateOf<Int?>(null)
@@ -133,11 +151,9 @@ class ComposeFrameSettingsActivity : BaseActivity() {
 
             val commonSection = createCommonSection(BackupRestoreManager.Which.FRAME)
             val preferenceScreen = rememberPreferenceScreen {
-                commonSection.addToPreferenceScreen(this)
-
                 category(
-                    key = "frame_management_category",
-                    title = resources.getString(R.string.frame_management),
+                    key = "frame_select_category",
+                    title = null,
                 ) {
                     preference(
                         title = { stringResource(R.string.select_frame) },
@@ -149,8 +165,51 @@ class ComposeFrameSettingsActivity : BaseActivity() {
                         icon = { painterResource(R.drawable.wall) },
                         defaultValue = {},
                         visible = { frameCount > 1 },
-                    )
+                        widget = {
+                            if (!isSelectingFrame) {
+                                val density = LocalDensity.current
+                                val frameSizeAndPosition = remember {
+                                    FrameSizeAndPosition.getInstance(this@ComposeFrameSettingsActivity)
+                                }
+                                val size = remember {
+                                    frameSizeAndPosition.getSizeForType(
+                                        type = FrameSizeAndPosition.FrameType.SecondaryLockscreen.Portrait(selectedFrame),
+                                        display = lsDisplay,
+                                    )
+                                }
 
+                                val [width, height] = remember(density) {
+                                    with(density) {
+                                        val screenWidth = size.x
+                                        val screenHeight = size.y
+
+                                        val desiredHeight = 48.dp
+                                        val actualHeight = screenHeight.toDp()
+
+                                        val heightRatio = desiredHeight / actualHeight
+
+                                        val scaledWidth = (screenWidth * heightRatio).toDp()
+
+                                        scaledWidth to desiredHeight
+                                    }
+                                }
+
+                                WidgetFramePreviewLayout(
+                                    modifier = it.width(width).height(height),
+                                    frameId = selectedFrame,
+                                    display = lsDisplay,
+                                )
+                            }
+                        },
+                    )
+                }
+
+                commonSection.addToPreferenceScreen(this)
+
+                category(
+                    key = "frame_management_category",
+                    title = resources.getString(R.string.frame_management),
+                ) {
                     preference(
                         title = { stringResource(R.string.add_frame) },
                         summary = {

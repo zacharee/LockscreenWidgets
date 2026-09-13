@@ -16,7 +16,11 @@ import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
@@ -34,7 +38,13 @@ import tk.zwander.common.compose.WidgetGrid
 import tk.zwander.common.compose.util.rememberPreferenceState
 import tk.zwander.common.data.provider.IFrameProvider
 import tk.zwander.common.host.widgetHostCompat
-import tk.zwander.common.util.*
+import tk.zwander.common.util.BaseDelegate
+import tk.zwander.common.util.FrameSizeAndPosition
+import tk.zwander.common.util.HandlerRegistry
+import tk.zwander.common.util.LSDisplay
+import tk.zwander.common.util.PrefManager
+import tk.zwander.common.util.prefManager
+import tk.zwander.common.util.themedContext
 import tk.zwander.lockscreenwidgets.util.FramePrefs
 import tk.zwander.lockscreenwidgets.util.FrameSpecificPreferences
 import tk.zwander.lockscreenwidgets.util.MainWidgetFrameDelegate
@@ -54,20 +64,18 @@ fun WidgetFramePreviewLayout(
         val lifecycleOwner = LocalLifecycleOwner.current
         val savedStateRegistryOwner = LocalSavedStateRegistryOwner.current
 
-        val frameSize = remember(frameId) {
+        val frameSize = remember(frameId, context, display) {
             FrameSizeAndPosition.getInstance(context).getSizeForType(
                 type = FrameSizeAndPosition.FrameType.SecondaryLockscreen.Portrait(frameId),
                 display = display,
             )
         }
 
-        val scale by remember {
-            derivedStateOf {
-                constraints.maxHeight / frameSize.x.dp
-            }
+        val scale = remember(frameSize, constraints) {
+            constraints.maxHeight / frameSize.x.dp
         }
 
-        val dummyDelegate = remember(frameId) {
+        val dummyDelegate = remember(frameId, context, display, view, savedStateRegistryOwner) {
             PreviewDelegate(
                 themedContext = context.themedContext,
                 targetDisplayId = display.uniqueIdCompat,
