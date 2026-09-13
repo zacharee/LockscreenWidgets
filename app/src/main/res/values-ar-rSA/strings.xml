@@ -359,4 +359,5 @@
     <string name="show_on_power_menu_desc">When enabled, the frame will continue showing when the power menu is visible instead of hiding.</string>
     <string name="show_bottom_bar">Show Bottom Controls</string>
     <string name="show_bottom_bar_desc">Adds a set of basic controls below your widgets in the frame. More controls can always be accessed by tapping the frame with two fingers.</string>
+    <string name="frame_settings">Frame %s Settings</string>
 </resources>
