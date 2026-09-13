@@ -19,7 +19,12 @@ import androidx.preference.PreferenceManager
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import dev.zwander.lswinterconnect.safeApplicationContext
-import tk.zwander.common.data.*
+import tk.zwander.common.data.SafePointF
+import tk.zwander.common.data.WidgetData
+import tk.zwander.common.data.WidgetListFilters
+import tk.zwander.common.data.WidgetSizeData
+import tk.zwander.common.data.WidgetStackStyle
+import tk.zwander.common.data.WidgetTileInfo
 import tk.zwander.common.iconpacks.IconEntry
 import tk.zwander.lockscreenwidgets.R
 import tk.zwander.lockscreenwidgets.data.Mode
@@ -146,6 +151,7 @@ class PrefManager private constructor(private val context: Context) {
         const val KEY_DRAWER_ITEM_SPACING = "drawer_item_spacing"
         const val KEY_FRAME_ITEM_SPACING = "frame_item_spacing"
         const val KEY_FRAME_SHOW_OVER_POWER_MENU = "frame_show_over_power_menu"
+        const val KEY_FRAME_SHOW_BOTTOM_BAR = "frame_show_bottom_bar"
 
         const val VALUE_PAGE_INDICATOR_BEHAVIOR_HIDDEN = 0
         const val VALUE_PAGE_INDICATOR_BEHAVIOR_AUTO_HIDE = 1

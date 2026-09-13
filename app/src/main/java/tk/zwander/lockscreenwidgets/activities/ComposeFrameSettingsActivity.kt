@@ -5,8 +5,20 @@ import android.content.Context
 import android.os.Build
 import android.os.Bundle
 import android.view.Display
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Badge
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
@@ -18,10 +30,25 @@ import tk.zwander.common.activities.HideForIDsActivity
 import tk.zwander.common.activities.HideOnAppsChooserActivity
 import tk.zwander.common.activities.OnboardingActivity
 import tk.zwander.common.compose.LocalLSDisplayManager
-import tk.zwander.common.compose.settings.*
+import tk.zwander.common.compose.settings.ListPreferenceEntry
+import tk.zwander.common.compose.settings.PreferenceScreen
+import tk.zwander.common.compose.settings.booleanPreferenceDependency
+import tk.zwander.common.compose.settings.createCommonSection
+import tk.zwander.common.compose.settings.rememberBooleanPreferenceDependency
+import tk.zwander.common.compose.settings.rememberPreferenceScreen
 import tk.zwander.common.compose.util.rememberPreferenceState
-import tk.zwander.common.util.*
+import tk.zwander.common.util.LifecycleEffect
+import tk.zwander.common.util.PrefManager
 import tk.zwander.common.util.backup.BackupRestoreManager
+import tk.zwander.common.util.canReadWallpaper
+import tk.zwander.common.util.isLikelyRazr
+import tk.zwander.common.util.isOneUI
+import tk.zwander.common.util.isPixelUI
+import tk.zwander.common.util.isTouchWiz
+import tk.zwander.common.util.launchUrl
+import tk.zwander.common.util.prefManager
+import tk.zwander.common.util.setThemedContent
+import tk.zwander.common.util.wallpaperClient
 import tk.zwander.lockscreenwidgets.BuildConfig
 import tk.zwander.lockscreenwidgets.R
 import tk.zwander.lockscreenwidgets.compose.SelectDisplayDialog
@@ -414,6 +441,14 @@ class ComposeFrameSettingsActivity : BaseActivity() {
                         key = { PrefManager.KEY_SEPARATE_LAYOUT_FOR_LANDSCAPE },
                         icon = { painterResource(R.drawable.baseline_screen_rotation_24) },
                         badge = globalBadge,
+                    )
+
+                    switchPreference(
+                        title = { stringResource(R.string.show_bottom_bar) },
+                        summary = { stringResource(R.string.show_bottom_bar_desc) },
+                        key = { PrefManager.KEY_FRAME_SHOW_BOTTOM_BAR },
+                        icon = { painterResource(R.drawable.call_to_action_24px) },
+                        preferences = framePrefs.framePreferences,
                     )
                 }
 

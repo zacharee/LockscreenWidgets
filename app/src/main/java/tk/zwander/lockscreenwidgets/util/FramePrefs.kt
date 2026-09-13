@@ -8,7 +8,11 @@ import android.graphics.Color
 import androidx.core.content.edit
 import tk.zwander.common.data.WidgetData
 import tk.zwander.common.host.widgetHostCompat
-import tk.zwander.common.util.*
+import tk.zwander.common.util.FrameSizeAndPosition
+import tk.zwander.common.util.PrefManager
+import tk.zwander.common.util.frameSizeAndPosition
+import tk.zwander.common.util.prefManager
+import tk.zwander.common.util.safeFromJson
 import tk.zwander.lockscreenwidgets.App
 
 class FrameSpecificPreferences private constructor(
@@ -159,6 +163,12 @@ class FrameSpecificPreferences private constructor(
         get() = getBoolean(PrefManager.KEY_FRAME_SHOW_OVER_POWER_MENU, false)
         set(value) {
             putBoolean(PrefManager.KEY_FRAME_SHOW_OVER_POWER_MENU, value)
+        }
+
+    var showControlBar: Boolean
+        get() = getBoolean(PrefManager.KEY_FRAME_SHOW_BOTTOM_BAR, false)
+        set(value) {
+            putBoolean(PrefManager.KEY_FRAME_SHOW_BOTTOM_BAR, value)
         }
 
     fun getString(key: String, def: String? = null): String? = framePreferences.getString(key, def)

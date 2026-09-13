@@ -8,6 +8,7 @@ import android.graphics.PixelFormat
 import android.graphics.Point
 import android.graphics.PointF
 import android.graphics.drawable.Drawable
+import android.util.Log
 import android.view.Display
 import android.view.Gravity
 import android.view.Surface
@@ -18,20 +19,34 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.LocalContentColor
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.platform.ViewCompositionStrategy
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.core.graphics.component1
 import androidx.core.graphics.component2
@@ -85,6 +100,7 @@ import tk.zwander.common.util.safeRemoveViewImmediate
 import tk.zwander.common.util.set
 import tk.zwander.common.util.wallpaperClient
 import tk.zwander.common.util.wallpaperUtils
+import tk.zwander.lockscreenwidgets.R
 import tk.zwander.lockscreenwidgets.activities.add.ReconfigureFrameWidgetActivity
 import tk.zwander.lockscreenwidgets.compose.WidgetFrameLayout
 import tk.zwander.lockscreenwidgets.data.Mode
@@ -253,6 +269,11 @@ open class MainWidgetFrameDelegate protected constructor(
                             value = { currentWidgets.toList() },
                             onChanged = { _, value -> currentWidgets = value.toSet() },
                         )
+                        val controlBarVisible by rememberPreferenceState(
+                            key = PrefManager.KEY_FRAME_SHOW_BOTTOM_BAR,
+                            value = { framePrefs.showControlBar },
+                            preferences = framePrefs.framePreferences,
+                        )
 
                         val rememberFramePosition by rememberPreferenceState(
                             key = PrefManager.KEY_FRAME_REMEMBER_POSITION,
@@ -298,6 +319,7 @@ open class MainWidgetFrameDelegate protected constructor(
                             key = PrefManager.KEY_LOCK_WIDGET_FRAME,
                         )
                         val state by state.collectAsState()
+                        val scope = rememberCoroutineScope()
 
                         LaunchedEffect(pageInfo) {
                             showingPager = pageIndicatorBehavior != PrefManager.VALUE_PAGE_INDICATOR_BEHAVIOR_HIDDEN
@@ -323,68 +345,192 @@ open class MainWidgetFrameDelegate protected constructor(
                             }
                         }
 
-                        WidgetGrid(
-                            currentWidgets = currentWidgetsState,
-                            onWidgetsChanged = { widgets ->
-                                currentWidgetsState = widgets
-                            },
-                            orientation = Orientation.Horizontal,
-                            columnCount = columnCount,
-                            rowCount = rowCount,
-                            resizeThresholdPx = { which ->
-                                val display = viewModel.display.orDefault(context)
-                                val frameSize = frameSizeAndPosition.getSizeForType(viewModel.saveMode, display)
-                                if (which == WidgetResizeListener.Which.LEFT || which == WidgetResizeListener.Which.RIGHT) {
-                                    display.dpToPx(frameSize.x.toInt()) / colCount
-                                } else {
-                                    display.dpToPx(frameSize.y.toInt()) / rowCount
-                                }
-                            },
-                            launchAddActivity = {
-                                context.eventManager.sendEvent(Event.LaunchAddWidget(holderId))
-                            },
-                            launchReconfigure = { id, providerInfo ->
-                                updateState {
-                                    it.copy(isPreview = false)
-                                }
-                                ReconfigureFrameWidgetActivity.launch(context, id, holderId, providerInfo)
-                            },
-                            launchShortcutIconOverride = { id ->
-                                SelectIconPackActivity.launchForOverride(context, id)
-                            },
+                        Column(
                             modifier = Modifier.fillMaxSize(),
-                            rowSpanForAddButton = 1,
-                            enableSnapping = true,
-                            lazyGridState = gridState,
-                            locked = frameLocked && !state.isPreview,
-                            itemSpacingKey = PrefManager.KEY_FRAME_ITEM_SPACING,
-                            preferences = framePrefs.framePreferences,
-                        )
-
-                        AnimatedVisibility(
-                            visible = showingPager && pageInfo.second > 1,
-                            enter = fadeIn() + slideInVertically(initialOffsetY = { it }),
-                            exit = fadeOut() + slideOutVertically(targetOffsetY = { it }),
-                            modifier = Modifier
-                                .align(Alignment.BottomCenter)
-                                .padding(bottom = 8.dp),
                         ) {
-                            PagerWormIndicator(
-                                pageCount = pageInfo.second,
-                                currentPageFraction = remember {
-                                    derivedStateOf {
-                                        pageInfo.first
+                            WidgetGrid(
+                                currentWidgets = currentWidgetsState,
+                                onWidgetsChanged = { widgets ->
+                                    currentWidgetsState = widgets
+                                },
+                                orientation = Orientation.Horizontal,
+                                columnCount = columnCount,
+                                rowCount = rowCount,
+                                resizeThresholdPx = { which ->
+                                    val display = viewModel.display.orDefault(context)
+                                    val frameSize = frameSizeAndPosition.getSizeForType(viewModel.saveMode, display)
+                                    if (which == WidgetResizeListener.Which.LEFT || which == WidgetResizeListener.Which.RIGHT) {
+                                        display.dpToPx(frameSize.x.toInt()) / colCount
+                                    } else {
+                                        display.dpToPx(frameSize.y.toInt()) / rowCount
                                     }
                                 },
-                                activeDotColor = LocalContentColor.current,
-                                dotColor = LocalContentColor.current.copy(alpha = 0.5f),
+                                launchAddActivity = {
+                                    context.eventManager.sendEvent(Event.LaunchAddWidget(holderId))
+                                },
+                                launchReconfigure = { id, providerInfo ->
+                                    updateState {
+                                        it.copy(isPreview = false)
+                                    }
+                                    ReconfigureFrameWidgetActivity.launch(context, id, holderId, providerInfo)
+                                },
+                                launchShortcutIconOverride = { id ->
+                                    SelectIconPackActivity.launchForOverride(context, id)
+                                },
+                                modifier = Modifier.fillMaxWidth()
+                                    .weight(1f),
+                                rowSpanForAddButton = 1,
+                                enableSnapping = true,
+                                lazyGridState = gridState,
+                                locked = frameLocked && !state.isPreview,
+                                itemSpacingKey = PrefManager.KEY_FRAME_ITEM_SPACING,
+                                preferences = framePrefs.framePreferences,
                             )
+
+                            androidx.compose.animation.AnimatedVisibility(
+                                visible = controlBarVisible,
+                                modifier = Modifier.fillMaxWidth(),
+                                enter = fadeIn() + slideInVertically(initialOffsetY = { it }),
+                                exit = fadeOut() + slideOutVertically(targetOffsetY = { it }),
+                            ) {
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                ) {
+                                    Row(
+                                        modifier = Modifier.weight(1f),
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                    ) {
+                                        IconButton(
+                                            onClick = {
+                                                isEditing.value = true
+                                            },
+                                        ) {
+                                            Icon(
+                                                painter = painterResource(R.drawable.ic_baseline_settings_24),
+                                                contentDescription = stringResource(R.string.settings),
+                                                modifier = Modifier.size(24.dp),
+                                            )
+                                        }
+
+                                        Spacer(modifier = Modifier.weight(1f))
+                                    }
+
+                                    PagerIndicator(
+                                        showingPager = pageInfo.second > 1,
+                                        pageFraction = pageInfo.first,
+                                        pageCount = pageInfo.second,
+                                        onPageClick = {
+                                            scope.launch {
+                                                gridState.animateScrollToLine(
+                                                    (it * columnCount)
+                                                        .coerceAtLeast(0)
+                                                        .coerceAtMost((pageInfo.second * columnCount) - 1)
+                                                        .also { t -> Log.e("LSW", "$t, $it, $columnCount ${pageInfo.second}") },
+                                                )
+                                            }
+                                        },
+                                    )
+
+                                    Row(
+                                        modifier = Modifier.weight(1f),
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                    ) {
+                                        Spacer(modifier = Modifier.weight(1f))
+
+                                        IconButton(
+                                            onClick = {
+                                                scope.launch {
+                                                    gridState.animateScrollToLine(
+                                                        (gridState.firstVisibleLine + (pageInfo.second * columnCount) - columnCount)
+                                                                % (pageInfo.second * columnCount),
+                                                    )
+                                                }
+                                            },
+                                        ) {
+                                            Icon(
+                                                painter = painterResource(R.drawable.arrow_left_24px),
+                                                contentDescription = stringResource(R.string.previous),
+                                                modifier = Modifier.size(24.dp),
+                                            )
+                                        }
+
+                                        IconButton(
+                                            onClick = {
+                                                scope.launch {
+                                                    gridState.animateScrollToLine(
+                                                        (gridState.firstVisibleLine + columnCount) % (pageInfo.second * columnCount),
+                                                    )
+                                                }
+                                            },
+                                        ) {
+                                            Icon(
+                                                painter = painterResource(R.drawable.arrow_left_24px),
+                                                contentDescription = stringResource(R.string.next),
+                                                modifier = Modifier.rotate(180f)
+                                                    .size(24.dp),
+                                            )
+                                        }
+                                    }
+                                }
+                            }
                         }
+
+                        PagerIndicator(
+                            showingPager = showingPager && !controlBarVisible,
+                            pageFraction = pageInfo.first,
+                            pageCount = pageInfo.second,
+                            modifier = Modifier.align(Alignment.BottomCenter)
+                                .padding(bottom = 8.dp),
+                            onPageClick = {
+                                scope.launch {
+                                    gridState.animateScrollToLine(
+                                        (it * columnCount)
+                                            .coerceAtLeast(0)
+                                            .coerceAtMost(pageInfo.second - 1),
+                                    )
+                                }
+                            },
+                        )
                     }
                 },
                 modifier = Modifier.fillMaxSize(),
             )
         }.also { it.setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed) }
+    }
+
+    @Composable
+    private fun PagerIndicator(
+        showingPager: Boolean,
+        pageFraction: Float,
+        pageCount: Int,
+        onPageClick: (Int) -> Unit,
+        modifier: Modifier = Modifier,
+    ) {
+        val updatedPageFraction by rememberUpdatedState(pageFraction)
+
+        AnimatedVisibility(
+            visible = showingPager && pageCount > 1,
+            enter = fadeIn() + slideInVertically(initialOffsetY = { it }),
+            exit = fadeOut() + slideOutVertically(targetOffsetY = { it }),
+            modifier = modifier,
+        ) {
+            PagerWormIndicator(
+                pageCount = pageCount,
+                currentPageFraction = remember {
+                    derivedStateOf {
+                        updatedPageFraction
+                    }
+                },
+                activeDotColor = LocalContentColor.current,
+                dotColor = LocalContentColor.current.copy(alpha = 0.5f),
+                onDotClick = onPageClick,
+                dotCount = pageCount,
+            )
+        }
     }
 
     override val viewModel = WidgetFrameViewModel(this)

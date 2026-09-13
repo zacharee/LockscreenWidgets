@@ -3,9 +3,18 @@ package tk.zwander.common.compose.components
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.*
+import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.foundation.gestures.draggable
+import androidx.compose.foundation.gestures.draggable2D
+import androidx.compose.foundation.gestures.rememberDraggable2DState
+import androidx.compose.foundation.gestures.rememberDraggableState
 import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -38,6 +47,7 @@ import tk.zwander.lockscreenwidgets.util.MainWidgetFrameDelegate
 fun MainWidgetFrameDelegate.WidgetFrameViewModel.FrameEditWrapperLayout(
     frameId: Int,
     onRemovePressed: () -> Unit,
+    onClose: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val context = LocalContext.current
@@ -119,7 +129,7 @@ fun MainWidgetFrameDelegate.WidgetFrameViewModel.FrameEditWrapperLayout(
                 }
 
                 Row(
-                    modifier = Modifier.align(Alignment.TopEnd),
+                    modifier = Modifier.align(Alignment.BottomEnd),
                 ) {
                     if (frameId != MainWidgetFrameDelegate.ID) {
                         IconButton(
@@ -183,6 +193,21 @@ fun MainWidgetFrameDelegate.WidgetFrameViewModel.FrameEditWrapperLayout(
                         Icon(
                             painter = painterResource(R.drawable.ic_baseline_add_24),
                             contentDescription = stringResource(R.string.add_widget),
+                            modifier = Modifier.rotate(90f).size(32.dp),
+                            tint = Color.White,
+                        )
+                    }
+                }
+
+                Row(
+                    modifier = Modifier.align(Alignment.TopStart),
+                ) {
+                    IconButton(
+                        onClick = onClose,
+                    ) {
+                        Icon(
+                            painter = painterResource(R.drawable.close_24px),
+                            contentDescription = stringResource(R.string.done),
                             modifier = Modifier.rotate(90f).size(32.dp),
                             tint = Color.White,
                         )
