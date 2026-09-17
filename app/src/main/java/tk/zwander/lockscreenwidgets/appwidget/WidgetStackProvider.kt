@@ -327,6 +327,10 @@ class WidgetStackProvider : AppWidgetProvider() {
                 }
             )
 
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
+                root.reduceImageSizes(512, 512)
+            }
+
             updateAutoChangeForStack(context.safeApplicationContext, appWidgetId)
             updateWidgetStackMonitor(context)
             try {
