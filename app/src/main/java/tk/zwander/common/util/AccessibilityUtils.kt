@@ -34,6 +34,20 @@ import tk.zwander.widgetdrawer.util.DrawerDelegate
 import java.util.concurrent.ConcurrentLinkedQueue
 
 object AccessibilityUtils {
+    // The window/node tree walk in processWindows() does a lot of blocking Binder IPC
+    // (AccessibilityWindowInfo.getRoot(), AccessibilityNodeInfo.getChild()), and previously
+    // ran entirely on Dispatchers.Main (inherited from runAccessibilityJob), blocking the
+    // main thread for up to a second per accessibility event.
+    // A genuinely multithreaded dispatcher was tried here before and reverted (see "Crash fixes"
+    // in git history): onAccessibilityEvent() cancels the previous event's job before starting a
+    // new one, but cancellation can't interrupt a blocking call already in flight, so a stale
+    // walk's getChild() could still be running on one thread while a new event's walk started on
+    // another, racing on the same node tree/cache and throwing "already sealed" exceptions.
+    // limitedParallelism(1) is a single shared slot across every call (every event's job), so a
+    // new walk has to wait for a stale one to finish rather than running alongside it on another
+    // thread - serialized, like Main was, but without blocking Main itself.
+    private val windowProcessingDispatcher = Dispatchers.IO.limitedParallelism(1)
+
     data class NodeState(
         val onMainLockscreen: AtomicBoolean = atomic(false),
         val showingNotificationsPanel: AtomicBoolean = atomic(false),
@@ -306,15 +320,13 @@ object AccessibilityUtils {
                     sysUiWindowViewIds,
                     sysUiWindowAwaits,
                 ) { node ->
-                    launch(Dispatchers.IO) {
-                        processNode(
-                            nodeState = nodeState,
-                            node = node,
-                            presentIds = presentIds,
-                            nonPresentIds = nonPresentIds,
-                            isPixelUI = isPixelUI,
-                        )
-                    }
+                    processNode(
+                        nodeState = nodeState,
+                        node = node,
+                        presentIds = presentIds,
+                        nonPresentIds = nonPresentIds,
+                        isPixelUI = isPixelUI,
+                    )
                 }
             }
 
@@ -500,7 +512,9 @@ object AccessibilityUtils {
             )
 
             getWindows()?.forEach { displayId, windows ->
-                val windowInfo = processWindows(windows).also { windowInfo ->
+                val windowInfo = withContext(windowProcessingDispatcher) {
+                    processWindows(windows)
+                }.also { windowInfo ->
                     logUtils.debugLog("Got windows for display $displayId: $windowInfo", null)
                 }
 
