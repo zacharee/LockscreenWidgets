@@ -348,7 +348,7 @@ fun Content(
                         }?.takeIf { !it.isNaN() }
                             ?: firstSize?.let { firstSize ->
                                 firstSize.height.takeIf { it != 0f }?.let { height -> firstSize.width / height }
-                            }?.takeIf { !it.isNaN() }
+                            }?.takeIf { !it.isNaN() && it > 0 }
                             ?: (16 / 9f)
                     }
                 }
