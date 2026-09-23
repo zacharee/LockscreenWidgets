@@ -242,10 +242,7 @@ open class MainWidgetFrameDelegate protected constructor(
             targetDisplayId.value = display
 
             removeWindow()
-
-            if (canShow()) {
-                addWindow()
-            }
+            updateWindowState()
         }
         handler(PrefManager.KEY_FRAME_IGNORE_TOUCHES) {
             updateState {
@@ -464,15 +461,7 @@ open class MainWidgetFrameDelegate protected constructor(
 
                 if (actualNewState.isPreview != oldState.isPreview) {
                     lifecycleScope.launch(Dispatchers.Main) {
-                        if (actualNewState.isPreview) {
-                            if (canShow()) {
-                                addWindow()
-                            }
-                        } else {
-                            if (!canShow()) {
-                                removeWindow()
-                            }
-                        }
+                        updateWindowState()
                     }
                 }
 
@@ -622,7 +611,9 @@ open class MainWidgetFrameDelegate protected constructor(
             viewModel.animationState.value = AnimationState.STATE_IDLE
         } else if (!rootView.isAttachedToWindow) {
             logUtils.debugLog("Attempting emergency removeViewImmediate", extras = mapOf("frameId" to id))
-            wm?.safeRemoveViewImmediate(rootView, false)
+            animationMutex.withLock {
+                wm?.safeRemoveViewImmediate(rootView, false)
+            }
         }
     }
 
