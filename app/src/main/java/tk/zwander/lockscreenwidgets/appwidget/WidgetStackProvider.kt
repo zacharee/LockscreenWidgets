@@ -200,7 +200,9 @@ class WidgetStackProvider : AppWidgetProvider() {
                 }
             }
 
-            context.prefManager.widgetStackLastUpdates[appWidgetId] = System.currentTimeMillis()
+            context.prefManager.widgetStackLastUpdates = context.prefManager.widgetStackLastUpdates.apply {
+                this[appWidgetId] = System.currentTimeMillis()
+            }
 
             val root = RemoteViews(context.packageName, R.layout.widget_stack)
             val stackedWidgets = (context.prefManager.widgetStackWidgets[appWidgetId] ?: LinkedHashSet()).toList()
