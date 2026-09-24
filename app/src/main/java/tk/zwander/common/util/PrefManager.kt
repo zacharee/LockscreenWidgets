@@ -19,12 +19,7 @@ import androidx.preference.PreferenceManager
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import dev.zwander.lswinterconnect.safeApplicationContext
-import tk.zwander.common.data.SafePointF
-import tk.zwander.common.data.WidgetData
-import tk.zwander.common.data.WidgetListFilters
-import tk.zwander.common.data.WidgetSizeData
-import tk.zwander.common.data.WidgetStackStyle
-import tk.zwander.common.data.WidgetTileInfo
+import tk.zwander.common.data.*
 import tk.zwander.common.iconpacks.IconEntry
 import tk.zwander.lockscreenwidgets.R
 import tk.zwander.lockscreenwidgets.data.Mode
@@ -128,9 +123,17 @@ class PrefManager private constructor(private val context: Context) {
         const val KEY_DRAWER_HANDLE_TAP_TO_OPEN = "drawer_handle_tap_to_open"
         const val KEY_SELECTED_ICON_PACK_PACKAGE = "selected_icon_pack_package"
         const val KEY_SHORTCUT_OVERRIDE_ICONS = "shortcut_override_icon_entries"
-        @Deprecated("Doesn't support displays", replaceWith = ReplaceWith("PrefManager.KEY_CURRENT_FRAMES_WITH_DISPLAY"))
+
+        @Deprecated(
+            "Doesn't support displays",
+            replaceWith = ReplaceWith("PrefManager.KEY_CURRENT_FRAMES_WITH_DISPLAY"),
+        )
         const val KEY_CURRENT_FRAMES = "current_secondary_widget_frames"
-        @Deprecated("Doesn't support unique displays", replaceWith = ReplaceWith("PrefManager.KEY_CURRENT_FRAMES_WITH_STRING_DISPLAY"))
+
+        @Deprecated(
+            "Doesn't support unique displays",
+            replaceWith = ReplaceWith("PrefManager.KEY_CURRENT_FRAMES_WITH_STRING_DISPLAY"),
+        )
         const val KEY_CURRENT_FRAMES_WITH_DISPLAY = "current_secondary_widget_frames_with_display"
 
         const val KEY_CURRENT_FRAMES_WITH_STRING_DISPLAY = "current_seconday_widget_frames_with_string_display"
@@ -223,7 +226,7 @@ class PrefManager private constructor(private val context: Context) {
         set(value) {
             putString(
                 KEY_SHORTCUT_IDS,
-                gson.toJson(value)
+                gson.toJson(value),
             )
         }
 
@@ -233,7 +236,8 @@ class PrefManager private constructor(private val context: Context) {
         set(value) {
             putStringSet(
                 KEY_PRESENT_IDS,
-                value)
+                value,
+            )
         }
 
     //IDs the user has selected. The widget frame will hide if any of these are *not* detected on-screen.
@@ -242,7 +246,7 @@ class PrefManager private constructor(private val context: Context) {
         set(value) {
             putStringSet(
                 KEY_NON_PRESENT_IDS,
-                value
+                value,
             )
         }
 
@@ -255,7 +259,7 @@ class PrefManager private constructor(private val context: Context) {
         set(value) {
             putString(
                 KEY_WIDGET_SIZES,
-                gson.toJson(value)
+                gson.toJson(value),
             )
         }
 
@@ -317,10 +321,13 @@ class PrefManager private constructor(private val context: Context) {
     //The horizontal position of the center of the frame in the NC (from the center of the screen) in pixels
     @Deprecated("Use [FrameSizeAndPosition] instead.")
     var notificationPosX: Int
-        get() = getInt(KEY_NOTIFICATION_POS_X, context.calculateNCPosXFromRightDefault(
-            FrameSizeAndPosition.FrameType.NotificationNormal.Portrait,
-            defaultDisplay,
-        ))
+        get() = getInt(
+            KEY_NOTIFICATION_POS_X,
+            context.calculateNCPosXFromRightDefault(
+                FrameSizeAndPosition.FrameType.NotificationNormal.Portrait,
+                defaultDisplay,
+            ),
+        )
         set(value) {
             putInt(KEY_NOTIFICATION_POS_X, value)
         }
@@ -328,10 +335,13 @@ class PrefManager private constructor(private val context: Context) {
     //The horizontal position of the center of the frame in the locked NC (from the center of the screen) in pixels
     @Deprecated("Use [FrameSizeAndPosition] instead.")
     var lockNotificationPosX: Int
-        get() = getInt(KEY_LOCK_NOTIFICATION_POS_X, context.calculateNCPosXFromRightDefault(
-            FrameSizeAndPosition.FrameType.LockNotification.Portrait,
-            defaultDisplay,
-        ))
+        get() = getInt(
+            KEY_LOCK_NOTIFICATION_POS_X,
+            context.calculateNCPosXFromRightDefault(
+                FrameSizeAndPosition.FrameType.LockNotification.Portrait,
+                defaultDisplay,
+            ),
+        )
         set(value) {
             putInt(KEY_LOCK_NOTIFICATION_POS_X, value)
         }
@@ -355,10 +365,13 @@ class PrefManager private constructor(private val context: Context) {
     //The vertical position of the center of the frame in the NC (from the center of the screen) in pixels
     @Deprecated("Use [FrameSizeAndPosition] instead.")
     var notificationPosY: Int
-        get() = getInt(KEY_NOTIFICATION_POS_Y, context.calculateNCPosYFromTopDefault(
-            FrameSizeAndPosition.FrameType.NotificationNormal.Portrait,
-            defaultDisplay,
-        ))
+        get() = getInt(
+            KEY_NOTIFICATION_POS_Y,
+            context.calculateNCPosYFromTopDefault(
+                FrameSizeAndPosition.FrameType.NotificationNormal.Portrait,
+                defaultDisplay,
+            ),
+        )
         set(value) {
             putInt(KEY_NOTIFICATION_POS_Y, value)
         }
@@ -366,10 +379,13 @@ class PrefManager private constructor(private val context: Context) {
     //The vertical position of the center of the frame in the NC (from the center of the screen) in pixels
     @Deprecated("Use [FrameSizeAndPosition] instead.")
     var lockNotificationPosY: Int
-        get() = getInt(KEY_LOCK_NOTIFICATION_POS_Y, context.calculateNCPosYFromTopDefault(
-            FrameSizeAndPosition.FrameType.LockNotification.Portrait,
-            defaultDisplay,
-        ))
+        get() = getInt(
+            KEY_LOCK_NOTIFICATION_POS_Y,
+            context.calculateNCPosYFromTopDefault(
+                FrameSizeAndPosition.FrameType.LockNotification.Portrait,
+                defaultDisplay,
+            ),
+        )
         set(value) {
             putInt(KEY_LOCK_NOTIFICATION_POS_Y, value)
         }
@@ -407,7 +423,7 @@ class PrefManager private constructor(private val context: Context) {
         set(value) {
             putString(
                 KEY_CUSTOM_TILES,
-                gson.toJson(value)
+                gson.toJson(value),
             )
         }
 
@@ -513,7 +529,10 @@ class PrefManager private constructor(private val context: Context) {
     //The corner radius for the widget frame
     //(how rounded the corners are, in dp)
     var cornerRadiusDp: Float
-        get() = getInt(KEY_FRAME_CORNER_RADIUS, context.resources.getInteger(R.integer.def_corner_radius_dp_scaled_10x)) / 10f
+        get() = getInt(
+            KEY_FRAME_CORNER_RADIUS,
+            context.resources.getInteger(R.integer.def_corner_radius_dp_scaled_10x),
+        ) / 10f
         set(value) {
             putInt(KEY_FRAME_CORNER_RADIUS, (value * 10f).toInt())
         }
@@ -625,7 +644,10 @@ class PrefManager private constructor(private val context: Context) {
         }
 
     var drawerBackgroundColor: Int
-        get() = getInt(KEY_DRAWER_BACKGROUND_COLOR, ResourcesCompat.getColor(context.resources, R.color.drawerBackgroundDefault, context.theme))
+        get() = getInt(
+            KEY_DRAWER_BACKGROUND_COLOR,
+            ResourcesCompat.getColor(context.resources, R.color.drawerBackgroundDefault, context.theme),
+        )
         set(value) {
             putInt(KEY_DRAWER_BACKGROUND_COLOR, value)
         }
@@ -688,7 +710,10 @@ class PrefManager private constructor(private val context: Context) {
             putStringSet(KEY_CURRENT_FRAMES, value.map { it.toString() }.toSet())
         }
 
-    @Deprecated("Doesn't support unique display IDs", ReplaceWith("PrefManager.currentSecondaryFramesWithStringDisplay"))
+    @Deprecated(
+        "Doesn't support unique display IDs",
+        ReplaceWith("PrefManager.currentSecondaryFramesWithStringDisplay"),
+    )
     @Suppress("DEPRECATION")
     var currentSecondaryFramesWithDisplay: HashMap<Int, Int>
         get() = gson.mapFromJson(
@@ -782,7 +807,7 @@ class PrefManager private constructor(private val context: Context) {
 
     var widgetStackStyle: HashMap<Int, WidgetStackStyle>
         get() = gson.mapFromJson(
-            getString(KEY_WIDGET_STACK_STYLE_OPTIONS, "")
+            getString(KEY_WIDGET_STACK_STYLE_OPTIONS, ""),
         )
         set(value) {
             putString(KEY_WIDGET_STACK_STYLE_OPTIONS, gson.toJson(value))

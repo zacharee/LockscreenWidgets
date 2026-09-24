@@ -326,7 +326,7 @@ class WidgetStackProvider : AppWidgetProvider() {
                     View.VISIBLE
                 } else {
                     View.GONE
-                }
+                },
             )
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
@@ -551,7 +551,7 @@ class WidgetStackProvider : AppWidgetProvider() {
                 createSwapIntent(context, intArrayOf(stackId), false),
                 0,
                 false,
-            )
+            ),
         )
         root.setOnClickPendingIntent(
             R.id.stack_backward,
@@ -584,8 +584,8 @@ class WidgetStackProvider : AppWidgetProvider() {
                     .setAction(AppWidgetManager.ACTION_APPWIDGET_UPDATE)
                     .putExtra(EXTRA_REFRESH, true),
                 0,
-                false
-            )
+                false,
+            ),
         )
     }
 
@@ -806,14 +806,17 @@ class WidgetStackProvider : AppWidgetProvider() {
     }
 
     private fun scheduleWidgetRefresh(context: Context, id: Int) {
-        mainHandler.postDelayed({
-            update(
-                context = context.safeApplicationContext,
-                ids = intArrayOf(id),
-                fromChild = false,
-                refresh = true,
-            )
-        }, 300)
+        mainHandler.postDelayed(
+            {
+                update(
+                    context = context.safeApplicationContext,
+                    ids = intArrayOf(id),
+                    fromChild = false,
+                    refresh = true,
+                )
+            },
+            300,
+        )
     }
 
     override fun onAppWidgetOptionsChanged(
@@ -914,7 +917,7 @@ class WidgetStackProvider : AppWidgetProvider() {
 
             return SizeF(
                 (baseSize.first - horizontalPaddingDp),
-                    (baseSize.second - bottomBarHeightDp - verticalPaddingDp),
+                (baseSize.second - bottomBarHeightDp - verticalPaddingDp),
             )
         }
 

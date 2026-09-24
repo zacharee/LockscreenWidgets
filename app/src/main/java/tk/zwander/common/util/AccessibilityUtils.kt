@@ -156,7 +156,8 @@ object AccessibilityUtils {
             if (node.hasWildcardId("com.samsung.android.app.aodservice:id/facewidget_") &&
                 !node.hasVisibleIds(
                     unitMapOf("com.samsung.android.app.aodservice:id/facewidget_clock_container"),
-                )) {
+                )
+            ) {
                 logUtils.debugLog("Found FaceWidgets ${node.sourceNodeId} ${node.viewIdResourceName}", null)
                 nodeState.onFaceWidgets.value = true
             }
@@ -211,7 +212,10 @@ object AccessibilityUtils {
 
         if (!nodeState.hasSettingsContainerButton.value) {
             if (node.hasVisibleIds(IDMaps.settingsContainerButtonIds)) {
-                logUtils.debugLog("Found settings container ${node.sourceNodeId} $isPixelUI ${node.viewIdResourceName}", null)
+                logUtils.debugLog(
+                    "Found settings container ${node.sourceNodeId} $isPixelUI ${node.viewIdResourceName}",
+                    null,
+                )
                 nodeState.hasSettingsContainerButton.value = isPixelUI
             }
         }
@@ -236,7 +240,10 @@ object AccessibilityUtils {
         //(or are present but not visible). If any aren't, the frame will be hidden.
         if (!nodeState.hideForNonPresentIds.value && nonPresentIds.isNotEmpty()) {
             if (!node.hasVisibleIds(nonPresentIds)) {
-                logUtils.debugLog("Found non present ID to hide for ${node.sourceNodeId} ${node.viewIdResourceName}", null)
+                logUtils.debugLog(
+                    "Found non present ID to hide for ${node.sourceNodeId} ${node.viewIdResourceName}",
+                    null,
+                )
                 nodeState.hideForNonPresentIds.value = true
             }
         }
@@ -252,7 +259,10 @@ object AccessibilityUtils {
                 node.parentNodeId == globalState.powerMenuNodeId.value &&
                 node.isVisibleToUser
             ) {
-                logUtils.debugLog("Found power menu node by global ID ${node.sourceNodeId} ${node.viewIdResourceName}", null)
+                logUtils.debugLog(
+                    "Found power menu node by global ID ${node.sourceNodeId} ${node.viewIdResourceName}",
+                    null,
+                )
                 nodeState.showingPowerMenu.value = true
             }
         }
@@ -430,48 +440,50 @@ object AccessibilityUtils {
         }
 
         for (i in 0 until parentNode.childCount) {
-            awaits.add(async {
-                val child = try {
-                    parentNode.getChild(i)
-                } catch (e: SecurityException) {
-                    //Sometimes a SecurityException gets thrown here (on Huawei devices)
-                    //so just return null if it happens
-                    peekLogUtils?.debugLog("Error getting child node", e)
-                    null
-                } catch (e: NullPointerException) {
-                    //Sometimes a NullPointerException is thrown here with this error:
-                    //"Attempt to read from field 'com.android.server.appwidget.AppWidgetServiceImpl$ProviderId
-                    //com.android.server.appwidget.AppWidgetServiceImpl$Provider.id' on a null object reference"
-                    //so just return null if that happens.
-                    peekLogUtils?.debugLog("Error getting child node", e)
-                    null
-                } catch (_: IllegalStateException) {
-                    try {
-                        parentNode.isSealed = true
-                        parentNode.getChild(i).also {
-                            parentNode.isSealed = false
+            awaits.add(
+                async {
+                    val child = try {
+                        parentNode.getChild(i)
+                    } catch (e: SecurityException) {
+                        //Sometimes a SecurityException gets thrown here (on Huawei devices)
+                        //so just return null if it happens
+                        peekLogUtils?.debugLog("Error getting child node", e)
+                        null
+                    } catch (e: NullPointerException) {
+                        //Sometimes a NullPointerException is thrown here with this error:
+                        //"Attempt to read from field 'com.android.server.appwidget.AppWidgetServiceImpl$ProviderId
+                        //com.android.server.appwidget.AppWidgetServiceImpl$Provider.id' on a null object reference"
+                        //so just return null if that happens.
+                        peekLogUtils?.debugLog("Error getting child node", e)
+                        null
+                    } catch (_: IllegalStateException) {
+                        try {
+                            parentNode.isSealed = true
+                            parentNode.getChild(i).also {
+                                parentNode.isSealed = false
+                            }
+                        } catch (e: Exception) {
+                            peekLogUtils?.debugLog("Error getting child node", e)
+                            null
                         }
-                    } catch (e: Exception) {
+                    } catch (e: IndexOutOfBoundsException) {
                         peekLogUtils?.debugLog("Error getting child node", e)
                         null
                     }
-                } catch (e: IndexOutOfBoundsException) {
-                    peekLogUtils?.debugLog("Error getting child node", e)
-                    null
-                }
 
-                if (child != null) {
-                    if (child.childCount > 0) {
-                        addAllNodesToList(child, list, ids, awaits, nodeAddedCallback)
-                    } else {
-                        list.add(child)
-                        nodeAddedCallback(child)
-                        if (child.isVisibleToUser && child.viewIdResourceName != null) {
-                            ids.add(child.viewIdResourceName)
+                    if (child != null) {
+                        if (child.childCount > 0) {
+                            addAllNodesToList(child, list, ids, awaits, nodeAddedCallback)
+                        } else {
+                            list.add(child)
+                            nodeAddedCallback(child)
+                            if (child.isVisibleToUser && child.viewIdResourceName != null) {
+                                ids.add(child.viewIdResourceName)
+                            }
                         }
                     }
-                }
-            })
+                },
+            )
         }
     }
 
@@ -518,7 +530,8 @@ object AccessibilityUtils {
                     logUtils.debugLog("Got windows for display $displayId: $windowInfo", null)
                 }
 
-                val relevantFrameDelegates = frameDelegates.filter { (val frame = value) -> frame.display?.displayId == displayId }
+                val relevantFrameDelegates =
+                    frameDelegates.filter { (val frame = value) -> frame.display?.displayId == displayId }
 
                 windowInfo.sysUiWindowViewIds.let { sysUiWindowViewIds ->
                     logUtils.debugLog("Found IDs on display $displayId\n${sysUiWindowViewIds.joinToString("\n")}", null)
@@ -534,7 +547,9 @@ object AccessibilityUtils {
                 if (isDebug) {
                     windowInfo.sysUiWindowNodes.let { sysUiWindowNodes ->
                         logUtils.debugLog(
-                            "$displayId: ${sysUiWindowNodes.filter { it.isVisibleToUser }.map { it.viewIdResourceName }}",
+                            "$displayId: ${
+                                sysUiWindowNodes.filter { it.isVisibleToUser }.map { it.viewIdResourceName }
+                            }",
                             null,
                         )
                     }
@@ -547,7 +562,8 @@ object AccessibilityUtils {
                 //However, it's not an Application-type window for some reason, so it won't hide with the
                 //currentAppLayer check. Explicitly check for its existence here.
                 globalState.isOnScreenOffMemo[displayId] = isOnKeyguard && windowInfo.hasScreenOffMemoWindow
-                globalState.isOnEdgePanel[displayId] = windowInfo.hasEdgePanelWindow || windowInfo.nodeState.showingEdgePanel.value
+                globalState.isOnEdgePanel[displayId] =
+                    windowInfo.hasEdgePanelWindow || windowInfo.nodeState.showingEdgePanel.value
                 globalState.isOnFaceWidgets[displayId] = windowInfo.hasFaceWidgetsWindow
                         || windowInfo.nodeState.onFaceWidgets.value
                 //Generate "layer" values for the System UI window and for the topmost app window, if
@@ -569,11 +585,13 @@ object AccessibilityUtils {
                 globalState.onMainLockScreen[displayId] = windowInfo.nodeState.onMainLockscreen.value
                 globalState.showingPowerMenu[displayId] = windowInfo.nodeState.showingPowerMenu.value
                 globalState.showingSecurityInput[displayId] = windowInfo.nodeState.showingSecurityInput.value
-                globalState.accessibilitySeesNotificationsOnMainLockScreen[displayId] = windowInfo.nodeState.onMainLockscreen.value &&
-                        windowInfo.nodeState.hasNotificationsShowing.value
+                globalState.accessibilitySeesNotificationsOnMainLockScreen[displayId] =
+                    windowInfo.nodeState.onMainLockscreen.value &&
+                            windowInfo.nodeState.hasNotificationsShowing.value
                 globalState.showingNotificationsPanel[displayId] = notificationsAreOpen
-                globalState.notificationsPanelFullyExpanded[displayId] = (windowInfo.nodeState.hasMoreButton.value) || (windowInfo.nodeState.hasSettingsContainerButton.value &&
-                        !windowInfo.nodeState.hasClearAllButton.value)
+                globalState.notificationsPanelFullyExpanded[displayId] =
+                    (windowInfo.nodeState.hasMoreButton.value) || (windowInfo.nodeState.hasSettingsContainerButton.value &&
+                            !windowInfo.nodeState.hasClearAllButton.value)
                 globalState.hideForPresentIds[displayId] = windowInfo.nodeState.hideForPresentIds.value
                 globalState.hideForNonPresentIds[displayId] = windowInfo.nodeState.hideForNonPresentIds.value
 
@@ -658,10 +676,10 @@ object AccessibilityUtils {
                 lsDisplayManager.displayAndWmCache.value.values.forEach { [dis, wm] ->
                     globalState.showingKeyboard[dis?.displayId ?: Display.DEFAULT_DISPLAY] =
                         wm?.currentWindowMetrics
-                        ?.windowInsets?.getInsets(WindowInsets.Type.ime())
-                        ?.toRect()
-                        ?.isEmpty
-                        .let { it == false }
+                            ?.windowInsets?.getInsets(WindowInsets.Type.ime())
+                            ?.toRect()
+                            ?.isEmpty
+                            .let { it == false }
                 }
             } else {
                 globalState.showingKeyboard[Display.DEFAULT_DISPLAY] = try {
@@ -683,7 +701,7 @@ object AccessibilityUtils {
                 try {
                     logUtils.debugLog(
                         "Source Node ID: ${event.sourceNodeId}, Window ID: ${event.windowId}, Source ID Name: ${event.source?.viewIdResourceName}",
-                        null
+                        null,
                     )
 
                     if (event.recordCount > 0) {
@@ -711,7 +729,7 @@ object AccessibilityUtils {
                         "isScreenOn: ${lsDisplayManager.isAnyDisplayOn}, " +
                         "wasOnKeyguard: ${globalState.wasOnKeyguard.value}, " +
                         "${drawerDelegate.state}",
-                null
+                null,
             )
 
             if (prefManager.widgetFrameEnabled) {
@@ -794,7 +812,7 @@ object AccessibilityUtils {
 val Context.isAccessibilityEnabled: Boolean
     get() = Settings.Secure.getString(
         contentResolver,
-        Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES
+        Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES,
     )?.contains(ComponentName(this, Accessibility::class.java).flattenToString()) == true
 
 fun Context.openAccessibilitySettings() {
@@ -810,7 +828,7 @@ fun Context.openAccessibilitySettings() {
         accIntent.`package` = "com.android.settings"
         accIntent.component = ComponentName(
             "com.android.settings",
-            $$"com.android.settings.Settings$AccessibilityInstalledServiceActivity"
+            $$"com.android.settings.Settings$AccessibilityInstalledServiceActivity",
         )
         startActivity(accIntent)
     } catch (e: Exception) {
