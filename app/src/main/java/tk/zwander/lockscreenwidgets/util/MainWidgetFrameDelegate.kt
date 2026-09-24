@@ -2,11 +2,7 @@ package tk.zwander.lockscreenwidgets.util
 
 import android.content.Context
 import android.content.SharedPreferences
-import android.graphics.Bitmap
-import android.graphics.Matrix
-import android.graphics.PixelFormat
-import android.graphics.Point
-import android.graphics.PointF
+import android.graphics.*
 import android.graphics.drawable.Drawable
 import android.view.Display
 import android.view.Gravity
@@ -20,45 +16,18 @@ import androidx.core.graphics.component2
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.viewModelScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.NonCancellable
-import kotlinx.coroutines.delay
+import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import kotlinx.coroutines.withContext
 import tk.zwander.common.activities.DismissOrUnlockActivity
 import tk.zwander.common.compose.util.createComposeViewHolder
 import tk.zwander.common.compose.util.findAccessibility
 import tk.zwander.common.data.provider.IFramePrefsProvider
 import tk.zwander.common.data.provider.IFrameProvider
-import tk.zwander.common.util.BaseDelegate
-import tk.zwander.common.util.DrawerOrFrame
-import tk.zwander.common.util.Event
-import tk.zwander.common.util.FrameSizeAndPosition
-import tk.zwander.common.util.GlobalState
-import tk.zwander.common.util.HandlerRegistry
-import tk.zwander.common.util.PrefManager
-import tk.zwander.common.util.awaitNextDraw
-import tk.zwander.common.util.eventManager
-import tk.zwander.common.util.fadeAndScaleIn
-import tk.zwander.common.util.fadeAndScaleOut
-import tk.zwander.common.util.frameSizeAndPosition
-import tk.zwander.common.util.globalState
-import tk.zwander.common.util.handler
-import tk.zwander.common.util.logUtils
-import tk.zwander.common.util.lsDisplayManager
-import tk.zwander.common.util.prefManager
-import tk.zwander.common.util.remove
-import tk.zwander.common.util.safeAddView
-import tk.zwander.common.util.safeRemoveViewImmediate
-import tk.zwander.common.util.set
-import tk.zwander.common.util.wallpaperClient
-import tk.zwander.common.util.wallpaperUtils
+import tk.zwander.common.util.*
 import tk.zwander.lockscreenwidgets.compose.WidgetFrameLayout
 import tk.zwander.lockscreenwidgets.data.Mode
 import kotlin.time.Duration.Companion.milliseconds
@@ -70,7 +39,7 @@ open class MainWidgetFrameDelegate protected constructor(
     context: Context,
     protected val id: Int = ID,
     initialDisplayId: String,
-    override val targetDisplayId: MutableStateFlow<String> = MutableStateFlow(initialDisplayId)
+    override val targetDisplayId: MutableStateFlow<String> = MutableStateFlow(initialDisplayId),
 ) : BaseDelegate<MainWidgetFrameDelegate.State>(
     context = context,
     targetDisplayId = targetDisplayId,
@@ -143,7 +112,7 @@ open class MainWidgetFrameDelegate protected constructor(
                         } else {
                             FrameSizeAndPosition.FrameType.SecondaryLockNotification.select(
                                 !isLandscape,
-                                id
+                                id,
                             )
                         }
                     } else {
@@ -152,7 +121,7 @@ open class MainWidgetFrameDelegate protected constructor(
                         } else {
                             FrameSizeAndPosition.FrameType.SecondaryNotification.select(
                                 !isLandscape,
-                                id
+                                id,
                             )
                         }
                     }
@@ -207,7 +176,6 @@ open class MainWidgetFrameDelegate protected constructor(
             )
         }.also { it.setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed) }
     }
-
 
 
     override val viewModel = WidgetFrameViewModel(this)
@@ -288,8 +256,8 @@ open class MainWidgetFrameDelegate protected constructor(
                             saveMode,
                             Point(
                                 0,
-                                frameSizeAndPosition.getPositionForType(saveMode, display).y
-                            )
+                                frameSizeAndPosition.getPositionForType(saveMode, display).y,
+                            ),
                         )
                     }
                     updateWindow()
@@ -303,8 +271,8 @@ open class MainWidgetFrameDelegate protected constructor(
                             saveMode,
                             Point(
                                 frameSizeAndPosition.getPositionForType(saveMode, display).x,
-                                0
-                            )
+                                0,
+                            ),
                         )
                     }
                     updateWindow()
@@ -339,12 +307,12 @@ open class MainWidgetFrameDelegate protected constructor(
 
                     frameSizeAndPosition.setPositionForType(
                         saveMode,
-                        Point(params.x, params.y)
+                        Point(params.x, params.y),
                     )
                     this@MainWidgetFrameDelegate.display?.let { display ->
                         frameSizeAndPosition.setSizeForType(
                             saveMode,
-                            PointF(display.pxToDp(params.width), display.pxToDp(params.height))
+                            PointF(display.pxToDp(params.width), display.pxToDp(params.height)),
                         )
                     }
 
@@ -364,7 +332,7 @@ open class MainWidgetFrameDelegate protected constructor(
 
                     frameSizeAndPosition.setPositionForType(
                         saveMode,
-                        Point(params.x, params.y)
+                        Point(params.x, params.y),
                     )
                 }
             }
@@ -523,26 +491,35 @@ open class MainWidgetFrameDelegate protected constructor(
     }
 
     private suspend fun addWindow() {
-        logUtils.debugLog("Adding overlay", extras = mapOf("frameId" to id, "rootAttachedBefore" to rootView.isAttachedToWindow))
+        logUtils.debugLog(
+            "Adding overlay",
+            extras = mapOf("frameId" to id, "rootAttachedBefore" to rootView.isAttachedToWindow),
+        )
 
         withContext(Dispatchers.Main) {
             if (!rootView.isAttachedToWindow) {
                 updateWindow()
             }
 
-            logUtils.debugLog("Trying to add overlay ${viewModel.animationState.value}", extras = mapOf(
-                "frameId" to id,
-                "rootAttachedBefore" to rootView.isAttachedToWindow,
-                "animState" to viewModel.animationState.toString(),
-            ))
+            logUtils.debugLog(
+                "Trying to add overlay ${viewModel.animationState.value}",
+                extras = mapOf(
+                    "frameId" to id,
+                    "rootAttachedBefore" to rootView.isAttachedToWindow,
+                    "animState" to viewModel.animationState.toString(),
+                ),
+            )
 
             if (!rootView.isAttachedToWindow && viewModel.animationState.value != AnimationState.STATE_ADDING) {
-                logUtils.debugLog("Actually adding overlay", extras = mapOf(
-                    "frameId" to id,
-                    "displayId" to this@MainWidgetFrameDelegate.display?.uniqueIdCompat,
-                    "paramsWidth" to params.width,
-                    "paramsHeight" to params.height,
-                ))
+                logUtils.debugLog(
+                    "Actually adding overlay",
+                    extras = mapOf(
+                        "frameId" to id,
+                        "displayId" to this@MainWidgetFrameDelegate.display?.uniqueIdCompat,
+                        "paramsWidth" to params.width,
+                        "paramsHeight" to params.height,
+                    ),
+                )
 
                 viewModel.animationState.value = AnimationState.STATE_ADDING
 
@@ -555,10 +532,13 @@ open class MainWidgetFrameDelegate protected constructor(
                     rootView.awaitNextDraw()
                     rootView.fadeAndScaleIn(DrawerOrFrame.FRAME)
                 } else {
-                    logUtils.debugLog("Adding overlay failed", extras = mapOf(
-                        "frameId" to id,
-                        "animState" to viewModel.animationState.toString(),
-                    ))
+                    logUtils.debugLog(
+                        "Adding overlay failed",
+                        extras = mapOf(
+                            "frameId" to id,
+                            "animState" to viewModel.animationState.toString(),
+                        ),
+                    )
                 }
 
                 viewModel.animationState.value = AnimationState.STATE_IDLE
@@ -568,15 +548,21 @@ open class MainWidgetFrameDelegate protected constructor(
 
     private suspend fun removeWindow() {
         if (isAttached) {
-            logUtils.debugLog("Removing overlay", extras = mapOf("frameId" to id, "rootAttachedBefore" to rootView.isAttachedToWindow))
+            logUtils.debugLog(
+                "Removing overlay",
+                extras = mapOf("frameId" to id, "rootAttachedBefore" to rootView.isAttachedToWindow),
+            )
         }
 
         if (rootView.isAttachedToWindow && viewModel.animationState.value != AnimationState.STATE_REMOVING) {
-            logUtils.debugLog("Trying to remove overlay ${viewModel.animationState.value}", extras = mapOf(
-                "frameId" to id,
-                "rootAttachedBefore" to rootView.isAttachedToWindow,
-                "animState" to viewModel.animationState.toString(),
-            ))
+            logUtils.debugLog(
+                "Trying to remove overlay ${viewModel.animationState.value}",
+                extras = mapOf(
+                    "frameId" to id,
+                    "rootAttachedBefore" to rootView.isAttachedToWindow,
+                    "animState" to viewModel.animationState.toString(),
+                ),
+            )
 
             if (!rootView.isAttachedToWindow) {
                 logUtils.debugLog("Root view already detached during removeWindow", extras = mapOf("frameId" to id))
@@ -588,10 +574,13 @@ open class MainWidgetFrameDelegate protected constructor(
             updateIgnoreAllTouches(true)
 
             withContext(Dispatchers.Main + NonCancellable) {
-                logUtils.debugLog("Actually removing overlay", extras = mapOf(
-                    "frameId" to id,
-                    "displayId" to this@MainWidgetFrameDelegate.display?.uniqueIdCompat,
-                ))
+                logUtils.debugLog(
+                    "Actually removing overlay",
+                    extras = mapOf(
+                        "frameId" to id,
+                        "displayId" to this@MainWidgetFrameDelegate.display?.uniqueIdCompat,
+                    ),
+                )
 
                 viewModel.currentEditingInterfaceId.value = null
 
@@ -876,7 +865,7 @@ open class MainWidgetFrameDelegate protected constructor(
 
         logUtils.debugLog(
             "Possibly updating params with display size ${display.rotatedRealSize}",
-            null
+            null,
         )
 
         val [newX, newY] = frameSizeAndPosition.getPositionForType(saveMode, display)
@@ -993,7 +982,7 @@ open class MainWidgetFrameDelegate protected constructor(
 
     abstract class IWidgetFrameViewModel<
             State : Any,
-            Delegate : BaseDelegate<State>
+            Delegate : BaseDelegate<State>,
             >(delegate: Delegate) : BaseViewModel<State, Delegate>(delegate), IFramePrefsProvider {
         abstract val saveMode: FrameSizeAndPosition.FrameType
 
