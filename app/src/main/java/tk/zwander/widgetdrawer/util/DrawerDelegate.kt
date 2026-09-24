@@ -293,6 +293,16 @@ class DrawerDelegate private constructor(context: Context, displayId: String) :
             }
 
             is Event.ScrollInDrawer -> {
+                if (!event.initial && !viewModel.scrollingOpen.value) {
+                    // This drag-position update was queued before the pointer lifted, but is only
+                    // being processed now, after ScrollOpenFinish already started the settle
+                    // animation. Applying it would stomp params.x with a stale, more-off-screen
+                    // value for a frame or two (visible as a flicker) before the animator's next
+                    // tick corrects it. Once the drag has ended, only the settle animator should
+                    // own params.x.
+                    return
+                }
+
                 if (event.velocity.sign != viewModel.latestScrollInVelocity.value.sign) {
                     viewModel.latestScrollInVelocity.value = 0f
                 }
