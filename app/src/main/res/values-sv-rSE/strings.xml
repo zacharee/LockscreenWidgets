@@ -349,11 +349,11 @@
     <string name="edit_layout">Redigera layout</string>
     <string name="edit_layout_desc">Använd den här skärmen för att ändra ordning och storlek på widgetarna i ramen på en större arbetsyta.</string>
     <string name="toggle_controls">Visa eller dölj kontroller</string>
-    <string name="show_bottom_bar_toggle_control">Show Controls Toggle</string>
+    <string name="show_bottom_bar_toggle_control">Visa reglage för kontroller</string>
     <string name="show_bottom_bar_toggle_control_desc">När detta är aktiverat visas en liten pillerformad knapp ovanför widgetstapelns kontroller. Tryck på den för att dölja kontrollerna.</string>
-    <string name="show_on_power_menu">Show over Power Menu</string>
-    <string name="show_on_power_menu_desc">When enabled, the frame will continue showing when the power menu is visible instead of hiding.</string>
-    <string name="show_bottom_bar">Show Bottom Controls</string>
-    <string name="show_bottom_bar_desc">Adds a set of basic controls below your widgets in the frame. More controls can always be accessed by tapping the frame with two fingers.</string>
-    <string name="frame_settings">Frame %s Settings</string>
+    <string name="show_on_power_menu">Visa ovanpå strömmenyn</string>
+    <string name="show_on_power_menu_desc">När detta är aktiverat visas ramen även när strömmenyn är öppen, i stället för att döljas.</string>
+    <string name="show_bottom_bar">Visa kontroller längst ned</string>
+    <string name="show_bottom_bar_desc">Lägger till grundläggande kontroller under dina widgetar i ramen. Du kan alltid komma åt fler kontroller genom att trycka på ramen med två fingrar.</string>
+    <string name="frame_settings">Inställningar för ram %s</string>
 </resources>
