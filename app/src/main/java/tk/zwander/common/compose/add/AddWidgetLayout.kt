@@ -124,9 +124,8 @@ fun AddWidgetLayout(
     ListPickerDialog(
         showingDialog = showingFiltersDialog,
         onDialogShowingChanged = { showingFiltersDialog = it },
-        state = rememberBottomSheetState(
-            initialValue = SheetValue.Hidden,
-            enabledValues = [SheetValue.Hidden, SheetValue.Expanded],
+        state = rememberModalBottomSheetState(
+            skipPartiallyExpanded = true,
         ),
         entries = remember {
             WidgetListFilters.Category.entries.map { category ->

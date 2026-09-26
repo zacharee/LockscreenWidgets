@@ -10,7 +10,7 @@ bugsnagGradlePlugin = "1.2.0"
 byteBuddyAndroid = "1.18.14"
 colorpickerCompose = "1.3.0"
 compose-material-icons-core = "1.7.8"
-composeBom = "2026.08.01"
+composeBom = "2026.09.00"
 composeintroslider = "1.0.0"
 constraintlayout = "2.2.2"
 core-remoteviews = "1.1.0"
@@ -48,7 +48,7 @@ bugsnag-exitinfo = { module = "com.bugsnag:bugsnag-plugin-android-exitinfo", ver
 byte-buddy-android = { module = "net.bytebuddy:byte-buddy-android", version.ref = "byteBuddyAndroid" }
 colorpicker-compose = { module = "com.github.skydoves:colorpicker-compose", version.ref = "colorpickerCompose" }
 compose-animation = { module = "androidx.compose.animation:animation" }
-compose-bom = { module = "androidx.compose:compose-bom-alpha", version.ref = "composeBom" }
+compose-bom = { module = "androidx.compose:compose-bom", version.ref = "composeBom" }
 compose-foundation = { module = "androidx.compose.foundation:foundation" }
 compose-foundation-layout = { module = "androidx.compose.foundation:foundation-layout" }
 compose-material3 = { module = "androidx.compose.material3:material3" }

@@ -233,9 +233,8 @@ private fun SeekBarLayout(
         mutableStateOf(0.dp)
     }
 
-    val sheetState = rememberBottomSheetState(
-        initialValue = SheetValue.Hidden,
-        enabledValues = [SheetValue.Hidden, SheetValue.Expanded],
+    val sheetState = rememberModalBottomSheetState(
+        skipPartiallyExpanded = true,
     )
 
     val decimalSeparator = remember {

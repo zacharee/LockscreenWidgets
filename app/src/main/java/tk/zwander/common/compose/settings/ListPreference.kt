@@ -117,9 +117,8 @@ fun ListPreference(
     var showingDialog by remember {
         mutableStateOf(false)
     }
-    val state = rememberBottomSheetState(
-        initialValue = SheetValue.Hidden,
-        enabledValues = [SheetValue.Hidden, SheetValue.Expanded],
+    val state = rememberModalBottomSheetState(
+        skipPartiallyExpanded = true,
     )
 
     BasePreferenceLayout(
@@ -162,9 +161,7 @@ fun <V, T : ListPickerEntry<V>> ListPickerDialog(
     entries: List<T>,
     currentEntries: List<T>,
     onEntrySelected: (T) -> Unit,
-    state: SheetState = rememberBottomSheetState(
-        initialValue = SheetValue.Hidden,
-    ),
+    state: SheetState = rememberModalBottomSheetState(),
 ) {
     AnimatedBottomSheet(
         onDismissRequest = { onDialogShowingChanged(false) },

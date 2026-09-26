@@ -18,6 +18,7 @@ import tk.zwander.lockscreenwidgets.R
 import tk.zwander.lockscreenwidgets.compose.FrameItem
 import tk.zwander.lockscreenwidgets.util.MainWidgetFrameDelegate
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ChooseFrameIDsLayout(
     initialSelectedIds: List<Int>,

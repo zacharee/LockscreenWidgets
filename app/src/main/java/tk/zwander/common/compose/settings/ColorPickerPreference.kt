@@ -151,9 +151,8 @@ fun ColorPickerLayout(
     initialColor: Color = remember { color },
     layout: @Composable (modifier: Modifier, colorPreview: @Composable (modifier: Modifier) -> Unit) -> Unit,
 ) {
-    val bottomSheetState = rememberBottomSheetState(
-        initialValue = SheetValue.Hidden,
-        enabledValues = [SheetValue.Hidden, SheetValue.Expanded],
+    val bottomSheetState = rememberModalBottomSheetState(
+        skipPartiallyExpanded = true,
     )
 
     val controller = rememberColorPickerController()
