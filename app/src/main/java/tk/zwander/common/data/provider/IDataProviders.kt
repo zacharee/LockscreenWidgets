@@ -70,7 +70,8 @@ interface IDrawerProvider : IRowColumProvider, ICurrentWidgetsProvider, IWidthHe
     override val colCount: Int
         get() = context.prefManager.drawerColCount
     override val rowCount: Int
-        get() = ((display?.rotatedRealSize?.y ?: 0) / context.resources.getDimensionPixelSize(R.dimen.drawer_row_height) - 10).coerceAtLeast(1)
+        get() = ((display?.rotatedRealSize?.y
+            ?: 0) / context.resources.getDimensionPixelSize(R.dimen.drawer_row_height) - 10).coerceAtLeast(1)
 
     override val width: Float
         get() = display?.pxToDp(display!!.rotatedRealSize.x) ?: 0f

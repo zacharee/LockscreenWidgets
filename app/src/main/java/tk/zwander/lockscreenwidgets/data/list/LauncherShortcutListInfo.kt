@@ -12,6 +12,6 @@ class LauncherShortcutListInfo(
     icon: IconCompat?,
     appInfo: BaseAppInfo<*>,
     itemInfo: ShortcutInfo,
-): BaseListInfo<ShortcutInfo>(
+) : BaseListInfo<ShortcutInfo>(
     shortcutName, icon, appInfo, itemInfo,
 )

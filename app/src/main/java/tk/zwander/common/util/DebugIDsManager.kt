@@ -18,7 +18,8 @@ object DebugIDsManager {
         val tempItems = newItems.toList()
 
         if (tempItems.containsAll(oldItems.value[displayId].orEmpty())
-            && oldItems.value[displayId]?.containsAll(tempItems) == true)
+            && oldItems.value[displayId]?.containsAll(tempItems) == true
+        )
             return
 
         val removed = (oldItems.value[displayId].orEmpty()) - tempItems.toSet()

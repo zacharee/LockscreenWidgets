@@ -469,7 +469,7 @@ private fun <VM : BaseDelegate.BaseViewModel<*, *>> VM.WidgetItem(
             }
         } else {
             null
-        }
+        },
     )
 
     WidgetItemLayout(
@@ -522,8 +522,10 @@ private fun <VM : BaseDelegate.BaseViewModel<*, *>> VM.WidgetItem(
         },
         launchReconfigure = launchReconfigure@{
             val providerInfo = manager.getAppWidgetInfo(updatedData.id)
-                ?: (context.getAllInstalledWidgetProviders(updatedData.packageName)[updatedData.profile
-                    ?: UserHandleCompat.SYSTEM]
+                ?: (context.getAllInstalledWidgetProviders(updatedData.packageName)[
+                    updatedData.profile
+                        ?: UserHandleCompat.SYSTEM,
+                ]
                     ?.find { info -> info.provider == updatedData.widgetProviderComponent })
 
             if (providerInfo == null) {
@@ -531,7 +533,7 @@ private fun <VM : BaseDelegate.BaseViewModel<*, *>> VM.WidgetItem(
                     .show()
                 context.logUtils.normalLog(
                     "Unable to reconfigure widget ${updatedData.widgetProviderComponent}: provider info is null.",
-                    null
+                    null,
                 )
                 return@launchReconfigure
             }
@@ -641,7 +643,7 @@ private fun <VM : BaseDelegate.BaseViewModel<*, *>> VM.WidgetContents(
                                 context,
                                 resources.getString(
                                     R.string.bind_widget_error,
-                                    widgetInfo.provider
+                                    widgetInfo.provider,
                                 ),
                                 Toast.LENGTH_LONG,
                             ).show()
@@ -728,13 +730,16 @@ private fun <VM : BaseDelegate.BaseViewModel<*, *>> VM.WidgetContents(
                 if (!isResizingItem) {
                     it.removeAllViews()
                     widgetView?.let { v ->
-                        it.postOnAnimationDelayed({
-                            it.addView(
-                                v.andRemoveFromParent(),
-                                ViewGroup.LayoutParams.MATCH_PARENT,
-                                ViewGroup.LayoutParams.MATCH_PARENT,
-                            )
-                        }, 10)
+                        it.postOnAnimationDelayed(
+                            {
+                                it.addView(
+                                    v.andRemoveFromParent(),
+                                    ViewGroup.LayoutParams.MATCH_PARENT,
+                                    ViewGroup.LayoutParams.MATCH_PARENT,
+                                )
+                            },
+                            10,
+                        )
                     }
                 }
             },
@@ -837,7 +842,7 @@ private fun View.hasScrollableDescendantAt(
     screenX: Float,
     screenY: Float,
     isVertical: Boolean,
-    direction: Int
+    direction: Int,
 ): Boolean {
     if (this is ViewGroup) {
         val rect = Rect()
@@ -989,7 +994,7 @@ private fun Modifier.interceptUnclaimedDrags(
                                             rawEvent.rawX,
                                             rawEvent.rawY,
                                             isVertical,
-                                            direction
+                                            direction,
                                         )
 
                                 if (!hasScrollableDescendant && updatedEditingId == null) {

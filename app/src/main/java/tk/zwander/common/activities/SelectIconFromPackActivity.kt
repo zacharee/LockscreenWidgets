@@ -142,7 +142,8 @@ class SelectIconFromPackActivity : BaseActivity() {
                                 ) {
                                     items(
                                         items = filteredItems,
-                                        key = { item -> item.name }) { icon ->
+                                        key = { item -> item.name },
+                                    ) { icon ->
                                         val loadedDrawable = remember(icon.loadDrawable)
 
                                         Row(

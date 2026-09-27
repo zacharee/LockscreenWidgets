@@ -16,7 +16,7 @@ import tk.zwander.common.util.lsDisplayManager
 import tk.zwander.common.util.prefManager
 import tk.zwander.lockscreenwidgets.R
 import tk.zwander.lockscreenwidgets.compose.FrameItem
-import tk.zwander.lockscreenwidgets.util.MainWidgetFrameDelegate
+import tk.zwander.lockscreenwidgets.util.WidgetFrameDelegate
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -29,7 +29,8 @@ fun ChooseFrameIDsLayout(
     val context = LocalContext.current
     val display = remember {
         { frameId: Int ->
-            val id = context.prefManager.currentSecondaryFramesWithStringDisplay[frameId] ?: Display.DEFAULT_DISPLAY.toString()
+            val id = context.prefManager.currentSecondaryFramesWithStringDisplay[frameId]
+                ?: Display.DEFAULT_DISPLAY.toString()
             context.lsDisplayManager.findDisplayByStringId(id)
                 ?: context.lsDisplayManager.availableDisplays.value.values.first()
         }
@@ -71,7 +72,7 @@ fun ChooseFrameIDsLayout(
             },
             content = { paddingValues ->
                 val frameIds = remember {
-                    MainWidgetFrameDelegate.allIds(context).sorted()
+                    WidgetFrameDelegate.allIds(context).sorted()
                 }
 
                 LazyColumn(
@@ -105,7 +106,8 @@ fun ChooseFrameIDsLayout(
             },
             bottomBar = {
                 BottomAppBar(
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier
+                        .fillMaxWidth()
                         .padding(horizontal = 16.dp),
                     containerColor = MaterialTheme.colorScheme.surface,
                 ) {

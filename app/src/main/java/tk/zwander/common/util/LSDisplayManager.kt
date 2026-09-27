@@ -24,7 +24,7 @@ fun LSDisplay?.orDefault(context: Context): LSDisplay {
     return this ?: run {
         val availableDisplays = context.lsDisplayManager.availableDisplays.value.values
         availableDisplays.find { it.display.displayId == Display.DEFAULT_DISPLAY }
-            ?:availableDisplays.first()
+            ?: availableDisplays.first()
     }
 }
 
@@ -53,10 +53,12 @@ class LSDisplayManager private constructor(context: Context) : ContextWrapper(co
 
             processDisplay(displayId)
         }
+
         override fun onDisplayRemoved(displayId: Int) {
             logUtils.debugLog("Display $displayId removed", null)
             availableDisplays.remove(displayId)
         }
+
         override fun onDisplayChanged(displayId: Int) {
             logUtils.debugLog("Display $displayId changed", null)
 
@@ -220,13 +222,13 @@ class LSDisplay(
         get() = this@LSDisplay.display.state == Display.STATE_ON
 
     fun dpToPx(dpValue: Number): Int {
-        return with (density) {
+        return with(density) {
             dpValue.toDouble().dp.roundToPx()
         }
     }
 
     fun pxToDp(pxValue: Number): Float {
-        return with (density) {
+        return with(density) {
             pxValue.toDouble().roundToInt().toDp().value
         }
     }

@@ -64,7 +64,7 @@ class HideForIDsActivity : BaseActivity() {
                 Type.PRESENT -> TreeSet(prefManager.presentIds)
                 Type.NON_PRESENT -> TreeSet(prefManager.nonPresentIds)
                 else -> TreeSet()
-            }
+            },
         )
     }
 
@@ -115,7 +115,7 @@ class HideForIDsActivity : BaseActivity() {
                 Type.PRESENT -> R.string.settings_screen_present_ids
                 Type.NON_PRESENT -> R.string.settings_screen_non_present_ids
                 Type.NONE -> R.string.app_name
-            }
+            },
         )
 
         setThemedContent {
@@ -125,7 +125,7 @@ class HideForIDsActivity : BaseActivity() {
                 rememberCreateDocumentLauncherWithDownloadFallback(mimeType = "text/plain") { uri ->
                     //Write the current list of IDs to the specified file
                     contentResolver.openOutputStream(
-                        uri ?: return@rememberCreateDocumentLauncherWithDownloadFallback
+                        uri ?: return@rememberCreateDocumentLauncherWithDownloadFallback,
                     )?.use { out ->
                         val stringified = gson.toJson(this.items.value)
 
@@ -159,7 +159,7 @@ class HideForIDsActivity : BaseActivity() {
                     modifier = Modifier
                         .fillMaxSize()
                         .systemBarsPadding()
-                        .imePadding()
+                        .imePadding(),
                 )
             }
         }

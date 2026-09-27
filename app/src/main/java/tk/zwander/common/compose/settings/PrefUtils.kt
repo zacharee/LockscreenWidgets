@@ -9,7 +9,10 @@ import tk.zwander.common.compose.util.rememberBooleanPreferenceState
 import tk.zwander.common.util.prefManager
 
 @Composable
-fun rememberBooleanPreferenceDependency(key: String, preferences: SharedPreferences = LocalContext.current.prefManager.prefs): Boolean {
+fun rememberBooleanPreferenceDependency(
+    key: String,
+    preferences: SharedPreferences = LocalContext.current.prefManager.prefs,
+): Boolean {
     val prefState by rememberUpdatedState(rememberBooleanPreferenceState(key, preferences = preferences).value)
 
     return prefState

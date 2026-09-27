@@ -49,7 +49,7 @@ import java.util.concurrent.atomic.AtomicReference
 abstract class BaseWidgetTile : TileService(), SharedPreferences.OnSharedPreferenceChangeListener {
     protected val iManager: IAppWidgetService by lazy {
         IAppWidgetService.Stub.asInterface(
-            ServiceManager.getService(APPWIDGET_SERVICE)
+            ServiceManager.getService(APPWIDGET_SERVICE),
         )
     }
 
@@ -246,9 +246,11 @@ abstract class BaseWidgetTile : TileService(), SharedPreferences.OnSharedPrefere
     private fun generateDefaultViews(): RemoteViews {
         val views = RemoteViews(packageName, R.layout.default_tile_views)
         views.setOnClickPendingIntent(
-            R.id.add, PendingIntent.getActivity(
-            this, 100, semGetSettingsIntent(), PendingIntent.FLAG_IMMUTABLE
-        ))
+            R.id.add,
+            PendingIntent.getActivity(
+                this, 100, semGetSettingsIntent(), PendingIntent.FLAG_IMMUTABLE,
+            ),
+        )
         return views
     }
 
@@ -259,14 +261,18 @@ abstract class BaseWidgetTile : TileService(), SharedPreferences.OnSharedPrefere
     private fun updateTile() {
         widgetInfo.apply {
             if (this != null) {
-                with (remoteResources) {
+                with(remoteResources) {
                     if (this != null) {
                         val iconDrawable = ResourcesCompat.getDrawable(this, icon, this.newTheme())
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && iconDrawable is AdaptiveIconDrawable) {
                             val foreground = iconDrawable.foreground
-                            qsTile?.icon = Icon.createWithBitmap(foreground.toSafeBitmap(density, maxSize = 128.dp).cropBitmapTransparency())
+                            qsTile?.icon = Icon.createWithBitmap(
+                                foreground.toSafeBitmap(density, maxSize = 128.dp).cropBitmapTransparency(),
+                            )
                         } else if (iconDrawable is BitmapDrawable) {
-                            qsTile?.icon = Icon.createWithBitmap(qsTile?.label?.first()?.toString()?.textAsBitmap(128f, Color.WHITE))
+                            qsTile?.icon = Icon.createWithBitmap(
+                                qsTile?.label?.first()?.toString()?.textAsBitmap(128f, Color.WHITE),
+                            )
                         } else {
                             qsTile?.icon = Icon.createWithResource(widgetPackage, icon)
                         }
@@ -276,7 +282,8 @@ abstract class BaseWidgetTile : TileService(), SharedPreferences.OnSharedPrefere
                 }
                 qsTile?.label = this.loadLabel(packageManager)
             } else {
-                qsTile?.icon = Icon.createWithResource(this@BaseWidgetTile.packageName, R.drawable.ic_baseline_launch_24)
+                qsTile?.icon =
+                    Icon.createWithResource(this@BaseWidgetTile.packageName, R.drawable.ic_baseline_launch_24)
                 qsTile?.label = resources.getString(R.string.app_name)
             }
         }

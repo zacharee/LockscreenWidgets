@@ -74,7 +74,8 @@ class RemoteViewsProxyService : RemoteViewsService() {
                 created = false
                 try {
                     unbindService(this)
-                } catch (_: IllegalArgumentException) {}
+                } catch (_: IllegalArgumentException) {
+                }
             }
 
             override fun onNullBinding(name: ComponentName?) {
@@ -82,7 +83,8 @@ class RemoteViewsProxyService : RemoteViewsService() {
                 created = false
                 try {
                     unbindService(this)
-                } catch (_: IllegalArgumentException) {}
+                } catch (_: IllegalArgumentException) {
+                }
             }
         }
 
@@ -243,7 +245,8 @@ class RemoteViewsProxyService : RemoteViewsService() {
         override fun onDestroy(intent: Intent?) {
             try {
                 unbindService(connection)
-            } catch (_: IllegalArgumentException) {}
+            } catch (_: IllegalArgumentException) {
+            }
             sFactories.remove(widgetId)
         }
 
@@ -257,7 +260,8 @@ class RemoteViewsProxyService : RemoteViewsService() {
         sFactories.forEach { [_, factory] ->
             try {
                 unbindService(factory.connection)
-            } catch (_: IllegalArgumentException) {}
+            } catch (_: IllegalArgumentException) {
+            }
         }
         super.onDestroy()
     }

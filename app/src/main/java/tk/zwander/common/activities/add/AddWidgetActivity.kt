@@ -57,9 +57,11 @@ abstract class AddWidgetActivity : BaseBindWidgetActivity() {
                         is WidgetListInfo -> {
                             tryBindWidget(it.itemInfo)
                         }
+
                         is ShortcutListInfo -> {
                             tryBindShortcut(it)
                         }
+
                         is LauncherItemListInfo -> {
                             val item = WidgetData.launcherItem(
                                 idManager.allocateAndSaveShortcutId(),
@@ -70,14 +72,18 @@ abstract class AddWidgetActivity : BaseBindWidgetActivity() {
 
                             addNewShortcut(item)
                         }
+
                         is LauncherShortcutListInfo -> {
                             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N_MR1) {
                                 val shortcut = WidgetData.shortcut(
                                     this@AddWidgetActivity,
                                     idManager.allocateAndSaveShortcutId(),
-                                    it.name, it.icon?.loadDrawable(this@AddWidgetActivity)?.toSafeBitmap(density, maxSize = 128.dp),
-                                    null, it.itemInfo.intent,
-                                    WidgetSizeData(1, 1)
+                                    it.name,
+                                    it.icon?.loadDrawable(this@AddWidgetActivity)
+                                        ?.toSafeBitmap(density, maxSize = 128.dp),
+                                    null,
+                                    it.itemInfo.intent,
+                                    WidgetSizeData(1, 1),
                                 )
 
                                 addNewShortcut(shortcut)
@@ -104,6 +110,7 @@ abstract class AddWidgetActivity : BaseBindWidgetActivity() {
                 onBackPressedDispatcher.onBackPressed()
                 true
             }
+
             else -> super.onOptionsItemSelected(item)
         }
     }

@@ -33,7 +33,8 @@ fun WidgetItem(
     label: String?,
     subLabel: String?,
     modifier: Modifier = Modifier,
-    itemModifier: Modifier = Modifier.size(200.dp)
+    itemModifier: Modifier = Modifier
+        .size(200.dp)
         .padding(8.dp),
     badgeDrawable: Drawable? = null,
     previewLayout: View? = null,
@@ -115,7 +116,8 @@ fun WidgetItem(
                 Image(
                     painter = rememberDrawablePainter(it),
                     contentDescription = null,
-                    modifier = Modifier.size(24.dp)
+                    modifier = Modifier
+                        .size(24.dp)
                         .align(Alignment.BottomEnd),
                 )
             }

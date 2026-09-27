@@ -49,7 +49,11 @@ internal fun items(
                         return@forEach
                     }
 
-                    if (!showWidgetStackWidget && it.provider == ComponentName(context, WidgetStackProvider::class.java)) {
+                    if (!showWidgetStackWidget && it.provider == ComponentName(
+                            context,
+                            WidgetStackProvider::class.java,
+                        )
+                    ) {
                         context.logUtils.debugLog("Excluding widget stack widget.")
                         return@forEach
                     }
@@ -82,7 +86,7 @@ internal fun items(
                                     profile,
                                     density.density.toInt(),
                                 ),
-                            )
+                            ),
                         )
                     } catch (e: PackageManager.NameNotFoundException) {
                         context.logUtils.debugLog("Unable to parse application info for widget", e)
@@ -105,7 +109,7 @@ internal fun items(
 
                         val app = apps[appInfo.packageName] ?: AppInfo(
                             appName.toString(),
-                            appInfo
+                            appInfo,
                         ).apply {
                             apps[appInfo.packageName] = this
                         }
@@ -120,7 +124,7 @@ internal fun items(
                                 ),
                                 app,
                                 it,
-                            )
+                            ),
                         )
                     } catch (e: PackageManager.NameNotFoundException) {
                         context.logUtils.debugLog(
@@ -161,7 +165,7 @@ internal fun items(
                                             fallbackResource = appInfo.icon,
                                             packageName = appInfo.packageName,
                                         )
-                                    ),
+                                        ),
                                 appInfo = appEntry,
                                 itemInfo = launcherItem,
                             ),
@@ -235,10 +239,19 @@ internal fun items(
                     app.copy(
                         widgets = TreeSet(app.widgets.filter { it.matchesFilter(updatedFilter, updatedFilters) }),
                         shortcuts = TreeSet(app.shortcuts.filter { it.matchesFilter(updatedFilter, updatedFilters) }),
-                        launcherShortcuts = TreeSet(app.launcherShortcuts.filter {
-                            it.matchesFilter(updatedFilter, updatedFilters)
-                        }),
-                        launcherItems = TreeSet(app.launcherItems.filter { it.matchesFilter(updatedFilter, updatedFilters) }),
+                        launcherShortcuts = TreeSet(
+                            app.launcherShortcuts.filter {
+                                it.matchesFilter(updatedFilter, updatedFilters)
+                            },
+                        ),
+                        launcherItems = TreeSet(
+                            app.launcherItems.filter {
+                                it.matchesFilter(
+                                    updatedFilter,
+                                    updatedFilters,
+                                )
+                            },
+                        ),
                     )
                 } else {
                     null

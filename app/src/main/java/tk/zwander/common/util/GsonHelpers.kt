@@ -12,7 +12,7 @@ import java.lang.reflect.Type
 class CrashFixExclusionStrategy : ExclusionStrategy {
     private val fieldsToAvoid: Set<String> = [
         "IS_ELASTIC_ENABLED",
-        "isElasticEnabled"
+        "isElasticEnabled",
     ]
 
     override fun shouldSkipClass(clazz: Class<*>?): Boolean {

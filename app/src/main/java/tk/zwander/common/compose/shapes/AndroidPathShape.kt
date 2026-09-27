@@ -15,7 +15,7 @@ class AndroidPathShape(
     override fun createOutline(
         size: Size,
         layoutDirection: LayoutDirection,
-        density: Density
+        density: Density,
     ): Outline {
         val displayPath = android.graphics.Path(displayPath)
 

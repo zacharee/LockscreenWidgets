@@ -18,8 +18,8 @@ import tk.zwander.lockscreenwidgets.appwidget.IDListProvider
 import tk.zwander.lockscreenwidgets.appwidget.WidgetStackProvider
 import tk.zwander.lockscreenwidgets.util.FramePrefs
 import tk.zwander.lockscreenwidgets.util.FrameSpecificPreferences
-import tk.zwander.lockscreenwidgets.util.MainWidgetFrameDelegate
 import tk.zwander.lockscreenwidgets.util.SecondaryWidgetFrameDelegate
+import tk.zwander.lockscreenwidgets.util.WidgetFrameDelegate
 import tk.zwander.widgetdrawer.util.DrawerDelegate
 
 /**
@@ -38,8 +38,8 @@ class Accessibility : AccessibilityService(), CoroutineScope by MainScope(), Eve
     private val kgm by lazy { keyguardManager }
     private val imm by lazy { getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager }
     private val lsDisplayManager by lazy { LSDisplayManager.getInstance(this) }
-    private val frameDelegate: MainWidgetFrameDelegate
-        get() = MainWidgetFrameDelegate.getInstance(this, "${Display.DEFAULT_DISPLAY}")
+    private val frameDelegate: WidgetFrameDelegate
+        get() = WidgetFrameDelegate.getInstance(this, "${Display.DEFAULT_DISPLAY}")
     private val drawerDelegate: DrawerDelegate
         get() = DrawerDelegate.getInstance(this, "${Display.DEFAULT_DISPLAY}")
 
@@ -108,9 +108,10 @@ class Accessibility : AccessibilityService(), CoroutineScope by MainScope(), Eve
 
     override fun onServiceConnected() {
         if (FrameSpecificPreferences.doAnyFramesHaveSettingEnabled(
-            context = this,
-            baseKey = PrefManager.KEY_FRAME_MASKED_MODE,
-        )) {
+                context = this,
+                baseKey = PrefManager.KEY_FRAME_MASKED_MODE,
+            )
+        ) {
             wallpaperClient.tryBindService()
         }
 
@@ -128,9 +129,10 @@ class Accessibility : AccessibilityService(), CoroutineScope by MainScope(), Eve
         WidgetStackProvider.updateWidgetStackMonitor(this)
 
         prefManager.currentSecondaryFramesWithStringDisplay.forEach { [secondaryId, secondaryDisplay] ->
-            FrameInstances.secondaryFrameDelegates[secondaryId] = SecondaryWidgetFrameDelegate(this, secondaryId, secondaryDisplay).also {
-                it.onCreate()
-            }
+            FrameInstances.secondaryFrameDelegates[secondaryId] =
+                SecondaryWidgetFrameDelegate(this, secondaryId, secondaryDisplay).also {
+                    it.onCreate()
+                }
         }
 
         sharedPreferencesChangeHandler.register(this)
@@ -143,7 +145,7 @@ class Accessibility : AccessibilityService(), CoroutineScope by MainScope(), Eve
             globalState.wasOnKeyguard.value = kgm.isKeyguardLocked
 
             runWindowOperation(
-                frameDelegates = FrameInstances.secondaryFrameDelegates + (MainWidgetFrameDelegate.ID to frameDelegate),
+                frameDelegates = FrameInstances.secondaryFrameDelegates + (WidgetFrameDelegate.ID to frameDelegate),
                 drawerDelegate = drawerDelegate,
                 getWindows = ::getWindowsSafely,
                 initialRun = true,
@@ -163,7 +165,7 @@ class Accessibility : AccessibilityService(), CoroutineScope by MainScope(), Eve
                 accessibilityJob = runAccessibilityJob(
                     context = this@Accessibility,
                     event = eventCopy,
-                    frameDelegates = FrameInstances.secondaryFrameDelegates + (MainWidgetFrameDelegate.ID to frameDelegate),
+                    frameDelegates = FrameInstances.secondaryFrameDelegates + (WidgetFrameDelegate.ID to frameDelegate),
                     drawerDelegate = drawerDelegate,
                     kgm = kgm,
                     imm = imm,

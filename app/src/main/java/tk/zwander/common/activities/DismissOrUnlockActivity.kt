@@ -30,9 +30,12 @@ class DismissOrUnlockActivity : AppCompatActivity() {
 
         fun launch(context: Context, runOnMain: Boolean = true, activityIntent: Intent? = null) {
             if (runOnMain) {
-                mainHandler.postDelayed({
-                    launch(context, activityIntent)
-                }, 100)
+                mainHandler.postDelayed(
+                    {
+                        launch(context, activityIntent)
+                    },
+                    100,
+                )
             } else {
                 launch(context, activityIntent)
             }
@@ -81,30 +84,33 @@ class DismissOrUnlockActivity : AppCompatActivity() {
 
         if (kgm.isKeyguardLocked) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                kgm.requestDismissKeyguard(this, object : KeyguardManager.KeyguardDismissCallback() {
-                    override fun onDismissCancelled() {
-                        logUtils.debugLog("Dismiss cancelled.", null)
-                        startActivityIntent()
-                        finish()
-                    }
+                kgm.requestDismissKeyguard(
+                    this,
+                    object : KeyguardManager.KeyguardDismissCallback() {
+                        override fun onDismissCancelled() {
+                            logUtils.debugLog("Dismiss cancelled.", null)
+                            startActivityIntent()
+                            finish()
+                        }
 
-                    override fun onDismissError() {
-                        logUtils.debugLog("Dismiss error.", null)
-                        startActivityIntent()
-                        finish()
-                    }
+                        override fun onDismissError() {
+                            logUtils.debugLog("Dismiss error.", null)
+                            startActivityIntent()
+                            finish()
+                        }
 
-                    override fun onDismissSucceeded() {
-                        logUtils.debugLog("Dismiss success", null)
-                        startActivityIntent()
-                        finish()
-                    }
-                })
+                        override fun onDismissSucceeded() {
+                            logUtils.debugLog("Dismiss success", null)
+                            startActivityIntent()
+                            finish()
+                        }
+                    },
+                )
             } else {
                 logUtils.debugLog("Trying dismiss workaround", null)
 
                 //If we're below 8.0, we have to do some weirdness to dismiss the lock screen.
-                with (eventManager) {
+                with(eventManager) {
                     registerListener { _: Event.LockscreenDismissed ->
                         logUtils.debugLog("Dismiss done.", null)
                         startActivityIntent()

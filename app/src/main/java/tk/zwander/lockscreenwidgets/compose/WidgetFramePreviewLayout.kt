@@ -16,11 +16,7 @@ import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
@@ -38,16 +34,10 @@ import tk.zwander.common.compose.WidgetGrid
 import tk.zwander.common.compose.util.rememberPreferenceState
 import tk.zwander.common.data.provider.IFrameProvider
 import tk.zwander.common.host.widgetHostCompat
-import tk.zwander.common.util.BaseDelegate
-import tk.zwander.common.util.FrameSizeAndPosition
-import tk.zwander.common.util.HandlerRegistry
-import tk.zwander.common.util.LSDisplay
-import tk.zwander.common.util.PrefManager
-import tk.zwander.common.util.prefManager
-import tk.zwander.common.util.themedContext
+import tk.zwander.common.util.*
 import tk.zwander.lockscreenwidgets.util.FramePrefs
 import tk.zwander.lockscreenwidgets.util.FrameSpecificPreferences
-import tk.zwander.lockscreenwidgets.util.MainWidgetFrameDelegate
+import tk.zwander.lockscreenwidgets.util.WidgetFrameDelegate
 
 @Composable
 fun WidgetFramePreviewLayout(
@@ -169,12 +159,14 @@ fun WidgetFramePreviewLayout(
                 }
 
                 Box(
-                    modifier = Modifier.clickable(
-                        enabled = true,
-                        interactionSource = remember { MutableInteractionSource() },
-                        indication = null,
-                        onClick = {},
-                    ).fillMaxSize(),
+                    modifier = Modifier
+                        .clickable(
+                            enabled = true,
+                            interactionSource = remember { MutableInteractionSource() },
+                            indication = null,
+                            onClick = {},
+                        )
+                        .fillMaxSize(),
                 )
             }
         }
@@ -216,7 +208,7 @@ class PreviewDelegate(
     }
 
     @SuppressLint("StaticFieldLeak")
-    inner class PreviewViewModel : MainWidgetFrameDelegate.IWidgetFrameViewModel<
+    inner class PreviewViewModel : WidgetFrameDelegate.IWidgetFrameViewModel<
             Unit,
             BaseDelegate<Unit>,
             >(this) {

@@ -49,7 +49,7 @@ fun PackageManager.getResourcesForApplicationInAnyState(packageName: String): Re
 fun PackageManager.getApplicationInfoInAnyState(packageName: String): ApplicationInfo {
     return getApplicationInfoCompat(
         packageName = packageName,
-        flags = PackageManager.MATCH_DISABLED_COMPONENTS or PackageManager.MATCH_ALL
+        flags = PackageManager.MATCH_DISABLED_COMPONENTS or PackageManager.MATCH_ALL,
     )
 }
 

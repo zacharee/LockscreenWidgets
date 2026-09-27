@@ -11,7 +11,7 @@ import kotlin.math.max
 @Parcelize
 data class WidgetSizeData(
     private val widgetWidthSpan: Int,
-    private val widgetHeightSpan: Int
+    private val widgetHeightSpan: Int,
 ) : Parcelable {
     /**
      * Don't allow the user to have a zero-width widget.

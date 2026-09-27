@@ -84,7 +84,7 @@ class WidgetStackListActivity : BaseActivity() {
                                                     context.startActivity(
                                                         Intent(
                                                             context,
-                                                            WidgetStackConfigure::class.java
+                                                            WidgetStackConfigure::class.java,
                                                         ).putExtra(
                                                             AppWidgetManager.EXTRA_APPWIDGET_ID,
                                                             id,
@@ -114,7 +114,7 @@ class WidgetStackListActivity : BaseActivity() {
                                                     val appInfo = try {
                                                         widgetInfo?.provider?.packageName?.let {
                                                             context.packageManager.getApplicationInfoCompat(
-                                                                it
+                                                                it,
                                                             )
                                                         }
                                                     } catch (_: Throwable) {
@@ -133,7 +133,7 @@ class WidgetStackListActivity : BaseActivity() {
                                                         Text(
                                                             text = "${
                                                                 appInfo?.loadLabel(
-                                                                    context.packageManager
+                                                                    context.packageManager,
                                                                 )
                                                             }",
                                                         )

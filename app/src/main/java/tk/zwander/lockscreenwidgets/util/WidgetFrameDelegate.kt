@@ -35,12 +35,12 @@ import kotlin.time.Duration.Companion.milliseconds
 /**
  * Handle most of the logic involving the widget frame.
  */
-open class MainWidgetFrameDelegate protected constructor(
+open class WidgetFrameDelegate protected constructor(
     context: Context,
     protected val id: Int = ID,
     initialDisplayId: String,
     override val targetDisplayId: MutableStateFlow<String> = MutableStateFlow(initialDisplayId),
-) : BaseDelegate<MainWidgetFrameDelegate.State>(
+) : BaseDelegate<WidgetFrameDelegate.State>(
     context = context,
     targetDisplayId = targetDisplayId,
 ), IFrameProvider {
@@ -51,12 +51,12 @@ open class MainWidgetFrameDelegate protected constructor(
         // native Skia crashes.
         private val WINDOW_ADD_DEBOUNCE_DELAY = 50.milliseconds
 
-        private val instance = MutableStateFlow<MainWidgetFrameDelegate?>(null)
+        private val instance = MutableStateFlow<WidgetFrameDelegate?>(null)
 
         val readOnlyInstance = instance.asStateFlow()
 
         @Synchronized
-        fun peekInstance(context: Context): MainWidgetFrameDelegate? {
+        fun peekInstance(context: Context): WidgetFrameDelegate? {
             if (instance.value == null) {
                 context.logUtils.debugLog("Accessibility isn't running yet")
 
@@ -67,14 +67,14 @@ open class MainWidgetFrameDelegate protected constructor(
         }
 
         @Synchronized
-        fun getInstance(context: Context, displayId: String): MainWidgetFrameDelegate {
+        fun getInstance(context: Context, displayId: String): WidgetFrameDelegate {
             return instance.value ?: run {
                 val accessibilityContext = context.findAccessibility()
 
                 if (accessibilityContext == null) {
                     throw IllegalStateException("Delegate can only be initialized by Accessibility Service!")
                 } else {
-                    MainWidgetFrameDelegate(accessibilityContext, initialDisplayId = displayId).also {
+                    WidgetFrameDelegate(accessibilityContext, initialDisplayId = displayId).also {
                         instance.value = it
                     }
                 }
@@ -104,7 +104,7 @@ open class MainWidgetFrameDelegate protected constructor(
             val isMainFrame = id == ID
 
             return when {
-                globalState.notificationsPanelFullyExpanded.value[this@MainWidgetFrameDelegate.display?.displayId] == true &&
+                globalState.notificationsPanelFullyExpanded.value[this@WidgetFrameDelegate.display?.displayId] == true &&
                         framePrefs.showInNotificationShade -> {
                     if (kgm.isKeyguardLocked && framePrefs.separateLockNCPosition) {
                         if (isMainFrame) {
@@ -142,7 +142,7 @@ open class MainWidgetFrameDelegate protected constructor(
         WindowManager.LayoutParams().apply {
             type = WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY
 
-            this@MainWidgetFrameDelegate.display?.let { display ->
+            this@WidgetFrameDelegate.display?.let { display ->
                 frameSizeAndPosition.getSizeForType(saveMode, display).let { size ->
                     width = display.dpToPx(size.x)
                     height = display.dpToPx(size.y)
@@ -227,9 +227,9 @@ open class MainWidgetFrameDelegate protected constructor(
     private val showWallpaperLayerCondition: Boolean
         get() = !state.value.isPreview &&
                 framePrefs.maskedMode &&
-                (globalState.notificationsPanelFullyExpanded.value[this@MainWidgetFrameDelegate.display?.displayId] == false ||
+                (globalState.notificationsPanelFullyExpanded.value[this@WidgetFrameDelegate.display?.displayId] == false ||
                         !framePrefs.showInNotificationShade) &&
-                (globalState.showingNotificationsPanel.value[this@MainWidgetFrameDelegate.display?.displayId] == false ||
+                (globalState.showingNotificationsPanel.value[this@WidgetFrameDelegate.display?.displayId] == false ||
                         framePrefs.hideOnNotificationShade)
 
     override suspend fun onEvent(event: Event) {
@@ -251,7 +251,7 @@ open class MainWidgetFrameDelegate protected constructor(
 
             is Event.CenterFrameHorizontally -> {
                 if (event.frameId == id) {
-                    this@MainWidgetFrameDelegate.display?.let { display ->
+                    this@WidgetFrameDelegate.display?.let { display ->
                         frameSizeAndPosition.setPositionForType(
                             saveMode,
                             Point(
@@ -266,7 +266,7 @@ open class MainWidgetFrameDelegate protected constructor(
 
             is Event.CenterFrameVertically -> {
                 if (event.frameId == id) {
-                    this@MainWidgetFrameDelegate.display?.let { display ->
+                    this@WidgetFrameDelegate.display?.let { display ->
                         frameSizeAndPosition.setPositionForType(
                             saveMode,
                             Point(
@@ -309,7 +309,7 @@ open class MainWidgetFrameDelegate protected constructor(
                         saveMode,
                         Point(params.x, params.y),
                     )
-                    this@MainWidgetFrameDelegate.display?.let { display ->
+                    this@WidgetFrameDelegate.display?.let { display ->
                         frameSizeAndPosition.setSizeForType(
                             saveMode,
                             PointF(display.pxToDp(params.width), display.pxToDp(params.height)),
@@ -383,10 +383,10 @@ open class MainWidgetFrameDelegate protected constructor(
 
         viewModel.viewModelScope.launch(Dispatchers.Main) {
             lsDisplayManager.displayPowerStates
-                .map { it.displayStates[this@MainWidgetFrameDelegate.display?.uniqueIdCompat] != false }
+                .map { it.displayStates[this@WidgetFrameDelegate.display?.uniqueIdCompat] != false }
                 .collect { isScreenOn ->
                     if (!isScreenOn) {
-                        this@MainWidgetFrameDelegate.display?.displayId?.let {
+                        this@WidgetFrameDelegate.display?.displayId?.let {
                             globalState.notificationsPanelFullyExpanded[it] = false
                         }
                         updateState { it.copy(isPreview = false, isTempHide = false) }
@@ -515,7 +515,7 @@ open class MainWidgetFrameDelegate protected constructor(
                     "Actually adding overlay",
                     extras = mapOf(
                         "frameId" to id,
-                        "displayId" to this@MainWidgetFrameDelegate.display?.uniqueIdCompat,
+                        "displayId" to this@WidgetFrameDelegate.display?.uniqueIdCompat,
                         "paramsWidth" to params.width,
                         "paramsHeight" to params.height,
                     ),
@@ -578,7 +578,7 @@ open class MainWidgetFrameDelegate protected constructor(
                     "Actually removing overlay",
                     extras = mapOf(
                         "frameId" to id,
-                        "displayId" to this@MainWidgetFrameDelegate.display?.uniqueIdCompat,
+                        "displayId" to this@WidgetFrameDelegate.display?.uniqueIdCompat,
                     ),
                 )
 
@@ -695,22 +695,22 @@ open class MainWidgetFrameDelegate protected constructor(
         }
 
         fun forCommon(): Boolean {
-            return lsDisplayManager.displayPowerStates.value.displayStates[this@MainWidgetFrameDelegate.display?.uniqueIdCompat] == true
+            return lsDisplayManager.displayPowerStates.value.displayStates[this@WidgetFrameDelegate.display?.uniqueIdCompat] == true
                     && !state.value.isTempHide
-                    && globalState.hideForPresentIds.value[this@MainWidgetFrameDelegate.display?.displayId] != true
-                    && globalState.hideForNonPresentIds.value[this@MainWidgetFrameDelegate.display?.displayId] != true
+                    && globalState.hideForPresentIds.value[this@WidgetFrameDelegate.display?.displayId] != true
+                    && globalState.hideForNonPresentIds.value[this@WidgetFrameDelegate.display?.displayId] != true
                     && prefManager.widgetFrameEnabled
                     && (!prefManager.hideInLandscape || state.value.screenOrientation == Surface.ROTATION_0 || state.value.screenOrientation == Surface.ROTATION_180)
                     && framePrefs.canShowFromTasker
-                    && (!framePrefs.hideWhenKeyboardShown || globalState.showingKeyboard.value[this@MainWidgetFrameDelegate.display?.displayId] != true)
+                    && (!framePrefs.hideWhenKeyboardShown || globalState.showingKeyboard.value[this@WidgetFrameDelegate.display?.displayId] != true)
         }
 
         fun forSecondaryDisplay(): Boolean {
-            return globalState.wasOnKeyguard.value && this@MainWidgetFrameDelegate.display?.displayId != Display.DEFAULT_DISPLAY && forCommon()
+            return globalState.wasOnKeyguard.value && this@WidgetFrameDelegate.display?.displayId != Display.DEFAULT_DISPLAY && forCommon()
         }
 
         fun forNotificationCenter(): Boolean {
-            return (globalState.notificationsPanelFullyExpanded.value[this@MainWidgetFrameDelegate.display?.displayId] == true
+            return (globalState.notificationsPanelFullyExpanded.value[this@WidgetFrameDelegate.display?.displayId] == true
                     && framePrefs.showInNotificationShade)
                     && forCommon()
         }
@@ -718,18 +718,18 @@ open class MainWidgetFrameDelegate protected constructor(
         fun forLockscreen(): Boolean {
             return globalState.wasOnKeyguard.value
                     && (framePrefs.showOnMainLockScreen || !framePrefs.showInNotificationShade)
-                    && (!framePrefs.hideOnFaceWidgets || globalState.isOnFaceWidgets.value[this@MainWidgetFrameDelegate.display?.displayId] != true)
-                    && ((globalState.currentAppLayer.value[this@MainWidgetFrameDelegate.display?.displayId] ?: 0) < 0 &&
-                    globalState.currentAppPackage.value[this@MainWidgetFrameDelegate.display?.displayId] == null)
-                    && (globalState.isOnEdgePanel.value[this@MainWidgetFrameDelegate.display?.displayId] != true || !framePrefs.hideOnEdgePanel)
-                    && globalState.isOnScreenOffMemo.value[this@MainWidgetFrameDelegate.display?.displayId] != true
-                    && (globalState.showingNotificationsPanel.value[this@MainWidgetFrameDelegate.display?.displayId] != true ||
+                    && (!framePrefs.hideOnFaceWidgets || globalState.isOnFaceWidgets.value[this@WidgetFrameDelegate.display?.displayId] != true)
+                    && ((globalState.currentAppLayer.value[this@WidgetFrameDelegate.display?.displayId] ?: 0) < 0 &&
+                    globalState.currentAppPackage.value[this@WidgetFrameDelegate.display?.displayId] == null)
+                    && (globalState.isOnEdgePanel.value[this@WidgetFrameDelegate.display?.displayId] != true || !framePrefs.hideOnEdgePanel)
+                    && globalState.isOnScreenOffMemo.value[this@WidgetFrameDelegate.display?.displayId] != true
+                    && (globalState.showingNotificationsPanel.value[this@WidgetFrameDelegate.display?.displayId] != true ||
                     !framePrefs.hideOnNotificationShade)
-                    && (globalState.showingSecurityInput.value[this@MainWidgetFrameDelegate.display?.displayId] != true ||
+                    && (globalState.showingSecurityInput.value[this@WidgetFrameDelegate.display?.displayId] != true ||
                     !framePrefs.hideOnSecurityPage)
                     && (globalState.notificationCount.value == 0 || !framePrefs.hideOnNotifications)
-                    && globalState.hidingForPresentApp.value[this@MainWidgetFrameDelegate.display?.displayId] != true
-                    && (framePrefs.showOverPowerMenu || globalState.showingPowerMenu.value[this@MainWidgetFrameDelegate.display?.displayId] != true)
+                    && globalState.hidingForPresentApp.value[this@WidgetFrameDelegate.display?.displayId] != true
+                    && (framePrefs.showOverPowerMenu || globalState.showingPowerMenu.value[this@WidgetFrameDelegate.display?.displayId] != true)
                     && forCommon()
         }
 
@@ -757,8 +757,8 @@ open class MainWidgetFrameDelegate protected constructor(
                         "forceShowFrame: ${framePrefs.forceShow}\n" +
                         "hideOnFaceWidgets: ${framePrefs.hideOnFaceWidgets}\n" +
                         "hideWhenKeyboardShown: ${framePrefs.hideWhenKeyboardShown}\n" +
-                        "displayPower: ${lsDisplayManager.displayPowerStates.value.displayStates[this@MainWidgetFrameDelegate.display?.uniqueIdCompat]}\n" +
-                        "showingPowerMenu: ${globalState.showingPowerMenu.value[this@MainWidgetFrameDelegate.display?.displayId]}\n" +
+                        "displayPower: ${lsDisplayManager.displayPowerStates.value.displayStates[this@WidgetFrameDelegate.display?.uniqueIdCompat]}\n" +
+                        "showingPowerMenu: ${globalState.showingPowerMenu.value[this@WidgetFrameDelegate.display?.displayId]}\n" +
                         "showOverPowerMenu: ${framePrefs.showOverPowerMenu}\n",
                 null,
             )
@@ -780,7 +780,7 @@ open class MainWidgetFrameDelegate protected constructor(
      * TODO: You can only specifically retrieve the lock screen wallpaper on Nougat and up.
      */
     private fun updateWallpaperLayerIfNeeded() {
-        val display = this@MainWidgetFrameDelegate.display ?: run {
+        val display = this@WidgetFrameDelegate.display ?: run {
             logUtils.debugLog("Couldn't find display for $targetDisplayId to update wallpaper", null)
             return
         }
@@ -856,7 +856,7 @@ open class MainWidgetFrameDelegate protected constructor(
      * or in expanded notification center).
      */
     override suspend fun updateWindow() {
-        val display = this@MainWidgetFrameDelegate.display ?: run {
+        val display = this@WidgetFrameDelegate.display ?: run {
             logUtils.debugLog("Couldn't find display for $targetDisplayId to update window", null)
             return
         }
@@ -959,8 +959,8 @@ open class MainWidgetFrameDelegate protected constructor(
         val ignoreAllTouches: Boolean = false,
     )
 
-    open class WidgetFrameViewModel(delegate: MainWidgetFrameDelegate) :
-        IWidgetFrameViewModel<State, MainWidgetFrameDelegate>(delegate) {
+    open class WidgetFrameViewModel(delegate: WidgetFrameDelegate) :
+        IWidgetFrameViewModel<State, WidgetFrameDelegate>(delegate) {
         val wallpaperInfo = MutableStateFlow<WallpaperInfo?>(null)
         val animationState = MutableStateFlow(AnimationState.STATE_IDLE)
         val acknowledgedTwoFingerTap = MutableStateFlow<Boolean?>(null)

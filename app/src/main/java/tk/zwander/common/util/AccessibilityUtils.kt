@@ -29,7 +29,7 @@ import tk.zwander.lockscreenwidgets.R
 import tk.zwander.lockscreenwidgets.appwidget.IDListProvider
 import tk.zwander.lockscreenwidgets.services.Accessibility
 import tk.zwander.lockscreenwidgets.util.FrameSpecificPreferences
-import tk.zwander.lockscreenwidgets.util.MainWidgetFrameDelegate
+import tk.zwander.lockscreenwidgets.util.WidgetFrameDelegate
 import tk.zwander.widgetdrawer.util.DrawerDelegate
 import java.util.concurrent.ConcurrentLinkedQueue
 
@@ -488,7 +488,7 @@ object AccessibilityUtils {
     }
 
     suspend fun Context.runWindowOperation(
-        frameDelegates: Map<Int, MainWidgetFrameDelegate>,
+        frameDelegates: Map<Int, WidgetFrameDelegate>,
         drawerDelegate: DrawerDelegate,
         getWindows: () -> SparseArray<List<AccessibilityWindowInfo>>?,
         initialRun: Boolean = false,
@@ -652,7 +652,7 @@ object AccessibilityUtils {
     fun CoroutineScope.runAccessibilityJob(
         context: Context,
         event: AccessibilityEvent,
-        frameDelegates: Map<Int, MainWidgetFrameDelegate>,
+        frameDelegates: Map<Int, WidgetFrameDelegate>,
         drawerDelegate: DrawerDelegate,
         kgm: KeyguardManager,
         imm: InputMethodManager,

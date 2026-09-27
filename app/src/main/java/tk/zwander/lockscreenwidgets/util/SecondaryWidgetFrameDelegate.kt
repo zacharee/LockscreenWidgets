@@ -6,7 +6,7 @@ class SecondaryWidgetFrameDelegate(
     context: Context,
     id: Int,
     displayId: String,
-) : MainWidgetFrameDelegate(
+) : WidgetFrameDelegate(
     context = context,
     id = id,
     initialDisplayId = displayId,

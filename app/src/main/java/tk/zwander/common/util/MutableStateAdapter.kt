@@ -29,5 +29,5 @@ fun <T> MutableStateFlow<T>.collectAsMutableState(
     context: CoroutineContext = EmptyCoroutineContext,
 ): MutableState<T> = MutableStateAdapter(
     state = collectAsState(context),
-    mutate = { value = it }
+    mutate = { value = it },
 )

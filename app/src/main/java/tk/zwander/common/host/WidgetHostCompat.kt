@@ -71,13 +71,23 @@ class WidgetHostCompat(
         fun getInstance(context: Context): WidgetHostCompat {
             return instance ?: run {
                 val mode = when {
-                    INTERACTION_HANDLER_CLASS != null && INTERACTION_HANDLER_CLASS!!.isInterface -> Mode.Interface(INTERACTION_HANDLER_CLASS!!)
-                    ON_CLICK_HANDLER_CLASS != null && ON_CLICK_HANDLER_CLASS!!.isInterface -> Mode.Interface(ON_CLICK_HANDLER_CLASS!!)
-                    ON_CLICK_HANDLER_CLASS != null && !ON_CLICK_HANDLER_CLASS!!.isInterface -> Mode.Class(ON_CLICK_HANDLER_CLASS!!)
+                    INTERACTION_HANDLER_CLASS != null && INTERACTION_HANDLER_CLASS!!.isInterface -> Mode.Interface(
+                        INTERACTION_HANDLER_CLASS!!,
+                    )
+
+                    ON_CLICK_HANDLER_CLASS != null && ON_CLICK_HANDLER_CLASS!!.isInterface -> Mode.Interface(
+                        ON_CLICK_HANDLER_CLASS!!,
+                    )
+
+                    ON_CLICK_HANDLER_CLASS != null && !ON_CLICK_HANDLER_CLASS!!.isInterface -> Mode.Class(
+                        ON_CLICK_HANDLER_CLASS!!,
+                    )
+
                     else -> {
-                        throw IllegalStateException("Unable to find correct click/interaction handler!\n" +
-                                "Interaction Handler: ${INTERACTION_HANDLER_CLASS?.run { "$canonicalName / $isInterface" }}\n" +
-                                "Click Handler: ${ON_CLICK_HANDLER_CLASS?.run { "$canonicalName / $isInterface" }}",
+                        throw IllegalStateException(
+                            "Unable to find correct click/interaction handler!\n" +
+                                    "Interaction Handler: ${INTERACTION_HANDLER_CLASS?.run { "$canonicalName / $isInterface" }}\n" +
+                                    "Click Handler: ${ON_CLICK_HANDLER_CLASS?.run { "$canonicalName / $isInterface" }}",
                         )
                     }
                 }
@@ -131,11 +141,15 @@ class WidgetHostCompat(
                     .withParameters(View::class.java, PendingIntent::class.java, Intent::class.java, Int::class.java)
                     .intercept(MethodDelegation.to(clickHandler))
                     .make()
-                    .load(WidgetHostCompat::class.java.classLoader, AndroidClassLoadingStrategy.Wrapping(context.cacheDir))
+                    .load(
+                        WidgetHostCompat::class.java.classLoader,
+                        AndroidClassLoadingStrategy.Wrapping(context.cacheDir),
+                    )
                     .loaded
                     .getDeclaredConstructor()
                     .newInstance()
             }
+
             is Mode.Interface -> {
                 Proxy.newProxyInstance(
                     mode.handlerClass.classLoader,
@@ -246,7 +260,10 @@ class WidgetHostCompat(
                         )
                         .invoke(hostView, clickHandler)
                 } catch (e: Throwable) {
-                    context.logUtils.normalLog("Unable to update interaction handler on window attach for widget $appWidgetId, ${appWidget?.provider}.", e)
+                    context.logUtils.normalLog(
+                        "Unable to update interaction handler on window attach for widget $appWidgetId, ${appWidget?.provider}.",
+                        e,
+                    )
                 }
             },
             onDefaultClick = {
@@ -321,7 +338,8 @@ class WidgetHostCompat(
 
                 val getLaunchOptions = responseClass.getDeclaredMethod("getLaunchOptions", View::class.java)
                 val startPendingIntent = RemoteViews::class.java.getDeclaredMethod(
-                    "startPendingIntent", View::class.java, PendingIntent::class.java, android.util.Pair::class.java)
+                    "startPendingIntent", View::class.java, PendingIntent::class.java, android.util.Pair::class.java,
+                )
 
                 @Suppress("UNCHECKED_CAST")
                 val launchOptions = response?.let {
@@ -352,8 +370,13 @@ class WidgetHostCompat(
                 fillInIntent: Intent,
             ): Boolean {
                 return checkPendingIntent(context, pendingIntent, widgetId, onClickCallbacks)
-                        && clickHandlerClass.getMethod("onClickHandler", View::class.java, PendingIntent::class.java, Intent::class.java)
-                            .invoke(defaultHandler, view, pendingIntent, fillInIntent) as Boolean
+                        && clickHandlerClass.getMethod(
+                    "onClickHandler",
+                    View::class.java,
+                    PendingIntent::class.java,
+                    Intent::class.java,
+                )
+                    .invoke(defaultHandler, view, pendingIntent, fillInIntent) as Boolean
             }
 
             @Suppress("unused")
@@ -364,7 +387,13 @@ class WidgetHostCompat(
                 windowingMode: Int,
             ): Boolean {
                 return checkPendingIntent(context, pendingIntent, widgetId, onClickCallbacks) &&
-                        clickHandlerClass.getMethod("onClickHandler", View::class.java, PendingIntent::class.java, Intent::class.java, Int::class.java)
+                        clickHandlerClass.getMethod(
+                            "onClickHandler",
+                            View::class.java,
+                            PendingIntent::class.java,
+                            Intent::class.java,
+                            Int::class.java,
+                        )
                             .invoke(defaultHandler, view, pendingIntent, fillInIntent, windowingMode) as Boolean
             }
         }

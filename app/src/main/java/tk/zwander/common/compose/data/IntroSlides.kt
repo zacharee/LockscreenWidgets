@@ -91,7 +91,7 @@ fun rememberIntroSlides(
         context.contentResolver.registerContentObserver(
             listenUri,
             true,
-            contentObserver
+            contentObserver,
         )
 
         onDispose {
@@ -114,7 +114,7 @@ fun rememberIntroSlides(
         context.contentResolver.registerContentObserver(
             listenUri,
             true,
-            contentObserver
+            contentObserver,
         )
 
         onDispose {
@@ -131,295 +131,320 @@ fun rememberIntroSlides(
                     slideColor = { MaterialTheme.colorScheme.background },
                     contentColor = { MaterialTheme.colorScheme.onBackground },
                     icon = { painterResource(id = R.drawable.ic_baseline_right_hand_24) },
-                )
+                ),
             )
 
-            slides.add(SimpleIntroPage(
-                title = { stringResource(id = R.string.intro_usage_title) },
-                description = { stringResource(id = R.string.intro_usage_desc) },
-                slideColor = { MaterialTheme.colorScheme.background },
-                contentColor = { MaterialTheme.colorScheme.onBackground },
-                icon = { painterResource(id = R.drawable.ic_baseline_gesture_two_tap) },
-            ))
+            slides.add(
+                SimpleIntroPage(
+                    title = { stringResource(id = R.string.intro_usage_title) },
+                    description = { stringResource(id = R.string.intro_usage_desc) },
+                    slideColor = { MaterialTheme.colorScheme.background },
+                    contentColor = { MaterialTheme.colorScheme.onBackground },
+                    icon = { painterResource(id = R.drawable.ic_baseline_gesture_two_tap) },
+                ),
+            )
 
-            slides.add(SimpleIntroPage(
-                title = { stringResource(id = R.string.privacy_policy) },
-                description = { stringResource(id = R.string.intro_privacy_policy_desc) },
-                slideColor = { MaterialTheme.colorScheme.background },
-                contentColor = { MaterialTheme.colorScheme.onBackground },
-                icon = { painterResource(id = R.drawable.info) },
-                extraContent = {
-                    OutlinedButton(
-                        onClick = {
-                            context.launchUrl("https://github.com/zacharee/LockscreenWidgets/blob/master/PRIVACY.md")
+            slides.add(
+                SimpleIntroPage(
+                    title = { stringResource(id = R.string.privacy_policy) },
+                    description = { stringResource(id = R.string.intro_privacy_policy_desc) },
+                    slideColor = { MaterialTheme.colorScheme.background },
+                    contentColor = { MaterialTheme.colorScheme.onBackground },
+                    icon = { painterResource(id = R.drawable.info) },
+                    extraContent = {
+                        OutlinedButton(
+                            onClick = {
+                                context.launchUrl("https://github.com/zacharee/LockscreenWidgets/blob/master/PRIVACY.md")
+                            },
+                        ) {
+                            Text(text = stringResource(id = R.string.more_info))
                         }
-                    ) {
-                        Text(text = stringResource(id = R.string.more_info))
-                    }
-                },
-            ))
+                    },
+                ),
+            )
         }
 
         if (startReason == OnboardingActivity.RetroMode.NONE ||
             startReason == OnboardingActivity.RetroMode.ACCESSIBILITY
         ) {
-            slides.add(SimpleIntroPage(
-                title = { stringResource(id = R.string.intro_accessibility_title) },
-                description = { stringResource(id = R.string.accessibility_service_desc) },
-                slideColor = { MaterialTheme.colorScheme.background },
-                contentColor = { MaterialTheme.colorScheme.onBackground },
-                icon = { painterResource(id = R.drawable.ic_baseline_accessibility_new_24) },
-                extraContent = {
-                    var showingDialog by remember {
-                        mutableStateOf(false)
-                    }
-
-                    OutlinedButton(
-                        onClick = { showingDialog = true },
-                        enabled = !hasAccessibility,
-                    ) {
-                        Text(text = stringResource(id = if (hasAccessibility) R.string.granted else R.string.more_info))
-                    }
-
-                    if (showingDialog) {
-                        AppTheme {
-                            AlertDialog(
-                                onDismissRequest = { showingDialog = false },
-                                title = { Text(text = stringResource(id = R.string.intro_accessibility_title)) },
-                                text = { Text(text = stringResource(id = R.string.intro_accessibility_desc)) },
-                                confirmButton = {
-                                    TextButton(
-                                        onClick = {
-                                            context.openAccessibilitySettings()
-                                            showingDialog = false
-                                        }
-                                    ) {
-                                        Text(text = stringResource(id = R.string.grant))
-                                    }
-                                },
-                                dismissButton = {
-                                    TextButton(
-                                        onClick = finish
-                                    ) {
-                                        Text(text = stringResource(id = R.string.close_app))
-                                    }
-                                }
-                            )
+            slides.add(
+                SimpleIntroPage(
+                    title = { stringResource(id = R.string.intro_accessibility_title) },
+                    description = { stringResource(id = R.string.accessibility_service_desc) },
+                    slideColor = { MaterialTheme.colorScheme.background },
+                    contentColor = { MaterialTheme.colorScheme.onBackground },
+                    icon = { painterResource(id = R.drawable.ic_baseline_accessibility_new_24) },
+                    extraContent = {
+                        var showingDialog by remember {
+                            mutableStateOf(false)
                         }
-                    }
-                },
-            ))
+
+                        OutlinedButton(
+                            onClick = { showingDialog = true },
+                            enabled = !hasAccessibility,
+                        ) {
+                            Text(text = stringResource(id = if (hasAccessibility) R.string.granted else R.string.more_info))
+                        }
+
+                        if (showingDialog) {
+                            AppTheme {
+                                AlertDialog(
+                                    onDismissRequest = { showingDialog = false },
+                                    title = { Text(text = stringResource(id = R.string.intro_accessibility_title)) },
+                                    text = { Text(text = stringResource(id = R.string.intro_accessibility_desc)) },
+                                    confirmButton = {
+                                        TextButton(
+                                            onClick = {
+                                                context.openAccessibilitySettings()
+                                                showingDialog = false
+                                            },
+                                        ) {
+                                            Text(text = stringResource(id = R.string.grant))
+                                        }
+                                    },
+                                    dismissButton = {
+                                        TextButton(
+                                            onClick = finish,
+                                        ) {
+                                            Text(text = stringResource(id = R.string.close_app))
+                                        }
+                                    },
+                                )
+                            }
+                        }
+                    },
+                ),
+            )
         }
 
         if (startReason == OnboardingActivity.RetroMode.NONE ||
             startReason == OnboardingActivity.RetroMode.MOTO_SECONDARY_DISPLAY
         ) {
-            slides.add(SimpleIntroPage(
-                title = { stringResource(R.string.intro_moto_razr_allow_secondary_display_access) },
-                description = { stringResource(R.string.intro_moto_razr_allow_secondary_display_access_desc) },
-                slideColor = { MaterialTheme.colorScheme.background },
-                contentColor = { MaterialTheme.colorScheme.onBackground },
-                icon = { painterResource(R.drawable.devices_fold_2_24px) },
-                extraContent = {
-                    OutlinedButton(
-                        onClick = {
-                            val settingsIntent = Intent(Intent.ACTION_MAIN)
-                            settingsIntent.`package` = "com.motorola.cli.settings"
-                            settingsIntent.component = ComponentName(
-                                "com.motorola.cli.settings",
-                                "com.motorola.cli.settings.search.SearchResultTrampoline",
-                            )
-                            settingsIntent.putExtra(":settings:fragment_args_key", "cli_app_settings")
+            slides.add(
+                SimpleIntroPage(
+                    title = { stringResource(R.string.intro_moto_razr_allow_secondary_display_access) },
+                    description = { stringResource(R.string.intro_moto_razr_allow_secondary_display_access_desc) },
+                    slideColor = { MaterialTheme.colorScheme.background },
+                    contentColor = { MaterialTheme.colorScheme.onBackground },
+                    icon = { painterResource(R.drawable.devices_fold_2_24px) },
+                    extraContent = {
+                        OutlinedButton(
+                            onClick = {
+                                val settingsIntent = Intent(Intent.ACTION_MAIN)
+                                settingsIntent.`package` = "com.motorola.cli.settings"
+                                settingsIntent.component = ComponentName(
+                                    "com.motorola.cli.settings",
+                                    "com.motorola.cli.settings.search.SearchResultTrampoline",
+                                )
+                                settingsIntent.putExtra(":settings:fragment_args_key", "cli_app_settings")
 
-                            try {
-                                context.startActivity(settingsIntent)
-                            } catch (e: Throwable) {
-                                context.logUtils.normalLog("Unable to launch Moto CLI settings", e)
-                            }
-                        },
-                    ) {
-                        Text(text = stringResource(R.string.grant))
-                    }
-                }
-            ))
+                                try {
+                                    context.startActivity(settingsIntent)
+                                } catch (e: Throwable) {
+                                    context.logUtils.normalLog("Unable to launch Moto CLI settings", e)
+                                }
+                            },
+                        ) {
+                            Text(text = stringResource(R.string.grant))
+                        }
+                    },
+                ),
+            )
         }
 
         if (startReason == OnboardingActivity.RetroMode.NONE ||
             startReason == OnboardingActivity.RetroMode.NOTIFICATION
         ) {
-            slides.add(SimpleIntroPage(
-                title = { stringResource(id = R.string.intro_notification_listener_title) },
-                description = { stringResource(id = R.string.intro_notification_listener_desc) },
-                slideColor = { MaterialTheme.colorScheme.background },
-                contentColor = { MaterialTheme.colorScheme.onBackground },
-                icon = { painterResource(id = R.drawable.ic_baseline_notifications_active_24) },
-                extraContent = {
-                    OutlinedButton(
-                        onClick = {
-                            try {
-                                val notifIntent = Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS)
-                                context.startActivity(notifIntent)
-                            } catch (e: Throwable) {
-                                context.logUtils.normalLog("Unable to launch notification listener settings", e)
-
+            slides.add(
+                SimpleIntroPage(
+                    title = { stringResource(id = R.string.intro_notification_listener_title) },
+                    description = { stringResource(id = R.string.intro_notification_listener_desc) },
+                    slideColor = { MaterialTheme.colorScheme.background },
+                    contentColor = { MaterialTheme.colorScheme.onBackground },
+                    icon = { painterResource(id = R.drawable.ic_baseline_notifications_active_24) },
+                    extraContent = {
+                        OutlinedButton(
+                            onClick = {
                                 try {
-                                    val generalIntent = Intent(Settings.ACTION_MANAGE_ALL_APPLICATIONS_SETTINGS)
-                                    context.startActivity(generalIntent)
-                                } catch (e2: Throwable) {
-                                    context.logUtils.normalLog("Unable to launch all applications settings", e2)
-                                    Toast.makeText(context, R.string.unable_to_launch, Toast.LENGTH_SHORT).show()
+                                    val notifIntent = Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS)
+                                    context.startActivity(notifIntent)
+                                } catch (e: Throwable) {
+                                    context.logUtils.normalLog("Unable to launch notification listener settings", e)
+
+                                    try {
+                                        val generalIntent = Intent(Settings.ACTION_MANAGE_ALL_APPLICATIONS_SETTINGS)
+                                        context.startActivity(generalIntent)
+                                    } catch (e2: Throwable) {
+                                        context.logUtils.normalLog("Unable to launch all applications settings", e2)
+                                        Toast.makeText(context, R.string.unable_to_launch, Toast.LENGTH_SHORT).show()
+                                    }
                                 }
-                            }
-                        },
-                        enabled = !hasNotificationAccess,
-                    ) {
-                        Text(text = stringResource(id = if (hasNotificationAccess) R.string.granted else R.string.grant))
-                    }
-                },
-                canMoveForward = { startReason != OnboardingActivity.RetroMode.NOTIFICATION || hasNotificationAccess || BuildConfig.DEBUG },
-            ))
+                            },
+                            enabled = !hasNotificationAccess,
+                        ) {
+                            Text(text = stringResource(id = if (hasNotificationAccess) R.string.granted else R.string.grant))
+                        }
+                    },
+                    canMoveForward = { startReason != OnboardingActivity.RetroMode.NOTIFICATION || hasNotificationAccess || BuildConfig.DEBUG },
+                ),
+            )
         }
 
         if ((startReason == OnboardingActivity.RetroMode.NONE &&
                     Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) ||
-            startReason == OnboardingActivity.RetroMode.STORAGE) {
-            slides.add(SimpleIntroPage(
-                title = { stringResource(id = R.string.intro_read_storage_title) },
-                description = {
-                    stringResource(id = R.string.intro_read_storage_desc)
-                },
-                slideColor = { MaterialTheme.colorScheme.background },
-                contentColor = { MaterialTheme.colorScheme.onBackground },
-                extraContent = {
-                    var showingGrantFailureDialog by remember {
-                        mutableStateOf(false)
-                    }
-
-                    OutlinedButton(
-                        onClick = {
-                            storagePermissionLauncher.launch(
-                                arrayOf(android.Manifest.permission.READ_EXTERNAL_STORAGE),
-                            )
-                        },
-                        enabled = !canReadWallpaper,
-                    ) {
-                        Text(
-                            text = stringResource(
-                                id = if (canReadWallpaper) {
-                                    R.string.granted
-                                } else {
-                                    R.string.grant
-                                },
-                            ),
-                        )
-                    }
-
-                    OutlinedButton(
-                        onClick = {
-                            context.launchUrl("https://github.com/zacharee/LockscreenWidgets/blob/master/PRIVACY.md")
+            startReason == OnboardingActivity.RetroMode.STORAGE
+        ) {
+            slides.add(
+                SimpleIntroPage(
+                    title = { stringResource(id = R.string.intro_read_storage_title) },
+                    description = {
+                        stringResource(id = R.string.intro_read_storage_desc)
+                    },
+                    slideColor = { MaterialTheme.colorScheme.background },
+                    contentColor = { MaterialTheme.colorScheme.onBackground },
+                    extraContent = {
+                        var showingGrantFailureDialog by remember {
+                            mutableStateOf(false)
                         }
-                    ) {
-                        Text(text = stringResource(id = R.string.privacy_policy))
-                    }
 
-                    if (showingGrantFailureDialog) {
-                        AlertDialog(
-                            onDismissRequest = { showingGrantFailureDialog = false },
-                            title = { Text(text = stringResource(R.string.unable_to_grant_storage)) },
-                            text = { Text(text = stringResource(R.string.unable_to_grant_storage_desc)) },
-                            confirmButton = {
-                                AppTheme {
-                                    if (Settings.Global.getInt(context.contentResolver, Settings.Global.DEVELOPMENT_SETTINGS_ENABLED, 0) == 1) {
-                                        TextButton(
-                                            onClick = {
-                                                showingGrantFailureDialog = false
-                                                try {
-                                                    context.startActivity(
-                                                        Intent(Settings.ACTION_APPLICATION_DEVELOPMENT_SETTINGS),
-                                                    )
-                                                } catch (e: ActivityNotFoundException) {
-                                                    context.logUtils.debugLog("Error launching developer options", e)
-                                                }
-                                            },
+                        OutlinedButton(
+                            onClick = {
+                                storagePermissionLauncher.launch(
+                                    arrayOf(android.Manifest.permission.READ_EXTERNAL_STORAGE),
+                                )
+                            },
+                            enabled = !canReadWallpaper,
+                        ) {
+                            Text(
+                                text = stringResource(
+                                    id = if (canReadWallpaper) {
+                                        R.string.granted
+                                    } else {
+                                        R.string.grant
+                                    },
+                                ),
+                            )
+                        }
+
+                        OutlinedButton(
+                            onClick = {
+                                context.launchUrl("https://github.com/zacharee/LockscreenWidgets/blob/master/PRIVACY.md")
+                            },
+                        ) {
+                            Text(text = stringResource(id = R.string.privacy_policy))
+                        }
+
+                        if (showingGrantFailureDialog) {
+                            AlertDialog(
+                                onDismissRequest = { showingGrantFailureDialog = false },
+                                title = { Text(text = stringResource(R.string.unable_to_grant_storage)) },
+                                text = { Text(text = stringResource(R.string.unable_to_grant_storage_desc)) },
+                                confirmButton = {
+                                    AppTheme {
+                                        if (Settings.Global.getInt(
+                                                context.contentResolver,
+                                                Settings.Global.DEVELOPMENT_SETTINGS_ENABLED,
+                                                0,
+                                            ) == 1
                                         ) {
-                                            Text(text = stringResource(R.string.developer_options))
+                                            TextButton(
+                                                onClick = {
+                                                    showingGrantFailureDialog = false
+                                                    try {
+                                                        context.startActivity(
+                                                            Intent(Settings.ACTION_APPLICATION_DEVELOPMENT_SETTINGS),
+                                                        )
+                                                    } catch (e: ActivityNotFoundException) {
+                                                        context.logUtils.debugLog(
+                                                            "Error launching developer options",
+                                                            e,
+                                                        )
+                                                    }
+                                                },
+                                            ) {
+                                                Text(text = stringResource(R.string.developer_options))
+                                            }
+                                        }
+
+                                        TextButton(
+                                            onClick = { showingGrantFailureDialog = false },
+                                        ) {
+                                            Text(text = stringResource(android.R.string.ok))
                                         }
                                     }
-
-                                    TextButton(
-                                        onClick = { showingGrantFailureDialog = false },
-                                    ) {
-                                        Text(text = stringResource(android.R.string.ok))
-                                    }
-                                }
-                            },
-                        )
-                    }
-                },
-                canMoveForward = { startReason != OnboardingActivity.RetroMode.STORAGE || canReadWallpaper || BuildConfig.DEBUG },
-            ))
+                                },
+                            )
+                        }
+                    },
+                    canMoveForward = { startReason != OnboardingActivity.RetroMode.STORAGE || canReadWallpaper || BuildConfig.DEBUG },
+                ),
+            )
         }
 
         if (startReason == OnboardingActivity.RetroMode.NONE &&
             Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
             !context.wallpaperClient.isServerInstalled
         ) {
-            slides.add(SimpleIntroPage(
-                title = { stringResource(id = R.string.intro_wallpaper_companion_title) },
-                description = {
-                    stringResource(id = R.string.intro_wallpaper_companion_desc)
-                },
-                slideColor = { MaterialTheme.colorScheme.background },
-                contentColor = { MaterialTheme.colorScheme.onBackground },
-                extraContent = {
-                    var isInstalled by remember {
-                        mutableStateOf(context.wallpaperClient.isServerInstalled)
-                    }
+            slides.add(
+                SimpleIntroPage(
+                    title = { stringResource(id = R.string.intro_wallpaper_companion_title) },
+                    description = {
+                        stringResource(id = R.string.intro_wallpaper_companion_desc)
+                    },
+                    slideColor = { MaterialTheme.colorScheme.background },
+                    contentColor = { MaterialTheme.colorScheme.onBackground },
+                    extraContent = {
+                        var isInstalled by remember {
+                            mutableStateOf(context.wallpaperClient.isServerInstalled)
+                        }
 
-                    LifecycleEffect(Lifecycle.State.RESUMED) {
-                        isInstalled = context.wallpaperClient.isServerInstalled
-                    }
+                        LifecycleEffect(Lifecycle.State.RESUMED) {
+                            isInstalled = context.wallpaperClient.isServerInstalled
+                        }
 
-                    OutlinedButton(
-                        onClick = {
-                            context.launchUrl("https://github.com/zacharee/LockscreenWidgets/releases/latest")
-                        },
-                        enabled = !isInstalled,
-                    ) {
-                        Text(
-                            text = stringResource(
-                                id = if (isInstalled) {
-                                    R.string.installed
-                                } else {
-                                    R.string.install
-                                },
-                            ),
-                        )
-                    }
-                },
-                icon = { painterResource(R.drawable.image) },
-            ))
+                        OutlinedButton(
+                            onClick = {
+                                context.launchUrl("https://github.com/zacharee/LockscreenWidgets/releases/latest")
+                            },
+                            enabled = !isInstalled,
+                        ) {
+                            Text(
+                                text = stringResource(
+                                    id = if (isInstalled) {
+                                        R.string.installed
+                                    } else {
+                                        R.string.install
+                                    },
+                                ),
+                            )
+                        }
+                    },
+                    icon = { painterResource(R.drawable.image) },
+                ),
+            )
         }
 
         if (startReason == OnboardingActivity.RetroMode.NONE ||
             startReason == OnboardingActivity.RetroMode.BATTERY
         ) {
-            slides.add(SimpleIntroPage(
-                title = { stringResource(id = R.string.intro_battery_optimization) },
-                description = { stringResource(id = R.string.intro_battery_optimization_desc) },
-                slideColor = { MaterialTheme.colorScheme.background },
-                contentColor = { MaterialTheme.colorScheme.onBackground },
-                icon = { painterResource(id = R.drawable.ic_baseline_battery_alert_24) },
-                extraContent = {
-                    OutlinedButton(
-                        onClick = {
-                            context.launchUrl("https://dontkillmyapp.com/?app=Lockscreen%20Widgets")
-                        },
-                    ) {
-                        Text(text = stringResource(id = R.string.more_info))
-                    }
-                },
-            ))
+            slides.add(
+                SimpleIntroPage(
+                    title = { stringResource(id = R.string.intro_battery_optimization) },
+                    description = { stringResource(id = R.string.intro_battery_optimization_desc) },
+                    slideColor = { MaterialTheme.colorScheme.background },
+                    contentColor = { MaterialTheme.colorScheme.onBackground },
+                    icon = { painterResource(id = R.drawable.ic_baseline_battery_alert_24) },
+                    extraContent = {
+                        OutlinedButton(
+                            onClick = {
+                                context.launchUrl("https://dontkillmyapp.com/?app=Lockscreen%20Widgets")
+                            },
+                        ) {
+                            Text(text = stringResource(id = R.string.more_info))
+                        }
+                    },
+                ),
+            )
         }
 
         if ((startReason == OnboardingActivity.RetroMode.NONE && context.missingAutostart()) ||
@@ -446,13 +471,15 @@ fun rememberIntroSlides(
         }
 
         if (startReason == OnboardingActivity.RetroMode.NONE) {
-            slides.add(SimpleIntroPage(
-                title = { stringResource(id = R.string.intro_done_title) },
-                description = { stringResource(id = R.string.intro_done_desc) },
-                slideColor = { MaterialTheme.colorScheme.background },
-                contentColor = { MaterialTheme.colorScheme.onBackground },
-                icon = { painterResource(id = R.drawable.ic_baseline_done_24) },
-            ))
+            slides.add(
+                SimpleIntroPage(
+                    title = { stringResource(id = R.string.intro_done_title) },
+                    description = { stringResource(id = R.string.intro_done_desc) },
+                    slideColor = { MaterialTheme.colorScheme.background },
+                    contentColor = { MaterialTheme.colorScheme.onBackground },
+                    icon = { painterResource(id = R.drawable.ic_baseline_done_24) },
+                ),
+            )
         }
     }
 

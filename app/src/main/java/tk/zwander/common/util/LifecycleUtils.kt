@@ -104,6 +104,7 @@ fun View.createAlwaysOnComposer(
                             }
                         }
                     }
+
                     Lifecycle.Event.ON_START -> {
                         // The clock starts life as paused so resume it when starting. If it is
                         // already running (this ON_START is after an ON_STOP) then the resume is
@@ -115,26 +116,31 @@ fun View.createAlwaysOnComposer(
                         // `resumeFrameClock()` is ignored.
                         recomposer.resumeCompositionFrameClock()
                     }
+
                     Lifecycle.Event.ON_STOP -> {
                         // Pause the recomposer's frame clock which will pause all calls to
                         // `withFrameNanos` (e.g. animations) while the window is stopped.
                         recomposer.pauseCompositionFrameClock()
                     }
+
                     Lifecycle.Event.ON_DESTROY -> {
                         recomposer.cancel()
                     }
+
                     Lifecycle.Event.ON_PAUSE -> {
                         // Nothing
                     }
+
                     Lifecycle.Event.ON_RESUME -> {
                         // Nothing
                     }
+
                     Lifecycle.Event.ON_ANY -> {
                         // Nothing
                     }
                 }
             }
-        }
+        },
     )
     return recomposer
 }

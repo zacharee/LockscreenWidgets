@@ -15,7 +15,7 @@ import tk.zwander.lockscreenwidgets.R
 @Composable
 fun TitleBar(
     title: String,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     val backPressedDispatcher = LocalOnBackPressedDispatcherOwner.current?.onBackPressedDispatcher
 
@@ -29,10 +29,12 @@ fun TitleBar(
             ) {
                 Icon(
                     painter = painterResource(id = R.drawable.baseline_arrow_back_24),
-                    contentDescription = stringResource(id = R.string.back)
+                    contentDescription = stringResource(id = R.string.back),
                 )
             }
         },
-        modifier = modifier.shadow(4.dp).zIndex(2f)
+        modifier = modifier
+            .shadow(4.dp)
+            .zIndex(2f),
     )
 }

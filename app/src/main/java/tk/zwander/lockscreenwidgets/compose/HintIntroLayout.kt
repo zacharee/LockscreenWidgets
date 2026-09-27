@@ -5,12 +5,7 @@ import androidx.compose.animation.Crossfade
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Icon
@@ -33,10 +28,10 @@ import tk.zwander.common.util.PrefManager
 import tk.zwander.common.util.collectAsMutableState
 import tk.zwander.common.util.prefManager
 import tk.zwander.lockscreenwidgets.R
-import tk.zwander.lockscreenwidgets.util.MainWidgetFrameDelegate
+import tk.zwander.lockscreenwidgets.util.WidgetFrameDelegate
 
 @Composable
-fun MainWidgetFrameDelegate.WidgetFrameViewModel.HintIntroLayout(
+fun WidgetFrameDelegate.WidgetFrameViewModel.HintIntroLayout(
     modifier: Modifier = Modifier,
 ) {
     val context = LocalContext.current
@@ -62,7 +57,8 @@ fun MainWidgetFrameDelegate.WidgetFrameViewModel.HintIntroLayout(
         modifier = modifier,
     ) {
         Column(
-            modifier = Modifier.fillMaxSize()
+            modifier = Modifier
+                .fillMaxSize()
                 .background(MaterialTheme.colorScheme.surface)
                 .padding(8.dp),
         ) {
@@ -88,7 +84,7 @@ fun MainWidgetFrameDelegate.WidgetFrameViewModel.HintIntroLayout(
                                 acknowledged == null -> R.string.edit_gesture_hint
                                 !acknowledged -> R.string.edit_gesture_hint_2
                                 else -> R.string.hide_gesture_hint
-                            }
+                            },
                         ),
                         fontSize = 18.sp,
                         modifier = Modifier

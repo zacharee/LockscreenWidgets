@@ -22,7 +22,7 @@ fun HideOnAppsChooserScroller(
     filteredItems: Collection<BasicAppInfo>,
     checked: Set<String>,
     onCheckedChanged: (Set<String>) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     val context = LocalContext.current
 
@@ -32,8 +32,8 @@ fun HideOnAppsChooserScroller(
         contentPadding = insetsContentPadding(
             WindowInsets.navigationBars,
             WindowInsets.ime,
-            extraPadding = PaddingValues(8.dp)
-        )
+            extraPadding = PaddingValues(8.dp),
+        ),
     ) {
         items(filteredItems.toList(), key = { it.appInfo.packageName }) {
             CardSwitch(
@@ -46,7 +46,7 @@ fun HideOnAppsChooserScroller(
                             } else {
                                 minus(it.appInfo.packageName)
                             }
-                        }
+                        },
                     )
                 },
                 title = it.appName,

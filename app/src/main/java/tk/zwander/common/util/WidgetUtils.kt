@@ -25,7 +25,7 @@ fun AppWidgetProviderInfo.getSamsungConfigureComponent(context: Context): Compon
     return try {
         context.packageManager.getReceiverInfoCompat(
             provider,
-            PackageManager.GET_META_DATA
+            PackageManager.GET_META_DATA,
         ).metaData?.getString("android.appwidget.provider.semConfigureActivity")
             ?.let { ComponentName.unflattenFromString("${provider.packageName}/$it") }
     } catch (e: PackageManager.NameNotFoundException) {
@@ -58,15 +58,15 @@ private fun Context.getAllInstalledWidgetProvidersForProfile(
         manager.getInstalledProvidersForProfile(
             AppWidgetProviderInfo.WIDGET_CATEGORY_HOME_SCREEN,
             profile,
-            pkg
+            pkg,
         ) + manager.getInstalledProvidersForProfile(
             AppWidgetProviderInfo.WIDGET_CATEGORY_KEYGUARD,
             profile,
-            pkg
+            pkg,
         ) + manager.getInstalledProvidersForProfile(
             AppWidgetProviderInfo.WIDGET_CATEGORY_SEARCHBOX,
             profile,
-            pkg
+            pkg,
         )
     } catch (e: NoSuchMethodError) {
         logUtils.debugLog("Unable to use getInstalledProvidersForProfile", e)

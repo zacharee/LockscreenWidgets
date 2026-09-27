@@ -80,8 +80,8 @@ fun AutoSizeText(
                     fontFamily = fontFamily,
                     textDecoration = textDecoration,
                     fontStyle = fontStyle,
-                    letterSpacing = letterSpacing
-                )
+                    letterSpacing = letterSpacing,
+                ),
             )
             Paragraph(
                 text = text,
@@ -100,7 +100,7 @@ fun AutoSizeText(
 
         check(targetWidth.isFinite || maxFontSize.isSpecified) { "maxFontSize must be specified if the target width isn't finite!" }
 
-        with (LocalDensity.current) {
+        with(LocalDensity.current) {
             // this loop will attempt to quickly find the correct size font by scaling it by the error
             // it only runs if the max font size isn't specified or the font must be smaller
             // minIntrinsicWidth is "The width for text if all soft wrap opportunities were taken."
@@ -132,7 +132,7 @@ fun AutoSizeText(
             lineHeight = lineHeight,
             onTextLayout = onTextLayout,
             maxLines = maxLines,
-            style = style
+            style = style,
         )
     }
 }

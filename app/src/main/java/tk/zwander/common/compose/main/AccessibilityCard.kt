@@ -46,17 +46,17 @@ fun AccessibilityCard(
         modifier = modifier
             .fillMaxWidth(),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.errorContainer
-        )
+            containerColor = MaterialTheme.colorScheme.errorContainer,
+        ),
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(16.dp),
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment = Alignment.CenterVertically,
         ) {
             Icon(
                 painter = painterResource(id = R.drawable.info),
-                contentDescription = null
+                contentDescription = null,
             )
 
             Text(text = stringResource(id = R.string.main_screen_accessibility_not_started))
@@ -78,9 +78,10 @@ fun AccessibilityCard(
                 },
                 colors = ButtonDefaults.outlinedButtonColors(
                     containerColor = Color.Transparent,
-                    contentColor = MaterialTheme.colorScheme.onErrorContainer
+                    contentColor = MaterialTheme.colorScheme.onErrorContainer,
                 ),
-                border = ButtonDefaults.outlinedButtonBorder(true).copy(brush = SolidColor(MaterialTheme.colorScheme.onErrorContainer)),
+                border = ButtonDefaults.outlinedButtonBorder(true)
+                    .copy(brush = SolidColor(MaterialTheme.colorScheme.onErrorContainer)),
                 modifier = Modifier.padding(end = 4.dp),
             ) {
                 Text(text = stringResource(id = R.string.battery_whitelist))
@@ -106,7 +107,8 @@ fun AccessibilityCard(
                         containerColor = Color.Transparent,
                         contentColor = MaterialTheme.colorScheme.onErrorContainer,
                     ),
-                    border = ButtonDefaults.outlinedButtonBorder(true).copy(brush = SolidColor(MaterialTheme.colorScheme.onErrorContainer)),
+                    border = ButtonDefaults.outlinedButtonBorder(true)
+                        .copy(brush = SolidColor(MaterialTheme.colorScheme.onErrorContainer)),
                     modifier = Modifier.padding(end = 4.dp),
                 ) {
                     Text(text = stringResource(id = R.string.autostart))
@@ -117,9 +119,10 @@ fun AccessibilityCard(
                 onClick = { context.openAccessibilitySettings() },
                 colors = ButtonDefaults.outlinedButtonColors(
                     containerColor = Color.Transparent,
-                    contentColor = MaterialTheme.colorScheme.onErrorContainer
+                    contentColor = MaterialTheme.colorScheme.onErrorContainer,
                 ),
-                border = ButtonDefaults.outlinedButtonBorder(true).copy(brush = SolidColor(MaterialTheme.colorScheme.onErrorContainer)),
+                border = ButtonDefaults.outlinedButtonBorder(true)
+                    .copy(brush = SolidColor(MaterialTheme.colorScheme.onErrorContainer)),
                 modifier = Modifier.padding(start = 4.dp),
             ) {
                 Text(text = stringResource(id = R.string.accessibility_settings))

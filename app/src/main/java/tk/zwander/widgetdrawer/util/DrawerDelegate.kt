@@ -41,27 +41,7 @@ import tk.zwander.common.compose.util.createComposeViewHolder
 import tk.zwander.common.compose.util.findAccessibility
 import tk.zwander.common.compose.util.rememberPreferenceState
 import tk.zwander.common.data.provider.IDrawerProvider
-import tk.zwander.common.util.BaseDelegate
-import tk.zwander.common.util.DrawerOrFrame
-import tk.zwander.common.util.Event
-import tk.zwander.common.util.HandlerRegistry
-import tk.zwander.common.util.PrefManager
-import tk.zwander.common.util.awaitNextDraw
-import tk.zwander.common.util.eventManager
-import tk.zwander.common.util.fadeIn
-import tk.zwander.common.util.fadeOut
-import tk.zwander.common.util.globalState
-import tk.zwander.common.util.handler
-import tk.zwander.common.util.hideNavBarsForGestureExclusion
-import tk.zwander.common.util.logUtils
-import tk.zwander.common.util.lsDisplayManager
-import tk.zwander.common.util.prefManager
-import tk.zwander.common.util.remove
-import tk.zwander.common.util.safeAddView
-import tk.zwander.common.util.safeRemoveView
-import tk.zwander.common.util.safeUpdateViewLayout
-import tk.zwander.common.util.set
-import tk.zwander.common.util.statusBarHeight
+import tk.zwander.common.util.*
 import tk.zwander.widgetdrawer.activities.TaskerIsShowingDrawer
 import tk.zwander.widgetdrawer.compose.DrawerLayout
 import kotlin.math.absoluteValue
@@ -140,7 +120,8 @@ class DrawerDelegate private constructor(context: Context, displayId: String) :
 
             DrawerLayout(
                 previousNonZeroCutout = previousNonZeroCutout,
-                modifier = Modifier.fillMaxSize()
+                modifier = Modifier
+                    .fillMaxSize()
                     .then(
                         if (closeOnTap) {
                             Modifier.clickable(
@@ -151,19 +132,23 @@ class DrawerDelegate private constructor(context: Context, displayId: String) :
                                 interactionSource = remember { MutableInteractionSource() },
                                 indication = null,
                             )
-                        } else { Modifier },
+                        } else {
+                            Modifier
+                        },
                     ),
             )
         }.also {
-            it.addOnAttachStateChangeListener(object : View.OnAttachStateChangeListener {
-                @SuppressLint("WrongConstant")
-                override fun onViewAttachedToWindow(v: View) {
-                    previousNonZeroCutout = ViewCompat.getRootWindowInsets(v)
-                        ?.getInsets(0xFFFFFFFF.toInt())?.top?.takeIf { top -> top > 0 } ?: statusBarHeight
-                }
+            it.addOnAttachStateChangeListener(
+                object : View.OnAttachStateChangeListener {
+                    @SuppressLint("WrongConstant")
+                    override fun onViewAttachedToWindow(v: View) {
+                        previousNonZeroCutout = ViewCompat.getRootWindowInsets(v)
+                            ?.getInsets(0xFFFFFFFF.toInt())?.top?.takeIf { top -> top > 0 } ?: statusBarHeight
+                    }
 
-                override fun onViewDetachedFromWindow(v: View) {}
-            })
+                    override fun onViewDetachedFromWindow(v: View) {}
+                },
+            )
         }
     }
 
@@ -343,17 +328,19 @@ class DrawerDelegate private constructor(context: Context, displayId: String) :
                 animator.duration = with(DrawerOrFrame.DRAWER) { duration() }
                 animator.interpolator =
                     if (metThreshold) DecelerateInterpolator() else AccelerateInterpolator()
-                animator.addListener(object : AnimatorListenerAdapter() {
-                    override fun onAnimationEnd(animation: Animator) {
-                        if (!metThreshold) {
-                            lifecycleScope.launch {
-                                hideDrawer()
+                animator.addListener(
+                    object : AnimatorListenerAdapter() {
+                        override fun onAnimationEnd(animation: Animator) {
+                            if (!metThreshold) {
+                                lifecycleScope.launch {
+                                    hideDrawer()
+                                }
+                            } else {
+                                eventManager.sendEvent(Event.DrawerShown)
                             }
-                        } else {
-                            eventManager.sendEvent(Event.DrawerShown)
                         }
-                    }
-                })
+                    },
+                )
                 animator.start()
             }
 
@@ -454,7 +441,8 @@ class DrawerDelegate private constructor(context: Context, displayId: String) :
     private suspend fun tryShowHandle() {
         logUtils.debugLog("Trying to show handle on display ${this@DrawerDelegate.display?.uniqueIdCompat}", null)
         if (prefManager.drawerEnabled && prefManager.showDrawerHandle &&
-            lsDisplayManager.displayPowerStates.value.displayStates[this@DrawerDelegate.display?.uniqueIdCompat] == true) {
+            lsDisplayManager.displayPowerStates.value.displayStates[this@DrawerDelegate.display?.uniqueIdCompat] == true
+        ) {
             if (prefManager.showDrawerHandleOnlyWhenLocked && !globalState.wasOnKeyguard.value) {
                 return
             }

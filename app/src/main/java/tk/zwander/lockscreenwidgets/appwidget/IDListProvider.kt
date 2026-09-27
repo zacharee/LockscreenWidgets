@@ -54,11 +54,14 @@ class IDListProvider : AppWidgetProvider() {
                             DebugIDsManager.items.value[displayId]?.forEach { debugId ->
                                 val itemView = RemoteViews(context.packageName, R.layout.id_list_widget_item).apply {
                                     setTextViewText(R.id.id_list_item, debugId.id)
-                                    setTextColor(R.id.id_list_item, when (debugId.type) {
-                                        IDData.IDType.ADDED -> Color.GREEN
-                                        IDData.IDType.REMOVED -> Color.RED
-                                        IDData.IDType.SAME -> Color.WHITE
-                                    })
+                                    setTextColor(
+                                        R.id.id_list_item,
+                                        when (debugId.type) {
+                                            IDData.IDType.ADDED -> Color.GREEN
+                                            IDData.IDType.REMOVED -> Color.RED
+                                            IDData.IDType.SAME -> Color.WHITE
+                                        },
+                                    )
                                 }
 
                                 addItem(debugId.id.hashCode().toLong(), itemView)

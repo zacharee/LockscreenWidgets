@@ -117,7 +117,7 @@ class IconPackManager private constructor(private val context: Context) {
                     },
                     entry = entry,
                 )
-            }
+            },
         )
     }
 
@@ -144,7 +144,8 @@ class IconPackManager private constructor(private val context: Context) {
                         val drawableName = parseXml[if (isCalendar) "prefix" else "drawable"]
                         if (componentName != null && drawableName != null) {
                             if (componentName.startsWith(compStart) && componentName.endsWith(compEnd)) {
-                                componentName = componentName.substring(compStartLength, componentName.length - compEndLength)
+                                componentName =
+                                    componentName.substring(compStartLength, componentName.length - compEndLength)
                             }
                             val parsed = ComponentName.unflattenFromString(componentName)
                             if (parsed != null) {
@@ -156,6 +157,7 @@ class IconPackManager private constructor(private val context: Context) {
                             }
                         }
                     }
+
                     "dynamic-clock" -> {
                         val drawableName = parseXml["drawable"]
                         if (drawableName != null) {

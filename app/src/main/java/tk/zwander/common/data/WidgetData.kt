@@ -125,9 +125,9 @@ data class WidgetData(
                 && other.safeType == safeType
                 && (safeType != WidgetType.WIDGET || widgetProviderComponent == other.widgetProviderComponent)
                 && (
-                    profile == other.profile ||
-                    (profile == null && other.profile == UserHandleCompat.SYSTEM) ||
-                    (profile == UserHandleCompat.SYSTEM && other.profile == null)
+                profile == other.profile ||
+                        (profile == null && other.profile == UserHandleCompat.SYSTEM) ||
+                        (profile == UserHandleCompat.SYSTEM && other.profile == null)
                 )
                 && size == other.size
     }
@@ -161,7 +161,7 @@ data class WidgetData(
 
             return (context.iconPackManager.currentIconPack.value?.resolveIcon(
                 context,
-                widgetProviderComponent
+                widgetProviderComponent,
             ) ?: (try {
                 context.packageManager.getActivityIcon(widgetProviderComponent)
             } catch (e: Exception) {
@@ -218,7 +218,10 @@ data class WidgetData(
                 context.getRemoteDrawable(this.packageName, this)
                     .toSafeBitmap(context.density, maxSize = 128.dp)
             } catch (e: PackageManager.NameNotFoundException) {
-                context.logUtils.debugLog("Error getting non overridden icon res ${this.packageName}/${this.resourceName}", e)
+                context.logUtils.debugLog(
+                    "Error getting non overridden icon res ${this.packageName}/${this.resourceName}",
+                    e,
+                )
                 null
             }
         }

@@ -192,7 +192,7 @@ class ClockDrawableWrapper private constructor(base: AdaptiveIconDrawable) :
         override fun newConstantState(): FastBitmapConstantState {
             return ClockConstantState(
                 mBitmap, mIconColor, mThemedFgColor, mBoundsOffset,
-                mAnimInfo, mBG, mBgPaint.colorFilter
+                mAnimInfo, mBG, mBgPaint.colorFilter,
             )
         }
 
@@ -203,7 +203,7 @@ class ClockDrawableWrapper private constructor(base: AdaptiveIconDrawable) :
             val mBoundsOffset: Float,
             val mAnimInfo: AnimationInfo?,
             val mBG: Bitmap,
-            val mBgFilter: ColorFilter
+            val mBgFilter: ColorFilter,
         ) : FastBitmapConstantState(bitmap, color) {
             override fun createDrawable(): FastBitmapDrawable {
                 return ClockIconDrawable(this)
@@ -225,7 +225,7 @@ class ClockDrawableWrapper private constructor(base: AdaptiveIconDrawable) :
 
         fun forMeta(
             metadata: ClockMetadata,
-            drawableProvider: Supplier<Drawable?>
+            drawableProvider: Supplier<Drawable?>,
         ): ClockDrawableWrapper? {
             val drawable = drawableProvider.get()?.mutate() as? AdaptiveIconDrawable ?: return null
 

@@ -88,7 +88,8 @@ class WallpaperClient private constructor(private val context: Context) {
     fun tryBindService() {
         try {
             context.unbindService(serviceConnection)
-        } catch (_: IllegalArgumentException) {}
+        } catch (_: IllegalArgumentException) {
+        }
 
         peekLogUtils?.debugLog("Trying bind", null)
         val result = context.bindService(

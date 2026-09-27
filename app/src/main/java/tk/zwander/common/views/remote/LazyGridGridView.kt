@@ -7,23 +7,14 @@ import android.view.Gravity
 import android.view.RemotableViewMethod
 import android.view.ViewDebug.ExportedProperty
 import android.view.inspector.InspectableProperty
-import android.widget.AbsListView
-import android.widget.FrameLayout
-import android.widget.GridView
-import android.widget.RemoteViews
-import android.widget.RemoteViewsAdapter
+import android.widget.*
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.snapshotFlow
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.ComposeView
@@ -223,16 +214,21 @@ class LazyGridGridView(
 
     @StretchMode
     @InspectableProperty(
-        enumMapping = [InspectableProperty.EnumEntry(
-            value = NO_STRETCH,
-            name = "none"
-        ), InspectableProperty.EnumEntry(
-            value = STRETCH_SPACING,
-            name = "spacingWidth"
-        ), InspectableProperty.EnumEntry(
-            value = STRETCH_SPACING_UNIFORM,
-            name = "spacingWidthUniform"
-        ), InspectableProperty.EnumEntry(value = STRETCH_COLUMN_WIDTH, name = "columnWidth")]
+        enumMapping = [
+            InspectableProperty.EnumEntry(
+                value = NO_STRETCH,
+                name = "none",
+            ),
+            InspectableProperty.EnumEntry(
+                value = STRETCH_SPACING,
+                name = "spacingWidth",
+            ),
+            InspectableProperty.EnumEntry(
+                value = STRETCH_SPACING_UNIFORM,
+                name = "spacingWidthUniform",
+            ),
+            InspectableProperty.EnumEntry(value = STRETCH_COLUMN_WIDTH, name = "columnWidth"),
+        ],
     )
     override fun getStretchMode(): Int {
         return this.stretchMode.intValue

@@ -51,7 +51,7 @@ class ZeroPaddingAppWidgetHostView(
     override fun dispatchDraw(canvas: Canvas) {
         context.logUtils.debugLog(
             "dispatchDraw() AppWidgetHostView for ${appWidgetInfo?.provider}",
-            null
+            null,
         )
         super.dispatchDraw(canvas)
     }
@@ -64,7 +64,7 @@ class ZeroPaddingAppWidgetHostView(
     override fun drawChild(canvas: Canvas, child: View?, drawingTime: Long): Boolean {
         context.logUtils.debugLog(
             "drawChild() AppWidgetHostView for ${appWidgetInfo?.provider}",
-            null
+            null,
         )
         return super.drawChild(canvas, child, drawingTime)
     }
@@ -102,7 +102,8 @@ class ZeroPaddingAppWidgetHostView(
                     ?.let { mainIntent ->
                         if (onDefaultClick(
                                 PendingIntent.getActivity(context, 0, mainIntent, PendingIntent.FLAG_IMMUTABLE),
-                            )) {
+                            )
+                        ) {
                             context.startActivity(mainIntent)
                         }
                     }

@@ -51,7 +51,8 @@ import tk.zwander.lockscreenwidgets.R
 fun DrawerToolbarPreview() {
     AppTheme {
         Surface(
-            modifier = Modifier.fillMaxSize()
+            modifier = Modifier
+                .fillMaxSize()
                 .systemBarsPadding(),
             color = Color.DarkGray,
         ) {
@@ -146,7 +147,8 @@ fun DrawerToolbar(
         }
 
         Surface(
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier
+                .fillMaxWidth()
                 .shadow(
                     elevation = 8.dp,
                     clip = false,

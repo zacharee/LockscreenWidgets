@@ -13,7 +13,7 @@ class OpenDrawerProvider : AppWidgetProvider() {
     override fun onUpdate(
         context: Context,
         appWidgetManager: AppWidgetManager,
-        appWidgetIds: IntArray
+        appWidgetIds: IntArray,
     ) {
         val view = RemoteViews(context.packageName, R.layout.open_drawer_layout)
         view.setOnClickPendingIntent(
@@ -24,8 +24,8 @@ class OpenDrawerProvider : AppWidgetProvider() {
                 Intent(context, OpenDrawerReceiver::class.java).apply {
                     action = OpenDrawerReceiver.OPEN_ACTION
                 },
-                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_MUTABLE
-            )
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_MUTABLE,
+            ),
         )
 
         appWidgetIds.forEach {

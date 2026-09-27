@@ -19,7 +19,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import tk.zwander.common.compose.components.MainContentDivider
 import tk.zwander.common.compose.util.insetsContentPadding
-import tk.zwander.lockscreenwidgets.util.MainWidgetFrameDelegate
+import tk.zwander.lockscreenwidgets.util.WidgetFrameDelegate
 import tk.zwander.widgetdrawer.util.DrawerDelegate
 
 @Preview
@@ -31,7 +31,7 @@ fun MainContent() {
     val gridState = rememberLazyStaggeredGridState()
 
     val hasFrameDelegateInstance =
-        MainWidgetFrameDelegate.readOnlyInstance.collectAsState().value != null
+        WidgetFrameDelegate.readOnlyInstance.collectAsState().value != null
     val hasDrawerDelegateInstance = DrawerDelegate.readOnlyInstance.collectAsState().value != null
 
     LaunchedEffect(hasFrameDelegateInstance, hasDrawerDelegateInstance) {

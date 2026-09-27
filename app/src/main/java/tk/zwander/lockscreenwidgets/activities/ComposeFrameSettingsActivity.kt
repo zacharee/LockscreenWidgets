@@ -10,20 +10,8 @@ import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Badge
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.derivedStateOf
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberUpdatedState
-import androidx.compose.runtime.setValue
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalResources
@@ -39,35 +27,17 @@ import tk.zwander.common.activities.HideForIDsActivity
 import tk.zwander.common.activities.HideOnAppsChooserActivity
 import tk.zwander.common.activities.OnboardingActivity
 import tk.zwander.common.compose.LocalLSDisplayManager
-import tk.zwander.common.compose.settings.ListPreferenceEntry
-import tk.zwander.common.compose.settings.PreferenceScreen
-import tk.zwander.common.compose.settings.booleanPreferenceDependency
-import tk.zwander.common.compose.settings.createCommonSection
-import tk.zwander.common.compose.settings.rememberBooleanPreferenceDependency
-import tk.zwander.common.compose.settings.rememberPreferenceScreen
+import tk.zwander.common.compose.settings.*
 import tk.zwander.common.compose.util.rememberPreferenceState
-import tk.zwander.common.util.FrameSizeAndPosition
-import tk.zwander.common.util.LifecycleEffect
-import tk.zwander.common.util.PrefManager
+import tk.zwander.common.util.*
 import tk.zwander.common.util.backup.BackupRestoreManager
-import tk.zwander.common.util.canReadWallpaper
-import tk.zwander.common.util.isLikelyRazr
-import tk.zwander.common.util.isOneUI
-import tk.zwander.common.util.isPixelUI
-import tk.zwander.common.util.isTouchWiz
-import tk.zwander.common.util.launchUrl
-import tk.zwander.common.util.orDefault
-import tk.zwander.common.util.prefManager
-import tk.zwander.common.util.setThemedContent
-import tk.zwander.common.util.uniqueIdCompat
-import tk.zwander.common.util.wallpaperClient
 import tk.zwander.lockscreenwidgets.BuildConfig
 import tk.zwander.lockscreenwidgets.R
 import tk.zwander.lockscreenwidgets.compose.SelectDisplayDialog
 import tk.zwander.lockscreenwidgets.compose.WidgetFramePreviewLayout
 import tk.zwander.lockscreenwidgets.services.isNotificationListenerActive
 import tk.zwander.lockscreenwidgets.util.FrameSpecificPreferences
-import tk.zwander.lockscreenwidgets.util.MainWidgetFrameDelegate
+import tk.zwander.lockscreenwidgets.util.WidgetFrameDelegate
 
 class ComposeFrameSettingsActivity : BaseActivity() {
     private val Context.shouldShowBlurOptions: Boolean
@@ -76,7 +46,7 @@ class ComposeFrameSettingsActivity : BaseActivity() {
                     (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && windowManager.isCrossWindowBlurEnabled)
         }
 
-    private var selectedFrame by mutableIntStateOf(MainWidgetFrameDelegate.ID)
+    private var selectedFrame by mutableIntStateOf(WidgetFrameDelegate.ID)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -85,7 +55,7 @@ class ComposeFrameSettingsActivity : BaseActivity() {
         val canShowNCOptions =
             isOneUI || (isPixelUI && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S)
 
-        intent.getIntExtra(INITIAL_FRAME_ID, MainWidgetFrameDelegate.ID).let {
+        intent.getIntExtra(INITIAL_FRAME_ID, WidgetFrameDelegate.ID).let {
             selectedFrame = it
         }
 
@@ -181,7 +151,9 @@ class ComposeFrameSettingsActivity : BaseActivity() {
                                     }
                                     val size = remember {
                                         frameSizeAndPosition.getSizeForType(
-                                            type = FrameSizeAndPosition.FrameType.SecondaryLockscreen.Portrait(selectedFrame),
+                                            type = FrameSizeAndPosition.FrameType.SecondaryLockscreen.Portrait(
+                                                selectedFrame,
+                                            ),
                                             display = lsDisplay,
                                         )
                                     }
@@ -203,7 +175,9 @@ class ComposeFrameSettingsActivity : BaseActivity() {
                                     }
 
                                     WidgetFramePreviewLayout(
-                                        modifier = it.width(width).height(height),
+                                        modifier = it
+                                            .width(width)
+                                            .height(height),
                                         frameId = selectedFrame,
                                         display = lsDisplay,
                                     )
@@ -351,7 +325,7 @@ class ComposeFrameSettingsActivity : BaseActivity() {
                             if (newValue && !canReadWallpaper) {
                                 OnboardingActivity.start(
                                     this@ComposeFrameSettingsActivity,
-                                    OnboardingActivity.RetroMode.STORAGE
+                                    OnboardingActivity.RetroMode.STORAGE,
                                 )
                                 false
                             } else true
@@ -383,7 +357,7 @@ class ComposeFrameSettingsActivity : BaseActivity() {
                             }
 
                             LifecycleEffect(Lifecycle.State.RESUMED) {
-                                state = !wallpaperClient.isServerInstalled  &&
+                                state = !wallpaperClient.isServerInstalled &&
                                         Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU
                             }
 
@@ -536,7 +510,7 @@ class ComposeFrameSettingsActivity : BaseActivity() {
                             if (newValue && !isNotificationListenerActive) {
                                 OnboardingActivity.start(
                                     this@ComposeFrameSettingsActivity,
-                                    OnboardingActivity.RetroMode.NOTIFICATION
+                                    OnboardingActivity.RetroMode.NOTIFICATION,
                                 )
                                 false
                             } else true
@@ -615,7 +589,7 @@ class ComposeFrameSettingsActivity : BaseActivity() {
                         onClick = {
                             HideForIDsActivity.start(
                                 this@ComposeFrameSettingsActivity,
-                                HideForIDsActivity.Type.PRESENT
+                                HideForIDsActivity.Type.PRESENT,
                             )
                         },
                     )
@@ -629,7 +603,7 @@ class ComposeFrameSettingsActivity : BaseActivity() {
                         onClick = {
                             HideForIDsActivity.start(
                                 this@ComposeFrameSettingsActivity,
-                                HideForIDsActivity.Type.NON_PRESENT
+                                HideForIDsActivity.Type.NON_PRESENT,
                             )
                         },
                     )
@@ -856,7 +830,7 @@ class ComposeFrameSettingsActivity : BaseActivity() {
                         pendingMovedFrameId = null
                     },
                     onDisplaySelected = {
-                        if (pendingMoved == MainWidgetFrameDelegate.ID) {
+                        if (pendingMoved == WidgetFrameDelegate.ID) {
                             prefManager.primaryFrameDisplay = it
                         } else {
                             prefManager.currentSecondaryFramesWithStringDisplay =
@@ -888,11 +862,11 @@ class ComposeFrameSettingsActivity : BaseActivity() {
                                     prefManager.currentSecondaryFramesWithStringDisplay.apply {
                                         this.remove(pending)
                                         if (selectedFrame == pending) {
-                                            selectedFrame = MainWidgetFrameDelegate.ID
+                                            selectedFrame = WidgetFrameDelegate.ID
                                         }
                                     }
                                 pendingFrameToRemove = null
-                            }
+                            },
                         ) {
                             Text(text = stringResource(R.string.yes))
                         }
@@ -901,7 +875,7 @@ class ComposeFrameSettingsActivity : BaseActivity() {
                         TextButton(
                             onClick = {
                                 pendingFrameToRemove = null
-                            }
+                            },
                         ) {
                             Text(text = stringResource(R.string.no))
                         }

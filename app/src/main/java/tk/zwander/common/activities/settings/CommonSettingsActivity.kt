@@ -89,7 +89,7 @@ class CommonSettingsActivity : BaseActivity() {
 
                     preference(
                         title = { stringResource(id = R.string.settings_screen_export_debug_log) },
-                        summary = { stringResource(id = R.string.settings_screen_export_debug_log_desc)},
+                        summary = { stringResource(id = R.string.settings_screen_export_debug_log_desc) },
                         icon = { painterResource(R.drawable.ic_baseline_save_24) },
                         key = { "export_debug_logs" },
                         onClick = {
@@ -249,7 +249,7 @@ class CommonSettingsActivity : BaseActivity() {
                                     )
                                 }
                             },
-                        )
+                        ),
                     ]
 
                     items.forEach { item ->
@@ -298,7 +298,7 @@ class CommonSettingsActivity : BaseActivity() {
                     },
                     dismissButton = {
                         TextButton(
-                            onClick = { pendingAction = null }
+                            onClick = { pendingAction = null },
                         ) {
                             Text(text = stringResource(id = R.string.no))
                         }

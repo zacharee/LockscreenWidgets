@@ -20,7 +20,7 @@ import tk.zwander.common.util.FrameInstances
 import tk.zwander.common.util.setThemedContent
 import tk.zwander.lockscreenwidgets.compose.tasker.ChooseFrameIDsLayout
 import tk.zwander.lockscreenwidgets.util.FrameSpecificPreferences
-import tk.zwander.lockscreenwidgets.util.MainWidgetFrameDelegate
+import tk.zwander.lockscreenwidgets.util.WidgetFrameDelegate
 
 @TaskerInputRoot
 data class FrameIDs @JvmOverloads constructor(
@@ -68,7 +68,8 @@ abstract class BaseTaskerFrameActivity : BaseActivity(), TaskerPluginConfig<Fram
 class TaskerCanShowActivity : BaseTaskerFrameActivity() {
     override val helper by lazy { CanShowHelper(this) }
 
-    class CanShowHelper(config: TaskerPluginConfig<FrameIDs>) : TaskerPluginConfigHelperNoOutput<FrameIDs, CanShowRunner>(config) {
+    class CanShowHelper(config: TaskerPluginConfig<FrameIDs>) :
+        TaskerPluginConfigHelperNoOutput<FrameIDs, CanShowRunner>(config) {
         override val inputClass: Class<FrameIDs> = FrameIDs::class.java
         override val runnerClass: Class<CanShowRunner> = CanShowRunner::class.java
     }
@@ -88,7 +89,8 @@ class TaskerCanShowActivity : BaseTaskerFrameActivity() {
 class TaskerCanNotShowActivity : BaseTaskerFrameActivity() {
     override val helper by lazy { CanNotShowHelper(this) }
 
-    class CanNotShowHelper(config: TaskerPluginConfig<FrameIDs>) : TaskerPluginConfigHelperNoOutput<FrameIDs, CanNotShowRunner>(config) {
+    class CanNotShowHelper(config: TaskerPluginConfig<FrameIDs>) :
+        TaskerPluginConfigHelperNoOutput<FrameIDs, CanNotShowRunner>(config) {
         override val inputClass: Class<FrameIDs> = FrameIDs::class.java
         override val runnerClass: Class<CanNotShowRunner> = CanNotShowRunner::class.java
     }
@@ -107,7 +109,8 @@ class TaskerCanNotShowActivity : BaseTaskerFrameActivity() {
 class TaskerForceShowActivity : BaseTaskerFrameActivity() {
     override val helper by lazy { ForceShowHelper(this) }
 
-    class ForceShowHelper(config: TaskerPluginConfig<FrameIDs>) : TaskerPluginConfigHelperNoOutput<FrameIDs, ForceShowRunner>(config) {
+    class ForceShowHelper(config: TaskerPluginConfig<FrameIDs>) :
+        TaskerPluginConfigHelperNoOutput<FrameIDs, ForceShowRunner>(config) {
         override val inputClass: Class<FrameIDs> = FrameIDs::class.java
         override val runnerClass: Class<ForceShowRunner> = ForceShowRunner::class.java
     }
@@ -127,7 +130,8 @@ class TaskerForceShowActivity : BaseTaskerFrameActivity() {
 class TaskerUnForceShowActivity : BaseTaskerFrameActivity() {
     override val helper by lazy { UnForceShowHelper(this) }
 
-    class UnForceShowHelper(config: TaskerPluginConfig<FrameIDs>) : TaskerPluginConfigHelperNoOutput<FrameIDs, UnForceShowRunner>(config) {
+    class UnForceShowHelper(config: TaskerPluginConfig<FrameIDs>) :
+        TaskerPluginConfigHelperNoOutput<FrameIDs, UnForceShowRunner>(config) {
         override val inputClass: Class<FrameIDs> = FrameIDs::class.java
         override val runnerClass: Class<UnForceShowRunner> = UnForceShowRunner::class.java
     }
@@ -147,7 +151,8 @@ class TaskerUnForceShowActivity : BaseTaskerFrameActivity() {
 class TaskerIsAllowedToShowFrame : BaseTaskerFrameActivity() {
     override val helper by lazy { AllowedToShowHelper(this) }
 
-    class AllowedToShowHelper(config: TaskerPluginConfig<FrameIDs>) : TaskerPluginConfigHelperNoOutput<FrameIDs, AllowedToShowRunner>(config) {
+    class AllowedToShowHelper(config: TaskerPluginConfig<FrameIDs>) :
+        TaskerPluginConfigHelperNoOutput<FrameIDs, AllowedToShowRunner>(config) {
         override val inputClass: Class<FrameIDs>
             get() = FrameIDs::class.java
         override val runnerClass: Class<AllowedToShowRunner>
@@ -161,7 +166,7 @@ class TaskerIsAllowedToShowFrame : BaseTaskerFrameActivity() {
         override fun getSatisfiedCondition(
             context: Context,
             input: TaskerInput<FrameIDs>,
-            update: Unit?
+            update: Unit?,
         ): TaskerPluginResultCondition<Unit> {
             val anySatisfy = input.regular.ids.orAllIds(context).any {
                 FrameSpecificPreferences[it].canShowFromTasker
@@ -179,7 +184,8 @@ class TaskerIsAllowedToShowFrame : BaseTaskerFrameActivity() {
 class TaskerIsShowingFrame : BaseTaskerFrameActivity() {
     override val helper by lazy { IsShowingHelper(this) }
 
-    class IsShowingHelper(config: TaskerPluginConfig<FrameIDs>) : TaskerPluginConfigHelperNoOutput<FrameIDs, IsShowingRunner>(config) {
+    class IsShowingHelper(config: TaskerPluginConfig<FrameIDs>) :
+        TaskerPluginConfigHelperNoOutput<FrameIDs, IsShowingRunner>(config) {
         override val inputClass: Class<FrameIDs>
             get() = FrameIDs::class.java
         override val runnerClass: Class<IsShowingRunner>
@@ -193,7 +199,7 @@ class TaskerIsShowingFrame : BaseTaskerFrameActivity() {
         override fun getSatisfiedCondition(
             context: Context,
             input: TaskerInput<FrameIDs>,
-            update: Unit?
+            update: Unit?,
         ): TaskerPluginResultCondition<Unit> {
             val ids = input.regular.ids.orAllIds(context)
             val allInstances = FrameInstances.allInstances(context).filter { ids.contains(it.key) }
@@ -210,7 +216,8 @@ class TaskerIsShowingFrame : BaseTaskerFrameActivity() {
 class TaskerIsForceShowingFrame : BaseTaskerFrameActivity() {
     override val helper by lazy { ForcedToShowHelper(this) }
 
-    class ForcedToShowHelper(config: TaskerPluginConfig<FrameIDs>) : TaskerPluginConfigHelperNoOutput<FrameIDs, ForcedToShowRunner>(config) {
+    class ForcedToShowHelper(config: TaskerPluginConfig<FrameIDs>) :
+        TaskerPluginConfigHelperNoOutput<FrameIDs, ForcedToShowRunner>(config) {
         override val inputClass: Class<FrameIDs>
             get() = FrameIDs::class.java
         override val runnerClass: Class<ForcedToShowRunner>
@@ -224,7 +231,7 @@ class TaskerIsForceShowingFrame : BaseTaskerFrameActivity() {
         override fun getSatisfiedCondition(
             context: Context,
             input: TaskerInput<FrameIDs>,
-            update: Unit?
+            update: Unit?,
         ): TaskerPluginResultCondition<Unit> {
             val anySatisfy = input.regular.ids.orAllIds(context).any {
                 FrameSpecificPreferences[it].forceShow
@@ -241,5 +248,5 @@ class TaskerIsForceShowingFrame : BaseTaskerFrameActivity() {
 
 private fun List<String>.orAllIds(context: Context): List<Int> {
     return this.mapNotNull { it.toIntOrNull() }.takeIf { it.isNotEmpty() }
-        ?: MainWidgetFrameDelegate.allIds(context)
+        ?: WidgetFrameDelegate.allIds(context)
 }

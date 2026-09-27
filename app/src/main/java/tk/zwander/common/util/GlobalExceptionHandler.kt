@@ -4,7 +4,10 @@ import android.content.Context
 import android.os.DeadObjectException
 import kotlin.system.exitProcess
 
-class GlobalExceptionHandler(private val context: Context, private val previousHandler: Thread.UncaughtExceptionHandler?) : Thread.UncaughtExceptionHandler {
+class GlobalExceptionHandler(
+    private val context: Context,
+    private val previousHandler: Thread.UncaughtExceptionHandler?,
+) : Thread.UncaughtExceptionHandler {
     override fun uncaughtException(t: Thread, e: Throwable) {
         context.logUtils.normalLog(
             message = "Uncaught Exception!",

@@ -58,7 +58,7 @@ class FrameSizeAndPosition private constructor(private val context: Context) {
         set(value) {
             prefManager.putString(
                 KEY_POSITIONS_MAP,
-                prefManager.gson.toJson(value)
+                prefManager.gson.toJson(value),
             )
         }
 
@@ -69,7 +69,7 @@ class FrameSizeAndPosition private constructor(private val context: Context) {
         set(value) {
             prefManager.putString(
                 KEY_SIZES_MAP,
-                prefManager.gson.toJson(value)
+                prefManager.gson.toJson(value),
             )
         }
 
@@ -114,7 +114,7 @@ class FrameSizeAndPosition private constructor(private val context: Context) {
             FrameType.Preview.Portrait,
             is FrameType.SecondaryLockscreen.Portrait,
             is FrameType.SecondaryPreview.Portrait,
-                 -> Point(0, 0)
+                -> Point(0, 0)
 
             FrameType.LockNotification.Portrait,
             FrameType.NotificationNormal.Portrait,
@@ -131,10 +131,29 @@ class FrameSizeAndPosition private constructor(private val context: Context) {
             FrameType.LockNotification.Landscape -> getPositionForType(FrameType.LockNotification.Portrait, display)
             FrameType.NotificationNormal.Landscape -> getPositionForType(FrameType.NotificationNormal.Portrait, display)
             FrameType.Preview.Landscape -> getPositionForType(FrameType.Preview.Portrait, display)
-            is FrameType.SecondaryLockscreen.Landscape -> getPositionForType(FrameType.SecondaryLockscreen.Portrait(type.id), display)
-            is FrameType.SecondaryNotification.Landscape -> getPositionForType(FrameType.SecondaryNotification.Portrait(type.id), display)
-            is FrameType.SecondaryLockNotification.Landscape -> getPositionForType(FrameType.SecondaryLockNotification.Portrait(type.id), display)
-            is FrameType.SecondaryPreview.Landscape -> getPositionForType(FrameType.SecondaryPreview.Portrait(type.id), display)
+            is FrameType.SecondaryLockscreen.Landscape -> getPositionForType(
+                FrameType.SecondaryLockscreen.Portrait(type.id),
+                display,
+            )
+
+            is FrameType.SecondaryNotification.Landscape -> getPositionForType(
+                FrameType.SecondaryNotification.Portrait(
+                    type.id,
+                ),
+                display,
+            )
+
+            is FrameType.SecondaryLockNotification.Landscape -> getPositionForType(
+                FrameType.SecondaryLockNotification.Portrait(
+                    type.id,
+                ),
+                display,
+            )
+
+            is FrameType.SecondaryPreview.Landscape -> getPositionForType(
+                FrameType.SecondaryPreview.Portrait(type.id),
+                display,
+            )
         }
     }
 
@@ -143,7 +162,8 @@ class FrameSizeAndPosition private constructor(private val context: Context) {
             FrameType.LockNormal.Portrait,
             FrameType.Preview.Portrait,
             is FrameType.SecondaryLockscreen.Portrait,
-            is FrameType.SecondaryPreview.Portrait -> PointF(
+            is FrameType.SecondaryPreview.Portrait,
+                -> PointF(
                 prefManager.getResourceFloat(R.integer.def_frame_width),
                 prefManager.getResourceFloat(R.integer.def_frame_height),
             )
@@ -151,7 +171,8 @@ class FrameSizeAndPosition private constructor(private val context: Context) {
             FrameType.LockNotification.Portrait,
             FrameType.NotificationNormal.Portrait,
             is FrameType.SecondaryNotification.Portrait,
-            is FrameType.SecondaryLockNotification.Portrait -> PointF(
+            is FrameType.SecondaryLockNotification.Portrait,
+                -> PointF(
                 prefManager.getResourceFloat(R.integer.def_notification_frame_width),
                 prefManager.getResourceFloat(R.integer.def_notification_frame_height),
             )
@@ -162,10 +183,27 @@ class FrameSizeAndPosition private constructor(private val context: Context) {
             FrameType.LockNotification.Landscape -> getSizeForType(FrameType.LockNotification.Portrait, display)
             FrameType.NotificationNormal.Landscape -> getSizeForType(FrameType.NotificationNormal.Portrait, display)
             FrameType.Preview.Landscape -> getSizeForType(FrameType.Preview.Portrait, display)
-            is FrameType.SecondaryLockscreen.Landscape -> getSizeForType(FrameType.SecondaryLockscreen.Portrait(type.id), display)
-            is FrameType.SecondaryLockNotification.Landscape -> getSizeForType(FrameType.SecondaryLockNotification.Portrait(type.id), display)
-            is FrameType.SecondaryNotification.Landscape -> getSizeForType(FrameType.SecondaryNotification.Portrait(type.id), display)
-            is FrameType.SecondaryPreview.Landscape -> getSizeForType(FrameType.SecondaryPreview.Portrait(type.id), display)
+            is FrameType.SecondaryLockscreen.Landscape -> getSizeForType(
+                FrameType.SecondaryLockscreen.Portrait(type.id),
+                display,
+            )
+
+            is FrameType.SecondaryLockNotification.Landscape -> getSizeForType(
+                FrameType.SecondaryLockNotification.Portrait(
+                    type.id,
+                ),
+                display,
+            )
+
+            is FrameType.SecondaryNotification.Landscape -> getSizeForType(
+                FrameType.SecondaryNotification.Portrait(type.id),
+                display,
+            )
+
+            is FrameType.SecondaryPreview.Landscape -> getSizeForType(
+                FrameType.SecondaryPreview.Portrait(type.id),
+                display,
+            )
         }
     }
 

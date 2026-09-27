@@ -154,7 +154,8 @@ fun BasePreferenceLayout(
 
             badge?.let {
                 Box(
-                    modifier = Modifier.align(Alignment.TopEnd)
+                    modifier = Modifier
+                        .align(Alignment.TopEnd)
                         .padding(top = 8.dp, end = 8.dp),
                 ) {
                     it()

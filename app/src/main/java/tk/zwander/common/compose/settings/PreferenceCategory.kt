@@ -34,7 +34,9 @@ fun PreferenceCategory(
         title = category.title ?: "",
         summary = if (!expanded) category.items.take(3).map { it.title() }
             .joinToString(", ") else null,
-        onClick = if (category.collapsible()) {{ onExpandChange(!expanded) }} else null,
+        onClick = if (category.collapsible()) {
+            { onExpandChange(!expanded) }
+        } else null,
         icon = category.icon?.let { rememberDrawablePainter(it) },
         widget = {
             val rotation by animateFloatAsState(if (expanded) 0f else 180f)

@@ -147,7 +147,8 @@ class SelectIconPackActivity : BaseActivity() {
                                         items = filteredItems,
                                         key = { item ->
                                             item.packageName ?: "SystemIconPack__"
-                                        }) { pack ->
+                                        },
+                                    ) { pack ->
                                         Row(
                                             modifier = Modifier
                                                 .fillMaxWidth()

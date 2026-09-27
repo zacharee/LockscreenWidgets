@@ -10,7 +10,8 @@ class SecondaryFrameWithDisplayToStringDisplayMigration : Migration {
     override fun run(context: Context) {
         val oldFrameData = context.prefManager.currentSecondaryFramesWithDisplay
 
-        context.prefManager.currentSecondaryFramesWithStringDisplay = HashMap(oldFrameData.map { (key, value) -> key to "$value" }.toMap())
+        context.prefManager.currentSecondaryFramesWithStringDisplay =
+            HashMap(oldFrameData.map { (key, value) -> key to "$value" }.toMap())
 
         context.prefManager.currentSecondaryFramesWithDisplay = hashMapOf()
     }

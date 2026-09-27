@@ -10,23 +10,10 @@ import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
-import androidx.compose.foundation.gestures.detectTapGestures
-import androidx.compose.foundation.gestures.draggable2D
-import androidx.compose.foundation.gestures.rememberDraggable2DState
-import androidx.compose.foundation.gestures.rememberTransformableState
-import androidx.compose.foundation.gestures.transformable
-import androidx.compose.foundation.gestures.waitForUpOrCancellation
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.gestures.*
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.Text
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -56,19 +43,13 @@ import tk.zwander.common.compose.components.ConfirmWidgetRemovalLayout
 import tk.zwander.common.compose.components.FrameEditWrapperLayout
 import tk.zwander.common.compose.util.rememberBooleanPreferenceState
 import tk.zwander.common.compose.util.rememberPreferenceState
-import tk.zwander.common.util.Event
-import tk.zwander.common.util.PrefManager
-import tk.zwander.common.util.collectAsMutableState
-import tk.zwander.common.util.eventManager
-import tk.zwander.common.util.globalState
-import tk.zwander.common.util.logUtils
-import tk.zwander.common.util.prefManager
+import tk.zwander.common.util.*
 import tk.zwander.lockscreenwidgets.R
 import tk.zwander.lockscreenwidgets.activities.ComposeFrameSettingsActivity
-import tk.zwander.lockscreenwidgets.util.MainWidgetFrameDelegate
+import tk.zwander.lockscreenwidgets.util.WidgetFrameDelegate
 
 @Composable
-fun MainWidgetFrameDelegate.WidgetFrameViewModel.WidgetFrameLayout(
+fun WidgetFrameDelegate.WidgetFrameViewModel.WidgetFrameLayout(
     modifier: Modifier = Modifier,
 ) {
     val context = LocalContext.current
@@ -183,7 +164,7 @@ fun MainWidgetFrameDelegate.WidgetFrameViewModel.WidgetFrameLayout(
                         onDoubleTap = {
                             context.logUtils.debugLog(
                                 "Sending display off from base frame layer",
-                                null
+                                null,
                             )
                             context.eventManager.sendEvent(Event.TurnOffDisplay)
                         },
@@ -291,8 +272,8 @@ fun MainWidgetFrameDelegate.WidgetFrameViewModel.WidgetFrameLayout(
                             context.eventManager.sendEvent(
                                 Event.RemoveWidgetConfirmed(
                                     removed,
-                                    data
-                                )
+                                    data,
+                                ),
                             )
                             itemToRemove = null
                         },
@@ -365,8 +346,8 @@ fun MainWidgetFrameDelegate.WidgetFrameViewModel.WidgetFrameLayout(
                             context.eventManager.sendEvent(
                                 Event.RemoveFrameConfirmed(
                                     removed,
-                                    data
-                                )
+                                    data,
+                                ),
                             )
                             removing = false
                         },
@@ -402,7 +383,7 @@ fun MainWidgetFrameDelegate.WidgetFrameViewModel.WidgetFrameLayout(
                                     )
                                 }
                                 maskScale *= zoomChange
-                            }
+                            },
                         ),
                 ) {
                     Row(

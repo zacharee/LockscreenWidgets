@@ -26,7 +26,7 @@ import tk.zwander.common.util.LSDisplay
 import tk.zwander.common.util.PrefManager
 import tk.zwander.common.util.prefManager
 import tk.zwander.lockscreenwidgets.R
-import tk.zwander.lockscreenwidgets.util.MainWidgetFrameDelegate
+import tk.zwander.lockscreenwidgets.util.WidgetFrameDelegate
 import java.util.*
 import kotlin.math.absoluteValue
 
@@ -57,7 +57,7 @@ fun SelectDisplayDialog(
     )
     val defaultFrame by remember {
         derivedStateOf {
-            MainWidgetFrameDelegate.ID to defaultFrameDisplay
+            WidgetFrameDelegate.ID to defaultFrameDisplay
         }
     }
     val allFrames by remember {
@@ -172,14 +172,15 @@ fun SelectDisplayDialog(
                         if (expandedMap["DEFAULT_DISPLAY"] != false && onFrameSelected != null) {
                             items(
                                 items = framesForDefaultDisplay,
-                                key = { "DEFAULT_DISPLAY_FRAME_$it" }) {
+                                key = { "DEFAULT_DISPLAY_FRAME_$it" },
+                            ) {
                                 FrameItem(
                                     display = defaultDisplay,
                                     frameId = it,
                                     onSelected = { _ ->
                                         onFrameSelected.invoke(it)
                                     },
-                                    modifier = Modifier.animateItem()
+                                    modifier = Modifier.animateItem(),
                                 )
                             }
                         }
@@ -190,7 +191,7 @@ fun SelectDisplayDialog(
                             DisplayCard(
                                 labelText = "${display.display.name} (${
                                     descriptionForDisplay(
-                                        display
+                                        display,
                                     )
                                 })",
                                 accessory = {

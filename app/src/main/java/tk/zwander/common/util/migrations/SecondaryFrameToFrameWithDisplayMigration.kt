@@ -11,7 +11,8 @@ class SecondaryFrameToFrameWithDisplayMigration : Migration {
     override fun run(context: Context) {
         val oldFrameData = context.prefManager.currentSecondaryFrames
 
-        context.prefManager.currentSecondaryFramesWithStringDisplay = HashMap(oldFrameData.associateWith { "${Display.DEFAULT_DISPLAY}" })
+        context.prefManager.currentSecondaryFramesWithStringDisplay =
+            HashMap(oldFrameData.associateWith { "${Display.DEFAULT_DISPLAY}" })
 
         context.prefManager.currentSecondaryFrames = []
     }

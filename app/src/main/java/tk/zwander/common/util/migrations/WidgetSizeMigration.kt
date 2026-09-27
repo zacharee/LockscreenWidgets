@@ -21,7 +21,7 @@ class WidgetSizeMigration : Migration {
                         ?: WidgetSizeData(1, 1)
 
                     widget.copy(size = sizeInfo)
-                }
+                },
             )
 
             @Suppress("DEPRECATION")

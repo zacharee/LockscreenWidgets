@@ -4,7 +4,7 @@ import android.content.Context
 import tk.zwander.common.util.PrefManager
 import tk.zwander.common.util.prefManager
 import tk.zwander.lockscreenwidgets.util.FrameSpecificPreferences
-import tk.zwander.lockscreenwidgets.util.MainWidgetFrameDelegate
+import tk.zwander.lockscreenwidgets.util.WidgetFrameDelegate
 
 @Suppress("DEPRECATION")
 class CurrentFrameIndexMigration : Migration {
@@ -12,7 +12,7 @@ class CurrentFrameIndexMigration : Migration {
 
     override fun run(context: Context) {
         if (context.prefManager.contains(PrefManager.KEY_CURRENT_PAGE)) {
-            FrameSpecificPreferences[MainWidgetFrameDelegate.ID].currentIndex = context.prefManager.currentPage
+            FrameSpecificPreferences[WidgetFrameDelegate.ID].currentIndex = context.prefManager.currentPage
 
             context.prefManager.remove(PrefManager.KEY_CURRENT_PAGE)
         }

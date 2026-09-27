@@ -42,7 +42,7 @@ import tk.zwander.common.util.*
 import tk.zwander.lockscreenwidgets.BuildConfig
 import tk.zwander.lockscreenwidgets.R
 import tk.zwander.lockscreenwidgets.activities.WidgetStackConfigure
-import tk.zwander.lockscreenwidgets.util.MainWidgetFrameDelegate
+import tk.zwander.lockscreenwidgets.util.WidgetFrameDelegate
 import kotlin.math.floor
 import kotlin.math.roundToInt
 
@@ -924,7 +924,7 @@ class WidgetStackProvider : AppWidgetProvider() {
         fun updateWidgetStackMonitor(context: Context) {
             val appContext = context.safeApplicationContext
             val shouldRun = appContext.prefManager.widgetStackWidgets.isNotEmpty() &&
-                    MainWidgetFrameDelegate.peekInstance(appContext) == null
+                    WidgetFrameDelegate.peekInstance(appContext) == null
 
             val serviceIntent = Intent(appContext, WidgetStackMonitorService::class.java)
 

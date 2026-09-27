@@ -11,12 +11,13 @@ import com.ehsanmsz.mszprogressindicator.progressindicator.BallTrianglePathProgr
 
 @Composable
 fun Loader(
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     BoxWithConstraints(
-        modifier = modifier.fillMaxWidth(0.5f)
+        modifier = modifier
+            .fillMaxWidth(0.5f)
             .aspectRatio(1f),
-        contentAlignment = Alignment.Center
+        contentAlignment = Alignment.Center,
     ) {
         val constraints = this
 

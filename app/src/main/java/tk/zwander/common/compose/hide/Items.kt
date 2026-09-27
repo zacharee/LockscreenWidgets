@@ -21,7 +21,7 @@ internal fun items(
     LaunchedEffect(key1 = checked) {
         items = items.map {
             it.copy(
-                isChecked = checked.contains(it.appInfo.packageName)
+                isChecked = checked.contains(it.appInfo.packageName),
             )
         }.toSortedSet()
     }
@@ -32,7 +32,7 @@ internal fun items(
                 BasicAppInfo(
                     appName = it.loadLabel(context.packageManager).toString(),
                     appInfo = it,
-                    isChecked = checked.contains(it.packageName)
+                    isChecked = checked.contains(it.packageName),
                 )
             }
         }

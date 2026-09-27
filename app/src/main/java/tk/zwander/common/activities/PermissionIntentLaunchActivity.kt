@@ -39,14 +39,17 @@ class PermissionIntentLaunchActivity : ComponentActivity() {
         @Suppress("DEPRECATION")
         intent.getParcelableExtra(EXTRA_INTENT_TO_LAUNCH)
     }
-    private val launchType by lazy { (intent.getSerializableExtra(EXTRA_LAUNCH_TYPE) as? LaunchType) ?: LaunchType.ACTIVITY }
-    private val permissionsLauncher = registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { result ->
-        if (result.all { it.value }) {
-            performLaunch()
-        } else {
-            finish()
-        }
+    private val launchType by lazy {
+        (intent.getSerializableExtra(EXTRA_LAUNCH_TYPE) as? LaunchType) ?: LaunchType.ACTIVITY
     }
+    private val permissionsLauncher =
+        registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { result ->
+            if (result.all { it.value }) {
+                performLaunch()
+            } else {
+                finish()
+            }
+        }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -78,7 +81,7 @@ class PermissionIntentLaunchActivity : ComponentActivity() {
             Toast.makeText(
                 this,
                 R.string.unable_to_launch,
-                Toast.LENGTH_SHORT
+                Toast.LENGTH_SHORT,
             ).show()
         }
 

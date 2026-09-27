@@ -21,7 +21,7 @@ val LocalLSDisplayManager = compositionLocalOf<LSDisplayManager> { error("LSDisp
 
 @Composable
 fun AppTheme(
-    content: @Composable () -> Unit
+    content: @Composable () -> Unit,
 ) {
     val context = LocalContext.current
     val lsDisplayManager = remember {
@@ -38,7 +38,7 @@ fun AppTheme(
                 } else {
                     dynamicLightColorScheme(context)
                 },
-                content = content
+                content = content,
             )
         } else {
             MaterialTheme(

@@ -38,20 +38,22 @@ class EventManager private constructor(private val context: Context) {
     inline fun <reified T : Event> LifecycleOwner.registerListener(noinline listener: (T) -> Unit) {
         addListener(listener)
 
-        lifecycle.addObserver(object : DefaultLifecycleObserver {
-            override fun onDestroy(owner: LifecycleOwner) {
-                removeListener(listener)
-                lifecycle.removeObserver(this)
-            }
-        })
+        lifecycle.addObserver(
+            object : DefaultLifecycleObserver {
+                override fun onDestroy(owner: LifecycleOwner) {
+                    removeListener(listener)
+                    lifecycle.removeObserver(this)
+                }
+            },
+        )
     }
 
     inline fun <reified T : Event> addListener(noinline listener: (T) -> Unit) {
         addListener(
             ListenerInfo(
                 T::class.java,
-                listener
-            )
+                listener,
+            ),
         )
     }
 
@@ -63,12 +65,14 @@ class EventManager private constructor(private val context: Context) {
     fun LifecycleOwner.registerObserver(observer: EventObserver) {
         addObserver(observer)
 
-        lifecycle.addObserver(object : DefaultLifecycleObserver {
-            override fun onDestroy(owner: LifecycleOwner) {
-                removeObserver(observer)
-                lifecycle.removeObserver(this)
-            }
-        })
+        lifecycle.addObserver(
+            object : DefaultLifecycleObserver {
+                override fun onDestroy(owner: LifecycleOwner) {
+                    removeObserver(observer)
+                    lifecycle.removeObserver(this)
+                }
+            },
+        )
     }
 
     fun addObserver(observer: EventObserver) {
@@ -130,6 +134,7 @@ sealed class Event {
             BOTTOM
         }
     }
+
     data class RemoveWidgetConfirmed(val remove: Boolean, val item: WidgetData?) : Event()
     data class FrameMoveFinished(val frameId: Int) : Event()
     data class CenterFrameHorizontally(val frameId: Int) : Event()
@@ -145,6 +150,7 @@ sealed class Event {
             TOGGLE,
         }
     }
+
     data class TrimMemory(val level: Int) : Event()
     data class StackUpdateComplete(val stackId: Int) : Event()
 
@@ -164,6 +170,7 @@ sealed class Event {
         val initial: Boolean,
         val velocity: Float,
     ) : Event()
+
     data class ScrollOpenFinish(val from: Int) : Event()
     data class DrawerIntercept(val down: Boolean) : Event()
 }
@@ -174,7 +181,7 @@ interface EventObserver {
 
 data class ListenerInfo<T : Event>(
     val listenerClass: Class<T>,
-    val listener: (T) -> Unit
+    val listener: (T) -> Unit,
 )
 
 @Composable

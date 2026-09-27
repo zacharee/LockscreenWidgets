@@ -23,7 +23,7 @@ class EnableDisableDrawerTile : TileService() {
     private fun updateState() {
         qsTile?.apply {
             state = (if (prefManager.drawerEnabled) Tile.STATE_ACTIVE
-                    else Tile.STATE_INACTIVE)
+            else Tile.STATE_INACTIVE)
             updateTile()
         }
     }

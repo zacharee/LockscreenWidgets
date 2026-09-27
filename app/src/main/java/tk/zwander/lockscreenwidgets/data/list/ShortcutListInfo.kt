@@ -5,7 +5,7 @@ import androidx.core.graphics.drawable.IconCompat
 import tk.zwander.common.activities.add.AddWidgetActivity
 import tk.zwander.common.data.BaseAppInfo
 import tk.zwander.common.util.componentNameCompat
-import java.util.Objects
+import java.util.*
 
 /**
  * Hold the info for a shortcut listed in [AddWidgetActivity]
@@ -19,9 +19,9 @@ class ShortcutListInfo(
     shortcutName: String,
     icon: IconCompat?,
     appInfo: BaseAppInfo<*>,
-    itemInfo: ResolveInfo
+    itemInfo: ResolveInfo,
 ) : BaseListInfo<ResolveInfo>(
-    shortcutName, icon, appInfo, itemInfo
+    shortcutName, icon, appInfo, itemInfo,
 ) {
     override fun equals(other: Any?): Boolean {
         return super.equals(other) &&

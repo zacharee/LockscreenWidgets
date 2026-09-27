@@ -39,7 +39,7 @@ fun ConfirmWidgetRemovalPreview() {
         ) {
             ConfirmWidgetRemovalLayout(
                 itemToRemove = null,
-                onItemRemovalConfirmed = {_, _ -> },
+                onItemRemovalConfirmed = { _, _ -> },
                 modifier = Modifier.height(150.dp),
             )
         }
@@ -109,13 +109,13 @@ fun <T> ConfirmItemRemovalLayout(
                     horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.End),
                 ) {
                     OutlinedButton(
-                        onClick = { onItemRemovalConfirmed(false, itemToRemove) }
+                        onClick = { onItemRemovalConfirmed(false, itemToRemove) },
                     ) {
                         Text(text = stringResource(R.string.no))
                     }
 
                     OutlinedButton(
-                        onClick = { onItemRemovalConfirmed(true, itemToRemove) }
+                        onClick = { onItemRemovalConfirmed(true, itemToRemove) },
                     ) {
                         Text(text = stringResource(R.string.yes))
                     }

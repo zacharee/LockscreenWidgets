@@ -10,11 +10,16 @@ class WidgetIconMigration : Migration {
     override val runBelowDatabaseVersion: Int = 5
 
     override fun run(context: Context) {
-        context.prefManager.currentWidgets = LinkedHashSet(migrateCollection(context, context.prefManager.currentWidgets))
+        context.prefManager.currentWidgets =
+            LinkedHashSet(migrateCollection(context, context.prefManager.currentWidgets))
         context.prefManager.drawerWidgets = LinkedHashSet(migrateCollection(context, context.prefManager.drawerWidgets))
 
         context.prefManager.currentSecondaryFramesWithStringDisplay.forEach { [frameId] ->
-            FramePrefs.setWidgetsForFrame(context, frameId, migrateCollection(context, FramePrefs.getWidgetsForFrame(context, frameId)))
+            FramePrefs.setWidgetsForFrame(
+                context,
+                frameId,
+                migrateCollection(context, FramePrefs.getWidgetsForFrame(context, frameId)),
+            )
         }
     }
 

@@ -66,7 +66,7 @@ class PreferenceScreenScope(context: Context) : ContextWrapper(context) {
                 items = categoryScope.prefs,
                 icon = icon,
                 collapsible = collapsible,
-            )
+            ),
         )
     }
 }
@@ -284,7 +284,7 @@ data class CommonSectionInfo(
     private val dateFormatter = SimpleDateFormat("yyyy-MM-dd_HH:mm:ss", Locale.getDefault())
 
     fun addToPreferenceScreen(screenScope: PreferenceScreenScope) {
-        with (screenScope) {
+        with(screenScope) {
             category(
                 key = "common_category",
                 title = null,

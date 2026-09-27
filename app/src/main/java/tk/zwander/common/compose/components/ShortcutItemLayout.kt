@@ -66,7 +66,8 @@ fun ShortcutItemLayout(
         Image(
             bitmap = icon?.asImageBitmap() ?: ImageBitmap(1, 1),
             contentDescription = stringResource(R.string.shortcut_icon),
-            modifier = Modifier.align(Alignment.CenterHorizontally)
+            modifier = Modifier
+                .align(Alignment.CenterHorizontally)
                 .weight(1f)
                 .padding(top = 8.dp, start = 8.dp, end = 8.dp),
         )
@@ -74,7 +75,8 @@ fun ShortcutItemLayout(
         name?.let {
             Text(
                 text = name,
-                modifier = Modifier.align(Alignment.CenterHorizontally)
+                modifier = Modifier
+                    .align(Alignment.CenterHorizontally)
                     .padding(start = 8.dp, end = 8.dp, bottom = 8.dp),
                 textAlign = TextAlign.Center,
             )

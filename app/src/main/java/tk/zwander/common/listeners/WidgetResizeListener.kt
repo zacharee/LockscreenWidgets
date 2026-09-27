@@ -15,7 +15,7 @@ class WidgetResizeListener(
     private val _thresholdPx: (Which) -> Int,
     private val which: Which,
     private val resizeCallback: (Boolean, Int, Int) -> Unit,
-    private val liftCallback: () -> Unit
+    private val liftCallback: () -> Unit,
 ) : View.OnTouchListener {
     enum class Which {
         LEFT,
@@ -73,7 +73,11 @@ class WidgetResizeListener(
                         prevX += thresholdPx * distX.sign
                     }
 
-                    resizeCallback(overThreshold, (newX - prevXTrack).sign.toInt(), (newX - prevXTrack).absoluteValue.toInt())
+                    resizeCallback(
+                        overThreshold,
+                        (newX - prevXTrack).sign.toInt(),
+                        (newX - prevXTrack).absoluteValue.toInt(),
+                    )
 
                 } else {
                     val overThreshold = distY.absoluteValue > thresholdPx
@@ -82,7 +86,11 @@ class WidgetResizeListener(
                         prevY += thresholdPx * distY.sign
                     }
 
-                    resizeCallback(overThreshold, (newY - prevYTrack).sign.toInt(), (newY - prevYTrack).absoluteValue.toInt())
+                    resizeCallback(
+                        overThreshold,
+                        (newY - prevYTrack).sign.toInt(),
+                        (newY - prevYTrack).absoluteValue.toInt(),
+                    )
                 }
 
                 prevXTrack = newX

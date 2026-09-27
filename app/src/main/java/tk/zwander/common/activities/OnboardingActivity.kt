@@ -55,7 +55,7 @@ class OnboardingActivity : ComponentActivity() {
         fun startForResult(
             activity: Activity,
             request: ActivityResultLauncher<Intent>,
-            retroMode: RetroMode = RetroMode.NONE
+            retroMode: RetroMode = RetroMode.NONE,
         ) {
             val intent = Intent(activity, OnboardingActivity::class.java)
             intent.putExtra(EXTRA_RETRO_MODE, retroMode.toString())
@@ -81,7 +81,7 @@ class OnboardingActivity : ComponentActivity() {
 
     private val retroMode by lazy {
         RetroMode.valueOf(
-            intent.getStringExtra(EXTRA_RETRO_MODE) ?: RetroMode.NONE.toString()
+            intent.getStringExtra(EXTRA_RETRO_MODE) ?: RetroMode.NONE.toString(),
         )
     }
 

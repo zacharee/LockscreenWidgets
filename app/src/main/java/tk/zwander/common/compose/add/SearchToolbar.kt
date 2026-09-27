@@ -58,11 +58,11 @@ fun SearchToolbar(
                                     } else {
                                         onFilterChanged(null)
                                     }
-                                }
+                                },
                             ) {
                                 Icon(
                                     painter = painterResource(id = R.drawable.baseline_clear_24),
-                                    contentDescription = stringResource(id = R.string.clear)
+                                    contentDescription = stringResource(id = R.string.clear),
                                 )
                             }
                         },
@@ -97,7 +97,7 @@ fun SearchToolbar(
                 IconButton(onClick = onBack) {
                     Icon(
                         painter = painterResource(id = R.drawable.baseline_arrow_back_24),
-                        contentDescription = stringResource(id = R.string.back)
+                        contentDescription = stringResource(id = R.string.back),
                     )
                 }
             },

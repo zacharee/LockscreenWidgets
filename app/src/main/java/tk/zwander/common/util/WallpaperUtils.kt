@@ -51,15 +51,18 @@ class WallpaperUtils private constructor(
             cachedWallpapers[flag] != null -> {
                 cachedWallpapers[flag]
             }
+
             wallpaperServer.value != null -> {
                 wallpaperServer.value?.getWallpaper(flag)
                     ?.toDrawable(context.resources)
                     ?.also { cachedWallpapers[flag] = it }
             }
+
             Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU -> {
                 context.directWallpaperUtils.getWallpaperDrawable(flag)
                     ?.also { cachedWallpapers[flag] = it }
             }
+
             else -> {
                 context.logUtils.debugLog("Unable to retrieve wallpaper", null)
                 null

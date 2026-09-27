@@ -6,12 +6,7 @@ import android.app.NotificationManager
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
-import android.os.BadParcelableException
-import android.os.Build
-import android.os.DeadObjectException
-import android.os.IBinder
-import android.os.Parcel
-import android.os.SystemProperties
+import android.os.*
 import android.provider.Settings
 import android.service.notification.NotificationListenerService
 import android.service.notification.StatusBarNotification
@@ -26,12 +21,7 @@ import kotlinx.atomicfu.atomic
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
-import tk.zwander.common.util.Event
-import tk.zwander.common.util.EventObserver
-import tk.zwander.common.util.eventManager
-import tk.zwander.common.util.globalState
-import tk.zwander.common.util.logUtils
-import tk.zwander.common.util.mainHandler
+import tk.zwander.common.util.*
 
 //Check if the notification listener service is enabled
 val Context.isNotificationListenerActive: Boolean
@@ -111,7 +101,7 @@ class NotificationListener : NotificationListenerService(), EventObserver, Lifec
                 if (isListening.value) {
                     logUtils.debugLog(
                         "Sending notification update because update was requested.",
-                        null
+                        null,
                     )
                     mainHandler.post {
                         sendUpdate()
@@ -171,7 +161,7 @@ class NotificationListener : NotificationListenerService(), EventObserver, Lifec
                     BugsnagUtils.leaveBreadcrumb(
                         "Error sending notification count update",
                         mapOf("error" to e.stringify()),
-                        BreadcrumbType.ERROR
+                        BreadcrumbType.ERROR,
                     )
                 }
             }
@@ -223,7 +213,7 @@ class NotificationListener : NotificationListenerService(), EventObserver, Lifec
                     if (shouldCheckHideSilentStatusBarIcons) {
                         logUtils.debugLog(
                             "Checking shouldHideSilentStatusBarIcons with context package name $opPackageName",
-                            null
+                            null,
                         )
                     }
 
@@ -236,7 +226,7 @@ class NotificationListener : NotificationListenerService(), EventObserver, Lifec
                     ) {
                         logUtils.debugLog(
                             "Low importance and silent hidden ${this.notification.channelId}",
-                            null
+                            null,
                         )
                         return false
                     }
@@ -250,7 +240,7 @@ class NotificationListener : NotificationListenerService(), EventObserver, Lifec
                     ) {
                         logUtils.debugLog(
                             "Pixel workaround on ${this.packageName} ${this.notification.channelId}",
-                            null
+                            null,
                         )
                         return false
                     }
@@ -274,7 +264,7 @@ class NotificationListener : NotificationListenerService(), EventObserver, Lifec
                 BugsnagUtils.leaveBreadcrumb(
                     "Unable to receive notification update",
                     mapOf("error" to e.stringify()),
-                    BreadcrumbType.ERROR
+                    BreadcrumbType.ERROR,
                 )
                 false
             }

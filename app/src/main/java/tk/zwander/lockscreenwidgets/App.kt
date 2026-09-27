@@ -140,29 +140,38 @@ class App : Application(), CoroutineScope by scope, EventObserver {
 
             setUpAborter()
 
-            Bugsnag.start(this, Configuration.load(this).apply {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                    addPlugin(BugsnagExitInfoPlugin(ExitInfoPluginConfiguration().apply {
-                        includeLogcat = true
-                    }))
-                }
-                maxBreadcrumbs = 500
-                projectPackages = [
-                    "tk.zwander.lockscreenwidgets",
-                    "tk.zwander.widgetdrawer",
-                    "tk.zwander.common",
-                    "dev.zwander.lswwallpaper",
-                    "dev.zwander.lswinterconnect",
-                ]
-                discardClasses = [
-                    Regex(".*?${DeadObjectException::class.java.name}").toPattern(),
-                ]
-            })
-            BugsnagPerformance.start(PerformanceConfiguration.load(this).apply {
-                enabledMetrics.rendering = true
-                enabledMetrics.cpu = true
-                enabledMetrics.memory = true
-            })
+            Bugsnag.start(
+                this,
+                Configuration.load(this).apply {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                        addPlugin(
+                            BugsnagExitInfoPlugin(
+                                ExitInfoPluginConfiguration().apply {
+                                    includeLogcat = true
+                                },
+                            ),
+                        )
+                    }
+                    maxBreadcrumbs = 500
+                    projectPackages = [
+                        "tk.zwander.lockscreenwidgets",
+                        "tk.zwander.widgetdrawer",
+                        "tk.zwander.common",
+                        "dev.zwander.lswwallpaper",
+                        "dev.zwander.lswinterconnect",
+                    ]
+                    discardClasses = [
+                        Regex(".*?${DeadObjectException::class.java.name}").toPattern(),
+                    ]
+                },
+            )
+            BugsnagPerformance.start(
+                PerformanceConfiguration.load(this).apply {
+                    enabledMetrics.rendering = true
+                    enabledMetrics.cpu = true
+                    enabledMetrics.memory = true
+                },
+            )
 
             Bugsnag.addOnError {
                 val error = it.originalError
@@ -198,7 +207,7 @@ class App : Application(), CoroutineScope by scope, EventObserver {
                                 prefManager.gson.toJson(
                                     prefManager.currentWidgets.map { widget ->
                                         widget.copy(icon = null, iconRes = null)
-                                    }
+                                    },
                                 )
                             } catch (_: OutOfMemoryError) {
                                 "Too large to parse."
@@ -207,7 +216,7 @@ class App : Application(), CoroutineScope by scope, EventObserver {
                                 prefManager.gson.toJson(
                                     prefManager.drawerWidgets.map { widget ->
                                         widget.copy(icon = null, iconRes = null)
-                                    }
+                                    },
                                 )
                             } catch (_: OutOfMemoryError) {
                                 "Too large to parse."
@@ -322,7 +331,7 @@ class App : Application(), CoroutineScope by scope, EventObserver {
             widgetsToDelete.addAll(
                 widgetHostCompat.appWidgetIds.filterNot { id ->
                     currentIds.contains(id)
-                }
+                },
             )
 
             logUtils.debugLog("Found widgets $widgetsToDelete not in any widget lists", null)
@@ -379,9 +388,11 @@ class App : Application(), CoroutineScope by scope, EventObserver {
                     FramePrefs.removeFrame(this, event.frameId)
                 }
             }
+
             is Event.LaunchAddDrawerWidget -> {
                 AddDrawerWidgetActivity.launch(this, event.fromDrawer)
             }
+
             is Event.LaunchAddWidget -> {
                 val intent = Intent(this, AddFrameWidgetActivity::class.java)
                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
@@ -389,6 +400,7 @@ class App : Application(), CoroutineScope by scope, EventObserver {
 
                 startActivity(intent)
             }
+
             else -> {}
         }
     }

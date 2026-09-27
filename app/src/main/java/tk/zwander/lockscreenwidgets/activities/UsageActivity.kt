@@ -17,7 +17,8 @@ class UsageActivity : BaseActivity() {
             MeasuredComposable(name = "UsageLayout") {
                 UsageLayout(
                     title = title.toString(),
-                    modifier = Modifier.fillMaxSize()
+                    modifier = Modifier
+                        .fillMaxSize()
                         .statusBarsPadding(),
                 )
             }

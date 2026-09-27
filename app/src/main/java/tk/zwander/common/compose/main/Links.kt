@@ -107,7 +107,7 @@ fun LinkItem(
                     context.launchUrl(option.link)
                 }
             }
-        }
+        },
     ) {
         Row(
             modifier = Modifier
@@ -117,13 +117,13 @@ fun LinkItem(
         ) {
             Icon(
                 painter = painterResource(id = option.icon),
-                contentDescription = stringResource(id = option.title)
+                contentDescription = stringResource(id = option.title),
             )
 
             Spacer(Modifier.size(16.dp))
 
             Column(
-                modifier = Modifier.weight(1f)
+                modifier = Modifier.weight(1f),
             ) {
                 Text(
                     text = stringResource(id = option.title),

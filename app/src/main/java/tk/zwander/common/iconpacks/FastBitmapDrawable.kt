@@ -26,7 +26,7 @@ import androidx.core.graphics.withSave
 @RequiresApi(Build.VERSION_CODES.N)
 open class FastBitmapDrawable protected constructor(
     @JvmField protected val mBitmap: Bitmap,
-    @JvmField protected val mIconColor: Int
+    @JvmField protected val mIconColor: Int,
 ) :
     Drawable(), Drawable.Callback {
     protected val mPaint: Paint = Paint(Paint.FILTER_BITMAP_FLAG or Paint.ANTI_ALIAS_FLAG)
@@ -35,8 +35,10 @@ open class FastBitmapDrawable protected constructor(
 
     protected var mIsPressed: Boolean = false
     protected var mIsHovered: Boolean = false
+
     @JvmField
     protected var mIsDisabled: Boolean = false
+
     @JvmField
     var mDisabledAlpha: Float = 1f
 
@@ -93,7 +95,7 @@ open class FastBitmapDrawable protected constructor(
             val whiteScrim: Int =
                 setColorAlphaBound(
                     Color.WHITE,
-                    WHITE_SCRIM_ALPHA
+                    WHITE_SCRIM_ALPHA,
                 )
             return ColorUtils.compositeColors(whiteScrim, mIconColor)
         }
@@ -109,8 +111,9 @@ open class FastBitmapDrawable protected constructor(
         updateFilter()
     }
 
-    @Deprecated("Deprecated in Java",
-        ReplaceWith("PixelFormat.TRANSLUCENT", "android.graphics.PixelFormat")
+    @Deprecated(
+        "Deprecated in Java",
+        ReplaceWith("PixelFormat.TRANSLUCENT", "android.graphics.PixelFormat"),
     )
     override fun getOpacity(): Int {
         return PixelFormat.TRANSLUCENT
@@ -271,7 +274,8 @@ open class FastBitmapDrawable protected constructor(
         unscheduleSelf(what)
     }
 
-    protected open class FastBitmapConstantState(@JvmField val mBitmap: Bitmap, @JvmField val mIconColor: Int) : ConstantState() {
+    protected open class FastBitmapConstantState(@JvmField val mBitmap: Bitmap, @JvmField val mIconColor: Int) :
+        ConstantState() {
         // These are initialized later so that subclasses don't need to
         // pass everything in constructor
         var mIsDisabled: Boolean = false
@@ -334,10 +338,11 @@ open class FastBitmapDrawable protected constructor(
                     fastBitmapDrawable.invalidateSelf()
                 }
             }
+
         @JvmStatic
         val disabledColorFilter: ColorFilter
             get() = getDisabledColorFilter(
-                1f
+                1f,
             )
 
         private fun getDisabledColorFilter(disabledAlpha: Float): ColorFilter {
@@ -366,7 +371,7 @@ open class FastBitmapDrawable protected constructor(
             val size: Int = getBadgeSizeForIconSize(iconBounds.width())
             badge.setBounds(
                 iconBounds.right - size, iconBounds.bottom - size,
-                iconBounds.right, iconBounds.bottom
+                iconBounds.right, iconBounds.bottom,
             )
         }
 

@@ -62,7 +62,8 @@ fun PreferenceScreen(
 
             LazyColumn(
                 modifier = Modifier.weight(1f),
-                contentPadding = insets.only(WindowInsetsSides.Left + WindowInsetsSides.Right + WindowInsetsSides.Bottom).asPaddingValues(),
+                contentPadding = insets.only(WindowInsetsSides.Left + WindowInsetsSides.Right + WindowInsetsSides.Bottom)
+                    .asPaddingValues(),
             ) {
                 filteredCategories.forEachIndexed { index, [category, renderedKeys] ->
                     if (category.title != null) {
@@ -80,9 +81,14 @@ fun PreferenceScreen(
                     }
 
                     if (expandedStates[category.key]?.value != false) {
-                        itemsIndexed(items = category.items, key = { itemIndex, _ -> renderedKeys[itemIndex] }) { itemIndex, item ->
+                        itemsIndexed(
+                            items = category.items,
+                            key = { itemIndex, _ -> renderedKeys[itemIndex] },
+                        ) { itemIndex, item ->
                             item.Render(
-                                modifier = Modifier.fillMaxWidth().animateItem(),
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .animateItem(),
                             )
 
                             if (itemIndex < category.items.lastIndex) {

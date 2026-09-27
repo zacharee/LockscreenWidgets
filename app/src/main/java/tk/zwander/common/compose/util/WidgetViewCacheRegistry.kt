@@ -44,8 +44,11 @@ class WidgetViewCacheRegistry private constructor(@Suppress("unused") private va
                     appWidgetId,
                 )
             } catch (e: Throwable) {
-                context.logUtils.debugLog("Unable to create application context for " +
-                        "${appWidget.providerInfo.applicationInfo.packageName}", e)
+                context.logUtils.debugLog(
+                    "Unable to create application context for " +
+                            "${appWidget.providerInfo.applicationInfo.packageName}",
+                    e,
+                )
                 null
             }
 

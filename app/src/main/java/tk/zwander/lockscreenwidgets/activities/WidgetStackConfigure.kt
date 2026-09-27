@@ -487,14 +487,15 @@ fun Content(
                                                     .heightIn(min = 48.dp),
                                                 titleTextStyle = MaterialTheme.typography.titleMedium,
                                                 contentPadding = ButtonDefaults.ContentPadding - PaddingValues(
-                                                    horizontal = 12.dp
+                                                    horizontal = 12.dp,
                                                 ),
                                             )
                                         }
                                     }
 
                                     Column(
-                                        verticalArrangement = object : Arrangement.Vertical by Arrangement.SpaceBetween {
+                                        verticalArrangement = object :
+                                            Arrangement.Vertical by Arrangement.SpaceBetween {
                                             override val spacing: Dp = 8.dp
                                         },
                                         horizontalAlignment = Alignment.CenterHorizontally,
@@ -796,7 +797,7 @@ fun Content(
                         .padding(top = 4.dp),
                     horizontalArrangement = Arrangement.spacedBy(
                         8.dp,
-                        Alignment.CenterHorizontally
+                        Alignment.CenterHorizontally,
                     ),
                     verticalArrangement = Arrangement.spacedBy(4.dp),
                 ) {
@@ -902,7 +903,7 @@ private fun Context.openWidgetConfig(currentData: WidgetData, stackId: Int) {
                 .show()
             logUtils.normalLog(
                 "Unable to reconfigure widget $provider: provider info is null.",
-                null
+                null,
             )
         } else {
             WidgetStackReconfigureActivity.launch(

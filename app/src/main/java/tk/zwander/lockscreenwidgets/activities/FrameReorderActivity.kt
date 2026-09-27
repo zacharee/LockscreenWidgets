@@ -35,7 +35,7 @@ import tk.zwander.lockscreenwidgets.R
 import tk.zwander.lockscreenwidgets.activities.add.ReconfigureFrameWidgetActivity
 import tk.zwander.lockscreenwidgets.util.FramePrefs
 import tk.zwander.lockscreenwidgets.util.FrameSpecificPreferences
-import tk.zwander.lockscreenwidgets.util.MainWidgetFrameDelegate
+import tk.zwander.lockscreenwidgets.util.WidgetFrameDelegate
 
 class FrameReorderActivity : BaseActivity() {
     companion object {
@@ -84,7 +84,8 @@ class FrameReorderActivity : BaseActivity() {
             )
 
             Surface(
-                modifier = Modifier.fillMaxSize()
+                modifier = Modifier
+                    .fillMaxSize()
                     .systemBarsPadding(),
             ) {
                 Column(
@@ -94,7 +95,8 @@ class FrameReorderActivity : BaseActivity() {
                     },
                 ) {
                     Box(
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier
+                            .fillMaxWidth()
                             .weight(0.25f),
                         contentAlignment = Alignment.BottomCenter,
                     ) {
@@ -106,7 +108,8 @@ class FrameReorderActivity : BaseActivity() {
                     }
 
                     Box(
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier
+                            .fillMaxWidth()
                             .weight(0.75f),
                         contentAlignment = Alignment.TopCenter,
                     ) {
@@ -123,14 +126,21 @@ class FrameReorderActivity : BaseActivity() {
                                 eventManager.sendEvent(Event.LaunchAddWidget(delegate.holderId))
                             },
                             launchReconfigure = { id, providerInfo ->
-                                ReconfigureFrameWidgetActivity.launch(this@FrameReorderActivity, id, delegate.holderId, providerInfo)
+                                ReconfigureFrameWidgetActivity.launch(
+                                    this@FrameReorderActivity,
+                                    id,
+                                    delegate.holderId,
+                                    providerInfo,
+                                )
                             },
                             launchShortcutIconOverride = { id ->
                                 SelectIconPackActivity.launchForOverride(this@FrameReorderActivity, id)
                             },
                             locked = false,
                             itemSpacingKey = PrefManager.KEY_FRAME_ITEM_SPACING,
-                            modifier = Modifier.fillMaxWidth().aspectRatio(1f)
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .aspectRatio(1f)
                                 .background(MaterialTheme.colorScheme.surfaceDim)
                                 .padding(vertical = 8.dp),
                             rowSpanForAddButton = 1,
@@ -178,7 +188,8 @@ class FrameReorderActivity : BaseActivity() {
             get() = FrameSpecificPreferences[holderId].rowCount
     }
 
-    class ReorderViewModel(delegate: ReorderDelegate) : MainWidgetFrameDelegate.IWidgetFrameViewModel<Unit, ReorderDelegate>(delegate) {
+    class ReorderViewModel(delegate: ReorderDelegate) :
+        WidgetFrameDelegate.IWidgetFrameViewModel<Unit, ReorderDelegate>(delegate) {
         override val saveMode: FrameSizeAndPosition.FrameType = FrameSizeAndPosition.FrameType.Preview.Portrait
         override val ignoreWidgetTouchesKey: Pair<String, SharedPreferences>? = null
         override val doubleTapTurnOffDisplayKey: String? = null

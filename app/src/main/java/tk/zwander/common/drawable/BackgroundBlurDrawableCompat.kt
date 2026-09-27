@@ -29,7 +29,8 @@ sealed class BackgroundBlurDrawableCompat(protected open val wrapped: Drawable) 
     }
 
     @RequiresApi(Build.VERSION_CODES.S)
-    class BackgroundBlurDrawableCompatApi31(override val wrapped: BackgroundBlurDrawable) : BackgroundBlurDrawableCompat(wrapped) {
+    class BackgroundBlurDrawableCompatApi31(override val wrapped: BackgroundBlurDrawable) :
+        BackgroundBlurDrawableCompat(wrapped) {
         override fun setColor(color: Int) {
             wrapped.setColor(color)
         }

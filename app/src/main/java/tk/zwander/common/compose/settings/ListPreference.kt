@@ -217,7 +217,7 @@ fun <V, T : ListPickerEntry<V>> ListPickerDialog(
                 onClick = { onDialogShowingChanged(false) },
             ) {
                 Text(
-                    text = stringResource(R.string.done)
+                    text = stringResource(R.string.done),
                 )
             }
         }

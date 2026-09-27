@@ -22,7 +22,7 @@ fun insetsContentPadding(
             left = extraPadding.calculateLeftPadding(direction),
             top = extraPadding.calculateTopPadding(),
             right = extraPadding.calculateRightPadding(direction),
-            bottom = extraPadding.calculateBottomPadding()
-        )
+            bottom = extraPadding.calculateBottomPadding(),
+        ),
     ).asPaddingValues()
 }

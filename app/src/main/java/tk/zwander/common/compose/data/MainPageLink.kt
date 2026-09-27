@@ -12,5 +12,5 @@ data class MainPageLink(
     val desc: Int,
     val link: String = "",
     val isEmail: Boolean = false,
-    val onClick: (() -> Unit)? = null
+    val onClick: (() -> Unit)? = null,
 )

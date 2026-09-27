@@ -209,11 +209,17 @@ class ConfigureLauncher(
                     )
 
                     if (matchedComponents.isEmpty() || !matchedComponents.any { it.activityInfo.componentNameCompat == widgetInfo.configure }) {
-                        activity.logUtils.debugLog("Found a widget configuration that probably wasn't expecting to be launched here. Assuming a canceled result should still continue. ${widgetInfo.provider}, ${widgetInfo.configure}", null)
+                        activity.logUtils.debugLog(
+                            "Found a widget configuration that probably wasn't expecting to be launched here. Assuming a canceled result should still continue. ${widgetInfo.provider}, ${widgetInfo.configure}",
+                            null,
+                        )
                         resultOk = true
                     }
                 } else if (widgetInfo != null) {
-                    activity.logUtils.debugLog("Found a widget configuration that no longer exists? ${widgetInfo.provider}", null)
+                    activity.logUtils.debugLog(
+                        "Found a widget configuration that no longer exists? ${widgetInfo.provider}",
+                        null,
+                    )
                     resultOk = true
                 }
 
@@ -223,7 +229,7 @@ class ConfigureLauncher(
                     if (widgetInfo == null) {
                         activity.logUtils.debugLog(
                             "Unable to get widget info for $id, not adding",
-                            null
+                            null,
                         )
                         finishIfNoErrors()
                         return
@@ -235,14 +241,14 @@ class ConfigureLauncher(
                 } else {
                     activity.logUtils.debugLog(
                         "Failed to configure widget. Result code $resultCode, id $id.",
-                        null
+                        null,
                     )
                     finishIfNoErrors()
                 }
             } else {
                 activity.logUtils.debugLog(
                     "Failed to configure widget. Result code $resultCode, id $id.",
-                    null
+                    null,
                 )
                 finishIfNoErrors()
             }

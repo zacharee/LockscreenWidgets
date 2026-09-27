@@ -38,10 +38,10 @@ fun Context.getRemoteDrawable(
             remRes.getIdentifier(
                 it.packageName,
                 "drawable",
-                it.resourceName
+                it.resourceName,
             )
         } ?: 0,
-        remRes
+        remRes,
     ) { packageManager.getApplicationIcon(appInfo) }
 }
 
@@ -49,7 +49,7 @@ fun Context.getRemoteDrawable(
     packageName: String,
     resourceId: Int,
     remRes: Resources,
-    defaultGetter: () -> Drawable = { packageManager.getApplicationIcon(packageName) }
+    defaultGetter: () -> Drawable = { packageManager.getApplicationIcon(packageName) },
 ): Drawable {
     val drawable = when (resourceId) {
         0 -> defaultGetter()
@@ -110,7 +110,7 @@ fun String?.base64ToBitmap(): Bitmap? {
 }
 
 fun Drawable.toSafeBitmap(density: Density, config: Bitmap.Config? = null, maxSize: Dp = 512.dp): Bitmap {
-    val maxSizePixels = with (density) { maxSize.toPx() }.toInt()
+    val maxSizePixels = with(density) { maxSize.toPx() }.toInt()
 
     return toBitmap(maxWidth = maxSizePixels, maxHeight = maxSizePixels, config = config)
 }
@@ -173,7 +173,7 @@ fun Bitmap.cropBitmapTransparency(): Bitmap {
         minX,
         minY,
         maxX - minX + 1,
-        maxY - minY + 1
+        maxY - minY + 1,
     )
 }
 
@@ -203,7 +203,7 @@ fun Resources.iconCompatFromResource(
                 IconCompat.createWithResource(
                     this,
                     packageName,
-                    iconResource
+                    iconResource,
                 )
             } catch (e: IllegalArgumentException) {
                 peekLogUtils?.debugLog("Error creating icon", e)

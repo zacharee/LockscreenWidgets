@@ -11,7 +11,7 @@ import tk.zwander.common.host.widgetHostCompat
 import tk.zwander.common.util.*
 import tk.zwander.lockscreenwidgets.util.FramePrefs
 import tk.zwander.lockscreenwidgets.util.FrameSpecificPreferences
-import tk.zwander.lockscreenwidgets.util.MainWidgetFrameDelegate
+import tk.zwander.lockscreenwidgets.util.WidgetFrameDelegate
 
 val Context.backupRestoreManager: BackupRestoreManager
     get() = BackupRestoreManager.getInstance(this)
@@ -93,19 +93,20 @@ class BackupRestoreManager private constructor(private val context: Context) {
 
     // TODO: migrate remaining frame prefs to their own file.
     fun createFrameBackupString(): String {
-        val frameBackups = (context.prefManager.currentSecondaryFramesWithStringDisplay.keys + MainWidgetFrameDelegate.ID).map { frameId ->
-            val framePrefs = FrameSpecificPreferences[frameId]
-            val prefsMap = framePrefs.framePreferences.all
-            val currentWidgets = framePrefs.currentWidgets
+        val frameBackups =
+            (context.prefManager.currentSecondaryFramesWithStringDisplay.keys + WidgetFrameDelegate.ID).map { frameId ->
+                val framePrefs = FrameSpecificPreferences[frameId]
+                val prefsMap = framePrefs.framePreferences.all
+                val currentWidgets = framePrefs.currentWidgets
 
-            FrameBackupHolder(
-                frameId = frameId,
-                data = IndividualBackupData(
-                    widgets = LinkedHashSet(currentWidgets),
-                    prefsMap = HashMap(prefsMap),
-                ),
-            )
-        }
+                FrameBackupHolder(
+                    frameId = frameId,
+                    data = IndividualBackupData(
+                        widgets = LinkedHashSet(currentWidgets),
+                        prefsMap = HashMap(prefsMap),
+                    ),
+                )
+            }
 
         val backup = AllFramesBackup(
             frameData = frameBackups,
@@ -178,12 +179,13 @@ class BackupRestoreManager private constructor(private val context: Context) {
     }
 
     fun handleIndividualFrameRestore(data: FrameBackupHolder) {
-        if (data.frameId != MainWidgetFrameDelegate.ID) {
-            context.prefManager.currentSecondaryFramesWithStringDisplay = context.prefManager.currentSecondaryFramesWithStringDisplay.apply {
-                this[data.frameId] = this[data.frameId] ?:
-                        (context.lsDisplayManager.availableDisplays.value.values.firstOrNull()?.uniqueIdCompat
+        if (data.frameId != WidgetFrameDelegate.ID) {
+            context.prefManager.currentSecondaryFramesWithStringDisplay =
+                context.prefManager.currentSecondaryFramesWithStringDisplay.apply {
+                    this[data.frameId] = this[data.frameId]
+                        ?: (context.lsDisplayManager.availableDisplays.value.values.firstOrNull()?.uniqueIdCompat
                             ?: Display.DEFAULT_DISPLAY.toString())
-            }
+                }
         }
         val framePrefs = FrameSpecificPreferences[data.frameId]
         framePrefs.currentWidgets = data.data.widgets
@@ -323,16 +325,18 @@ class BackupRestoreManager private constructor(private val context: Context) {
                     rows?.let { rows ->
                         when (which) {
                             Which.FRAME -> {
-                                FrameSpecificPreferences[MainWidgetFrameDelegate.ID].rowCount = rows
+                                FrameSpecificPreferences[WidgetFrameDelegate.ID].rowCount = rows
                             }
+
                             Which.DRAWER -> {}
                         }
                     }
                     cols?.let { cols ->
                         when (which) {
                             Which.FRAME -> {
-                                FrameSpecificPreferences[MainWidgetFrameDelegate.ID].colCount = cols
+                                FrameSpecificPreferences[WidgetFrameDelegate.ID].colCount = cols
                             }
+
                             Which.DRAWER -> context.prefManager.drawerColCount = cols
                         }
                     }

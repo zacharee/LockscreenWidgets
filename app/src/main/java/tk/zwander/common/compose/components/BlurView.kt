@@ -110,7 +110,10 @@ fun BaseDelegate.BaseViewModel<*, *>.BlurView(
                 },
             )
 
-            context.logUtils.debugLog("Setting blur drawable $newBlurDrawable on target view with current background ${currentDrawable}.", null)
+            context.logUtils.debugLog(
+                "Setting blur drawable $newBlurDrawable on target view with current background ${currentDrawable}.",
+                null,
+            )
 
             currentDrawable = newBlurDrawable
         } else {

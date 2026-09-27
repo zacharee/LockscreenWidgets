@@ -70,7 +70,12 @@ fun BaseDelegate.BaseViewModel<*, *>.WidgetItemLayout(
         },
     )
     val animatedCornerRadius by animateDpAsState(widgetCornerRadius)
-    val ignoreTouches by ignoreTouchesKey?.let { rememberBooleanPreferenceState(ignoreTouchesKey.first, preferences = ignoreTouchesKey.second) }
+    val ignoreTouches by ignoreTouchesKey?.let {
+        rememberBooleanPreferenceState(
+            ignoreTouchesKey.first,
+            preferences = ignoreTouchesKey.second,
+        )
+    }
         ?: remember { mutableStateOf(false) }
     val doubleTapTurnOffDisplay by doubleTapTurnOffKey?.let { rememberBooleanPreferenceState(doubleTapTurnOffKey) }
         ?: remember { mutableStateOf(false) }
@@ -89,26 +94,34 @@ fun BaseDelegate.BaseViewModel<*, *>.WidgetItemLayout(
             LocalContentColor provides Color.White,
         ) {
             Box(
-                modifier = Modifier.fillMaxSize()
+                modifier = Modifier
+                    .fillMaxSize()
                     .scrollable(rememberScrollableState { it }, orientation = Orientation.Vertical),
                 contentAlignment = Alignment.Center,
             ) {
-                widgetContents(Modifier.fillMaxSize()
-                    .scrollable(rememberScrollableState { it }, orientation = Orientation.Vertical))
+                widgetContents(
+                    Modifier
+                        .fillMaxSize()
+                        .scrollable(rememberScrollableState { it }, orientation = Orientation.Vertical),
+                )
 
                 if (ignoreTouches) {
                     Box(
-                        modifier = Modifier.fillMaxSize()
+                        modifier = Modifier
+                            .fillMaxSize()
                             .combinedClickable(
                                 interactionSource = remember { MutableInteractionSource() },
                                 indication = null,
                                 onClick = {},
                                 onDoubleClick = if (doubleTapTurnOffDisplay) {
                                     {
-                                        context.logUtils.debugLog("Sending display off action from touch ignore overlay", null)
+                                        context.logUtils.debugLog(
+                                            "Sending display off action from touch ignore overlay",
+                                            null,
+                                        )
                                         context.eventManager.sendEvent(Event.TurnOffDisplay)
                                     }
-                                } else{
+                                } else {
                                     null
                                 },
                             ),
@@ -121,7 +134,8 @@ fun BaseDelegate.BaseViewModel<*, *>.WidgetItemLayout(
                     exit = fadeOut(),
                 ) {
                     Box(
-                        modifier = Modifier.fillMaxSize()
+                        modifier = Modifier
+                            .fillMaxSize()
                             .clickable(onClick = launchReconfigure),
                     ) {
                         Column(
@@ -146,7 +160,8 @@ fun BaseDelegate.BaseViewModel<*, *>.WidgetItemLayout(
                         Icon(
                             painter = painterResource(R.drawable.ic_baseline_restore_24),
                             contentDescription = stringResource(R.string.reconfigure),
-                            modifier = Modifier.fillMaxSize()
+                            modifier = Modifier
+                                .fillMaxSize()
                                 .background(colorResource(R.color.backdrop)),
                         )
                     }
@@ -158,7 +173,8 @@ fun BaseDelegate.BaseViewModel<*, *>.WidgetItemLayout(
                     exit = fadeOut(),
                 ) {
                     Box(
-                        modifier = Modifier.fillMaxSize()
+                        modifier = Modifier
+                            .fillMaxSize()
                             .background(colorResource(R.color.backdrop))
                             .border(
                                 width = 1.dp,
@@ -176,7 +192,8 @@ fun BaseDelegate.BaseViewModel<*, *>.WidgetItemLayout(
                             Icon(
                                 painter = painterResource(R.drawable.handle_left),
                                 contentDescription = stringResource(R.string.expand_left),
-                                modifier = Modifier.align(AbsoluteAlignment.CenterLeft)
+                                modifier = Modifier
+                                    .align(AbsoluteAlignment.CenterLeft)
                                     .dragDetection(
                                         getResizeThresholdPx = getResizeThresholdPx,
                                         which = Which.LEFT,
@@ -196,7 +213,8 @@ fun BaseDelegate.BaseViewModel<*, *>.WidgetItemLayout(
                             Icon(
                                 painter = painterResource(R.drawable.handle_right),
                                 contentDescription = stringResource(R.string.expand_right),
-                                modifier = Modifier.align(AbsoluteAlignment.CenterRight)
+                                modifier = Modifier
+                                    .align(AbsoluteAlignment.CenterRight)
                                     .dragDetection(
                                         getResizeThresholdPx = getResizeThresholdPx,
                                         which = Which.RIGHT,
@@ -218,7 +236,8 @@ fun BaseDelegate.BaseViewModel<*, *>.WidgetItemLayout(
                             Icon(
                                 painter = painterResource(R.drawable.handle_top),
                                 contentDescription = stringResource(R.string.expand_up),
-                                modifier = Modifier.align(Alignment.TopCenter)
+                                modifier = Modifier
+                                    .align(Alignment.TopCenter)
                                     .dragDetection(
                                         getResizeThresholdPx = getResizeThresholdPx,
                                         which = Which.TOP,
@@ -238,7 +257,8 @@ fun BaseDelegate.BaseViewModel<*, *>.WidgetItemLayout(
                             Icon(
                                 painter = painterResource(R.drawable.handle_bottom),
                                 contentDescription = stringResource(R.string.expand_down),
-                                modifier = Modifier.align(Alignment.BottomCenter)
+                                modifier = Modifier
+                                    .align(Alignment.BottomCenter)
                                     .dragDetection(
                                         getResizeThresholdPx = getResizeThresholdPx,
                                         which = Which.BOTTOM,
@@ -257,7 +277,8 @@ fun BaseDelegate.BaseViewModel<*, *>.WidgetItemLayout(
                         }
 
                         Row(
-                            modifier = Modifier.align(Alignment.TopStart)
+                            modifier = Modifier
+                                .align(Alignment.TopStart)
                                 .padding(8.dp),
                         ) {
                             IconButton(
@@ -274,7 +295,8 @@ fun BaseDelegate.BaseViewModel<*, *>.WidgetItemLayout(
                         }
 
                         Row(
-                            modifier = Modifier.align(Alignment.TopEnd)
+                            modifier = Modifier
+                                .align(Alignment.TopEnd)
                                 .padding(8.dp),
                         ) {
                             if (widgetData.type == WidgetType.WIDGET) {
@@ -290,7 +312,8 @@ fun BaseDelegate.BaseViewModel<*, *>.WidgetItemLayout(
                             }
 
                             if (widgetData.type == WidgetType.LAUNCHER_ITEM
-                                || widgetData.type == WidgetType.SHORTCUT) {
+                                || widgetData.type == WidgetType.SHORTCUT
+                            ) {
                                 IconButton(
                                     onClick = launchIconOverride,
                                     modifier = Modifier.size(32.dp),

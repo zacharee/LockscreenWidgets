@@ -208,7 +208,8 @@ abstract class BaseDelegate<State : Any>(
                             WidgetType.WIDGET -> widgetHost.deleteAppWidgetId(event.item.id)
                             WidgetType.SHORTCUT,
                             WidgetType.LAUNCHER_SHORTCUT,
-                            WidgetType.LAUNCHER_ITEM -> idManager.removeShortcutId(event.item.id)
+                            WidgetType.LAUNCHER_ITEM,
+                                -> idManager.removeShortcutId(event.item.id)
 
                             else -> {}
                         }

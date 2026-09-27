@@ -52,11 +52,11 @@ import tk.zwander.common.util.prefManager
 import tk.zwander.lockscreenwidgets.R
 import tk.zwander.lockscreenwidgets.activities.add.ReconfigureFrameWidgetActivity
 import tk.zwander.lockscreenwidgets.util.FramePrefs
-import tk.zwander.lockscreenwidgets.util.MainWidgetFrameDelegate
+import tk.zwander.lockscreenwidgets.util.WidgetFrameDelegate
 import kotlin.time.Duration.Companion.milliseconds
 
 @Composable
-fun MainWidgetFrameDelegate.WidgetFrameViewModel.FrameWidgetGridWrapper(
+fun WidgetFrameDelegate.WidgetFrameViewModel.FrameWidgetGridWrapper(
     modifier: Modifier = Modifier,
 ) {
     val context = LocalContext.current
@@ -196,7 +196,8 @@ fun MainWidgetFrameDelegate.WidgetFrameViewModel.FrameWidgetGridWrapper(
                 launchShortcutIconOverride = { id ->
                     SelectIconPackActivity.launchForOverride(context, id)
                 },
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier
+                    .fillMaxWidth()
                     .weight(1f),
                 rowSpanForAddButton = 1,
                 enableSnapping = true,
@@ -288,7 +289,8 @@ fun MainWidgetFrameDelegate.WidgetFrameViewModel.FrameWidgetGridWrapper(
                             Icon(
                                 painter = painterResource(R.drawable.arrow_left_24px),
                                 contentDescription = stringResource(R.string.next),
-                                modifier = Modifier.rotate(180f)
+                                modifier = Modifier
+                                    .rotate(180f)
                                     .size(24.dp),
                             )
                         }
@@ -301,7 +303,8 @@ fun MainWidgetFrameDelegate.WidgetFrameViewModel.FrameWidgetGridWrapper(
             showingPager = showingPager && !controlBarVisible,
             pageFraction = pageInfo.first,
             pageCount = pageInfo.second,
-            modifier = Modifier.align(Alignment.BottomCenter)
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
                 .padding(bottom = 8.dp),
             onPageClick = {
                 scope.launch {

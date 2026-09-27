@@ -5,34 +5,11 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkHorizontally
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.heightIn
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedTextFieldDefaults
-import androidx.compose.material3.Surface
-import androidx.compose.material3.SwipeToDismissBox
-import androidx.compose.material3.SwipeToDismissBoxValue
-import androidx.compose.material3.Text
-import androidx.compose.material3.rememberSwipeToDismissBoxState
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -60,10 +37,10 @@ fun HideForIDsLayout(
     }
 
     Surface(
-        modifier = modifier
+        modifier = modifier,
     ) {
         Column(
-            modifier = Modifier.fillMaxSize()
+            modifier = Modifier.fillMaxSize(),
         ) {
             TitleBar(title = title)
 
@@ -77,7 +54,8 @@ fun HideForIDsLayout(
 
                     LaunchedEffect(key1 = state.currentValue, key2 = state.targetValue) {
                         if (state.currentValue != SwipeToDismissBoxValue.Settled &&
-                            state.targetValue != SwipeToDismissBoxValue.Settled) {
+                            state.targetValue != SwipeToDismissBoxValue.Settled
+                        ) {
                             onRemove(id)
                         }
                     }
@@ -127,7 +105,7 @@ fun HideForIDsLayout(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(bottom = 8.dp),
-                contentAlignment = Alignment.Center
+                contentAlignment = Alignment.Center,
             ) {
                 // Messy workaround to keep the height consistent.
                 OutlinedTextField(
@@ -135,7 +113,7 @@ fun HideForIDsLayout(
                     onValueChange = {},
                     enabled = false,
                     modifier = Modifier.alpha(0f),
-                    label = { Text(text = "") }
+                    label = { Text(text = "") },
                 )
 
                 Row(
@@ -148,7 +126,7 @@ fun HideForIDsLayout(
                     ) {
                         Icon(
                             painter = painterResource(id = R.drawable.ic_baseline_save_24),
-                            contentDescription = stringResource(id = R.string.back_up)
+                            contentDescription = stringResource(id = R.string.back_up),
                         )
                     }
 
@@ -157,7 +135,7 @@ fun HideForIDsLayout(
                     ) {
                         Icon(
                             painter = painterResource(id = R.drawable.ic_baseline_add_24),
-                            contentDescription = stringResource(id = R.string.add_id)
+                            contentDescription = stringResource(id = R.string.add_id),
                         )
                     }
 
@@ -166,7 +144,7 @@ fun HideForIDsLayout(
                     ) {
                         Icon(
                             painter = painterResource(id = R.drawable.ic_baseline_restore_24),
-                            contentDescription = stringResource(id = R.string.restore)
+                            contentDescription = stringResource(id = R.string.restore),
                         )
                     }
                 }
@@ -175,28 +153,28 @@ fun HideForIDsLayout(
                     visible = isAdding,
                     modifier = Modifier.fillMaxWidth(),
                     enter = fadeIn() + expandHorizontally(expandFrom = Alignment.CenterHorizontally),
-                    exit = fadeOut() + shrinkHorizontally(shrinkTowards = Alignment.CenterHorizontally)
+                    exit = fadeOut() + shrinkHorizontally(shrinkTowards = Alignment.CenterHorizontally),
                 ) {
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
                             .background(MaterialTheme.colorScheme.surface)
                             .padding(horizontal = 8.dp),
-                        contentAlignment = Alignment.Center
+                        contentAlignment = Alignment.Center,
                     ) {
                         OutlinedTextField(
                             value = idToAdd,
                             onValueChange = { newValue -> idToAdd = newValue },
                             placeholder = {
                                 Text(
-                                    text = stringResource(id = R.string.add_id_hint)
+                                    text = stringResource(id = R.string.add_id_hint),
                                 )
                             },
                             leadingIcon = {
                                 IconButton(onClick = { isAdding = false }) {
                                     Icon(
                                         painter = painterResource(id = R.drawable.baseline_clear_24),
-                                        contentDescription = stringResource(id = android.R.string.cancel)
+                                        contentDescription = stringResource(id = android.R.string.cancel),
                                     )
                                 }
                             },
@@ -205,7 +183,7 @@ fun HideForIDsLayout(
                                     IconButton(onClick = { onAdd(idToAdd) }) {
                                         Icon(
                                             painter = painterResource(id = R.drawable.baseline_check_24),
-                                            contentDescription = stringResource(id = R.string.add)
+                                            contentDescription = stringResource(id = R.string.add),
                                         )
                                     }
                                 }
@@ -217,7 +195,7 @@ fun HideForIDsLayout(
                                 focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
                                 errorContainerColor = MaterialTheme.colorScheme.surfaceVariant,
                             ),
-                            modifier = Modifier.fillMaxWidth()
+                            modifier = Modifier.fillMaxWidth(),
                         )
                     }
                 }

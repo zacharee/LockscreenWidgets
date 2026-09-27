@@ -110,26 +110,28 @@ suspend fun View.fadeAndScaleOut(drawerOrFrame: DrawerOrFrame) {
         playTogether(
             ObjectAnimator.ofFloat(this@fadeAndScaleOut, "scaleX", scaleX, 0.95f),
             ObjectAnimator.ofFloat(this@fadeAndScaleOut, "scaleY", scaleY, 0.95f),
-            ObjectAnimator.ofFloat(this@fadeAndScaleOut, "alpha", alpha, 0f)
+            ObjectAnimator.ofFloat(this@fadeAndScaleOut, "alpha", alpha, 0f),
         )
         duration = with(drawerOrFrame) { context.duration() }
     }
     runningFadeAnimators[this] = animator
 
     suspendCoroutine { continuation ->
-        animator.addListener(object : AnimatorListenerAdapter() {
-            override fun onAnimationEnd(animation: Animator) {
-                if (runningFadeAnimators[this@fadeAndScaleOut] === animator) {
-                    runningFadeAnimators.remove(this@fadeAndScaleOut)
+        animator.addListener(
+            object : AnimatorListenerAdapter() {
+                override fun onAnimationEnd(animation: Animator) {
+                    if (runningFadeAnimators[this@fadeAndScaleOut] === animator) {
+                        runningFadeAnimators.remove(this@fadeAndScaleOut)
+                    }
+
+                    scaleX = 0.95f
+                    scaleY = 0.95f
+                    alpha = 0f
+
+                    continuation.resume(Unit)
                 }
-
-                scaleX = 0.95f
-                scaleY = 0.95f
-                alpha = 0f
-
-                continuation.resume(Unit)
-            }
-        })
+            },
+        )
         animator.start()
     }
 
@@ -173,26 +175,28 @@ suspend fun View.fadeAndScaleIn(drawerOrFrame: DrawerOrFrame) {
         playTogether(
             ObjectAnimator.ofFloat(this@fadeAndScaleIn, "scaleX", scaleX, 1.0f),
             ObjectAnimator.ofFloat(this@fadeAndScaleIn, "scaleY", scaleY, 1.0f),
-            ObjectAnimator.ofFloat(this@fadeAndScaleIn, "alpha", alpha, 1.0f)
+            ObjectAnimator.ofFloat(this@fadeAndScaleIn, "alpha", alpha, 1.0f),
         )
         duration = with(drawerOrFrame) { context.duration() }
     }
     runningFadeAnimators[this] = animator
 
     suspendCoroutine { continuation ->
-        animator.addListener(object : AnimatorListenerAdapter() {
-            override fun onAnimationEnd(animation: Animator) {
-                if (runningFadeAnimators[this@fadeAndScaleIn] === animator) {
-                    runningFadeAnimators.remove(this@fadeAndScaleIn)
+        animator.addListener(
+            object : AnimatorListenerAdapter() {
+                override fun onAnimationEnd(animation: Animator) {
+                    if (runningFadeAnimators[this@fadeAndScaleIn] === animator) {
+                        runningFadeAnimators.remove(this@fadeAndScaleIn)
+                    }
+
+                    scaleX = 1f
+                    scaleY = 1f
+                    alpha = 1f
+
+                    continuation.resume(Unit)
                 }
-
-                scaleX = 1f
-                scaleY = 1f
-                alpha = 1f
-
-                continuation.resume(Unit)
-            }
-        })
+            },
+        )
         animator.start()
     }
 }
@@ -209,17 +213,19 @@ suspend fun View.fadeIn(drawerOrFrame: DrawerOrFrame) {
     runningFadeAnimators[this] = animator
 
     suspendCoroutine { continuation ->
-        animator.addListener(object : AnimatorListenerAdapter() {
-            override fun onAnimationEnd(animation: Animator) {
-                if (runningFadeAnimators[this@fadeIn] === animator) {
-                    runningFadeAnimators.remove(this@fadeIn)
+        animator.addListener(
+            object : AnimatorListenerAdapter() {
+                override fun onAnimationEnd(animation: Animator) {
+                    if (runningFadeAnimators[this@fadeIn] === animator) {
+                        runningFadeAnimators.remove(this@fadeIn)
+                    }
+
+                    alpha = 1f
+
+                    continuation.resume(Unit)
                 }
-
-                alpha = 1f
-
-                continuation.resume(Unit)
-            }
-        })
+            },
+        )
         animator.start()
     }
 }
@@ -238,8 +244,8 @@ val Context.statusBarHeight: Int
         resources.getIdentifier(
             "status_bar_height",
             "dimen",
-            "android"
-        )
+            "android",
+        ),
     )
 
 val Context.density: Density

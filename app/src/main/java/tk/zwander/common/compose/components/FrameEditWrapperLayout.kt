@@ -41,10 +41,10 @@ import tk.zwander.common.util.prefManager
 import tk.zwander.lockscreenwidgets.R
 import tk.zwander.lockscreenwidgets.activities.FrameReorderActivity
 import tk.zwander.lockscreenwidgets.util.FrameSpecificPreferences
-import tk.zwander.lockscreenwidgets.util.MainWidgetFrameDelegate
+import tk.zwander.lockscreenwidgets.util.WidgetFrameDelegate
 
 @Composable
-fun MainWidgetFrameDelegate.WidgetFrameViewModel.FrameEditWrapperLayout(
+fun WidgetFrameDelegate.WidgetFrameViewModel.FrameEditWrapperLayout(
     frameId: Int,
     onRemovePressed: () -> Unit,
     onClose: () -> Unit,
@@ -63,17 +63,20 @@ fun MainWidgetFrameDelegate.WidgetFrameViewModel.FrameEditWrapperLayout(
     )
 
     Box(
-        modifier = modifier.border(
-            width = 1.dp,
-            color = Color.White,
-            shape = RoundedCornerShape(cornerRadius.dp),
-        ).background(
-            color = colorResource(R.color.backdrop),
-        ).clickable(
-            indication = null,
-            interactionSource = remember { MutableInteractionSource() },
-            onClick = {},
-        ),
+        modifier = modifier
+            .border(
+                width = 1.dp,
+                color = Color.White,
+                shape = RoundedCornerShape(cornerRadius.dp),
+            )
+            .background(
+                color = colorResource(R.color.backdrop),
+            )
+            .clickable(
+                indication = null,
+                interactionSource = remember { MutableInteractionSource() },
+                onClick = {},
+            ),
     ) {
         Box(
             modifier = Modifier.fillMaxSize(),
@@ -104,14 +107,16 @@ fun MainWidgetFrameDelegate.WidgetFrameViewModel.FrameEditWrapperLayout(
                     Icon(
                         painter = painterResource(R.drawable.ic_baseline_move_24),
                         contentDescription = stringResource(R.string.move),
-                        modifier = Modifier.draggable2D(
-                            state = rememberDraggable2DState {
-                                context.eventManager.sendEvent(Event.FrameMoved(frameId, it.x, it.y))
-                            },
-                            onDragStopped = {
-                                context.eventManager.sendEvent(Event.FrameMoveFinished(frameId))
-                            },
-                        ).size(32.dp),
+                        modifier = Modifier
+                            .draggable2D(
+                                state = rememberDraggable2DState {
+                                    context.eventManager.sendEvent(Event.FrameMoved(frameId, it.x, it.y))
+                                },
+                                onDragStopped = {
+                                    context.eventManager.sendEvent(Event.FrameMoveFinished(frameId))
+                                },
+                            )
+                            .size(32.dp),
                         tint = Color.White,
                     )
 
@@ -123,7 +128,9 @@ fun MainWidgetFrameDelegate.WidgetFrameViewModel.FrameEditWrapperLayout(
                         Icon(
                             painter = painterResource(R.drawable.ic_baseline_vertical_align_center_24),
                             contentDescription = stringResource(R.string.center_horizontally),
-                            modifier = Modifier.rotate(90f).size(32.dp),
+                            modifier = Modifier
+                                .rotate(90f)
+                                .size(32.dp),
                             tint = Color.White,
                         )
                     }
@@ -132,7 +139,7 @@ fun MainWidgetFrameDelegate.WidgetFrameViewModel.FrameEditWrapperLayout(
                 Row(
                     modifier = Modifier.align(Alignment.BottomEnd),
                 ) {
-                    if (frameId != MainWidgetFrameDelegate.ID) {
+                    if (frameId != WidgetFrameDelegate.ID) {
                         IconButton(
                             onClick = onRemovePressed,
                         ) {
@@ -194,7 +201,9 @@ fun MainWidgetFrameDelegate.WidgetFrameViewModel.FrameEditWrapperLayout(
                         Icon(
                             painter = painterResource(R.drawable.ic_baseline_add_24),
                             contentDescription = stringResource(R.string.add_widget),
-                            modifier = Modifier.rotate(90f).size(32.dp),
+                            modifier = Modifier
+                                .rotate(90f)
+                                .size(32.dp),
                             tint = Color.White,
                         )
                     }
@@ -209,7 +218,9 @@ fun MainWidgetFrameDelegate.WidgetFrameViewModel.FrameEditWrapperLayout(
                         Icon(
                             painter = painterResource(R.drawable.close_24px),
                             contentDescription = stringResource(R.string.done),
-                            modifier = Modifier.rotate(90f).size(32.dp),
+                            modifier = Modifier
+                                .rotate(90f)
+                                .size(32.dp),
                             tint = Color.White,
                         )
                     }
@@ -220,7 +231,9 @@ fun MainWidgetFrameDelegate.WidgetFrameViewModel.FrameEditWrapperLayout(
                         Icon(
                             painter = painterResource(R.drawable.ic_baseline_settings_24),
                             contentDescription = stringResource(R.string.settings),
-                            modifier = Modifier.rotate(90f).size(32.dp),
+                            modifier = Modifier
+                                .rotate(90f)
+                                .size(32.dp),
                             tint = Color.White,
                         )
                     }
@@ -233,14 +246,29 @@ fun MainWidgetFrameDelegate.WidgetFrameViewModel.FrameEditWrapperLayout(
                 Icon(
                     painter = painterResource(R.drawable.handle_left),
                     contentDescription = stringResource(R.string.expand_left),
-                    modifier = Modifier.align(AbsoluteAlignment.CenterLeft)
+                    modifier = Modifier
+                        .align(AbsoluteAlignment.CenterLeft)
                         .draggable(
                             state = rememberDraggableState {
-                                context.eventManager.sendEvent(Event.FrameResized(frameId, Event.FrameResized.Side.LEFT, it.toInt(), false))
+                                context.eventManager.sendEvent(
+                                    Event.FrameResized(
+                                        frameId,
+                                        Event.FrameResized.Side.LEFT,
+                                        it.toInt(),
+                                        false,
+                                    ),
+                                )
                             },
                             orientation = Orientation.Horizontal,
                             onDragStopped = {
-                                context.eventManager.sendEvent(Event.FrameResized(frameId, Event.FrameResized.Side.LEFT, 0, true))
+                                context.eventManager.sendEvent(
+                                    Event.FrameResized(
+                                        frameId,
+                                        Event.FrameResized.Side.LEFT,
+                                        0,
+                                        true,
+                                    ),
+                                )
                             },
                         ),
                     tint = Color.White,
@@ -249,14 +277,29 @@ fun MainWidgetFrameDelegate.WidgetFrameViewModel.FrameEditWrapperLayout(
                 Icon(
                     painter = painterResource(R.drawable.handle_top),
                     contentDescription = stringResource(R.string.expand_up),
-                    modifier = Modifier.align(Alignment.TopCenter)
+                    modifier = Modifier
+                        .align(Alignment.TopCenter)
                         .draggable(
                             state = rememberDraggableState {
-                                context.eventManager.sendEvent(Event.FrameResized(frameId, Event.FrameResized.Side.TOP, it.toInt(), false))
+                                context.eventManager.sendEvent(
+                                    Event.FrameResized(
+                                        frameId,
+                                        Event.FrameResized.Side.TOP,
+                                        it.toInt(),
+                                        false,
+                                    ),
+                                )
                             },
                             orientation = Orientation.Vertical,
                             onDragStopped = {
-                                context.eventManager.sendEvent(Event.FrameResized(frameId, Event.FrameResized.Side.TOP, 0, true))
+                                context.eventManager.sendEvent(
+                                    Event.FrameResized(
+                                        frameId,
+                                        Event.FrameResized.Side.TOP,
+                                        0,
+                                        true,
+                                    ),
+                                )
                             },
                         ),
                     tint = Color.White,
@@ -265,14 +308,29 @@ fun MainWidgetFrameDelegate.WidgetFrameViewModel.FrameEditWrapperLayout(
                 Icon(
                     painter = painterResource(R.drawable.handle_bottom),
                     contentDescription = stringResource(R.string.expand_down),
-                    modifier = Modifier.align(Alignment.BottomCenter)
+                    modifier = Modifier
+                        .align(Alignment.BottomCenter)
                         .draggable(
                             state = rememberDraggableState {
-                                context.eventManager.sendEvent(Event.FrameResized(frameId, Event.FrameResized.Side.BOTTOM, it.toInt(), false))
+                                context.eventManager.sendEvent(
+                                    Event.FrameResized(
+                                        frameId,
+                                        Event.FrameResized.Side.BOTTOM,
+                                        it.toInt(),
+                                        false,
+                                    ),
+                                )
                             },
                             orientation = Orientation.Vertical,
                             onDragStopped = {
-                                context.eventManager.sendEvent(Event.FrameResized(frameId, Event.FrameResized.Side.BOTTOM, 0, true))
+                                context.eventManager.sendEvent(
+                                    Event.FrameResized(
+                                        frameId,
+                                        Event.FrameResized.Side.BOTTOM,
+                                        0,
+                                        true,
+                                    ),
+                                )
                             },
                         ),
                     tint = Color.White,
@@ -281,14 +339,29 @@ fun MainWidgetFrameDelegate.WidgetFrameViewModel.FrameEditWrapperLayout(
                 Icon(
                     painter = painterResource(R.drawable.handle_right),
                     contentDescription = stringResource(R.string.expand_right),
-                    modifier = Modifier.align(AbsoluteAlignment.CenterRight)
+                    modifier = Modifier
+                        .align(AbsoluteAlignment.CenterRight)
                         .draggable(
                             state = rememberDraggableState {
-                                context.eventManager.sendEvent(Event.FrameResized(frameId, Event.FrameResized.Side.RIGHT, it.toInt(), false))
+                                context.eventManager.sendEvent(
+                                    Event.FrameResized(
+                                        frameId,
+                                        Event.FrameResized.Side.RIGHT,
+                                        it.toInt(),
+                                        false,
+                                    ),
+                                )
                             },
                             orientation = Orientation.Horizontal,
                             onDragStopped = {
-                                context.eventManager.sendEvent(Event.FrameResized(frameId, Event.FrameResized.Side.RIGHT, 0, true))
+                                context.eventManager.sendEvent(
+                                    Event.FrameResized(
+                                        frameId,
+                                        Event.FrameResized.Side.RIGHT,
+                                        0,
+                                        true,
+                                    ),
+                                )
                             },
                         ),
                     tint = Color.White,

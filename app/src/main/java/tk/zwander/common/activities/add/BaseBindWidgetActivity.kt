@@ -107,7 +107,8 @@ abstract class BaseBindWidgetActivity : BaseActivity(), IConfigureActivity {
                                 data.getParcelableExtra<Intent.ShortcutIconResource?>(Intent.EXTRA_SHORTCUT_ICON_RESOURCE)
                             val iconBmp =
                                 data.getParcelableExtra(Intent.EXTRA_SHORTCUT_ICON) ?: try {
-                                    iconRes?.let { getRemoteDrawable(iconRes.packageName, iconRes) }?.toSafeBitmap(density, maxSize = 128.dp)
+                                    iconRes?.let { getRemoteDrawable(iconRes.packageName, iconRes) }
+                                        ?.toSafeBitmap(density, maxSize = 128.dp)
                                 } catch (e: PackageManager.NameNotFoundException) {
                                     logUtils.debugLog("Error getting shortcut icon bitmap", e)
                                     null
@@ -120,7 +121,7 @@ abstract class BaseBindWidgetActivity : BaseActivity(), IConfigureActivity {
                                 icon = iconBmp,
                                 iconRes = null,
                                 shortcutIntent = shortcutIntent,
-                                size = WidgetSizeData(1, 1)
+                                size = WidgetSizeData(1, 1),
                             )
 
                             addNewShortcut(shortcut)
@@ -156,9 +157,9 @@ abstract class BaseBindWidgetActivity : BaseActivity(), IConfigureActivity {
                                         setData(
                                             "tel://${
                                                 PhoneNumberUtils.convertAndStrip(
-                                                    number.toString()
+                                                    number.toString(),
                                                 )
-                                            }".toUri()
+                                            }".toUri(),
                                         )
                                     }
                                 } else {
@@ -202,7 +203,7 @@ abstract class BaseBindWidgetActivity : BaseActivity(), IConfigureActivity {
                         addShortcutFromIntent(
                             pinItemRequest?.shortcutInfo?.run {
                                 longLabel.takeIf { !it.isNullOrEmpty() } ?: shortLabel
-                            }?.toString()
+                            }?.toString(),
                         )
                     } else {
                         addShortcutFromIntent()
@@ -296,8 +297,8 @@ abstract class BaseBindWidgetActivity : BaseActivity(), IConfigureActivity {
                 .setMessage(
                     resources.getString(
                         R.string.create_shortcut_error,
-                        e.message
-                    )
+                        e.message,
+                    ),
                 )
                 .setPositiveButton(android.R.string.ok) { _, _ ->
                     pendingErrors--

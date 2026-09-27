@@ -9,11 +9,7 @@ import com.joaomgcd.taskerpluginlibrary.config.TaskerPluginConfigHelperNoOutputO
 import com.joaomgcd.taskerpluginlibrary.config.TaskerPluginConfigHelperStateNoOutputOrInputOrUpdate
 import com.joaomgcd.taskerpluginlibrary.config.TaskerPluginConfigNoInput
 import com.joaomgcd.taskerpluginlibrary.input.TaskerInput
-import com.joaomgcd.taskerpluginlibrary.runner.TaskerPluginResult
-import com.joaomgcd.taskerpluginlibrary.runner.TaskerPluginResultCondition
-import com.joaomgcd.taskerpluginlibrary.runner.TaskerPluginResultConditionSatisfied
-import com.joaomgcd.taskerpluginlibrary.runner.TaskerPluginResultConditionUnsatisfied
-import com.joaomgcd.taskerpluginlibrary.runner.TaskerPluginResultSucess
+import com.joaomgcd.taskerpluginlibrary.runner.*
 import tk.zwander.common.util.Event
 import tk.zwander.common.util.eventManager
 import tk.zwander.widgetdrawer.util.DrawerDelegate
@@ -75,7 +71,8 @@ class TaskerIsShowingDrawer : ComponentActivity(), TaskerPluginConfigNoInput {
         helper.finishForTasker()
     }
 
-    class IsShowingHelper(config: TaskerPluginConfigNoInput) : TaskerPluginConfigHelperStateNoOutputOrInputOrUpdate<IsShowingRunner>(config) {
+    class IsShowingHelper(config: TaskerPluginConfigNoInput) :
+        TaskerPluginConfigHelperStateNoOutputOrInputOrUpdate<IsShowingRunner>(config) {
         override val runnerClass: Class<IsShowingRunner>
             get() = IsShowingRunner::class.java
     }
@@ -84,7 +81,7 @@ class TaskerIsShowingDrawer : ComponentActivity(), TaskerPluginConfigNoInput {
         override fun getSatisfiedCondition(
             context: Context,
             input: TaskerInput<Unit>,
-            update: Unit?
+            update: Unit?,
         ): TaskerPluginResultCondition<Unit> {
             return if (DrawerDelegate.peekInstance(context)?.isAttached == true) {
                 TaskerPluginResultConditionSatisfied(context)

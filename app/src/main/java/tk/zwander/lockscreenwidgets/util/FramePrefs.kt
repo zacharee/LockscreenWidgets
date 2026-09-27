@@ -8,18 +8,15 @@ import android.graphics.Color
 import androidx.core.content.edit
 import tk.zwander.common.data.WidgetData
 import tk.zwander.common.host.widgetHostCompat
-import tk.zwander.common.util.FrameSizeAndPosition
-import tk.zwander.common.util.PrefManager
-import tk.zwander.common.util.frameSizeAndPosition
-import tk.zwander.common.util.prefManager
-import tk.zwander.common.util.safeFromJson
+import tk.zwander.common.util.*
 import tk.zwander.lockscreenwidgets.App
 
 class FrameSpecificPreferences private constructor(
     val frameId: Int,
     private val context: Context,
 ) {
-    val framePreferences: SharedPreferences = context.getSharedPreferences("frame_prefs_${frameId}", Context.MODE_PRIVATE)
+    val framePreferences: SharedPreferences =
+        context.getSharedPreferences("frame_prefs_${frameId}", Context.MODE_PRIVATE)
 
     var currentWidgets: Set<WidgetData>
         get() = FramePrefs.getWidgetsForFrame(context, frameId)
@@ -175,7 +172,8 @@ class FrameSpecificPreferences private constructor(
     fun getFloat(key: String, def: Float): Float = framePreferences.getFloat(key, def)
     fun getInt(key: String, def: Int): Int = framePreferences.getInt(key, def)
     fun getBoolean(key: String, def: Boolean): Boolean = framePreferences.getBoolean(key, def)
-    fun getStringSet(key: String, def: Set<String>): Set<String> = framePreferences.getStringSet(key, def)?.toSet() ?: def
+    fun getStringSet(key: String, def: Set<String>): Set<String> =
+        framePreferences.getStringSet(key, def)?.toSet() ?: def
 
     fun putString(key: String, value: String?) = framePreferences.edit(true) { putString(key, value) }
     fun putFloat(key: String, value: Float) = framePreferences.edit(true) { putFloat(key, value) }
@@ -199,7 +197,7 @@ class FrameSpecificPreferences private constructor(
         }
 
         fun all(context: Context): List<FrameSpecificPreferences> {
-            return ([MainWidgetFrameDelegate.ID] + context.prefManager.currentSecondaryFramesWithStringDisplay.map { it.key }).map { frameId ->
+            return ([WidgetFrameDelegate.ID] + context.prefManager.currentSecondaryFramesWithStringDisplay.map { it.key }).map { frameId ->
                 FrameSpecificPreferences[frameId]
             }
         }
@@ -227,13 +225,15 @@ class FrameSpecificPreferences private constructor(
 
 object FramePrefs {
     private const val KEY_FRAME_WIDGETS = "FRAME_WIDGETS_FOR_FRAME_"
+
     @Deprecated("Use PrefManager version")
     const val KEY_FRAME_ROW_COUNT = "FRAME_ROW_COUNT_FOR_FRAME_"
+
     @Deprecated("Use PrefManager version")
     const val KEY_FRAME_COL_COUNT = "FRAME_COL_COUNT_FOR_FRAME_"
 
     fun getWidgetsForFrame(context: Context, frameId: Int): Set<WidgetData> {
-        if (frameId == MainWidgetFrameDelegate.ID) {
+        if (frameId == WidgetFrameDelegate.ID) {
             return context.prefManager.currentWidgets
         }
 
@@ -250,7 +250,7 @@ object FramePrefs {
     fun setWidgetsForFrame(context: Context, frameId: Int, widgets: Collection<WidgetData>) {
         val set = LinkedHashSet(widgets.toSet())
 
-        if (frameId == MainWidgetFrameDelegate.ID) {
+        if (frameId == WidgetFrameDelegate.ID) {
             context.prefManager.currentWidgets = set
             return
         }
@@ -262,13 +262,14 @@ object FramePrefs {
     }
 
     fun removeFrame(context: Context, frameId: Int) {
-        if (frameId == MainWidgetFrameDelegate.ID) {
+        if (frameId == WidgetFrameDelegate.ID) {
             return
         }
 
-        context.prefManager.currentSecondaryFramesWithStringDisplay = context.prefManager.currentSecondaryFramesWithStringDisplay.apply {
-            remove(frameId)
-        }
+        context.prefManager.currentSecondaryFramesWithStringDisplay =
+            context.prefManager.currentSecondaryFramesWithStringDisplay.apply {
+                remove(frameId)
+            }
 
         getWidgetsForFrame(context, frameId).forEach { data ->
             context.widgetHostCompat.deleteAppWidgetId(data.id)
@@ -288,7 +289,7 @@ object FramePrefs {
     }
 
     fun generateCurrentWidgetsKey(id: Int): String {
-        if (id == MainWidgetFrameDelegate.ID) {
+        if (id == WidgetFrameDelegate.ID) {
             return PrefManager.KEY_CURRENT_WIDGETS
         }
 
@@ -297,7 +298,7 @@ object FramePrefs {
 
     @Deprecated("Frames have their own preference files now.")
     fun generatePrefKey(baseKey: String, id: Int): String {
-        if (id == MainWidgetFrameDelegate.ID) {
+        if (id == WidgetFrameDelegate.ID) {
             return when (baseKey) {
                 KEY_FRAME_COL_COUNT -> PrefManager.KEY_FRAME_COL_COUNT
                 KEY_FRAME_ROW_COUNT -> PrefManager.KEY_FRAME_ROW_COUNT

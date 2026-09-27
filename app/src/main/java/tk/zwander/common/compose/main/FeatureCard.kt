@@ -37,7 +37,7 @@ import tk.zwander.lockscreenwidgets.activities.ComposeFrameSettingsActivity
 import tk.zwander.lockscreenwidgets.activities.UsageActivity
 import tk.zwander.lockscreenwidgets.appwidget.WidgetStackProvider
 import tk.zwander.lockscreenwidgets.compose.SelectDisplayDialog
-import tk.zwander.lockscreenwidgets.util.MainWidgetFrameDelegate
+import tk.zwander.lockscreenwidgets.util.WidgetFrameDelegate
 import tk.zwander.widgetdrawer.activities.ComposeDrawerSettingsActivity
 import tk.zwander.widgetdrawer.util.DrawerDelegate
 
@@ -92,7 +92,7 @@ fun rememberFeatureCards(): Map<String, List<FeatureCardInfo>> {
                         MainPageButton(
                             icon = R.drawable.ic_baseline_preview_24,
                             title = R.string.preview,
-                            dependency = { MainWidgetFrameDelegate.readOnlyInstance.collectAsState().value != null },
+                            dependency = { WidgetFrameDelegate.readOnlyInstance.collectAsState().value != null },
                         ) {
                             context.eventManager.sendEvent(Event.PreviewFrames(Event.PreviewFrames.ShowMode.TOGGLE))
                         },
@@ -116,7 +116,7 @@ fun rememberFeatureCards(): Map<String, List<FeatureCardInfo>> {
                         context.eventManager.sendEvent(Event.PreviewFrames(Event.PreviewFrames.ShowMode.HIDE))
 
                         if (!BuildConfig.DEBUG && context.prefManager.currentSecondaryFramesWithStringDisplay.isEmpty()) {
-                            context.eventManager.sendEvent(Event.LaunchAddWidget(MainWidgetFrameDelegate.ID))
+                            context.eventManager.sendEvent(Event.LaunchAddWidget(WidgetFrameDelegate.ID))
                         } else {
                             showingDisplaySelectorAddFrameWidget = true
                         }
@@ -223,8 +223,9 @@ fun FeatureCard(
         }
 
         if (info.enabled != null ||
-                info.buttons.isNotEmpty() ||
-                info.action != null) {
+            info.buttons.isNotEmpty() ||
+            info.action != null
+        ) {
             Box(modifier = Modifier.fillMaxWidth(0.25f)) {
                 HorizontalDivider(
                     modifier = Modifier.padding(top = 12.dp, bottom = 16.dp),
@@ -337,7 +338,7 @@ fun FeatureCard(
                                                 }
                                             } else {
                                                 Modifier
-                                            }
+                                            },
                                         ),
                                     onFontSizeCalculated = { min ->
                                         if (minTextSize.isUnspecified || min < minTextSize) {

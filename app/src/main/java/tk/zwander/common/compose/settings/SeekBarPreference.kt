@@ -202,24 +202,27 @@ private fun SeekBarLayout(
         if (scale == 1.0) minValue.toString() else BigDecimal(minValue * scale).setScale(
             -log(
                 scale,
-                10.0
-            ).roundToInt(), RoundingMode.HALF_UP
+                10.0,
+            ).roundToInt(),
+            RoundingMode.HALF_UP,
         ).toString()
     }
     val formattedMaxValue = remember(scale, maxValue) {
         if (scale == 1.0) maxValue.toString() else BigDecimal(maxValue * scale).setScale(
             -log(
                 scale,
-                10.0
-            ).roundToInt(), RoundingMode.HALF_UP
+                10.0,
+            ).roundToInt(),
+            RoundingMode.HALF_UP,
         ).toString()
     }
     val formattedValue = remember(scale, value) {
         if (scale == 1.0) value.toString() else BigDecimal(value * scale).setScale(
             -log(
                 scale,
-                10.0
-            ).roundToInt(), RoundingMode.HALF_UP
+                10.0,
+            ).roundToInt(),
+            RoundingMode.HALF_UP,
         ).toString()
     }
 
@@ -287,7 +290,7 @@ private fun SeekBarLayout(
         val animatedThumbBackgroundColor by animateColorAsState(
             if (enabled) sliderColors.inactiveTrackColor else sliderColors.disabledInactiveTrackColor.compositeOver(
                 MaterialTheme.colorScheme.surface,
-            )
+            ),
         )
         val animatedBorderWidth by animateDpAsState(if (value == defaultValue) 2.dp else 12.dp)
 
@@ -357,7 +360,7 @@ private fun SeekBarLayout(
                 .padding(4.dp),
         ) {
             SubcomposeLayout { constraints ->
-                val textWidth = with (density) {
+                val textWidth = with(density) {
                     subcompose(
                         slotId = "ValueText",
                         content = {
@@ -435,7 +438,7 @@ private fun SeekBarLayout(
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             SubcomposeLayout { constraints ->
-                val textWidth = with (density) {
+                val textWidth = with(density) {
                     subcompose(
                         slotId = "ValueText",
                         content = {

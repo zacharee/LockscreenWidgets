@@ -26,27 +26,27 @@ private fun rememberUsageInfos(): List<UsageInfo> {
         [
             UsageInfo(
                 title = R.string.usage_add_widget,
-                message = R.string.usage_add_widget_desc
+                message = R.string.usage_add_widget_desc,
             ),
             UsageInfo(
                 title = R.string.usage_modify_frame,
-                message = R.string.usage_modify_frame_desc
+                message = R.string.usage_modify_frame_desc,
             ),
             UsageInfo(
                 title = R.string.usage_reorder_widgets,
-                message = R.string.usage_reorder_widgets_desc
+                message = R.string.usage_reorder_widgets_desc,
             ),
             UsageInfo(
                 title = R.string.usage_remove_widgets,
-                message = R.string.usage_remove_widgets_desc
+                message = R.string.usage_remove_widgets_desc,
             ),
             UsageInfo(
                 title = R.string.usage_id_blacklists,
-                message = R.string.usage_id_blacklists_desc
+                message = R.string.usage_id_blacklists_desc,
             ),
             UsageInfo(
                 title = R.string.usage_widget_tiles,
-                message = R.string.usage_widget_tiles_desc
+                message = R.string.usage_widget_tiles_desc,
             ),
         ]
     }
@@ -55,7 +55,7 @@ private fun rememberUsageInfos(): List<UsageInfo> {
 @Composable
 fun UsageLayout(
     title: String,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     var selectedInfo by remember {
         mutableStateOf<UsageInfo?>(null)

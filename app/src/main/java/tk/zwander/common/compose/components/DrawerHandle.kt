@@ -96,7 +96,7 @@ fun DrawerDelegate.DrawerViewModel.DrawerHandle(
     )
 
     LaunchedEffect(width, height) {
-        with (density) {
+        with(density) {
             params.width = width.dp.roundToPx()
             params.height = height.dp.roundToPx()
             updateWindow()
@@ -213,7 +213,7 @@ fun DrawerDelegate.DrawerViewModel.DrawerHandle(
                                     scrollTotalX.absoluteValue,
                                     true,
                                     offset,
-                                )
+                                ),
                             )
                         }
                     } else {
@@ -225,7 +225,7 @@ fun DrawerDelegate.DrawerViewModel.DrawerHandle(
                                 scrollTotalX.absoluteValue,
                                 false,
                                 offset,
-                            )
+                            ),
                         )
                     }
                 },

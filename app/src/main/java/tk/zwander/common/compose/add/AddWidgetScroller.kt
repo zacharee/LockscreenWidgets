@@ -49,9 +49,11 @@ fun AddWidgetScroller(
             .asPaddingValues(),
     ) {
         items(items = filteredItems, key = { it.appInfo.packageName }) { app ->
-            Column(modifier = Modifier
-                .fillMaxWidth()
-                .animateItem()) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .animateItem(),
+            ) {
                 AppHeader(
                     app = app,
                     modifier = Modifier
@@ -78,7 +80,7 @@ fun AddWidgetScroller(
                                     widget.itemInfo.previewLayout.takeIf { it != 0 }?.let {
                                         val contextForProvider = context.createApplicationContext(
                                             widget.itemInfo.providerInfo.applicationInfo,
-                                            0
+                                            0,
                                         )
 
                                         LayoutInflater.from(contextForProvider).inflate(it, null)
