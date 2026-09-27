@@ -14,13 +14,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import tk.zwander.common.compose.LocalLSDisplayManager
+import tk.zwander.common.compose.Size
+import tk.zwander.common.compose.rememberScaledSize
 import tk.zwander.common.compose.util.rememberPreferenceState
 import tk.zwander.common.util.LSDisplay
 import tk.zwander.common.util.PrefManager
@@ -79,7 +80,6 @@ fun SelectDisplayDialog(
                 ?: displays.values.first()
         }
     }
-    val density = LocalDensity.current
 
     val framesForDefaultDisplay by remember {
         derivedStateOf {
@@ -195,24 +195,16 @@ fun SelectDisplayDialog(
                                     )
                                 })",
                                 accessory = {
-                                    val [width, height] = remember(display.uniqueIdCompat) {
-                                        with(density) {
-                                            val screenSize = display.realSize
-                                            val screenWidth = screenSize.x
-                                            val screenHeight = screenSize.y
+                                    val screenSize = remember(display) {
+                                        display.realSize
+                                    }
+                                    val [width, height] = rememberScaledSize(
+                                        originalSize = Size(screenSize.x, screenSize.y),
+                                    )
 
-                                            val desiredHeight = 48.dp
-                                            val actualHeight = screenHeight.toDp()
-
-                                            val heightRatio = desiredHeight / actualHeight
-
-                                            val scaledWidth = (screenWidth * heightRatio).toDp()
-
-                                            if (scaledWidth > maxDisplayWidth) {
-                                                maxDisplayWidth = scaledWidth
-                                            }
-
-                                            scaledWidth to desiredHeight
+                                    LaunchedEffect(width) {
+                                        if (width > maxDisplayWidth) {
+                                            maxDisplayWidth = width
                                         }
                                     }
 

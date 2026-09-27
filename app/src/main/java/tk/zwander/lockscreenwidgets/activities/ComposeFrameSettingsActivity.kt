@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
@@ -27,6 +26,7 @@ import tk.zwander.common.activities.HideForIDsActivity
 import tk.zwander.common.activities.HideOnAppsChooserActivity
 import tk.zwander.common.activities.OnboardingActivity
 import tk.zwander.common.compose.LocalLSDisplayManager
+import tk.zwander.common.compose.rememberScaledFrameSize
 import tk.zwander.common.compose.settings.*
 import tk.zwander.common.compose.util.rememberPreferenceState
 import tk.zwander.common.util.*
@@ -145,34 +145,9 @@ class ComposeFrameSettingsActivity : BaseActivity() {
                                 if (selecting) {
                                     Box(modifier = Modifier.height(48.dp))
                                 } else {
-                                    val density = LocalDensity.current
-                                    val frameSizeAndPosition = remember {
-                                        FrameSizeAndPosition.getInstance(this@ComposeFrameSettingsActivity)
-                                    }
-                                    val size = remember {
-                                        frameSizeAndPosition.getSizeForType(
-                                            type = FrameSizeAndPosition.FrameType.SecondaryLockscreen.Portrait(
-                                                selectedFrame,
-                                            ),
-                                            display = lsDisplay,
-                                        )
-                                    }
-
-                                    val [width, height] = remember(density) {
-                                        with(density) {
-                                            val screenWidth = size.x
-                                            val screenHeight = size.y
-
-                                            val desiredHeight = 48.dp
-                                            val actualHeight = screenHeight.toDp()
-
-                                            val heightRatio = desiredHeight / actualHeight
-
-                                            val scaledWidth = (screenWidth * heightRatio).toDp()
-
-                                            scaledWidth to desiredHeight
-                                        }
-                                    }
+                                    val [width, height] = lsDisplay.rememberScaledFrameSize(
+                                        frameId = selectedFrame,
+                                    )
 
                                     WidgetFramePreviewLayout(
                                         modifier = it
