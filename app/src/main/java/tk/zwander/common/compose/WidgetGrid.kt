@@ -12,11 +12,7 @@ import android.util.SizeF
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
-import android.widget.AbsListView
-import android.widget.FrameLayout
-import android.widget.HorizontalScrollView
-import android.widget.ScrollView
-import android.widget.Toast
+import android.widget.*
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
@@ -25,32 +21,11 @@ import androidx.compose.foundation.gestures.FlingBehavior
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.ScrollableDefaults
 import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxWithConstraints
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.systemGestureExclusion
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardColors
-import androidx.compose.material3.Icon
-import androidx.compose.material3.LocalTextStyle
-import androidx.compose.material3.Text
-import androidx.compose.material3.ripple
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.derivedStateOf
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.neverEqualPolicy
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.rememberUpdatedState
-import androidx.compose.runtime.setValue
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.composed
@@ -64,11 +39,7 @@ import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.input.pointer.util.VelocityTracker
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.platform.LocalLayoutDirection
-import androidx.compose.ui.platform.LocalResources
-import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.platform.*
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -82,15 +53,8 @@ import androidx.core.view.NestedScrollingChild
 import androidx.core.view.forEach
 import androidx.recyclerview.widget.RecyclerView
 import com.bugsnag.android.performance.compose.MeasuredComposable
-import dev.zwander.lazyspannedgrid.LazySpannedGrid
-import dev.zwander.lazyspannedgrid.LazySpannedGridScope
-import dev.zwander.lazyspannedgrid.LazySpannedGridState
-import dev.zwander.lazyspannedgrid.SpannedGridItemSpan
-import dev.zwander.lazyspannedgrid.itemsIndexed
-import dev.zwander.lazyspannedgrid.rememberLazySpannedGridState
-import dev.zwander.lazyspannedgrid.rememberSpannedGridSnapFlingBehavior
+import dev.zwander.lazyspannedgrid.*
 import dev.zwander.lazyspannedgrid.reorderable_calvin.ReorderableLazySpannedGridItem
-import dev.zwander.lazyspannedgrid.reorderable_calvin.ReorderableLazySpannedGridState
 import dev.zwander.lazyspannedgrid.reorderable_calvin.rememberReorderableLazySpannedGridState
 import dev.zwander.lswinterconnect.peekLogUtils
 import kotlinx.coroutines.CancellationException
@@ -108,19 +72,8 @@ import tk.zwander.common.data.WidgetData
 import tk.zwander.common.data.WidgetType
 import tk.zwander.common.host.widgetHostCompat
 import tk.zwander.common.listeners.WidgetResizeListener
-import tk.zwander.common.util.BaseDelegate
-import tk.zwander.common.util.BrokenAppsRegistry
-import tk.zwander.common.util.UserHandleCompat
-import tk.zwander.common.util.andRemoveFromParent
-import tk.zwander.common.util.appWidgetManager
-import tk.zwander.common.util.collectAsMutableState
-import tk.zwander.common.util.createWidgetErrorView
-import tk.zwander.common.util.getAllInstalledWidgetProviders
-import tk.zwander.common.util.globalState
-import tk.zwander.common.util.logUtils
+import tk.zwander.common.util.*
 import tk.zwander.common.util.mitigations.SafeContextWrapper
-import tk.zwander.common.util.prefManager
-import tk.zwander.common.util.remove
 import tk.zwander.common.views.remote.ComposeAdapterView
 import tk.zwander.lockscreenwidgets.R
 import kotlin.math.absoluteValue
@@ -204,6 +157,17 @@ fun <VM : BaseDelegate.BaseViewModel<*, *>> VM.WidgetGrid(
     val coroutineScope = rememberCoroutineScope()
     val rootView = LocalView.current
 
+    // interceptUnclaimedDrags does its own independent touch-slop/gesture recognition at
+    // PointerEventPass.Initial, then drives the grid's scroll itself once committed — racing
+    // LazySpannedGrid's own native scrollableArea-driven drag handling (Main pass) for the same
+    // lazyGridState, with no mutual exclusion between the two (isConsumed can't help here: Initial
+    // always precedes Main for a given event, so this modifier can never actually observe
+    // scrollableArea's own consumption). Disabling scrollableArea's native gesture recognition for
+    // exactly as long as this modifier is driving a committed drag removes the race, mirroring the
+    // same suppressPlacementAnimationKey-gated `enabled` pattern already used to keep scrollableArea
+    // out of .reorderable()'s way during a reorder drag (see that KDoc in the library).
+    var interceptedDragActive by remember { mutableStateOf(false) }
+
     LaunchedEffect(currentEditingId) {
         globalState.handlingClick.remove(holderId)
         globalState.itemIsActive.value = currentEditingId != null
@@ -221,6 +185,7 @@ fun <VM : BaseDelegate.BaseViewModel<*, *>> VM.WidgetGrid(
         contentPadding = contentPadding,
         mainAxisSpacing = itemSpacing,
         crossAxisSpacing = itemSpacing,
+        userScrollEnabled = !interceptedDragActive,
         modifier = modifier
             .interceptUnclaimedDrags(
                 gridState = lazyGridState,
@@ -230,51 +195,11 @@ fun <VM : BaseDelegate.BaseViewModel<*, *>> VM.WidgetGrid(
                 rootView = rootView,
                 currentEditingId = currentEditingId,
                 flingBehavior = flingBehavior,
+                onDragActiveChanged = { interceptedDragActive = it },
             ),
     ) {
-        widgetItems(
-            currentWidgetsList = updatedCurrentWidgets,
-            columnCount = updatedColumnCount,
-            rowCount = updatedRowCount,
-            rowSpanForAddButton = updatedRowSpanForAddButton,
-            launchAddActivity = launchAddActivity,
-            launchReconfigure = launchReconfigure,
-            launchShortcutIconOverride = launchShortcutIconOverride,
-            spans = updatedSpans,
-            reorderableState = reorderableState,
-            currentEditingId = currentEditingId,
-            onCurrentEditingIdChanged = {
-                currentEditingId = it
-            },
-            onWidgetsChanged = onWidgetsChanged,
-            resizeThresholdPx = resizeThresholdPx,
-            blockIndividualWidgetTouches = blockIndividualWidgetTouches,
-            locked = gridLocked,
-        )
-    }
-}
-
-context(viewModel: VM)
-private fun <VM : BaseDelegate.BaseViewModel<*, *>> LazySpannedGridScope.widgetItems(
-    currentWidgetsList: List<WidgetData>,
-    columnCount: Int,
-    rowCount: Int,
-    rowSpanForAddButton: Int,
-    launchAddActivity: () -> Unit,
-    launchReconfigure: (id: Int, providerInfo: AppWidgetProviderInfo) -> Unit,
-    launchShortcutIconOverride: (id: Int) -> Unit,
-    spans: List<IntSize>,
-    reorderableState: ReorderableLazySpannedGridState,
-    currentEditingId: String?,
-    onCurrentEditingIdChanged: (String?) -> Unit,
-    onWidgetsChanged: (List<WidgetData>) -> Unit,
-    resizeThresholdPx: (which: WidgetResizeListener.Which) -> Int,
-    blockIndividualWidgetTouches: Boolean,
-    locked: Boolean,
-) {
-    with(viewModel) {
-        if (currentWidgetsList.isEmpty()) {
-            item(key = "ADD", span = SpannedGridItemSpan(columnCount, rowSpanForAddButton)) {
+        if (updatedCurrentWidgets.isEmpty()) {
+            item(key = "ADD", span = SpannedGridItemSpan(updatedColumnCount, updatedRowSpanForAddButton)) {
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
@@ -302,8 +227,8 @@ private fun <VM : BaseDelegate.BaseViewModel<*, *>> LazySpannedGridScope.widgetI
         }
 
         itemsIndexed(
-            items = currentWidgetsList,
-            span = { index, _ -> SpannedGridItemSpan(spans[index]) },
+            items = updatedCurrentWidgets,
+            span = { index, _ -> SpannedGridItemSpan(updatedSpans[index]) },
             // Ideally, IDs should be fully unique, but there was a bug where data of different types
             // could be assigned the same ID.
             key = { _, data -> data.gridId },
@@ -327,22 +252,24 @@ private fun <VM : BaseDelegate.BaseViewModel<*, *>> LazySpannedGridScope.widgetI
                 WidgetItem(
                     data = data,
                     isDragging = isDragging,
-                    currentWidgets = currentWidgetsList,
+                    currentWidgets = updatedCurrentWidgets,
                     onWidgetsChanged = onWidgetsChanged,
                     launchShortcutIconOverride = launchShortcutIconOverride,
                     launchReconfigure = launchReconfigure,
                     resizeThresholdPx = resizeThresholdPx,
-                    onCurrentEditingIdChanged = onCurrentEditingIdChanged,
+                    onCurrentEditingIdChanged = {
+                        currentEditingId = it
+                    },
                     index = index,
                     columnCount = columnCount,
                     rowCount = rowCount,
                     currentEditingId = currentEditingId,
-                    modifier = if (locked) {
+                    modifier = if (gridLocked) {
                         Modifier
                     } else {
                         Modifier.longPressDraggableHandle(
                             onDragStarted = {
-                                onCurrentEditingIdChanged(data.gridId)
+                                currentEditingId = data.gridId
                             },
                         )
                     },
@@ -455,6 +382,7 @@ private fun <VM : BaseDelegate.BaseViewModel<*, *>> VM.WidgetItem(
     val alpha by animateFloatAsState(if (isDragging) 0.7f else 1f)
     val currentWidgetsList by rememberUpdatedState(currentWidgets)
     val updatedIndex by rememberUpdatedState(index)
+    val updatedOnWidgetsChanged by rememberUpdatedState(onWidgetsChanged)
 
     val widgetInfo by rememberUpdatedState(
         if (updatedData.type == WidgetType.WIDGET) {
@@ -486,7 +414,7 @@ private fun <VM : BaseDelegate.BaseViewModel<*, *>> VM.WidgetItem(
                             widgetInfo = it,
                             modifier = Modifier.fillMaxSize(),
                             currentWidgets = currentWidgetsList,
-                            onWidgetsChanged = onWidgetsChanged,
+                            onWidgetsChanged = updatedOnWidgetsChanged,
                         )
                     }
 
@@ -554,7 +482,7 @@ private fun <VM : BaseDelegate.BaseViewModel<*, *>> VM.WidgetItem(
                 vertical = vertical,
                 index = updatedIndex,
                 currentWidgets = currentWidgetsList,
-                onWidgetsChanged = onWidgetsChanged,
+                onWidgetsChanged = updatedOnWidgetsChanged,
             )
         },
         rowCount = rowCount,
@@ -902,6 +830,15 @@ private fun Modifier.interceptUnclaimedDrags(
     rootView: View,
     currentEditingId: String?,
     flingBehavior: FlingBehavior?,
+    // Lets the caller disable LazySpannedGrid's own native scrollableArea-driven gesture
+    // recognition for exactly as long as this modifier is driving a committed drag — see the call
+    // site's own comment. Without this, both this modifier's Initial-pass slop detection and
+    // scrollableArea's own (Main-pass) drag handling can independently recognize the same drag on
+    // the same gridState with no mutual exclusion between them: this modifier's own `if
+    // (change.isConsumed) break` check above can never observe scrollableArea's consumption,
+    // because Initial always dispatches before Main for a given event, so a consumption made
+    // during Main is invisible to code that already ran during Initial for that same event.
+    onDragActiveChanged: (Boolean) -> Unit,
 ): Modifier = composed {
     val updatedEditingId by rememberUpdatedState(currentEditingId)
     // Falls back to the same default Modifier.scrollable itself would use when its own
@@ -999,6 +936,7 @@ private fun Modifier.interceptUnclaimedDrags(
 
                                 if (!hasScrollableDescendant && updatedEditingId == null) {
                                     committed = true
+                                    onDragActiveChanged(true)
                                     change.consume()
 
                                     val channel = Channel<Float>(Channel.UNLIMITED)
@@ -1031,6 +969,12 @@ private fun Modifier.interceptUnclaimedDrags(
                     // any already-buffered deltas — and then run the fling above — instead of
                     // dropping them.
                     scrollChannel?.close()
+                    // Re-enable scrollableArea's own gesture recognition now that this modifier is
+                    // done driving the drag/fling it committed to — only reached if it was actually
+                    // set true above.
+                    if (committed) {
+                        onDragActiveChanged(false)
+                    }
                 }
             }
         }

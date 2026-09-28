@@ -7,14 +7,12 @@ import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.unit.dp
 import tk.zwander.common.activities.SelectIconPackActivity
-import tk.zwander.common.compose.util.preferenceAsState
 import tk.zwander.common.compose.util.rememberBooleanPreferenceState
 import tk.zwander.common.compose.util.rememberPreferenceState
 import tk.zwander.common.listeners.WidgetResizeListener
@@ -33,7 +31,6 @@ fun DrawerDelegate.DrawerViewModel.DrawerWidgetGridWrapper(
     modifier: Modifier = Modifier,
 ) {
     val context = LocalContext.current
-    val scope = rememberCoroutineScope()
     val resources = LocalResources.current
     val prefManager = remember(context) { context.prefManager }
     val rowCount = remember(display) {
@@ -50,11 +47,10 @@ fun DrawerDelegate.DrawerViewModel.DrawerWidgetGridWrapper(
     val cutoutPadding = remember(previousNonZeroCutout) {
         WindowInsets(top = previousNonZeroCutout)
     }
-    var currentWidgetsState by context.preferenceAsState(
+    var currentWidgetsState by rememberPreferenceState(
         key = PrefManager.KEY_DRAWER_WIDGETS,
         value = { currentWidgets.toList() },
         onChanged = { _, value -> currentWidgets = value.toSet() },
-        scope = scope,
     )
 
     val drawerSidePadding by rememberPreferenceState(
