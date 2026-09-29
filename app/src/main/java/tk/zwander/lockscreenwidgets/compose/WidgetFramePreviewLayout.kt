@@ -112,49 +112,14 @@ fun WidgetFramePreviewLayout(
             Box(
                 modifier = Modifier,
             ) {
-                val rowCount by rememberPreferenceState(
-                    key = PrefManager.KEY_FRAME_ROW_COUNT,
-                    preferences = framePrefs.framePreferences,
-                ) {
-                    framePrefs.rowCount
-                }
-                val columnCount by rememberPreferenceState(
-                    key = PrefManager.KEY_FRAME_COL_COUNT,
-                    preferences = framePrefs.framePreferences,
-                ) {
-                    framePrefs.colCount
-                }
-
-                var currentWidgetsState by rememberPreferenceState(
-                    key = FramePrefs.generateCurrentWidgetsKey(frameId),
-                    value = { framePrefs.currentWidgets.toList() },
-                    onChanged = { _, value -> framePrefs.currentWidgets = value.toSet() },
-                )
-
                 Box(
                     modifier = Modifier.requiredSize(
                         width = frameSize.x.dp,
                         height = frameSize.y.dp,
                     ),
                 ) {
-                    dummyDelegate.viewModel.WidgetGrid(
-                        currentWidgets = currentWidgetsState,
-                        onWidgetsChanged = { widgets ->
-                            currentWidgetsState = widgets
-                        },
-                        orientation = Orientation.Horizontal,
-                        columnCount = columnCount,
-                        rowCount = rowCount,
-                        resizeThresholdPx = { 0 },
-                        launchAddActivity = {},
-                        launchReconfigure = { _, _ -> },
-                        launchShortcutIconOverride = {},
+                    dummyDelegate.viewModel.GridWrapper(
                         modifier = Modifier.scale(scale),
-                        rowSpanForAddButton = 1,
-                        enableSnapping = true,
-                        itemSpacingKey = PrefManager.KEY_FRAME_ITEM_SPACING,
-                        preferences = framePrefs.framePreferences,
-                        locked = false,
                     )
                 }
 
@@ -221,5 +186,47 @@ class PreviewDelegate(
 
         override val saveMode: FrameSizeAndPosition.FrameType
             get() = FrameSizeAndPosition.FrameType.SecondaryLockscreen.Portrait(frameId)
+
+        @Composable
+        override fun GridWrapper(modifier: Modifier) {
+            val rowCount by rememberPreferenceState(
+                key = PrefManager.KEY_FRAME_ROW_COUNT,
+                preferences = framePrefs.framePreferences,
+            ) {
+                framePrefs.rowCount
+            }
+            val columnCount by rememberPreferenceState(
+                key = PrefManager.KEY_FRAME_COL_COUNT,
+                preferences = framePrefs.framePreferences,
+            ) {
+                framePrefs.colCount
+            }
+
+            var currentWidgetsState by rememberPreferenceState(
+                key = FramePrefs.generateCurrentWidgetsKey(frameId),
+                value = { framePrefs.currentWidgets.toList() },
+                onChanged = { _, value -> framePrefs.currentWidgets = value.toSet() },
+            )
+
+            WidgetGrid(
+                currentWidgets = currentWidgetsState,
+                onWidgetsChanged = { widgets ->
+                    currentWidgetsState = widgets
+                },
+                orientation = Orientation.Horizontal,
+                columnCount = columnCount,
+                rowCount = rowCount,
+                resizeThresholdPx = { 0 },
+                launchAddActivity = {},
+                launchReconfigure = { _, _ -> },
+                launchShortcutIconOverride = {},
+                modifier = modifier,
+                rowSpanForAddButton = 1,
+                enableSnapping = true,
+                itemSpacingKey = PrefManager.KEY_FRAME_ITEM_SPACING,
+                preferences = framePrefs.framePreferences,
+                locked = false,
+            )
+        }
     }
 }

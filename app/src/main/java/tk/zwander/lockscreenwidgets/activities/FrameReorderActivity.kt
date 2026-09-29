@@ -13,11 +13,13 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
@@ -71,18 +73,6 @@ class FrameReorderActivity : BaseActivity() {
         }
 
         setThemedContent {
-            val density = LocalDensity.current
-
-            val framePrefs = remember {
-                FrameSpecificPreferences[delegate.holderId]
-            }
-
-            var currentWidgetsState by rememberPreferenceState(
-                key = FramePrefs.generateCurrentWidgetsKey(delegate.holderId),
-                value = { delegate.currentWidgets.toList() },
-                onChanged = { _, value -> delegate.currentWidgets = value.toSet() },
-            )
-
             Surface(
                 modifier = Modifier
                     .fillMaxSize()
@@ -113,44 +103,12 @@ class FrameReorderActivity : BaseActivity() {
                             .weight(0.75f),
                         contentAlignment = Alignment.TopCenter,
                     ) {
-                        delegate.viewModel.WidgetGrid(
-                            currentWidgets = currentWidgetsState,
-                            onWidgetsChanged = {
-                                currentWidgetsState = it
-                            },
-                            orientation = Orientation.Horizontal,
-                            columnCount = delegate.colCount,
-                            rowCount = delegate.rowCount,
-                            resizeThresholdPx = { with(density) { 64.dp.roundToPx() } },
-                            launchAddActivity = {
-                                eventManager.sendEvent(Event.LaunchAddWidget(delegate.holderId))
-                            },
-                            launchReconfigure = { id, providerInfo ->
-                                ReconfigureFrameWidgetActivity.launch(
-                                    this@FrameReorderActivity,
-                                    id,
-                                    delegate.holderId,
-                                    providerInfo,
-                                )
-                            },
-                            launchShortcutIconOverride = { id ->
-                                SelectIconPackActivity.launchForOverride(this@FrameReorderActivity, id)
-                            },
-                            locked = false,
-                            itemSpacingKey = PrefManager.KEY_FRAME_ITEM_SPACING,
+                        delegate.viewModel.GridWrapper(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .aspectRatio(1f)
                                 .background(MaterialTheme.colorScheme.surfaceDim)
                                 .padding(vertical = 8.dp),
-                            rowSpanForAddButton = 1,
-                            minColSpan = 1,
-                            minRowSpan = 1,
-                            enableSnapping = true,
-                            contentPadding = PaddingValues.Zero,
-                            lazyGridState = rememberLazySpannedGridState(),
-                            preferences = framePrefs.framePreferences,
-                            blockIndividualWidgetTouches = true,
                         )
                     }
                 }
@@ -193,5 +151,57 @@ class FrameReorderActivity : BaseActivity() {
         override val saveMode: FrameSizeAndPosition.FrameType = FrameSizeAndPosition.FrameType.Preview.Portrait
         override val ignoreWidgetTouchesKey: Pair<String, SharedPreferences>? = null
         override val doubleTapTurnOffDisplayKey: String? = null
+
+        @Composable
+        override fun GridWrapper(modifier: Modifier) {
+            val context = LocalContext.current
+            val density = LocalDensity.current
+
+            val framePrefs = remember {
+                FrameSpecificPreferences[delegate.holderId]
+            }
+
+            var currentWidgetsState by rememberPreferenceState(
+                key = FramePrefs.generateCurrentWidgetsKey(delegate.holderId),
+                value = { delegate.currentWidgets.toList() },
+                onChanged = { _, value -> delegate.currentWidgets = value.toSet() },
+            )
+
+            delegate.viewModel.WidgetGrid(
+                currentWidgets = currentWidgetsState,
+                onWidgetsChanged = {
+                    currentWidgetsState = it
+                },
+                orientation = Orientation.Horizontal,
+                columnCount = delegate.colCount,
+                rowCount = delegate.rowCount,
+                resizeThresholdPx = { with(density) { 64.dp.roundToPx() } },
+                launchAddActivity = {
+                    context.eventManager.sendEvent(Event.LaunchAddWidget(delegate.holderId))
+                },
+                launchReconfigure = { id, providerInfo ->
+                    ReconfigureFrameWidgetActivity.launch(
+                        context,
+                        id,
+                        delegate.holderId,
+                        providerInfo,
+                    )
+                },
+                launchShortcutIconOverride = { id ->
+                    SelectIconPackActivity.launchForOverride(context, id)
+                },
+                locked = false,
+                itemSpacingKey = PrefManager.KEY_FRAME_ITEM_SPACING,
+                modifier = modifier,
+                rowSpanForAddButton = 1,
+                minColSpan = 1,
+                minRowSpan = 1,
+                enableSnapping = true,
+                contentPadding = PaddingValues.Zero,
+                lazyGridState = rememberLazySpannedGridState(),
+                preferences = framePrefs.framePreferences,
+                blockIndividualWidgetTouches = true,
+            )
+        }
     }
 }

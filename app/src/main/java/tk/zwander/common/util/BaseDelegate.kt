@@ -4,38 +4,21 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.content.SharedPreferences
 import android.os.Build
-import android.view.GestureDetector
-import android.view.MotionEvent
-import android.view.View
-import android.view.ViewGroup
-import android.view.WindowManager
+import android.view.*
 import androidx.annotation.CallSuper
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.AbstractComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.platform.compositionContext
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleEventObserver
-import androidx.lifecycle.LifecycleRegistry
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.setViewTreeLifecycleOwner
-import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.*
 import androidx.savedstate.SavedStateRegistry
 import androidx.savedstate.SavedStateRegistryController
 import androidx.savedstate.SavedStateRegistryOwner
 import androidx.savedstate.setViewTreeSavedStateRegistryOwner
 import dev.zwander.lswinterconnect.safeApplicationContext
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.cancel
-import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.*
 import tk.zwander.common.compose.util.widgetViewCacheRegistry
 import tk.zwander.common.data.WidgetData
 import tk.zwander.common.data.WidgetType
@@ -365,5 +348,8 @@ abstract class BaseDelegate<State : Any>(
         fun updateState(transform: (State) -> State) {
             delegate.updateState(transform)
         }
+
+        @Composable
+        abstract fun GridWrapper(modifier: Modifier = Modifier)
     }
 }

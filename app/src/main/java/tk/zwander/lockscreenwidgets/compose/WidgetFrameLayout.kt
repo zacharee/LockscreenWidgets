@@ -36,7 +36,6 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.zIndex
 import com.bugsnag.android.performance.compose.MeasuredComposable
-import tk.zwander.common.compose.FrameWidgetGridWrapper
 import tk.zwander.common.compose.components.BlurView
 import tk.zwander.common.compose.components.ConfirmFrameRemovalLayout
 import tk.zwander.common.compose.components.ConfirmWidgetRemovalLayout
@@ -247,7 +246,7 @@ fun WidgetFrameDelegate.WidgetFrameViewModel.WidgetFrameLayout(
                 exit = fadeOut(),
                 visible = !firstViewing,
             ) {
-                FrameWidgetGridWrapper(modifier = Modifier.fillMaxSize())
+                GridWrapper(modifier = Modifier.fillMaxSize())
             }
 
             HintIntroLayout(

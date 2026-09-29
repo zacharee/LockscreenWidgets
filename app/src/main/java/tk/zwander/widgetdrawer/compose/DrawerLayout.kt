@@ -17,7 +17,6 @@ import androidx.compose.ui.input.pointer.motionEventSpy
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.zIndex
-import tk.zwander.common.compose.DrawerWidgetGridWrapper
 import tk.zwander.common.compose.components.BlurView
 import tk.zwander.common.compose.components.ConfirmWidgetRemovalLayout
 import tk.zwander.common.compose.components.DrawerToolbar
@@ -28,7 +27,6 @@ import tk.zwander.widgetdrawer.util.DrawerDelegate
 
 @Composable
 fun DrawerDelegate.DrawerViewModel.DrawerLayout(
-    previousNonZeroCutout: Int,
     modifier: Modifier = Modifier,
 ) {
     val context = LocalContext.current
@@ -106,8 +104,7 @@ fun DrawerDelegate.DrawerViewModel.DrawerLayout(
                 )
             }
 
-            DrawerWidgetGridWrapper(
-                previousNonZeroCutout = previousNonZeroCutout,
+            GridWrapper(
                 modifier = Modifier
                     .fillMaxSize()
                     .zIndex(0f),
