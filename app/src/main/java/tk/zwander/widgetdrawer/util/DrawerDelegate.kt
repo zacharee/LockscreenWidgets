@@ -7,10 +7,7 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.content.SharedPreferences
 import android.graphics.PixelFormat
-import android.view.Gravity
-import android.view.View
-import android.view.ViewConfiguration
-import android.view.WindowManager
+import android.view.*
 import android.view.animation.AccelerateInterpolator
 import android.view.animation.DecelerateInterpolator
 import androidx.compose.foundation.clickable
@@ -24,14 +21,10 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalResources
-import androidx.compose.ui.platform.compositionContext
 import androidx.compose.ui.unit.dp
 import androidx.core.view.ViewCompat
-import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.setViewTreeLifecycleOwner
 import androidx.lifecycle.viewModelScope
-import androidx.savedstate.setViewTreeSavedStateRegistryOwner
 import com.joaomgcd.taskerpluginlibrary.extensions.requestQuery
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -119,8 +112,10 @@ class DrawerDelegate private constructor(context: Context, displayId: String) :
             gravity = Gravity.TOP or Gravity.CENTER
         }
     }
+
+    var previousNonZeroCutout by mutableIntStateOf(0)
+
     override val rootView by lazy {
-        var previousNonZeroCutout by mutableIntStateOf(0)
         viewModel.createComposeViewHolder {
             val closeOnTap by rememberPreferenceState(
                 key = PrefManager.KEY_CLOSE_DRAWER_ON_EMPTY_TAP,
@@ -129,7 +124,7 @@ class DrawerDelegate private constructor(context: Context, displayId: String) :
             }
 
             CompositionLocalProvider(
-                LocalTopInset provides previousNonZeroCutout,
+                LocalTopInset provides rememberUpdatedState(previousNonZeroCutout).value,
             ) {
                 DrawerLayout(
                     modifier = Modifier
@@ -150,18 +145,6 @@ class DrawerDelegate private constructor(context: Context, displayId: String) :
                         ),
                 )
             }
-        }.also {
-            it.addOnAttachStateChangeListener(
-                object : View.OnAttachStateChangeListener {
-                    @SuppressLint("WrongConstant")
-                    override fun onViewAttachedToWindow(v: View) {
-                        previousNonZeroCutout = ViewCompat.getRootWindowInsets(v)
-                            ?.getInsets(0xFFFFFFFF.toInt())?.top?.takeIf { top -> top > 0 } ?: statusBarHeight
-                    }
-
-                    override fun onViewDetachedFromWindow(v: View) {}
-                },
-            )
         }
     }
 
@@ -192,22 +175,11 @@ class DrawerDelegate private constructor(context: Context, displayId: String) :
                 },
                 modifier = Modifier.fillMaxSize(),
             )
-        }.apply {
-            addOnAttachStateChangeListener(
-                object : View.OnAttachStateChangeListener {
-                    override fun onViewAttachedToWindow(v: View) {
-                        lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_RESUME)
-                        v.hideNavBarsForGestureExclusion()
-                    }
-
-                    override fun onViewDetachedFromWindow(v: View) {
-                        if (!rootView.isAttachedToWindow) {
-                            lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_PAUSE)
-                        }
-                    }
-                },
-            )
         }
+    }
+
+    override val secondaryViews: List<ViewGroup> by lazy {
+        listOf(handle)
     }
 
     override val prefsHandler = HandlerRegistry {
@@ -392,10 +364,6 @@ class DrawerDelegate private constructor(context: Context, displayId: String) :
             return
         }
 
-        handle.setViewTreeLifecycleOwner(this)
-        handle.setViewTreeSavedStateRegistryOwner(this)
-        handle.compositionContext = recomposer
-
         viewModel.viewModelScope.launch(Dispatchers.Main) {
             tryShowHandle()
         }
@@ -432,18 +400,24 @@ class DrawerDelegate private constructor(context: Context, displayId: String) :
         invalidateInstance()
     }
 
-    override fun onRootViewAttached() {
-        super.onRootViewAttached()
+    @SuppressLint("WrongConstant")
+    override fun onViewAttached(view: View) {
+        super.onViewAttached(view)
 
-        rootView.hideNavBarsForGestureExclusion()
+        view.hideNavBarsForGestureExclusion()
+
+        if (view == rootView) {
+            previousNonZeroCutout = ViewCompat.getRootWindowInsets(view)
+                ?.getInsets(0xFFFFFFFF.toInt())?.top?.takeIf { top -> top > 0 } ?: statusBarHeight
+        }
     }
 
-    override fun onRootViewDetached() {
-        if (!rootView.isAttachedToWindow && !handle.isAttachedToWindow) {
-            super.onRootViewDetached()
-        }
+    override fun onViewDetached(view: View) {
+        super.onViewDetached(view)
 
-        eventManager.sendEvent(Event.DrawerAttachmentState(false))
+        if (!rootView.isAttachedToWindow) {
+            eventManager.sendEvent(Event.DrawerAttachmentState(false))
+        }
     }
 
     private suspend fun hideAll() {
@@ -511,7 +485,7 @@ class DrawerDelegate private constructor(context: Context, displayId: String) :
                 }
             }
 
-            if (isAttached) {
+            if (rootView.isAttachedToWindow) {
                 rootView.hideNavBarsForGestureExclusion()
                 wm?.safeUpdateViewLayout(rootView, params)
             }

@@ -67,6 +67,10 @@ abstract class BaseDelegate<State : Any>(
     protected abstract val prefsHandler: HandlerRegistry
     protected abstract val params: WindowManager.LayoutParams
     protected abstract val rootView: ViewGroup
+    protected open val secondaryViews: List<ViewGroup> = listOf()
+
+    protected val allViews: List<ViewGroup>
+        get() = [rootView] + secondaryViews
 
     protected val lifecycleRegistry by lazy { LifecycleRegistry(this) }
     protected val savedStateRegistryController by lazy { SavedStateRegistryController.create(this) }
@@ -74,15 +78,15 @@ abstract class BaseDelegate<State : Any>(
     override val savedStateRegistry: SavedStateRegistry by lazy { savedStateRegistryController.savedStateRegistry }
 
     val isAttached: Boolean
-        get() = rootView.isAttachedToWindow
+        get() = allViews.any { it.isAttachedToWindow }
 
-    private val rootViewAttachmentStateListener = object : View.OnAttachStateChangeListener {
+    private val viewAttachmentStateListener = object : View.OnAttachStateChangeListener {
         override fun onViewAttachedToWindow(v: View) {
-            onRootViewAttached()
+            onViewAttached(v)
         }
 
         override fun onViewDetachedFromWindow(v: View) {
-            onRootViewDetached()
+            onViewDetached(v)
         }
     }
 
@@ -111,17 +115,19 @@ abstract class BaseDelegate<State : Any>(
 
         lifecycleRegistry.addObserver(lifecycleObserver)
 
-        rootView.setViewTreeLifecycleOwner(this)
-        rootView.setViewTreeSavedStateRegistryOwner(this)
-        rootView.compositionContext = recomposer
-        (rootView as? AbstractComposeView)
-            ?.setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
+        allViews.forEach {
+            it.setViewTreeLifecycleOwner(this)
+            it.setViewTreeSavedStateRegistryOwner(this)
+            it.compositionContext = recomposer
+            (it as? AbstractComposeView)
+                ?.setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
+            it.addOnAttachStateChangeListener(viewAttachmentStateListener)
+        }
 
         // Will listen for frame prefs with ID -2 because of the drawer delegate.
         prefsHandler.register(this, holderId)
         eventManager.addObserver(this)
         widgetHost.addOnClickCallback(this)
-        rootView.addOnAttachStateChangeListener(rootViewAttachmentStateListener)
 
         viewModel.viewModelScope.launch {
             displayFlow.collect {
@@ -166,7 +172,9 @@ abstract class BaseDelegate<State : Any>(
         prefsHandler.unregister(this, holderId)
         widgetHost.removeOnClickCallback(this)
 
-        rootView.removeOnAttachStateChangeListener(rootViewAttachmentStateListener)
+        allViews.forEach {
+            it.removeOnAttachStateChangeListener(viewAttachmentStateListener)
+        }
         recomposer.cancel()
         lifecycleRegistry.removeObserver(lifecycleObserver)
 
@@ -247,13 +255,15 @@ abstract class BaseDelegate<State : Any>(
     }
 
     @CallSuper
-    protected open fun onRootViewAttached() {
+    protected open fun onViewAttached(view: View) {
         lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_RESUME)
     }
 
     @CallSuper
-    protected open fun onRootViewDetached() {
-        lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_PAUSE)
+    protected open fun onViewDetached(view: View) {
+        if (!isAttached) {
+            lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_PAUSE)
+        }
     }
 
     protected suspend fun preloadViews() = coroutineScope {

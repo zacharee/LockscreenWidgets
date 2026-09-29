@@ -4,10 +4,7 @@ import android.content.Context
 import android.content.SharedPreferences
 import android.graphics.*
 import android.graphics.drawable.Drawable
-import android.view.Display
-import android.view.Gravity
-import android.view.Surface
-import android.view.WindowManager
+import android.view.*
 import androidx.compose.animation.*
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.layout.*
@@ -932,19 +929,19 @@ open class WidgetFrameDelegate protected constructor(
         }
     }
 
-    override fun onRootViewAttached() {
-        super.onRootViewAttached()
+    override fun onViewAttached(view: View) {
+        super.onViewAttached(view)
 
         rootView.post {
             onFrameAttachmentStateChanged(true)
         }
     }
 
-    override fun onRootViewDetached() {
+    override fun onViewDetached(view: View) {
         viewModel.isEditing.value = false
         viewModel.isRemoving.value = false
 
-        super.onRootViewDetached()
+        super.onViewDetached(view)
 
         onFrameAttachmentStateChanged(false)
     }
