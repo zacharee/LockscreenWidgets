@@ -120,7 +120,7 @@ abstract class BaseDelegate<State : Any>(
             it.setViewTreeSavedStateRegistryOwner(this)
             it.compositionContext = recomposer
             (it as? AbstractComposeView)
-                ?.setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
+                ?.setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnDetachedFromWindow)
             it.addOnAttachStateChangeListener(viewAttachmentStateListener)
         }
 
@@ -256,13 +256,19 @@ abstract class BaseDelegate<State : Any>(
 
     @CallSuper
     protected open fun onViewAttached(view: View) {
-        lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_RESUME)
+        view.post {
+            if (lifecycleRegistry.currentState < Lifecycle.State.STARTED) {
+                lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_START)
+                lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_RESUME)
+            }
+        }
     }
 
     @CallSuper
     protected open fun onViewDetached(view: View) {
         if (!isAttached) {
             lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_PAUSE)
+            lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_STOP)
         }
     }
 
