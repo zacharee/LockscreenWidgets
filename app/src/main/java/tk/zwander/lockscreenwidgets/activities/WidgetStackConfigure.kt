@@ -804,7 +804,7 @@ fun Content(
                     OutlinedButton(
                         onClick = {
                             localAddedWidgets.forEach {
-                                context.widgetHostCompat.deleteAppWidgetId(it.id)
+                                context.idManager.removeId(it.id)
                             }
                             onFinish(false)
                         },
@@ -831,7 +831,7 @@ fun Content(
                             onStylesChange(localStyles)
 
                             localRemovedWidgets.forEach {
-                                context.widgetHostCompat.deleteAppWidgetId(it.id)
+                                context.idManager.removeId(it.id)
                             }
                             onFinish(true)
                         },

@@ -7,7 +7,6 @@ import android.view.Display
 import androidx.core.content.edit
 import dev.zwander.lswinterconnect.safeApplicationContext
 import tk.zwander.common.data.WidgetData
-import tk.zwander.common.host.widgetHostCompat
 import tk.zwander.common.util.*
 import tk.zwander.lockscreenwidgets.util.FramePrefs
 import tk.zwander.lockscreenwidgets.util.FrameSpecificPreferences
@@ -354,10 +353,10 @@ class BackupRestoreManager private constructor(private val context: Context) {
                 Which.FRAME -> context.prefManager.currentWidgets
                 Which.DRAWER -> context.prefManager.drawerWidgets
             }
-            val widgetHost = context.widgetHostCompat
+            val idManager = context.idManager
 
             old.forEach {
-                widgetHost.deleteAppWidgetId(it.id)
+                idManager.removeId(it.id)
             }
 
             when (which) {

@@ -70,7 +70,6 @@ import tk.zwander.common.compose.util.rememberPreferenceState
 import tk.zwander.common.compose.util.widgetViewCacheRegistry
 import tk.zwander.common.data.WidgetData
 import tk.zwander.common.data.WidgetType
-import tk.zwander.common.host.widgetHostCompat
 import tk.zwander.common.listeners.WidgetResizeListener
 import tk.zwander.common.util.*
 import tk.zwander.common.util.mitigations.SafeContextWrapper
@@ -510,7 +509,6 @@ private fun <VM : BaseDelegate.BaseViewModel<*, *>> VM.WidgetContents(
     onWidgetsChanged: (List<WidgetData>) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val host = remember { context.widgetHostCompat }
     val manager = remember { context.appWidgetManager }
     val viewCacheRegistry = remember { context.widgetViewCacheRegistry }
     val resources = LocalResources.current
@@ -578,7 +576,7 @@ private fun <VM : BaseDelegate.BaseViewModel<*, *>> VM.WidgetContents(
                             onWidgetsChanged(
                                 currentWidgets.toMutableList().apply {
                                     remove(data)
-                                    host.deleteAppWidgetId(data.id)
+                                    context.idManager.removeId(data.id)
                                 },
                             )
                         } else {
@@ -593,7 +591,7 @@ private fun <VM : BaseDelegate.BaseViewModel<*, *>> VM.WidgetContents(
                     onWidgetsChanged(
                         currentWidgets.toMutableList().apply {
                             remove(data)
-                            host.deleteAppWidgetId(data.id)
+                            context.idManager.removeId(data.id)
                         },
                     )
                 }

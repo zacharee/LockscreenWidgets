@@ -73,7 +73,7 @@ abstract class BaseBindWidgetActivity : BaseActivity(), IConfigureActivity {
 
                     if (widgetInfo == null) {
                         logUtils.debugLog("Unable to get app widget info for ID $id", null)
-                        widgetHost.deleteAppWidgetId(id)
+                        idManager.removeId(id)
                     } else {
                         //The user has granted permission for Lockscreen Widgets
                         //so retry binding the widget
@@ -83,7 +83,7 @@ abstract class BaseBindWidgetActivity : BaseActivity(), IConfigureActivity {
                 } else {
                     //The user didn't allow Lockscreen Widgets to bind
                     //widgets, so delete the allocated ID
-                    widgetHost.deleteAppWidgetId(id)
+                    idManager.removeId(id)
                 }
             } finally {
                 currentRequestId = null
@@ -325,7 +325,7 @@ abstract class BaseBindWidgetActivity : BaseActivity(), IConfigureActivity {
                     permRequest.launch(intent)
                 } catch (e: ActivityNotFoundException) {
                     logUtils.normalLog("Unable to launch widget permission request", e)
-                    widgetHost.deleteAppWidgetId(id)
+                    idManager.removeId(id)
                     pendingErrors++
 
                     MaterialAlertDialogBuilder(this)

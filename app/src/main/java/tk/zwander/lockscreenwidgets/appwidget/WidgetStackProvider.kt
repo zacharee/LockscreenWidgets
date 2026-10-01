@@ -836,7 +836,7 @@ class WidgetStackProvider : AppWidgetProvider() {
         super.onDeleted(context, appWidgetIds)
 
         appWidgetIds.forEach { appWidgetId ->
-            context.widgetHostCompat.deleteAppWidgetId(appWidgetId)
+            context.idManager.removeId(appWidgetId)
         }
     }
 

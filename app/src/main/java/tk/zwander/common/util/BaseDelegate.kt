@@ -21,7 +21,6 @@ import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 import tk.zwander.common.compose.util.widgetViewCacheRegistry
 import tk.zwander.common.data.WidgetData
-import tk.zwander.common.data.WidgetType
 import tk.zwander.common.data.provider.ICurrentWidgetsProvider
 import tk.zwander.common.data.provider.IRowColumProvider
 import tk.zwander.common.host.WidgetHostCompat
@@ -195,15 +194,7 @@ abstract class BaseDelegate<State : Any>(
                 if (event.remove && currentWidgets.any { it.id == event.item?.id }) {
                     val newWidgets = currentWidgets.toMutableSet().apply {
                         removeIf { it.id == event.item?.id }
-                        when (event.item?.safeType) {
-                            WidgetType.WIDGET -> widgetHost.deleteAppWidgetId(event.item.id)
-                            WidgetType.SHORTCUT,
-                            WidgetType.LAUNCHER_SHORTCUT,
-                            WidgetType.LAUNCHER_ITEM,
-                                -> idManager.removeShortcutId(event.item.id)
-
-                            else -> {}
-                        }
+                        event.item?.let { idManager.removeId(it.id) }
                     }
 
                     viewModel.currentEditingInterfaceId.value = null

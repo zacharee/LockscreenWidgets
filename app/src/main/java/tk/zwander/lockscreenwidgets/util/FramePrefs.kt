@@ -7,7 +7,6 @@ import android.content.SharedPreferences
 import android.graphics.Color
 import androidx.core.content.edit
 import tk.zwander.common.data.WidgetData
-import tk.zwander.common.host.widgetHostCompat
 import tk.zwander.common.util.*
 import tk.zwander.lockscreenwidgets.App
 
@@ -272,7 +271,7 @@ object FramePrefs {
             }
 
         getWidgetsForFrame(context, frameId).forEach { data ->
-            context.widgetHostCompat.deleteAppWidgetId(data.id)
+            context.idManager.removeId(data.id)
         }
         context.prefManager.remove(generatePrefKey(KEY_FRAME_WIDGETS, frameId))
 

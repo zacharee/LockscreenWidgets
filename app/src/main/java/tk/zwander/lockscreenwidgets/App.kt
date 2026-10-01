@@ -336,8 +336,9 @@ class App : Application(), CoroutineScope by scope, EventObserver {
 
             logUtils.debugLog("Found widgets $widgetsToDelete not in any widget lists", null)
 
+            val idManager = idManager
             widgetsToDelete.forEach {
-                widgetHostCompat.deleteAppWidgetId(it)
+                idManager.removeId(it)
             }
         }
 

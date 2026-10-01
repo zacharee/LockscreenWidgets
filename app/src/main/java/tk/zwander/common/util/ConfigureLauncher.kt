@@ -260,7 +260,7 @@ class ConfigureLauncher(
             currentConfigId?.let {
                 //Widget configuration was canceled: delete the
                 //allocated ID
-                widgetHost.deleteAppWidgetId(it)
+                activity.idManager.removeId(it)
             }
         }
     }
