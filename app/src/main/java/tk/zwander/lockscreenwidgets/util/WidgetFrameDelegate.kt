@@ -524,7 +524,7 @@ open class WidgetFrameDelegate protected constructor(
                 extras = mapOf(
                     "frameId" to id,
                     "rootAttachedBefore" to rootView.isAttachedToWindow,
-                    "animState" to viewModel.animationState.toString(),
+                    "animState" to viewModel.animationState.value.toString(),
                 ),
             )
 
@@ -554,7 +554,7 @@ open class WidgetFrameDelegate protected constructor(
                         "Adding overlay failed",
                         extras = mapOf(
                             "frameId" to id,
-                            "animState" to viewModel.animationState.toString(),
+                            "animState" to viewModel.animationState.value.toString(),
                         ),
                     )
                 }
@@ -578,7 +578,7 @@ open class WidgetFrameDelegate protected constructor(
                 extras = mapOf(
                     "frameId" to id,
                     "rootAttachedBefore" to rootView.isAttachedToWindow,
-                    "animState" to viewModel.animationState.toString(),
+                    "animState" to viewModel.animationState.value.toString(),
                 ),
             )
 
