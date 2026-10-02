@@ -74,7 +74,6 @@ import tk.zwander.common.data.WidgetData
 import tk.zwander.common.data.WidgetSizeData
 import tk.zwander.common.data.WidgetStackStyle
 import tk.zwander.common.host.WidgetHostCompat
-import tk.zwander.common.host.widgetHostCompat
 import tk.zwander.common.util.*
 import tk.zwander.lockscreenwidgets.R
 import tk.zwander.lockscreenwidgets.activities.add.AddWidgetStackWidgetActivity
@@ -345,7 +344,7 @@ fun Content(
 
                         maxHeight.takeIf { it != 0 }?.let { maxHeight ->
                             (minWidth / maxHeight.toFloat())
-                        }?.takeIf { !it.isNaN() }
+                        }?.takeIf { !it.isNaN() && it > 0 }
                             ?: firstSize?.let { firstSize ->
                                 firstSize.height.takeIf { it != 0f }?.let { height -> firstSize.width / height }
                             }?.takeIf { !it.isNaN() && it > 0 }
