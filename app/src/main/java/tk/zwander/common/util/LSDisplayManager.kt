@@ -6,9 +6,8 @@ import android.content.ContextWrapper
 import android.graphics.Point
 import android.hardware.display.DisplayManager
 import android.os.Build
-import android.view.Display
-import android.view.Surface
-import android.view.WindowManager
+import android.os.ServiceManager
+import android.view.*
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.dp
 import dev.zwander.lswinterconnect.safeApplicationContext
@@ -46,6 +45,7 @@ class LSDisplayManager private constructor(context: Context) : ContextWrapper(co
     val multiDisplaySupported = Build.VERSION.SDK_INT >= Build.VERSION_CODES.R
 
     val displayManager = getSystemService(DISPLAY_SERVICE) as DisplayManager
+    val windowManager = IWindowManager.Stub.asInterface(ServiceManager.getService(WINDOW_SERVICE))
 
     private val displayListener = object : DisplayManager.DisplayListener {
         override fun onDisplayAdded(displayId: Int) {
@@ -56,7 +56,7 @@ class LSDisplayManager private constructor(context: Context) : ContextWrapper(co
 
         override fun onDisplayRemoved(displayId: Int) {
             logUtils.debugLog("Display $displayId removed", null)
-            availableDisplays.remove(displayId)
+            removeDisplay(displayId)
         }
 
         override fun onDisplayChanged(displayId: Int) {
@@ -124,22 +124,34 @@ class LSDisplayManager private constructor(context: Context) : ContextWrapper(co
 
         if (!display.isBuiltIn(isLikelyRazr)) {
             logUtils.debugLog("Display isn't internal, removing if exists and skipping processing", null)
-            availableDisplays.remove(displayId)
+            removeDisplay(displayId)
             return
         }
 
         if (!multiDisplaySupported && displayId != Display.DEFAULT_DISPLAY) {
             logUtils.debugLog("Multi-display isn't supported and display $displayId isn't default display", null)
-            availableDisplays.remove(displayId)
+            removeDisplay(displayId)
             return
         }
 
-        availableDisplays[displayId] = LSDisplay(
-            display = display,
-            density = Density(createDisplayContextCompat(display)),
-        ).also {
-            logUtils.debugLog("Processed display ${it.loggingId}", null)
-        }
+        setDisplay(
+            LSDisplay(
+                display = display,
+                density = Density(createDisplayContextCompat(display)),
+            ).also {
+                logUtils.debugLog("Processed display ${it.loggingId}", null)
+            },
+        )
+    }
+
+    private fun setDisplay(display: LSDisplay) {
+        availableDisplays[display.displayId] = display
+        display.onCreate(windowManager)
+    }
+
+    private fun removeDisplay(id: Int) {
+        val display = availableDisplays.remove(id)
+        display?.onDestroy(windowManager)
     }
 
     fun fetchDisplays() {
@@ -158,12 +170,14 @@ class LSDisplayManager private constructor(context: Context) : ContextWrapper(co
             }
             .toSet()
 
-        availableDisplays.value = concatenatedDisplays.map {
-            LSDisplay(
-                display = it,
-                density = Density(createDisplayContextCompat(it)),
+        concatenatedDisplays.forEach {
+            setDisplay(
+                LSDisplay(
+                    display = it,
+                    density = Density(createDisplayContextCompat(it)),
+                ),
             )
-        }.associateBy { it.displayId }
+        }
 
         logUtils.debugLog("Got displays ${availableDisplays.value.values.map { it.loggingId }}", null)
     }
@@ -209,6 +223,8 @@ class LSDisplay(
             this@LSDisplay.display.getRealSize(this)
         }
 
+    val rotatedRealSizeState: MutableStateFlow<Point> by lazy { MutableStateFlow(rotatedRealSize) }
+
     val screenOrientation: Int
         get() = this@LSDisplay.display.rotation
 
@@ -221,6 +237,12 @@ class LSDisplay(
     val isOn: Boolean
         get() = this@LSDisplay.display.state == Display.STATE_ON
 
+    private val rotationWatcher = object : IRotationWatcher.Stub() {
+        override fun onRotationChanged(rotation: Int) {
+            rotatedRealSizeState.value = rotatedRealSize
+        }
+    }
+
     fun dpToPx(dpValue: Number): Int {
         return with(density) {
             dpValue.toDouble().dp.roundToPx()
@@ -231,6 +253,21 @@ class LSDisplay(
         return with(density) {
             pxValue.toDouble().roundToInt().toDp().value
         }
+    }
+
+    fun onCreate(windowManager: IWindowManager) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            windowManager.watchRotation(rotationWatcher, displayId)
+        } else {
+            IWindowManager::class.java.getMethod(
+                "watchRotation",
+                IRotationWatcher::class.java,
+            ).invoke(windowManager, rotationWatcher)
+        }
+    }
+
+    fun onDestroy(windowManager: IWindowManager) {
+        windowManager.removeRotationWatcher(rotationWatcher)
     }
 }
 
