@@ -16,15 +16,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.absolutePadding
 import androidx.compose.foundation.shape.AbsoluteRoundedCornerShape
 import androidx.compose.foundation.systemGestureExclusion
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberUpdatedState
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
@@ -32,17 +24,11 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.input.pointer.motionEventSpy
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import tk.zwander.common.compose.LocalLSDisplayManager
 import tk.zwander.common.compose.util.rememberPreferenceState
-import tk.zwander.common.util.Event
-import tk.zwander.common.util.PrefManager
-import tk.zwander.common.util.collectAsMutableState
-import tk.zwander.common.util.eventManager
-import tk.zwander.common.util.prefManager
-import tk.zwander.common.util.vibrate
+import tk.zwander.common.util.*
 import tk.zwander.lockscreenwidgets.R
 import tk.zwander.widgetdrawer.util.DrawerDelegate
 import kotlin.math.absoluteValue
@@ -57,12 +43,9 @@ fun DrawerDelegate.DrawerViewModel.DrawerHandle(
 ) {
     val context = LocalContext.current
     val density = LocalDensity.current
-    val resources = LocalResources.current
     val lsDisplayManager = LocalLSDisplayManager.current
     val currentDisplay by lsDisplayManager.collectDisplay(displayId).collectAsState(null)
-    val screenWidth = remember(currentDisplay, resources.configuration.orientation) {
-        currentDisplay?.rotatedRealSize?.x ?: 1
-    }
+    val screenWidth = currentDisplay?.rotatedRealSizeState?.collectAsState()?.value?.x ?: 1
 
     var side by rememberPreferenceState(
         key = PrefManager.KEY_DRAWER_HANDLE_SIDE,

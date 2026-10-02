@@ -550,9 +550,8 @@ class DrawerDelegate private constructor(context: Context, displayId: String) :
             val context = LocalContext.current
             val resources = LocalResources.current
             val prefManager = remember(context) { context.prefManager }
-            val rowCount = remember(display) {
-                (display.orDefault(context).rotatedRealSize.y / resources.getDimensionPixelSize(R.dimen.drawer_row_height)).coerceAtLeast(20)
-            }
+            val rowCount = (display.orDefault(context).rotatedRealSizeState.collectAsState().value.y /
+                    resources.getDimensionPixelSize(R.dimen.drawer_row_height)).coerceAtLeast(20)
             val columnCount by rememberPreferenceState(
                 key = PrefManager.KEY_DRAWER_COL_COUNT,
             ) {
