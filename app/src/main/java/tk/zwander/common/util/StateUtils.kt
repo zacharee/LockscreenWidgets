@@ -43,3 +43,7 @@ operator fun <K, V> MutableStateFlow<Map<K, V>>.set(key: K, value: V) {
         this[key] = value
     }
 }
+
+operator fun <K, V> MutableStateFlow<Map<K, V>>.get(key: K): V? {
+    return this.value[key]
+}

@@ -145,6 +145,12 @@ class LSDisplayManager private constructor(context: Context) : ContextWrapper(co
     }
 
     private fun setDisplay(display: LSDisplay) {
+        val existingDisplay = availableDisplays[display.displayId]
+
+        if (existingDisplay != display) {
+            existingDisplay?.onDestroy(windowManager)
+        }
+
         availableDisplays[display.displayId] = display
         display.onCreate(windowManager)
     }
@@ -155,29 +161,26 @@ class LSDisplayManager private constructor(context: Context) : ContextWrapper(co
     }
 
     fun fetchDisplays() {
+        @SuppressLint("InlinedApi")
         val builtInDisplays = displayManager.getDisplays(DisplayManager.DISPLAY_CATEGORY_BUILT_IN_DISPLAYS)
         val allIncludingDisabled = displayManager.getDisplays(DisplayManager.DISPLAY_CATEGORY_ALL_INCLUDING_DISABLED)
-            .filter { it.isBuiltIn(isLikelyRazr) }
         // Samsung has extra filtering on DISPLAY_CATEGORY_ALL_INCLUDING_DISABLED but not this.
         val samsung = displayManager.getDisplays("com.samsung.android.hardware.display.category.BUILTIN")
-            .filter { it.isBuiltIn(isLikelyRazr) }
-        val allDisplays = displayManager.displays.filter {
-            it.isBuiltIn(isLikelyRazr)
-        }
-        val concatenatedDisplays = (builtInDisplays + allIncludingDisabled + allDisplays + samsung)
-            .filter {
-                (multiDisplaySupported || it.displayId == Display.DEFAULT_DISPLAY)
-            }
-            .toSet()
+        val allDisplays = displayManager.displays
 
-        concatenatedDisplays.forEach {
-            setDisplay(
-                LSDisplay(
-                    display = it,
-                    density = Density(createDisplayContextCompat(it)),
-                ),
-            )
-        }
+        (builtInDisplays + allIncludingDisabled + allDisplays + samsung)
+            .associateBy { it.displayId }
+            .forEach { [_, display] ->
+                if (display.isBuiltIn(isLikelyRazr) &&
+                    (multiDisplaySupported || display.displayId == Display.DEFAULT_DISPLAY)) {
+                    setDisplay(
+                        LSDisplay(
+                            display = display,
+                            density = Density(createDisplayContextCompat(display)),
+                        ),
+                    )
+                }
+            }
 
         logUtils.debugLog("Got displays ${availableDisplays.value.values.map { it.loggingId }}", null)
     }
@@ -200,7 +203,7 @@ class LSDisplayManager private constructor(context: Context) : ContextWrapper(co
     }
 }
 
-class LSDisplay(
+data class LSDisplay(
     val display: Display,
     val density: Density,
 ) {
