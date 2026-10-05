@@ -33,6 +33,7 @@ android {
         versionName = "4.7.1"
 
         manifestPlaceholders["build_uuid"] = UUID.nameUUIDFromBytes("LockscreenWidgets_${versionCode}".toByteArray()).toString()
+        manifestPlaceholders["isDebug"] = false
 
         @Suppress("UnstableApiUsage")
         externalNativeBuild {
@@ -43,6 +44,12 @@ android {
 
             ndkBuild {
                 arguments.add("LOCAL_LDFLAGS+=-Wl,--build-id=none")
+            }
+        }
+
+        buildTypes {
+            debug {
+                manifestPlaceholders["isDebug"] = true
             }
         }
     }
@@ -171,6 +178,10 @@ dependencies {
     implementation(libs.lazyspannedgrid)
     implementation(libs.lazyspannedgrid.reorderable)
     implementation(libs.lazyspannedgrid.reorderable.calvin)
+
+    implementation(libs.glance)
+    implementation(libs.glance.appwidget)
+    implementation(libs.glance.material3)
 
     implementation(project(":lswinterconnect"))
 

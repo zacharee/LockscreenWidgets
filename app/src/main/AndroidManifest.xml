@@ -459,6 +459,18 @@
                 android:resource="@xml/open_drawer_provider_info" />
         </receiver>
 
+        <receiver android:name="tk.zwander.common.appwidget.GlanceTestWidgetReceiver"
+            android:label="Test Widget"
+            android:exported="true"
+            android:enabled="${isDebug}">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/glance_test_widget_provider_info" />
+        </receiver>
+
         <receiver android:name="tk.zwander.common.receivers.OpenDrawerReceiver"
             android:label="@string/open_drawer"
             android:exported="true"
