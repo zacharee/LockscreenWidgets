@@ -5,9 +5,9 @@
     <string name="edit_gesture_hint">اضغط على التطبيق المصغر بإصبعين للتحريك وضبط الحجم.</string>
     <string name="edit_gesture_hint_2">حسناً! اضغط بإصبعين لإخفاء عناصر الواجهة.</string>
     <string name="hide_gesture_hint">اضغط على اطار التطبيق المصغر بثلاث اصابع لإخفائة مؤقتاً. سيبقى مخفياً حتى تطفئ وتشغل الشاشة مجددا.</string>
-    <string name="accessibility_service_desc">Widgets Anywhere requires an Accessibility Service to display widgets on the lock screen and in the notification center. No data is collected, and no actions will be performed on the device. This permission is optional if you are only using the home screen widget stacks.</string>
-    <string name="lock_screen_widgets_desc">Display your home screen widgets in one or more frames above the lock screen.</string>
-    <string name="widget_drawer_desc">Display your home screen widgets in a drawer you can access from anywhere with a simple swipe.</string>
+    <string name="accessibility_service_desc">يتطلب التطبيق خدمة إمكانية الوصول لعرض الأدوات على شاشة القُفْل وفي مركز الإشعارات. لا يتم جمع أي بيانات، ولن يتم تنفيذ أي إجراءات على الجهاز هذا الإذن.</string>
+    <string name="lock_screen_widgets_desc">اعرض أدوات الشاشة الرئيسة في إطار واحد أو أكثر أعلى شاشة القُفْل.</string>
+    <string name="widget_drawer_desc">اعرض أدوات الشاشة الرئيسة في درج يمكنك الوصول إليه من أي مكان بتمريره بسيطة.</string>
     <string name="widget_stacks_desc">Display your home screen widgets in a paged stack in any launcher app.</string>
     <string name="widget_stacks_desc_empty">Display your home screen widgets in a paged stack in any launcher app. Get started by adding the \"Widget Stack\" widget to your home screen.</string>
     <string name="add_widget">اضافة تطبيق مصغر</string>
