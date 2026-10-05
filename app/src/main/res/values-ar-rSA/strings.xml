@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <string name="lock_screen_widgets">Lock Screen Widgets</string>
+    <string name="lock_screen_widgets">إضافات شاشة القُفْل</string>
     <string name="version_template">v%s</string>
     <string name="edit_gesture_hint">اضغط على التطبيق المصغر بإصبعين للتحريك وضبط الحجم.</string>
     <string name="edit_gesture_hint_2">حسناً! اضغط بإصبعين لإخفاء عناصر الواجهة.</string>
