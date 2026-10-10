@@ -57,14 +57,15 @@ class WidgetStackProvider : AppWidgetProvider() {
     private var isSwap = false
     private var isBottomBarToggle = false
     private var refresh = false
-    private lateinit var intent: Intent
+    private var previousIndex = RecyclerView.NO_POSITION
 
     override fun onReceive(context: Context, intent: Intent) {
         fromChild = intent.getBooleanExtra(FROM_CHILD, false)
         refresh = intent.getBooleanExtra(EXTRA_REFRESH, false)
+        previousIndex = intent.getIntExtra(EXTRA_PREVIOUS_INDEX, RecyclerView.NO_POSITION)
         isSwap = intent.action == ACTION_SWAP_INDEX
+        isBottomBarToggle = intent.action == ACTION_TOGGLE_BOTTOM_BAR
         val widgetIds = intent.getIntArrayExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS)
-        this.intent = intent
 
         context.logUtils.debugLog(
             message = "onReceive widget stack",
@@ -152,7 +153,6 @@ class WidgetStackProvider : AppWidgetProvider() {
             }
 
             ACTION_TOGGLE_BOTTOM_BAR -> {
-                isBottomBarToggle = true
                 context.logUtils.debugLog(
                     message = "ACTION_TOGGLE_BOTTOM_BAR",
                     throwable = null,
@@ -652,8 +652,6 @@ class WidgetStackProvider : AppWidgetProvider() {
         @ColorInt
         iconColor: Int,
     ) {
-        val previousIndex = intent.getIntExtra(EXTRA_PREVIOUS_INDEX, RecyclerView.NO_POSITION)
-
         root.removeAllViews(R.id.stack_dot_row)
 
         val availableDotWidth = realSize?.let { it.width - 162 }
