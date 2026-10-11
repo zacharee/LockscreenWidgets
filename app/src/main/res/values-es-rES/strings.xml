@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <string name="lock_screen_widgets">Lock Screen Widgets</string>
+    <string name="lock_screen_widgets">Widgets de pantalla de bloqueo</string>
     <string name="version_template">%s</string>
     <string name="edit_gesture_hint">Toca el Panel de widgets con los dos dedos para moverlo y redimensionarlo.</string>
     <string name="edit_gesture_hint_2">¡Genial! Toca con los dos dedos para ocultar la interfaz de edición.</string>
