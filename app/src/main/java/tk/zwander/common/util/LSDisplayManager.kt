@@ -12,7 +12,6 @@ import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.dp
 import dev.zwander.lswinterconnect.safeApplicationContext
 import kotlinx.coroutines.flow.*
-import tk.zwander.lockscreenwidgets.App
 import tk.zwander.lockscreenwidgets.services.Accessibility
 import kotlin.math.roundToInt
 
@@ -70,19 +69,8 @@ class LSDisplayManager private constructor(context: Context) : ContextWrapper(co
     val isLikelyRazr = context.isLikelyRazr
     val displayAndWmCache = MutableStateFlow<Map<String, DisplayAndWindowManager>>(mapOf())
 
-    val displayPowerStates: StateFlow<DisplayPowerStates> by lazy {
-        availableDisplays.map { currentDisplays ->
-            var anyOn = false
-            val states = currentDisplays.entries.associate { (val display = value) ->
-                display.uniqueIdCompat to display.isOn.also { anyOn = anyOn || it }
-            }
-
-            DisplayPowerStates(
-                displayStates = states,
-                anyOn = anyOn,
-            )
-        }.stateIn(scope = App.scope, started = SharingStarted.Eagerly, initialValue = DisplayPowerStates())
-    }
+    val _displayPowerStates = MutableStateFlow(DisplayPowerStates())
+    val displayPowerStates: StateFlow<DisplayPowerStates> = _displayPowerStates.asStateFlow()
 
     val isAnyDisplayOn: Boolean
         get() = displayPowerStates.value.anyOn
@@ -153,11 +141,25 @@ class LSDisplayManager private constructor(context: Context) : ContextWrapper(co
 
         availableDisplays[display.displayId] = display
         display.onCreate(windowManager)
+
+        updateDisplayStates()
     }
 
     private fun removeDisplay(id: Int) {
         val display = availableDisplays.remove(id)
         display?.onDestroy(windowManager)
+
+        updateDisplayStates()
+    }
+
+    private fun updateDisplayStates() {
+        val newStateMap = availableDisplays.value.values.associate { display ->
+            display.uniqueIdCompat to display.isOn
+        }
+        _displayPowerStates.value = _displayPowerStates.value.copy(
+            displayStates = newStateMap,
+            anyOn = newStateMap.any { it.value },
+        )
     }
 
     fun fetchDisplays() {
