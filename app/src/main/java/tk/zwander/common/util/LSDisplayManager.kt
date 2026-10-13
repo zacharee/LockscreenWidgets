@@ -13,6 +13,7 @@ import androidx.compose.ui.unit.dp
 import dev.zwander.lswinterconnect.safeApplicationContext
 import kotlinx.coroutines.flow.*
 import tk.zwander.lockscreenwidgets.services.Accessibility
+import java.util.*
 import kotlin.math.roundToInt
 
 val Context.lsDisplayManager: LSDisplayManager
@@ -273,6 +274,23 @@ data class LSDisplay(
 
     fun onDestroy(windowManager: IWindowManager) {
         windowManager.removeRotationWatcher(rotationWatcher)
+    }
+
+    override fun equals(other: Any?): Boolean {
+        return other is LSDisplay &&
+                other.displayId == displayId &&
+                other.uniqueIdCompat == uniqueIdCompat &&
+                other.density.density == density.density &&
+                other.realSize == realSize
+    }
+
+    override fun hashCode(): Int {
+        return Objects.hash(
+            displayId,
+            uniqueIdCompat,
+            density.density,
+            realSize,
+        )
     }
 }
 
