@@ -24,13 +24,13 @@ class FrameSpecificPreferences private constructor(
         }
 
     var rowCount: Int
-        get() = getInt(PrefManager.KEY_FRAME_ROW_COUNT, 1)
+        get() = getInt(PrefManager.KEY_FRAME_ROW_COUNT, 1).coerceAtLeast(1)
         set(value) {
             putInt(PrefManager.KEY_FRAME_ROW_COUNT, value)
         }
 
     var colCount: Int
-        get() = getInt(PrefManager.KEY_FRAME_COL_COUNT, 1)
+        get() = getInt(PrefManager.KEY_FRAME_COL_COUNT, 1).coerceAtLeast(1)
         set(value) {
             putInt(PrefManager.KEY_FRAME_COL_COUNT, value)
         }
