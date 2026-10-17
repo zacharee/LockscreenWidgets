@@ -513,9 +513,9 @@ class PrefManager private constructor(private val context: Context) {
         }
 
     var drawerColCount: Int
-        get() = getInt(KEY_DRAWER_COL_COUNT, 2)
+        get() = getInt(KEY_DRAWER_COL_COUNT, 2).coerceAtLeast(1)
         set(value) {
-            putInt(KEY_FRAME_COL_COUNT, value)
+            putInt(KEY_DRAWER_COL_COUNT, value)
         }
 
     //How much to dim the masked mode wallpaper (in percent)
