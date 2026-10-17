@@ -246,8 +246,8 @@ class BackupRestoreManager private constructor(private val context: Context) {
             }
 
             val newWidgets = dataMap[PrefManager.KEY_CURRENT_WIDGETS].toString()
-            val rows = dataMap[PrefManager.KEY_FRAME_ROW_COUNT]?.toString()?.toIntOrNull()
-            val cols = dataMap[PrefManager.KEY_FRAME_COL_COUNT]?.toString()?.toIntOrNull()
+            val rows = dataMap[PrefManager.KEY_FRAME_ROW_COUNT]?.toString()?.toIntOrNull()?.coerceAtLeast(1)
+            val cols = dataMap[PrefManager.KEY_FRAME_COL_COUNT]?.toString()?.toIntOrNull()?.coerceAtLeast(1)
 
             if (which == Which.FRAME) {
                 val secondaryFramesOld = dataMap["secondaryFrames"]?.let {

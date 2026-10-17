@@ -125,8 +125,8 @@ fun <VM : BaseDelegate.BaseViewModel<*, *>> VM.WidgetGrid(
 
     val updatedMinColSpan by rememberUpdatedState(minColSpan)
     val updatedMinRowSpan by rememberUpdatedState(minRowSpan)
-    val updatedRowCount by rememberUpdatedState(rowCount)
-    val updatedColumnCount by rememberUpdatedState(columnCount)
+    val updatedRowCount by rememberUpdatedState(rowCount.coerceAtLeast(1))
+    val updatedColumnCount by rememberUpdatedState(columnCount.coerceAtLeast(1))
     val spans by remember {
         derivedStateOf {
             updatedCurrentWidgets.map { widget ->
@@ -172,8 +172,8 @@ fun <VM : BaseDelegate.BaseViewModel<*, *>> VM.WidgetGrid(
         globalState.itemIsActive.value = currentEditingId != null
     }
 
-    val mainAxisCount = if (orientation == Orientation.Vertical) rowCount else columnCount
-    val crossAxisCount = if (orientation == Orientation.Vertical) columnCount else rowCount
+    val mainAxisCount = if (orientation == Orientation.Vertical) updatedRowCount else updatedColumnCount
+    val crossAxisCount = if (orientation == Orientation.Vertical) updatedColumnCount else updatedRowCount
 
     LazySpannedGrid(
         mainAxisCount = mainAxisCount,
@@ -260,8 +260,8 @@ fun <VM : BaseDelegate.BaseViewModel<*, *>> VM.WidgetGrid(
                         currentEditingId = it
                     },
                     index = index,
-                    columnCount = columnCount,
-                    rowCount = rowCount,
+                    columnCount = updatedColumnCount,
+                    rowCount = updatedRowCount,
                     currentEditingId = currentEditingId,
                     modifier = if (gridLocked) {
                         Modifier
