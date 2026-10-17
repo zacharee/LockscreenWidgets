@@ -7,6 +7,7 @@ import android.content.SharedPreferences
 import android.graphics.Color
 import androidx.core.content.edit
 import tk.zwander.common.data.WidgetData
+import tk.zwander.common.data.distinctById
 import tk.zwander.common.util.*
 import tk.zwander.lockscreenwidgets.App
 
@@ -243,7 +244,7 @@ object FramePrefs {
 
         return context.prefManager.gson.safeFromJson<LinkedHashSet<WidgetData>>(
             stringVal,
-        ) ?: LinkedHashSet()
+        )?.distinctById() ?: LinkedHashSet()
     }
 
     fun setWidgetsForFrame(context: Context, frameId: Int, widgets: Collection<WidgetData>) {

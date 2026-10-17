@@ -190,9 +190,9 @@ class PrefManager private constructor(private val context: Context) {
 
     //The widgets currently added to the widget frame
     var currentWidgets: LinkedHashSet<WidgetData>
-        get() = gson.safeFromJson(
+        get() = gson.safeFromJson<LinkedHashSet<WidgetData>>(
             currentWidgetsString,
-        ) ?: LinkedHashSet()
+        )?.distinctById() ?: LinkedHashSet()
         set(value) {
             currentWidgetsString = gson.toJson(value)
         }
@@ -205,9 +205,9 @@ class PrefManager private constructor(private val context: Context) {
 
     //The widgets currently added to the widget drawer
     var drawerWidgets: LinkedHashSet<WidgetData>
-        get() = gson.safeFromJson(
+        get() = gson.safeFromJson<LinkedHashSet<WidgetData>>(
             drawerWidgetsString,
-        ) ?: LinkedHashSet()
+        )?.distinctById() ?: LinkedHashSet()
         set(value) {
             drawerWidgetsString = gson.toJson(value)
         }
@@ -762,9 +762,9 @@ class PrefManager private constructor(private val context: Context) {
 
     var widgetStackWidgets: HashMap<Int, LinkedHashSet<WidgetData>>
         get() = try {
-            gson.mapFromJson(
+            gson.mapFromJson<Int, LinkedHashSet<WidgetData>>(
                 getString(KEY_WIDGET_STACK_WIDGETS, ""),
-            )
+            ).mapValuesTo(HashMap()) { entry -> entry.value.distinctById() }
         } catch (e: NullPointerException) {
             context.logUtils.normalLog("Error getting widget stack widgets", e)
             hashMapOf()

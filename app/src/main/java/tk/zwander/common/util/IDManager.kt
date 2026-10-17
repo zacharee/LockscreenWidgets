@@ -60,6 +60,7 @@ class IDManager private constructor(private val context: Context) {
                 context.prefManager.widgetStackWidgets.flatMap { entry -> [entry.key] + entry.value.map { it.id } } +
                 context.prefManager.currentSecondaryFramesWithStringDisplay.flatMap { [frameId] ->
                     FramePrefs.getWidgetsForFrame(context, frameId).map { it.id }
-                }
+                } +
+                context.prefManager.customTiles.values.map { it.widgetId }
     }
 }

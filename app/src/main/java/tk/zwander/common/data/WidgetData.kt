@@ -235,3 +235,13 @@ enum class WidgetType {
     LAUNCHER_SHORTCUT,
     LAUNCHER_ITEM,
 }
+
+/**
+ * [WidgetData.equals] also factors in size/provider/profile (needed so Compose can detect a
+ * resize as a real change), so a `Set` can't be trusted to collapse a persisted duplicate `id` on
+ * its own. Apply this wherever a widget collection is loaded from storage, since `id` is the only
+ * value that's actually guaranteed unique and is what UI code keys off of (see [WidgetData.gridId]).
+ */
+fun Iterable<WidgetData>.distinctById(): LinkedHashSet<WidgetData> {
+    return LinkedHashSet(distinctBy { it.id })
+}

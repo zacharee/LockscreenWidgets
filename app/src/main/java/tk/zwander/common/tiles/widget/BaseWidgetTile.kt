@@ -122,7 +122,12 @@ abstract class BaseWidgetTile : TileService(), SharedPreferences.OnSharedPrefere
     override fun onTileRemoved() {
         super.onTileRemoved()
 
+        val oldWidgetId = widgetId
         prefManager.customTiles = prefManager.customTiles.apply { remove(tileId) }
+
+        if (oldWidgetId != WidgetHostCompat.INVALID_WIDGET_ID) {
+            idManager.removeId(oldWidgetId)
+        }
     }
 
     /**

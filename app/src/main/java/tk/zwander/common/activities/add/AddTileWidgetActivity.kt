@@ -7,6 +7,8 @@ import android.os.Bundle
 import androidx.compose.ui.unit.IntSize
 import tk.zwander.common.data.WidgetData
 import tk.zwander.common.data.WidgetTileInfo
+import tk.zwander.common.host.WidgetHostCompat
+import tk.zwander.common.util.idManager
 import tk.zwander.common.util.prefManager
 
 /**
@@ -64,9 +66,16 @@ class AddTileWidgetActivity : AddWidgetActivity() {
      * @param id the ID of the widget to be added
      */
     override fun addNewWidget(id: Int, provider: AppWidgetProviderInfo) {
+        val oldWidgetId = prefManager.customTiles[tileId]?.widgetId
+
         prefManager.customTiles = prefManager.customTiles.apply {
             this[tileId] = WidgetTileInfo(id)
         }
+
+        if (oldWidgetId != null && oldWidgetId != id && oldWidgetId != WidgetHostCompat.INVALID_WIDGET_ID) {
+            idManager.removeId(oldWidgetId)
+        }
+
         finish()
     }
 }
