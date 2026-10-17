@@ -22,16 +22,7 @@ import com.android.internal.appwidget.IAppWidgetService
 import tk.zwander.common.activities.add.AddTileWidgetActivity
 import tk.zwander.common.host.WidgetHostCompat
 import tk.zwander.common.host.widgetHostCompat
-import tk.zwander.common.util.PrefManager
-import tk.zwander.common.util.appWidgetManager
-import tk.zwander.common.util.cropBitmapTransparency
-import tk.zwander.common.util.density
-import tk.zwander.common.util.getApplicationInfoInAnyState
-import tk.zwander.common.util.getRemoteViewsToApplyCompat
-import tk.zwander.common.util.logUtils
-import tk.zwander.common.util.prefManager
-import tk.zwander.common.util.textAsBitmap
-import tk.zwander.common.util.toSafeBitmap
+import tk.zwander.common.util.*
 import tk.zwander.lockscreenwidgets.R
 import java.util.concurrent.atomic.AtomicReference
 
@@ -260,7 +251,7 @@ abstract class BaseWidgetTile : TileService(), SharedPreferences.OnSharedPrefere
      */
     private fun updateTile() {
         widgetInfo.apply {
-            if (this != null) {
+            if (this != null && widgetPackage != null) {
                 with(remoteResources) {
                     if (this != null) {
                         val iconDrawable = ResourcesCompat.getDrawable(this, icon, this.newTheme())
