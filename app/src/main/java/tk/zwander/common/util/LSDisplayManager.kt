@@ -10,6 +10,7 @@ import android.os.ServiceManager
 import android.view.*
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.dp
+import dev.zwander.lswinterconnect.peekLogUtils
 import dev.zwander.lswinterconnect.safeApplicationContext
 import kotlinx.coroutines.flow.*
 import tk.zwander.lockscreenwidgets.services.Accessibility
@@ -262,18 +263,32 @@ data class LSDisplay(
     }
 
     fun onCreate(windowManager: IWindowManager) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            windowManager.watchRotation(rotationWatcher, displayId)
-        } else {
-            IWindowManager::class.java.getMethod(
-                "watchRotation",
-                IRotationWatcher::class.java,
-            ).invoke(windowManager, rotationWatcher)
+        try {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                windowManager.watchRotation(rotationWatcher, displayId)
+            } else {
+                IWindowManager::class.java.getMethod(
+                    "watchRotation",
+                    IRotationWatcher::class.java,
+                ).invoke(windowManager, rotationWatcher)
+            }
+        } catch (e: Exception) {
+            peekLogUtils?.debugLog(
+                message = "Unable to register rotation watcher",
+                throwable = e,
+            )
         }
     }
 
     fun onDestroy(windowManager: IWindowManager) {
-        windowManager.removeRotationWatcher(rotationWatcher)
+        try {
+            windowManager.removeRotationWatcher(rotationWatcher)
+        } catch (e: Exception) {
+            peekLogUtils?.debugLog(
+                message = "Unable to unregister rotation watcher",
+                throwable = e,
+            )
+        }
     }
 
     override fun equals(other: Any?): Boolean {
