@@ -15,7 +15,6 @@ import android.os.ServiceManager
 import android.service.quicksettings.Tile
 import android.service.quicksettings.TileService
 import android.widget.RemoteViews
-import androidx.annotation.RequiresApi
 import androidx.compose.ui.unit.dp
 import androidx.core.content.res.ResourcesCompat
 import com.android.internal.appwidget.IAppWidgetService
@@ -36,7 +35,6 @@ import java.util.concurrent.atomic.AtomicReference
  * dynamically. The detail view has to be exited and re-entered to see changes.
  */
 @Suppress("MemberVisibilityCanBePrivate")
-@RequiresApi(Build.VERSION_CODES.N)
 abstract class BaseWidgetTile : TileService(), SharedPreferences.OnSharedPreferenceChangeListener {
     protected val iManager: IAppWidgetService by lazy {
         IAppWidgetService.Stub.asInterface(
