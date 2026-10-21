@@ -67,6 +67,10 @@ open class WidgetFrameDelegate protected constructor(
         // native Skia crashes.
         private val WINDOW_ADD_DEBOUNCE_DELAY = 50.milliseconds
 
+        // A zero/negative window size gives the window an invalid surface, which aborts the process
+        // in libhwui (EGL_BAD_ACCESS when setting the damage region).
+        private const val MIN_FRAME_SIZE_DP = 48
+
         private val instance = MutableStateFlow<WidgetFrameDelegate?>(null)
 
         val readOnlyInstance = instance.asStateFlow()
@@ -160,8 +164,9 @@ open class WidgetFrameDelegate protected constructor(
 
             this@WidgetFrameDelegate.display?.let { display ->
                 frameSizeAndPosition.getSizeForType(saveMode, display).let { size ->
-                    width = display.dpToPx(size.x)
-                    height = display.dpToPx(size.y)
+                    val minPx = display.dpToPx(MIN_FRAME_SIZE_DP)
+                    width = display.dpToPx(size.x).coerceAtLeast(minPx)
+                    height = display.dpToPx(size.y).coerceAtLeast(minPx)
                 }
                 frameSizeAndPosition.getPositionForType(saveMode, display).let { pos ->
                     x = pos.x
@@ -317,6 +322,12 @@ open class WidgetFrameDelegate protected constructor(
                             params.height += event.velocity
                             params.y += (event.velocity / 2)
                         }
+                    }
+
+                    this@WidgetFrameDelegate.display?.let { display ->
+                        val minPx = display.dpToPx(MIN_FRAME_SIZE_DP)
+                        params.width = params.width.coerceAtLeast(minPx)
+                        params.height = params.height.coerceAtLeast(minPx)
                     }
 
                     updateOverlay()
@@ -885,8 +896,9 @@ open class WidgetFrameDelegate protected constructor(
         )
 
         val [newX, newY] = frameSizeAndPosition.getPositionForType(saveMode, display)
+        val minPx = display.dpToPx(MIN_FRAME_SIZE_DP)
         val [newW, newH] = frameSizeAndPosition.getSizeForType(saveMode, display).run {
-            Point(display.dpToPx(x), display.dpToPx(y))
+            Point(display.dpToPx(x).coerceAtLeast(minPx), display.dpToPx(y).coerceAtLeast(minPx))
         }
 
         var changed = false
