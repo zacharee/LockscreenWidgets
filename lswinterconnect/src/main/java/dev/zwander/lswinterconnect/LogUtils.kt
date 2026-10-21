@@ -4,6 +4,10 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.util.Log
 import com.bugsnag.android.BreadcrumbType
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.launch
 import java.io.BufferedWriter
 import java.io.File
 import java.io.FileOutputStream
@@ -14,11 +18,12 @@ import java.util.*
 val peekLogUtils: LogUtils?
     get() = LogUtils.peekInstance()
 
+// Using MainScope here should be fine since LogUtils is a process-scoped class.
 class LogUtils private constructor(
     private val context: Context,
     private val isDebug: () -> Boolean,
     private val writeToFile: Boolean,
-) {
+) : CoroutineScope by MainScope() {
     companion object {
         const val NORMAL_LOG_TAG = "LockscreenWidgets"
         const val DEBUG_LOG_TAG = "${NORMAL_LOG_TAG}Debug"
@@ -65,6 +70,7 @@ class LogUtils private constructor(
     }
 
     private val logFile = File(context.cacheDir, "log.txt")
+    private val loggingDispatcher = Dispatchers.IO.limitedParallelism(1)
 
     private var _logFileHandle: BufferedWriter? = null
     private val logFileHandle: BufferedWriter
@@ -89,41 +95,53 @@ class LogUtils private constructor(
     private fun createLogFileWriter(): BufferedWriter = FileOutputStream(logFile, true).bufferedWriter()
 
     fun debugLog(message: String, throwable: Throwable? = DefaultException(), leaveBreadcrumb: Boolean = true, extras: Map<String, Any?> = mapOf()) {
-        if (leaveBreadcrumb) {
-            BugsnagUtils.leaveBreadcrumb(
-                message,
-                (throwable?.takeIf { it !is DefaultException }?.let { mapOf("error" to throwable.stringify()) } ?: mapOf()) + extras,
-                BreadcrumbType.LOG,
-            )
-        }
+        launch(loggingDispatcher) {
+            if (leaveBreadcrumb) {
+                BugsnagUtils.leaveBreadcrumb(
+                    message,
+                    (throwable?.takeIf { it !is DefaultException }?.let { mapOf("error" to throwable.stringify()) } ?: mapOf()) + extras,
+                    BreadcrumbType.LOG,
+                )
+            }
 
-        if (isDebug()) {
-            val fullMessage = generateFullMessage(message, throwable, extras)
+            if (isDebug()) {
+                val fullMessage = generateFullMessage(
+                    message,
+                    throwable,
+                    extras,
+                )
 
-            Log.e(DEBUG_LOG_TAG, fullMessage)
+                Log.e(DEBUG_LOG_TAG, fullMessage)
 
-            synchronized(logFile) {
-                logFileHandle.writeSafely("\n\n$fullMessage")
+                if (writeToFile) {
+                    synchronized(logFile) {
+                        logFileHandle.writeSafely("\n\n$fullMessage")
+                    }
+                }
             }
         }
     }
 
     fun normalLog(message: String, throwable: Throwable? = DefaultException(), leaveBreadcrumb: Boolean = true, logToFile: Boolean = false, extras: Map<String, Any?> = mapOf()) {
-        val fullMessage = generateFullMessage(message, throwable, extras)
+        launch(loggingDispatcher) {
+            val fullMessage = generateFullMessage(message, throwable, extras)
 
-        Log.e(NORMAL_LOG_TAG, fullMessage)
+            Log.e(NORMAL_LOG_TAG, fullMessage)
 
-        if (leaveBreadcrumb) {
-            BugsnagUtils.leaveBreadcrumb(
-                message,
-                (throwable?.takeIf { it !is DefaultException }?.let { mapOf("error" to throwable.stringify()) } ?: mapOf()) + extras,
-                BreadcrumbType.ERROR,
-            )
-        }
+            if (leaveBreadcrumb) {
+                BugsnagUtils.leaveBreadcrumb(
+                    message,
+                    (throwable?.takeIf { it !is DefaultException }?.let { mapOf("error" to throwable.stringify()) } ?: mapOf()) + extras,
+                    BreadcrumbType.ERROR,
+                )
+            }
 
-        if (isDebug() || logToFile) {
-            synchronized(logFile) {
-                logFileHandle.writeSafely("\n\n$fullMessage")
+            if (isDebug() || logToFile) {
+                if (writeToFile) {
+                    synchronized(logFile) {
+                        logFileHandle.writeSafely("\n\n$fullMessage")
+                    }
+                }
             }
         }
     }
