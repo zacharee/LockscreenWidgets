@@ -12,6 +12,7 @@ import android.graphics.BlendMode
 import android.os.Build
 import android.os.Bundle
 import android.os.ServiceManager
+import android.os.SystemClock
 import android.util.SizeF
 import android.util.SparseArray
 import android.util.TypedValue
@@ -919,18 +920,60 @@ class WidgetStackProvider : AppWidgetProvider() {
             )
         }
 
-        fun updateWidgetStackMonitor(context: Context) {
+        fun updateWidgetStackMonitor(context: Context, direct: Boolean = false) {
             val appContext = context.safeApplicationContext
             val shouldRun = appContext.prefManager.widgetStackWidgets.isNotEmpty() &&
                     WidgetFrameDelegate.peekInstance(appContext) == null
+            val alarmManager = appContext.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+            val serviceRunning = WidgetStackMonitorService.isRunning
 
             val serviceIntent = Intent(appContext, WidgetStackMonitorService::class.java)
 
             if (shouldRun) {
-                try {
-                    ContextCompat.startForegroundService(appContext, serviceIntent)
-                } catch (e: Exception) {
-                    appContext.logUtils.debugLog("Couldn't start foreground service", e)
+                if (!serviceRunning) {
+                    val pi = if (!direct) {
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                            PendingIntentCompat.getForegroundService(
+                                appContext,
+                                10101,
+                                serviceIntent,
+                                0,
+                                false,
+                            )
+                        } else {
+                            PendingIntentCompat.getService(
+                                appContext,
+                                10101,
+                                serviceIntent,
+                                0,
+                                false,
+                            )
+                        }
+                    } else {
+                        null
+                    }
+
+                    if (pi == null) {
+                        try {
+                            ContextCompat.startForegroundService(appContext, serviceIntent)
+                        } catch (e: Exception) {
+                            appContext.logUtils.debugLog("Couldn't start foreground service", e)
+                        }
+                    } else {
+                        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S || alarmManager.canScheduleExactAlarms()) {
+                            alarmManager.setExactAndAllowWhileIdle(
+                                AlarmManager.ELAPSED_REALTIME_WAKEUP,
+                                SystemClock.elapsedRealtime() + 200,
+                                pi,
+                            )
+                        } else {
+                            alarmManager.setAndAllowWhileIdle(
+                                AlarmManager.ELAPSED_REALTIME_WAKEUP,
+                                SystemClock.elapsedRealtime() + 200,
+                                pi,
+                            )
+                        }
+                    }
                 }
             } else {
                 appContext.stopService(serviceIntent)

@@ -18,6 +18,8 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
     <uses-permission android:name="android.permission.ACCESS_HIDDEN_PROFILES" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 
     <uses-permission android:name="com.huawei.android.totemweather.permission.ACCESS_WEATHERCLOCK_PROVIDER" />
     <uses-permission android:name="android.permission.ACCESS_WEATHERCLOCK_PROVIDER" />
@@ -419,7 +421,14 @@
             android:permission="android.permission.BIND_REMOTEVIEWS" />
         <service android:name="tk.zwander.common.appwidget.WidgetStackMonitorService"
             android:foregroundServiceType="specialUse"
-            android:exported="false" />
+            android:exported="false">
+            <property android:name="PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+                      android:value="
+                      This service is used to keep the connection between proxied widgets and the widget stack feature
+                      alive. Without it, this app wouldn't receive updates to widgets it's proxying for the widget stack
+                      feature.
+                                    " />
+        </service>
 
         <receiver android:name=".appwidget.IDListProvider"
             android:label="@string/id_list"
@@ -483,6 +492,14 @@
         <receiver android:name="tk.zwander.common.receivers.PackageReplacedReceiver"
             android:exported="true">
             <intent-filter>
+                <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
+            </intent-filter>
+        </receiver>
+
+        <receiver android:name="tk.zwander.common.receivers.BootReceiver"
+                  android:exported="false">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
                 <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
             </intent-filter>
         </receiver>
