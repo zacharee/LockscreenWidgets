@@ -27,9 +27,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.viewModelScope
 import dev.zwander.lazyspannedgrid.rememberLazySpannedGridState
 import kotlinx.coroutines.*
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import mx.platacard.pagerindicator.PagerWormIndicator
@@ -1008,7 +1006,9 @@ open class WidgetFrameDelegate protected constructor(
                 modifier = modifier,
             ) {
                 val constraints = constraints
-                val gridState = rememberLazySpannedGridState()
+                val gridState = rememberLazySpannedGridState(
+                    initialFirstVisibleLine = if (prefManager.rememberFramePosition) framePrefs.currentIndex else 0,
+                )
                 val rowCount by rememberPreferenceState(
                     key = PrefManager.KEY_FRAME_ROW_COUNT,
                     preferences = framePrefs.framePreferences,
@@ -1090,16 +1090,22 @@ open class WidgetFrameDelegate protected constructor(
                 }
 
                 LaunchedEffect(null) {
-                    if (rememberFramePosition && gridState.layoutInfo.totalLineCount > 1) {
+                    // Wait for a real layout before restoring or saving, otherwise the initial
+                    // (empty) layout reports line 0 and overwrites the stored position.
+                    snapshotFlow { gridState.layoutInfo.totalLineCount }.first { it > 0 }
+
+                    if (rememberFramePosition && gridState.firstVisibleLine != derivedStoredPosition) {
                         gridState.scrollToLine(derivedStoredPosition)
                     }
-                }
 
-                LaunchedEffect(gridState.firstVisibleLine) {
-                    val newLine = gridState.firstVisibleLine
-                    if (newLine != derivedStoredPosition && !gridState.isScrollInProgress) {
-                        storedPosition = newLine
-                    }
+                    snapshotFlow { gridState.firstVisibleLine to gridState.isScrollInProgress }
+                        .filter { !it.second && gridState.layoutInfo.totalLineCount > 0 }
+                        .collect {
+                            val newLine = it.first
+                            if (newLine != derivedStoredPosition) {
+                                storedPosition = newLine
+                            }
+                        }
                 }
 
                 Column(
