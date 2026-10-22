@@ -12,6 +12,7 @@ import androidx.core.graphics.drawable.IconCompat
 import tk.zwander.common.util.getAttrColor
 import tk.zwander.common.util.logUtils
 import tk.zwander.lockscreenwidgets.R
+import tk.zwander.lockscreenwidgets.appwidget.WidgetStackProvider
 
 
 class WidgetStackMonitorService : Service() {
@@ -34,12 +35,31 @@ class WidgetStackMonitorService : Service() {
                 .build(),
         )
 
+        // Go foreground as early as possible, so a pending startForegroundService() is satisfied
+        // even if onStartCommand() is delayed or never delivered.
+        startForegroundWithNotification()
+
         isRunning = true
     }
 
-    @SuppressLint("InlinedApi")
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         logUtils.debugLog("WidgetStackMonitorService started", null)
+
+        // Every startForegroundService() call must be followed by startForeground(), even if
+        // we're about to stop.
+        startForegroundWithNotification()
+
+        if (!WidgetStackProvider.shouldRunWidgetStackMonitor(this)) {
+            logUtils.debugLog("WidgetStackMonitorService no longer needed, stopping", null)
+            stopSelf()
+            return START_NOT_STICKY
+        }
+
+        return START_STICKY
+    }
+
+    @SuppressLint("InlinedApi")
+    private fun startForegroundWithNotification() {
         val color = getAttrColor(android.R.attr.textColorPrimary)
 
         val notification = NotificationCompat.Builder(this, NOTIFICATION_CHANNEL_ID)
@@ -80,8 +100,6 @@ class WidgetStackMonitorService : Service() {
             notification,
             ServiceInfo.FOREGROUND_SERVICE_TYPE_SPECIAL_USE,
         )
-
-        return START_STICKY
     }
 
     override fun onDestroy() {

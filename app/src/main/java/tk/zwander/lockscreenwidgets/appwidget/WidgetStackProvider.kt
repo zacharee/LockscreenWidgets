@@ -920,10 +920,21 @@ class WidgetStackProvider : AppWidgetProvider() {
             )
         }
 
+        /**
+         * The monitor service is only needed when there are widget stacks and the accessibility
+         * service (which hosts the frame, and keeps the process alive) isn't running.
+         */
+        fun shouldRunWidgetStackMonitor(context: Context): Boolean {
+            val appContext = context.safeApplicationContext
+
+            return appContext.prefManager.widgetStackWidgets.isNotEmpty() &&
+                    (WidgetFrameDelegate.peekInstance(appContext) == null ||
+                            !appContext.isAccessibilityEnabled)
+        }
+
         fun updateWidgetStackMonitor(context: Context, direct: Boolean = false) {
             val appContext = context.safeApplicationContext
-            val shouldRun = appContext.prefManager.widgetStackWidgets.isNotEmpty() &&
-                    WidgetFrameDelegate.peekInstance(appContext) == null
+            val shouldRun = shouldRunWidgetStackMonitor(appContext)
             val alarmManager = appContext.getSystemService(Context.ALARM_SERVICE) as AlarmManager
             val serviceRunning = WidgetStackMonitorService.isRunning
 
@@ -975,7 +986,11 @@ class WidgetStackProvider : AppWidgetProvider() {
                         }
                     }
                 }
-            } else {
+            } else if (serviceRunning) {
+                // Only stop a service that's actually up. If a start is still in flight (or an alarm
+                // for one is pending), stopping now can leave the system waiting on a
+                // startForeground() call that never comes. The service re-checks shouldRun once it
+                // starts and stops itself.
                 appContext.stopService(serviceIntent)
             }
         }
