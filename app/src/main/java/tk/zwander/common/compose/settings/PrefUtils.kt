@@ -12,14 +12,27 @@ import tk.zwander.common.util.prefManager
 fun rememberBooleanPreferenceDependency(
     key: String,
     preferences: SharedPreferences = LocalContext.current.prefManager.prefs,
+    defaultValue: Boolean = false,
 ): Boolean {
-    val prefState by rememberUpdatedState(rememberBooleanPreferenceState(key, preferences = preferences).value)
+    val prefState by rememberUpdatedState(rememberBooleanPreferenceState(
+        key = key,
+        preferences = preferences,
+        defaultValue = defaultValue,
+    ).value)
 
     return prefState
 }
 
-fun booleanPreferenceDependency(key: String, preferences: SharedPreferences? = null): @Composable () -> Boolean {
+fun booleanPreferenceDependency(
+    key: String,
+    preferences: SharedPreferences? = null,
+    defaultValue: Boolean = false,
+): @Composable () -> Boolean {
     return {
-        rememberBooleanPreferenceState(key, preferences = preferences ?: LocalContext.current.prefManager.prefs).value
+        rememberBooleanPreferenceState(
+            key = key,
+            preferences = preferences ?: LocalContext.current.prefManager.prefs,
+            defaultValue = defaultValue,
+        ).value
     }
 }

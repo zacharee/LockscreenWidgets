@@ -131,7 +131,10 @@ class ComposeDrawerSettingsActivity : BaseActivity() {
                         key = { PrefManager.KEY_SHOW_DRAWER_HANDLE_SHADOW },
                         defaultValue = { true },
                         icon = { painterResource(R.drawable.shadow) },
-                        enabled = booleanPreferenceDependency(PrefManager.KEY_SHOW_DRAWER_HANDLE),
+                        enabled = booleanPreferenceDependency(
+                            key = PrefManager.KEY_SHOW_DRAWER_HANDLE,
+                            defaultValue = true,
+                        ),
                     )
 
                     seekBarPreference(
@@ -144,7 +147,10 @@ class ComposeDrawerSettingsActivity : BaseActivity() {
                         maxValue = { 500 },
                         unit = { stringResource(R.string.unit_dp) },
                         scale = { 1.0 },
-                        enabled = booleanPreferenceDependency(PrefManager.KEY_SHOW_DRAWER_HANDLE),
+                        enabled = booleanPreferenceDependency(
+                            key = PrefManager.KEY_SHOW_DRAWER_HANDLE,
+                            defaultValue = true,
+                        ),
                     )
 
                     seekBarPreference(
@@ -159,7 +165,10 @@ class ComposeDrawerSettingsActivity : BaseActivity() {
                         maxValue = { 64 },
                         unit = { stringResource(R.string.unit_dp) },
                         scale = { 1.0 },
-                        enabled = booleanPreferenceDependency(PrefManager.KEY_SHOW_DRAWER_HANDLE),
+                        enabled = booleanPreferenceDependency(
+                            key = PrefManager.KEY_SHOW_DRAWER_HANDLE,
+                            defaultValue = true,
+                        ),
                     )
 
                     colorPickerPreference(
@@ -170,7 +179,10 @@ class ComposeDrawerSettingsActivity : BaseActivity() {
                         icon = {
                             painterResource(R.drawable.ic_baseline_color_lens_24)
                         },
-                        enabled = booleanPreferenceDependency(PrefManager.KEY_SHOW_DRAWER_HANDLE),
+                        enabled = booleanPreferenceDependency(
+                            key = PrefManager.KEY_SHOW_DRAWER_HANDLE,
+                            defaultValue = true,
+                        ),
                     )
                 }
 
@@ -248,7 +260,10 @@ class ComposeDrawerSettingsActivity : BaseActivity() {
                         icon = {
                             painterResource(R.drawable.ic_baseline_visibility_24)
                         },
-                        enabled = booleanPreferenceDependency(PrefManager.KEY_SHOW_DRAWER_HANDLE),
+                        enabled = booleanPreferenceDependency(
+                            key = PrefManager.KEY_SHOW_DRAWER_HANDLE,
+                            defaultValue = true,
+                        ),
                     )
                 }
 
@@ -326,7 +341,10 @@ class ComposeDrawerSettingsActivity : BaseActivity() {
                         key = { PrefManager.KEY_DRAWER_HANDLE_TAP_TO_OPEN },
                         defaultValue = { false },
                         icon = { painterResource(R.drawable.tap) },
-                        enabled = booleanPreferenceDependency(PrefManager.KEY_SHOW_DRAWER_HANDLE),
+                        enabled = booleanPreferenceDependency(
+                            key = PrefManager.KEY_SHOW_DRAWER_HANDLE,
+                            defaultValue = true,
+                        ),
                     )
 
                     switchPreference(
@@ -337,7 +355,10 @@ class ComposeDrawerSettingsActivity : BaseActivity() {
                         icon = {
                             painterResource(R.drawable.ic_baseline_lock_24)
                         },
-                        enabled = booleanPreferenceDependency(PrefManager.KEY_SHOW_DRAWER_HANDLE),
+                        enabled = booleanPreferenceDependency(
+                            key = PrefManager.KEY_SHOW_DRAWER_HANDLE,
+                            defaultValue = true,
+                        ),
                     )
                 }
             }
