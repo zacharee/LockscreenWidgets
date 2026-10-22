@@ -623,21 +623,37 @@ class WidgetStackProvider : AppWidgetProvider() {
             scheduleWidgetRefresh(context, stackId)
         }
 
-        when (realRem) {
-            0 -> {
-                root.removeAllViews(R.id.widget_content_even)
-                root.addView(R.id.widget_content_even, viewsToApply)
-            }
+        try {
+            when (realRem) {
+                0 -> {
+                    root.removeAllViews(R.id.widget_content_even)
+                    root.addView(R.id.widget_content_even, viewsToApply)
+                }
 
-            1 -> {
-                root.removeAllViews(R.id.widget_content_odd)
-                root.addView(R.id.widget_content_odd, viewsToApply)
-            }
+                1 -> {
+                    root.removeAllViews(R.id.widget_content_odd)
+                    root.addView(R.id.widget_content_odd, viewsToApply)
+                }
 
-            2 -> {
-                root.removeAllViews(R.id.widget_content_third)
-                root.addView(R.id.widget_content_third, viewsToApply)
+                2 -> {
+                    root.removeAllViews(R.id.widget_content_third)
+                    root.addView(R.id.widget_content_third, viewsToApply)
+                }
             }
+        } catch (e: IllegalArgumentException) {
+            context.logUtils.normalLog(
+                message = "Unable to add nested RemoteViews",
+                throwable = e,
+                extras = mapOf(
+                    "stackId" to stackId,
+                ),
+            )
+
+            val errorViews = RemoteViews(context.packageName, R.layout.widget_stack_error_layout)
+
+            root.addView(R.id.widget_content_even, errorViews)
+            root.addView(R.id.widget_content_odd, errorViews)
+            root.addView(R.id.widget_content_third, errorViews)
         }
 
         root.setDisplayedChild(R.id.widget_content, realRem)
