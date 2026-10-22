@@ -280,6 +280,7 @@ class App : Application(), CoroutineScope by scope, EventObserver {
             isDebug = { isDebug },
             writeToFile = true,
         )
+        logUtils.logPreviousExitReasons()
         WallpaperClient.getInstance(this)
 
         globalState.onCreate(this)

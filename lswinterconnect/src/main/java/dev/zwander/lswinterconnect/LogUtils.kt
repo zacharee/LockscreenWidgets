@@ -1,9 +1,14 @@
 package dev.zwander.lswinterconnect
 
 import android.annotation.SuppressLint
+import android.app.ActivityManager
+import android.app.ApplicationExitInfo
 import android.content.Context
+import android.os.Build
 import android.util.Log
+import androidx.core.content.edit
 import com.bugsnag.android.BreadcrumbType
+import com.bugsnag.android.Severity
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.MainScope
@@ -27,6 +32,11 @@ class LogUtils private constructor(
     companion object {
         const val NORMAL_LOG_TAG = "LockscreenWidgets"
         const val DEBUG_LOG_TAG = "${NORMAL_LOG_TAG}Debug"
+
+        private const val EXIT_INFO_PREFS = "log_utils_exit_info"
+        private const val KEY_LAST_EXIT_TIMESTAMP = "last_exit_timestamp"
+        private const val MAX_EXIT_REASONS = 10
+        private const val MAX_ANR_TRACE_CHARS = 64 * 1024
 
         @SuppressLint("StaticFieldLeak")
         private var instance: LogUtils? = null
@@ -146,6 +156,101 @@ class LogUtils private constructor(
         }
     }
 
+    /**
+     * Log why this app's previous processes exited (API 30+). Bugsnag's ANR reports don't say what
+     * the ANR was actually waiting on (input, broadcast, service, etc.), but [ApplicationExitInfo]
+     * does. Each exit is only handled once. ANRs are additionally reported as handled events, with
+     * the system's description and (truncated) trace attached.
+     */
+    fun logPreviousExitReasons() {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) {
+            return
+        }
+
+        launch(loggingDispatcher) {
+            try {
+                val prefs = context.getSharedPreferences(EXIT_INFO_PREFS, Context.MODE_PRIVATE)
+                val lastSeen = prefs.getLong(KEY_LAST_EXIT_TIMESTAMP, 0L)
+                val am = context.getSystemService(ActivityManager::class.java) ?: return@launch
+
+                val newExits = am.getHistoricalProcessExitReasons(null, 0, MAX_EXIT_REASONS)
+                    .filter { it.timestamp > lastSeen }
+                    .sortedBy { it.timestamp }
+
+                newExits.forEach { info ->
+                    val reasonName = exitReasonName(info.reason)
+
+                    debugLog(
+                        message = "Previous process exit: $reasonName",
+                        throwable = null,
+                        extras = mapOf(
+                            "reason" to reasonName,
+                            "description" to info.description,
+                            "importance" to info.importance,
+                            "status" to info.status,
+                            "timestamp" to info.timestamp,
+                            "processName" to info.processName,
+                        ),
+                    )
+
+                    if (info.reason == ApplicationExitInfo.REASON_ANR) {
+                        val trace = try {
+                            info.traceInputStream?.bufferedReader()?.use { reader ->
+                                val buffer = CharArray(MAX_ANR_TRACE_CHARS)
+                                val read = reader.read(buffer)
+
+                                if (read > 0) String(buffer, 0, read) else null
+                            }
+                        } catch (e: Exception) {
+                            "Unable to read trace: ${e.stringify()}"
+                        }
+
+                        BugsnagUtils.notify(PreviousAnrException(info.description)) {
+                            it.severity = Severity.WARNING
+                            it.addMetadata(
+                                "previous_anr",
+                                mapOf(
+                                    "description" to info.description,
+                                    "importance" to info.importance,
+                                    "timestamp" to info.timestamp,
+                                    "processName" to info.processName,
+                                    "trace" to trace,
+                                ),
+                            )
+                            true
+                        }
+                    }
+                }
+
+                newExits.lastOrNull()?.let {
+                    prefs.edit { putLong(KEY_LAST_EXIT_TIMESTAMP, it.timestamp) }
+                }
+            } catch (e: Exception) {
+                BugsnagUtils.leaveBreadcrumb(
+                    "Unable to log previous exit reasons",
+                    mapOf("error" to e.stringify()),
+                    BreadcrumbType.ERROR,
+                )
+            }
+        }
+    }
+
+    private fun exitReasonName(reason: Int): String {
+        return when (reason) {
+            ApplicationExitInfo.REASON_ANR -> "ANR"
+            ApplicationExitInfo.REASON_CRASH -> "CRASH"
+            ApplicationExitInfo.REASON_CRASH_NATIVE -> "CRASH_NATIVE"
+            ApplicationExitInfo.REASON_LOW_MEMORY -> "LOW_MEMORY"
+            ApplicationExitInfo.REASON_EXCESSIVE_RESOURCE_USAGE -> "EXCESSIVE_RESOURCE_USAGE"
+            ApplicationExitInfo.REASON_SIGNALED -> "SIGNALED"
+            ApplicationExitInfo.REASON_USER_REQUESTED -> "USER_REQUESTED"
+            ApplicationExitInfo.REASON_USER_STOPPED -> "USER_STOPPED"
+            ApplicationExitInfo.REASON_EXIT_SELF -> "EXIT_SELF"
+            ApplicationExitInfo.REASON_OTHER -> "OTHER"
+            else -> "REASON_$reason"
+        }
+    }
+
     fun resetDebugLog() {
         synchronized(logFile) {
             logFile.delete()
@@ -185,4 +290,6 @@ class LogUtils private constructor(
     }
 
     class DefaultException : Exception()
+
+    class PreviousAnrException(description: String?) : Exception("Previous ANR: $description")
 }
