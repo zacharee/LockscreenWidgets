@@ -356,4 +356,5 @@
     <string name="show_bottom_bar">Visa kontroller längst ned</string>
     <string name="show_bottom_bar_desc">Lägger till grundläggande kontroller under dina widgetar i ramen. Du kan alltid komma åt fler kontroller genom att trycka på ramen med två fingrar.</string>
     <string name="frame_settings">Inställningar för ram %s</string>
+    <string name="widget_stack_not_supported">This widget is not supported in stacks.</string>
 </resources>
