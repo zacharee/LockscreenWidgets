@@ -14,11 +14,13 @@ fun rememberBooleanPreferenceDependency(
     preferences: SharedPreferences = LocalContext.current.prefManager.prefs,
     defaultValue: Boolean = false,
 ): Boolean {
-    val prefState by rememberUpdatedState(rememberBooleanPreferenceState(
-        key = key,
-        preferences = preferences,
-        defaultValue = defaultValue,
-    ).value)
+    val prefState by rememberUpdatedState(
+        rememberBooleanPreferenceState(
+            key = key,
+            preferences = preferences,
+            defaultValue = defaultValue,
+        ).value,
+    )
 
     return prefState
 }
