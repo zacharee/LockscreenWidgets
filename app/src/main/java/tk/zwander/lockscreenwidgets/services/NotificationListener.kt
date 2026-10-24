@@ -62,6 +62,7 @@ class NotificationListener : NotificationListenerService(), EventObserver, Lifec
         logUtils.debugLog("Notification listener disconnected.", null)
         isListening.value = false
         eventManager.removeObserver(this)
+        updateJob.value?.cancel()
     }
 
     override fun onCreate() {
@@ -92,6 +93,8 @@ class NotificationListener : NotificationListenerService(), EventObserver, Lifec
 
     override fun onDestroy() {
         dispatcher.onServicePreSuperOnDestroy()
+        eventManager.removeObserver(this)
+        updateJob.value?.cancel()
         super.onDestroy()
     }
 
