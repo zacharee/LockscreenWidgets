@@ -87,6 +87,7 @@ class Accessibility : AccessibilityService(), CoroutineScope by MainScope(), Eve
     }
 
     private var state = State()
+    private var alreadyConnected = false
 
     @SuppressLint("ClickableViewAccessibility", "NewApi")
     override fun onCreate() {
@@ -105,6 +106,10 @@ class Accessibility : AccessibilityService(), CoroutineScope by MainScope(), Eve
     }
 
     override fun onServiceConnected() {
+        if (alreadyConnected) {
+            return
+        }
+
         if (FrameSpecificPreferences.doAnyFramesHaveSettingEnabled(
                 context = this,
                 baseKey = PrefManager.KEY_FRAME_MASKED_MODE,
@@ -149,6 +154,8 @@ class Accessibility : AccessibilityService(), CoroutineScope by MainScope(), Eve
                 initialRun = true,
             )
         }
+
+        alreadyConnected = true
     }
 
     override fun onAccessibilityEvent(event: AccessibilityEvent) {
