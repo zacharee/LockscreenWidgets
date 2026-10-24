@@ -71,16 +71,14 @@ fun <T> rememberPreferenceState(
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
 
-    val state by remember {
-        derivedStateOf {
-            context.preferenceAsState(
-                key = key,
-                preferences = preferences,
-                onChanged = onChanged,
-                value = value,
-                scope = scope,
-            )
-        }
+    val state = remember(context, key, preferences, onChanged, value) {
+        context.preferenceAsState(
+            key = key,
+            preferences = preferences,
+            onChanged = onChanged,
+            value = value,
+            scope = scope,
+        )
     }
 
     return state
