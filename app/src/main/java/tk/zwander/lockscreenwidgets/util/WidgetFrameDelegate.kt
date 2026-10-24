@@ -1214,7 +1214,7 @@ open class WidgetFrameDelegate protected constructor(
                                         scope.launch {
                                             gridState.animateScrollToLine(
                                                 (gridState.firstVisibleLine + (pageInfo.second * columnCount) - columnCount)
-                                                        % (pageInfo.second * columnCount),
+                                                        % (pageInfo.second.coerceAtLeast(1) * columnCount),
                                             )
                                         }
                                     },
@@ -1260,7 +1260,7 @@ open class WidgetFrameDelegate protected constructor(
                             gridState.animateScrollToLine(
                                 (it * columnCount)
                                     .coerceAtLeast(0)
-                                    .coerceAtMost(pageInfo.second - 1),
+                                    .coerceAtMost(pageInfo.second * columnCount - 1),
                             )
                         }
                     },
