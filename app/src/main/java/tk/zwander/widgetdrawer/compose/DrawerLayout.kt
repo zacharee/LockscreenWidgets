@@ -57,7 +57,7 @@ fun DrawerDelegate.DrawerViewModel.DrawerLayout(
                     context.eventManager.sendEvent(Event.DrawerIntercept(true))
                 }
 
-                MotionEvent.ACTION_UP -> {
+                MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
                     context.eventManager.sendEvent(Event.DrawerIntercept(false))
                 }
             }

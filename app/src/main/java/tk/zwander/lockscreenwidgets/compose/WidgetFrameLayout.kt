@@ -176,7 +176,7 @@ fun WidgetFrameDelegate.WidgetFrameViewModel.WidgetFrameLayout(
                         context.eventManager.sendEvent(Event.FrameIntercept(holderId, true))
                     }
 
-                    MotionEvent.ACTION_UP -> {
+                    MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
                         context.eventManager.sendEvent(Event.FrameIntercept(holderId, false))
                     }
                 }

@@ -145,7 +145,7 @@ fun DrawerDelegate.DrawerViewModel.DrawerHandle(
             )
             .motionEventSpy { event ->
                 when (event.action) {
-                    MotionEvent.ACTION_UP -> {
+                    MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
                         if (updatedScrollingOpen) {
                             context.eventManager.sendEvent(
                                 Event.ScrollOpenFinish(side),
