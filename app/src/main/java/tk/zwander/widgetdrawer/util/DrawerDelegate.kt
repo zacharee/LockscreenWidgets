@@ -461,11 +461,14 @@ class DrawerDelegate private constructor(context: Context, displayId: String) :
         if (!rootView.isAttachedToWindow && viewModel.drawerAnimationState.value != AnimationState.ADDING) {
             viewModel.drawerAnimationState.value = AnimationState.ADDING
             rootView.alpha = 0f
-            onDrawerAttachmentStateChanged(true)
             wm?.safeAddView(rootView, params)
             if (hideHandle) {
                 hideHandle()
             }
+            // This must run after the view is attached. fadeIn() suspends until the
+            // animation completes, so calling it before safeAddView() would delay adding
+            // the drawer until after the fade had already finished.
+            onDrawerAttachmentStateChanged(true)
         }
     }
 
