@@ -16,7 +16,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -195,7 +194,7 @@ open class WidgetFrameDelegate protected constructor(
             WidgetFrameLayout(
                 modifier = Modifier.fillMaxSize(),
             )
-        }.also { it.setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed) }
+        }
     }
 
 
@@ -402,11 +401,11 @@ open class WidgetFrameDelegate protected constructor(
     }
 
     override fun onCreate() {
-        super.onCreate()
-
         if (created) {
             return
         }
+
+        super.onCreate()
 
         viewModel.viewModelScope.launch(Dispatchers.Main) {
             lsDisplayManager.displayPowerStates
@@ -493,20 +492,18 @@ open class WidgetFrameDelegate protected constructor(
                 ignoreAllTouches = framePrefs.ignoreAllTouches,
             )
         }
-
-        created = true
     }
 
     override suspend fun onDestroy() {
-        if (lifecycleRegistry.currentState >= Lifecycle.State.INITIALIZED) {
-            removeWindow()
-        }
-
         super.onDestroy()
 
         if (id == ID) {
             invalidateInstance()
         }
+    }
+
+    override suspend fun removeAllViews() {
+        removeWindow()
     }
 
     suspend fun updateStateAndWindowState(

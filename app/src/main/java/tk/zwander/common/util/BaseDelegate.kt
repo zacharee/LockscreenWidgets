@@ -7,6 +7,7 @@ import android.os.Build
 import android.view.*
 import androidx.annotation.CallSuper
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Recomposer
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.AbstractComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
@@ -68,6 +69,9 @@ abstract class BaseDelegate<State : Any>(
     protected abstract val rootView: ViewGroup
     protected open val secondaryViews: List<ViewGroup> = listOf()
 
+    protected open val ownsLifecycle: Boolean
+        get() = lifecycle == lifecycleRegistry
+
     protected val allViews: List<ViewGroup>
         get() = [rootView] + secondaryViews
 
@@ -89,9 +93,7 @@ abstract class BaseDelegate<State : Any>(
         }
     }
 
-    protected open val recomposer by lazy {
-        rootView.createAlwaysOnComposer(lifecycle = lifecycle)
-    }
+    private var _recomposer: Recomposer? = null
 
     private val lifecycleObserver = LifecycleEventObserver { source, event ->
         logUtils.debugLog("Lifecycle event in ${this::class.java.name}: $event from $source", null)
@@ -99,34 +101,42 @@ abstract class BaseDelegate<State : Any>(
 
     var created = false
         protected set
+    private var baseCreated = false
+    private var destroyed = false
 
     @CallSuper
     open fun onCreate() {
-        if (created) {
-            return
-        }
+        check(!destroyed) { "BaseDelegate was already destroyed; create a new instance" }
 
-        logUtils.debugLog("Creating ${this::class.java}", null)
+        if (baseCreated) return
+        baseCreated = true
+        created = true
 
-        savedStateRegistryController.performAttach()
-        savedStateRegistryController.performRestore(null)
-        lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_CREATE)
+        logUtils.debugLog("Creating ${this@BaseDelegate::class.java}", null)
 
-        lifecycleRegistry.addObserver(lifecycleObserver)
+        if (ownsLifecycle) {
+            _recomposer = rootView.createAlwaysOnComposer(lifecycle = lifecycle)
 
-        allViews.forEach {
-            it.setViewTreeLifecycleOwner(this)
-            it.setViewTreeSavedStateRegistryOwner(this)
-            it.compositionContext = recomposer
-            (it as? AbstractComposeView)
-                ?.setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnDetachedFromWindow)
-            it.addOnAttachStateChangeListener(viewAttachmentStateListener)
+            savedStateRegistryController.performAttach()
+            savedStateRegistryController.performRestore(null)
+            lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_CREATE)
+
+            lifecycleRegistry.addObserver(lifecycleObserver)
+
+            allViews.forEach {
+                it.setViewTreeLifecycleOwner(this@BaseDelegate)
+                it.setViewTreeSavedStateRegistryOwner(this@BaseDelegate)
+                it.compositionContext = _recomposer
+                (it as? AbstractComposeView)
+                    ?.setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnDetachedFromWindow)
+                it.addOnAttachStateChangeListener(viewAttachmentStateListener)
+            }
         }
 
         // Will listen for frame prefs with ID -2 because of the drawer delegate.
-        prefsHandler.register(this, holderId)
-        eventManager.addObserver(this)
-        widgetHost.addOnClickCallback(this)
+        prefsHandler.register(this@BaseDelegate, holderId)
+        eventManager.addObserver(this@BaseDelegate)
+        widgetHost.addOnClickCallback(this@BaseDelegate)
 
         viewModel.viewModelScope.launch {
             displayFlow.collect {
@@ -140,10 +150,10 @@ abstract class BaseDelegate<State : Any>(
         }
 
         val gestureDetector = GestureDetector(
-            this,
+            this@BaseDelegate,
             object : GestureDetector.SimpleOnGestureListener() {
                 override fun onDoubleTap(e: MotionEvent): Boolean {
-                    logUtils.debugLog("Got double tap on RecyclerView ${this::class.java}", null)
+                    logUtils.debugLog("Got double tap on Delegate ${this@BaseDelegate::class.java}", null)
                     viewModel.doubleTapTurnOffDisplayKey?.let {
                         if (prefManager.getBoolean(it, false)) {
                             eventManager.sendEvent(Event.TurnOffDisplay)
@@ -161,29 +171,49 @@ abstract class BaseDelegate<State : Any>(
                 false
             }
         }
+
+        scheduleLifecycleReconcile()
     }
 
     @CallSuper
     open suspend fun onDestroy() {
-        logUtils.debugLog("Destroying ${this::class.java}", null)
-
-        eventManager.removeObserver(this)
-        prefsHandler.unregister(this, holderId)
-        widgetHost.removeOnClickCallback(this)
-
-        allViews.forEach {
-            it.removeOnAttachStateChangeListener(viewAttachmentStateListener)
+        if (!baseCreated || destroyed) {
+            return
         }
-        recomposer.cancel()
+
+        logUtils.debugLog("Destroying ${this@BaseDelegate::class.java}", null)
+        mainHandler.removeCallbacks(reconcileLifecycle)
+
+        eventManager.removeObserver(this@BaseDelegate)
+        prefsHandler.unregister(this@BaseDelegate, holderId)
+        widgetHost.removeOnClickCallback(this@BaseDelegate)
+
         lifecycleRegistry.removeObserver(lifecycleObserver)
 
-        if (lifecycle.currentState > Lifecycle.State.INITIALIZED) {
-            lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_DESTROY)
+        if (ownsLifecycle) {
+            allViews.forEach {
+                (it as? AbstractComposeView)?.disposeComposition()
+            }
+
+            if (lifecycle.currentState > Lifecycle.State.INITIALIZED) {
+                lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_DESTROY)
+            }
+
+            _recomposer?.cancel()
+            _recomposer = null
+
+            removeAllViews()
+            allViews.forEach {
+                it.removeOnAttachStateChangeListener(viewAttachmentStateListener)
+                it.compositionContext = null
+                it.setViewTreeLifecycleOwner(null)
+                it.setViewTreeSavedStateRegistryOwner(null)
+            }
         }
 
         viewModel.viewModelScope.cancel()
 
-        created = false
+        destroyed = true
     }
 
     @SuppressLint("NotifyDataSetChanged")
@@ -247,20 +277,12 @@ abstract class BaseDelegate<State : Any>(
 
     @CallSuper
     protected open fun onViewAttached(view: View) {
-        view.post {
-            if (lifecycleRegistry.currentState < Lifecycle.State.STARTED) {
-                lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_START)
-                lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_RESUME)
-            }
-        }
+        scheduleLifecycleReconcile()
     }
 
     @CallSuper
     protected open fun onViewDetached(view: View) {
-        if (!isAttached) {
-            lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_PAUSE)
-            lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_STOP)
-        }
+        scheduleLifecycleReconcile()
     }
 
     protected suspend fun preloadViews() = coroutineScope {
@@ -303,6 +325,31 @@ abstract class BaseDelegate<State : Any>(
                 }
             }
         }
+    }
+
+    // Only called if the delegate owns the lifecycle
+    protected open suspend fun removeAllViews() {}
+
+    private val reconcileLifecycle = Runnable {
+        if (!baseCreated || destroyed) return@Runnable
+        if (!ownsLifecycle) return@Runnable
+        if (lifecycleRegistry.currentState == Lifecycle.State.DESTROYED) return@Runnable
+
+        val shouldBeStarted = allViews.any { it.isAttachedToWindow }
+        val state = lifecycleRegistry.currentState
+
+        if (shouldBeStarted && state < Lifecycle.State.STARTED) {
+            lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_START)
+            lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_RESUME)
+        } else if (!shouldBeStarted && state >= Lifecycle.State.STARTED) {
+            lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_PAUSE)
+            lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_STOP)
+        }
+    }
+
+    private fun scheduleLifecycleReconcile() {
+        mainHandler.removeCallbacks(reconcileLifecycle)
+        mainHandler.post(reconcileLifecycle)
     }
 
     @SuppressLint("StaticFieldLeak")

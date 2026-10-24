@@ -25,6 +25,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.Lifecycle
+import androidx.savedstate.SavedStateRegistry
 import dev.zwander.lazyspannedgrid.rememberLazySpannedGridState
 import kotlinx.coroutines.flow.MutableStateFlow
 import tk.zwander.common.activities.BaseActivity
@@ -61,6 +63,8 @@ class FrameReorderActivity : BaseActivity() {
             targetDisplayId = lsDisplayManager.availableDisplays.value.values.firstOrNull()?.uniqueIdCompat
                 ?: Display.DEFAULT_DISPLAY.toString(),
             rootView = findViewById(android.R.id.content),
+            lifecycle = lifecycle,
+            savedStateRegistry = savedStateRegistry,
         )
     }
 
@@ -120,6 +124,8 @@ class FrameReorderActivity : BaseActivity() {
         context: Context,
         targetDisplayId: String,
         override val rootView: ViewGroup,
+        override val lifecycle: Lifecycle,
+        override val savedStateRegistry: SavedStateRegistry,
     ) : BaseDelegate<Unit>(context, MutableStateFlow(targetDisplayId)) {
         override val viewModel by lazy {
             ReorderViewModel(this)

@@ -24,10 +24,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.savedstate.SavedStateRegistry
-import androidx.savedstate.SavedStateRegistryOwner
 import androidx.savedstate.compose.LocalSavedStateRegistryOwner
 import kotlinx.coroutines.flow.MutableStateFlow
 import tk.zwander.common.compose.WidgetGrid
@@ -69,10 +67,10 @@ fun WidgetFramePreviewLayout(
             PreviewDelegate(
                 themedContext = context.themedContext,
                 targetDisplayId = display.uniqueIdCompat,
-                lifecycleOwner = lifecycleOwner,
+                lifecycle = lifecycleOwner.lifecycle,
+                savedStateRegistry = savedStateRegistryOwner.savedStateRegistry,
                 frameId = frameId,
                 view = view,
-                savedStateRegistryOwner = savedStateRegistryOwner,
             )
         }
 
@@ -142,21 +140,15 @@ class PreviewDelegate(
     themedContext: Context,
     targetDisplayId: String,
     view: ViewGroup,
-    private val lifecycleOwner: LifecycleOwner,
-    private val savedStateRegistryOwner: SavedStateRegistryOwner,
     private val frameId: Int,
+    override val lifecycle: Lifecycle,
+    override val savedStateRegistry: SavedStateRegistry,
 ) : BaseDelegate<Unit>(
     context = themedContext,
     targetDisplayId = MutableStateFlow(targetDisplayId),
 ), IFrameProvider {
     override val holderId: Int
         get() = frameId
-
-    override val lifecycle: Lifecycle
-        get() = lifecycleOwner.lifecycle
-
-    override val savedStateRegistry: SavedStateRegistry
-        get() = savedStateRegistryOwner.savedStateRegistry
 
     override val viewModel
         get() = PreviewViewModel()

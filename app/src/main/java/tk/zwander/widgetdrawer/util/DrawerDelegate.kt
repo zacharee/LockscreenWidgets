@@ -358,11 +358,11 @@ class DrawerDelegate private constructor(context: Context, displayId: String) :
 
     @SuppressLint("UnspecifiedRegisterReceiverFlag")
     override fun onCreate() {
-        super.onCreate()
-
         if (created) {
             return
         }
+
+        super.onCreate()
 
         viewModel.viewModelScope.launch(Dispatchers.Main) {
             tryShowHandle()
@@ -387,17 +387,17 @@ class DrawerDelegate private constructor(context: Context, displayId: String) :
                     }
                 }
         }
-
-        created = true
     }
 
     override suspend fun onDestroy() {
-        hideDrawer(false)
-        hideHandle()
-
         super.onDestroy()
 
         invalidateInstance()
+    }
+
+    override suspend fun removeAllViews() {
+        hideDrawer(false)
+        hideHandle()
     }
 
     @SuppressLint("WrongConstant")
