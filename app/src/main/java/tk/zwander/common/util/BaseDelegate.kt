@@ -165,6 +165,13 @@ abstract class BaseDelegate<State : Any>(
         viewModel.viewModelScope.launch {
             preloadViews()
         }
+        viewModel.viewModelScope.launch {
+            displayFlow.collect {
+                withContext(Dispatchers.Main) {
+                    onDisplayChanged()
+                }
+            }
+        }
 
         val gestureDetector = GestureDetector(
             this@BaseDelegate,
@@ -291,6 +298,8 @@ abstract class BaseDelegate<State : Any>(
     }
 
     protected abstract suspend fun updateWindow()
+
+    protected open suspend fun onDisplayChanged() {}
 
     protected suspend fun updateOverlay() {
         withContext(Dispatchers.Main) {

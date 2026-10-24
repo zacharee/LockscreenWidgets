@@ -489,6 +489,21 @@ class DrawerDelegate private constructor(context: Context, displayId: String) :
         }
     }
 
+    override suspend fun onDisplayChanged() {
+        this@DrawerDelegate.display?.let { display ->
+            handleParams.width = display.dpToPx(context.prefManager.drawerHandleWidth)
+            handleParams.height = display.dpToPx(context.prefManager.drawerHandleHeight)
+
+            display.rotatedRealSize.let { displaySize ->
+                params.width = displaySize.x
+                params.height = displaySize.y
+            }
+
+            updateOverlay()
+            wm?.safeUpdateViewLayout(rootView, params)
+        }
+    }
+
     private suspend fun hideDrawer(callListener: Boolean = true) {
         withContext(Dispatchers.Main) {
             logUtils.debugLog("Trying to hide drawer, $callListener", null)

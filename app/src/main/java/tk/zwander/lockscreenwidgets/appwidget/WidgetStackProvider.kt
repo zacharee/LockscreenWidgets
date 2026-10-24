@@ -113,6 +113,7 @@ class WidgetStackProvider : AppWidgetProvider() {
 
                     val index = (context.prefManager.widgetStackIndices[widgetId] ?: 0)
                         .coerceAtMost(stackedWidgets.lastIndex)
+                        .coerceAtLeast(0)
 
                     val newIndex = if (targetIndex != RecyclerView.NO_POSITION) {
                         targetIndex

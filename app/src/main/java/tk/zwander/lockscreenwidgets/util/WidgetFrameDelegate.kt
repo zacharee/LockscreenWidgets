@@ -931,6 +931,22 @@ open class WidgetFrameDelegate protected constructor(
         }
     }
 
+    override suspend fun onDisplayChanged() {
+        this@WidgetFrameDelegate.display?.let { display ->
+            frameSizeAndPosition.getSizeForType(saveMode, display).let { size ->
+                val minPx = display.dpToPx(MIN_FRAME_SIZE_DP)
+                params.width = display.dpToPx(size.x).coerceAtLeast(minPx)
+                params.height = display.dpToPx(size.y).coerceAtLeast(minPx)
+            }
+            frameSizeAndPosition.getPositionForType(saveMode, display).let { pos ->
+                params.x = pos.x
+                params.y = pos.y
+            }
+
+            updateOverlay()
+        }
+    }
+
     override fun onViewAttached(view: View) {
         super.onViewAttached(view)
 
