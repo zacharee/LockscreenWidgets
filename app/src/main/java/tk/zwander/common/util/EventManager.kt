@@ -10,7 +10,10 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import dev.zwander.lswinterconnect.safeApplicationContext
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.launch
 import tk.zwander.common.data.WidgetData
 import tk.zwander.lockscreenwidgets.App
@@ -33,7 +36,13 @@ class EventManager private constructor(private val context: Context) {
     }
 
     private val listeners: MutableCollection<ListenerInfo<Event>> = ConcurrentLinkedQueue()
-    private val observers: MutableCollection<EventObserver> = ConcurrentLinkedQueue()
+    private val observersLock = Any()
+    private val observers = mutableMapOf<EventObserver, ObserverQueue>()
+
+    private class ObserverQueue {
+        val channel = Channel<Event>(Channel.UNLIMITED)
+        var job: Job? = null
+    }
 
     inline fun <reified T : Event> LifecycleOwner.registerListener(noinline listener: (T) -> Unit) {
         addListener(listener)
@@ -76,7 +85,29 @@ class EventManager private constructor(private val context: Context) {
     }
 
     fun addObserver(observer: EventObserver) {
-        observers.add(observer)
+        synchronized(observersLock) {
+            if (observers.containsKey(observer)) return
+
+            val queue = ObserverQueue()
+            observers[observer] = queue
+
+            // Deliver events to each observer serially, so a suspend onEvent() body
+            // can't interleave with another event for the same observer.
+            queue.job = App.scope.launch(Dispatchers.Main.immediate) {
+                for (event in queue.channel) {
+                    try {
+                        observer.onEvent(event)
+                    } catch (e: CancellationException) {
+                        throw e
+                    } catch (t: Throwable) {
+                        context.logUtils.normalLog(
+                            "Error delivering event $event to $observer",
+                            t,
+                        )
+                    }
+                }
+            }
+        }
     }
 
     fun <T : Event> removeListener(listener: (T) -> Unit) {
@@ -89,16 +120,24 @@ class EventManager private constructor(private val context: Context) {
     }
 
     fun removeObserver(observer: EventObserver) {
-        observers.remove(observer)
+        val queue = synchronized(observersLock) {
+            observers.remove(observer)
+        } ?: return
+
+        // Drop any events that haven't been delivered yet.
+        queue.channel.close()
+        queue.job?.cancel()
     }
 
     fun sendEvent(event: Event) {
         context.logUtils.debugLog("Sending event $event", null)
 
-        observers.forEach {
-            App.scope.launch(Dispatchers.Main) {
-                it.onEvent(event)
-            }
+        val queues = synchronized(observersLock) {
+            observers.values.toList()
+        }
+
+        queues.forEach {
+            it.channel.trySend(event)
         }
 
         listeners.filter { it.listenerClass == event::class.java }
