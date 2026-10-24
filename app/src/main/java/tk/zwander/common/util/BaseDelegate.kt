@@ -259,6 +259,10 @@ abstract class BaseDelegate<State : Any>(
         return currentWidgets.any { it.id == id }
     }
 
+    override fun holderId(): Int {
+        return holderId
+    }
+
     open fun updateState(transform: (State) -> State) {
         val newState = transform(state.value)
 

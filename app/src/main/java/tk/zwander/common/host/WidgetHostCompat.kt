@@ -297,15 +297,14 @@ class WidgetHostCompat(
                             "isActivity: ${pendingIntent?.isActivity}. " +
                             "creatorPackage: ${pendingIntent?.creatorPackage}",
                 )
+                val callbackForWidget = onClickCallbacks.firstOrNull { it.hasWidgetId(widgetId) }
 
                 val allowedByCallback = if (pendingIntent != null) {
                     val triggerUnlockOrDismiss = pendingIntent.isActivity
                     // This package check is so the frame/drawer doesn't dismiss itself when the
                     // Open Drawer widget is tapped.
                     if (pendingIntent.creatorPackage != context.packageName) {
-                        onClickCallbacks.all { callback ->
-                            !callback.hasWidgetId(widgetId) || callback.onWidgetClick(triggerUnlockOrDismiss)
-                        }
+                        callbackForWidget?.onWidgetClick(triggerUnlockOrDismiss) == true
                     } else {
                         true
                     }
@@ -313,7 +312,7 @@ class WidgetHostCompat(
                     true
                 }
 
-                return allowedByCallback && !globalState.itemIsActive.value
+                return allowedByCallback && globalState.itemIsActive.value[callbackForWidget?.holderId()] != true
             }
         }
 
@@ -404,6 +403,7 @@ class WidgetHostCompat(
     interface OnClickCallback {
         fun hasWidgetId(id: Int): Boolean
         fun onWidgetClick(trigger: Boolean): Boolean
+        fun holderId(): Int
     }
 
     sealed class Mode(val handlerClass: java.lang.Class<*>) {

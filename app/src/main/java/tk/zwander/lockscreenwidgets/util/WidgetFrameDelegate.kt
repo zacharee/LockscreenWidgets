@@ -383,7 +383,7 @@ open class WidgetFrameDelegate protected constructor(
     }
 
     override fun onWidgetClick(trigger: Boolean): Boolean {
-        val ignoreTouches = framePrefs.ignoreWidgetTouches || globalState.itemIsActive.value
+        val ignoreTouches = framePrefs.ignoreWidgetTouches || globalState.itemIsActive.value[holderId] == true
 
         if (!ignoreTouches) {
             if (trigger && prefManager.requestUnlock && prefManager.frameDirectlyCheckForActivity) {

@@ -28,7 +28,7 @@ data class GlobalState private constructor(
     val showingKeyboard: MutableStateFlow<Map<Int, Boolean>> = MutableStateFlow(mapOf()),
     val notificationsPanelFullyExpanded: MutableStateFlow<Map<Int, Boolean>> = MutableStateFlow(mapOf()),
     val handlingClick: MutableStateFlow<Map<Int, Unit>> = MutableStateFlow(mapOf()),
-    val itemIsActive: MutableStateFlow<Boolean> = MutableStateFlow(false),
+    val itemIsActive: MutableStateFlow<Map<Int, Boolean>> = MutableStateFlow(mapOf()),
     val proxTooClose: MutableStateFlow<Boolean> = MutableStateFlow(false),
     val accessibilitySeesNotificationsOnMainLockScreen: MutableStateFlow<Map<Int, Boolean>> = MutableStateFlow(mapOf()),
     val showingPowerMenu: MutableStateFlow<Map<Int, Boolean>> = MutableStateFlow(mapOf()),

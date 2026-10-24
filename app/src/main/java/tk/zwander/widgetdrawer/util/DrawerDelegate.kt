@@ -340,7 +340,7 @@ class DrawerDelegate private constructor(context: Context, displayId: String) :
     }
 
     override fun onWidgetClick(trigger: Boolean): Boolean {
-        return if (!globalState.itemIsActive.value) {
+        return if (globalState.itemIsActive.value[holderId] != true) {
             if (trigger && prefManager.requestUnlockDrawer && prefManager.drawerDirectlyCheckForActivity) {
                 DismissOrUnlockActivity.launch(this)
                 eventManager.sendEvent(Event.CloseDrawer)

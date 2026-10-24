@@ -168,7 +168,7 @@ fun <VM : BaseDelegate.BaseViewModel<*, *>> VM.WidgetGrid(
 
     LaunchedEffect(currentEditingId) {
         globalState.handlingClick.remove(holderId)
-        globalState.itemIsActive.value = currentEditingId != null
+        globalState.itemIsActive[holderId] = currentEditingId != null
     }
 
     val mainAxisCount = if (orientation == Orientation.Vertical) updatedRowCount else updatedColumnCount

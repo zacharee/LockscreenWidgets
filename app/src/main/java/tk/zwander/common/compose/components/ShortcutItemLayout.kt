@@ -22,12 +22,13 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import tk.zwander.common.compose.util.rememberPreferenceState
+import tk.zwander.common.util.BaseDelegate
 import tk.zwander.common.util.globalState
 import tk.zwander.common.util.prefManager
 import tk.zwander.lockscreenwidgets.R
 
 @Composable
-fun ShortcutItemLayout(
+fun <VM : BaseDelegate.BaseViewModel<*, *>> VM.ShortcutItemLayout(
     cornerRadiusKey: String,
     icon: Bitmap?,
     onClick: () -> Unit,
@@ -58,7 +59,7 @@ fun ShortcutItemLayout(
         elevation = CardDefaults.outlinedCardElevation(),
         shape = RoundedCornerShape(animatedCornerRadius),
         onClick = {
-            if (!itemIsSelected) {
+            if (itemIsSelected[holderId] != true) {
                 onClick()
             }
         },
