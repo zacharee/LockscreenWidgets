@@ -45,7 +45,7 @@ fun BaseDelegate.BaseViewModel<*, *>.BlurView(
     )
     val blurAmount by rememberIntPreferenceState(
         key = blurAmountKey.first,
-        preferences = blurKey.second,
+        preferences = blurAmountKey.second,
         defaultValue = 100,
     )
     val cornerRadiusPx by if (cornerRadiusKey != null) {
