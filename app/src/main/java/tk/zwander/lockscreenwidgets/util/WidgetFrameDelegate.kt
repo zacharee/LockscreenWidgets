@@ -47,6 +47,7 @@ import tk.zwander.lockscreenwidgets.activities.add.AddFrameWidgetActivity
 import tk.zwander.lockscreenwidgets.activities.add.ReconfigureFrameWidgetActivity
 import tk.zwander.lockscreenwidgets.compose.WidgetFrameLayout
 import tk.zwander.lockscreenwidgets.data.Mode
+import kotlin.math.roundToInt
 import kotlin.time.Duration.Companion.milliseconds
 
 /**
@@ -1019,9 +1020,6 @@ open class WidgetFrameDelegate protected constructor(
                 modifier = modifier,
             ) {
                 val constraints = constraints
-                val gridState = rememberLazySpannedGridState(
-                    initialFirstVisibleLine = if (prefManager.rememberFramePosition) framePrefs.currentIndex else 0,
-                )
                 val rowCount by rememberPreferenceState(
                     key = PrefManager.KEY_FRAME_ROW_COUNT,
                     preferences = framePrefs.framePreferences,
@@ -1034,6 +1032,17 @@ open class WidgetFrameDelegate protected constructor(
                 ) {
                     framePrefs.colCount
                 }
+                val gridState = rememberLazySpannedGridState(
+                    initialFirstVisibleLine = if (prefManager.rememberFramePosition) {
+                        val stored = framePrefs.currentIndex
+                        // Stored positions are page starts, i.e. multiples of columnCount. Snap any
+                        // value that isn't (from an older build, or from a session with a different
+                        // column count) to the nearest page so it can't restore between two pages.
+                        ((stored + columnCount / 2) / columnCount) * columnCount
+                    } else {
+                        0
+                    },
+                )
                 var currentWidgetsState by rememberPreferenceState(
                     key = FramePrefs.generateCurrentWidgetsKey(holderId),
                     value = { currentWidgets.toList() },
@@ -1061,6 +1070,11 @@ open class WidgetFrameDelegate protected constructor(
                 val derivedStoredPosition by remember {
                     derivedStateOf { storedPosition }
                 }
+                val pageAlignedStoredLine by remember {
+                    derivedStateOf {
+                        ((derivedStoredPosition + columnCount / 2) / columnCount) * columnCount
+                    }
+                }
                 val pageIndicatorBehavior by rememberPreferenceState(
                     key = PrefManager.KEY_PAGE_INDICATOR_BEHAVIOR,
                     value = { context.prefManager.pageIndicatorBehavior },
@@ -1085,6 +1099,23 @@ open class WidgetFrameDelegate protected constructor(
                         (page + pageOffset) to pageCount
                     }
                 }
+                // The scroll position rounded to the nearest whole line, rather than the line that
+                // contains the viewport's leading edge. firstVisibleLine truncates, so a page whose
+                // scroll offset is a fraction of a pixel short of its exact start (the grid's content
+                // and viewport widths can differ by rounding) reports the previous line. Saving that
+                // line makes the next show restore to a position between two pages.
+                val nearestLine by remember {
+                    derivedStateOf {
+                        val linePitchPx = gridState.lineSizePx + gridState.lineSpacingPx
+                        if (linePitchPx <= 0) {
+                            0
+                        } else {
+                            val scrollOffsetPx =
+                                gridState.firstVisibleLine * linePitchPx + gridState.firstVisibleLineScrollOffset
+                            (scrollOffsetPx.toFloat() / linePitchPx).roundToInt()
+                        }
+                    }
+                }
                 val frameLocked by rememberBooleanPreferenceState(
                     key = PrefManager.KEY_LOCK_WIDGET_FRAME,
                 )
@@ -1107,11 +1138,11 @@ open class WidgetFrameDelegate protected constructor(
                     // (empty) layout reports line 0 and overwrites the stored position.
                     snapshotFlow { gridState.layoutInfo.totalLineCount }.first { it > 0 }
 
-                    if (rememberFramePosition && gridState.firstVisibleLine != derivedStoredPosition) {
-                        gridState.scrollToLine(derivedStoredPosition)
+                    if (rememberFramePosition && nearestLine != pageAlignedStoredLine) {
+                        gridState.scrollToLine(pageAlignedStoredLine)
                     }
 
-                    snapshotFlow { gridState.firstVisibleLine to gridState.isScrollInProgress }
+                    snapshotFlow { nearestLine to gridState.isScrollInProgress }
                         .filter { !it.second && gridState.layoutInfo.totalLineCount > 0 }
                         .collect {
                             val newLine = it.first
@@ -1212,47 +1243,51 @@ open class WidgetFrameDelegate protected constructor(
                                 },
                             )
 
-                            Row(
-                                modifier = Modifier.weight(1f),
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                            ) {
+                            if (pageInfo.second > 1) {
+                                Row(
+                                    modifier = Modifier.weight(1f),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                ) {
+                                    Spacer(modifier = Modifier.weight(1f))
+
+                                    IconButton(
+                                        onClick = {
+                                            scope.launch {
+                                                gridState.animateScrollToLine(
+                                                    (nearestLine + (pageInfo.second * columnCount) - columnCount)
+                                                            % (pageInfo.second.coerceAtLeast(1) * columnCount),
+                                                )
+                                            }
+                                        },
+                                    ) {
+                                        Icon(
+                                            painter = painterResource(R.drawable.arrow_left_24px),
+                                            contentDescription = stringResource(R.string.previous),
+                                            modifier = Modifier.size(24.dp),
+                                        )
+                                    }
+
+                                    IconButton(
+                                        onClick = {
+                                            scope.launch {
+                                                gridState.animateScrollToLine(
+                                                    (nearestLine + columnCount) % (pageInfo.second * columnCount),
+                                                )
+                                            }
+                                        },
+                                    ) {
+                                        Icon(
+                                            painter = painterResource(R.drawable.arrow_left_24px),
+                                            contentDescription = stringResource(R.string.next),
+                                            modifier = Modifier
+                                                .rotate(180f)
+                                                .size(24.dp),
+                                        )
+                                    }
+                                }
+                            } else {
                                 Spacer(modifier = Modifier.weight(1f))
-
-                                IconButton(
-                                    onClick = {
-                                        scope.launch {
-                                            gridState.animateScrollToLine(
-                                                (gridState.firstVisibleLine + (pageInfo.second * columnCount) - columnCount)
-                                                        % (pageInfo.second.coerceAtLeast(1) * columnCount),
-                                            )
-                                        }
-                                    },
-                                ) {
-                                    Icon(
-                                        painter = painterResource(R.drawable.arrow_left_24px),
-                                        contentDescription = stringResource(R.string.previous),
-                                        modifier = Modifier.size(24.dp),
-                                    )
-                                }
-
-                                IconButton(
-                                    onClick = {
-                                        scope.launch {
-                                            gridState.animateScrollToLine(
-                                                (gridState.firstVisibleLine + columnCount) % (pageInfo.second * columnCount),
-                                            )
-                                        }
-                                    },
-                                ) {
-                                    Icon(
-                                        painter = painterResource(R.drawable.arrow_left_24px),
-                                        contentDescription = stringResource(R.string.next),
-                                        modifier = Modifier
-                                            .rotate(180f)
-                                            .size(24.dp),
-                                    )
-                                }
                             }
                         }
                     }
