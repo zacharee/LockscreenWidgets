@@ -202,6 +202,9 @@ open class WidgetFrameDelegate protected constructor(
 
     override val prefsHandler = HandlerRegistry {
         handler(PrefManager.KEY_FRAME_MASKED_MODE) {
+            if (framePrefs.maskedMode) {
+                wallpaperClient.tryBindService()
+            }
             updateWallpaperLayerIfNeeded()
         }
         handler(PrefManager.KEY_SHOW_IN_NOTIFICATION_CENTER) {
@@ -235,11 +238,6 @@ open class WidgetFrameDelegate protected constructor(
         handler(PrefManager.KEY_FRAME_IGNORE_TOUCHES) {
             updateState {
                 it.copy(ignoreAllTouches = framePrefs.ignoreAllTouches)
-            }
-        }
-        handler(PrefManager.KEY_FRAME_MASKED_MODE) {
-            if (framePrefs.maskedMode) {
-                wallpaperClient.tryBindService()
             }
         }
     }
