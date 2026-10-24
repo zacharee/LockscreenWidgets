@@ -234,7 +234,7 @@ open class WidgetFrameDelegate protected constructor(
                             }
 
                             Side.RIGHT -> {
-                                params.width = velocity
+                                params.width += velocity
                                 params.x += (velocity / 2)
                             }
 
