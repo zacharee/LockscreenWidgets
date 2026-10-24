@@ -59,7 +59,6 @@ import dev.zwander.lazyspannedgrid.reorderable_calvin.rememberReorderableLazySpa
 import dev.zwander.lswinterconnect.peekLogUtils
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.launch
 import tk.zwander.common.activities.DismissOrUnlockActivity
@@ -549,13 +548,11 @@ private fun <VM : BaseDelegate.BaseViewModel<*, *>> VM.WidgetContents(
             if (!isResizingItem) {
                 if (!BrokenAppsRegistry.isBroken(widgetInfo)) {
                     try {
-                        launch(Dispatchers.Main) {
-                            widgetView = viewCacheRegistry.getOrCreateView(
-                                SafeContextWrapper(context),
-                                data.id,
-                                widgetInfo,
-                            )
-                        }
+                        widgetView = viewCacheRegistry.getOrCreateView(
+                            SafeContextWrapper(context),
+                            data.id,
+                            widgetInfo,
+                        )
                     } catch (e: Throwable) {
                         if (e !is CancellationException) {
                             context.logUtils.normalLog(
