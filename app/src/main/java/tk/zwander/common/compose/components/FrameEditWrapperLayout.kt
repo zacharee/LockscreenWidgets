@@ -3,18 +3,9 @@ package tk.zwander.common.compose.components
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.Orientation
-import androidx.compose.foundation.gestures.draggable
-import androidx.compose.foundation.gestures.draggable2D
-import androidx.compose.foundation.gestures.rememberDraggable2DState
-import androidx.compose.foundation.gestures.rememberDraggableState
+import androidx.compose.foundation.gestures.*
 import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -34,12 +25,11 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import tk.zwander.common.compose.util.rememberBooleanPreferenceState
 import tk.zwander.common.compose.util.rememberPreferenceState
-import tk.zwander.common.util.Event
 import tk.zwander.common.util.PrefManager
-import tk.zwander.common.util.eventManager
 import tk.zwander.common.util.prefManager
 import tk.zwander.lockscreenwidgets.R
 import tk.zwander.lockscreenwidgets.activities.FrameReorderActivity
+import tk.zwander.lockscreenwidgets.activities.add.AddFrameWidgetActivity
 import tk.zwander.lockscreenwidgets.util.FrameSpecificPreferences
 import tk.zwander.lockscreenwidgets.util.WidgetFrameDelegate
 
@@ -49,6 +39,12 @@ fun WidgetFrameDelegate.WidgetFrameViewModel.FrameEditWrapperLayout(
     onRemovePressed: () -> Unit,
     onClose: () -> Unit,
     onSettings: () -> Unit,
+    frameMoveFinished: () -> Unit,
+    frameMoved: (velX: Float, velY: Float) -> Unit,
+    frameResized: (which: Side, velocity: Int, isUp: Boolean) -> Unit,
+    centerFrameHorizontally: () -> Unit,
+    centerFrameVertically: () -> Unit,
+    tempHide: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val context = LocalContext.current
@@ -93,7 +89,7 @@ fun WidgetFrameDelegate.WidgetFrameViewModel.FrameEditWrapperLayout(
                 ) {
                     IconButton(
                         onClick = {
-                            context.eventManager.sendEvent(Event.CenterFrameVertically(frameId))
+                            centerFrameVertically()
                         },
                     ) {
                         Icon(
@@ -110,10 +106,10 @@ fun WidgetFrameDelegate.WidgetFrameViewModel.FrameEditWrapperLayout(
                         modifier = Modifier
                             .draggable2D(
                                 state = rememberDraggable2DState {
-                                    context.eventManager.sendEvent(Event.FrameMoved(frameId, it.x, it.y))
+                                    frameMoved(it.x, it.y)
                                 },
                                 onDragStopped = {
-                                    context.eventManager.sendEvent(Event.FrameMoveFinished(frameId))
+                                    frameMoveFinished()
                                 },
                             )
                             .size(32.dp),
@@ -122,7 +118,7 @@ fun WidgetFrameDelegate.WidgetFrameViewModel.FrameEditWrapperLayout(
 
                     IconButton(
                         onClick = {
-                            context.eventManager.sendEvent(Event.CenterFrameHorizontally(frameId))
+                            centerFrameHorizontally()
                         },
                     ) {
                         Icon(
@@ -182,7 +178,7 @@ fun WidgetFrameDelegate.WidgetFrameViewModel.FrameEditWrapperLayout(
 
                     IconButton(
                         onClick = {
-                            context.eventManager.sendEvent(Event.TempHide(frameId))
+                            tempHide()
                         },
                     ) {
                         Icon(
@@ -195,7 +191,7 @@ fun WidgetFrameDelegate.WidgetFrameViewModel.FrameEditWrapperLayout(
 
                     IconButton(
                         onClick = {
-                            context.eventManager.sendEvent(Event.LaunchAddWidget(frameId))
+                            AddFrameWidgetActivity.launch(context, frameId)
                         },
                     ) {
                         Icon(
@@ -250,25 +246,11 @@ fun WidgetFrameDelegate.WidgetFrameViewModel.FrameEditWrapperLayout(
                         .align(AbsoluteAlignment.CenterLeft)
                         .draggable(
                             state = rememberDraggableState {
-                                context.eventManager.sendEvent(
-                                    Event.FrameResized(
-                                        frameId,
-                                        Event.FrameResized.Side.LEFT,
-                                        it.toInt(),
-                                        false,
-                                    ),
-                                )
+                                frameResized(Side.LEFT, it.toInt(), false)
                             },
                             orientation = Orientation.Horizontal,
                             onDragStopped = {
-                                context.eventManager.sendEvent(
-                                    Event.FrameResized(
-                                        frameId,
-                                        Event.FrameResized.Side.LEFT,
-                                        0,
-                                        true,
-                                    ),
-                                )
+                                frameResized(Side.LEFT, 0, true)
                             },
                         ),
                     tint = Color.White,
@@ -281,25 +263,11 @@ fun WidgetFrameDelegate.WidgetFrameViewModel.FrameEditWrapperLayout(
                         .align(Alignment.TopCenter)
                         .draggable(
                             state = rememberDraggableState {
-                                context.eventManager.sendEvent(
-                                    Event.FrameResized(
-                                        frameId,
-                                        Event.FrameResized.Side.TOP,
-                                        it.toInt(),
-                                        false,
-                                    ),
-                                )
+                                frameResized(Side.TOP, it.toInt(), false)
                             },
                             orientation = Orientation.Vertical,
                             onDragStopped = {
-                                context.eventManager.sendEvent(
-                                    Event.FrameResized(
-                                        frameId,
-                                        Event.FrameResized.Side.TOP,
-                                        0,
-                                        true,
-                                    ),
-                                )
+                                frameResized(Side.TOP, 0, true)
                             },
                         ),
                     tint = Color.White,
@@ -312,25 +280,11 @@ fun WidgetFrameDelegate.WidgetFrameViewModel.FrameEditWrapperLayout(
                         .align(Alignment.BottomCenter)
                         .draggable(
                             state = rememberDraggableState {
-                                context.eventManager.sendEvent(
-                                    Event.FrameResized(
-                                        frameId,
-                                        Event.FrameResized.Side.BOTTOM,
-                                        it.toInt(),
-                                        false,
-                                    ),
-                                )
+                                frameResized(Side.BOTTOM, it.toInt(), false)
                             },
                             orientation = Orientation.Vertical,
                             onDragStopped = {
-                                context.eventManager.sendEvent(
-                                    Event.FrameResized(
-                                        frameId,
-                                        Event.FrameResized.Side.BOTTOM,
-                                        0,
-                                        true,
-                                    ),
-                                )
+                                frameResized(Side.BOTTOM, 0, true)
                             },
                         ),
                     tint = Color.White,
@@ -343,25 +297,11 @@ fun WidgetFrameDelegate.WidgetFrameViewModel.FrameEditWrapperLayout(
                         .align(AbsoluteAlignment.CenterRight)
                         .draggable(
                             state = rememberDraggableState {
-                                context.eventManager.sendEvent(
-                                    Event.FrameResized(
-                                        frameId,
-                                        Event.FrameResized.Side.RIGHT,
-                                        it.toInt(),
-                                        false,
-                                    ),
-                                )
+                                frameResized(Side.RIGHT, it.toInt(), false)
                             },
                             orientation = Orientation.Horizontal,
                             onDragStopped = {
-                                context.eventManager.sendEvent(
-                                    Event.FrameResized(
-                                        frameId,
-                                        Event.FrameResized.Side.RIGHT,
-                                        0,
-                                        true,
-                                    ),
-                                )
+                                frameResized(Side.RIGHT, 0, true)
                             },
                         ),
                     tint = Color.White,
@@ -369,4 +309,11 @@ fun WidgetFrameDelegate.WidgetFrameViewModel.FrameEditWrapperLayout(
             }
         }
     }
+}
+
+enum class Side {
+    LEFT,
+    TOP,
+    RIGHT,
+    BOTTOM
 }

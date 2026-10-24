@@ -45,6 +45,7 @@ import tk.zwander.common.listeners.WidgetResizeListener
 import tk.zwander.common.util.*
 import tk.zwander.lockscreenwidgets.R
 import tk.zwander.widgetdrawer.activities.TaskerIsShowingDrawer
+import tk.zwander.widgetdrawer.activities.add.AddDrawerWidgetActivity
 import tk.zwander.widgetdrawer.activities.add.ReconfigureDrawerWidgetActivity
 import tk.zwander.widgetdrawer.compose.DrawerLayout
 import kotlin.math.absoluteValue
@@ -145,6 +146,12 @@ class DrawerDelegate private constructor(context: Context, displayId: String) :
                                 Modifier
                             },
                         ),
+                    removeWidgetConfirmed = ::removeWidget,
+                    drawerIntercept = { intercept ->
+                        lifecycleScope.launch {
+                            forceWakelock(intercept)
+                        }
+                    },
                 )
             }
         }
@@ -169,14 +176,89 @@ class DrawerDelegate private constructor(context: Context, displayId: String) :
     private val handle by lazy {
         viewModel.createComposeViewHolder {
             DrawerHandle(
+                lifecycleScope = lifecycleScope,
                 params = handleParams,
                 displayId = displayId,
                 updateWindow = {
                     it.hideNavBarsForGestureExclusion()
                     wm?.safeUpdateViewLayout(it, handleParams)
                 },
+                scrollOpenFinish = { from ->
+                    val distanceFromEdge = (params.width + params.x).absoluteValue
+                    val touchSlop = ViewConfiguration.get(this@DrawerDelegate).scaledTouchSlop
+                    @Suppress("RtlHardcoded")
+                    val velocityMatches = when {
+                        viewModel.latestScrollInVelocity.value.absoluteValue < touchSlop -> true
+                        from == Gravity.LEFT -> viewModel.latestScrollInVelocity.value > 0
+                        else -> viewModel.latestScrollInVelocity.value < 0
+                    }
+                    val metThreshold = this@DrawerDelegate.display?.let { display ->
+                        distanceFromEdge > display.dpToPx(100f) && velocityMatches
+                    } ?: false
+
+                    val animator = ValueAnimator.ofInt(params.x, if (metThreshold) 0 else -params.width)
+                    animator.addUpdateListener { anim ->
+                        params.x = anim.animatedValue as Int
+                        lifecycleScope.launch {
+                            updateWindow()
+                        }
+                    }
+                    animator.duration = with(DrawerOrFrame.DRAWER) { duration() }
+                    animator.interpolator =
+                        if (metThreshold) DecelerateInterpolator() else AccelerateInterpolator()
+                    animator.addListener(
+                        object : AnimatorListenerAdapter() {
+                            override fun onAnimationEnd(animation: Animator) {
+                                if (!metThreshold) {
+                                    lifecycleScope.launch {
+                                        hideDrawer()
+                                    }
+                                } else {
+                                    lifecycleScope.launch {
+                                        hideHandle()
+                                    }
+                                }
+                            }
+                        },
+                    )
+                    animator.start()
+                },
+                scrollInDrawer = ::scrollInDrawer,
+                showDrawer = {
+                    params.x = 0
+                    showDrawer()
+                },
                 modifier = Modifier.fillMaxSize(),
             )
+        }
+    }
+
+    private suspend fun scrollInDrawer(from: Int, dist: Float, initial: Boolean, velocity: Float) {
+        if (!initial && !viewModel.scrollingOpen.value) {
+            // This drag-position update was queued before the pointer lifted, but is only
+            // being processed now, after ScrollOpenFinish already started the settle
+            // animation. Applying it would stomp params.x with a stale, more-off-screen
+            // value for a frame or two (visible as a flicker) before the animator's next
+            // tick corrects it. Once the drag has ended, only the settle animator should
+            // own params.x.
+            return
+        }
+
+        if (velocity.sign != viewModel.latestScrollInVelocity.value.sign) {
+            viewModel.latestScrollInVelocity.value = 0f
+        }
+
+        viewModel.latestScrollInVelocity.value += velocity
+
+        val distanceFromEdge = (params.width - dist)
+
+        params.gravity = from
+        params.x = -distanceFromEdge.toInt()
+
+        if (initial) {
+            showDrawer(hideHandle = false)
+        } else {
+            updateWindow()
         }
     }
 
@@ -227,108 +309,8 @@ class DrawerDelegate private constructor(context: Context, displayId: String) :
                 hideDrawer()
             }
 
-            Event.ShowHandle -> {
-                tryShowHandle()
-            }
-
-            Event.DrawerShown -> {
-                hideHandle()
-            }
-
-            Event.DrawerHidden -> {
-                tryShowHandle()
-            }
-
             Event.CloseSystemDialogs -> {
                 hideDrawer()
-            }
-
-            is Event.DrawerIntercept -> {
-                forceWakelock(event.down)
-            }
-
-            is Event.DrawerAttachmentState -> {
-                TaskerIsShowingDrawer::class.java.requestQuery(this)
-                if (event.attached) {
-                    if (!viewModel.scrollingOpen.value) {
-                        rootView.fadeIn(DrawerOrFrame.DRAWER)
-                        eventManager.sendEvent(Event.DrawerShown)
-                        viewModel.drawerAnimationState.value = AnimationState.IDLE
-                    } else {
-                        rootView.alpha = 1f
-                    }
-                }
-            }
-
-            Event.DrawerBackButtonClick -> {
-                hideDrawer()
-            }
-
-            is Event.ScrollInDrawer -> {
-                if (!event.initial && !viewModel.scrollingOpen.value) {
-                    // This drag-position update was queued before the pointer lifted, but is only
-                    // being processed now, after ScrollOpenFinish already started the settle
-                    // animation. Applying it would stomp params.x with a stale, more-off-screen
-                    // value for a frame or two (visible as a flicker) before the animator's next
-                    // tick corrects it. Once the drag has ended, only the settle animator should
-                    // own params.x.
-                    return
-                }
-
-                if (event.velocity.sign != viewModel.latestScrollInVelocity.value.sign) {
-                    viewModel.latestScrollInVelocity.value = 0f
-                }
-
-                viewModel.latestScrollInVelocity.value += event.velocity
-
-                val distanceFromEdge = (params.width - event.dist)
-
-                params.gravity = event.from
-                params.x = -distanceFromEdge.toInt()
-
-                if (event.initial) {
-                    showDrawer(hideHandle = false)
-                } else {
-                    updateWindow()
-                }
-            }
-
-            is Event.ScrollOpenFinish -> {
-                val distanceFromEdge = (params.width + params.x).absoluteValue
-                val touchSlop = ViewConfiguration.get(this).scaledTouchSlop
-                val velocityMatches = when {
-                    viewModel.latestScrollInVelocity.value.absoluteValue < touchSlop -> true
-                    event.from == Gravity.LEFT -> viewModel.latestScrollInVelocity.value > 0
-                    else -> viewModel.latestScrollInVelocity.value < 0
-                }
-                val metThreshold = this@DrawerDelegate.display?.let { display ->
-                    distanceFromEdge > display.dpToPx(100f) && velocityMatches
-                } ?: false
-
-                val animator = ValueAnimator.ofInt(params.x, if (metThreshold) 0 else -params.width)
-                animator.addUpdateListener {
-                    params.x = it.animatedValue as Int
-                    lifecycleScope.launch {
-                        updateWindow()
-                    }
-                }
-                animator.duration = with(DrawerOrFrame.DRAWER) { duration() }
-                animator.interpolator =
-                    if (metThreshold) DecelerateInterpolator() else AccelerateInterpolator()
-                animator.addListener(
-                    object : AnimatorListenerAdapter() {
-                        override fun onAnimationEnd(animation: Animator) {
-                            if (!metThreshold) {
-                                lifecycleScope.launch {
-                                    hideDrawer()
-                                }
-                            } else {
-                                eventManager.sendEvent(Event.DrawerShown)
-                            }
-                        }
-                    },
-                )
-                animator.start()
             }
 
             Event.LockscreenDismissed -> {
@@ -341,11 +323,26 @@ class DrawerDelegate private constructor(context: Context, displayId: String) :
         }
     }
 
+    private suspend fun onDrawerAttachmentStateChanged(attached: Boolean) {
+        TaskerIsShowingDrawer::class.java.requestQuery(this)
+        if (attached) {
+            if (!viewModel.scrollingOpen.value) {
+                rootView.fadeIn(DrawerOrFrame.DRAWER)
+                hideHandle()
+                viewModel.drawerAnimationState.value = AnimationState.IDLE
+            } else {
+                rootView.alpha = 1f
+            }
+        }
+    }
+
     override fun onWidgetClick(trigger: Boolean): Boolean {
         return if (globalState.itemIsActive.value[holderId] != true) {
             if (trigger && prefManager.requestUnlockDrawer && prefManager.drawerDirectlyCheckForActivity) {
                 DismissOrUnlockActivity.launch(this)
-                eventManager.sendEvent(Event.CloseDrawer)
+                lifecycleScope.launch {
+                    hideDrawer()
+                }
             } else {
                 if (prefManager.requestUnlockDrawer) {
                     globalState.handlingClick[ID] = Unit
@@ -413,7 +410,9 @@ class DrawerDelegate private constructor(context: Context, displayId: String) :
         super.onViewDetached(view)
 
         if (!rootView.isAttachedToWindow) {
-            eventManager.sendEvent(Event.DrawerAttachmentState(false))
+            lifecycleScope.launch {
+                onDrawerAttachmentStateChanged(false)
+            }
         }
     }
 
@@ -458,16 +457,14 @@ class DrawerDelegate private constructor(context: Context, displayId: String) :
     }
 
     private suspend fun showDrawer(hideHandle: Boolean = true) {
-        withContext(Dispatchers.Main) {
-            logUtils.debugLog("Trying to show drawer", null)
-            if (!rootView.isAttachedToWindow && viewModel.drawerAnimationState.value != AnimationState.ADDING) {
-                eventManager.sendEvent(Event.DrawerAttachmentState(true))
-                viewModel.drawerAnimationState.value = AnimationState.ADDING
-                rootView.alpha = 0f
-                wm?.safeAddView(rootView, params)
-                if (hideHandle) {
-                    hideHandle()
-                }
+        logUtils.debugLog("Trying to show drawer", null)
+        if (!rootView.isAttachedToWindow && viewModel.drawerAnimationState.value != AnimationState.ADDING) {
+            viewModel.drawerAnimationState.value = AnimationState.ADDING
+            rootView.alpha = 0f
+            onDrawerAttachmentStateChanged(true)
+            wm?.safeAddView(rootView, params)
+            if (hideHandle) {
+                hideHandle()
             }
         }
     }
@@ -519,7 +516,9 @@ class DrawerDelegate private constructor(context: Context, displayId: String) :
 
                 updateIgnoreDrawerTouches(false)
                 viewModel.drawerAnimationState.value = AnimationState.IDLE
-                if (callListener) eventManager.sendEvent(Event.DrawerHidden)
+                if (callListener) {
+                    tryShowHandle()
+                }
             }
         }
     }
@@ -607,15 +606,21 @@ class DrawerDelegate private constructor(context: Context, displayId: String) :
                     }
                 },
                 launchAddActivity = {
-                    context.eventManager.sendEvent(Event.CloseDrawer)
-                    context.eventManager.sendEvent(Event.LaunchAddDrawerWidget(true))
+                    delegate.lifecycleScope.launch {
+                        delegate.hideDrawer()
+                    }
+                    AddDrawerWidgetActivity.launch(context, true)
                 },
                 launchReconfigure = { id, providerInfo ->
-                    context.eventManager.sendEvent(Event.CloseDrawer)
+                    delegate.lifecycleScope.launch {
+                        delegate.hideDrawer()
+                    }
                     ReconfigureDrawerWidgetActivity.launch(context, id, providerInfo)
                 },
                 launchShortcutIconOverride = { id ->
-                    context.eventManager.sendEvent(Event.CloseDrawer)
+                    delegate.lifecycleScope.launch {
+                        delegate.hideDrawer()
+                    }
                     SelectIconPackActivity.launchForOverride(context, id, true)
                 },
                 modifier = modifier,

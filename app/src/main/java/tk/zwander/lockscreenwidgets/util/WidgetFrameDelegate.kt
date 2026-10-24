@@ -33,6 +33,7 @@ import mx.platacard.pagerindicator.PagerWormIndicator
 import tk.zwander.common.activities.DismissOrUnlockActivity
 import tk.zwander.common.activities.SelectIconPackActivity
 import tk.zwander.common.compose.WidgetGrid
+import tk.zwander.common.compose.components.Side
 import tk.zwander.common.compose.util.createComposeViewHolder
 import tk.zwander.common.compose.util.findAccessibility
 import tk.zwander.common.compose.util.rememberBooleanPreferenceState
@@ -42,6 +43,7 @@ import tk.zwander.common.data.provider.IFrameProvider
 import tk.zwander.common.listeners.WidgetResizeListener
 import tk.zwander.common.util.*
 import tk.zwander.lockscreenwidgets.R
+import tk.zwander.lockscreenwidgets.activities.add.AddFrameWidgetActivity
 import tk.zwander.lockscreenwidgets.activities.add.ReconfigureFrameWidgetActivity
 import tk.zwander.lockscreenwidgets.compose.WidgetFrameLayout
 import tk.zwander.lockscreenwidgets.data.Mode
@@ -195,6 +197,110 @@ open class WidgetFrameDelegate protected constructor(
         viewModel.createComposeViewHolder {
             WidgetFrameLayout(
                 modifier = Modifier.fillMaxSize(),
+                removeWidgetConfirmed = ::removeWidget,
+                frameMoveFinished = {
+                    updateWallpaperLayerIfNeeded()
+                },
+                frameIntercept = {
+                    lifecycleScope.launch {
+                        forceWakelock(it)
+                    }
+                },
+                frameMoved = { velX, velY ->
+                    lifecycleScope.launch {
+                        params.x += velX.toInt()
+                        params.y += velY.toInt()
+
+                        updateOverlay()
+
+                        frameSizeAndPosition.setPositionForType(
+                            saveMode,
+                            Point(params.x, params.y),
+                        )
+                    }
+                },
+                frameResized = { which, velocity, isUp ->
+                    lifecycleScope.launch {
+                        when (which) {
+                            Side.LEFT -> {
+                                params.width -= velocity
+                                params.x += (velocity / 2)
+                            }
+
+                            Side.TOP -> {
+                                params.height -= velocity
+                                params.y += (velocity / 2)
+                            }
+
+                            Side.RIGHT -> {
+                                params.width = velocity
+                                params.x += (velocity / 2)
+                            }
+
+                            Side.BOTTOM -> {
+                                params.height += velocity
+                                params.y += (velocity / 2)
+                            }
+                        }
+
+                        this@WidgetFrameDelegate.display?.let { display ->
+                            val minPx = display.dpToPx(MIN_FRAME_SIZE_DP)
+                            params.width = params.width.coerceAtLeast(minPx)
+                            params.height = params.height.coerceAtLeast(minPx)
+                        }
+
+                        updateOverlay()
+
+                        frameSizeAndPosition.setPositionForType(
+                            saveMode,
+                            Point(params.x, params.y),
+                        )
+                        this@WidgetFrameDelegate.display?.let { display ->
+                            frameSizeAndPosition.setSizeForType(
+                                saveMode,
+                                PointF(display.pxToDp(params.width), display.pxToDp(params.height)),
+                            )
+                        }
+
+                        if (isUp) {
+                            updateWallpaperLayerIfNeeded()
+                        }
+                    }
+                },
+                centerFrameVertically = {
+                    lifecycleScope.launch {
+                        this@WidgetFrameDelegate.display?.let { display ->
+                            frameSizeAndPosition.setPositionForType(
+                                saveMode,
+                                Point(
+                                    frameSizeAndPosition.getPositionForType(saveMode, display).x,
+                                    0,
+                                ),
+                            )
+                        }
+                        updateWindow()
+                    }
+                },
+                centerFrameHorizontally = {
+                    lifecycleScope.launch {
+                        this@WidgetFrameDelegate.display?.let { display ->
+                            frameSizeAndPosition.setPositionForType(
+                                saveMode,
+                                Point(
+                                    0,
+                                    frameSizeAndPosition.getPositionForType(saveMode, display).y,
+                                ),
+                            )
+                        }
+                        updateWindow()
+                    }
+                },
+                tempHide = {
+                    lifecycleScope.launch {
+                        updateState { it.copy(isTempHide = true) }
+                        updateWindowState()
+                    }
+                },
             )
         }
     }
@@ -256,119 +362,6 @@ open class WidgetFrameDelegate protected constructor(
         super.onEvent(event)
 
         when (event) {
-            is Event.FrameMoveFinished -> {
-                if (event.frameId == id) {
-                    updateWallpaperLayerIfNeeded()
-                }
-            }
-
-            is Event.TempHide -> {
-                if (event.frameId == id) {
-                    updateState { it.copy(isTempHide = true) }
-                    updateWindowState()
-                }
-            }
-
-            is Event.CenterFrameHorizontally -> {
-                if (event.frameId == id) {
-                    this@WidgetFrameDelegate.display?.let { display ->
-                        frameSizeAndPosition.setPositionForType(
-                            saveMode,
-                            Point(
-                                0,
-                                frameSizeAndPosition.getPositionForType(saveMode, display).y,
-                            ),
-                        )
-                    }
-                    updateWindow()
-                }
-            }
-
-            is Event.CenterFrameVertically -> {
-                if (event.frameId == id) {
-                    this@WidgetFrameDelegate.display?.let { display ->
-                        frameSizeAndPosition.setPositionForType(
-                            saveMode,
-                            Point(
-                                frameSizeAndPosition.getPositionForType(saveMode, display).x,
-                                0,
-                            ),
-                        )
-                    }
-                    updateWindow()
-                }
-            }
-
-            is Event.FrameResized -> {
-                if (event.frameId == id) {
-                    when (event.which) {
-                        Event.FrameResized.Side.LEFT -> {
-                            params.width -= event.velocity
-                            params.x += (event.velocity / 2)
-                        }
-
-                        Event.FrameResized.Side.TOP -> {
-                            params.height -= event.velocity
-                            params.y += (event.velocity / 2)
-                        }
-
-                        Event.FrameResized.Side.RIGHT -> {
-                            params.width += event.velocity
-                            params.x += (event.velocity / 2)
-                        }
-
-                        Event.FrameResized.Side.BOTTOM -> {
-                            params.height += event.velocity
-                            params.y += (event.velocity / 2)
-                        }
-                    }
-
-                    this@WidgetFrameDelegate.display?.let { display ->
-                        val minPx = display.dpToPx(MIN_FRAME_SIZE_DP)
-                        params.width = params.width.coerceAtLeast(minPx)
-                        params.height = params.height.coerceAtLeast(minPx)
-                    }
-
-                    updateOverlay()
-
-                    frameSizeAndPosition.setPositionForType(
-                        saveMode,
-                        Point(params.x, params.y),
-                    )
-                    this@WidgetFrameDelegate.display?.let { display ->
-                        frameSizeAndPosition.setSizeForType(
-                            saveMode,
-                            PointF(display.pxToDp(params.width), display.pxToDp(params.height)),
-                        )
-                    }
-
-                    if (event.isUp) {
-                        eventManager.sendEvent(Event.FrameResizeFinished(id))
-                        updateWallpaperLayerIfNeeded()
-                    }
-                }
-            }
-
-            is Event.FrameMoved -> {
-                if (event.frameId == id) {
-                    params.x += event.velX.toInt()
-                    params.y += event.velY.toInt()
-
-                    updateOverlay()
-
-                    frameSizeAndPosition.setPositionForType(
-                        saveMode,
-                        Point(params.x, params.y),
-                    )
-                }
-            }
-
-            is Event.FrameIntercept -> {
-                if (event.frameId == id) {
-                    forceWakelock(event.down)
-                }
-            }
-
             is Event.PreviewFrames -> {
                 updateState {
                     val isPreview = event.show == Event.PreviewFrames.ShowMode.SHOW ||
@@ -1151,7 +1144,7 @@ open class WidgetFrameDelegate protected constructor(
                             }
                         },
                         launchAddActivity = {
-                            context.eventManager.sendEvent(Event.LaunchAddWidget(holderId))
+                            AddFrameWidgetActivity.launch(context, holderId)
                         },
                         launchReconfigure = { id, providerInfo ->
                             updateState {

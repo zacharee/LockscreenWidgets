@@ -23,10 +23,13 @@ import tk.zwander.common.compose.components.DrawerToolbar
 import tk.zwander.common.compose.util.rememberBooleanPreferenceState
 import tk.zwander.common.compose.util.rememberPreferenceState
 import tk.zwander.common.util.*
+import tk.zwander.widgetdrawer.activities.add.AddDrawerWidgetActivity
 import tk.zwander.widgetdrawer.util.DrawerDelegate
 
 @Composable
 fun DrawerDelegate.DrawerViewModel.DrawerLayout(
+    removeWidgetConfirmed: (Boolean, Int?) -> Unit,
+    drawerIntercept: (Boolean) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val context = LocalContext.current
@@ -54,11 +57,11 @@ fun DrawerDelegate.DrawerViewModel.DrawerLayout(
         modifier = modifier.motionEventSpy { event ->
             when (event.action) {
                 MotionEvent.ACTION_DOWN -> {
-                    context.eventManager.sendEvent(Event.DrawerIntercept(true))
+                    drawerIntercept(true)
                 }
 
                 MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
-                    context.eventManager.sendEvent(Event.DrawerIntercept(false))
+                    drawerIntercept(false)
                 }
             }
         },
@@ -113,7 +116,7 @@ fun DrawerDelegate.DrawerViewModel.DrawerLayout(
             DrawerToolbar(
                 addWidget = {
                     context.eventManager.sendEvent(Event.CloseDrawer)
-                    context.eventManager.sendEvent(Event.LaunchAddDrawerWidget(true))
+                    AddDrawerWidgetActivity.launch(context, true)
                 },
                 closeDrawer = {
                     context.eventManager.sendEvent(Event.CloseDrawer)
@@ -138,12 +141,7 @@ fun DrawerDelegate.DrawerViewModel.DrawerLayout(
                     ConfirmWidgetRemovalLayout(
                         itemToRemove = itemToRemove,
                         onItemRemovalConfirmed = { removed, data ->
-                            context.eventManager.sendEvent(
-                                Event.RemoveWidgetConfirmed(
-                                    removed,
-                                    data,
-                                ),
-                            )
+                            removeWidgetConfirmed(removed, data?.id)
                             itemToRemove = null
                         },
                     )

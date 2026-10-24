@@ -242,23 +242,17 @@ abstract class BaseDelegate<State : Any>(
         destroyed = true
     }
 
-    @SuppressLint("NotifyDataSetChanged")
-    @CallSuper
-    override suspend fun onEvent(event: Event) {
-        when (event) {
-            is Event.RemoveWidgetConfirmed -> {
-                if (event.remove && currentWidgets.any { it.id == event.item?.id }) {
-                    val newWidgets = currentWidgets.toMutableSet().apply {
-                        removeIf { it.id == event.item?.id }
-                        event.item?.let { idManager.removeId(it.id) }
-                    }
+    override suspend fun onEvent(event: Event) {}
 
-                    viewModel.currentEditingInterfaceId.value = null
-                    currentWidgets = newWidgets
-                }
+    protected fun removeWidget(remove: Boolean, id: Int?) {
+        if (remove && id != null && currentWidgets.any { it.id == id }) {
+            val newWidgets = currentWidgets.toMutableSet().apply {
+                removeIf { it.id == id }
+                idManager.removeId(id)
             }
 
-            else -> {}
+            viewModel.currentEditingInterfaceId.value = null
+            currentWidgets = newWidgets
         }
     }
 

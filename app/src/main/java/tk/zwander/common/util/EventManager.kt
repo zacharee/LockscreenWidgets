@@ -15,7 +15,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.launch
-import tk.zwander.common.data.WidgetData
 import tk.zwander.lockscreenwidgets.App
 import java.util.concurrent.ConcurrentLinkedQueue
 
@@ -162,26 +161,6 @@ sealed class Event {
      * lock screen has successfully been dismissed.
      */
     data class NewNotificationCount(val count: Int) : Event()
-    data class FrameIntercept(val frameId: Int, val down: Boolean) : Event()
-    data class FrameAttachmentState(val frameId: Int, val attached: Boolean) : Event()
-    data class FrameMoved(val frameId: Int, val velX: Float, val velY: Float) : Event()
-    data class FrameResized(val frameId: Int, val which: Side, val velocity: Int, val isUp: Boolean) : Event() {
-        enum class Side {
-            LEFT,
-            TOP,
-            RIGHT,
-            BOTTOM
-        }
-    }
-
-    data class RemoveWidgetConfirmed(val remove: Boolean, val item: WidgetData?) : Event()
-    data class FrameMoveFinished(val frameId: Int) : Event()
-    data class CenterFrameHorizontally(val frameId: Int) : Event()
-    data class CenterFrameVertically(val frameId: Int) : Event()
-    data class FrameResizeFinished(val frameId: Int) : Event()
-    data class LaunchAddWidget(val frameId: Int) : Event()
-    data class TempHide(val frameId: Int) : Event()
-    data class RemoveFrameConfirmed(val confirmed: Boolean, val frameId: Int?) : Event()
     data class PreviewFrames(val show: ShowMode) : Event() {
         enum class ShowMode {
             SHOW,
@@ -190,28 +169,11 @@ sealed class Event {
         }
     }
 
-    data class TrimMemory(val level: Int) : Event()
     data class StackUpdateComplete(val stackId: Int) : Event()
 
     //*** Widget Drawer
     data object CloseDrawer : Event()
     data object ShowDrawer : Event()
-    data object ShowHandle : Event()
-    data object DrawerShown : Event()
-    data object DrawerHidden : Event()
-    data object DrawerBackButtonClick : Event()
-
-    data class LaunchAddDrawerWidget(val fromDrawer: Boolean) : Event()
-    data class DrawerAttachmentState(val attached: Boolean) : Event()
-    data class ScrollInDrawer(
-        val from: Int,
-        val dist: Float,
-        val initial: Boolean,
-        val velocity: Float,
-    ) : Event()
-
-    data class ScrollOpenFinish(val from: Int) : Event()
-    data class DrawerIntercept(val down: Boolean) : Event()
 }
 
 interface EventObserver {

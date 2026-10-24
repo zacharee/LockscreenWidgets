@@ -26,9 +26,15 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import tk.zwander.common.compose.LocalLSDisplayManager
 import tk.zwander.common.compose.util.rememberPreferenceState
-import tk.zwander.common.util.*
+import tk.zwander.common.util.PrefManager
+import tk.zwander.common.util.collectAsMutableState
+import tk.zwander.common.util.prefManager
+import tk.zwander.common.util.vibrate
 import tk.zwander.lockscreenwidgets.R
 import tk.zwander.widgetdrawer.util.DrawerDelegate
 import kotlin.math.absoluteValue
@@ -36,9 +42,13 @@ import kotlin.math.absoluteValue
 @SuppressLint("RtlHardcoded")
 @Composable
 fun DrawerDelegate.DrawerViewModel.DrawerHandle(
+    lifecycleScope: CoroutineScope,
     params: WindowManager.LayoutParams,
     displayId: String,
     updateWindow: () -> Unit,
+    scrollOpenFinish: suspend (from: Int) -> Unit,
+    scrollInDrawer: suspend (from: Int, dist: Float, initial: Boolean, velocity: Float) -> Unit,
+    showDrawer: suspend () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val context = LocalContext.current
@@ -147,9 +157,9 @@ fun DrawerDelegate.DrawerViewModel.DrawerHandle(
                 when (event.action) {
                     MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
                         if (updatedScrollingOpen) {
-                            context.eventManager.sendEvent(
-                                Event.ScrollOpenFinish(side),
-                            )
+                            lifecycleScope.launch(Dispatchers.Main.immediate) {
+                                scrollOpenFinish(side)
+                            }
                         }
 
                         isScrollingOpen = false
@@ -190,26 +200,26 @@ fun DrawerDelegate.DrawerViewModel.DrawerHandle(
                             context.vibrate(25L)
                             isScrollingOpen = true
 
-                            context.eventManager.sendEvent(
-                                Event.ScrollInDrawer(
+                            lifecycleScope.launch(Dispatchers.Main.immediate) {
+                                scrollInDrawer(
                                     context.prefManager.drawerHandleSide,
                                     scrollTotalX.absoluteValue,
                                     true,
                                     offset,
-                                ),
-                            )
+                                )
+                            }
                         }
                     } else {
                         scrollTotalX += offset
 
-                        context.eventManager.sendEvent(
-                            Event.ScrollInDrawer(
+                        lifecycleScope.launch(Dispatchers.Main.immediate) {
+                            scrollInDrawer(
                                 context.prefManager.drawerHandleSide,
                                 scrollTotalX.absoluteValue,
                                 false,
                                 offset,
-                            ),
-                        )
+                            )
+                        }
                     }
                 },
                 orientation = Orientation.Horizontal,
@@ -240,13 +250,17 @@ fun DrawerDelegate.DrawerViewModel.DrawerHandle(
                 onDoubleClick = if (tapToOpen) null else {
                     {
                         context.vibrate(25L)
-                        context.eventManager.sendEvent(Event.ShowDrawer)
+                        lifecycleScope.launch(Dispatchers.Main.immediate) {
+                            showDrawer()
+                        }
                     }
                 },
                 onClick = {
                     if (tapToOpen) {
                         context.vibrate(25L)
-                        context.eventManager.sendEvent(Event.ShowDrawer)
+                        lifecycleScope.launch(Dispatchers.Main.immediate) {
+                            showDrawer()
+                        }
                     }
                 },
                 enabled = !isMoving,

@@ -36,6 +36,7 @@ import tk.zwander.common.compose.util.rememberPreferenceState
 import tk.zwander.common.data.WidgetData
 import tk.zwander.common.util.*
 import tk.zwander.lockscreenwidgets.R
+import tk.zwander.lockscreenwidgets.activities.add.AddFrameWidgetActivity
 import tk.zwander.lockscreenwidgets.activities.add.ReconfigureFrameWidgetActivity
 import tk.zwander.lockscreenwidgets.util.FramePrefs
 import tk.zwander.lockscreenwidgets.util.FrameSpecificPreferences
@@ -183,7 +184,7 @@ class FrameReorderActivity : BaseActivity() {
                 rowCount = delegate.rowCount,
                 resizeThresholdPx = { with(density) { 64.dp.roundToPx() } },
                 launchAddActivity = {
-                    context.eventManager.sendEvent(Event.LaunchAddWidget(delegate.holderId))
+                    AddFrameWidgetActivity.launch(context, delegate.holderId)
                 },
                 launchReconfigure = { id, providerInfo ->
                     ReconfigureFrameWidgetActivity.launch(

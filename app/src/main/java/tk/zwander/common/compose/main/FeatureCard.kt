@@ -35,10 +35,12 @@ import tk.zwander.lockscreenwidgets.BuildConfig
 import tk.zwander.lockscreenwidgets.R
 import tk.zwander.lockscreenwidgets.activities.ComposeFrameSettingsActivity
 import tk.zwander.lockscreenwidgets.activities.UsageActivity
+import tk.zwander.lockscreenwidgets.activities.add.AddFrameWidgetActivity
 import tk.zwander.lockscreenwidgets.appwidget.WidgetStackProvider
 import tk.zwander.lockscreenwidgets.compose.SelectDisplayDialog
 import tk.zwander.lockscreenwidgets.util.WidgetFrameDelegate
 import tk.zwander.widgetdrawer.activities.ComposeDrawerSettingsActivity
+import tk.zwander.widgetdrawer.activities.add.AddDrawerWidgetActivity
 import tk.zwander.widgetdrawer.util.DrawerDelegate
 
 @Composable
@@ -65,7 +67,7 @@ fun rememberFeatureCards(): Map<String, List<FeatureCardInfo>> {
                 showingDisplaySelectorAddFrameWidget = false
             },
             onFrameSelected = {
-                context.eventManager.sendEvent(Event.LaunchAddWidget(it))
+                AddFrameWidgetActivity.launch(context, it)
                 showingDisplaySelectorAddFrameWidget = false
             },
         )
@@ -116,7 +118,7 @@ fun rememberFeatureCards(): Map<String, List<FeatureCardInfo>> {
                         context.eventManager.sendEvent(Event.PreviewFrames(Event.PreviewFrames.ShowMode.HIDE))
 
                         if (!BuildConfig.DEBUG && context.prefManager.currentSecondaryFramesWithStringDisplay.isEmpty()) {
-                            context.eventManager.sendEvent(Event.LaunchAddWidget(WidgetFrameDelegate.ID))
+                            AddFrameWidgetActivity.launch(context, WidgetFrameDelegate.ID)
                         } else {
                             showingDisplaySelectorAddFrameWidget = true
                         }
@@ -151,9 +153,7 @@ fun rememberFeatureCards(): Map<String, List<FeatureCardInfo>> {
                         label = R.string.add_widget,
                         icon = R.drawable.ic_baseline_add_24,
                     ) {
-                        context.eventManager.sendEvent(
-                            Event.LaunchAddDrawerWidget(false),
-                        )
+                        AddDrawerWidgetActivity.launch(context, false)
                     },
                 ),
             ]

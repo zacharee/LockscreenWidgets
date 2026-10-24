@@ -36,19 +36,25 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.zIndex
 import com.bugsnag.android.performance.compose.MeasuredComposable
-import tk.zwander.common.compose.components.BlurView
-import tk.zwander.common.compose.components.ConfirmFrameRemovalLayout
-import tk.zwander.common.compose.components.ConfirmWidgetRemovalLayout
-import tk.zwander.common.compose.components.FrameEditWrapperLayout
+import tk.zwander.common.compose.components.*
 import tk.zwander.common.compose.util.rememberBooleanPreferenceState
 import tk.zwander.common.compose.util.rememberPreferenceState
 import tk.zwander.common.util.*
 import tk.zwander.lockscreenwidgets.R
 import tk.zwander.lockscreenwidgets.activities.ComposeFrameSettingsActivity
+import tk.zwander.lockscreenwidgets.util.FramePrefs
 import tk.zwander.lockscreenwidgets.util.WidgetFrameDelegate
 
 @Composable
 fun WidgetFrameDelegate.WidgetFrameViewModel.WidgetFrameLayout(
+    removeWidgetConfirmed: (Boolean, Int?) -> Unit,
+    frameMoveFinished: () -> Unit,
+    frameIntercept: (Boolean) -> Unit,
+    frameMoved: (velX: Float, velY: Float) -> Unit,
+    frameResized: (which: Side, velocity: Int, isUp: Boolean) -> Unit,
+    centerFrameHorizontally: () -> Unit,
+    centerFrameVertically: () -> Unit,
+    tempHide: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val context = LocalContext.current
@@ -144,7 +150,7 @@ fun WidgetFrameDelegate.WidgetFrameViewModel.WidgetFrameLayout(
                                 if (firstViewing) {
                                     acknowledgedThreeFingerTap = true
                                 } else {
-                                    context.eventManager.sendEvent(Event.TempHide(frameId = holderId))
+                                    tempHide()
                                 }
                             }
 
@@ -173,11 +179,11 @@ fun WidgetFrameDelegate.WidgetFrameViewModel.WidgetFrameLayout(
             .motionEventSpy { event ->
                 when (event.action) {
                     MotionEvent.ACTION_DOWN -> {
-                        context.eventManager.sendEvent(Event.FrameIntercept(holderId, true))
+                        frameIntercept(true)
                     }
 
                     MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
-                        context.eventManager.sendEvent(Event.FrameIntercept(holderId, false))
+                        frameIntercept(false)
                     }
                 }
             },
@@ -268,12 +274,7 @@ fun WidgetFrameDelegate.WidgetFrameViewModel.WidgetFrameLayout(
                     ConfirmWidgetRemovalLayout(
                         itemToRemove = itemToRemove,
                         onItemRemovalConfirmed = { removed, data ->
-                            context.eventManager.sendEvent(
-                                Event.RemoveWidgetConfirmed(
-                                    removed,
-                                    data,
-                                ),
-                            )
+                            removeWidgetConfirmed(removed, data?.id)
                             itemToRemove = null
                         },
                     )
@@ -325,6 +326,12 @@ fun WidgetFrameDelegate.WidgetFrameViewModel.WidgetFrameLayout(
                         onSettings = {
                             ComposeFrameSettingsActivity.launch(context, holderId)
                         },
+                        frameMoveFinished = frameMoveFinished,
+                        frameMoved = frameMoved,
+                        frameResized = frameResized,
+                        centerFrameHorizontally = centerFrameHorizontally,
+                        centerFrameVertically = centerFrameVertically,
+                        tempHide = tempHide,
                     )
                 }
             }
@@ -342,12 +349,9 @@ fun WidgetFrameDelegate.WidgetFrameViewModel.WidgetFrameLayout(
                     ConfirmFrameRemovalLayout(
                         itemToRemove = holderId,
                         onItemRemovalConfirmed = { removed, data ->
-                            context.eventManager.sendEvent(
-                                Event.RemoveFrameConfirmed(
-                                    removed,
-                                    data,
-                                ),
-                            )
+                            if (removed && data != null) {
+                                FramePrefs.removeFrame(context, data)
+                            }
                             removing = false
                         },
                     )

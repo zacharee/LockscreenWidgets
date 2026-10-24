@@ -29,14 +29,11 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
 import org.lsposed.hiddenapibypass.HiddenApiBypass
-import tk.zwander.common.activities.add.BaseBindWidgetActivity
 import tk.zwander.common.host.widgetHostCompat
 import tk.zwander.common.util.*
 import tk.zwander.common.util.shizuku.shizukuManager
-import tk.zwander.lockscreenwidgets.activities.add.AddFrameWidgetActivity
 import tk.zwander.lockscreenwidgets.appwidget.WidgetStackProvider
 import tk.zwander.lockscreenwidgets.util.FramePrefs
-import tk.zwander.widgetdrawer.activities.add.AddDrawerWidgetActivity
 
 /**
  * The main application.
@@ -48,7 +45,7 @@ import tk.zwander.widgetdrawer.activities.add.AddDrawerWidgetActivity
  * QS tile depending on whether the user is
  * running One UI or not.
  */
-class App : Application(), CoroutineScope by scope, EventObserver {
+class App : Application(), CoroutineScope by scope {
     companion object {
         @SuppressLint("StaticFieldLeak")
         lateinit var instance: App
@@ -125,7 +122,6 @@ class App : Application(), CoroutineScope by scope, EventObserver {
     override fun onTrimMemory(level: Int) {
         super.onTrimMemory(level)
         logUtils.debugLog("Received trim memory, level: $level", null)
-        eventManager.sendEvent(Event.TrimMemory(level))
     }
 
     override fun onCreate() {
@@ -350,7 +346,6 @@ class App : Application(), CoroutineScope by scope, EventObserver {
 
         prefsHandler.register(this)
         migrationManager.runMigrations()
-        eventManager.addObserver(this)
         shizukuManager.onCreate()
         lsDisplayManager.onCreate()
 
@@ -380,30 +375,6 @@ class App : Application(), CoroutineScope by scope, EventObserver {
 
                 updateProxListener()
             }
-        }
-    }
-
-    override suspend fun onEvent(event: Event) {
-        when (event) {
-            is Event.RemoveFrameConfirmed -> {
-                if (event.confirmed && event.frameId != null) {
-                    FramePrefs.removeFrame(this, event.frameId)
-                }
-            }
-
-            is Event.LaunchAddDrawerWidget -> {
-                AddDrawerWidgetActivity.launch(this, event.fromDrawer)
-            }
-
-            is Event.LaunchAddWidget -> {
-                val intent = Intent(this, AddFrameWidgetActivity::class.java)
-                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                intent.putExtra(BaseBindWidgetActivity.EXTRA_HOLDER_ID, event.frameId)
-
-                startActivity(intent)
-            }
-
-            else -> {}
         }
     }
 
