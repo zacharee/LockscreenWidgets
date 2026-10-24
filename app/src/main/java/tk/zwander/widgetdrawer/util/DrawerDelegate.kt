@@ -87,8 +87,10 @@ class DrawerDelegate private constructor(context: Context, displayId: String) :
             }
         }
 
-        fun invalidateInstance() {
-            instance.value = null
+        fun invalidateInstance(delegate: DrawerDelegate) {
+            if (delegate == instance.value) {
+                instance.value = null
+            }
         }
     }
 
@@ -392,7 +394,7 @@ class DrawerDelegate private constructor(context: Context, displayId: String) :
     override fun onDestroy() {
         super.onDestroy()
 
-        invalidateInstance()
+        invalidateInstance(this)
     }
 
     @SuppressLint("WrongConstant")

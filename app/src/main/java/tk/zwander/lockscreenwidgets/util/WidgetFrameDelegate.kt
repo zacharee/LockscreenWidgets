@@ -101,8 +101,10 @@ open class WidgetFrameDelegate protected constructor(
         }
 
         @Synchronized
-        fun invalidateInstance() {
-            instance.value = null
+        fun invalidateInstance(delegate: WidgetFrameDelegate) {
+            if (delegate == instance.value) {
+                instance.value = null
+            }
         }
 
         fun allIds(context: Context): List<Int> {
@@ -463,7 +465,7 @@ open class WidgetFrameDelegate protected constructor(
         super.onDestroy()
 
         if (id == ID) {
-            invalidateInstance()
+            invalidateInstance(this)
         }
     }
 
