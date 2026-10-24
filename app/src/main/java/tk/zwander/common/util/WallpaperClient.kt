@@ -92,18 +92,23 @@ class WallpaperClient private constructor(private val context: Context) {
         }
 
         peekLogUtils?.debugLog("Trying bind", null)
-        val result = context.bindService(
-            serviceIntent,
-            serviceConnection,
-            Context.BIND_AUTO_CREATE or
-                    Context.BIND_IMPORTANT or
-                    Context.BIND_TREAT_LIKE_VISIBLE_FOREGROUND_SERVICE or
-                    Context.BIND_FOREGROUND_SERVICE or
-                    Context.BIND_SHOWING_UI or
-                    Context.BIND_ABOVE_CLIENT or
-                    Context.BIND_ALLOW_ACTIVITY_STARTS or
-                    Context.BIND_INCLUDE_CAPABILITIES,
-        )
-        peekLogUtils?.debugLog("bound? $result", null)
+
+        try {
+            val result = context.bindService(
+                serviceIntent,
+                serviceConnection,
+                Context.BIND_AUTO_CREATE or
+                        Context.BIND_IMPORTANT or
+                        Context.BIND_TREAT_LIKE_VISIBLE_FOREGROUND_SERVICE or
+                        Context.BIND_FOREGROUND_SERVICE or
+                        Context.BIND_SHOWING_UI or
+                        Context.BIND_ABOVE_CLIENT or
+                        Context.BIND_ALLOW_ACTIVITY_STARTS or
+                        Context.BIND_INCLUDE_CAPABILITIES,
+            )
+            peekLogUtils?.debugLog("bound? $result", null)
+        } catch (e: SecurityException) {
+            peekLogUtils?.normalLog("Failed to bind wallpaper service", e)
+        }
     }
 }
