@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.content.SharedPreferences
 import android.os.Build
+import android.os.Looper
 import android.view.*
 import androidx.annotation.CallSuper
 import androidx.compose.runtime.Composable
@@ -123,11 +124,10 @@ abstract class BaseDelegate<State : Any>(
 
     @CallSuper
     open fun onCreate() {
+        check(Looper.myLooper() == Looper.getMainLooper()) { "Must be called on the main thread" }
         check(!destroyed) { "BaseDelegate was already destroyed; create a new instance" }
 
         if (baseCreated) return
-        baseCreated = true
-        created = true
 
         logUtils.debugLog("Creating ${this@BaseDelegate::class.java}", null)
 
@@ -190,6 +190,8 @@ abstract class BaseDelegate<State : Any>(
         }
 
         scheduleLifecycleReconcile()
+        baseCreated = true
+        created = true
     }
 
     @CallSuper
