@@ -195,25 +195,17 @@ class Accessibility : AccessibilityService(), CoroutineScope by MainScope(), Eve
 
         sharedPreferencesChangeHandler.unregister(this)
         eventManager.removeObserver(this)
-        lsDisplayManager.displayAndWmCache.value = mapOf()
 
-        // This is hacky and ideally it'd stay inside Accessibility,
-        // but I can't find a way to suspend the destruction of the
-        // Accessibility class while these destroy methods run without
-        // just blocking forever.
-        App.instance.launch {
-            frameDelegate.onDestroy()
-            drawerDelegate.onDestroy()
-            FrameInstances.secondaryFrameDelegates.forEach { (val delegate = value) ->
-                delegate.onDestroy()
-            }
-            FrameInstances.secondaryFrameDelegates.clear()
-
-            WidgetStackProvider.updateWidgetStackMonitor(App.instance)
-
-            logUtils.debugLog("Accessibility destroy work completed", null)
+        frameDelegate.onDestroy()
+        drawerDelegate.onDestroy()
+        FrameInstances.secondaryFrameDelegates.forEach { (val delegate = value) ->
+            delegate.onDestroy()
         }
+        FrameInstances.secondaryFrameDelegates.clear()
 
+        WidgetStackProvider.updateWidgetStackMonitor(App.instance)
+
+        lsDisplayManager.displayAndWmCache.value = mapOf()
         cancel()
         logUtils.debugLog("Accessibility service destroyed.", null)
     }

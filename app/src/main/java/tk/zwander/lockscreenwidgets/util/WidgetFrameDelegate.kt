@@ -494,16 +494,12 @@ open class WidgetFrameDelegate protected constructor(
         }
     }
 
-    override suspend fun onDestroy() {
+    override fun onDestroy() {
         super.onDestroy()
 
         if (id == ID) {
             invalidateInstance()
         }
-    }
-
-    override suspend fun removeAllViews() {
-        removeWindow()
     }
 
     suspend fun updateStateAndWindowState(

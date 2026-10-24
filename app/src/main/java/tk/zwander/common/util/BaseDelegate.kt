@@ -104,6 +104,23 @@ abstract class BaseDelegate<State : Any>(
     private var baseCreated = false
     private var destroyed = false
 
+    private val reconcileLifecycle = Runnable {
+        if (!baseCreated || destroyed) return@Runnable
+        if (!ownsLifecycle) return@Runnable
+        if (lifecycleRegistry.currentState == Lifecycle.State.DESTROYED) return@Runnable
+
+        val shouldBeStarted = allViews.any { it.isAttachedToWindow }
+        val state = lifecycleRegistry.currentState
+
+        if (shouldBeStarted && state < Lifecycle.State.STARTED) {
+            lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_START)
+            lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_RESUME)
+        } else if (!shouldBeStarted && state >= Lifecycle.State.STARTED) {
+            lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_PAUSE)
+            lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_STOP)
+        }
+    }
+
     @CallSuper
     open fun onCreate() {
         check(!destroyed) { "BaseDelegate was already destroyed; create a new instance" }
@@ -176,7 +193,7 @@ abstract class BaseDelegate<State : Any>(
     }
 
     @CallSuper
-    open suspend fun onDestroy() {
+    open fun onDestroy() {
         if (!baseCreated || destroyed) {
             return
         }
@@ -193,6 +210,7 @@ abstract class BaseDelegate<State : Any>(
         if (ownsLifecycle) {
             allViews.forEach {
                 (it as? AbstractComposeView)?.disposeComposition()
+                wm?.safeRemoveViewImmediate(it)
             }
 
             if (lifecycle.currentState > Lifecycle.State.INITIALIZED) {
@@ -202,7 +220,6 @@ abstract class BaseDelegate<State : Any>(
             _recomposer?.cancel()
             _recomposer = null
 
-            removeAllViews()
             allViews.forEach {
                 it.removeOnAttachStateChangeListener(viewAttachmentStateListener)
                 it.compositionContext = null
@@ -324,26 +341,6 @@ abstract class BaseDelegate<State : Any>(
                     }
                 }
             }
-        }
-    }
-
-    // Only called if the delegate owns the lifecycle
-    protected open suspend fun removeAllViews() {}
-
-    private val reconcileLifecycle = Runnable {
-        if (!baseCreated || destroyed) return@Runnable
-        if (!ownsLifecycle) return@Runnable
-        if (lifecycleRegistry.currentState == Lifecycle.State.DESTROYED) return@Runnable
-
-        val shouldBeStarted = allViews.any { it.isAttachedToWindow }
-        val state = lifecycleRegistry.currentState
-
-        if (shouldBeStarted && state < Lifecycle.State.STARTED) {
-            lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_START)
-            lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_RESUME)
-        } else if (!shouldBeStarted && state >= Lifecycle.State.STARTED) {
-            lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_PAUSE)
-            lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_STOP)
         }
     }
 

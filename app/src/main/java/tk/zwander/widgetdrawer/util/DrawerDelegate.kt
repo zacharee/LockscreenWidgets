@@ -389,15 +389,10 @@ class DrawerDelegate private constructor(context: Context, displayId: String) :
         }
     }
 
-    override suspend fun onDestroy() {
+    override fun onDestroy() {
         super.onDestroy()
 
         invalidateInstance()
-    }
-
-    override suspend fun removeAllViews() {
-        hideDrawer(false)
-        hideHandle()
     }
 
     @SuppressLint("WrongConstant")
