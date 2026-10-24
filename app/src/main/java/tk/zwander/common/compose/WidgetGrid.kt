@@ -171,6 +171,12 @@ fun <VM : BaseDelegate.BaseViewModel<*, *>> VM.WidgetGrid(
         globalState.itemIsActive[holderId] = currentEditingId != null
     }
 
+    DisposableEffect(null) {
+        onDispose {
+            globalState.itemIsActive[holderId] = false
+        }
+    }
+
     val mainAxisCount = if (orientation == Orientation.Vertical) updatedRowCount else updatedColumnCount
     val crossAxisCount = if (orientation == Orientation.Vertical) updatedColumnCount else updatedRowCount
 
