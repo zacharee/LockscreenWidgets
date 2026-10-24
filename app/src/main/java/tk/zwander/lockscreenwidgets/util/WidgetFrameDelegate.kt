@@ -436,39 +436,6 @@ open class WidgetFrameDelegate protected constructor(
         }
 
         viewModel.viewModelScope.launch(Dispatchers.Main) {
-            var oldState = state.value
-            state.collect { newState ->
-                var actualNewState = newState
-
-                if (actualNewState.isTempHide != oldState.isTempHide && actualNewState.isTempHide) {
-                    actualNewState = actualNewState.copy(isPreview = false)
-                }
-
-                if (actualNewState.screenOrientation != oldState.screenOrientation) {
-                    actualNewState =
-                        actualNewState.copy(isPendingOrientationStateChange = true, isPreview = false)
-                }
-
-                // ------------ //
-
-                if (actualNewState.isPreview != oldState.isPreview) {
-                    lifecycleScope.launch(Dispatchers.Main) {
-                        updateWindowState()
-                    }
-                }
-
-                if (actualNewState.ignoreAllTouches != oldState.ignoreAllTouches) {
-                    lifecycleScope.launch(Dispatchers.Main) {
-                        updateIgnoreAllTouches()
-                    }
-                }
-
-                oldState = actualNewState
-                state.value = actualNewState
-            }
-        }
-
-        viewModel.viewModelScope.launch(Dispatchers.Main) {
             globalState.notificationsPanelFullyExpanded.collect {
                 updateState { it.copy(isPendingNotificationStateChange = true, isPreview = false) }
             }
@@ -498,6 +465,38 @@ open class WidgetFrameDelegate protected constructor(
         if (id == ID) {
             invalidateInstance()
         }
+    }
+
+    override fun updateState(transform: (State) -> State) {
+        val oldState = state.value
+        super.updateState(transform)
+
+        var actualNewState = state.value
+
+        if (actualNewState.isTempHide != oldState.isTempHide && actualNewState.isTempHide) {
+            actualNewState = actualNewState.copy(isPreview = false)
+        }
+
+        if (actualNewState.screenOrientation != oldState.screenOrientation) {
+            actualNewState =
+                actualNewState.copy(isPendingOrientationStateChange = true, isPreview = false)
+        }
+
+        // ------------ //
+
+        if (actualNewState.isPreview != oldState.isPreview) {
+            lifecycleScope.launch(Dispatchers.Main) {
+                updateWindowState()
+            }
+        }
+
+        if (actualNewState.ignoreAllTouches != oldState.ignoreAllTouches) {
+            lifecycleScope.launch(Dispatchers.Main) {
+                updateIgnoreAllTouches()
+            }
+        }
+
+        state.value = actualNewState
     }
 
     suspend fun updateStateAndWindowState(
