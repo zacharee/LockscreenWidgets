@@ -379,7 +379,7 @@ class WidgetStackProvider : AppWidgetProvider() {
                 "stackSize" to stackSize,
                 "style" to style,
                 "realSize" to realSize,
-                "options" to options.keySet().associateWith {
+                "options" to options?.keySet()?.associateWith {
                     @Suppress("DEPRECATION")
                     options.get(it)
                 },
@@ -1053,7 +1053,9 @@ class WidgetStackProvider : AppWidgetProvider() {
                     .get(rootCollectionCacheSource) as Map<String, *>
 
                 (sourceIdToUriMapping + rootSourceIdToUriMapping).forEach { intentId, uri ->
-                    val items = sourceUriToCollectionMapping[uri] ?: rootSourceUriToCollectionMapping[uri]!!
+                    val items = sourceUriToCollectionMapping[uri]
+                        ?: rootSourceUriToCollectionMapping[uri]
+                        ?: return@forEach
 
                     collectionCacheClass.getDeclaredMethod(
                         "addMapping",
