@@ -11,6 +11,7 @@ import tk.zwander.common.util.RemoteViewsLayoutInflaterContext
 import tk.zwander.common.util.andRemoveFromParent
 import tk.zwander.common.util.logUtils
 import tk.zwander.common.util.themedContext
+import java.util.concurrent.ConcurrentHashMap
 
 val Context.widgetViewCacheRegistry: WidgetViewCacheRegistry
     get() = WidgetViewCacheRegistry.getInstance(this)
@@ -28,7 +29,7 @@ class WidgetViewCacheRegistry private constructor(@Suppress("unused") private va
         }
     }
 
-    private val cachedViews = HashMap<Int, AppWidgetHostView>()
+    private val cachedViews = ConcurrentHashMap<Int, AppWidgetHostView>()
 
     fun getOrCreateView(context: Context, appWidgetId: Int, appWidget: AppWidgetProviderInfo): AppWidgetHostView {
         return cachedViews.getOrPut(appWidgetId) {
@@ -59,6 +60,6 @@ class WidgetViewCacheRegistry private constructor(@Suppress("unused") private va
     }
 
     fun removeView(appWidgetId: Int) {
-        cachedViews.remove(appWidgetId)
+        cachedViews.remove(appWidgetId)?.andRemoveFromParent()
     }
 }
