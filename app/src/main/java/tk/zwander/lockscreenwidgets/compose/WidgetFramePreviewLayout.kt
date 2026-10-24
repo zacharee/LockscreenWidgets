@@ -60,7 +60,7 @@ fun WidgetFramePreviewLayout(
         }
 
         val scale = remember(frameSize, constraints) {
-            constraints.maxHeight / frameSize.x.dp
+            constraints.maxHeight / frameSize.y.dp
         }
 
         val dummyDelegate = remember(frameId, context, display, view, savedStateRegistryOwner) {
@@ -150,8 +150,7 @@ class PreviewDelegate(
     override val holderId: Int
         get() = frameId
 
-    override val viewModel
-        get() = PreviewViewModel()
+    override val viewModel by lazy { PreviewViewModel() }
 
     override var state = MutableStateFlow(Unit)
     override val prefsHandler: HandlerRegistry = HandlerRegistry {}
