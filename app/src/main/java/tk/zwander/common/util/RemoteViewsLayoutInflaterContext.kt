@@ -23,9 +23,9 @@ class RemoteViewsLayoutInflaterContext(
             ): View? {
                 logUtils.debugLog("onCreateView(${name}) for widget ${getWidgetData()}", null)
                 return when (name) {
-                    "ListView" -> CatchingListView(context, attrs, widgetId)
-                    "TextClock" -> CatchingTextClock(context, attrs)
-                    "GridView" -> CatchingGridView(context, attrs, widgetId)
+                    "ListView", "android.widget.ListView" -> CatchingListView(context, attrs, widgetId)
+                    "TextClock", "android.widget.TextClock" -> CatchingTextClock(context, attrs)
+                    "GridView", "android.widget.GridView" -> CatchingGridView(context, attrs, widgetId)
                     else -> null
                 }
             }
