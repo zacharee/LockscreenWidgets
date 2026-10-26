@@ -133,7 +133,6 @@ class ComposeDrawerSettingsActivity : BaseActivity() {
                         icon = { painterResource(R.drawable.shadow) },
                         enabled = booleanPreferenceDependency(
                             key = PrefManager.KEY_SHOW_DRAWER_HANDLE,
-                            defaultValue = true,
                         ),
                     )
 
@@ -149,7 +148,6 @@ class ComposeDrawerSettingsActivity : BaseActivity() {
                         scale = { 1.0 },
                         enabled = booleanPreferenceDependency(
                             key = PrefManager.KEY_SHOW_DRAWER_HANDLE,
-                            defaultValue = true,
                         ),
                     )
 
@@ -167,7 +165,6 @@ class ComposeDrawerSettingsActivity : BaseActivity() {
                         scale = { 1.0 },
                         enabled = booleanPreferenceDependency(
                             key = PrefManager.KEY_SHOW_DRAWER_HANDLE,
-                            defaultValue = true,
                         ),
                     )
 
@@ -181,7 +178,6 @@ class ComposeDrawerSettingsActivity : BaseActivity() {
                         },
                         enabled = booleanPreferenceDependency(
                             key = PrefManager.KEY_SHOW_DRAWER_HANDLE,
-                            defaultValue = true,
                         ),
                     )
                 }
@@ -262,7 +258,6 @@ class ComposeDrawerSettingsActivity : BaseActivity() {
                         },
                         enabled = booleanPreferenceDependency(
                             key = PrefManager.KEY_SHOW_DRAWER_HANDLE,
-                            defaultValue = true,
                         ),
                     )
                 }
@@ -343,7 +338,6 @@ class ComposeDrawerSettingsActivity : BaseActivity() {
                         icon = { painterResource(R.drawable.tap) },
                         enabled = booleanPreferenceDependency(
                             key = PrefManager.KEY_SHOW_DRAWER_HANDLE,
-                            defaultValue = true,
                         ),
                     )
 
@@ -357,15 +351,13 @@ class ComposeDrawerSettingsActivity : BaseActivity() {
                         },
                         enabled = booleanPreferenceDependency(
                             key = PrefManager.KEY_SHOW_DRAWER_HANDLE,
-                            defaultValue = true,
                         ),
                     )
                 }
             }
 
-            PreferenceScreen(
+            prefs.PreferenceScreen(
                 title = resources.getString(R.string.settings),
-                categories = prefs,
             )
         }
     }

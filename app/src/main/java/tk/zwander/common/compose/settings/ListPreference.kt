@@ -32,8 +32,8 @@ class ListPreference(
     key: @Composable () -> String,
     defaultValue: @Composable () -> String?,
     icon: @Composable () -> Painter? = { null },
-    enabled: @Composable () -> Boolean = { true },
-    visible: @Composable () -> Boolean = { true },
+    enabled: @Composable PreferenceScreenScope.() -> Boolean = { true },
+    visible: @Composable PreferenceScreenScope.() -> Boolean = { true },
     badge: (@Composable () -> Unit)? = null,
     preferences: SharedPreferences? = null,
 ) : BasePreference<String?>(
@@ -48,7 +48,7 @@ class ListPreference(
     preferences = preferences,
 ) {
     @Composable
-    override fun Render(modifier: Modifier) {
+    override fun PreferenceScreenScope.Render(modifier: Modifier) {
         ListPreference(
             title = title(),
             summary = summary(),

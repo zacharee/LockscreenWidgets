@@ -15,9 +15,8 @@ import tk.zwander.common.compose.components.TitleBar
 import tk.zwander.common.compose.util.rememberBooleanPreferenceState
 
 @Composable
-fun PreferenceScreen(
+fun PreferenceScreenScope.PreferenceScreen(
     title: String,
-    categories: List<PreferenceCategory>,
     modifier: Modifier = Modifier,
 ) {
     val expandedStates = categories.associate { category ->
@@ -35,7 +34,11 @@ fun PreferenceScreen(
     val filteredCategories = categories.mapNotNull { category ->
         val unfilteredCategoryIsEmpty = category.items.isEmpty()
 
-        val filteredRenderedItems = category.items.filter { it.visible() }
+        val filteredRenderedItems = category.items.filter {
+            with(it) {
+                visible()
+            }
+        }
         val filteredCategory = category.copy(
             items = filteredRenderedItems,
         )
@@ -75,7 +78,9 @@ fun PreferenceScreen(
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .animateItem(),
-                                enabled = category.enabled(),
+                                enabled = with(category) {
+                                    enabled()
+                                },
                             )
                         }
                     }
@@ -85,11 +90,13 @@ fun PreferenceScreen(
                             items = category.items,
                             key = { itemIndex, _ -> renderedKeys[itemIndex] },
                         ) { itemIndex, item ->
-                            item.Render(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .animateItem(),
-                            )
+                            with(item) {
+                                Render(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .animateItem(),
+                                )
+                            }
 
                             if (itemIndex < category.items.lastIndex) {
                                 Box(

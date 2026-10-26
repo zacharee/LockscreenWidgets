@@ -267,9 +267,8 @@ class CommonSettingsActivity : BaseActivity() {
                 }
             }
 
-            PreferenceScreen(
+            preferenceScreen.PreferenceScreen(
                 title = stringResource(R.string.more_settings),
-                categories = preferenceScreen,
             )
 
             pendingAction?.let { action ->

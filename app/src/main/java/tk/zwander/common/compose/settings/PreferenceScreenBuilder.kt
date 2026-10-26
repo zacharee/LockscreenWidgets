@@ -31,23 +31,34 @@ import java.util.*
 fun rememberPreferenceScreen(
     vararg keys: Any?,
     content: PreferenceScreenScope.() -> Unit,
-): List<PreferenceCategory> {
+): PreferenceScreenScope {
     val context = LocalContext.current
 
-    return remember(keys) {
+    return remember(*keys) {
         context.preferenceScreen(content)
     }
 }
 
-inline fun Context.preferenceScreen(content: PreferenceScreenScope.() -> Unit): List<PreferenceCategory> {
+inline fun Context.preferenceScreen(content: PreferenceScreenScope.() -> Unit): PreferenceScreenScope {
     val screenScope = PreferenceScreenScope(this)
     screenScope.content()
 
-    return screenScope.categories
+    return screenScope
 }
 
 class PreferenceScreenScope(context: Context) : ContextWrapper(context) {
     val categories: MutableList<PreferenceCategory> = []
+
+    @Composable
+    fun findPreference(key: String): BasePreference<*>? {
+        categories.forEach { category ->
+            category.items.firstOrNull { it.key() == key }?.let { pref ->
+                return pref
+            }
+        }
+
+        return null
+    }
 
     fun category(
         key: String,
@@ -87,8 +98,8 @@ class PreferenceCategoryScope(context: Context) : ContextWrapper(context) {
         onClick: (() -> Unit)? = null,
         widget: (@Composable (Modifier) -> Unit)? = null,
         widgetPosition: @Composable () -> WidgetPosition = { WidgetPosition.END },
-        enabled: @Composable () -> Boolean = { true },
-        visible: @Composable () -> Boolean = { true },
+        enabled: @Composable PreferenceScreenScope.() -> Boolean = { true },
+        visible: @Composable PreferenceScreenScope.() -> Boolean = { true },
         badge: (@Composable () -> Unit)? = null,
         preferences: SharedPreferences? = null,
     ) {
@@ -116,8 +127,8 @@ class PreferenceCategoryScope(context: Context) : ContextWrapper(context) {
         key: @Composable () -> String,
         defaultValue: @Composable () -> Boolean = { false },
         icon: @Composable () -> Painter? = { null },
-        enabled: @Composable () -> Boolean = { true },
-        visible: @Composable () -> Boolean = { true },
+        enabled: @Composable PreferenceScreenScope.() -> Boolean = { true },
+        visible: @Composable PreferenceScreenScope.() -> Boolean = { true },
         canChange: (Boolean) -> Boolean = { true },
         badge: (@Composable () -> Unit)? = null,
         preferences: SharedPreferences? = null,
@@ -149,8 +160,8 @@ class PreferenceCategoryScope(context: Context) : ContextWrapper(context) {
         icon: @Composable () -> Painter? = { null },
         unit: @Composable () -> String? = { null },
         increment: @Composable () -> Int = { 1 },
-        enabled: @Composable () -> Boolean = { true },
-        visible: @Composable () -> Boolean = { true },
+        enabled: @Composable PreferenceScreenScope.() -> Boolean = { true },
+        visible: @Composable PreferenceScreenScope.() -> Boolean = { true },
         badge: (@Composable () -> Unit)? = null,
         preferences: SharedPreferences? = null,
     ) {
@@ -180,8 +191,8 @@ class PreferenceCategoryScope(context: Context) : ContextWrapper(context) {
         key: @Composable () -> String,
         defaultValue: @Composable () -> Int,
         icon: @Composable () -> Painter? = { null },
-        enabled: @Composable () -> Boolean = { true },
-        visible: @Composable () -> Boolean = { true },
+        enabled: @Composable PreferenceScreenScope.() -> Boolean = { true },
+        visible: @Composable PreferenceScreenScope.() -> Boolean = { true },
         badge: (@Composable () -> Unit)? = null,
         preferences: SharedPreferences? = null,
     ) {
@@ -207,8 +218,8 @@ class PreferenceCategoryScope(context: Context) : ContextWrapper(context) {
         key: @Composable () -> String,
         defaultValue: @Composable () -> String?,
         icon: @Composable () -> Painter? = { null },
-        enabled: @Composable () -> Boolean = { true },
-        visible: @Composable () -> Boolean = { true },
+        enabled: @Composable PreferenceScreenScope.() -> Boolean = { true },
+        visible: @Composable PreferenceScreenScope.() -> Boolean = { true },
         badge: (@Composable () -> Unit)? = null,
         preferences: SharedPreferences? = null,
     ) {

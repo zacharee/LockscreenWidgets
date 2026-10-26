@@ -36,8 +36,8 @@ class ColorPickerPreference(
     key: @Composable () -> String,
     defaultValue: @Composable () -> Int,
     icon: @Composable () -> Painter? = { null },
-    enabled: @Composable () -> Boolean = { true },
-    visible: @Composable () -> Boolean = { true },
+    enabled: @Composable PreferenceScreenScope.() -> Boolean = { true },
+    visible: @Composable PreferenceScreenScope.() -> Boolean = { true },
     badge: (@Composable () -> Unit)? = null,
     preferences: SharedPreferences? = null,
 ) : BasePreference<Int>(
@@ -52,7 +52,7 @@ class ColorPickerPreference(
     preferences = preferences,
 ) {
     @Composable
-    override fun Render(modifier: Modifier) {
+    override fun PreferenceScreenScope.Render(modifier: Modifier) {
         ColorPickerPreference(
             title = title(),
             summary = summary(),

@@ -28,13 +28,13 @@ open class BasePreference<ValueType>(
     val onClick: (() -> Unit)? = null,
     val widget: (@Composable (Modifier) -> Unit)? = null,
     val widgetPosition: @Composable () -> WidgetPosition = { WidgetPosition.END },
-    val enabled: @Composable () -> Boolean = { true },
-    val visible: @Composable () -> Boolean = { true },
+    val enabled: @Composable PreferenceScreenScope.() -> Boolean = { true },
+    val visible: @Composable PreferenceScreenScope.() -> Boolean = { true },
     val badge: (@Composable () -> Unit)? = null,
     val preferences: SharedPreferences? = null,
 ) {
     @Composable
-    open fun Render(modifier: Modifier) {
+    open fun PreferenceScreenScope.Render(modifier: Modifier) {
         BasePreferenceLayout(
             title = title(),
             summary = summary(),

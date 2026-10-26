@@ -18,8 +18,8 @@ open class SwitchPreference(
     key: @Composable () -> String,
     defaultValue: @Composable () -> Boolean = { false },
     icon: @Composable () -> Painter? = { null },
-    enabled: @Composable () -> Boolean = { true },
-    visible: @Composable () -> Boolean = { true },
+    enabled: @Composable PreferenceScreenScope.() -> Boolean = { true },
+    visible: @Composable PreferenceScreenScope.() -> Boolean = { true },
     val canChange: (Boolean) -> Boolean = { true },
     badge: (@Composable () -> Unit)? = null,
     preferences: SharedPreferences? = null,
@@ -35,7 +35,7 @@ open class SwitchPreference(
     preferences = preferences,
 ) {
     @Composable
-    override fun Render(modifier: Modifier) {
+    override fun PreferenceScreenScope.Render(modifier: Modifier) {
         SwitchPreference(
             title = title(),
             summary = summary(),

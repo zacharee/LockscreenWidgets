@@ -18,7 +18,7 @@ data class PreferenceCategory(
     val items: List<BasePreference<*>>,
     val icon: Drawable? = null,
     val collapsible: @Composable () -> Boolean = { true },
-    val enabled: @Composable () -> Boolean = { true },
+    val enabled: @Composable PreferenceScreenScope.() -> Boolean = { true },
 )
 
 @Composable

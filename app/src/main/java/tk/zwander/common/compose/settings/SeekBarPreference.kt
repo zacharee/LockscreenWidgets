@@ -56,8 +56,8 @@ open class SeekBarPreference(
     icon: @Composable () -> Painter? = { null },
     val unit: @Composable () -> String? = { null },
     val increment: @Composable () -> Int = { 1 },
-    enabled: @Composable () -> Boolean = { true },
-    visible: @Composable () -> Boolean = { true },
+    enabled: @Composable PreferenceScreenScope.() -> Boolean = { true },
+    visible: @Composable PreferenceScreenScope.() -> Boolean = { true },
     badge: (@Composable () -> Unit)? = null,
     preferences: SharedPreferences? = null,
 ) : BasePreference<Int>(
@@ -74,7 +74,7 @@ open class SeekBarPreference(
     preferences = preferences,
 ) {
     @Composable
-    override fun Render(modifier: Modifier) {
+    override fun PreferenceScreenScope.Render(modifier: Modifier) {
         SeekBarPreference(
             title = title(),
             summary = summary(),

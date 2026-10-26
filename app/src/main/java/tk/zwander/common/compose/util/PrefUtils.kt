@@ -34,6 +34,7 @@ fun <T> Context.preferenceAsState(
 
     scope.launch {
         preferences.registerOnSharedPreferenceChangeListener(listener)
+        state.value = value(key)
 
         try {
             awaitCancellation()
@@ -102,6 +103,35 @@ fun rememberBooleanPreferenceState(
         onChanged = onEnabledChanged,
         preferences = preferences,
     )
+}
+
+@Composable
+fun rememberBooleanPreferenceValue(
+    key: String,
+    preferences: SharedPreferences = LocalContext.current.prefManager.prefs,
+    defaultValue: Boolean = false,
+): State<Boolean> {
+    val state = remember(key, preferences, defaultValue) {
+        mutableStateOf(preferences.getBoolean(key, defaultValue))
+    }
+
+    DisposableEffect(key, preferences, defaultValue) {
+        val listener = SharedPreferences.OnSharedPreferenceChangeListener { _, changedKey ->
+            if (changedKey == key) {
+                state.value = preferences.getBoolean(key, defaultValue)
+            }
+        }
+
+        preferences.registerOnSharedPreferenceChangeListener(listener)
+        // Re-read after registering to avoid missing a change in between.
+        state.value = preferences.getBoolean(key, defaultValue)
+
+        onDispose {
+            preferences.unregisterOnSharedPreferenceChangeListener(listener)
+        }
+    }
+
+    return state
 }
 
 @Composable

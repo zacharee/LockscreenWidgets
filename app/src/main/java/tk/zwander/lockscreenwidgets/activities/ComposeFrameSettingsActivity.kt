@@ -280,12 +280,7 @@ class ComposeFrameSettingsActivity : BaseActivity() {
                         defaultValue = { 100 },
                         minValue = { 1 },
                         maxValue = { 1000 },
-                        enabled = {
-                            rememberBooleanPreferenceDependency(
-                                key = PrefManager.KEY_BLUR_BACKGROUND,
-                                preferences = framePrefs.framePreferences,
-                            )
-                        },
+                        enabled = booleanPreferenceDependency(PrefManager.KEY_BLUR_BACKGROUND),
                         scale = { 1.0 },
                         visible = { shouldShowBlurOptions },
                         preferences = framePrefs.framePreferences,
@@ -317,12 +312,7 @@ class ComposeFrameSettingsActivity : BaseActivity() {
                         },
                         icon = { painterResource(R.drawable.app_icon) },
                         defaultValue = { null },
-                        enabled = {
-                            rememberBooleanPreferenceDependency(
-                                key = PrefManager.KEY_FRAME_MASKED_MODE,
-                                preferences = framePrefs.framePreferences,
-                            )
-                        },
+                        enabled = booleanPreferenceDependency(PrefManager.KEY_FRAME_MASKED_MODE),
                         visible = {
                             var state by remember {
                                 mutableStateOf(
@@ -346,12 +336,7 @@ class ComposeFrameSettingsActivity : BaseActivity() {
                         icon = { painterResource(R.drawable.ic_baseline_brightness_medium_24) },
                         key = { PrefManager.KEY_MASKED_MODE_DIM_AMOUNT },
                         defaultValue = { 0 },
-                        enabled = {
-                            rememberBooleanPreferenceDependency(
-                                key = PrefManager.KEY_FRAME_MASKED_MODE,
-                                preferences = framePrefs.framePreferences,
-                            )
-                        },
+                        enabled = booleanPreferenceDependency(PrefManager.KEY_FRAME_MASKED_MODE),
                         minValue = { 0 },
                         maxValue = { 10000 },
                         scale = { 0.01 },
@@ -445,12 +430,7 @@ class ComposeFrameSettingsActivity : BaseActivity() {
                         summary = { stringResource(R.string.settings_screen_separate_position_for_lock_nc_desc) },
                         key = { PrefManager.KEY_SEPARATE_POS_FOR_LOCK_NC },
                         icon = { painterResource(R.drawable.ic_baseline_layers_24) },
-                        enabled = {
-                            rememberBooleanPreferenceDependency(
-                                key = PrefManager.KEY_SHOW_IN_NOTIFICATION_CENTER,
-                                preferences = framePrefs.framePreferences,
-                            )
-                        },
+                        enabled = booleanPreferenceDependency(PrefManager.KEY_SHOW_IN_NOTIFICATION_CENTER),
                         visible = { canShowNCOptions },
                         preferences = framePrefs.framePreferences,
                     )
@@ -615,12 +595,7 @@ class ComposeFrameSettingsActivity : BaseActivity() {
                         key = { PrefManager.KEY_SHOW_ON_MAIN_LOCK_SCREEN },
                         icon = { painterResource(R.drawable.ic_baseline_lock_24) },
                         defaultValue = { true },
-                        enabled = {
-                            rememberBooleanPreferenceDependency(
-                                key = PrefManager.KEY_SHOW_IN_NOTIFICATION_CENTER,
-                                preferences = framePrefs.framePreferences,
-                            )
-                        },
+                        enabled = booleanPreferenceDependency(PrefManager.KEY_SHOW_IN_NOTIFICATION_CENTER),
                         visible = { canShowNCOptions },
                         preferences = framePrefs.framePreferences,
                     )
@@ -741,9 +716,8 @@ class ComposeFrameSettingsActivity : BaseActivity() {
                 }
             }
 
-            PreferenceScreen(
+            preferenceScreen.PreferenceScreen(
                 title = stringResource(R.string.frame_settings, selectedFrame.toString()),
-                categories = preferenceScreen,
             )
 
             pendingFrameId?.let { frameId ->
