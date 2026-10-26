@@ -138,7 +138,7 @@ dependencies {
     implementation(libs.patreonSupportersRetrieval)
     implementation(libs.composeIntroSlider)
 
-    implementation(platform(libs.compose.bom))
+    implementation(platform(libs.compose.bom.alpha))
     implementation(libs.activity.compose)
     implementation(libs.compose.animation)
     implementation(libs.compose.foundation)
@@ -181,7 +181,6 @@ dependencies {
 
     implementation(libs.glance)
     implementation(libs.glance.appwidget)
-    implementation(libs.glance.material3)
 
     implementation(project(":lswinterconnect"))
 
