@@ -9,6 +9,7 @@ import android.util.Log
 import androidx.core.content.edit
 import com.bugsnag.android.BreadcrumbType
 import com.bugsnag.android.Severity
+import com.google.gson.Gson
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.MainScope
@@ -81,6 +82,7 @@ class LogUtils private constructor(
 
     private val logFile = File(context.cacheDir, "log.txt")
     private val loggingDispatcher = Dispatchers.IO.limitedParallelism(1)
+    private val gson = Gson()
 
     private var _logFileHandle: BufferedWriter? = null
     private val logFileHandle: BufferedWriter
@@ -275,7 +277,7 @@ class LogUtils private constructor(
     private fun generateFullMessage(message: String, throwable: Throwable?, extras: Map<String, Any?>): String {
         val formatter = SimpleDateFormat("yyyy-MM-dd_HH:mm:ss", Locale.getDefault())
 
-        return "${formatter.format(Date())}\n${message}\n${extras}\n${throwable?.let { 
+        return "${formatter.format(Date())}\n${message}\n${gson.toJson(extras)}\n${throwable?.let { 
             "\n${Log.getStackTraceString(it)}"
         } ?: ""}"
     }
