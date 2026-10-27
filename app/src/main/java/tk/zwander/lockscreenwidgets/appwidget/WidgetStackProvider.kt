@@ -339,8 +339,16 @@ class WidgetStackProvider : AppWidgetProvider() {
             updateWidgetStackMonitor(context)
             try {
                 appWidgetManager.updateAppWidget(appWidgetId, root)
-            } catch (e: SecurityException) {
-                context.logUtils.normalLog("Error updating widget stack widget", e)
+            } catch (e: Exception) {
+                context.logUtils.normalLog(
+                    message = "Error updating widget stack widget",
+                    throwable = e,
+                    extras = mapOf(
+                        "stackId" to appWidgetId,
+                        "widgetId" to widgetData?.id,
+                        "widgetProvider" to widgetData?.widgetProvider,
+                    ),
+                )
             }
             context.eventManager.sendEvent(Event.StackUpdateComplete(appWidgetId))
         }
