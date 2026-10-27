@@ -497,15 +497,18 @@ object AccessibilityUtils {
         val isOnKeyguard = globalState.wasOnKeyguard.value
 
         logUtils.debugLog(
-            "Trying to run window operation " +
-                    "${initialRun}, " +
-                    "${isScreenOn}, " +
-                    "${isOnKeyguard}, " +
-                    "${prefManager.widgetFrameEnabled}, " +
-                    "${prefManager.drawerEnabled}, " +
-                    "${drawerDelegate.isAttached}, " +
-                    "${prefManager.drawerHideWhenNotificationPanelOpen}",
-            null,
+            message = "Trying to run window operation ",
+            throwable = null,
+            extras = mapOf(
+                "initialRun" to initialRun,
+                "isScreenOn" to isScreenOn,
+                "isOnKeyguard" to isOnKeyguard,
+                "widgetFrameEnabled" to prefManager.widgetFrameEnabled,
+                "drawerEnabled" to prefManager.drawerEnabled,
+                "drawerIsAttached" to drawerDelegate.isAttached,
+                "anyFrameAttached" to frameDelegates.any { it.value.isAttached },
+                "drawerHideWhenNotificationPanelOpen" to prefManager.drawerHideWhenNotificationPanelOpen,
+            ),
         )
 
         //The below block can (very rarely) take over half a second to execute, so only run it
