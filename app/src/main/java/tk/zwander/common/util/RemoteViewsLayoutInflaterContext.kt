@@ -21,7 +21,11 @@ class RemoteViewsLayoutInflaterContext(
                 context: Context,
                 attrs: AttributeSet,
             ): View? {
-                logUtils.debugLog("onCreateView(${name}) for widget ${getWidgetData()}", null)
+                logUtils.debugLog(
+                    message = "onCreateView(${name}) for widget ${getWidgetData()}",
+                    throwable = null,
+                    leaveBreadcrumb = false,
+                )
                 return when (name) {
                     "ListView", "android.widget.ListView" -> CatchingListView(context, attrs, widgetId)
                     "TextClock", "android.widget.TextClock" -> CatchingTextClock(context, attrs)
