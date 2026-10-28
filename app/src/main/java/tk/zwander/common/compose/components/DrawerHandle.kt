@@ -3,6 +3,7 @@ package tk.zwander.common.compose.components
 import android.annotation.SuppressLint
 import android.view.Gravity
 import android.view.MotionEvent
+import android.view.ViewConfiguration
 import android.view.WindowManager
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateDpAsState
@@ -38,6 +39,7 @@ import tk.zwander.common.util.vibrate
 import tk.zwander.lockscreenwidgets.R
 import tk.zwander.widgetdrawer.util.DrawerDelegate
 import kotlin.math.absoluteValue
+import kotlin.math.sign
 
 @SuppressLint("RtlHardcoded")
 @Composable
@@ -128,6 +130,9 @@ fun DrawerDelegate.DrawerViewModel.DrawerHandle(
     val updatedSide by rememberUpdatedState(side)
 
     val animatedElevation by animateDpAsState(if (showShadow) 8.dp else 0.dp)
+    val touchSlop = remember(context) {
+        ViewConfiguration.get(context).scaledTouchSlop
+    }
 
     DisposableEffect(null) {
         onDispose {
@@ -197,8 +202,8 @@ fun DrawerDelegate.DrawerViewModel.DrawerHandle(
                 state = rememberDraggableState { offset ->
                     if (!updatedScrollingOpen) {
                         scrollTotalX += offset
-                        if (scrollTotalX.absoluteValue > 20) {
-                            scrollTotalX = 0f
+                        if (scrollTotalX.absoluteValue > touchSlop) {
+                            scrollTotalX = touchSlop * offset.sign
                             context.vibrate(25L)
                             isScrollingOpen = true
 
