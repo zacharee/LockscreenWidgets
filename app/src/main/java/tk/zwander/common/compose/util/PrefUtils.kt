@@ -1,85 +1,58 @@
 package tk.zwander.common.compose.util
 
-import android.content.Context
 import android.content.SharedPreferences
 import androidx.compose.runtime.*
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.edit
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CancellationException
+import tk.zwander.common.util.logUtils
 import tk.zwander.common.util.prefManager
-
-fun <T> Context.preferenceAsState(
-    key: String,
-    scope: CoroutineScope,
-    preferences: SharedPreferences = prefManager.prefs,
-    onChanged: suspend (String, T) -> Unit = { _, _ -> },
-    value: (String) -> T,
-): MutableState<T> {
-    val state = mutableStateOf(value(key))
-    val listener = SharedPreferences.OnSharedPreferenceChangeListener { _, k ->
-        if (key == k) {
-            scope.launch(Dispatchers.IO) {
-                state.value = value(key)
-            }
-        }
-    }
-
-    scope.launch(Dispatchers.IO) {
-        snapshotFlow { state.value }.collect {
-            if (it != value(key)) {
-                onChanged(key, it)
-            }
-        }
-    }
-
-    scope.launch {
-        preferences.registerOnSharedPreferenceChangeListener(listener)
-        state.value = value(key)
-
-        try {
-            awaitCancellation()
-        } catch (_: CancellationException) {
-            preferences.unregisterOnSharedPreferenceChangeListener(listener)
-        }
-    }
-
-    return object : MutableState<T> {
-        override var value: T
-            get() = derivedStateOf { state.value }.value
-            set(value) {
-                state.value = value
-            }
-
-        override fun component1(): T {
-            return this.value
-        }
-
-        override fun component2(): (T) -> Unit {
-            return {
-                this.value = it
-            }
-        }
-    }
-}
 
 @Composable
 fun <T> rememberPreferenceState(
     key: String,
     preferences: SharedPreferences = LocalContext.current.prefManager.prefs,
+    resetKey: Any? = Unit,
     onChanged: suspend (String, T) -> Unit = { _, _ -> },
     value: (String) -> T,
 ): MutableState<T> {
     val context = LocalContext.current
-    val scope = rememberCoroutineScope()
 
-    val state = remember(context, key, preferences, onChanged, value) {
-        context.preferenceAsState(
-            key = key,
-            preferences = preferences,
-            onChanged = onChanged,
-            value = value,
-            scope = scope,
-        )
+    val updatedOnChanged by rememberUpdatedState(onChanged)
+    val updatedValue by rememberUpdatedState(value)
+
+    val state = remember(key, preferences, resetKey) {
+        mutableStateOf(updatedValue(key))
+    }
+
+    LaunchedEffect(state) {
+        snapshotFlow { state.value }.collect {
+            if (it != updatedValue(key)) {
+                try {
+                    updatedOnChanged(key, it)
+                } catch (e: CancellationException) {
+                    throw e
+                } catch (e: Exception) {
+                    // one failed write shouldn't kill the pipeline
+                    context.logUtils.debugLog("Unable to write state pref $key $it", e)
+                }
+            }
+        }
+    }
+
+    DisposableEffect(state) {
+        val listener = SharedPreferences.OnSharedPreferenceChangeListener { _, k ->
+            if (key == k) {
+                state.value = updatedValue(key)
+            }
+        }
+
+        preferences.registerOnSharedPreferenceChangeListener(listener)
+        state.value = updatedValue(key)
+
+        onDispose {
+            preferences.unregisterOnSharedPreferenceChangeListener(listener)
+        }
     }
 
     return state
@@ -111,27 +84,13 @@ fun rememberBooleanPreferenceValue(
     preferences: SharedPreferences = LocalContext.current.prefManager.prefs,
     defaultValue: Boolean = false,
 ): State<Boolean> {
-    val state = remember(key, preferences, defaultValue) {
-        mutableStateOf(preferences.getBoolean(key, defaultValue))
-    }
-
-    DisposableEffect(key, preferences, defaultValue) {
-        val listener = SharedPreferences.OnSharedPreferenceChangeListener { _, changedKey ->
-            if (changedKey == key) {
-                state.value = preferences.getBoolean(key, defaultValue)
-            }
-        }
-
-        preferences.registerOnSharedPreferenceChangeListener(listener)
-        // Re-read after registering to avoid missing a change in between.
-        state.value = preferences.getBoolean(key, defaultValue)
-
-        onDispose {
-            preferences.unregisterOnSharedPreferenceChangeListener(listener)
-        }
-    }
-
-    return state
+    return rememberPreferenceState(
+        key = key,
+        preferences = preferences,
+        value = {
+            preferences.getBoolean(key, defaultValue)
+        },
+    )
 }
 
 @Composable

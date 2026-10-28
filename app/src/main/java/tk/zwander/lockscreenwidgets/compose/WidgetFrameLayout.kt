@@ -108,6 +108,7 @@ fun WidgetFrameDelegate.WidgetFrameViewModel.WidgetFrameLayout(
                 context.prefManager.maskedModeAdjustment = mutatedValue
             }
         },
+        resetKey = display?.uniqueIdCompat,
     )
     var maskScale by rememberPreferenceState(
         key = PrefManager.KEY_MASKED_MODE_SCALE_FOR_DISPLAY,
@@ -119,6 +120,7 @@ fun WidgetFrameDelegate.WidgetFrameViewModel.WidgetFrameLayout(
             mutatedValue[display?.uniqueIdCompat] = value
             context.prefManager.maskedModeScaleForDisplay = mutatedValue
         },
+        resetKey = display?.uniqueIdCompat,
     )
 
     Card(
