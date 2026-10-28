@@ -196,14 +196,16 @@ fun DrawerDelegate.DrawerViewModel.DrawerHandle(
             .draggable(
                 state = rememberDraggableState { offset ->
                     if (!updatedScrollingOpen) {
-                        if (offset.absoluteValue > 20) {
+                        scrollTotalX += offset
+                        if (scrollTotalX.absoluteValue > 20) {
+                            scrollTotalX = 0f
                             context.vibrate(25L)
                             isScrollingOpen = true
 
                             lifecycleScope.launch(Dispatchers.Main.immediate) {
                                 scrollInDrawer(
                                     context.prefManager.drawerHandleSide,
-                                    scrollTotalX.absoluteValue,
+                                    -scrollTotalX,
                                     true,
                                     offset,
                                 )
@@ -215,7 +217,7 @@ fun DrawerDelegate.DrawerViewModel.DrawerHandle(
                         lifecycleScope.launch(Dispatchers.Main.immediate) {
                             scrollInDrawer(
                                 context.prefManager.drawerHandleSide,
-                                scrollTotalX.absoluteValue,
+                                -scrollTotalX,
                                 false,
                                 offset,
                             )
