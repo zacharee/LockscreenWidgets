@@ -29,6 +29,7 @@ import com.joaomgcd.taskerpluginlibrary.extensions.requestQuery
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -184,6 +185,8 @@ class DrawerDelegate private constructor(context: Context, displayId: String) :
                     wm?.safeUpdateViewLayout(it, handleParams)
                 },
                 scrollOpenFinish = { from ->
+                    viewModel.drawerScrollInAnimator.getAndUpdate { null }?.cancel()
+
                     val distanceFromEdge = (params.width + params.x).absoluteValue
                     val touchSlop = ViewConfiguration.get(this@DrawerDelegate).scaledTouchSlop
                     @Suppress("RtlHardcoded")
@@ -208,7 +211,11 @@ class DrawerDelegate private constructor(context: Context, displayId: String) :
                         if (metThreshold) DecelerateInterpolator() else AccelerateInterpolator()
                     animator.addListener(
                         object : AnimatorListenerAdapter() {
+                            var canceled = false
+
                             override fun onAnimationEnd(animation: Animator) {
+                                if (canceled) return
+
                                 if (!metThreshold) {
                                     lifecycleScope.launch {
                                         hideDrawer()
@@ -219,12 +226,20 @@ class DrawerDelegate private constructor(context: Context, displayId: String) :
                                     }
                                 }
                             }
+
+                            override fun onAnimationCancel(animation: Animator) {
+                                canceled = true
+                            }
                         },
                     )
+
+                    viewModel.drawerScrollInAnimator.value = animator
                     animator.start()
                 },
                 scrollInDrawer = ::scrollInDrawer,
                 showDrawer = {
+                    viewModel.drawerScrollInAnimator.getAndUpdate { null }?.cancel()
+
                     params.x = 0
                     showDrawer()
                 },
@@ -277,6 +292,8 @@ class DrawerDelegate private constructor(context: Context, displayId: String) :
             // own params.x.
             return
         }
+
+        viewModel.drawerScrollInAnimator.getAndUpdate { null }?.cancel()
 
         if (velocity.sign != viewModel.latestScrollInVelocity.value.sign) {
             viewModel.latestScrollInVelocity.value = 0f
@@ -557,6 +574,7 @@ class DrawerDelegate private constructor(context: Context, displayId: String) :
         val latestScrollInVelocity = MutableStateFlow(0f)
         val handleAnimationState = MutableStateFlow(AnimationState.IDLE)
         val drawerAnimationState = MutableStateFlow(AnimationState.IDLE)
+        val drawerScrollInAnimator = MutableStateFlow<Animator?>(null)
 
         override val containerCornerRadiusKey: String? = null
         override val widgetCornerRadiusKey: String = PrefManager.KEY_DRAWER_WIDGET_CORNER_RADIUS
