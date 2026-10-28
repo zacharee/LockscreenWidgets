@@ -27,6 +27,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.viewModelScope
 import com.joaomgcd.taskerpluginlibrary.extensions.requestQuery
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.getAndUpdate
@@ -354,7 +355,10 @@ class DrawerDelegate private constructor(context: Context, displayId: String) :
                 viewModel.drawerAnimationState.value = AnimationState.IDLE
             } else {
                 rootView.alpha = 1f
+                viewModel.drawerAnimationState.value = AnimationState.IDLE
             }
+        } else {
+            viewModel.drawerAnimationState.value = AnimationState.IDLE
         }
     }
 
@@ -463,7 +467,7 @@ class DrawerDelegate private constructor(context: Context, displayId: String) :
     }
 
     private suspend fun hideHandle() {
-        withContext(Dispatchers.Main) {
+        withContext(Dispatchers.Main + NonCancellable) {
             logUtils.debugLog("Trying to hide handle", null)
 
             if (handle.isAttachedToWindow && viewModel.handleAnimationState.value != AnimationState.REMOVING) {
@@ -527,7 +531,7 @@ class DrawerDelegate private constructor(context: Context, displayId: String) :
     }
 
     private suspend fun hideDrawer(callListener: Boolean = true) {
-        withContext(Dispatchers.Main) {
+        withContext(Dispatchers.Main + NonCancellable) {
             logUtils.debugLog("Trying to hide drawer, $callListener", null)
             if (rootView.isAttachedToWindow && viewModel.drawerAnimationState.value != AnimationState.REMOVING) {
                 viewModel.drawerAnimationState.value = AnimationState.REMOVING
