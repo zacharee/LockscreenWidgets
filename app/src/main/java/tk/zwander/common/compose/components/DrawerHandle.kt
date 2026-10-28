@@ -209,7 +209,7 @@ fun DrawerDelegate.DrawerViewModel.DrawerHandle(
 
                             lifecycleScope.launch(Dispatchers.Main.immediate) {
                                 scrollInDrawer(
-                                    context.prefManager.drawerHandleSide,
+                                    updatedSide,
                                     -scrollTotalX,
                                     true,
                                     offset,
@@ -221,7 +221,7 @@ fun DrawerDelegate.DrawerViewModel.DrawerHandle(
 
                         lifecycleScope.launch(Dispatchers.Main.immediate) {
                             scrollInDrawer(
-                                context.prefManager.drawerHandleSide,
+                                updatedSide,
                                 -scrollTotalX,
                                 false,
                                 offset,
