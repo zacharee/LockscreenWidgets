@@ -28,6 +28,7 @@ import androidx.lifecycle.viewModelScope
 import com.joaomgcd.taskerpluginlibrary.extensions.requestQuery
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.NonCancellable
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.getAndUpdate
@@ -118,7 +119,8 @@ class DrawerDelegate private constructor(context: Context, displayId: String) :
         }
     }
 
-    var previousNonZeroCutout by mutableIntStateOf(0)
+    private var previousNonZeroCutout by mutableIntStateOf(0)
+    private val windowUpdateRequests = Channel<Unit>(Channel.CONFLATED)
 
     override val rootView by lazy {
         viewModel.createComposeViewHolder {
@@ -182,8 +184,7 @@ class DrawerDelegate private constructor(context: Context, displayId: String) :
                 params = handleParams,
                 displayId = displayId,
                 updateWindow = {
-                    it.hideNavBarsForGestureExclusion()
-                    wm?.safeUpdateViewLayout(it, handleParams)
+                    windowUpdateRequests.trySend(Unit)
                 },
                 scrollOpenFinish = { from ->
                     viewModel.drawerScrollInAnimator.getAndUpdate { null }?.cancel()
@@ -203,9 +204,7 @@ class DrawerDelegate private constructor(context: Context, displayId: String) :
                     val animator = ValueAnimator.ofInt(params.x, if (metThreshold) 0 else -params.width)
                     animator.addUpdateListener { anim ->
                         params.x = anim.animatedValue as Int
-                        lifecycleScope.launch {
-                            updateWindow()
-                        }
+                        windowUpdateRequests.trySend(Unit)
                     }
                     animator.duration = with(DrawerOrFrame.DRAWER) { duration() }
                     animator.interpolator =
@@ -283,7 +282,7 @@ class DrawerDelegate private constructor(context: Context, displayId: String) :
     override val viewModel = DrawerViewModel(this)
 
     @SuppressLint("RtlHardcoded")
-    private suspend fun scrollInDrawer(from: Int, dist: Float, initial: Boolean, velocity: Float) {
+    private fun scrollInDrawer(from: Int, dist: Float, initial: Boolean, velocity: Float) {
         if (!initial && !viewModel.scrollingOpen.value) {
             // This drag-position update was queued before the pointer lifted, but is only
             // being processed now, after ScrollOpenFinish already started the settle
@@ -312,9 +311,11 @@ class DrawerDelegate private constructor(context: Context, displayId: String) :
         params.x = -distanceFromEdge.toInt()
 
         if (initial) {
-            showDrawer(hideHandle = false)
+            viewModel.viewModelScope.launch {
+                showDrawer(hideHandle = false)
+            }
         } else {
-            updateWindow()
+            windowUpdateRequests.trySend(Unit)
         }
     }
 
@@ -395,8 +396,18 @@ class DrawerDelegate private constructor(context: Context, displayId: String) :
 
         viewModel.viewModelScope.launch(Dispatchers.Main) {
             state.collect {
-                lifecycleScope.launch(Dispatchers.Main) {
-                    updateWindow()
+                windowUpdateRequests.trySend(Unit)
+            }
+        }
+
+        viewModel.viewModelScope.launch(Dispatchers.Main) {
+            for (request in windowUpdateRequests) {
+                if (rootView.isAttachedToWindow) {
+                    updateOverlay()
+                }
+
+                if (handle.isAttachedToWindow) {
+                    wm?.safeUpdateViewLayout(handle, handleParams)
                 }
             }
         }
@@ -500,7 +511,6 @@ class DrawerDelegate private constructor(context: Context, displayId: String) :
 
     override suspend fun updateWindow() {
         withContext(Dispatchers.Main) {
-            logUtils.debugLog("Updating drawer window", null)
             params.apply {
                 this@DrawerDelegate.display?.rotatedRealSize?.let { displaySize ->
                     width = displaySize.x
@@ -525,8 +535,7 @@ class DrawerDelegate private constructor(context: Context, displayId: String) :
                 params.height = displaySize.y
             }
 
-            updateOverlay()
-            wm?.safeUpdateViewLayout(rootView, params)
+            windowUpdateRequests.trySend(Unit)
         }
     }
 

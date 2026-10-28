@@ -296,7 +296,7 @@ abstract class BaseDelegate<State : Any>(
     protected open suspend fun onDisplayChanged() {}
 
     protected suspend fun updateOverlay() {
-        withContext(Dispatchers.Main) {
+        withContext(Dispatchers.Main.immediate) {
             wm?.safeUpdateViewLayout(rootView, params)
         }
     }

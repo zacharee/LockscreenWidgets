@@ -48,8 +48,8 @@ fun DrawerDelegate.DrawerViewModel.DrawerHandle(
     params: WindowManager.LayoutParams,
     displayId: String,
     updateWindow: () -> Unit,
-    scrollOpenFinish: suspend (from: Int) -> Unit,
-    scrollInDrawer: suspend (from: Int, dist: Float, initial: Boolean, velocity: Float) -> Unit,
+    scrollOpenFinish: (from: Int) -> Unit,
+    scrollInDrawer: (from: Int, dist: Float, initial: Boolean, velocity: Float) -> Unit,
     showDrawer: suspend () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -162,9 +162,7 @@ fun DrawerDelegate.DrawerViewModel.DrawerHandle(
                 when (event.action) {
                     MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
                         if (updatedScrollingOpen) {
-                            lifecycleScope.launch(Dispatchers.Main.immediate) {
-                                scrollOpenFinish(updatedSide)
-                            }
+                            scrollOpenFinish(updatedSide)
                         }
 
                         isScrollingOpen = false
@@ -207,26 +205,22 @@ fun DrawerDelegate.DrawerViewModel.DrawerHandle(
                             context.vibrate(25L)
                             isScrollingOpen = true
 
-                            lifecycleScope.launch(Dispatchers.Main.immediate) {
-                                scrollInDrawer(
-                                    updatedSide,
-                                    -scrollTotalX,
-                                    true,
-                                    offset,
-                                )
-                            }
+                            scrollInDrawer(
+                                updatedSide,
+                                -scrollTotalX,
+                                true,
+                                offset,
+                            )
                         }
                     } else {
                         scrollTotalX += offset
 
-                        lifecycleScope.launch(Dispatchers.Main.immediate) {
-                            scrollInDrawer(
-                                updatedSide,
-                                -scrollTotalX,
-                                false,
-                                offset,
-                            )
-                        }
+                        scrollInDrawer(
+                            updatedSide,
+                            -scrollTotalX,
+                            false,
+                            offset,
+                        )
                     }
                 },
                 orientation = Orientation.Horizontal,
