@@ -102,7 +102,7 @@ fun DrawerDelegate.DrawerViewModel.DrawerHandle(
         mutableStateOf(false)
     }
     var isScrollingOpen by this.scrollingOpen.collectAsMutableState()
-    var scrollTotalX = remember { 0f }
+    var scrollTotalX by remember { mutableFloatStateOf(0f) }
 
     val shownColor by animateColorAsState(
         targetValue = if (isMoving) {
@@ -163,7 +163,7 @@ fun DrawerDelegate.DrawerViewModel.DrawerHandle(
                     MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
                         if (updatedScrollingOpen) {
                             lifecycleScope.launch(Dispatchers.Main.immediate) {
-                                scrollOpenFinish(side)
+                                scrollOpenFinish(updatedSide)
                             }
                         }
 
@@ -238,11 +238,13 @@ fun DrawerDelegate.DrawerViewModel.DrawerHandle(
                     if (updatedIsMoving) {
                         params.y += offset.toInt()
                         updateWindow()
-                        context.prefManager.drawerHandleYPosition = params.y
                     }
                 },
                 orientation = Orientation.Vertical,
                 interactionSource = interactionSource,
+                onDragStopped = {
+                    context.prefManager.drawerHandleYPosition = params.y
+                },
             )
             .combinedClickable(
                 interactionSource = interactionSource,
