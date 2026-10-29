@@ -21,6 +21,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalResources
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.core.view.ViewCompat
 import androidx.lifecycle.lifecycleScope
@@ -145,6 +146,7 @@ class DrawerDelegate private constructor(context: Context, displayId: String) :
                                     },
                                     interactionSource = remember { MutableInteractionSource() },
                                     indication = null,
+                                    onClickLabel = stringResource(R.string.close_widget_drawer),
                                 )
                             } else {
                                 Modifier
