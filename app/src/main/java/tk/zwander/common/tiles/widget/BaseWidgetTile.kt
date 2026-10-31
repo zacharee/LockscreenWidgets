@@ -215,7 +215,7 @@ abstract class BaseWidgetTile : TileService(), SharedPreferences.OnSharedPrefere
 
         try {
             //Try to get the widget RemoteViews.
-            val widgetView = iManager.getAppWidgetViews(packageName, widgetId)
+            val widgetView = iManager.getAppWidgetViewsCompat(packageName, widgetId)
             if (widgetView != null) {
                 logUtils.debugLog("Custom widget loaded for tile ID $tileId")
 

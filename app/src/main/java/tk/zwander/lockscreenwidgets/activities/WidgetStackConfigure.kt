@@ -327,12 +327,12 @@ fun Content(
                     if (localInspectionMode) {
                         16 / 9f
                     } else {
-                        val options = iAppWidgetService.getAppWidgetOptions(
+                        val options = iAppWidgetService.getAppWidgetOptionsCompat(
                             context.packageName,
                             widgets.getOrNull(widgetStackIndex)?.id
                                 ?: widgets.firstOrNull()?.id
                                 ?: widgetId,
-                        )
+                        ) ?: Bundle()
                         val minWidth = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH)
                         val maxHeight = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT)
 
@@ -411,7 +411,7 @@ fun Content(
 
                                 LaunchedEffect(eventCount) {
                                     widgetView?.updateAppWidget(
-                                        iAppWidgetService.getAppWidgetViews(
+                                        iAppWidgetService.getAppWidgetViewsCompat(
                                             context.packageName,
                                             widget.id,
                                         ),

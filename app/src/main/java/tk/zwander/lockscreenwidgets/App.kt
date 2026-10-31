@@ -15,7 +15,9 @@ import android.net.Uri
 import android.os.Build
 import android.os.DeadObjectException
 import android.provider.Settings
+import android.util.Log
 import androidx.core.content.ContextCompat
+import com.android.internal.appwidget.IAppWidgetService
 import com.bugsnag.android.Bugsnag
 import com.bugsnag.android.BugsnagExitInfoPlugin
 import com.bugsnag.android.Configuration
@@ -269,6 +271,10 @@ class App : Application(), CoroutineScope by scope {
         //Make sure we can access hidden APIs
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
             HiddenApiBypass.setHiddenApiExemptions("L")
+        }
+
+        IAppWidgetService::class.java.methods.forEach { method ->
+            Log.e("LSW", "${method.name}(${method.parameters.map { param -> "${param.name}: ${param.type}" }.joinToString(", ")}): ${method.returnType}")
         }
 
         LogUtils.createInstance(

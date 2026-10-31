@@ -133,10 +133,10 @@ class ConfigureLauncher(
 
         //Use the system API instead of ACTION_APPWIDGET_CONFIGURE to try to avoid some permissions issues
         try {
-            val intentSender = appWidgetService.createAppWidgetConfigIntentSender(activity.opPackageName, id, 0)
+            val intentSender = appWidgetService.createAppWidgetConfigIntentSenderCompat(activity.opPackageName, id, 0)
             val component = try {
-                appWidgetService.getAppWidgetInfo(activity.opPackageName, id)
-                    .configure
+                appWidgetService.getAppWidgetInfoCompat(activity.opPackageName, id)
+                    ?.configure
             } catch (e: Throwable) {
                 activity.logUtils.normalLog("Error retrieving normal config component for $id", e)
                 null

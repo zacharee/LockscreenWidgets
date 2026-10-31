@@ -236,7 +236,7 @@ class WidgetStackProvider : AppWidgetProvider() {
                                 throwable = null,
                             )
                         }
-                    } ?: appWidgetService.getAppWidgetViews(context.packageName, it.id).also { view ->
+                    } ?: appWidgetService.getAppWidgetViewsCompat(context.packageName, it.id).also { view ->
                         context.widgetHostCompat.cachedRemoteViews[widgetData.id] = view
 
                         context.logUtils.debugLog(
