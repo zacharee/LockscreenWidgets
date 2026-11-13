@@ -213,6 +213,12 @@ data class LSDisplay(
 ) {
     val displayId: Int = this@LSDisplay.display.displayId
 
+    // `Display` objects are updated in place when the display changes, so a live rotation
+    // getter can't be used to detect rotation changes. Snapshot it at construction instead,
+    // so equals()/hashCode() change when a new LSDisplay is created for a rotated display.
+    // This makes availableDisplays (and therefore displayFlow) emit on rotation.
+    private val rotationAtCreation: Int = this@LSDisplay.display.rotation
+
     val realSize: Point by lazy {
         val size = rotatedRealSize
         val currentRotation = this@LSDisplay.display.rotation
@@ -296,7 +302,8 @@ data class LSDisplay(
                 other.displayId == displayId &&
                 other.uniqueIdCompat == uniqueIdCompat &&
                 other.density.density == density.density &&
-                other.realSize == realSize
+                other.realSize == realSize &&
+                other.rotationAtCreation == rotationAtCreation
     }
 
     override fun hashCode(): Int {
@@ -305,6 +312,7 @@ data class LSDisplay(
             uniqueIdCompat,
             density.density,
             realSize,
+            rotationAtCreation,
         )
     }
 }

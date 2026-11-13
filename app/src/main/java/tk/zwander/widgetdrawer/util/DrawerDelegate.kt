@@ -13,6 +13,7 @@ import android.view.animation.DecelerateInterpolator
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.add
 import androidx.compose.foundation.layout.asPaddingValues
@@ -602,8 +603,6 @@ class DrawerDelegate private constructor(context: Context, displayId: String) :
             val context = LocalContext.current
             val resources = LocalResources.current
             val prefManager = remember(context) { context.prefManager }
-            val rowCount = (display.orDefault(context).rotatedRealSizeState.collectAsState().value.y /
-                    resources.getDimensionPixelSize(R.dimen.drawer_row_height)).coerceAtLeast(20)
             val columnCount by rememberPreferenceState(
                 key = PrefManager.KEY_DRAWER_COL_COUNT,
             ) {
@@ -631,47 +630,65 @@ class DrawerDelegate private constructor(context: Context, displayId: String) :
                 WindowInsets(left = drawerSidePadding, right = drawerSidePadding),
             )
 
-            WidgetGrid(
-                currentWidgets = currentWidgetsState,
-                onWidgetsChanged = { widgets ->
-                    currentWidgetsState = widgets
-                },
-                orientation = Orientation.Vertical,
-                columnCount = columnCount,
-                rowCount = rowCount,
-                resizeThresholdPx = { which ->
-                    if (which == WidgetResizeListener.Which.LEFT || which == WidgetResizeListener.Which.RIGHT) {
-                        display.orDefault(context).rotatedRealSize.x / colCount
-                    } else {
-                        resources.getDimensionPixelSize(R.dimen.drawer_row_height)
-                    }
-                },
-                launchAddActivity = {
-                    delegate.lifecycleScope.launch {
-                        delegate.hideDrawer()
-                    }
-                    AddDrawerWidgetActivity.launch(context, true)
-                },
-                launchReconfigure = { id, providerInfo ->
-                    delegate.lifecycleScope.launch {
-                        delegate.hideDrawer()
-                    }
-                    ReconfigureDrawerWidgetActivity.launch(context, id, providerInfo)
-                },
-                launchShortcutIconOverride = { id ->
-                    delegate.lifecycleScope.launch {
-                        delegate.hideDrawer()
-                    }
-                    SelectIconPackActivity.launchForOverride(context, id, true)
-                },
-                modifier = modifier,
-                rowSpanForAddButton = 20,
-                enableSnapping = false,
-                contentPadding = combinedPadding.asPaddingValues(),
-                minRowSpan = 5,
-                locked = drawerLocked,
-                itemSpacingKey = PrefManager.KEY_DRAWER_ITEM_SPACING,
-            )
+            BoxWithConstraints(modifier = modifier) {
+                // Derive the row count from the height the grid is actually laid out at instead
+                // of the display's cached size. Cell height is viewportHeight / rowCount, so if
+                // the viewport and the row count come from different sources (the window uses
+                // the live display size while rotatedRealSizeState only updates asynchronously
+                // on rotation), every widget is briefly drawn smaller until they resync. Using
+                // the measured constraints keeps a row at drawer_row_height at all times.
+                val rowHeight = resources.getDimensionPixelSize(R.dimen.drawer_row_height)
+                val rowCount = if (constraints.hasBoundedHeight) {
+                    ((constraints.maxHeight - previousNonZeroCutout) / rowHeight)
+                        .coerceAtLeast(20)
+                } else {
+                    // Fall back to the display size if the parent gives us unbounded height.
+                    (display.orDefault(context).rotatedRealSize.y / rowHeight)
+                        .coerceAtLeast(20)
+                }
+
+                WidgetGrid(
+                    currentWidgets = currentWidgetsState,
+                    onWidgetsChanged = { widgets ->
+                        currentWidgetsState = widgets
+                    },
+                    orientation = Orientation.Vertical,
+                    columnCount = columnCount,
+                    rowCount = rowCount,
+                    resizeThresholdPx = { which ->
+                        if (which == WidgetResizeListener.Which.LEFT || which == WidgetResizeListener.Which.RIGHT) {
+                            display.orDefault(context).rotatedRealSize.x / colCount
+                        } else {
+                            rowHeight
+                        }
+                    },
+                    launchAddActivity = {
+                        delegate.lifecycleScope.launch {
+                            delegate.hideDrawer()
+                        }
+                        AddDrawerWidgetActivity.launch(context, true)
+                    },
+                    launchReconfigure = { id, providerInfo ->
+                        delegate.lifecycleScope.launch {
+                            delegate.hideDrawer()
+                        }
+                        ReconfigureDrawerWidgetActivity.launch(context, id, providerInfo)
+                    },
+                    launchShortcutIconOverride = { id ->
+                        delegate.lifecycleScope.launch {
+                            delegate.hideDrawer()
+                        }
+                        SelectIconPackActivity.launchForOverride(context, id, true)
+                    },
+                    modifier = Modifier.fillMaxSize(),
+                    rowSpanForAddButton = 20,
+                    enableSnapping = false,
+                    contentPadding = combinedPadding.asPaddingValues(),
+                    minRowSpan = 5,
+                    locked = drawerLocked,
+                    itemSpacingKey = PrefManager.KEY_DRAWER_ITEM_SPACING,
+                )
+            }
         }
     }
 }
