@@ -77,7 +77,9 @@ class FrameSizeAndPosition private constructor(private val context: Context) {
     fun hasSizes() = sizesMap.isNotEmpty()
 
     fun getPositionForType(type: FrameType, display: LSDisplay): Point {
-        return positionsMap[type.key] ?: getDefaultPositionForType(type, display)
+        val position = positionsMap[type.key] ?: getDefaultPositionForType(type, display)
+
+        return clampPositionToDisplay(position, display)
     }
 
     fun setPositionForType(type: FrameType, position: Point) {
@@ -93,7 +95,37 @@ class FrameSizeAndPosition private constructor(private val context: Context) {
     }
 
     fun getSizeForType(type: FrameType, display: LSDisplay): PointF {
-        return sizesMap[type.key] ?: getDefaultSizeForType(type, display)
+        val size = sizesMap[type.key] ?: getDefaultSizeForType(type, display)
+
+        return clampSizeToDisplay(size, display)
+    }
+
+    private fun clampSizeToDisplay(size: PointF, display: LSDisplay): PointF {
+        val displaySize = display.rotatedRealSize
+        val maxWidth = display.pxToDp(displaySize.x)
+        val maxHeight = display.pxToDp(displaySize.y)
+
+        val width = if (size.x.isFinite()) {
+            size.x.coerceIn(0f, maxWidth)
+        } else {
+            maxWidth
+        }
+        val height = if (size.y.isFinite()) {
+            size.y.coerceIn(0f, maxHeight)
+        } else {
+            maxHeight
+        }
+
+        return if (width == size.x && height == size.y) size else PointF(width, height)
+    }
+
+    private fun clampPositionToDisplay(position: Point, display: LSDisplay): Point {
+        val displaySize = display.rotatedRealSize
+
+        return Point(
+            position.x.coerceIn(-displaySize.x, displaySize.x),
+            position.y.coerceIn(-displaySize.y, displaySize.y),
+        )
     }
 
     fun setSizeForType(type: FrameType, size: PointF) {

@@ -118,6 +118,22 @@ open class WidgetFrameDelegate protected constructor(
     override val holderId: Int
         get() = id
 
+    private fun clampFrameWidth(width: Int, display: LSDisplay): Int {
+        return clampFrameDimension(width, display, display.rotatedRealSize.x)
+    }
+
+    private fun clampFrameHeight(height: Int, display: LSDisplay): Int {
+        return clampFrameDimension(height, display, display.rotatedRealSize.y)
+    }
+
+    private fun clampFrameDimension(value: Int, display: LSDisplay, displaySizePx: Int): Int {
+        val minPx = display.dpToPx(MIN_FRAME_SIZE_DP)
+        val maxPx = displaySizePx.coerceAtLeast(1)
+        val lower = minPx.coerceAtMost(maxPx)
+
+        return value.coerceIn(lower, maxPx)
+    }
+
     override var state = MutableStateFlow(State())
 
     private val saveMode: FrameSizeAndPosition.FrameType
@@ -168,9 +184,8 @@ open class WidgetFrameDelegate protected constructor(
 
             this@WidgetFrameDelegate.display?.let { display ->
                 frameSizeAndPosition.getSizeForType(saveMode, display).let { size ->
-                    val minPx = display.dpToPx(MIN_FRAME_SIZE_DP)
-                    width = display.dpToPx(size.x).coerceAtLeast(minPx)
-                    height = display.dpToPx(size.y).coerceAtLeast(minPx)
+                    width = clampFrameWidth(display.dpToPx(size.x), display)
+                    height = clampFrameHeight(display.dpToPx(size.y), display)
                 }
                 frameSizeAndPosition.getPositionForType(saveMode, display).let { pos ->
                     x = pos.x
@@ -245,9 +260,8 @@ open class WidgetFrameDelegate protected constructor(
                         }
 
                         this@WidgetFrameDelegate.display?.let { display ->
-                            val minPx = display.dpToPx(MIN_FRAME_SIZE_DP)
-                            params.width = params.width.coerceAtLeast(minPx)
-                            params.height = params.height.coerceAtLeast(minPx)
+                            params.width = clampFrameWidth(params.width, display)
+                            params.height = clampFrameHeight(params.height, display)
                         }
 
                         updateOverlay()
@@ -882,9 +896,11 @@ open class WidgetFrameDelegate protected constructor(
         )
 
         val [newX, newY] = frameSizeAndPosition.getPositionForType(saveMode, display)
-        val minPx = display.dpToPx(MIN_FRAME_SIZE_DP)
         val [newW, newH] = frameSizeAndPosition.getSizeForType(saveMode, display).run {
-            Point(display.dpToPx(x).coerceAtLeast(minPx), display.dpToPx(y).coerceAtLeast(minPx))
+            Point(
+                clampFrameWidth(display.dpToPx(x), display),
+                clampFrameHeight(display.dpToPx(y), display),
+            )
         }
 
         var changed = false
@@ -928,9 +944,8 @@ open class WidgetFrameDelegate protected constructor(
     override suspend fun onDisplayChanged() {
         this@WidgetFrameDelegate.display?.let { display ->
             frameSizeAndPosition.getSizeForType(saveMode, display).let { size ->
-                val minPx = display.dpToPx(MIN_FRAME_SIZE_DP)
-                params.width = display.dpToPx(size.x).coerceAtLeast(minPx)
-                params.height = display.dpToPx(size.y).coerceAtLeast(minPx)
+                params.width = clampFrameWidth(display.dpToPx(size.x), display)
+                params.height = clampFrameHeight(display.dpToPx(size.y), display)
             }
             frameSizeAndPosition.getPositionForType(saveMode, display).let { pos ->
                 params.x = pos.x
