@@ -1,7 +1,7 @@
 package tk.zwander.common.views.remote
 
 import android.widget.AbsListView
-import tk.zwander.common.util.appWidgetManager
+import tk.zwander.common.util.appWidgetInfoCache
 import tk.zwander.common.util.logUtils
 
 interface BaseListView {
@@ -30,12 +30,8 @@ class BaseListViewClass(private val widgetId: Int) : BaseListView {
     }
 
     override fun findAppWidgetProvider(): String? {
-        return try {
-            listView.context.appWidgetManager.getAppWidgetInfo(widgetId)
-                ?.provider?.flattenToString()
-        } catch (_: Throwable) {
-            null
-        }
+        return listView.context.appWidgetInfoCache.getCached(widgetId)
+            ?.provider?.flattenToString()
     }
 
     override fun shouldLayout(): Boolean {

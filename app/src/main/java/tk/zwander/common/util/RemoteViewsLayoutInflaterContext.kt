@@ -65,14 +65,9 @@ class RemoteViewsLayoutInflaterContext(
     }
 
     private fun getWidgetData(): String {
-        return try {
-            appWidgetManager.getAppWidgetInfo(widgetId)
-                ?.provider
-                ?.flattenToString()
-                ?: "$widgetId"
-        } catch (e: Throwable) {
-            logUtils.debugLog("Error getting widget data in inflater", e)
-            "$widgetId"
-        }
+        return appWidgetInfoCache.getCached(widgetId)
+            ?.provider
+            ?.flattenToString()
+            ?: "$widgetId"
     }
 }

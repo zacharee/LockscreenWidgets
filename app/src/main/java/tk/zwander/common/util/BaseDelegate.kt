@@ -315,7 +315,6 @@ abstract class BaseDelegate<State : Any>(
         launch(Dispatchers.IO) {
             val currentWidgets = currentWidgets.toList()
             val viewCacheRegistry = context.widgetViewCacheRegistry
-            val widgetManager = appWidgetManager
 
             val maxPerPage = rowCount * colCount
             var countDown = maxPerPage
@@ -334,11 +333,7 @@ abstract class BaseDelegate<State : Any>(
             }
 
             currentWidgets.take(perPage).forEach { widget ->
-                val providerInfo = try {
-                    widgetManager.getAppWidgetInfo(widget.id)
-                } catch (_: Throwable) {
-                    null
-                }
+                val providerInfo = context.appWidgetInfoCache.fetchAndCache(widget.id)
 
                 providerInfo?.let {
                     launch(Dispatchers.Main) {

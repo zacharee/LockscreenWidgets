@@ -5,7 +5,6 @@ import android.appwidget.AppWidgetHostView
 import android.appwidget.AppWidgetProviderInfo
 import android.content.Intent
 import android.content.SharedPreferences
-import android.content.pm.PackageManager
 import android.graphics.Rect
 import android.os.Build
 import android.util.SizeF
@@ -388,21 +387,13 @@ private fun <VM : BaseDelegate.BaseViewModel<*, *>> VM.WidgetItem(
     val updatedIndex by rememberUpdatedState(index)
     val updatedOnWidgetsChanged by rememberUpdatedState(onWidgetsChanged)
 
-    val widgetInfo by rememberUpdatedState(
+    val widgetInfo = remember(updatedData.id, updatedData.type) {
         if (updatedData.type == WidgetType.WIDGET) {
-            try {
-                manager.getAppWidgetInfo(updatedData.id)
-            } catch (e: PackageManager.NameNotFoundException) {
-                context.logUtils.debugLog(
-                    "Unable to retrieve widget info for ${updatedData.id} ${data.widgetProviderComponent}",
-                    e,
-                )
-                null
-            }
+            context.appWidgetInfoCache.getOrFetch(updatedData.id)
         } else {
             null
-        },
-    )
+        }
+    }
 
     WidgetItemLayout(
         needsReconfigure = widgetInfo == null && updatedData.safeType == WidgetType.WIDGET,

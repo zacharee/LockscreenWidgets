@@ -12,6 +12,8 @@ import android.content.Context
 import android.content.Intent
 import android.view.View
 import android.widget.RemoteViews
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import net.bytebuddy.ByteBuddy
 import net.bytebuddy.android.AndroidClassLoadingStrategy
 import net.bytebuddy.implementation.MethodDelegation
@@ -104,17 +106,24 @@ class WidgetHostCompat(
 
     private val prefsHandler = HandlerRegistry {
         handler(PrefManager.KEY_WIDGET_STACK_WIDGETS) {
-            context.prefManager.widgetStackWidgets.forEach { [stackId, widgets] ->
-                widgets.forEach { widget ->
-                    // Allows listening to events from original/wrapped widget providers on older
-                    // Android versions.
-                    context.widgetViewCacheRegistry.getOrCreateView(
-                        context = context,
-                        appWidget = context.appWidgetManager.getAppWidgetInfo(widget.id)
-                            ?: return@forEach,
-                        appWidgetId = widget.id,
-                    )
+            val widgets = context.prefManager.widgetStackWidgets.values.flatten()
+
+            if (widgets.isEmpty()) return@handler
+
+            // Allows listening to events from original/wrapped widget providers on older
+            // Android versions.
+            val infos = withContext(Dispatchers.IO) {
+                widgets.mapNotNull { widget ->
+                    context.appWidgetInfoCache.getOrFetch(widget.id)?.let { widget.id to it }
                 }
+            }
+
+            infos.forEach { [appWidgetId, appWidget] ->
+                context.widgetViewCacheRegistry.getOrCreateView(
+                    context = context,
+                    appWidget = appWidget,
+                    appWidgetId = appWidgetId,
+                )
             }
         }
     }
@@ -198,8 +207,22 @@ class WidgetHostCompat(
         }
     }
 
+    override fun onProviderChanged(appWidgetId: Int, appWidget: AppWidgetProviderInfo?) {
+        super.onProviderChanged(appWidgetId, appWidget)
+
+        context.appWidgetInfoCache[appWidgetId] = appWidget
+    }
+
+    override fun onProvidersChanged() {
+        super.onProvidersChanged()
+
+        context.appWidgetInfoCache.clear()
+    }
+
     override fun deleteAppWidgetId(appWidgetId: Int) {
         super.deleteAppWidgetId(appWidgetId)
+
+        context.appWidgetInfoCache.remove(appWidgetId)
 
         IconPrefs.removeIcon(context, appWidgetId)
         context.widgetViewCacheRegistry.removeView(appWidgetId)
@@ -236,6 +259,8 @@ class WidgetHostCompat(
         appWidgetId: Int,
         appWidget: AppWidgetProviderInfo?,
     ): AppWidgetHostView {
+        this.context.appWidgetInfoCache[appWidgetId] = appWidget
+
         val clickHandler = createOnClickHandlerForWidget(appWidgetId)
 
         AppWidgetHost::class.java

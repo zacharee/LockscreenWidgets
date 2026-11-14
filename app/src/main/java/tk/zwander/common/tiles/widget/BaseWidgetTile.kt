@@ -53,7 +53,7 @@ abstract class BaseWidgetTile : TileService(), SharedPreferences.OnSharedPrefere
             val widgetId = widgetId
             if (widgetId == WidgetHostCompat.INVALID_WIDGET_ID) return null
 
-            return appWidgetManager.getAppWidgetInfo(widgetId)
+            return appWidgetInfoCache.getOrFetch(widgetId)
         }
     protected val widgetPackage: String?
         get() = widgetInfo?.providerInfo?.packageName

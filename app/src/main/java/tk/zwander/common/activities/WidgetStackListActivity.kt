@@ -21,6 +21,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import tk.zwander.common.compose.AppTheme
 import tk.zwander.common.compose.components.TitleBar
+import tk.zwander.common.util.appWidgetInfoCache
 import tk.zwander.common.util.appWidgetManager
 import tk.zwander.common.util.getApplicationInfoCompat
 import tk.zwander.common.util.prefManager
@@ -105,9 +106,9 @@ class WidgetStackListActivity : BaseActivity() {
 
                                                 val widgets = context.prefManager.widgetStackWidgets[id].orEmpty()
 
-                                                widgets.forEach { widget ->
+                                                widgets.forEach { (val widgetId = id, val label) ->
                                                     val widgetInfo = try {
-                                                        context.appWidgetManager.getAppWidgetInfo(widget.id)
+                                                        context.appWidgetInfoCache.getOrFetch(widgetId)
                                                     } catch (_: Throwable) {
                                                         null
                                                     }
@@ -126,7 +127,7 @@ class WidgetStackListActivity : BaseActivity() {
                                                         horizontalArrangement = Arrangement.spacedBy(8.dp),
                                                     ) {
                                                         Text(
-                                                            text = "• ${widget.label}",
+                                                            text = "• $label",
                                                             style = MaterialTheme.typography.titleMedium,
                                                         )
 
