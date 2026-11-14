@@ -5,7 +5,6 @@ import android.app.PendingIntent
 import android.appwidget.AppWidgetHostView
 import android.appwidget.AppWidgetProviderInfo
 import android.content.Context
-import android.graphics.Canvas
 import android.os.Build
 import android.os.Bundle
 import android.util.AttributeSet
@@ -14,10 +13,7 @@ import android.widget.AdapterView
 import android.widget.RemoteViews
 import androidx.core.view.updateLayoutParams
 import tk.zwander.common.host.widgetHostCompat
-import tk.zwander.common.util.RemoteViewsLayoutInflaterContext
-import tk.zwander.common.util.appWidgetManager
-import tk.zwander.common.util.logUtils
-import tk.zwander.common.util.prefManager
+import tk.zwander.common.util.*
 import tk.zwander.lockscreenwidgets.App
 import tk.zwander.lockscreenwidgets.appwidget.WidgetStackProvider
 
@@ -39,6 +35,8 @@ class ZeroPaddingAppWidgetHostView(
     override fun setAppWidget(appWidgetId: Int, info: AppWidgetProviderInfo?) {
         super.setAppWidget(appWidgetId, info)
 
+        context.appWidgetInfoCache[appWidgetId] = info
+
         setPadding(0, 0, 0, 0)
     }
 
@@ -46,32 +44,6 @@ class ZeroPaddingAppWidgetHostView(
         super.onAttachedToWindow()
 
         onAttach(this)
-    }
-
-    override fun dispatchDraw(canvas: Canvas) {
-        context.logUtils.debugLog(
-            "dispatchDraw() AppWidgetHostView for ${appWidgetInfo?.provider}",
-            null,
-        )
-        super.dispatchDraw(canvas)
-    }
-
-    override fun draw(canvas: Canvas) {
-        context.logUtils.debugLog("draw() AppWidgetHostView for ${appWidgetInfo?.provider}", null)
-        super.draw(canvas)
-    }
-
-    override fun drawChild(canvas: Canvas, child: View?, drawingTime: Long): Boolean {
-        context.logUtils.debugLog(
-            "drawChild() AppWidgetHostView for ${appWidgetInfo?.provider}",
-            null,
-        )
-        return super.drawChild(canvas, child, drawingTime)
-    }
-
-    override fun canHaveDisplayList(): Boolean {
-        context.logUtils.debugLog("canHaveDisplayList() ${this::class.java.name}")
-        return super.canHaveDisplayList()
     }
 
     override fun generateLayoutParams(attrs: AttributeSet?): LayoutParams? {
