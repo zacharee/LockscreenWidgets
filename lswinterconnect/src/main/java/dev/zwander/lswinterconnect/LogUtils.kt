@@ -219,6 +219,7 @@ class LogUtils private constructor(
                                     "trace" to trace,
                                 ),
                             )
+                            it.groupingHash = "reason:${info.reason}"
                             true
                         }
                     }
