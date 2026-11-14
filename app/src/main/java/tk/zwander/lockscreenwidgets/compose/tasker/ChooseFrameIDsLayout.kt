@@ -13,6 +13,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import tk.zwander.common.util.lsDisplayManager
+import tk.zwander.common.util.orDefault
 import tk.zwander.common.util.prefManager
 import tk.zwander.lockscreenwidgets.R
 import tk.zwander.lockscreenwidgets.compose.FrameItem
@@ -32,7 +33,7 @@ fun ChooseFrameIDsLayout(
             val id = context.prefManager.currentSecondaryFramesWithStringDisplay[frameId]
                 ?: Display.DEFAULT_DISPLAY.toString()
             context.lsDisplayManager.findDisplayByStringId(id)
-                ?: context.lsDisplayManager.availableDisplays.value.values.first()
+                .orDefault(context)
         }
     }
 

@@ -12,7 +12,9 @@ import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.dp
 import dev.zwander.lswinterconnect.peekLogUtils
 import dev.zwander.lswinterconnect.safeApplicationContext
+import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
+import tk.zwander.lockscreenwidgets.App
 import tk.zwander.lockscreenwidgets.services.Accessibility
 import java.util.*
 import kotlin.math.roundToInt
@@ -21,14 +23,10 @@ val Context.lsDisplayManager: LSDisplayManager
     get() = LSDisplayManager.getInstance(this)
 
 fun LSDisplay?.orDefault(context: Context): LSDisplay {
-    return this ?: run {
-        val availableDisplays = context.lsDisplayManager.availableDisplays.value.values
-        availableDisplays.find { it.display.displayId == Display.DEFAULT_DISPLAY }
-            ?: availableDisplays.first()
-    }
+    return this ?: context.lsDisplayManager.defaultDisplay
 }
 
-class LSDisplayManager private constructor(context: Context) : ContextWrapper(context) {
+class LSDisplayManager private constructor(context: Context) : ContextWrapper(context), CoroutineScope by App.scope {
     companion object {
         @SuppressLint("StaticFieldLeak")
         private var instance: LSDisplayManager? = null
@@ -77,10 +75,41 @@ class LSDisplayManager private constructor(context: Context) : ContextWrapper(co
     val isAnyDisplayOn: Boolean
         get() = displayPowerStates.value.anyOn
 
-    fun onCreate() {
-        fetchDisplays()
+    private val fetchLock = Any()
+    private var fetchJob: Job? = null
 
+    @Volatile
+    private var fallbackDisplay: LSDisplay? = null
+
+    /**
+     * Returns the default display, even before [fetchDisplays] has completed.
+     */
+    val defaultDisplay: LSDisplay
+        get() {
+            availableDisplays.value.values
+                .firstOrNull { it.display.displayId == Display.DEFAULT_DISPLAY }
+                ?.let { return it }
+
+            availableDisplays.value.values.firstOrNull()?.let { return it }
+
+            return fallbackDisplay ?: run {
+                val display = checkNotNull(displayManager.getDisplay(Display.DEFAULT_DISPLAY)) {
+                    "Unable to find the default display"
+                }
+
+                LSDisplay(
+                    display = display,
+                    density = Density(createDisplayContextCompat(display)),
+                ).also {
+                    fallbackDisplay = it
+                }
+            }
+        }
+
+    fun onCreate() {
         displayManager.registerDisplayListener(displayListener, null)
+
+        fetchDisplays()
     }
 
     fun findDisplayByStringId(displayId: String): LSDisplay? {
@@ -164,29 +193,63 @@ class LSDisplayManager private constructor(context: Context) : ContextWrapper(co
         )
     }
 
-    fun fetchDisplays() {
-        @SuppressLint("InlinedApi")
-        val builtInDisplays = displayManager.getDisplays(DisplayManager.DISPLAY_CATEGORY_BUILT_IN_DISPLAYS)
-        val allIncludingDisabled = displayManager.getDisplays(DisplayManager.DISPLAY_CATEGORY_ALL_INCLUDING_DISABLED)
-        // Samsung has extra filtering on DISPLAY_CATEGORY_ALL_INCLUDING_DISABLED but not this.
-        val samsung = displayManager.getDisplays("com.samsung.android.hardware.display.category.BUILTIN")
-        val allDisplays = displayManager.displays
+    /**
+     * Refresh the list of displays.
+     *
+     * The binder work happens on [Dispatchers.IO], but everything that mutates
+     * [availableDisplays] happens back on the main thread.
+     *
+     * If a fetch is already running, its job is returned instead of starting another one.
+     * Job is returned so that callers can `join()` on it if needed.
+     */
+    @SuppressLint("InlinedApi")
+    fun fetchDisplays(): Job {
+        synchronized(fetchLock) {
+            fetchJob?.takeIf { it.isActive }?.let { return it }
 
-        (builtInDisplays + allIncludingDisabled + allDisplays + samsung)
-            .associateBy { it.displayId }
-            .forEach { [_, display] ->
-                if (display.isBuiltIn(isLikelyRazr) &&
-                    (multiDisplaySupported || display.displayId == Display.DEFAULT_DISPLAY)) {
-                    setDisplay(
-                        LSDisplay(
-                            display = display,
-                            density = Density(createDisplayContextCompat(display)),
-                        ),
-                    )
+            val job = launch(Dispatchers.IO, start = CoroutineStart.LAZY) {
+                try {
+                    val builtInDisplays = displayManager.getDisplays(DisplayManager.DISPLAY_CATEGORY_BUILT_IN_DISPLAYS)
+                    val allIncludingDisabled = displayManager.getDisplays(DisplayManager.DISPLAY_CATEGORY_ALL_INCLUDING_DISABLED)
+                    // Samsung has extra filtering on DISPLAY_CATEGORY_ALL_INCLUDING_DISABLED but not this.
+                    val samsung = displayManager.getDisplays("com.samsung.android.hardware.display.category.BUILTIN")
+                    val allDisplays = displayManager.displays
+
+                    val displays = (builtInDisplays + allIncludingDisabled + allDisplays + samsung)
+                        .associateBy { it.displayId }
+                        .values
+                        .filter { display ->
+                            display.isBuiltIn(isLikelyRazr) &&
+                                    (multiDisplaySupported || display.displayId == Display.DEFAULT_DISPLAY)
+                        }
+                        .map { display ->
+                            LSDisplay(
+                                display = display,
+                                density = Density(createDisplayContextCompat(display)),
+                            )
+                        }
+
+                    withContext(Dispatchers.Main.immediate) {
+                        displays.forEach(::setDisplay)
+
+                        logUtils.debugLog(
+                            "Got displays ${availableDisplays.value.values.map { it.loggingId }}",
+                            null,
+                        )
+                    }
+                } catch (e: Throwable) {
+                    if (e is CancellationException) {
+                        ensureActive()
+                    }
+                    logUtils.normalLog("Error fetching displays", e)
                 }
             }
 
-        logUtils.debugLog("Got displays ${availableDisplays.value.values.map { it.loggingId }}", null)
+            fetchJob = job
+            job.start()
+
+            return job
+        }
     }
 
     suspend fun handleDisplayUpdates(

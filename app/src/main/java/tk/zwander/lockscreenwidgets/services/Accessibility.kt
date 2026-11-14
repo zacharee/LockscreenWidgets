@@ -103,6 +103,8 @@ class Accessibility : AccessibilityService(), CoroutineScope by MainScope(), Eve
                 }
             }
         }
+
+        WidgetStackProvider.refreshAll(this)
     }
 
     override fun onServiceConnected() {
@@ -146,6 +148,9 @@ class Accessibility : AccessibilityService(), CoroutineScope by MainScope(), Eve
 
         launch(Dispatchers.Main) {
             globalState.wasOnKeyguard.value = kgm.isKeyguardLocked
+
+            // Make sure displays are populated before initial accessibility pass
+            lsDisplayManager.fetchDisplays().join()
 
             runWindowOperation(
                 frameDelegates = FrameInstances.secondaryFrameDelegates + (WidgetFrameDelegate.ID to frameDelegate),
