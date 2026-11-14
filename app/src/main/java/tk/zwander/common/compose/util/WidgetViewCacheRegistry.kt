@@ -6,17 +6,19 @@ import android.appwidget.AppWidgetProviderInfo
 import android.content.Context
 import android.content.Context.CONTEXT_INCLUDE_CODE
 import dev.zwander.lswinterconnect.safeApplicationContext
+import kotlinx.atomicfu.atomic
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import tk.zwander.common.host.widgetHostCompat
-import tk.zwander.common.util.RemoteViewsLayoutInflaterContext
-import tk.zwander.common.util.andRemoveFromParent
-import tk.zwander.common.util.logUtils
-import tk.zwander.common.util.themedContext
+import tk.zwander.common.util.*
+import tk.zwander.lockscreenwidgets.App
 import java.util.concurrent.ConcurrentHashMap
 
 val Context.widgetViewCacheRegistry: WidgetViewCacheRegistry
     get() = WidgetViewCacheRegistry.getInstance(this)
 
-class WidgetViewCacheRegistry private constructor(@Suppress("unused") private val context: Context) {
+class WidgetViewCacheRegistry private constructor(@Suppress("unused") private val context: Context) : CoroutineScope by App.scope {
     companion object {
         @SuppressLint("StaticFieldLeak")
         private var instance: WidgetViewCacheRegistry? = null
@@ -30,8 +32,12 @@ class WidgetViewCacheRegistry private constructor(@Suppress("unused") private va
     }
 
     private val cachedViews = ConcurrentHashMap<Int, AppWidgetHostView>()
+    private val isListening = atomic(false)
 
     fun getOrCreateView(context: Context, appWidgetId: Int, appWidget: AppWidgetProviderInfo): AppWidgetHostView {
+        startListeningIfNeeded()
+        context.appWidgetInfoCache[appWidgetId] = appWidget
+
         return cachedViews.getOrPut(appWidgetId) {
             val widgetContext = try {
                 RemoteViewsLayoutInflaterContext(
@@ -61,5 +67,15 @@ class WidgetViewCacheRegistry private constructor(@Suppress("unused") private va
 
     fun removeView(appWidgetId: Int) {
         cachedViews.remove(appWidgetId)?.andRemoveFromParent()
+    }
+
+    private fun startListeningIfNeeded() {
+        if (isListening.compareAndSet(expect = false, update = true)) {
+            context.widgetHostCompat.startListening(this)
+
+            launch(Dispatchers.IO) {
+                App.instance.cleanUpDeadWidgets()
+            }
+        }
     }
 }

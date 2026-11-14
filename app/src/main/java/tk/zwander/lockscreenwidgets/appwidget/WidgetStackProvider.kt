@@ -876,6 +876,11 @@ class WidgetStackProvider : AppWidgetProvider() {
 
         private val remoteViewsClass = RemoteViews::class.java
 
+        private const val REFRESH_ALL_DEBOUNCE_MS = 1000L
+
+        @Volatile
+        private var lastRefreshAllTime = 0L
+
         fun update(context: Context, ids: IntArray, fromChild: Boolean = false, refresh: Boolean = false) {
             context.sendBroadcast(
                 createBaseIntent(context, ids)
@@ -883,6 +888,23 @@ class WidgetStackProvider : AppWidgetProvider() {
                     .putExtra(FROM_CHILD, fromChild)
                     .putExtra(EXTRA_REFRESH, refresh),
             )
+        }
+
+        @Synchronized
+        fun refreshAll(context: Context) {
+            val now = SystemClock.elapsedRealtime()
+
+            if (now - lastRefreshAllTime < REFRESH_ALL_DEBOUNCE_MS) {
+                return
+            }
+
+            lastRefreshAllTime = now
+
+            val appContext = context.safeApplicationContext
+
+            appContext.prefManager.widgetStackWidgets.keys.forEach { stackId ->
+                update(appContext, intArrayOf(stackId))
+            }
         }
 
         fun updateOptions(context: Context, ids: IntArray, options: Bundle?) {

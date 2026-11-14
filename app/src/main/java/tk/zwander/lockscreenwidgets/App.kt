@@ -296,52 +296,6 @@ class App : Application(), CoroutineScope by scope {
 
         updateProxListener()
 
-        widgetHostCompat.startListening(this)
-
-        launch(Dispatchers.IO) {
-            val widgetsToDelete = mutableSetOf<Int>()
-            prefManager.widgetStackWidgets = HashMap(
-                prefManager.widgetStackWidgets.mapNotNull { [stackId, widgets] ->
-                    val hasStackInfo = appWidgetManager.getAppWidgetInfo(stackId) != null
-
-                    if (!hasStackInfo) {
-                        logUtils.debugLog("Found invalid widget stack $stackId", null)
-                        widgetsToDelete.add(stackId)
-                        null
-                    } else {
-                        widgets.removeAll { widget ->
-                            (appWidgetManager.getAppWidgetInfo(widget.id) == null).also {
-                                if (it) {
-                                    logUtils.debugLog("Found invalid widget ${widget.id} in stack $stackId", null)
-                                    widgetsToDelete.add(widget.id)
-                                }
-                            }
-                        }
-
-                        stackId to widgets
-                    }
-                }.toMap(),
-            )
-
-            val currentIds = idManager.collectAllIds()
-            @SuppressLint("NewApi")
-            widgetsToDelete.addAll(
-                widgetHostCompat.appWidgetIds.filterNot { id ->
-                    currentIds.contains(id)
-                },
-            )
-
-            logUtils.debugLog("Found widgets $widgetsToDelete not in any widget lists", null)
-
-            val idManager = idManager
-            widgetsToDelete.forEach {
-                idManager.removeId(it)
-            }
-        }
-
-        prefManager.widgetStackWidgets.forEach { [stackId] ->
-            WidgetStackProvider.update(this, intArrayOf(stackId))
-        }
         WidgetStackProvider.updateWidgetStackMonitor(this)
 
         prefsHandler.register(this)
@@ -380,6 +334,47 @@ class App : Application(), CoroutineScope by scope {
 
     override fun getApplicationContext(): Context {
         return this
+    }
+
+    fun cleanUpDeadWidgets() {
+        val widgetsToDelete = mutableSetOf<Int>()
+        prefManager.widgetStackWidgets = HashMap(
+            prefManager.widgetStackWidgets.mapNotNull { [stackId, widgets] ->
+                val hasStackInfo = appWidgetManager.getAppWidgetInfo(stackId) != null
+
+                if (!hasStackInfo) {
+                    logUtils.debugLog("Found invalid widget stack $stackId", null)
+                    widgetsToDelete.add(stackId)
+                    null
+                } else {
+                    widgets.removeAll { widget ->
+                        (appWidgetManager.getAppWidgetInfo(widget.id) == null).also {
+                            if (it) {
+                                logUtils.debugLog("Found invalid widget ${widget.id} in stack $stackId", null)
+                                widgetsToDelete.add(widget.id)
+                            }
+                        }
+                    }
+
+                    stackId to widgets
+                }
+            }.toMap(),
+        )
+
+        val idManager = idManager
+        val currentIds = idManager.collectAllIds()
+        @SuppressLint("NewApi")
+        widgetsToDelete.addAll(
+            widgetHostCompat.appWidgetIds.filterNot { id ->
+                currentIds.contains(id)
+            },
+        )
+
+        logUtils.debugLog("Found widgets $widgetsToDelete not in any widget lists", null)
+
+        widgetsToDelete.forEach {
+            idManager.removeId(it)
+        }
     }
 
     private fun updateProxListener() {

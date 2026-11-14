@@ -40,6 +40,8 @@ class WidgetStackMonitorService : Service() {
         startForegroundWithNotification()
 
         isRunning = true
+
+        WidgetStackProvider.refreshAll(this)
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
