@@ -1,6 +1,7 @@
 package tk.zwander.lockscreenwidgets
 
 import android.annotation.SuppressLint
+import android.app.Activity
 import android.app.Application
 import android.content.BroadcastReceiver
 import android.content.Context
@@ -13,6 +14,7 @@ import android.hardware.SensorEventListener2
 import android.hardware.SensorManager
 import android.net.Uri
 import android.os.Build
+import android.os.Bundle
 import android.os.DeadObjectException
 import android.provider.Settings
 import androidx.core.content.ContextCompat
@@ -49,7 +51,13 @@ class App : Application(), CoroutineScope by scope {
     companion object {
         @SuppressLint("StaticFieldLeak")
         lateinit var instance: App
+            private set
 
+        @Volatile
+        private var foregroundActivities: Int = 0
+
+        val isInForeground: Boolean
+            get() = foregroundActivities > 0
         val scope = MainScope()
     }
 
@@ -111,6 +119,28 @@ class App : Application(), CoroutineScope by scope {
                 WidgetStackProvider.updateWidgetStackMonitor(this@App)
             }
         }
+    }
+
+    private val lifecycleCallbacks = object : ActivityLifecycleCallbacks {
+        override fun onActivityStarted(activity: Activity) {
+            foregroundActivities++
+        }
+
+        override fun onActivityStopped(activity: Activity) {
+            foregroundActivities--
+        }
+
+        override fun onActivityResumed(activity: Activity) {
+            WidgetStackProvider.updateWidgetStackMonitor(this@App, true)
+        }
+
+        override fun onActivityCreated(activity: Activity, savedInstanceState: Bundle?) {}
+
+        override fun onActivityPaused(activity: Activity) {}
+
+        override fun onActivitySaveInstanceState(activity: Activity, outState: Bundle) {}
+
+        override fun onActivityDestroyed(activity: Activity) {}
     }
 
     init {
@@ -293,6 +323,7 @@ class App : Application(), CoroutineScope by scope {
             true,
             nightModeListener,
         )
+        registerActivityLifecycleCallbacks(lifecycleCallbacks)
 
         updateProxListener()
 

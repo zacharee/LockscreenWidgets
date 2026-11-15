@@ -1,6 +1,7 @@
 package tk.zwander.common.appwidget
 
 import android.annotation.SuppressLint
+import android.app.ForegroundServiceStartNotAllowedException
 import android.app.Service
 import android.content.Intent
 import android.content.pm.ServiceInfo
@@ -37,7 +38,10 @@ class WidgetStackMonitorService : Service() {
 
         // Go foreground as early as possible, so a pending startForegroundService() is satisfied
         // even if onStartCommand() is delayed or never delivered.
-        startForegroundWithNotification()
+        if (!startForegroundWithNotification()) {
+            stopSelf()
+            return
+        }
 
         isRunning = true
 
@@ -49,7 +53,10 @@ class WidgetStackMonitorService : Service() {
 
         // Every startForegroundService() call must be followed by startForeground(), even if
         // we're about to stop.
-        startForegroundWithNotification()
+        if (!startForegroundWithNotification()) {
+            stopSelf()
+            return START_NOT_STICKY
+        }
 
         if (!WidgetStackProvider.shouldRunWidgetStackMonitor(this)) {
             logUtils.debugLog("WidgetStackMonitorService no longer needed, stopping", null)
@@ -61,7 +68,7 @@ class WidgetStackMonitorService : Service() {
     }
 
     @SuppressLint("InlinedApi")
-    private fun startForegroundWithNotification() {
+    private fun startForegroundWithNotification(): Boolean {
         val color = getAttrColor(android.R.attr.textColorPrimary)
 
         val notification = NotificationCompat.Builder(this, NOTIFICATION_CHANNEL_ID)
@@ -96,12 +103,24 @@ class WidgetStackMonitorService : Service() {
             )
             .build()
 
-        ServiceCompat.startForeground(
-            this,
-            100,
-            notification,
-            ServiceInfo.FOREGROUND_SERVICE_TYPE_SPECIAL_USE,
-        )
+        return try {
+            ServiceCompat.startForeground(
+                this,
+                100,
+                notification,
+                ServiceInfo.FOREGROUND_SERVICE_TYPE_SPECIAL_USE,
+            )
+            true
+        } catch (e: RuntimeException) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S &&
+                e is ForegroundServiceStartNotAllowedException
+            ) {
+                logUtils.debugLog("Unable to start in foreground", e)
+            } else {
+                logUtils.normalLog("Unexpected failure starting widget stack monitor", e)
+            }
+            false
+        }
     }
 
     override fun onDestroy() {

@@ -9,10 +9,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.res.ColorStateList
 import android.graphics.BlendMode
-import android.os.Build
-import android.os.Bundle
-import android.os.ServiceManager
-import android.os.SystemClock
+import android.os.*
 import android.util.SizeF
 import android.util.SparseArray
 import android.util.TypedValue
@@ -40,6 +37,7 @@ import tk.zwander.common.appwidget.WidgetStackMonitorService
 import tk.zwander.common.data.WidgetStackStyle
 import tk.zwander.common.host.widgetHostCompat
 import tk.zwander.common.util.*
+import tk.zwander.lockscreenwidgets.App
 import tk.zwander.lockscreenwidgets.BuildConfig
 import tk.zwander.lockscreenwidgets.R
 import tk.zwander.lockscreenwidgets.activities.WidgetStackConfigure
@@ -989,6 +987,11 @@ class WidgetStackProvider : AppWidgetProvider() {
 
             if (shouldRun) {
                 if (!serviceRunning) {
+                    if (!canStartMonitor(context, direct)) {
+                        // Not allowed to start FGS. Try again later.
+                        return
+                    }
+
                     val pi = if (!direct) {
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                             PendingIntentCompat.getForegroundService(
@@ -1040,6 +1043,14 @@ class WidgetStackProvider : AppWidgetProvider() {
                 // starts and stops itself.
                 appContext.stopService(serviceIntent)
             }
+        }
+
+        private fun canStartMonitor(context: Context, direct: Boolean): Boolean {
+            if (direct) return true
+            if (WidgetStackMonitorService.isRunning) return true
+            if (App.isInForeground) return true
+            return (context.getSystemService(Context.POWER_SERVICE) as PowerManager)
+                .isIgnoringBatteryOptimizations(context.packageName)
         }
 
         private fun createBaseIntent(context: Context, ids: IntArray): Intent {

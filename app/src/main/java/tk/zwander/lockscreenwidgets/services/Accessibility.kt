@@ -9,11 +9,11 @@ import android.view.WindowManager
 import android.view.accessibility.AccessibilityEvent
 import android.view.accessibility.AccessibilityWindowInfo
 import android.view.inputmethod.InputMethodManager
+import dev.zwander.lswinterconnect.safeApplicationContext
 import kotlinx.coroutines.*
 import tk.zwander.common.util.*
 import tk.zwander.common.util.AccessibilityUtils.runAccessibilityJob
 import tk.zwander.common.util.AccessibilityUtils.runWindowOperation
-import tk.zwander.lockscreenwidgets.App
 import tk.zwander.lockscreenwidgets.appwidget.IDListProvider
 import tk.zwander.lockscreenwidgets.appwidget.WidgetStackProvider
 import tk.zwander.lockscreenwidgets.util.FramePrefs
@@ -215,7 +215,7 @@ class Accessibility : AccessibilityService(), CoroutineScope by MainScope(), Eve
         }
         FrameInstances.secondaryFrameDelegates.clear()
 
-        WidgetStackProvider.updateWidgetStackMonitor(App.instance)
+        WidgetStackProvider.updateWidgetStackMonitor(safeApplicationContext)
 
         lsDisplayManager.displayAndWmCache.value = mapOf()
         cancel()
