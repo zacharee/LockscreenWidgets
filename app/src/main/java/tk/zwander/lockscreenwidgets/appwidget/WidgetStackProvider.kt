@@ -946,7 +946,7 @@ class WidgetStackProvider : AppWidgetProvider() {
             val optionsWidth = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MAX_WIDTH).toFloat()
             val optionsHeight = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT).toFloat()
 
-            val baseSize = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            (val width = first, val height = second) = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                 val allSizes = BundleCompat.getParcelableArrayList(
                     options,
                     AppWidgetManager.OPTION_APPWIDGET_SIZES,
@@ -960,8 +960,8 @@ class WidgetStackProvider : AppWidgetProvider() {
             }
 
             return SizeF(
-                (baseSize.first - horizontalPaddingDp),
-                (baseSize.second - bottomBarHeightDp - verticalPaddingDp),
+                (width - horizontalPaddingDp),
+                (height - bottomBarHeightDp - verticalPaddingDp),
             )
         }
 
