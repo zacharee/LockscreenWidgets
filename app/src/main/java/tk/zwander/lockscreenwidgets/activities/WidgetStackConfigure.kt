@@ -158,6 +158,7 @@ class WidgetStackConfigure : BaseActivity() {
                     WidgetStackProvider.update(
                         context = this,
                         ids = intArrayOf(widgetId),
+                        refresh = true,
                     )
                     finish()
                 },

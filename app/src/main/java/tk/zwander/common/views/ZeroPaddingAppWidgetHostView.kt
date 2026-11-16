@@ -111,6 +111,43 @@ class ZeroPaddingAppWidgetHostView(
         }
     }
 
+    override fun onViewDataChanged(viewId: Int) {
+        super.onViewDataChanged(viewId)
+
+        // This host view can be used to listen for updates to widgets that are embedded in a
+        // stack. In that case, the view that's actually on screen is the stack's, and its
+        // adapter is bound to RemoteViewsProxyService, so forward the notification to the
+        // stack that shows this widget.
+        val stacks = App.instance.prefManager.widgetStackWidgets
+        if (stacks.isEmpty()) {
+            return
+        }
+
+        val indices = App.instance.prefManager.widgetStackIndices
+
+        stacks.entries.forEach { entry ->
+            val stackId = entry.key
+
+            if (entry.value.elementAtOrNull(indices[stackId] ?: 0)?.id == appWidgetId) {
+                try {
+                    // The updated API sets the entire RemoteViews, so this is for widgets using the older API.
+                    @Suppress("DEPRECATION")
+                    context.appWidgetManager.notifyAppWidgetViewDataChanged(stackId, viewId)
+                } catch (e: Exception) {
+                    context.logUtils.normalLog(
+                        message = "Error notifying stack $stackId of view data change",
+                        throwable = e,
+                        extras = mapOf(
+                            "stackId" to stackId,
+                            "widgetId" to appWidgetId,
+                            "viewId" to viewId,
+                        ),
+                    )
+                }
+            }
+        }
+    }
+
     override fun prepareView(view: View?) {
         super.prepareView(view)
 

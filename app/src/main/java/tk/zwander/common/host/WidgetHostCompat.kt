@@ -130,6 +130,13 @@ class WidgetHostCompat(
 
     val cachedRemoteViews = HashMap<Int, RemoteViews?>()
 
+    /**
+     * Whether the host is actively receiving widget updates. The [cachedRemoteViews] cache is only
+     * kept current while this is true, so it must not be trusted otherwise.
+     */
+    val isListening: Boolean
+        get() = listeners.isNotEmpty()
+
     private fun createOnClickHandlerForWidget(widgetId: Int): Any {
         return when (mode) {
             is Mode.Class -> {
@@ -228,27 +235,37 @@ class WidgetHostCompat(
         context.widgetViewCacheRegistry.removeView(appWidgetId)
 
         val newWidgets = context.prefManager.widgetStackWidgets
-        newWidgets.remove(appWidgetId)?.forEach { widget ->
+        val removedWidgets = newWidgets.remove(appWidgetId)?.forEach { widget ->
             context.widgetViewCacheRegistry.removeView(widget.id)
             deleteAppWidgetId(widget.id)
         }
-        context.prefManager.widgetStackWidgets = newWidgets
+        if (removedWidgets != null) {
+            context.prefManager.widgetStackWidgets = newWidgets
+        }
 
         val newIndices = context.prefManager.widgetStackIndices
-        newIndices.remove(appWidgetId)
-        context.prefManager.widgetStackIndices = newIndices
+        val removedIndices = newIndices.remove(appWidgetId)
+        if (removedIndices != null) {
+            context.prefManager.widgetStackIndices = newIndices
+        }
 
         val newAutoChange = context.prefManager.widgetStackAutoChange
-        newAutoChange.remove(appWidgetId)
-        context.prefManager.widgetStackAutoChange = newAutoChange
+        val removedAutoChange = newAutoChange.remove(appWidgetId)
+        if (removedAutoChange != null) {
+            context.prefManager.widgetStackAutoChange = newAutoChange
+        }
 
         val newPadding = context.prefManager.widgetStackWidgetPadding
-        newPadding.remove(appWidgetId)
-        context.prefManager.widgetStackWidgetPadding = newPadding
+        val removedPadding = newPadding.remove(appWidgetId)
+        if (removedPadding != null) {
+            context.prefManager.widgetStackWidgetPadding = newPadding
+        }
 
         val newStyles = context.prefManager.widgetStackStyle
-        newStyles.remove(appWidgetId)
-        context.prefManager.widgetStackStyle = newStyles
+        val removedStyle = newStyles.remove(appWidgetId)
+        if (removedStyle != null) {
+            context.prefManager.widgetStackStyle = newStyles
+        }
 
         cachedRemoteViews.remove(appWidgetId)
     }

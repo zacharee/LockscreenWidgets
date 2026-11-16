@@ -7,10 +7,7 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
-import android.os.Build
-import android.os.Handler
-import android.os.IBinder
-import android.os.IInterface
+import android.os.*
 import android.widget.RemoteViews
 import android.widget.RemoteViewsService
 import androidx.annotation.Keep
@@ -39,7 +36,13 @@ class RemoteViewsProxyService : RemoteViewsService() {
             ?: return null
 
         sFactories[widgetId]?.let {
-            if (!it.created) {
+            // A new adapter is binding, so it needs to load the data itself. Without this a
+            // reused factory reports itself as created and RemoteViewsAdapter skips
+            // onDataSetChanged(), leaving the new adapter with whatever was cached before.
+            it.dataLoaded = false
+
+            if (it.wrapped?.asBinder()?.isBinderAlive != true) {
+                it.created = false
                 it.onCreate()
             }
             return it
@@ -57,7 +60,26 @@ class RemoteViewsProxyService : RemoteViewsService() {
         private val widgetId: Int,
         private val widgetIntent: Intent,
     ) : IRemoteViewsFactory.Stub() {
+        @Volatile
         var created = false
+
+        /**
+         * Whether this factory has forwarded a data load for the adapter that's currently bound
+         * to it. Reset in [onBind] so every newly bound adapter reloads the data.
+         */
+        @Volatile
+        var dataLoaded = false
+
+        @Volatile
+        private var binding = false
+
+        @Volatile
+        private var bindAttemptTime = 0L
+
+        @Volatile
+        private var pendingDataSetChanged = false
+
+        @Volatile
         var wrapped: IRemoteViewsFactory? = null
 
         val connection = object : ServiceConnection {
@@ -67,11 +89,26 @@ class RemoteViewsProxyService : RemoteViewsService() {
             ) {
                 wrapped = asInterface(service)
                 created = true
+                binding = false
+
+                // A data load was requested before the underlying factory finished binding.
+                if (pendingDataSetChanged) {
+                    pendingDataSetChanged = false
+
+                    try {
+                        wrapped?.onDataSetChanged()
+                        dataLoaded = true
+                    } catch (e: Exception) {
+                        logUtils.debugLog("Error loading widget data $widgetId", e)
+                    }
+                }
             }
 
             override fun onServiceDisconnected(name: ComponentName?) {
                 wrapped = null
                 created = false
+                binding = false
+                pendingDataSetChanged = false
                 try {
                     unbindService(this)
                 } catch (_: IllegalArgumentException) {
@@ -81,6 +118,8 @@ class RemoteViewsProxyService : RemoteViewsService() {
             override fun onNullBinding(name: ComponentName?) {
                 wrapped = null
                 created = false
+                binding = false
+                pendingDataSetChanged = false
                 try {
                     unbindService(this)
                 } catch (_: IllegalArgumentException) {
@@ -90,13 +129,25 @@ class RemoteViewsProxyService : RemoteViewsService() {
 
         @SuppressLint("PrivateApi")
         fun onCreate() {
-            if (wrapped != null && wrapped?.asBinder()?.isBinderAlive == true) {
+            val now = SystemClock.elapsedRealtime()
+
+            // A bind is in flight. Retry eventually in case the connection callback never comes.
+            if (binding && now - bindAttemptTime < BIND_RETRY_TIMEOUT) {
                 return
             }
 
+            val existing = wrapped
+            if (existing != null && existing.asBinder()?.isBinderAlive == true) {
+                created = true
+                return
+            }
+
+            binding = true
+            bindAttemptTime = now
+
             try {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-                    appWidgetManager.bindRemoteViewsService(
+                    val bound = appWidgetManager.bindRemoteViewsService(
                         this@RemoteViewsProxyService,
                         widgetId,
                         widgetIntent,
@@ -121,6 +172,10 @@ class RemoteViewsProxyService : RemoteViewsService() {
                         },
                         BIND_AUTO_CREATE or BIND_FOREGROUND_SERVICE_WHILE_AWAKE,
                     )
+
+                    if (!bound) {
+                        binding = false
+                    }
                 } else {
                     val proxyClass = Class.forName(
                         $$"com.android.internal.widget.IRemoteViewsAdapterConnection$Stub",
@@ -170,15 +225,22 @@ class RemoteViewsProxyService : RemoteViewsService() {
                         )
                 }
             } catch (e: Exception) {
+                binding = false
                 logUtils.debugLog("Error binding widget service $widgetId, $widgetIntent", e)
             }
         }
 
         override fun onDataSetChanged() {
             onCreate()
-            if (!created || wrapped?.isCreated == false) {
-                wrapped?.onDataSetChanged()
+
+            val factory = wrapped
+            if (factory == null) {
+                pendingDataSetChanged = true
+                return
             }
+
+            factory.onDataSetChanged()
+            dataLoaded = true
         }
 
         override fun getCount(): Int {
@@ -212,7 +274,9 @@ class RemoteViewsProxyService : RemoteViewsService() {
         }
 
         override fun isCreated(): Boolean {
-            return created
+            // Only report created once the data for the currently bound adapter has actually been
+            // loaded. RemoteViewsAdapter only calls onDataSetChanged() when this is false.
+            return created && dataLoaded
         }
 
         override fun getRemoteCollectionItems(
@@ -252,7 +316,11 @@ class RemoteViewsProxyService : RemoteViewsService() {
 
         override fun onDataSetChangedAsync() {
             onCreate()
-            wrapped?.onDataSetChangedAsync()
+
+            val factory = wrapped ?: return
+
+            factory.onDataSetChangedAsync()
+            dataLoaded = true
         }
     }
 
@@ -268,6 +336,8 @@ class RemoteViewsProxyService : RemoteViewsService() {
 
     companion object {
         const val EXTRA_INTENT = "intent"
+
+        private const val BIND_RETRY_TIMEOUT = 5_000L
 
         private val sFactories = hashMapOf<Int, Factory>()
 

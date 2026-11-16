@@ -31,6 +31,7 @@ import androidx.core.widget.RemoteViewsCompat.setViewBackgroundColor
 import androidx.core.widget.RemoteViewsCompat.setViewBackgroundResource
 import com.android.internal.appwidget.IAppWidgetService
 import com.android.internal.widget.RecyclerView
+import dev.zwander.lswinterconnect.peekLogUtils
 import dev.zwander.lswinterconnect.safeApplicationContext
 import tk.zwander.common.appwidget.RemoteViewsProxyService
 import tk.zwander.common.appwidget.WidgetStackMonitorService
@@ -131,8 +132,7 @@ class WidgetStackProvider : AppWidgetProvider() {
                         }
                     }
 
-                    intent.putExtra(EXTRA_SWAP_INDEX, newIndex)
-                    intent.putExtra(EXTRA_PREVIOUS_INDEX, index)
+                    previousIndex = index
 
                     context.prefManager.widgetStackIndices = context.prefManager.widgetStackIndices.apply {
                         this[widgetId] = newIndex
@@ -149,7 +149,10 @@ class WidgetStackProvider : AppWidgetProvider() {
                     )
                 }
 
-                onReceive(context, intent.setAction(AppWidgetManager.ACTION_APPWIDGET_UPDATE))
+                widgetIds?.let {
+                    onUpdate(context, AppWidgetManager.getInstance(context), it)
+                }
+                return
             }
 
             ACTION_TOGGLE_BOTTOM_BAR -> {
@@ -161,17 +164,22 @@ class WidgetStackProvider : AppWidgetProvider() {
                     ),
                 )
 
+                val currentStyles = context.prefManager.widgetStackStyle
+
                 widgetIds?.forEach { stackId ->
-                    context.prefManager.widgetStackStyle = context.prefManager.widgetStackStyle.apply {
-                        this[stackId] = (this[stackId] ?: WidgetStackStyle()).let {
-                            it.copy(
-                                showBottomBar = !it.showBottomBar,
-                            )
-                        }
+                    currentStyles[stackId] = (currentStyles[stackId] ?: WidgetStackStyle()).let {
+                        it.copy(
+                            showBottomBar = !it.showBottomBar,
+                        )
                     }
                 }
 
-                onReceive(context, intent.setAction(AppWidgetManager.ACTION_APPWIDGET_UPDATE))
+                context.prefManager.widgetStackStyle = currentStyles
+
+                widgetIds?.let {
+                    onUpdate(context, AppWidgetManager.getInstance(context), it)
+                }
+                return
             }
         }
 
@@ -192,163 +200,185 @@ class WidgetStackProvider : AppWidgetProvider() {
         )
 
         appWidgetIds.forEach { appWidgetId ->
-            if (!isSwap && !refresh) {
-                val lastUpdateTime = context.prefManager.widgetStackLastUpdates[appWidgetId] ?: 0
+           try {
+               if (!isSwap && !isBottomBarToggle && !refresh) {
+                   val lastUpdateTime = context.prefManager.widgetStackLastUpdates[appWidgetId] ?: 0
 
-                if (System.currentTimeMillis() - lastUpdateTime < 500) {
-                    return@forEach
-                }
-            }
+                   if (System.currentTimeMillis() - lastUpdateTime < 500) {
+                       return@forEach
+                   }
+               }
 
-            context.prefManager.widgetStackLastUpdates = context.prefManager.widgetStackLastUpdates.apply {
-                this[appWidgetId] = System.currentTimeMillis()
-            }
+               context.prefManager.widgetStackLastUpdates = context.prefManager.widgetStackLastUpdates.apply {
+                   this[appWidgetId] = System.currentTimeMillis()
+               }
 
-            val root = RemoteViews(context.packageName, R.layout.widget_stack)
-            val stackedWidgets = (context.prefManager.widgetStackWidgets[appWidgetId] ?: LinkedHashSet()).toList()
-            val index = (context.prefManager.widgetStackIndices[appWidgetId] ?: 0)
-                .coerceAtMost(stackedWidgets.lastIndex)
-                .coerceAtLeast(0)
-            val widgetStyle = context.prefManager.widgetStackStyle[appWidgetId] ?: WidgetStackStyle()
+               val root = RemoteViews(context.packageName, R.layout.widget_stack)
+               val stackedWidgets = (context.prefManager.widgetStackWidgets[appWidgetId] ?: LinkedHashSet()).toList()
+               val index = (context.prefManager.widgetStackIndices[appWidgetId] ?: 0)
+                   .coerceAtMost(stackedWidgets.lastIndex)
+                   .coerceAtLeast(0)
+               val widgetStyle = context.prefManager.widgetStackStyle[appWidgetId] ?: WidgetStackStyle()
 
-            val widgetData = stackedWidgets.getOrNull(index)
+               val widgetData = stackedWidgets.getOrNull(index)
 
-            context.logUtils.debugLog(
-                message = "Current index $index for widget stack $appWidgetId",
-                throwable = null,
-                extras = mapOf(
-                    "widgetData" to widgetData,
-                ),
-            )
+               context.logUtils.debugLog(
+                   message = "Current index $index for widget stack $appWidgetId",
+                   throwable = null,
+                   extras = mapOf(
+                       "widgetData" to widgetData,
+                   ),
+               )
 
-            val widgetView =
-                widgetData?.let {
-                    context.widgetHostCompat.cachedRemoteViews[it.id]?.let { cached ->
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                            RemoteViews(cached)
-                        } else {
-                            cached
-                        }.also {
-                            context.logUtils.debugLog(
-                                message = "Using cached widget view for widget ${widgetData.id} in stack $appWidgetId",
-                                throwable = null,
-                            )
-                        }
-                    } ?: appWidgetService.getAppWidgetViewsCompat(context.packageName, it.id).also { view ->
-                        context.widgetHostCompat.cachedRemoteViews[widgetData.id] = view
+               val widgetView =
+                   widgetData?.let {
+                       // The host only refreshes the cached view while it's listening for
+                       // updates. On an explicit refresh (or when nothing is listening) fetch
+                       // the latest views from the service so the nested widget actually
+                       // re-renders with current content.
+                       val useCache = !refresh && context.widgetHostCompat.isListening
+                       val cached = if (useCache) {
+                           context.widgetHostCompat.cachedRemoteViews[it.id]
+                       } else {
+                           null
+                       }
 
-                        context.logUtils.debugLog(
-                            message = "Creating widget view for widget ${widgetData.id} in stack $appWidgetId",
-                            throwable = null,
-                        )
-                    }
-                }
+                       cached?.let { cached ->
+                           if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                               RemoteViews(cached)
+                           } else {
+                               cached
+                           }.also {
+                               context.logUtils.debugLog(
+                                   message = "Using cached widget view for widget ${widgetData.id} in stack $appWidgetId",
+                                   throwable = null,
+                               )
+                           }
+                       } ?: appWidgetService.getAppWidgetViewsCompat(context.packageName, it.id).also { view ->
+                           context.widgetHostCompat.cachedRemoteViews[widgetData.id] = view
 
-            root.setViewVisibility(
-                R.id.add_widget,
-                if (widgetView == null) View.VISIBLE else View.GONE,
-            )
-            root.setViewVisibility(
-                R.id.widget_content_wrapper,
-                if (widgetView == null) View.GONE else View.VISIBLE,
-            )
+                           context.logUtils.debugLog(
+                               message = "Creating widget view for widget ${widgetData.id} in stack $appWidgetId",
+                               throwable = null,
+                           )
+                       }
+                   }
 
-            // Dummy click listener to prevent default click behavior opening the main app.
-            root.setOnClickPendingIntent(
-                android.R.id.background,
-                PendingIntentCompat.getBroadcast(
-                    context,
-                    Int.MAX_VALUE,
-                    Intent(context, WidgetStackProvider::class.java),
-                    0,
-                    false,
-                ),
-            )
+               root.setViewVisibility(
+                   R.id.add_widget,
+                   if (widgetView == null) View.VISIBLE else View.GONE,
+               )
+               root.setViewVisibility(
+                   R.id.widget_content_wrapper,
+                   if (widgetView == null) View.GONE else View.VISIBLE,
+               )
 
-            if (widgetView != null) {
-                fillInWidgetViews(
-                    context = context,
-                    appWidgetManager = appWidgetManager,
-                    stackId = appWidgetId,
-                    innerWidgetId = widgetData.id,
-                    index = index,
-                    rootWidgetViews = widgetView,
-                    root = root,
-                    stackSize = stackedWidgets.size,
-                )
+               // Dummy click listener to prevent default click behavior opening the main app.
+               root.setOnClickPendingIntent(
+                   android.R.id.background,
+                   PendingIntentCompat.getBroadcast(
+                       context,
+                       Int.MAX_VALUE,
+                       Intent(context, WidgetStackProvider::class.java),
+                       0,
+                       false,
+                   ),
+               )
 
-                root.setViewVisibility(
-                    R.id.bottom_bar,
-                    if (context.prefManager.widgetStackStyle[appWidgetId]?.showBottomBar == false) {
-                        View.GONE
-                    } else {
-                        View.VISIBLE
-                    },
-                )
+               if (widgetView != null) {
+                   fillInWidgetViews(
+                       context = context,
+                       appWidgetManager = appWidgetManager,
+                       stackId = appWidgetId,
+                       innerWidgetId = widgetData.id,
+                       index = index,
+                       rootWidgetViews = widgetView,
+                       root = root,
+                       stackSize = stackedWidgets.size,
+                       style = widgetStyle,
+                   )
 
-                root.setOnClickPendingIntent(
-                    R.id.bottom_bar_toggler,
-                    PendingIntent.getBroadcast(
-                        context,
-                        appWidgetId.hashCode(),
-                        createBottomBarToggleIntent(
-                            context = context,
-                            ids = [appWidgetId],
-                        ),
-                        PendingIntent.FLAG_IMMUTABLE,
-                    ),
-                )
-            } else {
-                context.logUtils.debugLog(
-                    message = "No widgets in stack $appWidgetId or view failed to inflate",
-                    throwable = null,
-                )
-                root.setOnClickPendingIntent(
-                    R.id.add_widget,
-                    PendingIntentCompat.getActivity(
-                        context,
-                        appWidgetId,
-                        Intent(context, WidgetStackConfigure::class.java)
-                            .putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId),
-                        0,
-                        false,
-                    ),
-                )
-                root.setViewVisibility(
-                    R.id.bottom_bar,
-                    View.VISIBLE,
-                )
-            }
+                   root.setViewVisibility(
+                       R.id.bottom_bar,
+                       if (!widgetStyle.showBottomBar) {
+                           View.GONE
+                       } else {
+                           View.VISIBLE
+                       },
+                   )
 
-            root.setViewVisibility(
-                R.id.bottom_bar_toggler,
-                if (widgetStyle.showToggler && widgetData != null) {
-                    View.VISIBLE
-                } else {
-                    View.GONE
-                },
-            )
+                   root.setOnClickPendingIntent(
+                       R.id.bottom_bar_toggler,
+                       PendingIntent.getBroadcast(
+                           context,
+                           appWidgetId.hashCode(),
+                           createBottomBarToggleIntent(
+                               context = context,
+                               ids = [appWidgetId],
+                           ),
+                           PendingIntent.FLAG_IMMUTABLE,
+                       ),
+                   )
+               } else {
+                   context.logUtils.debugLog(
+                       message = "No widgets in stack $appWidgetId or view failed to inflate",
+                       throwable = null,
+                   )
+                   root.setOnClickPendingIntent(
+                       R.id.add_widget,
+                       PendingIntentCompat.getActivity(
+                           context,
+                           appWidgetId,
+                           Intent(context, WidgetStackConfigure::class.java)
+                               .putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId),
+                           0,
+                           false,
+                       ),
+                   )
+                   root.setViewVisibility(
+                       R.id.bottom_bar,
+                       View.VISIBLE,
+                   )
+               }
 
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
-                root.reduceImageSizes(512, 512)
-            }
+               root.setViewVisibility(
+                   R.id.bottom_bar_toggler,
+                   if (widgetStyle.showToggler && widgetData != null) {
+                       View.VISIBLE
+                   } else {
+                       View.GONE
+                   },
+               )
 
-            updateAutoChangeForStack(context.safeApplicationContext, appWidgetId)
-            updateWidgetStackMonitor(context)
-            try {
-                appWidgetManager.updateAppWidget(appWidgetId, root)
-            } catch (e: Exception) {
-                context.logUtils.normalLog(
-                    message = "Error updating widget stack widget",
-                    throwable = e,
-                    extras = mapOf(
-                        "stackId" to appWidgetId,
-                        "widgetId" to widgetData?.id,
-                        "widgetProvider" to widgetData?.widgetProvider,
-                    ),
-                )
-            }
-            context.eventManager.sendEvent(Event.StackUpdateComplete(appWidgetId))
+               if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
+                   root.reduceImageSizes(512, 512)
+               }
+
+               updateAutoChangeForStack(context.safeApplicationContext, appWidgetId)
+               try {
+                   appWidgetManager.updateAppWidget(appWidgetId, root)
+               } catch (e: Exception) {
+                   context.logUtils.normalLog(
+                       message = "Error updating widget stack widget",
+                       throwable = e,
+                       extras = mapOf(
+                           "stackId" to appWidgetId,
+                           "widgetId" to widgetData?.id,
+                           "widgetProvider" to widgetData?.widgetProvider,
+                       ),
+                   )
+               }
+               updateWidgetStackMonitor(context)
+               context.eventManager.sendEvent(Event.StackUpdateComplete(appWidgetId))
+           } catch (e: Exception) {
+               context.logUtils.normalLog(
+                   message = "Error updating widget stack",
+                   throwable = e,
+                   extras = mapOf(
+                       "stackId" to appWidgetId,
+                   ),
+               )
+           }
         }
     }
 
@@ -362,10 +392,10 @@ class WidgetStackProvider : AppWidgetProvider() {
         rootWidgetViews: RemoteViews,
         root: RemoteViews,
         stackSize: Int,
+        style: WidgetStackStyle,
     ) {
         val options = appWidgetManager.getAppWidgetOptions(stackId)
         val applyPadding = context.prefManager.widgetStackWidgetPadding[stackId]?.get(innerWidgetId) ?: false
-        val style = context.prefManager.widgetStackStyle[stackId] ?: WidgetStackStyle()
         val iconColor = style.getIconColor(context.themedContext)
         val realSize = options?.let { options ->
             extractSizeFromOptions(options, applyPadding).also { size ->
@@ -446,6 +476,7 @@ class WidgetStackProvider : AppWidgetProvider() {
             innerView = viewsToApply,
             rootWidgetViews = rootWidgetViews,
             outerView = root,
+            stackId = stackId,
         )
 
         if (!isBottomBarToggle) {
@@ -468,6 +499,7 @@ class WidgetStackProvider : AppWidgetProvider() {
         hoistWidgetData(
             innerView = viewsToApply,
             outerView = root,
+            stackId = stackId,
         )
     }
 
@@ -828,15 +860,21 @@ class WidgetStackProvider : AppWidgetProvider() {
     }
 
     private fun scheduleWidgetRefresh(context: Context, id: Int) {
+        pendingRefreshes[id]?.let(mainHandler::removeCallbacks)
+
+        val runnable = Runnable {
+            pendingRefreshes.remove(id)
+            update(
+                context = context.safeApplicationContext,
+                ids = intArrayOf(id),
+                fromChild = false,
+                refresh = true,
+            )
+        }
+        pendingRefreshes.put(id, runnable)
+
         mainHandler.postDelayed(
-            {
-                update(
-                    context = context.safeApplicationContext,
-                    ids = intArrayOf(id),
-                    fromChild = false,
-                    refresh = true,
-                )
-            },
+            runnable,
             300,
         )
     }
@@ -847,11 +885,7 @@ class WidgetStackProvider : AppWidgetProvider() {
         appWidgetId: Int,
         newOptions: Bundle?,
     ) {
-        onUpdate(
-            context,
-            appWidgetManager,
-            intArrayOf(appWidgetId),
-        )
+        scheduleWidgetRefresh(context, appWidgetId)
     }
 
     override fun onDeleted(context: Context, appWidgetIds: IntArray) {
@@ -859,6 +893,21 @@ class WidgetStackProvider : AppWidgetProvider() {
 
         appWidgetIds.forEach { appWidgetId ->
             context.idManager.removeId(appWidgetId)
+
+            PendingIntentCompat.getBroadcast(
+                context,
+                appWidgetId + 50000,
+                createSwapIntent(
+                    context = context,
+                    ids = intArrayOf(appWidgetId),
+                    backward = false,
+                    autoSwap = true,
+                ),
+                0,
+                true,
+            )?.let {
+                (context.getSystemService(Context.ALARM_SERVICE) as AlarmManager).cancel(it)
+            }
         }
     }
 
@@ -878,6 +927,8 @@ class WidgetStackProvider : AppWidgetProvider() {
 
         @Volatile
         private var lastRefreshAllTime = 0L
+
+        private val pendingRefreshes = SparseArray<Runnable>()
 
         fun update(context: Context, ids: IntArray, fromChild: Boolean = false, refresh: Boolean = false) {
             context.sendBroadcast(
@@ -1065,54 +1116,65 @@ class WidgetStackProvider : AppWidgetProvider() {
             innerView: RemoteViews,
             rootWidgetViews: RemoteViews,
             outerView: RemoteViews,
+            stackId: Int,
         ) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.VANILLA_ICE_CREAM) {
-                val collectionCacheSource = remoteViewsClass.getDeclaredField("mCollectionCache")
-                    .apply { isAccessible = true }
-                    .get(innerView)
-                val rootCollectionCacheSource = remoteViewsClass.getDeclaredField("mCollectionCache")
-                    .apply { isAccessible = true }
-                    .get(rootWidgetViews)
+            try {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.VANILLA_ICE_CREAM) {
+                    val collectionCacheSource = remoteViewsClass.getDeclaredField("mCollectionCache")
+                        .apply { isAccessible = true }
+                        .get(innerView)
+                    val rootCollectionCacheSource = remoteViewsClass.getDeclaredField("mCollectionCache")
+                        .apply { isAccessible = true }
+                        .get(rootWidgetViews)
 
-                val collectionCacheDest = remoteViewsClass.getDeclaredField("mCollectionCache")
-                    .apply { isAccessible = true }
-                    .get(outerView)
+                    val collectionCacheDest = remoteViewsClass.getDeclaredField("mCollectionCache")
+                        .apply { isAccessible = true }
+                        .get(outerView)
 
-                val collectionCacheClass = collectionCacheSource::class.java
+                    val collectionCacheClass = collectionCacheSource::class.java
 
-                val sourceIdToUriMapping = collectionCacheClass.getDeclaredField("mIdToUriMapping")
-                    .apply { isAccessible = true }
-                    .get(collectionCacheSource) as SparseArray<String>
-                val sourceUriToCollectionMapping = collectionCacheClass.getDeclaredField("mUriToCollectionMapping")
-                    .apply { isAccessible = true }
-                    .get(collectionCacheSource) as Map<String, *>
+                    val sourceIdToUriMapping = collectionCacheClass.getDeclaredField("mIdToUriMapping")
+                        .apply { isAccessible = true }
+                        .get(collectionCacheSource) as SparseArray<String>
+                    val sourceUriToCollectionMapping = collectionCacheClass.getDeclaredField("mUriToCollectionMapping")
+                        .apply { isAccessible = true }
+                        .get(collectionCacheSource) as Map<String, *>
 
-                val rootSourceIdToUriMapping = collectionCacheClass.getDeclaredField("mIdToUriMapping")
-                    .apply { isAccessible = true }
-                    .get(rootCollectionCacheSource) as SparseArray<String>
-                val rootSourceUriToCollectionMapping = collectionCacheClass.getDeclaredField("mUriToCollectionMapping")
-                    .apply { isAccessible = true }
-                    .get(rootCollectionCacheSource) as Map<String, *>
+                    val rootSourceIdToUriMapping = collectionCacheClass.getDeclaredField("mIdToUriMapping")
+                        .apply { isAccessible = true }
+                        .get(rootCollectionCacheSource) as SparseArray<String>
+                    val rootSourceUriToCollectionMapping = collectionCacheClass.getDeclaredField("mUriToCollectionMapping")
+                        .apply { isAccessible = true }
+                        .get(rootCollectionCacheSource) as Map<String, *>
 
-                (sourceIdToUriMapping + rootSourceIdToUriMapping).forEach { intentId, uri ->
-                    val items = sourceUriToCollectionMapping[uri]
-                        ?: rootSourceUriToCollectionMapping[uri]
-                        ?: return@forEach
+                    (sourceIdToUriMapping + rootSourceIdToUriMapping).forEach { intentId, uri ->
+                        val items = sourceUriToCollectionMapping[uri]
+                            ?: rootSourceUriToCollectionMapping[uri]
+                            ?: return@forEach
 
-                    collectionCacheClass.getDeclaredMethod(
-                        "addMapping",
-                        Int::class.java,
-                        String::class.java,
-                        items::class.java,
-                    ).apply {
-                        isAccessible = true
-                    }.invoke(
-                        collectionCacheDest,
-                        intentId,
-                        uri,
-                        items,
-                    )
+                        collectionCacheClass.getDeclaredMethod(
+                            "addMapping",
+                            Int::class.java,
+                            String::class.java,
+                            items::class.java,
+                        ).apply {
+                            isAccessible = true
+                        }.invoke(
+                            collectionCacheDest,
+                            intentId,
+                            uri,
+                            items,
+                        )
+                    }
                 }
+            } catch (e: Exception) {
+                peekLogUtils?.debugLog(
+                    message = "Unable to hoist stack collections",
+                    throwable = e,
+                    extras = mapOf(
+                        "stackId" to stackId,
+                    ),
+                )
             }
         }
 
@@ -1155,24 +1217,35 @@ class WidgetStackProvider : AppWidgetProvider() {
         private fun hoistWidgetData(
             innerView: RemoteViews,
             outerView: RemoteViews,
+            stackId: Int,
         ) {
-            val sourceActions = remoteViewsClass.getDeclaredField("mActions")
-                .apply { isAccessible = true }
-                .get(innerView) as? MutableList<Any>
+            try {
+                val sourceActions = remoteViewsClass.getDeclaredField("mActions")
+                    .apply { isAccessible = true }
+                    .get(innerView) as? MutableList<Any>
 
-            val collectionActions = (sourceActions?.filter { action ->
-                val actionClassName = action::class.java.name
-                actionClassName.contains("SetRemoteCollectionItemListAdapterAction")
-                        || actionClassName.contains("SetRemoteViewsAdapterIntent")
-            }.orEmpty())
+                val collectionActions = (sourceActions?.filter { action ->
+                    val actionClassName = action::class.java.name
+                    actionClassName.contains("SetRemoteCollectionItemListAdapterAction")
+                            || actionClassName.contains("SetRemoteViewsAdapterIntent")
+                }.orEmpty())
 
-            val destActionsField = remoteViewsClass.getDeclaredField("mActions")
-                .apply { isAccessible = true }
+                val destActionsField = remoteViewsClass.getDeclaredField("mActions")
+                    .apply { isAccessible = true }
 
-            if (destActionsField.get(outerView) == null) {
-                destActionsField.set(outerView, collectionActions)
-            } else {
-                (destActionsField.get(outerView) as? MutableList<Any>)?.addAll(collectionActions)
+                if (destActionsField.get(outerView) == null) {
+                    destActionsField.set(outerView, collectionActions)
+                } else {
+                    (destActionsField.get(outerView) as? MutableList<Any>)?.addAll(collectionActions)
+                }
+            } catch (e: Exception) {
+                peekLogUtils?.debugLog(
+                    message = "Unable to hoist widget stack data",
+                    throwable = e,
+                    extras = mapOf(
+                        "stackId" to stackId,
+                    ),
+                )
             }
         }
     }
