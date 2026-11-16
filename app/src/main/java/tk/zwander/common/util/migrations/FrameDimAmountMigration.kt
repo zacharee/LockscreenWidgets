@@ -6,7 +6,7 @@ import android.content.Context
 import tk.zwander.common.util.prefManager
 
 class FrameDimAmountMigration : Migration {
-    override val runBelowDatabaseVersion: Int = 3
+    override val runBelowDatabaseVersion: Int = 4
 
     override fun run(context: Context) {
         val currentDimAmount = context.prefManager.wallpaperDimAmount

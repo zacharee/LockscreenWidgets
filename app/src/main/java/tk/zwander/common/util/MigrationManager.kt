@@ -22,6 +22,9 @@ class MigrationManager private constructor(private val context: Context) {
         }
     }
 
+    // Order matters! This list is intentionally not sorted by runBelowDatabaseVersion: the icon
+    // migration reads the secondary-frame prefs that the two display migrations populate, so it
+    // must stay after them. Do not reorder without checking those dependencies.
     private val migrations = [
         AddExtraWidgetInfoMigration(),
         WidgetSizeMigration(),
@@ -38,15 +41,28 @@ class MigrationManager private constructor(private val context: Context) {
         val currentVersion = BuildConfig.DATABASE_VERSION
         val storedVersion = context.prefManager.databaseVersion
 
-        if (currentVersion >= storedVersion) {
-            migrations.forEach { migration ->
-                if (migration.runBelowDatabaseVersion > storedVersion) {
-                    migration.run(context)
-                }
-            }
-
-            updateDatabaseVersion(currentVersion)
+        // Nothing to do. This also avoids a synchronous prefs write on every cold start.
+        if (currentVersion <= storedVersion) {
+            return
         }
+
+        context.logUtils.debugLog(
+            message = "Running database migrations from version $storedVersion to $currentVersion",
+            throwable = null,
+        )
+
+        migrations.forEach { migration ->
+            if (migration.runBelowDatabaseVersion > storedVersion) {
+                context.logUtils.debugLog(
+                    message = "Running migration ${migration.javaClass.simpleName} " +
+                        "(runs for versions below ${migration.runBelowDatabaseVersion})",
+                    throwable = null,
+                )
+                migration.run(context)
+            }
+        }
+
+        updateDatabaseVersion(currentVersion)
     }
 
     private fun updateDatabaseVersion(newVersion: Int) {

@@ -307,6 +307,7 @@ class App : Application(), CoroutineScope by scope {
             writeToFile = true,
         )
         logUtils.logPreviousExitReasons()
+        migrationManager.runMigrations()
         WallpaperClient.getInstance(this)
 
         globalState.onCreate(this)
@@ -330,7 +331,6 @@ class App : Application(), CoroutineScope by scope {
         WidgetStackProvider.updateWidgetStackMonitor(this)
 
         prefsHandler.register(this)
-        migrationManager.runMigrations()
         shizukuManager.onCreate()
         lsDisplayManager.onCreate()
 

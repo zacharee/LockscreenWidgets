@@ -7,7 +7,7 @@ import tk.zwander.lockscreenwidgets.util.FramePrefs
 import tk.zwander.lockscreenwidgets.util.IconPrefs
 
 class WidgetIconMigration : Migration {
-    override val runBelowDatabaseVersion: Int = 5
+    override val runBelowDatabaseVersion: Int = 6
 
     override fun run(context: Context) {
         context.prefManager.currentWidgets =

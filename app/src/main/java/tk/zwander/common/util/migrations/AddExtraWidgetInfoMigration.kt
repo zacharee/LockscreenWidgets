@@ -13,7 +13,7 @@ import tk.zwander.lockscreenwidgets.util.IconPrefs
 
 class AddExtraWidgetInfoMigration : Migration {
     override val runBelowDatabaseVersion: Int
-        get() = 1
+        get() = 2
 
     override fun run(context: Context) {
         val manager = context.appWidgetManager
