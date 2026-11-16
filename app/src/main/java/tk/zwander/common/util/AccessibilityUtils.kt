@@ -54,7 +54,6 @@ object AccessibilityUtils {
         val showingSecurityInput: AtomicBoolean = atomic(false),
         val hasMoreButton: AtomicBoolean = atomic(false),
         val hideForPresentIds: AtomicBoolean = atomic(false),
-        val hideForNonPresentIds: AtomicBoolean = atomic(false),
         val hasClearAllButton: AtomicBoolean = atomic(false),
         val hasSettingsContainerButton: AtomicBoolean = atomic(false),
         val onFaceWidgets: AtomicBoolean = atomic(false),
@@ -149,7 +148,6 @@ object AccessibilityUtils {
         nodeState: NodeState,
         node: AccessibilityNodeInfo,
         presentIds: Map<String, Unit>,
-        nonPresentIds: Map<String, Unit>,
         isPixelUI: Boolean,
     ) {
         if (!nodeState.onFaceWidgets.value) {
@@ -236,18 +234,6 @@ object AccessibilityUtils {
             }
         }
 
-        //Check to see if any of the user-specified IDs aren't present
-        //(or are present but not visible). If any aren't, the frame will be hidden.
-        if (!nodeState.hideForNonPresentIds.value && nonPresentIds.isNotEmpty()) {
-            if (!node.hasVisibleIds(nonPresentIds)) {
-                logUtils.debugLog(
-                    "Found non present ID to hide for ${node.sourceNodeId} ${node.viewIdResourceName}",
-                    null,
-                )
-                nodeState.hideForNonPresentIds.value = true
-            }
-        }
-
         if (!nodeState.showingPowerMenu.value) {
             if (node.hasVisibleIds(IDMaps.powerMenuIds)) {
                 logUtils.debugLog("Found power menu node ${node.sourceNodeId} ${node.viewIdResourceName}", null)
@@ -301,7 +287,6 @@ object AccessibilityUtils {
         var minSysUiWindowIndex = -1
 
         val presentIds = prefManager.presentIds.associateWith {}
-        val nonPresentIds = prefManager.nonPresentIds.associateWith {}
         val isPixelUI = isPixelUI
 
         val processed = windows.mapIndexed { index, rawWindow ->
@@ -329,7 +314,6 @@ object AccessibilityUtils {
                         nodeState = nodeState,
                         node = node,
                         presentIds = presentIds,
-                        nonPresentIds = nonPresentIds,
                         isPixelUI = isPixelUI,
                     )
                 }
@@ -586,7 +570,7 @@ object AccessibilityUtils {
                     (windowInfo.nodeState.hasMoreButton.value) || (windowInfo.nodeState.hasSettingsContainerButton.value &&
                             !windowInfo.nodeState.hasClearAllButton.value)
                 globalState.hideForPresentIds[displayId] = windowInfo.nodeState.hideForPresentIds.value
-                globalState.hideForNonPresentIds[displayId] = windowInfo.nodeState.hideForNonPresentIds.value
+                globalState.hideForNonPresentIds[displayId] = prefManager.nonPresentIds.any { it !in windowInfo.sysUiWindowViewIds }
 
                 relevantFrameDelegates.forEach { (val frameDelegate = value) ->
                     frameDelegate.updateWindowState(
