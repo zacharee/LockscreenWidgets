@@ -655,6 +655,13 @@ open class WidgetFrameDelegate protected constructor(
         if (canShow()) {
             pendingShowJob?.cancel()
 
+            if (rootView.isAttachedToWindow &&
+                viewModel.animationState.value == AnimationState.STATE_IDLE
+            ) {
+                if (updateAccessibility) updateAccessibilityPass()
+                return
+            }
+
             val job = lifecycleScope.launch {
                 delay(WINDOW_ADD_DEBOUNCE_DELAY)
 
@@ -717,76 +724,118 @@ open class WidgetFrameDelegate protected constructor(
      * =======
      */
     private fun canShow(): Boolean {
+        val [displayId, uniqueIdCompat] = this@WidgetFrameDelegate.display?.let {
+            it.displayId to it.uniqueIdCompat
+        } ?: (null to null)
+        val framePrefs = framePrefs
+        val prefManager = prefManager
+        val lsDisplayManager = lsDisplayManager
+        val globalState = globalState
+        val state = state.value
+
+        val isPreview = state.isPreview
+        val isTempHide = state.isTempHide
+        val widgetFrameEnabled = prefManager.widgetFrameEnabled
+        val isDisplayOn = lsDisplayManager.displayPowerStates.value.displayStates[uniqueIdCompat] == true
+        val hidingForPresentIds = globalState.hideForPresentIds.value[displayId] == true
+        val hidingForNonPresentIds = globalState.hideForNonPresentIds.value[displayId] == true
+        val hideInLandscape = prefManager.hideInLandscape
+        val isPortrait = state.screenOrientation == Surface.ROTATION_0 || state.screenOrientation == Surface.ROTATION_180
+        val canShowFromTasker = framePrefs.canShowFromTasker
+        val hideWhenKeyboardShown = framePrefs.hideWhenKeyboardShown
+        val showingKeyboard = globalState.showingKeyboard.value[displayId] == true
+        val wasOnKeyguard = globalState.wasOnKeyguard.value
+        val isDefaultDisplay = displayId == Display.DEFAULT_DISPLAY
+        val notificationsPanelFullyExpanded = globalState.notificationsPanelFullyExpanded.value[displayId] == true
+        val showInNotificationShade = framePrefs.showInNotificationShade
+        val showOnMainLockScreen = framePrefs.showOnMainLockScreen
+        val hideOnFaceWidgets = framePrefs.hideOnFaceWidgets
+        val isOnFaceWidgets = globalState.isOnFaceWidgets.value[displayId] == true
+        val hasAppLayer = (globalState.currentAppLayer.value[displayId] ?: 0) >= 0 ||
+                globalState.currentAppPackage.value[displayId] != null
+        val hideOnEdgePanel = framePrefs.hideOnEdgePanel
+        val isOnEdgePanel = globalState.isOnEdgePanel.value[displayId] == true
+        val isOnScreenOffMemo = globalState.isOnScreenOffMemo.value[displayId] == true
+        val showingNotificationsPanel = globalState.showingNotificationsPanel.value[displayId] == true
+        val hideOnNotificationShade = framePrefs.hideOnNotificationShade
+        val showingSecurityInput = globalState.showingSecurityInput.value[displayId] == true
+        val hideOnSecurityPage = framePrefs.hideOnSecurityPage
+        val hasNotifications = globalState.notificationCount.value > 0
+        val hideOnNotifications = framePrefs.hideOnNotifications
+        val hidingForPresentApp = globalState.hidingForPresentApp.value[displayId] == true
+        val showOverPowerMenu = framePrefs.showOverPowerMenu
+        val showingPowerMenu = globalState.showingPowerMenu.value[displayId] == true
+        val forceShow = framePrefs.forceShow
+
         fun forPreview(): Boolean {
-            return state.value.isPreview && !state.value.isTempHide && prefManager.widgetFrameEnabled
+            return isPreview && !isTempHide && widgetFrameEnabled
         }
 
         fun forCommon(): Boolean {
-            return lsDisplayManager.displayPowerStates.value.displayStates[this@WidgetFrameDelegate.display?.uniqueIdCompat] == true
-                    && !state.value.isTempHide
-                    && globalState.hideForPresentIds.value[this@WidgetFrameDelegate.display?.displayId] != true
-                    && globalState.hideForNonPresentIds.value[this@WidgetFrameDelegate.display?.displayId] != true
-                    && prefManager.widgetFrameEnabled
-                    && (!prefManager.hideInLandscape || state.value.screenOrientation == Surface.ROTATION_0 || state.value.screenOrientation == Surface.ROTATION_180)
-                    && framePrefs.canShowFromTasker
-                    && (!framePrefs.hideWhenKeyboardShown || globalState.showingKeyboard.value[this@WidgetFrameDelegate.display?.displayId] != true)
+            return isDisplayOn &&
+                    !isTempHide &&
+                    !hidingForPresentIds &&
+                    !hidingForNonPresentIds &&
+                    widgetFrameEnabled &&
+                    (!hideInLandscape || isPortrait) &&
+                    canShowFromTasker &&
+                    (!hideWhenKeyboardShown || !showingKeyboard)
         }
 
         fun forSecondaryDisplay(): Boolean {
-            return globalState.wasOnKeyguard.value && this@WidgetFrameDelegate.display?.displayId != Display.DEFAULT_DISPLAY && forCommon()
+            return wasOnKeyguard &&
+                    !isDefaultDisplay &&
+                    forCommon()
         }
 
         fun forNotificationCenter(): Boolean {
-            return (globalState.notificationsPanelFullyExpanded.value[this@WidgetFrameDelegate.display?.displayId] == true
-                    && framePrefs.showInNotificationShade)
-                    && forCommon()
+            return notificationsPanelFullyExpanded &&
+                    showInNotificationShade &&
+                    forCommon()
         }
 
         fun forLockscreen(): Boolean {
-            return globalState.wasOnKeyguard.value
-                    && (framePrefs.showOnMainLockScreen || !framePrefs.showInNotificationShade)
-                    && (!framePrefs.hideOnFaceWidgets || globalState.isOnFaceWidgets.value[this@WidgetFrameDelegate.display?.displayId] != true)
-                    && ((globalState.currentAppLayer.value[this@WidgetFrameDelegate.display?.displayId] ?: 0) < 0 &&
-                    globalState.currentAppPackage.value[this@WidgetFrameDelegate.display?.displayId] == null)
-                    && (globalState.isOnEdgePanel.value[this@WidgetFrameDelegate.display?.displayId] != true || !framePrefs.hideOnEdgePanel)
-                    && globalState.isOnScreenOffMemo.value[this@WidgetFrameDelegate.display?.displayId] != true
-                    && (globalState.showingNotificationsPanel.value[this@WidgetFrameDelegate.display?.displayId] != true ||
-                    !framePrefs.hideOnNotificationShade)
-                    && (globalState.showingSecurityInput.value[this@WidgetFrameDelegate.display?.displayId] != true ||
-                    !framePrefs.hideOnSecurityPage)
-                    && (globalState.notificationCount.value == 0 || !framePrefs.hideOnNotifications)
-                    && globalState.hidingForPresentApp.value[this@WidgetFrameDelegate.display?.displayId] != true
-                    && (framePrefs.showOverPowerMenu || globalState.showingPowerMenu.value[this@WidgetFrameDelegate.display?.displayId] != true)
-                    && forCommon()
+            return wasOnKeyguard &&
+                    (showOnMainLockScreen || !showInNotificationShade) &&
+                    (!hideOnFaceWidgets || !isOnFaceWidgets) &&
+                    !hasAppLayer &&
+                    (!isOnEdgePanel || !hideOnEdgePanel) &&
+                    !isOnScreenOffMemo &&
+                    (!showingNotificationsPanel || !hideOnNotificationShade) &&
+                    (!showingSecurityInput || !hideOnSecurityPage) &&
+                    (!hasNotifications || !hideOnNotifications) &&
+                    !hidingForPresentApp &&
+                    (showOverPowerMenu || !showingPowerMenu) &&
+                    forCommon()
         }
 
         fun forced(): Boolean {
-            return prefManager.widgetFrameEnabled && framePrefs.forceShow
+            return widgetFrameEnabled && forceShow
         }
 
         return (forced() || forSecondaryDisplay() || forPreview() || forNotificationCenter() || forLockscreen()).also {
             logUtils.debugLog(
                 "canShow $id: $it\n" +
                         "forced: ${forced()}, forSecondaryDisplay: ${forSecondaryDisplay()}, forPreview: ${forPreview()}, forNotificationCenter: ${forNotificationCenter()}, forLockscreen: ${forLockscreen()}, forCommon: ${forCommon()}\n" +
-                        "state: ${state.value}\n" +
+                        "state: ${state}\n" +
                         "globalState: $globalState\n" +
-                        "showOnMainLockScreen: ${framePrefs.showOnMainLockScreen}\n" +
-                        "widgetFrameEnabled: ${prefManager.widgetFrameEnabled}\n" +
-                        "hideOnSecurityPage: ${framePrefs.hideOnSecurityPage}\n" +
-                        "hideOnNotifications: ${framePrefs.hideOnNotifications}\n" +
-                        "hideOnNotificationShade: ${framePrefs.hideOnNotificationShade}\n" +
+                        "showOnMainLockScreen: ${showOnMainLockScreen}\n" +
+                        "widgetFrameEnabled: ${widgetFrameEnabled}\n" +
+                        "hideOnSecurityPage: ${hideOnSecurityPage}\n" +
+                        "hideOnNotifications: ${hideOnNotifications}\n" +
+                        "hideOnNotificationShade: ${hideOnNotificationShade}\n" +
                         "presentIds: ${prefManager.presentIds}\n" +
                         "nonPresentIds: ${prefManager.nonPresentIds}\n" +
-                        "hideInLandscape: ${prefManager.hideInLandscape}\n" +
-                        "showInNotificationCenter: ${framePrefs.showInNotificationShade}\n" +
-                        "hideOnEdgePanel: ${framePrefs.hideOnEdgePanel}\n" +
-                        "canShowFrameFromTasker: ${framePrefs.canShowFromTasker}\n" +
-                        "forceShowFrame: ${framePrefs.forceShow}\n" +
-                        "hideOnFaceWidgets: ${framePrefs.hideOnFaceWidgets}\n" +
-                        "hideWhenKeyboardShown: ${framePrefs.hideWhenKeyboardShown}\n" +
-                        "displayPower: ${lsDisplayManager.displayPowerStates.value.displayStates[this@WidgetFrameDelegate.display?.uniqueIdCompat]}\n" +
-                        "showingPowerMenu: ${globalState.showingPowerMenu.value[this@WidgetFrameDelegate.display?.displayId]}\n" +
-                        "showOverPowerMenu: ${framePrefs.showOverPowerMenu}\n",
+                        "hideInLandscape: ${hideInLandscape}\n" +
+                        "showInNotificationCenter: ${showInNotificationShade}\n" +
+                        "hideOnEdgePanel: ${hideOnEdgePanel}\n" +
+                        "canShowFrameFromTasker: ${canShowFromTasker}\n" +
+                        "forceShowFrame: ${forceShow}\n" +
+                        "hideOnFaceWidgets: ${hideOnFaceWidgets}\n" +
+                        "hideWhenKeyboardShown: ${hideWhenKeyboardShown}\n" +
+                        "displayPower: ${isDisplayOn}\n" +
+                        "showingPowerMenu: ${showingPowerMenu}\n" +
+                        "showOverPowerMenu: ${showOverPowerMenu}\n",
                 null,
             )
         }

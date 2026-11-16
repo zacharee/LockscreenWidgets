@@ -2,8 +2,6 @@ package tk.zwander.common.util
 
 import android.content.Context
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlin.reflect.full.declaredMemberProperties
 
 val globalState: GlobalState
     get() = GlobalState.getInstance()
@@ -47,9 +45,32 @@ data class GlobalState private constructor(
     }
 
     override fun toString(): String {
-        return "GlobalState(\n" +
-                GlobalState::class.declaredMemberProperties
-                    .joinToString("\n", postfix = "\n") { "${it.name}=${(it.get(this) as StateFlow<*>).value}" } +
-                ")"
+        return buildString {
+            appendLine("GlobalState(")
+            appendLine("wasOnKeyguard=${wasOnKeyguard.value}")
+            appendLine("isOnFaceWidgets=${isOnFaceWidgets.value}")
+            appendLine("currentAppLayer=${currentAppLayer.value}")
+            appendLine("isOnScreenOffMemo=${isOnScreenOffMemo.value}")
+            appendLine("onMainLockScreen=${onMainLockScreen.value}")
+            appendLine("showingNotificationsPanel=${showingNotificationsPanel.value}")
+            appendLine("showingSecurityInput=${showingSecurityInput.value}")
+            appendLine("notificationCount=${notificationCount.value}")
+            appendLine("hideForPresentIds=${hideForPresentIds.value}")
+            appendLine("hideForNonPresentIds=${hideForNonPresentIds.value}")
+            appendLine("currentSysUiLayer=${currentSysUiLayer.value}")
+            appendLine("currentSystemLayer=${currentSystemLayer.value}")
+            appendLine("currentAppPackage=${currentAppPackage.value}")
+            appendLine("isOnEdgePanel=${isOnEdgePanel.value}")
+            appendLine("hidingForPresentApp=${hidingForPresentApp.value}")
+            appendLine("showingKeyboard=${showingKeyboard.value}")
+            appendLine("notificationsPanelFullyExpanded=${notificationsPanelFullyExpanded.value}")
+            appendLine("handlingClick=${handlingClick.value}")
+            appendLine("itemIsActive=${itemIsActive.value}")
+            appendLine("proxTooClose=${proxTooClose.value}")
+            appendLine("accessibilitySeesNotificationsOnMainLockScreen=${accessibilitySeesNotificationsOnMainLockScreen.value}")
+            appendLine("showingPowerMenu=${showingPowerMenu.value}")
+            appendLine("powerMenuNodeId=${powerMenuNodeId.value}")
+            append(")")
+        }
     }
 }

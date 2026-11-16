@@ -280,15 +280,13 @@ object AccessibilityUtils {
      * Find the [AccessibilityWindowInfo] and [AccessibilityNodeInfo] corresponding to the topmost app window.
      * Find the [AccessibilityWindowInfo] and [AccessibilityNodeInfo] corresponding to the topmost non-System UI window.
      */
-    private suspend fun Context.processWindows(
+    private fun Context.processWindows(
         windows: List<AccessibilityWindowInfo>,
     ): WindowInfo {
         val nodeState = NodeState()
 
-        val systemUiWindows = ConcurrentLinkedQueue<WindowRootPair>()
         val sysUiWindowViewIds = ConcurrentLinkedQueue<String>()
         val sysUiWindowNodes = ConcurrentLinkedQueue<AccessibilityNodeInfo>()
-        val sysUiWindowAwaits = ConcurrentLinkedQueue<Deferred<*>>()
 
         var topAppWindowIndex: Int = -1
         var topNonSysUiWindowIndex: Int = -1
@@ -306,7 +304,7 @@ object AccessibilityUtils {
         val nonPresentIds = prefManager.nonPresentIds.associateWith {}
         val isPixelUI = isPixelUI
 
-        val processed = windows.mapIndexedParallel { index, rawWindow ->
+        val processed = windows.mapIndexed { index, rawWindow ->
             val safeRoot = try {
                 rawWindow.root
             } catch (e: Exception) {
@@ -318,8 +316,6 @@ object AccessibilityUtils {
             val window = WindowRootPair(rawWindow, safeRoot, index)
 
             if (isSysUi) {
-                systemUiWindows.add(window)
-
                 if (minSysUiWindowIndex == -1) {
                     minSysUiWindowIndex = index
                 }
@@ -328,7 +324,6 @@ object AccessibilityUtils {
                     safeRoot,
                     sysUiWindowNodes,
                     sysUiWindowViewIds,
-                    sysUiWindowAwaits,
                 ) { node ->
                     processNode(
                         nodeState = nodeState,
@@ -391,8 +386,6 @@ object AccessibilityUtils {
             window
         }
 
-        sysUiWindowAwaits.awaitAll()
-
         return WindowInfo(
             windows = processed,
             topAppWindowIndex = topAppWindowIndex,
@@ -410,80 +403,77 @@ object AccessibilityUtils {
     }
 
     /**
-     * Recursively add all [AccessibilityNodeInfo]s contained in a parent to a list.
+     * Iteratively add all [AccessibilityNodeInfo]s contained in [parentNode] to [list], starting
+     * with [parentNode] itself, in depth-first pre-order (the same order a recursive walk would
+     * produce).
+     *
      * We use this instead of [AccessibilityNodeInfo.findAccessibilityNodeInfosByViewId]
      * for performance and reliability reasons.
      * @param parentNode the root [AccessibilityNodeInfo] whose children we want to add to
      * a list. List will include this node as well.
      * @param list the list that will contain the child nodes.
      * @param ids the list of all visible IDs
-     * @param awaits a list of all running Jobs here. The caller should use awaitAll().
-     *
-     * TODO: This has to recursively traverse the View tree it's given. [AccessibilityNodeInfo.getChild]
-     * TODO: can be pretty slow. All adjacent nodes of the tree are processed concurrently, but their
-     * TODO: children have to be processed linearly. We need a flattened list of [AccessibilityNodeInfo] objects
-     * TODO: to properly handle frame visibility, but there may be a better way to do that, since this can take
-     * TODO: up to a second to finish executing.
      */
-    private fun CoroutineScope.addAllNodesToList(
+    private fun addAllNodesToList(
         parentNode: AccessibilityNodeInfo,
         list: ConcurrentLinkedQueue<AccessibilityNodeInfo>,
         ids: ConcurrentLinkedQueue<String>,
-        awaits: ConcurrentLinkedQueue<Deferred<*>>,
-        nodeAddedCallback: (CoroutineScope.(AccessibilityNodeInfo) -> Unit),
+        nodeAddedCallback: ((AccessibilityNodeInfo) -> Unit),
     ) {
-        list.add(parentNode)
-        nodeAddedCallback(parentNode)
+        val pendingNodes = ArrayDeque<AccessibilityNodeInfo>()
+        pendingNodes.addLast(parentNode)
 
-        if (parentNode.isVisibleToUser && parentNode.viewIdResourceName != null) {
-            ids.add(parentNode.viewIdResourceName)
+        while (pendingNodes.isNotEmpty()) {
+            val node = pendingNodes.removeLast()
+
+            list.add(node)
+            nodeAddedCallback(node)
+
+            if (node.isVisibleToUser && node.viewIdResourceName != null) {
+                ids.add(node.viewIdResourceName)
+            }
+
+            // Push children in reverse so they're popped (and therefore visited) in order.
+            for (i in node.childCount - 1 downTo 0) {
+                getChildOrNull(node, i)?.let(pendingNodes::addLast)
+            }
         }
+    }
 
-        for (i in 0 until parentNode.childCount) {
-            awaits.add(
-                async {
-                    val child = try {
-                        parentNode.getChild(i)
-                    } catch (e: SecurityException) {
-                        //Sometimes a SecurityException gets thrown here (on Huawei devices)
-                        //so just return null if it happens
-                        peekLogUtils?.debugLog("Error getting child node", e)
-                        null
-                    } catch (e: NullPointerException) {
-                        //Sometimes a NullPointerException is thrown here with this error:
-                        //"Attempt to read from field 'com.android.server.appwidget.AppWidgetServiceImpl$ProviderId
-                        //com.android.server.appwidget.AppWidgetServiceImpl$Provider.id' on a null object reference"
-                        //so just return null if that happens.
-                        peekLogUtils?.debugLog("Error getting child node", e)
-                        null
-                    } catch (_: IllegalStateException) {
-                        try {
-                            parentNode.isSealed = true
-                            parentNode.getChild(i).also {
-                                parentNode.isSealed = false
-                            }
-                        } catch (e: Exception) {
-                            peekLogUtils?.debugLog("Error getting child node", e)
-                            null
-                        }
-                    } catch (e: IndexOutOfBoundsException) {
-                        peekLogUtils?.debugLog("Error getting child node", e)
-                        null
-                    }
-
-                    if (child != null) {
-                        if (child.childCount > 0) {
-                            addAllNodesToList(child, list, ids, awaits, nodeAddedCallback)
-                        } else {
-                            list.add(child)
-                            nodeAddedCallback(child)
-                            if (child.isVisibleToUser && child.viewIdResourceName != null) {
-                                ids.add(child.viewIdResourceName)
-                            }
-                        }
-                    }
-                },
-            )
+    private fun getChildOrNull(parentNode: AccessibilityNodeInfo, index: Int): AccessibilityNodeInfo? {
+        return try {
+            parentNode.getChild(index)
+        } catch (e: SecurityException) {
+            //Sometimes a SecurityException gets thrown here (on Huawei devices)
+            //so just return null if it happens
+            peekLogUtils?.debugLog("Error getting child node", e)
+            null
+        } catch (e: NullPointerException) {
+            //Sometimes a NullPointerException is thrown here with this error:
+            //"Attempt to read from field 'com.android.server.appwidget.AppWidgetServiceImpl$ProviderId
+            //com.android.server.appwidget.AppWidgetServiceImpl$Provider.id' on a null object reference"
+            //so just return null if that happens.
+            peekLogUtils?.debugLog("Error getting child node", e)
+            null
+        } catch (_: IllegalStateException) {
+            //The system can re-seal a node while we're walking the tree. Briefly unseal the
+            //parent so its child list is refreshed, then retry once. Always restore the sealed
+            //state, otherwise a stale sealed node could make later passes throw.
+            try {
+                parentNode.isSealed = true
+                parentNode.getChild(index)
+            } catch (e: Exception) {
+                peekLogUtils?.debugLog("Error getting child node", e)
+                null
+            } finally {
+                try {
+                    parentNode.isSealed = false
+                } catch (_: Exception) {
+                }
+            }
+        } catch (e: IndexOutOfBoundsException) {
+            peekLogUtils?.debugLog("Error getting child node", e)
+            null
         }
     }
 
@@ -661,151 +651,153 @@ object AccessibilityUtils {
         imm: InputMethodManager,
         getWindows: () -> SparseArray<List<AccessibilityWindowInfo>>?,
     ) = async(Dispatchers.Main) {
-        with(context) {
-            logUtils.debugLog("Running accessibility job")
+        try {
+            with(context) {
+                logUtils.debugLog("Running accessibility job")
 
-            val powerMenuTexts = IDMaps.powerMenuTextIds.map { id -> resources.getString(id.key) }
+                val powerMenuTexts = IDMaps.powerMenuTextIds.map { id -> resources.getString(id.key) }
 
-            if (
-                IDMaps.sysUiPackageNames.containsKey(event.packageName?.toString()) &&
-                (event.text.any { powerMenuTexts.contains(it) } ||
-                        event.source?.window?.title?.let { powerMenuTexts.contains(it) } == true)
-            ) {
-                logUtils.debugLog("Received power menu ID ${event.sourceNodeId}", null)
-                globalState.powerMenuNodeId.value = event.sourceNodeId
-            }
-
-            if (lsDisplayManager.multiDisplaySupported) {
-                lsDisplayManager.displayAndWmCache.value.values.forEach { [dis, wm] ->
-                    globalState.showingKeyboard[dis?.displayId ?: Display.DEFAULT_DISPLAY] =
-                        wm?.currentWindowMetrics
-                            ?.windowInsets?.getInsets(WindowInsets.Type.ime())
-                            ?.toRect()
-                            ?.isEmpty
-                            .let { it == false }
+                if (
+                    IDMaps.sysUiPackageNames.containsKey(event.packageName?.toString()) &&
+                    (event.text.any { powerMenuTexts.contains(it) } ||
+                            event.source?.window?.title?.let { powerMenuTexts.contains(it) } == true)
+                ) {
+                    logUtils.debugLog("Received power menu ID ${event.sourceNodeId}", null)
+                    globalState.powerMenuNodeId.value = event.sourceNodeId
                 }
-            } else {
-                globalState.showingKeyboard[Display.DEFAULT_DISPLAY] = try {
-                    imm.inputMethodWindowVisibleHeight > 0
-                } catch (e: Throwable) {
-                    logUtils.debugLog("Unable to check if keyboard is showing, assuming it's not", e)
-                    // Fetching the IME height can cause the system to throw an NPE:
-                    // "Attempt to read from field 'com.android.server.wm.DisplayFrames com.android.server.wm.DisplayContent.mDisplayFrames' on a null object reference".
-                    // If this happens, assume the keyboard isn't showing.
-                    false
+
+                if (lsDisplayManager.multiDisplaySupported) {
+                    lsDisplayManager.displayAndWmCache.value.values.forEach { [dis, wm] ->
+                        globalState.showingKeyboard[dis?.displayId ?: Display.DEFAULT_DISPLAY] =
+                            wm?.currentWindowMetrics
+                                ?.windowInsets?.getInsets(WindowInsets.Type.ime())
+                                ?.toRect()
+                                ?.isEmpty
+                                .let { it == false }
+                    }
+                } else {
+                    globalState.showingKeyboard[Display.DEFAULT_DISPLAY] = try {
+                        imm.inputMethodWindowVisibleHeight > 0
+                    } catch (e: Throwable) {
+                        logUtils.debugLog("Unable to check if keyboard is showing, assuming it's not", e)
+                        // Fetching the IME height can cause the system to throw an NPE:
+                        // "Attempt to read from field 'com.android.server.wm.DisplayFrames com.android.server.wm.DisplayContent.mDisplayFrames' on a null object reference".
+                        // If this happens, assume the keyboard isn't showing.
+                        false
+                    }
                 }
-            }
 
-            //Check if the lock screen is shown.
-            globalState.wasOnKeyguard.value = kgm.isKeyguardLocked
+                //Check if the lock screen is shown.
+                globalState.wasOnKeyguard.value = kgm.isKeyguardLocked
 
-            if (isDebug) {
-                // Nest this in the debug check so that loop doesn't have to run always.
-                try {
-                    logUtils.debugLog(
-                        "Source Node ID: ${event.sourceNodeId}, Window ID: ${event.windowId}, Source ID Name: ${event.source?.viewIdResourceName}",
-                        null,
-                    )
-
-                    if (event.recordCount > 0) {
+                if (isDebug) {
+                    // Nest this in the debug check so that loop doesn't have to run always.
+                    try {
                         logUtils.debugLog(
-                            "Records: ${
-                                run {
-                                    val records = ArrayList<String>()
-                                    for (i in 0 until event.recordCount) {
-                                        val record = event.getRecord(i)
-                                        records.add("$record ${record.sourceNodeId} ${record.windowId} ${record.source?.viewIdResourceName}")
-                                    }
-                                    records.joinToString(",,,,,,,,")
-                                }
-                            }",
+                            "Source Node ID: ${event.sourceNodeId}, Window ID: ${event.windowId}, Source ID Name: ${event.source?.viewIdResourceName}",
                             null,
                         )
-                    }
-                } catch (e: Exception) {
-                    logUtils.debugLog("Error printing debug info", e)
-                }
-            }
 
-            logUtils.debugLog(
-                "Accessibility event: $event, " +
-                        "isScreenOn: ${lsDisplayManager.isAnyDisplayOn}, " +
-                        "wasOnKeyguard: ${globalState.wasOnKeyguard.value}, " +
-                        "${drawerDelegate.state}",
-                null,
-            )
-
-            if (prefManager.widgetFrameEnabled) {
-                frameDelegates.forEach { (val frameDelegate = value) ->
-                    frameDelegate.updateStateAndWindowState(
-                        updateAccessibility = true,
-                        transform = {
-                            it.copy(
-                                screenOrientation = frameDelegate.screenOrientation ?: it.screenOrientation,
+                        if (event.recordCount > 0) {
+                            logUtils.debugLog(
+                                "Records: ${
+                                    run {
+                                        val records = ArrayList<String>()
+                                        for (i in 0 until event.recordCount) {
+                                            val record = event.getRecord(i)
+                                            records.add("$record ${record.sourceNodeId} ${record.windowId} ${record.source?.viewIdResourceName}")
+                                        }
+                                        records.joinToString(",,,,,,,,")
+                                    }
+                                }",
+                                null,
                             )
-                        },
-                    )
+                        }
+                    } catch (e: Exception) {
+                        logUtils.debugLog("Error printing debug info", e)
+                    }
                 }
-            }
-
-            runWindowOperation(
-                frameDelegates = frameDelegates,
-                drawerDelegate = drawerDelegate,
-                getWindows = getWindows,
-            )
-
-            // Some logic for making the drawer go away or system dialogs dismiss when widgets launch Activities indirectly.
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-                val matchesWindowsChanged =
-                    event.eventType == AccessibilityEvent.TYPE_WINDOWS_CHANGED
-                            && ((event.windowChanges and AccessibilityEvent.WINDOWS_CHANGE_ADDED != 0)
-                            || (event.windowChanges and AccessibilityEvent.WINDOWS_CHANGE_ACTIVE != 0))
-                val matchesWindowStateChanged =
-                    event.eventType == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED
 
                 logUtils.debugLog(
-                    "Checking for dismiss eligibility.\n" +
-                            "matchesWindowsChanges: $matchesWindowsChanged\n" +
-                            "matchesWindowStateChanged: $matchesWindowStateChanged\n" +
-                            "packageName: ${event.packageName}\n" +
-                            "handlingClick: ${globalState.handlingClick.value}",
+                    "Accessibility event: $event, " +
+                            "isScreenOn: ${lsDisplayManager.isAnyDisplayOn}, " +
+                            "wasOnKeyguard: ${globalState.wasOnKeyguard.value}, " +
+                            "${drawerDelegate.state}",
                     null,
                 )
 
-                if ((matchesWindowsChanged || matchesWindowStateChanged)
-                    && event.packageName != packageName
-                    && globalState.handlingClick.value.isNotEmpty()
-                ) {
-                    logUtils.debugLog("Starting dismiss Activity because of window change.", null)
-                    DismissOrUnlockActivity.launch(context)
-
-                    if (globalState.handlingClick.value.containsKey(DrawerDelegate.ID)) {
-                        logUtils.debugLog("Hiding drawer because of window change", null)
-                        eventManager.sendEvent(Event.CloseDrawer)
+                if (prefManager.widgetFrameEnabled) {
+                    frameDelegates.forEach { (val frameDelegate = value) ->
+                        frameDelegate.updateStateAndWindowState(
+                            updateAccessibility = true,
+                            transform = {
+                                it.copy(
+                                    screenOrientation = frameDelegate.screenOrientation ?: it.screenOrientation,
+                                )
+                            },
+                        )
                     }
+                }
 
+                runWindowOperation(
+                    frameDelegates = frameDelegates,
+                    drawerDelegate = drawerDelegate,
+                    getWindows = getWindows,
+                )
+
+                // Some logic for making the drawer go away or system dialogs dismiss when widgets launch Activities indirectly.
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                    val matchesWindowsChanged =
+                        event.eventType == AccessibilityEvent.TYPE_WINDOWS_CHANGED
+                                && ((event.windowChanges and AccessibilityEvent.WINDOWS_CHANGE_ADDED != 0)
+                                || (event.windowChanges and AccessibilityEvent.WINDOWS_CHANGE_ACTIVE != 0))
+                    val matchesWindowStateChanged =
+                        event.eventType == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED
+
+                    logUtils.debugLog(
+                        "Checking for dismiss eligibility.\n" +
+                                "matchesWindowsChanges: $matchesWindowsChanged\n" +
+                                "matchesWindowStateChanged: $matchesWindowStateChanged\n" +
+                                "packageName: ${event.packageName}\n" +
+                                "handlingClick: ${globalState.handlingClick.value}",
+                        null,
+                    )
+
+                    if ((matchesWindowsChanged || matchesWindowStateChanged)
+                        && event.packageName != packageName
+                        && globalState.handlingClick.value.isNotEmpty()
+                    ) {
+                        logUtils.debugLog("Starting dismiss Activity because of window change.", null)
+                        DismissOrUnlockActivity.launch(context)
+
+                        if (globalState.handlingClick.value.containsKey(DrawerDelegate.ID)) {
+                            logUtils.debugLog("Hiding drawer because of window change", null)
+                            eventManager.sendEvent(Event.CloseDrawer)
+                        }
+
+                        globalState.handlingClick.value = mapOf()
+                    }
+                }
+
+                if ((event.eventType == AccessibilityEvent.TYPE_WINDOWS_CHANGED
+                            || event.eventType == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED) && event.packageName != null
+                ) {
                     globalState.handlingClick.value = mapOf()
                 }
-            }
 
-            if ((event.eventType == AccessibilityEvent.TYPE_WINDOWS_CHANGED
-                        || event.eventType == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED) && event.packageName != null
-            ) {
-                globalState.handlingClick.value = mapOf()
+                if (prefManager.widgetFrameEnabled) {
+                    frameDelegates.forEach { (val frameDelegate = value) ->
+                        frameDelegate.updateStateAndWindowState(true)
+                    }
+                }
             }
-
+        } finally {
             try {
                 //Make sure to recycle the copy of the event.
                 @Suppress("DEPRECATION")
                 event.recycle()
             } catch (_: IllegalStateException) {
                 //Sometimes the event is already recycled somehow.
-            }
-
-            if (prefManager.widgetFrameEnabled) {
-                frameDelegates.forEach { (val frameDelegate = value) ->
-                    frameDelegate.updateStateAndWindowState(true)
-                }
             }
         }
     }
