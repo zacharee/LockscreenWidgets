@@ -164,6 +164,13 @@ class Accessibility : AccessibilityService(), CoroutineScope by MainScope(), Eve
     }
 
     override fun onAccessibilityEvent(event: AccessibilityEvent) {
+        if (event.eventType == AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED) {
+            if (AccessibilityUtils.IDMaps.sysUiPackageNames[event.packageName] == null) {
+                // Limit content change processing to System UI-related windows.
+                return
+            }
+        }
+
         //Since we're launching our logic on the main Thread, it's possible
         //that [event] will be reused by Android, causing some crash issues.
         //Make a copy that is recycled later.
