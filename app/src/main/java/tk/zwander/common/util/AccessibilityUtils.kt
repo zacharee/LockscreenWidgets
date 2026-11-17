@@ -637,155 +637,146 @@ object AccessibilityUtils {
         imm: InputMethodManager,
         getWindows: () -> SparseArray<List<AccessibilityWindowInfo>>?,
     ) = async(Dispatchers.Main) {
-        try {
-            with(context) {
-                logUtils.debugLog("Running accessibility job")
+        with(context) {
+            logUtils.debugLog("Running accessibility job")
 
-                val powerMenuTexts = IDMaps.powerMenuTextIds.map { id -> resources.getString(id.key) }
+            val powerMenuTexts = IDMaps.powerMenuTextIds.map { id -> resources.getString(id.key) }
 
-                if (
-                    IDMaps.sysUiPackageNames.containsKey(event.packageName?.toString()) &&
-                    (event.text.any { powerMenuTexts.contains(it) } ||
-                            event.source?.window?.title?.let { powerMenuTexts.contains(it) } == true)
-                ) {
-                    logUtils.debugLog("Received power menu ID ${event.sourceNodeId}", null)
-                    globalState.powerMenuNodeId.value = event.sourceNodeId
+            if (
+                IDMaps.sysUiPackageNames.containsKey(event.packageName?.toString()) &&
+                (event.text.any { powerMenuTexts.contains(it) } ||
+                        event.source?.window?.title?.let { powerMenuTexts.contains(it) } == true)
+            ) {
+                logUtils.debugLog("Received power menu ID ${event.sourceNodeId}", null)
+                globalState.powerMenuNodeId.value = event.sourceNodeId
+            }
+
+            if (lsDisplayManager.multiDisplaySupported) {
+                lsDisplayManager.displayAndWmCache.value.values.forEach { [dis, wm] ->
+                    globalState.showingKeyboard[dis?.displayId ?: Display.DEFAULT_DISPLAY] =
+                        wm?.currentWindowMetrics
+                            ?.windowInsets?.getInsets(WindowInsets.Type.ime())
+                            ?.toRect()
+                            ?.isEmpty
+                            .let { it == false }
                 }
-
-                if (lsDisplayManager.multiDisplaySupported) {
-                    lsDisplayManager.displayAndWmCache.value.values.forEach { [dis, wm] ->
-                        globalState.showingKeyboard[dis?.displayId ?: Display.DEFAULT_DISPLAY] =
-                            wm?.currentWindowMetrics
-                                ?.windowInsets?.getInsets(WindowInsets.Type.ime())
-                                ?.toRect()
-                                ?.isEmpty
-                                .let { it == false }
-                    }
-                } else {
-                    globalState.showingKeyboard[Display.DEFAULT_DISPLAY] = try {
-                        imm.inputMethodWindowVisibleHeight > 0
-                    } catch (e: Throwable) {
-                        logUtils.debugLog("Unable to check if keyboard is showing, assuming it's not", e)
-                        // Fetching the IME height can cause the system to throw an NPE:
-                        // "Attempt to read from field 'com.android.server.wm.DisplayFrames com.android.server.wm.DisplayContent.mDisplayFrames' on a null object reference".
-                        // If this happens, assume the keyboard isn't showing.
-                        false
-                    }
+            } else {
+                globalState.showingKeyboard[Display.DEFAULT_DISPLAY] = try {
+                    imm.inputMethodWindowVisibleHeight > 0
+                } catch (e: Throwable) {
+                    logUtils.debugLog("Unable to check if keyboard is showing, assuming it's not", e)
+                    // Fetching the IME height can cause the system to throw an NPE:
+                    // "Attempt to read from field 'com.android.server.wm.DisplayFrames com.android.server.wm.DisplayContent.mDisplayFrames' on a null object reference".
+                    // If this happens, assume the keyboard isn't showing.
+                    false
                 }
+            }
 
-                //Check if the lock screen is shown.
-                globalState.wasOnKeyguard.value = kgm.isKeyguardLocked
+            //Check if the lock screen is shown.
+            globalState.wasOnKeyguard.value = kgm.isKeyguardLocked
 
-                if (isDebug) {
-                    // Nest this in the debug check so that loop doesn't have to run always.
-                    try {
-                        logUtils.debugLog(
-                            "Source Node ID: ${event.sourceNodeId}, Window ID: ${event.windowId}, Source ID Name: ${event.source?.viewIdResourceName}",
-                            null,
-                        )
-
-                        if (event.recordCount > 0) {
-                            logUtils.debugLog(
-                                "Records: ${
-                                    run {
-                                        val records = ArrayList<String>()
-                                        for (i in 0 until event.recordCount) {
-                                            val record = event.getRecord(i)
-                                            records.add("$record ${record.sourceNodeId} ${record.windowId} ${record.source?.viewIdResourceName}")
-                                        }
-                                        records.joinToString(",,,,,,,,")
-                                    }
-                                }",
-                                null,
-                            )
-                        }
-                    } catch (e: Exception) {
-                        logUtils.debugLog("Error printing debug info", e)
-                    }
-                }
-
-                logUtils.debugLog(
-                    "Accessibility event: $event, " +
-                            "isScreenOn: ${lsDisplayManager.isAnyDisplayOn}, " +
-                            "wasOnKeyguard: ${globalState.wasOnKeyguard.value}, " +
-                            "${drawerDelegate.state}",
-                    null,
-                )
-
-                if (prefManager.widgetFrameEnabled) {
-                    frameDelegates.forEach { (val frameDelegate = value) ->
-                        frameDelegate.updateStateAndWindowState(
-                            updateAccessibility = true,
-                            transform = {
-                                it.copy(
-                                    screenOrientation = frameDelegate.screenOrientation ?: it.screenOrientation,
-                                )
-                            },
-                        )
-                    }
-                }
-
-                runWindowOperation(
-                    frameDelegates = frameDelegates,
-                    drawerDelegate = drawerDelegate,
-                    getWindows = getWindows,
-                )
-
-                // Some logic for making the drawer go away or system dialogs dismiss when widgets launch Activities indirectly.
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-                    val matchesWindowsChanged =
-                        event.eventType == AccessibilityEvent.TYPE_WINDOWS_CHANGED
-                                && ((event.windowChanges and AccessibilityEvent.WINDOWS_CHANGE_ADDED != 0)
-                                || (event.windowChanges and AccessibilityEvent.WINDOWS_CHANGE_ACTIVE != 0))
-                    val matchesWindowStateChanged =
-                        event.eventType == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED
-
+            if (isDebug) {
+                // Nest this in the debug check so that loop doesn't have to run always.
+                try {
                     logUtils.debugLog(
-                        "Checking for dismiss eligibility.\n" +
-                                "matchesWindowsChanges: $matchesWindowsChanged\n" +
-                                "matchesWindowStateChanged: $matchesWindowStateChanged\n" +
-                                "packageName: ${event.packageName}\n" +
-                                "handlingClick: ${globalState.handlingClick.value}",
+                        "Source Node ID: ${event.sourceNodeId}, Window ID: ${event.windowId}, Source ID Name: ${event.source?.viewIdResourceName}",
                         null,
                     )
 
-                    if ((matchesWindowsChanged || matchesWindowStateChanged)
-                        && event.packageName != packageName
-                        && globalState.handlingClick.value.isNotEmpty()
-                    ) {
-                        logUtils.debugLog("Starting dismiss Activity because of window change.", null)
-                        DismissOrUnlockActivity.launch(context)
-
-                        if (globalState.handlingClick.value.containsKey(DrawerDelegate.ID)) {
-                            logUtils.debugLog("Hiding drawer because of window change", null)
-                            eventManager.sendEvent(Event.CloseDrawer)
-                        }
-
-                        globalState.handlingClick.value = mapOf()
+                    if (event.recordCount > 0) {
+                        logUtils.debugLog(
+                            "Records: ${
+                                run {
+                                    val records = ArrayList<String>()
+                                    for (i in 0 until event.recordCount) {
+                                        val record = event.getRecord(i)
+                                        records.add("$record ${record.sourceNodeId} ${record.windowId} ${record.source?.viewIdResourceName}")
+                                    }
+                                    records.joinToString(",,,,,,,,")
+                                }
+                            }",
+                            null,
+                        )
                     }
+                } catch (e: Exception) {
+                    logUtils.debugLog("Error printing debug info", e)
                 }
+            }
 
-                if ((event.eventType == AccessibilityEvent.TYPE_WINDOWS_CHANGED
-                            || event.eventType == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED) && event.packageName != null
+            logUtils.debugLog(
+                "Accessibility event: $event, " +
+                        "isScreenOn: ${lsDisplayManager.isAnyDisplayOn}, " +
+                        "wasOnKeyguard: ${globalState.wasOnKeyguard.value}, " +
+                        "${drawerDelegate.state}",
+                null,
+            )
+
+            if (prefManager.widgetFrameEnabled) {
+                frameDelegates.forEach { (val frameDelegate = value) ->
+                    frameDelegate.updateStateAndWindowState(
+                        updateAccessibility = true,
+                        transform = {
+                            it.copy(
+                                screenOrientation = frameDelegate.screenOrientation ?: it.screenOrientation,
+                            )
+                        },
+                    )
+                }
+            }
+
+            runWindowOperation(
+                frameDelegates = frameDelegates,
+                drawerDelegate = drawerDelegate,
+                getWindows = getWindows,
+            )
+
+            // Some logic for making the drawer go away or system dialogs dismiss when widgets launch Activities indirectly.
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                val matchesWindowsChanged =
+                    event.eventType == AccessibilityEvent.TYPE_WINDOWS_CHANGED
+                            && ((event.windowChanges and AccessibilityEvent.WINDOWS_CHANGE_ADDED != 0)
+                            || (event.windowChanges and AccessibilityEvent.WINDOWS_CHANGE_ACTIVE != 0))
+                val matchesWindowStateChanged =
+                    event.eventType == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED
+
+                logUtils.debugLog(
+                    "Checking for dismiss eligibility.\n" +
+                            "matchesWindowsChanges: $matchesWindowsChanged\n" +
+                            "matchesWindowStateChanged: $matchesWindowStateChanged\n" +
+                            "packageName: ${event.packageName}\n" +
+                            "handlingClick: ${globalState.handlingClick.value}",
+                    null,
+                )
+
+                if ((matchesWindowsChanged || matchesWindowStateChanged)
+                    && event.packageName != packageName
+                    && globalState.handlingClick.value.isNotEmpty()
                 ) {
+                    logUtils.debugLog("Starting dismiss Activity because of window change.", null)
+                    DismissOrUnlockActivity.launch(context)
+
+                    if (globalState.handlingClick.value.containsKey(DrawerDelegate.ID)) {
+                        logUtils.debugLog("Hiding drawer because of window change", null)
+                        eventManager.sendEvent(Event.CloseDrawer)
+                    }
+
                     globalState.handlingClick.value = mapOf()
                 }
+            }
 
-                if (prefManager.widgetFrameEnabled) {
-                    frameDelegates.forEach { (val frameDelegate = value) ->
-                        frameDelegate.updateStateAndWindowState(true)
-                    }
+            if ((event.eventType == AccessibilityEvent.TYPE_WINDOWS_CHANGED
+                        || event.eventType == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED) && event.packageName != null
+            ) {
+                globalState.handlingClick.value = mapOf()
+            }
+
+            if (prefManager.widgetFrameEnabled) {
+                frameDelegates.forEach { (val frameDelegate = value) ->
+                    frameDelegate.updateStateAndWindowState(true)
                 }
             }
-        } finally {
-            try {
-                //Make sure to recycle the copy of the event.
-                @Suppress("DEPRECATION")
-                event.recycle()
-            } catch (_: IllegalStateException) {
-                //Sometimes the event is already recycled somehow.
-            }
         }
+
     }
 }
 

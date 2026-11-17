@@ -180,7 +180,17 @@ class Accessibility : AccessibilityService(), CoroutineScope by MainScope(), Eve
                     kgm = kgm,
                     imm = imm,
                     getWindows = ::getWindowsSafely,
-                ),
+                ).also { job ->
+                    job.invokeOnCompletion {
+                        try {
+                            //Make sure to recycle the copy of the event.
+                            @Suppress("DEPRECATION")
+                            event.recycle()
+                        } catch (_: IllegalStateException) {
+                            //Sometimes the event is already recycled somehow.
+                        }
+                    }
+                },
             )
         }
     }
