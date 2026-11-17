@@ -185,7 +185,7 @@ class Accessibility : AccessibilityService(), CoroutineScope by MainScope(), Eve
                         try {
                             //Make sure to recycle the copy of the event.
                             @Suppress("DEPRECATION")
-                            event.recycle()
+                            eventCopy.recycle()
                         } catch (_: IllegalStateException) {
                             //Sometimes the event is already recycled somehow.
                         }
