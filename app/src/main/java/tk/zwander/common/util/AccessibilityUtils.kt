@@ -713,8 +713,7 @@ object AccessibilityUtils {
 
             if (prefManager.widgetFrameEnabled) {
                 frameDelegates.forEach { (val frameDelegate = value) ->
-                    frameDelegate.updateStateAndWindowState(
-                        updateAccessibility = true,
+                    frameDelegate.updateState(
                         transform = {
                             it.copy(
                                 screenOrientation = frameDelegate.screenOrientation ?: it.screenOrientation,
