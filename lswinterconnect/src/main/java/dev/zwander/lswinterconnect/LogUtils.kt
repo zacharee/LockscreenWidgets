@@ -106,29 +106,79 @@ class LogUtils private constructor(
 
     private fun createLogFileWriter(): BufferedWriter = FileOutputStream(logFile, true).bufferedWriter()
 
-    fun debugLog(message: String, throwable: Throwable? = DefaultException(), leaveBreadcrumb: Boolean = true, extras: Map<String, Any?> = mapOf()) {
+    fun debugLog(
+        message: String,
+        throwable: Throwable? = DefaultException(),
+        leaveBreadcrumb: Boolean = true,
+        extras: Map<String, Any?> = mapOf(),
+    ) {
         launch(loggingDispatcher) {
-            if (leaveBreadcrumb) {
-                BugsnagUtils.leaveBreadcrumb(
-                    message,
-                    (throwable?.takeIf { it !is DefaultException }?.let { mapOf("error" to throwable.stringify()) } ?: mapOf()) + extras,
-                    BreadcrumbType.LOG,
-                )
-            }
+            writeDebugLog(
+                message = message,
+                throwable = throwable,
+                extras = extras,
+                leaveBreadcrumb = leaveBreadcrumb,
+            )
+        }
+    }
 
-            if (isDebug()) {
-                val fullMessage = generateFullMessage(
-                    message,
-                    throwable,
-                    extras,
-                )
+    /**
+     * @param message the message recorded as a breadcrumb. This is always evaluated, even when
+     * debug logging is disabled, so keep it cheap.
+     * @param throwable a throwable to record. Defaults to null, since an exception created inside
+     * a lambda would have a useless stack trace.
+     * @param debugMessage an optional, more detailed message to use in place of [message] when
+     * debug logging is enabled. Use this for anything expensive to build, like node tree dumps.
+     */
+    fun debugLog(
+        message: () -> String,
+        throwable: () -> Throwable? = { null },
+        leaveBreadcrumb: Boolean = true,
+        extras: () -> Map<String, Any?> = { mapOf() },
+        debugMessage: (() -> String)? = null,
+    ) {
+        launch(loggingDispatcher) {
+            writeDebugLog(
+                message = message(),
+                throwable = throwable(),
+                extras = extras(),
+                leaveBreadcrumb = leaveBreadcrumb,
+                debugMessage = debugMessage,
+            )
+        }
+    }
 
-                Log.e(DEBUG_LOG_TAG, fullMessage)
+    /**
+     * Shared implementation for the [debugLog] overloads. [debugMessage] is only invoked when
+     * debug logging is enabled.
+     */
+    private fun writeDebugLog(
+        message: String,
+        throwable: Throwable?,
+        extras: Map<String, Any?>,
+        leaveBreadcrumb: Boolean,
+        debugMessage: (() -> String)? = null,
+    ) {
+        if (leaveBreadcrumb) {
+            BugsnagUtils.leaveBreadcrumb(
+                message,
+                (throwable?.takeIf { it !is DefaultException }?.let { mapOf("error" to it.stringify()) } ?: mapOf()) + extras,
+                BreadcrumbType.LOG,
+            )
+        }
 
-                if (writeToFile) {
-                    synchronized(logFile) {
-                        logFileHandle.writeSafely("\n\n$fullMessage")
-                    }
+        if (isDebug()) {
+            val fullMessage = generateFullMessage(
+                debugMessage?.invoke() ?: message,
+                throwable,
+                extras,
+            )
+
+            Log.e(DEBUG_LOG_TAG, fullMessage)
+
+            if (writeToFile) {
+                synchronized(logFile) {
+                    logFileHandle.writeSafely("\n\n$fullMessage")
                 }
             }
         }
