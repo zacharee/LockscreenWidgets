@@ -165,7 +165,7 @@ class Accessibility : AccessibilityService(), CoroutineScope by MainScope(), Eve
 
     override fun onAccessibilityEvent(event: AccessibilityEvent) {
         if (event.eventType == AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED) {
-            if (AccessibilityUtils.IDMaps.sysUiPackageNames[event.packageName] == null) {
+            if (AccessibilityUtils.IDMaps.sysUiPackageNames[event.packageName?.toString()] == null) {
                 // Limit content change processing to System UI-related windows.
                 return
             }
