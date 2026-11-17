@@ -383,6 +383,7 @@ object AccessibilityUtils {
             topAppWindowPackageName = topAppWindowPackageName,
             hasHideForPresentApp = hasHideForPresentApp,
             nodeState = nodeState,
+            nonPresentIds = prefManager.nonPresentIds,
         )
     }
 
@@ -571,7 +572,7 @@ object AccessibilityUtils {
                             !windowInfo.nodeState.hasClearAllButton.value)
                 globalState.hideForPresentIds[displayId] = windowInfo.nodeState.hideForPresentIds.value
                 globalState.hideForNonPresentIds[displayId] = windowInfo.sysUiWindowViewIds.isNotEmpty() &&
-                        prefManager.nonPresentIds.any { it !in windowInfo.sysUiWindowViewIds }
+                        windowInfo.nonPresentIds.any { it !in windowInfo.sysUiWindowViewIds }
 
                 relevantFrameDelegates.forEach { (val frameDelegate = value) ->
                     frameDelegate.updateWindowState(
