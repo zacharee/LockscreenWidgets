@@ -570,7 +570,8 @@ object AccessibilityUtils {
                     (windowInfo.nodeState.hasMoreButton.value) || (windowInfo.nodeState.hasSettingsContainerButton.value &&
                             !windowInfo.nodeState.hasClearAllButton.value)
                 globalState.hideForPresentIds[displayId] = windowInfo.nodeState.hideForPresentIds.value
-                globalState.hideForNonPresentIds[displayId] = prefManager.nonPresentIds.any { it !in windowInfo.sysUiWindowViewIds }
+                globalState.hideForNonPresentIds[displayId] = windowInfo.sysUiWindowViewIds.isNotEmpty() &&
+                        prefManager.nonPresentIds.any { it !in windowInfo.sysUiWindowViewIds }
 
                 relevantFrameDelegates.forEach { (val frameDelegate = value) ->
                     frameDelegate.updateWindowState(
