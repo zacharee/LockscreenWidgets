@@ -403,7 +403,7 @@ object AccessibilityUtils {
         parentNode: AccessibilityNodeInfo,
         list: ConcurrentLinkedQueue<AccessibilityNodeInfo>,
         ids: ConcurrentLinkedQueue<String>,
-        nodeAddedCallback: ((AccessibilityNodeInfo) -> Unit),
+        nodeAddedCallback: (AccessibilityNodeInfo) -> Unit,
     ) {
         val pendingNodes = ArrayDeque<AccessibilityNodeInfo>()
         pendingNodes.addLast(parentNode)
