@@ -2,6 +2,7 @@ package tk.zwander.common.compose
 
 import android.annotation.SuppressLint
 import android.appwidget.AppWidgetHostView
+import android.appwidget.AppWidgetManager
 import android.appwidget.AppWidgetProviderInfo
 import android.content.Intent
 import android.content.SharedPreferences
@@ -43,10 +44,7 @@ import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.IntSize
-import androidx.compose.ui.unit.LayoutDirection
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+import androidx.compose.ui.unit.*
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.view.NestedScrollingChild
 import androidx.core.view.forEach
@@ -73,6 +71,7 @@ import tk.zwander.common.util.*
 import tk.zwander.common.util.mitigations.SafeContextWrapper
 import tk.zwander.common.views.remote.ComposeAdapterView
 import tk.zwander.lockscreenwidgets.R
+import java.util.concurrent.atomic.AtomicReference
 import kotlin.math.absoluteValue
 import kotlin.math.min
 
@@ -615,36 +614,56 @@ private fun <VM : BaseDelegate.BaseViewModel<*, *>> VM.WidgetContents(
 
         LaunchedEffect(widgetView, width, height, data.id, data.safeSize, isResizingItem) {
             if (!isResizingItem) {
-                (widgetView as? AppWidgetHostView)?.apply {
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                        updateAppWidgetSize(
-                            manager.getAppWidgetOptions(appWidgetId),
-                            [
-                                SizeF(
-                                    width.value + 2 * paddingValue.value,
-                                    height.value + 2 * paddingValue.value,
-                                ),
-                            ],
-                        )
-                    } else {
-                        val adjustedWidth = width.value + 2 * paddingValue.value
-                        val adjustedHeight = height.value + 2 * paddingValue.value
+                (widgetView as? AppWidgetHostView)?.updateAppWidgetSizeCompat(
+                    manager = manager,
+                    width = width,
+                    height = height,
+                    padding = paddingValue,
+                )
+            }
+        }
 
-                        @Suppress("DEPRECATION")
-                        updateAppWidgetSize(
-                            manager.getAppWidgetOptions(appWidgetId),
-                            adjustedWidth.toInt(),
-                            adjustedHeight.toInt(),
-                            adjustedWidth.toInt(),
-                            adjustedHeight.toInt(),
+        val hostContainer = remember { AtomicReference<FrameLayout?>(null) }
+        val currentWidth by rememberUpdatedState(width)
+        val currentHeight by rememberUpdatedState(height)
+
+        DisposableEffect(widgetView) {
+            val hostView = widgetView as? AppWidgetHostView
+                ?: return@DisposableEffect onDispose {}
+
+            // There's only ever one AppWidgetHostView per widget, no matter how many hosts
+            // display it (the frame, the widget drawer, settings previews). The widget's size
+            // options are stored per widget too, so a host that displayed the widget at a
+            // smaller size leaves those options (and therefore the widget's layout) behind.
+            // Re-assert the size for this host whenever the view is attached back to it.
+            // Right now, this is just a theoretical/future issue, since widgets for one
+            // feature are never used in another place.
+            val listener = object : View.OnAttachStateChangeListener {
+                override fun onViewAttachedToWindow(view: View) {
+                    if (view.parent === hostContainer.get()) {
+                        (view as? AppWidgetHostView)?.updateAppWidgetSizeCompat(
+                            manager = manager,
+                            width = currentWidth,
+                            height = currentHeight,
+                            padding = paddingValue,
                         )
                     }
                 }
+
+                override fun onViewDetachedFromWindow(view: View) = Unit
+            }
+
+            hostView.addOnAttachStateChangeListener(listener)
+
+            onDispose {
+                hostView.removeOnAttachStateChangeListener(listener)
             }
         }
 
         AndroidView(
-            factory = { FrameLayout(it) },
+            factory = { context ->
+                FrameLayout(context).also { hostContainer.set(it) }
+            },
             modifier = Modifier.fillMaxSize(),
             update = {
                 if (!isResizingItem) {
@@ -663,6 +682,36 @@ private fun <VM : BaseDelegate.BaseViewModel<*, *>> VM.WidgetContents(
                     }
                 }
             },
+        )
+    }
+}
+
+/**
+ * Reports [width] x [height] (plus the widget's default padding, which the framework subtracts
+ * again) as the size the widget is displayed at.
+ */
+private fun AppWidgetHostView.updateAppWidgetSizeCompat(
+    manager: AppWidgetManager,
+    width: Dp,
+    height: Dp,
+    padding: Dp,
+) {
+    val adjustedWidth = width.value + 2 * padding.value
+    val adjustedHeight = height.value + 2 * padding.value
+
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+        updateAppWidgetSize(
+            manager.getAppWidgetOptions(appWidgetId),
+            [SizeF(adjustedWidth, adjustedHeight)],
+        )
+    } else {
+        @Suppress("DEPRECATION")
+        updateAppWidgetSize(
+            manager.getAppWidgetOptions(appWidgetId),
+            adjustedWidth.toInt(),
+            adjustedHeight.toInt(),
+            adjustedWidth.toInt(),
+            adjustedHeight.toInt(),
         )
     }
 }

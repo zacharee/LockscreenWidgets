@@ -8,6 +8,7 @@ import android.appwidget.AppWidgetProvider
 import android.content.Context
 import android.content.Intent
 import android.content.res.ColorStateList
+import android.content.res.Configuration
 import android.graphics.BlendMode
 import android.os.*
 import android.util.SizeF
@@ -43,6 +44,7 @@ import tk.zwander.lockscreenwidgets.BuildConfig
 import tk.zwander.lockscreenwidgets.R
 import tk.zwander.lockscreenwidgets.activities.WidgetStackConfigure
 import tk.zwander.lockscreenwidgets.util.WidgetFrameDelegate
+import kotlin.math.abs
 import kotlin.math.floor
 import kotlin.math.roundToInt
 
@@ -398,11 +400,19 @@ class WidgetStackProvider : AppWidgetProvider() {
         val applyPadding = context.prefManager.widgetStackWidgetPadding[stackId]?.get(innerWidgetId) ?: false
         val iconColor = style.getIconColor(context.themedContext)
         val realSize = options?.let { options ->
-            extractSizeFromOptions(options, applyPadding).also { size ->
-                options.putInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH, size.width.roundToInt())
-                options.putInt(AppWidgetManager.OPTION_APPWIDGET_MAX_WIDTH, size.width.roundToInt())
-                options.putInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT, size.height.roundToInt())
-                options.putInt(AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT, size.height.roundToInt())
+            extractSizeFromOptions(
+                options = options,
+                applyPadding = applyPadding,
+                showBottomBar = style.showBottomBar,
+                landscape = context.resources.configuration.orientation ==
+                        Configuration.ORIENTATION_LANDSCAPE,
+            ).also { size ->
+                // The options that get forwarded to the nested widget have to describe the
+                // same size the stack just computed. Bundles that only have their MIN/MAX
+                // values rewritten keep the stack's own (unadjusted) OPTION_APPWIDGET_SIZES,
+                // so widgets that read the size list see a different size than the one the
+                // stack is actually laying them out at.
+                options.putSizeOptions(size)
             }
         }
 
@@ -990,31 +1000,109 @@ class WidgetStackProvider : AppWidgetProvider() {
                 .setAction(ACTION_TOGGLE_BOTTOM_BAR)
         }
 
-        fun extractSizeFromOptions(options: Bundle, applyPadding: Boolean): SizeF {
-            val horizontalPaddingDp = if (applyPadding) 16 else 0
-            val verticalPaddingDp = if (applyPadding) 8 else 0
-            val bottomBarHeightDp = 36
-            val optionsWidth = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MAX_WIDTH).toFloat()
-            val optionsHeight = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT).toFloat()
+        fun Bundle.putSizeOptions(size: SizeF) {
+            val width = size.width.roundToInt()
+            val height = size.height.roundToInt()
 
-            (val width = first, val height = second) = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                val allSizes = BundleCompat.getParcelableArrayList(
+            putInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH, width)
+            putInt(AppWidgetManager.OPTION_APPWIDGET_MAX_WIDTH, width)
+            putInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT, height)
+            putInt(AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT, height)
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                putParcelableArrayList(
+                    AppWidgetManager.OPTION_APPWIDGET_SIZES,
+                    arrayListOf(SizeF(width.toFloat(), height.toFloat())),
+                )
+            }
+        }
+
+        fun currentSizeFromOptions(options: Bundle, landscape: Boolean): SizeF {
+            val reportedSizes = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                BundleCompat.getParcelableArrayList(
                     options,
                     AppWidgetManager.OPTION_APPWIDGET_SIZES,
                     SizeF::class.java,
-                )
-
-                (allSizes?.minOfOrNull { it.width } ?: optionsWidth) to
-                        (allSizes?.maxOfOrNull { it.height } ?: optionsHeight)
+                )?.filter { it.isValidSize }?.takeIf { it.isNotEmpty() }
             } else {
-                optionsWidth to optionsHeight
+                null
             }
 
+            return when {
+                reportedSizes == null -> options.getBoundsSize(landscape)
+                reportedSizes.size == 1 -> reportedSizes.first()
+                else -> {
+                    val boundsSize = options.getBoundsSize(landscape)
+
+                    reportedSizes.firstOrNull { it.isSameSizeAs(boundsSize) }
+                        // The reported sizes don't line up with the reported bounds, so fall
+                        // back to a shape that matches the orientation we're in rather than
+                        // assuming the stack is always portrait.
+                        ?: reportedSizes.firstOrNull { (it.width >= it.height) == landscape }
+                        ?: reportedSizes.maxByOrNull { it.width * it.height }
+                        ?: boundsSize
+                }
+            }
+        }
+
+        fun extractSizeFromOptions(
+            options: Bundle,
+            applyPadding: Boolean,
+            showBottomBar: Boolean,
+            landscape: Boolean,
+        ): SizeF {
+            val horizontalPaddingDp = if (applyPadding) 16 else 0
+            val verticalPaddingDp = if (applyPadding) 8 else 0
+            // The bottom bar is 32dp tall and has a 4dp top margin.
+            val bottomBarHeightDp = if (showBottomBar) 36 else 0
+
+            val currentSize = currentSizeFromOptions(options, landscape)
+
             return SizeF(
-                (width - horizontalPaddingDp),
-                (height - bottomBarHeightDp - verticalPaddingDp),
+                (currentSize.width - horizontalPaddingDp).coerceAtLeast(1f),
+                (currentSize.height - bottomBarHeightDp - verticalPaddingDp).coerceAtLeast(1f),
             )
         }
+
+        /**
+         * The size the host says the widget currently is, taking the orientation into account.
+         *
+         * Hosts report the portrait size as MIN_WIDTH x MAX_HEIGHT and the landscape size as
+         * MAX_WIDTH x MIN_HEIGHT, so the two dimensions have to be paired consistently instead
+         * of assuming one of those shapes.
+         */
+        private fun Bundle.getBoundsSize(landscape: Boolean): SizeF {
+            val portraitSize = SizeF(
+                getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH).toFloat(),
+                getInt(AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT).toFloat(),
+            )
+            val landscapeSize = SizeF(
+                getInt(AppWidgetManager.OPTION_APPWIDGET_MAX_WIDTH).toFloat(),
+                getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT).toFloat(),
+            )
+
+            val preferred = if (landscape) landscapeSize else portraitSize
+            val fallback = if (landscape) portraitSize else landscapeSize
+
+            return when {
+                preferred.isValidSize -> preferred
+                fallback.isValidSize -> fallback
+                // Neither pairing has usable values (a host that only set some of the keys), so
+                // use the outer bounds.
+                else -> SizeF(
+                    maxOf(portraitSize.width, landscapeSize.width),
+                    maxOf(portraitSize.height, landscapeSize.height),
+                )
+            }
+        }
+
+        private fun SizeF.isSameSizeAs(other: SizeF): Boolean {
+            // MIN/MAX are stored as rounded ints while the size list keeps the exact values.
+            return abs(width - other.width) <= 1f && abs(height - other.height) <= 1f
+        }
+
+        private val SizeF.isValidSize: Boolean
+            get() = width > 0f && height > 0f
 
         /**
          * The monitor service is only needed when there are widget stacks and the accessibility

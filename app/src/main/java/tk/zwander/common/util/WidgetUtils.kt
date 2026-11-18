@@ -16,6 +16,7 @@ import android.widget.RemoteViews
 import android.widget.TextView
 import dev.zwander.lswinterconnect.safeApplicationContext
 import tk.zwander.lockscreenwidgets.R
+import java.lang.reflect.Field
 import kotlin.math.floor
 
 val Context.appWidgetManager: AppWidgetManager
@@ -129,8 +130,83 @@ fun AppWidgetProviderInfo.getCellHeightCompat(totalHeightPx: Int, rowCount: Int)
         .coerceAtLeast(1)
 }
 
-@SuppressLint("DiscouragedPrivateApi")
+@SuppressLint("PrivateApi")
+private fun remoteViewsField(name: String): Field? {
+    return try {
+        RemoteViews::class.java.getDeclaredField(name).apply { isAccessible = true }
+    } catch (_: Throwable) {
+        null
+    }
+}
+
+/**
+ * The size-dependent layouts of this [RemoteViews] (if it has any) paired with the size each
+ * one was designed for.
+ */
+private val sizedRemoteViewsField by lazy { remoteViewsField("mSizedRemoteViews") }
+
+private val remoteViewsIdealSizeField by lazy { remoteViewsField("mIdealSize") }
+
+@SuppressLint("PrivateApi")
+private fun RemoteViews.getSizedVariants(): List<Pair<RemoteViews, SizeF>>? {
+    val variantsField = sizedRemoteViewsField ?: return null
+    val idealSizeField = remoteViewsIdealSizeField ?: return null
+
+    val variants = try {
+        variantsField.get(this) as? List<*>
+    } catch (_: Throwable) {
+        null
+    } ?: return null
+
+    val result = variants.mapNotNull { variant ->
+        val remoteViews = variant as? RemoteViews ?: return@mapNotNull null
+        val idealSize = try {
+            idealSizeField.get(remoteViews) as? SizeF
+        } catch (_: Throwable) {
+            null
+        } ?: return@mapNotNull null
+
+        remoteViews to idealSize
+    }
+
+    return result.takeIf { it.isNotEmpty() }
+}
+
+/**
+ * Picks the size-dependent layout that fills [size] the best.
+ *
+ * The framework's own selection falls back to the *smallest* layout when none of the layouts
+ * fit inside the given size. A widget stack reserves space for its bottom bar (and optionally
+ * for padding), so a widget can end up a few dp short of the layout it was designed for and
+ * then be drawn at its smallest size, leaving most of the stack empty. Prefer the largest
+ * layout that fits, and otherwise the one closest to the space that's actually available.
+ */
+@SuppressLint("PrivateApi")
+private fun RemoteViews.pickSizedVariant(size: SizeF): RemoteViews? {
+    val variants = getSizedVariants() ?: return null
+
+    // The framework allows a 1dp margin to account for rounding.
+    val fits = variants.filter {
+        it.second.width <= size.width + 1f && it.second.height <= size.height + 1f
+    }
+
+    return if (fits.isNotEmpty()) {
+        fits.maxByOrNull { it.second.width * it.second.height }?.first
+    } else {
+        variants.minByOrNull {
+            val widthDelta = it.second.width - size.width
+            val heightDelta = it.second.height - size.height
+            widthDelta * widthDelta + heightDelta * heightDelta
+        }?.first
+    }
+}
+
+@SuppressLint("DiscouragedPrivateApi", "PrivateApi")
 fun RemoteViews.getRemoteViewsToApplyCompat(context: Context, size: SizeF? = null): RemoteViews {
+    if (size != null && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+        pickSizedVariant(size)?.let { return it }
+    }
+
     return try {
         getRemoteViewsToApply(context, size)
     } catch (_: NoSuchMethodError) {

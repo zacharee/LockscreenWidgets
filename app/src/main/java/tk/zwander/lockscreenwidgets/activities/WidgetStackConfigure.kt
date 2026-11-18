@@ -7,11 +7,11 @@ import android.appwidget.AppWidgetProviderInfo
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
+import android.content.res.Configuration
 import android.graphics.drawable.Drawable
 import android.os.Build
 import android.os.Bundle
 import android.os.ServiceManager
-import android.util.SizeF
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -43,6 +43,7 @@ import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.shadow.Shadow
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalInspectionMode
@@ -55,7 +56,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.core.content.IntentCompat
-import androidx.core.os.BundleCompat
 import com.android.internal.appwidget.IAppWidgetService
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -323,7 +323,10 @@ fun Content(
                 localWidgetList = newWidgets
             }
 
-            val widgetAspectRatio by remember {
+            val landscape = LocalConfiguration.current.orientation ==
+                    Configuration.ORIENTATION_LANDSCAPE
+
+            val widgetAspectRatio by remember(landscape) {
                 derivedStateOf {
                     if (localInspectionMode) {
                         16 / 9f
@@ -334,21 +337,14 @@ fun Content(
                                 ?: widgets.firstOrNull()?.id
                                 ?: widgetId,
                         ) ?: Bundle()
-                        val minWidth = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH)
-                        val maxHeight = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT)
+                        val stackSize = WidgetStackProvider.currentSizeFromOptions(
+                            options = options,
+                            landscape = landscape,
+                        )
 
-                        val firstSize = BundleCompat.getParcelableArrayList(
-                            options,
-                            AppWidgetManager.OPTION_APPWIDGET_SIZES,
-                            SizeF::class.java,
-                        )?.firstOrNull()
-
-                        maxHeight.takeIf { it != 0 }?.let { maxHeight ->
-                            (minWidth / maxHeight.toFloat())
+                        stackSize.height.takeIf { it != 0f }?.let { height ->
+                            stackSize.width / height
                         }?.takeIf { !it.isNaN() && it > 0 }
-                            ?: firstSize?.let { firstSize ->
-                                firstSize.height.takeIf { it != 0f }?.let { height -> firstSize.width / height }
-                            }?.takeIf { !it.isNaN() && it > 0 }
                             ?: (16 / 9f)
                     }
                 }
