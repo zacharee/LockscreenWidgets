@@ -789,6 +789,9 @@ object AccessibilityUtils {
                             )
                         },
                     )
+
+                    // Eagerly hide the widget frame before parsing SysUI nodes.
+                    frameDelegate.hideIfShouldNotShow()
                 }
             }
 

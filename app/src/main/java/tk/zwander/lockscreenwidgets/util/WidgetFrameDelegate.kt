@@ -517,6 +517,16 @@ open class WidgetFrameDelegate protected constructor(
         updateWindowState(updateAccessibility)
     }
 
+    suspend fun hideIfShouldNotShow() {
+        if (!isAttached) {
+            return
+        }
+
+        if (!canShow()) {
+            updateWindowState()
+        }
+    }
+
     private suspend fun addWindow() {
         logUtils.debugLog(
             "Adding overlay",
@@ -815,28 +825,30 @@ open class WidgetFrameDelegate protected constructor(
 
         return (forced() || forSecondaryDisplay() || forPreview() || forNotificationCenter() || forLockscreen()).also {
             logUtils.debugLog(
-                "canShow $id: $it\n" +
-                        "forced: ${forced()}, forSecondaryDisplay: ${forSecondaryDisplay()}, forPreview: ${forPreview()}, forNotificationCenter: ${forNotificationCenter()}, forLockscreen: ${forLockscreen()}, forCommon: ${forCommon()}\n" +
-                        "state: ${state}\n" +
-                        "globalState: $globalState\n" +
-                        "showOnMainLockScreen: ${showOnMainLockScreen}\n" +
-                        "widgetFrameEnabled: ${widgetFrameEnabled}\n" +
-                        "hideOnSecurityPage: ${hideOnSecurityPage}\n" +
-                        "hideOnNotifications: ${hideOnNotifications}\n" +
-                        "hideOnNotificationShade: ${hideOnNotificationShade}\n" +
-                        "presentIds: ${prefManager.presentIds}\n" +
-                        "nonPresentIds: ${prefManager.nonPresentIds}\n" +
-                        "hideInLandscape: ${hideInLandscape}\n" +
-                        "showInNotificationCenter: ${showInNotificationShade}\n" +
-                        "hideOnEdgePanel: ${hideOnEdgePanel}\n" +
-                        "canShowFrameFromTasker: ${canShowFromTasker}\n" +
-                        "forceShowFrame: ${forceShow}\n" +
-                        "hideOnFaceWidgets: ${hideOnFaceWidgets}\n" +
-                        "hideWhenKeyboardShown: ${hideWhenKeyboardShown}\n" +
-                        "displayPower: ${isDisplayOn}\n" +
-                        "showingPowerMenu: ${showingPowerMenu}\n" +
-                        "showOverPowerMenu: ${showOverPowerMenu}\n",
-                null,
+                message = { "canShow $id: $it" },
+                debugMessage = {
+                    "canShow $id: $it\n" +
+                            "forced: ${forced()}, forSecondaryDisplay: ${forSecondaryDisplay()}, forPreview: ${forPreview()}, forNotificationCenter: ${forNotificationCenter()}, forLockscreen: ${forLockscreen()}, forCommon: ${forCommon()}\n" +
+                            "state: ${state}\n" +
+                            "globalState: $globalState\n" +
+                            "showOnMainLockScreen: ${showOnMainLockScreen}\n" +
+                            "widgetFrameEnabled: ${widgetFrameEnabled}\n" +
+                            "hideOnSecurityPage: ${hideOnSecurityPage}\n" +
+                            "hideOnNotifications: ${hideOnNotifications}\n" +
+                            "hideOnNotificationShade: ${hideOnNotificationShade}\n" +
+                            "presentIds: ${prefManager.presentIds}\n" +
+                            "nonPresentIds: ${prefManager.nonPresentIds}\n" +
+                            "hideInLandscape: ${hideInLandscape}\n" +
+                            "showInNotificationCenter: ${showInNotificationShade}\n" +
+                            "hideOnEdgePanel: ${hideOnEdgePanel}\n" +
+                            "canShowFrameFromTasker: ${canShowFromTasker}\n" +
+                            "forceShowFrame: ${forceShow}\n" +
+                            "hideOnFaceWidgets: ${hideOnFaceWidgets}\n" +
+                            "hideWhenKeyboardShown: ${hideWhenKeyboardShown}\n" +
+                            "displayPower: ${isDisplayOn}\n" +
+                            "showingPowerMenu: ${showingPowerMenu}\n" +
+                            "showOverPowerMenu: ${showOverPowerMenu}\n"
+                },
             )
         }
     }
