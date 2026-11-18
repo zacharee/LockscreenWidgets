@@ -55,7 +55,10 @@
             <ViewFlipper
                 android:id="@+id/widget_content"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent">
+                android:layout_height="match_parent"
+                android:inAnimation="@anim/stack_page_in"
+                android:outAnimation="@anim/stack_page_out"
+                android:animateFirstView="false">
 
                 <LinearLayout
                     android:id="@+id/widget_content_even"

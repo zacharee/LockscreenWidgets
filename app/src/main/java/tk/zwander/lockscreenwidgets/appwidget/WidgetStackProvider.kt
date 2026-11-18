@@ -705,7 +705,12 @@ class WidgetStackProvider : AppWidgetProvider() {
             root.addView(R.id.widget_content_third, errorViews)
         }
 
-        root.setDisplayedChild(R.id.widget_content, realRem)
+        // ViewAnimator re-runs its in-animation for setDisplayedChild even when the target
+        // child is already the displayed one. The check here prevents double-animations
+        // when changing pages.
+        if (!fromChild && !refresh) {
+            root.setDisplayedChild(R.id.widget_content, realRem)
+        }
     }
 
     private fun fillInPageRow(
