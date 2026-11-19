@@ -1,5 +1,6 @@
 package tk.zwander.common.util
 
+import kotlinx.atomicfu.atomic
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -12,6 +13,39 @@ object DebugIDsManager {
 
     private val mutableItems = MutableStateFlow<Map<Int, List<IDData>>>(mapOf())
     val items: StateFlow<Map<Int, List<IDData>>> = mutableItems.asStateFlow()
+
+    private val idListWidgetIds = atomic<Set<Int>>(emptySet())
+
+    /**
+     * Whether anything is currently consuming the full visible-ID list. If nothing is,
+     * accessibility passes can skip collecting every visible view ID.
+     */
+    val shouldCollectIds: Boolean
+        get() = mutableItems.subscriptionCount.value > 0 || idListWidgetIds.value.isNotEmpty()
+
+    /**
+     * Replaces the known ID list widget IDs. [android.appwidget.AppWidgetManager.getAppWidgetIds]
+     * returns every instance for this provider across all hosts, so this is authoritative.
+     */
+    fun setExistingIdListWidgetIds(ids: Collection<Int>) {
+        idListWidgetIds.value = ids.toSet()
+    }
+
+    /**
+     * [android.appwidget.AppWidgetProvider.onUpdate] only reports the IDs belonging to the
+     * host that sent the broadcast, so merge instead of replacing.
+     */
+    fun addIdListWidgetIds(ids: Collection<Int>) {
+        idListWidgetIds.value += ids.toSet()
+    }
+
+    fun removeIdListWidgetIds(ids: Collection<Int>) {
+        idListWidgetIds.value -= ids.toSet()
+    }
+
+    fun clearIdListWidgetIds() {
+        idListWidgetIds.value = emptySet()
+    }
 
     private val comparator = Comparator<IDData> { o1, o2 ->
         when {

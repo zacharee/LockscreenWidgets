@@ -53,13 +53,85 @@ object AccessibilityUtils {
         val showingSecurityInput: AtomicBoolean = atomic(false),
         val hasMoreButton: AtomicBoolean = atomic(false),
         val hideForPresentIds: AtomicBoolean = atomic(false),
+        val hideForNonPresentIds: AtomicBoolean = atomic(false),
         val hasClearAllButton: AtomicBoolean = atomic(false),
         val hasSettingsContainerButton: AtomicBoolean = atomic(false),
         val onFaceWidgets: AtomicBoolean = atomic(false),
         val hasNotificationsShowing: AtomicBoolean = atomic(false),
         val showingPowerMenu: AtomicBoolean = atomic(false),
         val showingEdgePanel: AtomicBoolean = atomic(false),
+        val sawAnyVisibleViewId: AtomicBoolean = atomic(false),
     )
+
+    /**
+     * Describes what this accessibility pass actually needs to find. Any flag that isn't
+     * required can be ignored for the purposes of early-exiting the node walk.
+     */
+    private data class WalkRequirements(
+        val collectAllVisibleIds: Boolean,
+        val collectNodes: Boolean,
+        val requireMainLockScreen: Boolean,
+        val requireNotificationsPanel: Boolean,
+        val requireSecurityInput: Boolean,
+        val requireExpandedPanel: Boolean,
+        val requireFaceWidgets: Boolean,
+        val requireEdgePanel: Boolean,
+        val requirePowerMenu: Boolean,
+        /**
+         * Whether the walk may skip parts of the tree that can't change any decision. This is
+         * false when the full visible-ID set is needed (debugging / ID list widgets) or when the
+         * user configured IDs, since hide-for-ID decisions need a complete view of the tree.
+         */
+        val allowSkipping: Boolean,
+    ) {
+        /**
+         * Every "hide on X" preference can only be confirmed by *finding* X. Until each enabled
+         * one has been found, stopping early could leave a frame visible that should be hidden,
+         * so all of them (plus the positive show conditions) must be resolved first.
+         */
+        fun isSatisfied(state: NodeState): Boolean {
+            return (!requireMainLockScreen || state.onMainLockscreen.value) &&
+                    (!requireNotificationsPanel || state.showingNotificationsPanel.value) &&
+                    (!requireSecurityInput || state.showingSecurityInput.value) &&
+                    (!requireExpandedPanel || state.hasMoreButton.value) &&
+                    (!requireFaceWidgets || state.onFaceWidgets.value) &&
+                    (!requireEdgePanel || state.showingEdgePanel.value) &&
+                    (!requirePowerMenu || state.showingPowerMenu.value)
+        }
+
+        fun canStopEarly(state: NodeState): Boolean {
+            return allowSkipping && isSatisfied(state)
+        }
+    }
+
+    private fun Context.buildWalkRequirements(
+        frameDelegates: Map<Int, WidgetFrameDelegate>,
+        drawerDelegate: DrawerDelegate,
+    ): WalkRequirements {
+        val framePrefs = frameDelegates.values.map { it.framePrefs }
+        val collectAllVisibleIds = isDebug || DebugIDsManager.shouldCollectIds
+
+        return WalkRequirements(
+            collectAllVisibleIds = collectAllVisibleIds,
+            collectNodes = isDebug,
+            requireMainLockScreen = framePrefs.any { it.showOnMainLockScreen },
+            requireNotificationsPanel = framePrefs.any {
+                it.hideOnNotificationShade || it.showInNotificationShade || it.maskedMode
+            } || (prefManager.drawerEnabled &&
+                    drawerDelegate.isAttached &&
+                    prefManager.drawerHideWhenNotificationPanelOpen),
+            requireSecurityInput = framePrefs.any { it.hideOnSecurityPage },
+            // Only hasMoreButton can positively prove that the panel is fully expanded
+            // without having to see the rest of the tree.
+            requireExpandedPanel = framePrefs.any { it.showInNotificationShade },
+            requireFaceWidgets = framePrefs.any { it.hideOnFaceWidgets },
+            requireEdgePanel = framePrefs.any { it.hideOnEdgePanel },
+            requirePowerMenu = framePrefs.any { !it.showOverPowerMenu },
+            allowSkipping = !collectAllVisibleIds &&
+                    prefManager.presentIds.isEmpty() &&
+                    prefManager.nonPresentIds.isEmpty(),
+        )
+    }
 
     @SuppressLint("DiscouragedApi")
     data object IDMaps {
@@ -150,7 +222,6 @@ object AccessibilityUtils {
     private fun Context.processNode(
         nodeState: NodeState,
         node: AccessibilityNodeInfo,
-        presentIds: Set<String>,
         isPixelUI: Boolean,
     ) {
         val sourceNodeId = node.sourceNodeId
@@ -242,17 +313,6 @@ object AccessibilityUtils {
             }
         }
 
-        //Check to see if any of the user-specified IDs are present.
-        //If any are, the frame will be hidden.
-        if (!nodeState.hideForPresentIds.value && presentIds.isNotEmpty()) {
-            if (node.hasVisibleIds(presentIds)) {
-                logUtils.debugLog(
-                    message = { "Found present ID to hide for $sourceNodeId $viewIdResourceName" },
-                )
-                nodeState.hideForPresentIds.value = true
-            }
-        }
-
         if (!nodeState.showingPowerMenu.value) {
             if (node.hasVisibleIds(IDMaps.powerMenuIds)) {
                 logUtils.debugLog(
@@ -290,6 +350,7 @@ object AccessibilityUtils {
      */
     private fun Context.processWindows(
         windows: List<AccessibilityWindowInfo>,
+        requirements: WalkRequirements,
     ): WindowInfo {
         val nodeState = NodeState()
 
@@ -309,6 +370,9 @@ object AccessibilityUtils {
         var minSysUiWindowIndex = -1
 
         val presentIds = prefManager.presentIds
+        val nonPresentIds = prefManager.nonPresentIds
+        val configuredIds = presentIds + nonPresentIds
+        val foundConfiguredIds = HashSet<String>()
         val isPixelUI = isPixelUI
 
         val processed = windows.mapIndexed { index, rawWindow ->
@@ -330,17 +394,37 @@ object AccessibilityUtils {
                     minSysUiWindowIndex = index
                 }
 
-                addAllNodesToList(
-                    safeRoot,
-                    sysUiWindowNodes,
-                    sysUiWindowViewIds,
-                ) { node ->
-                    processNode(
+                if (requirements.collectAllVisibleIds ||
+                    !requirements.canStopEarly(nodeState)
+                ) {
+                    addAllNodesToList(
+                        parentNode = safeRoot,
+                        list = sysUiWindowNodes,
+                        ids = sysUiWindowViewIds,
                         nodeState = nodeState,
-                        node = node,
-                        presentIds = presentIds,
-                        isPixelUI = isPixelUI,
-                    )
+                        requirements = requirements,
+                        configuredIds = configuredIds,
+                        foundConfiguredIds = foundConfiguredIds,
+                    ) { node ->
+                        processNode(
+                            nodeState = nodeState,
+                            node = node,
+                            isPixelUI = isPixelUI,
+                        )
+                    }
+                }
+
+                // User-configured IDs are looked up directly instead of requiring a full
+                // visible-ID walk. This also keeps them working when the walk exits early.
+                if (!requirements.collectAllVisibleIds && configuredIds.isNotEmpty()) {
+                    configuredIds.forEach { id ->
+                        if (id !in foundConfiguredIds &&
+                            safeRoot.hasVisibleNodeWithId(id)
+                        ) {
+                            foundConfiguredIds.add(id)
+                            nodeState.sawAnyVisibleViewId.value = true
+                        }
+                    }
                 }
             }
 
@@ -398,6 +482,16 @@ object AccessibilityUtils {
             window
         }
 
+        val visibleConfiguredIds = if (requirements.collectAllVisibleIds) {
+            sysUiWindowViewIds
+        } else {
+            foundConfiguredIds
+        }
+
+        nodeState.hideForPresentIds.value = presentIds.any { it in visibleConfiguredIds }
+        nodeState.hideForNonPresentIds.value =
+            nodeState.sawAnyVisibleViewId.value && nonPresentIds.any { it !in visibleConfiguredIds }
+
         return WindowInfo(
             windows = processed,
             topAppWindowIndex = topAppWindowIndex,
@@ -411,17 +505,19 @@ object AccessibilityUtils {
             topAppWindowPackageName = topAppWindowPackageName,
             hasHideForPresentApp = hasHideForPresentApp,
             nodeState = nodeState,
-            nonPresentIds = prefManager.nonPresentIds,
         )
     }
 
     /**
-     * Iteratively add all [AccessibilityNodeInfo]s contained in [parentNode] to [list], starting
-     * with [parentNode] itself, in depth-first pre-order (the same order a recursive walk would
-     * produce).
+     * Iteratively add all [AccessibilityNodeInfo]s contained in [parentNode] to [list].
      *
      * We use this instead of [AccessibilityNodeInfo.findAccessibilityNodeInfosByViewId]
-     * for performance and reliability reasons.
+     * for performance and reliability reasons, except for the small, user-configured ID set.
+     *
+     * Nodes are visited breadth-first so shallow System UI containers (keyguard indicators,
+     * quick settings, etc.) are found before descending into large notification subtrees.
+     * The walk also stops as soon as [WalkRequirements.canStopEarly] is true.
+     *
      * @param parentNode the root [AccessibilityNodeInfo] whose children we want to add to
      * a list. List will include this node as well.
      * @param list the list that will contain the child nodes.
@@ -431,25 +527,114 @@ object AccessibilityUtils {
         parentNode: AccessibilityNodeInfo,
         list: ArrayList<AccessibilityNodeInfo>,
         ids: LinkedHashSet<String>,
+        nodeState: NodeState,
+        requirements: WalkRequirements,
+        configuredIds: Set<String>,
+        foundConfiguredIds: MutableSet<String>,
         nodeAddedCallback: (AccessibilityNodeInfo) -> Unit,
     ) {
         val pendingNodes = ArrayDeque<AccessibilityNodeInfo>()
         pendingNodes.addLast(parentNode)
 
-        while (pendingNodes.isNotEmpty()) {
-            val node = pendingNodes.removeLast()
+        fun recycleIfNeeded(node: AccessibilityNodeInfo) {
+            if (!requirements.collectNodes && node !== parentNode) {
+                node.recycleQuietly()
+            }
+        }
 
-            list.add(node)
+        while (pendingNodes.isNotEmpty()) {
+            val node = pendingNodes.removeFirst()
+
+            // All checks in processNode() require a visible node, and only visible IDs are
+            // collected. An invisible node therefore cannot contribute anything.
+            if (node !== parentNode && !node.isVisibleToUser) {
+                recycleIfNeeded(node)
+                continue
+            }
+
+            if (requirements.collectNodes) {
+                list.add(node)
+            }
             nodeAddedCallback(node)
 
-            if (node.isVisibleToUser && node.viewIdResourceName != null) {
-                ids.add(node.viewIdResourceName)
+            if (node.isVisibleToUser) {
+                node.viewIdResourceName?.let { viewId ->
+                    nodeState.sawAnyVisibleViewId.value = true
+
+                    if (requirements.collectAllVisibleIds) {
+                        ids.add(viewId)
+                    }
+                    if (viewId in configuredIds) {
+                        foundConfiguredIds.add(viewId)
+                    }
+                }
             }
 
-            // Push children in reverse so they're popped (and therefore visited) in order.
-            for (i in node.childCount - 1 downTo 0) {
-                getChildOrNull(node, i)?.let(pendingNodes::addLast)
+            if (requirements.canStopEarly(nodeState)) {
+                recycleIfNeeded(node)
+                while (pendingNodes.isNotEmpty()) {
+                    recycleIfNeeded(pendingNodes.removeFirst())
+                }
+                return
             }
+
+            if (!(requirements.allowSkipping && shouldPruneSection(node, nodeState))) {
+                for (i in 0 until node.childCount) {
+                    getChildOrNull(node, i)?.let(pendingNodes::addLast)
+                }
+            }
+
+            recycleIfNeeded(node)
+        }
+    }
+
+    /**
+     * Sections whose children can't contribute anything once we've seen the section itself.
+     * Only used when the full visible-ID set and user-configured IDs aren't needed.
+     */
+    private fun shouldPruneSection(
+        node: AccessibilityNodeInfo,
+        nodeState: NodeState,
+    ): Boolean {
+        val id = node.viewIdResourceName ?: return false
+
+        return when {
+            // Notification rows are large and can't contain any of the other state we track.
+            IDMaps.notificationIds.containsKey(id) -> nodeState.hasNotificationsShowing.value
+
+            // Once notifications have been found and clear-all has been resolved, the rest
+            // of the notification stack is just more notification rows.
+            id == "com.android.systemui:id/notification_stack_scroller" ||
+                    id == "com.android.systemui:id/notification_list" ->
+                nodeState.hasNotificationsShowing.value && nodeState.hasClearAllButton.value
+
+            else -> false
+        }
+    }
+
+    private fun AccessibilityNodeInfo.hasVisibleNodeWithId(id: String): Boolean {
+        return try {
+            val nodes = findAccessibilityNodeInfosByViewId(id) ?: return false
+
+            try {
+                nodes.any { it.isVisibleToUser }
+            } finally {
+                nodes.forEach { it.recycleQuietly() }
+            }
+        } catch (e: Exception) {
+            peekLogUtils?.debugLog(
+                message = "Error finding node by ID $id",
+                throwable = e,
+            )
+            false
+        }
+    }
+
+    @Suppress("DEPRECATION")
+    private fun AccessibilityNodeInfo.recycleQuietly() {
+        try {
+            recycle()
+        } catch (_: IllegalStateException) {
         }
     }
 
@@ -530,9 +715,11 @@ object AccessibilityUtils {
                 throwable = if (initialRun) LogUtils.DefaultException() else null,
             )
 
+            val walkRequirements = buildWalkRequirements(frameDelegates, drawerDelegate)
+
             getWindows()?.forEach { displayId, windows ->
                 val windowInfo = withContext(windowProcessingDispatcher) {
-                    processWindows(windows)
+                    processWindows(windows, walkRequirements)
                 }.also { windowInfo ->
                     logUtils.debugLog(
                         message = {
@@ -547,18 +734,20 @@ object AccessibilityUtils {
                 val relevantFrameDelegates =
                     frameDelegates.filter { (val frame = value) -> frame.display?.displayId == displayId }
 
-                windowInfo.sysUiWindowViewIds.let { sysUiWindowViewIds ->
-                    logUtils.debugLog(
-                        message = { "Found ${sysUiWindowViewIds.size} IDs on display $displayId" },
-                        debugMessage = {
-                            "Found IDs on display $displayId\n${sysUiWindowViewIds.joinToString("\n")}"
-                        },
-                    )
-                    //Update any ID list widgets on the new IDs
-                    coroutineScope {
-                        if (DebugIDsManager.setItems(displayId, sysUiWindowViewIds)) {
-                            launch(Dispatchers.Main) {
-                                IDListProvider.sendUpdate(this@runWindowOperation)
+                if (walkRequirements.collectAllVisibleIds) {
+                    windowInfo.sysUiWindowViewIds.let { sysUiWindowViewIds ->
+                        logUtils.debugLog(
+                            message = { "Found ${sysUiWindowViewIds.size} IDs on display $displayId" },
+                            debugMessage = {
+                                "Found IDs on display $displayId\n${sysUiWindowViewIds.joinToString("\n")}"
+                            },
+                        )
+                        //Update any ID list widgets on the new IDs
+                        coroutineScope {
+                            if (DebugIDsManager.setItems(displayId, sysUiWindowViewIds)) {
+                                launch(Dispatchers.Main) {
+                                    IDListProvider.sendUpdate(this@runWindowOperation)
+                                }
                             }
                         }
                     }
@@ -612,8 +801,7 @@ object AccessibilityUtils {
                     (windowInfo.nodeState.hasMoreButton.value) || (windowInfo.nodeState.hasSettingsContainerButton.value &&
                             !windowInfo.nodeState.hasClearAllButton.value)
                 globalState.hideForPresentIds[displayId] = windowInfo.nodeState.hideForPresentIds.value
-                globalState.hideForNonPresentIds[displayId] = windowInfo.sysUiWindowViewIds.isNotEmpty() &&
-                        windowInfo.nonPresentIds.any { it !in windowInfo.sysUiWindowViewIds }
+                globalState.hideForNonPresentIds[displayId] = windowInfo.nodeState.hideForNonPresentIds.value
 
                 relevantFrameDelegates.forEach { (val frameDelegate = value) ->
                     frameDelegate.updateWindowState(

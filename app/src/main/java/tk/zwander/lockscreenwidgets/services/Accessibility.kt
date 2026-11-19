@@ -105,6 +105,7 @@ class Accessibility : AccessibilityService(), CoroutineScope by MainScope(), Eve
         }
 
         WidgetStackProvider.refreshAll(this)
+        IDListProvider.refreshWidgetIds(this)
     }
 
     override fun onServiceConnected() {

@@ -19,15 +19,28 @@ import tk.zwander.lockscreenwidgets.data.IDData
  */
 class IDListProvider : AppWidgetProvider() {
     companion object {
+        fun refreshWidgetIds(context: Context) {
+            val manager = context.appWidgetManager
+            DebugIDsManager.setExistingIdListWidgetIds(
+                manager.getAppWidgetIds(
+                    ComponentName(context, IDListProvider::class.java),
+                ).toList(),
+            )
+        }
+
         fun sendUpdate(context: Context) {
             //There's a new list of IDs; make sure the factory is notified
             val manager = context.appWidgetManager
             val component = ComponentName(context, IDListProvider::class.java)
+            val appWidgetIds = manager.getAppWidgetIds(component)
+
+            //This is the full provider-wide list across all hosts, unlike onUpdate()'s IDs.
+            DebugIDsManager.setExistingIdListWidgetIds(appWidgetIds.toList())
 
             updateWidget(
                 context,
                 manager,
-                manager.getAppWidgetIds(component),
+                appWidgetIds,
             )
         }
 
@@ -80,6 +93,23 @@ class IDListProvider : AppWidgetProvider() {
         appWidgetManager: AppWidgetManager,
         appWidgetIds: IntArray,
     ) {
+        // appWidgetIds only covers the host that sent this broadcast, so query the full set.
+        refreshWidgetIds(context)
         updateWidget(context, appWidgetManager, appWidgetIds)
+    }
+
+    override fun onRestored(context: Context, oldWidgetIds: IntArray, newWidgetIds: IntArray) {
+        super.onRestored(context, oldWidgetIds, newWidgetIds)
+        DebugIDsManager.addIdListWidgetIds(newWidgetIds.toList())
+    }
+
+    override fun onDeleted(context: Context, appWidgetIds: IntArray) {
+        super.onDeleted(context, appWidgetIds)
+        DebugIDsManager.removeIdListWidgetIds(appWidgetIds.toList())
+    }
+
+    override fun onDisabled(context: Context) {
+        super.onDisabled(context)
+        DebugIDsManager.clearIdListWidgetIds()
     }
 }

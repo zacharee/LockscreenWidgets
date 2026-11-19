@@ -19,5 +19,4 @@ data class WindowInfo(
     val topAppWindowPackageName: String?,
     val hasHideForPresentApp: Boolean,
     val nodeState: AccessibilityUtils.NodeState,
-    val nonPresentIds: Set<String>,
 )
