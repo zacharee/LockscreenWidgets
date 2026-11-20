@@ -8,6 +8,7 @@ import android.content.Context
 import android.os.Build
 import android.os.Bundle
 import android.util.AttributeSet
+import android.view.MotionEvent
 import android.view.View
 import android.widget.AdapterView
 import android.widget.RemoteViews
@@ -44,6 +45,13 @@ class ZeroPaddingAppWidgetHostView(
         super.onAttachedToWindow()
 
         onAttach(this)
+    }
+
+    override fun dispatchTouchEvent(event: MotionEvent): Boolean {
+        // Keep the ID list widget from replacing its collection while the user is
+        // interacting with any hosted widget.
+        DebugIDsManager.notifyIdListInteraction()
+        return super.dispatchTouchEvent(event)
     }
 
     override fun generateLayoutParams(attrs: AttributeSet?): LayoutParams? {

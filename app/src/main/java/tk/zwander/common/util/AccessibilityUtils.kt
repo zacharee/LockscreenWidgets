@@ -746,7 +746,7 @@ object AccessibilityUtils {
                         coroutineScope {
                             if (DebugIDsManager.setItems(displayId, sysUiWindowViewIds)) {
                                 launch(Dispatchers.Main) {
-                                    IDListProvider.sendUpdate(this@runWindowOperation)
+                                    IDListProvider.sendUpdate()
                                 }
                             }
                         }

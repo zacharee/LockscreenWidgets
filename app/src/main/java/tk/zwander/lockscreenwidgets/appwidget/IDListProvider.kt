@@ -10,6 +10,8 @@ import android.widget.RemoteViews
 import androidx.core.widget.RemoteViewsCompat
 import tk.zwander.common.util.DebugIDsManager
 import tk.zwander.common.util.appWidgetManager
+import tk.zwander.common.util.mainHandler
+import tk.zwander.lockscreenwidgets.App
 import tk.zwander.lockscreenwidgets.R
 import tk.zwander.lockscreenwidgets.data.IDData
 
@@ -19,29 +21,60 @@ import tk.zwander.lockscreenwidgets.data.IDData
  */
 class IDListProvider : AppWidgetProvider() {
     companion object {
-        fun refreshWidgetIds(context: Context) {
-            val manager = context.appWidgetManager
-            DebugIDsManager.setExistingIdListWidgetIds(
-                manager.getAppWidgetIds(
-                    ComponentName(context, IDListProvider::class.java),
-                ).toList(),
+        private const val UPDATE_DEBOUNCE_MS = 1_000L
+        private const val INTERACTION_RETRY_MS = 750L
+
+        private var updateScheduled = false
+
+        private val updateRunnable: Runnable = object : Runnable {
+            override fun run() {
+                //Never replace the collection while the list is being touched/scrolled.
+                //The platform's RemoteCollectionItemsAdapter doesn't bounds-check positions,
+                //so a shrinking collection can crash an in-progress scroll.
+                if (DebugIDsManager.isIdListInteracting) {
+                    mainHandler.postDelayed(this, INTERACTION_RETRY_MS)
+                    return
+                }
+
+                updateScheduled = false
+
+                updateAllWidgets(App.instance)
+            }
+        }
+
+        private fun currentWidgetIds(context: Context): IntArray {
+            return context.appWidgetManager.getAppWidgetIds(
+                ComponentName(context, IDListProvider::class.java),
             )
         }
 
-        fun sendUpdate(context: Context) {
-            //There's a new list of IDs; make sure the factory is notified
-            val manager = context.appWidgetManager
-            val component = ComponentName(context, IDListProvider::class.java)
-            val appWidgetIds = manager.getAppWidgetIds(component)
+        /**
+         * Update every instance of this provider right now.
+         *
+         * Used by [onUpdate]/[onRestored], which run inside a broadcast receiver: once
+         * onReceive() returns, the system is free to kill the process, so a delayed post
+         * from there isn't guaranteed to ever run.
+         */
+        private fun updateAllWidgets(context: Context) {
+            val appWidgetIds = currentWidgetIds(context)
 
             //This is the full provider-wide list across all hosts, unlike onUpdate()'s IDs.
             DebugIDsManager.setExistingIdListWidgetIds(appWidgetIds.toList())
 
-            updateWidget(
-                context,
-                manager,
-                appWidgetIds,
-            )
+            updateWidget(context, context.appWidgetManager, appWidgetIds)
+        }
+
+        fun refreshWidgetIds(context: Context) {
+            DebugIDsManager.setExistingIdListWidgetIds(currentWidgetIds(context).toList())
+        }
+
+        fun sendUpdate() {
+            mainHandler.post {
+                if (!updateScheduled) {
+                    updateScheduled = true
+                    mainHandler.postDelayed(updateRunnable, UPDATE_DEBOUNCE_MS)
+                }
+            }
         }
 
         private fun updateWidget(
@@ -49,9 +82,9 @@ class IDListProvider : AppWidgetProvider() {
             appWidgetManager: AppWidgetManager,
             appWidgetIds: IntArray,
         ) {
-            val view = RemoteViews(context.packageName, R.layout.id_list_widget_layout)
-
             appWidgetIds.forEach { appWidgetId ->
+                val view = RemoteViews(context.packageName, R.layout.id_list_widget_layout)
+
                 val displayId = appWidgetManager.getAppWidgetOptions(appWidgetId)
                     .getInt("displayId", Display.DEFAULT_DISPLAY)
 
@@ -82,9 +115,9 @@ class IDListProvider : AppWidgetProvider() {
                         }
                         .build(),
                 )
-            }
 
-            appWidgetManager.updateAppWidget(appWidgetIds, view)
+                appWidgetManager.updateAppWidget(appWidgetId, view)
+            }
         }
     }
 
@@ -94,13 +127,13 @@ class IDListProvider : AppWidgetProvider() {
         appWidgetIds: IntArray,
     ) {
         // appWidgetIds only covers the host that sent this broadcast, so query the full set.
-        refreshWidgetIds(context)
-        updateWidget(context, appWidgetManager, appWidgetIds)
+        updateAllWidgets(context)
     }
 
     override fun onRestored(context: Context, oldWidgetIds: IntArray, newWidgetIds: IntArray) {
         super.onRestored(context, oldWidgetIds, newWidgetIds)
         DebugIDsManager.addIdListWidgetIds(newWidgetIds.toList())
+        updateAllWidgets(context)
     }
 
     override fun onDeleted(context: Context, appWidgetIds: IntArray) {

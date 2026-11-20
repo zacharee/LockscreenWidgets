@@ -1,5 +1,6 @@
 package tk.zwander.common.util
 
+import android.os.SystemClock
 import kotlinx.atomicfu.atomic
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -7,6 +8,8 @@ import kotlinx.coroutines.flow.asStateFlow
 import tk.zwander.lockscreenwidgets.data.IDData
 
 object DebugIDsManager {
+    private const val ID_LIST_INTERACTION_GRACE_MS = 2_000L
+
     private val oldItems = hashMapOf<Int, Set<String>>()
 
     private val sortedItems: HashMap<Int, List<IDData>> = hashMapOf()
@@ -15,6 +18,7 @@ object DebugIDsManager {
     val items: StateFlow<Map<Int, List<IDData>>> = mutableItems.asStateFlow()
 
     private val idListWidgetIds = atomic<Set<Int>>(emptySet())
+    private val idListLastInteraction = atomic(0L)
 
     /**
      * Whether anything is currently consuming the full visible-ID list. If nothing is,
@@ -45,6 +49,21 @@ object DebugIDsManager {
 
     fun clearIdListWidgetIds() {
         idListWidgetIds.value = emptySet()
+    }
+
+    /**
+     * True while the user is touching a hosted widget, plus a short grace period after the
+     * last touch so an in-progress fling is covered too. Replacing a widget's
+     * [android.widget.RemoteViews] collection in the middle of a scroll can trip the
+     * platform's `RemoteCollectionItemsAdapter` (it queries item positions without a
+     * bounds check), so the ID list widget defers updates until this is false.
+     */
+    val isIdListInteracting: Boolean
+        get() = SystemClock.elapsedRealtime() - idListLastInteraction.value <
+                ID_LIST_INTERACTION_GRACE_MS
+
+    fun notifyIdListInteraction() {
+        idListLastInteraction.value = SystemClock.elapsedRealtime()
     }
 
     private val comparator = Comparator<IDData> { o1, o2 ->
