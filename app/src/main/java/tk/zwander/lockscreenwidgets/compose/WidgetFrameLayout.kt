@@ -14,10 +14,7 @@ import androidx.compose.foundation.gestures.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
@@ -27,6 +24,7 @@ import androidx.compose.ui.input.pointer.motionEventSpy
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -35,6 +33,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.zIndex
+import androidx.core.graphics.drawable.toDrawable
 import com.bugsnag.android.performance.compose.MeasuredComposable
 import tk.zwander.common.compose.components.*
 import tk.zwander.common.compose.util.rememberBooleanPreferenceState
@@ -59,6 +58,7 @@ fun WidgetFrameDelegate.WidgetFrameViewModel.WidgetFrameLayout(
 ) {
     val context = LocalContext.current
     val density = LocalDensity.current
+    val resources = LocalResources.current
     val frameCornerRadius by rememberPreferenceState(
         key = PrefManager.KEY_FRAME_CORNER_RADIUS,
         value = { context.prefManager.cornerRadiusDp.dp },
@@ -211,7 +211,10 @@ fun WidgetFrameDelegate.WidgetFrameViewModel.WidgetFrameLayout(
             )
 
             wallpaper?.let { wallpaper ->
-                wallpaper.drawable?.mutate()?.let { drawable ->
+                wallpaper.bitmap?.let { bitmap ->
+                    val drawable = remember(bitmap) {
+                        bitmap.toDrawable(resources)
+                    }
                     val maskedModeDimAmount by rememberPreferenceState(
                         key = PrefManager.KEY_MASKED_MODE_DIM_AMOUNT,
                         value = { framePrefs.maskedModeDimAmount },

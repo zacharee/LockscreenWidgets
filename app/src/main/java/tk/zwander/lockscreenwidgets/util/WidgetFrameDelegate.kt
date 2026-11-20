@@ -1,9 +1,9 @@
 package tk.zwander.lockscreenwidgets.util
 
+import android.app.WallpaperManager
 import android.content.Context
 import android.content.SharedPreferences
 import android.graphics.*
-import android.graphics.drawable.Drawable
 import android.view.*
 import androidx.compose.animation.*
 import androidx.compose.foundation.gestures.Orientation
@@ -881,18 +881,18 @@ open class WidgetFrameDelegate protected constructor(
             logUtils.debugLog("Trying to retrieve wallpaper", null)
 
             try {
-                val drawable = wallpaperUtils.getWallpaperDrawable(id)
+                val drawable = wallpaperUtils.getWallpaperBitmap(WallpaperManager.FLAG_LOCK)
 
                 logUtils.debugLog("Retrieved wallpaper: $drawable", null)
 
-                drawable?.mutate()?.let {
+                drawable?.let {
                     logUtils.debugLog("Setting wallpaper drawable.", null)
 
                     val realSize = display.rotatedRealSize
                     val loc = rootView.locationOnScreen ?: intArrayOf(0, 0)
 
-                    val dWidth: Int = it.intrinsicWidth
-                    val dHeight: Int = it.intrinsicHeight
+                    val dWidth: Int = it.width
+                    val dHeight: Int = it.height
 
                     val wallpaperAdjustmentX = (dWidth - realSize.x) / 2f
                     val wallpaperAdjustmentY = (dHeight - realSize.y) / 2f
@@ -902,7 +902,7 @@ open class WidgetFrameDelegate protected constructor(
                     val dy = (-loc[1].toFloat() - wallpaperAdjustmentY)
 
                     WallpaperInfo(
-                        drawable = it,
+                        bitmap = it,
                         dx = dx,
                         dy = dy,
                     )
@@ -1432,7 +1432,7 @@ open class WidgetFrameDelegate protected constructor(
     }
 
     data class WallpaperInfo(
-        val drawable: Drawable?,
+        val bitmap: Bitmap?,
         val dx: Float,
         val dy: Float,
     )

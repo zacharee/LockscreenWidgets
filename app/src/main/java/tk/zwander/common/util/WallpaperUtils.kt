@@ -2,16 +2,12 @@ package tk.zwander.common.util
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.graphics.drawable.Drawable
+import android.graphics.Bitmap
 import android.os.Build
-import androidx.core.graphics.drawable.toDrawable
-import dev.zwander.lswinterconnect.IWallpaperAPI
-import dev.zwander.lswinterconnect.IWallpaperListener
-import dev.zwander.lswinterconnect.directWallpaperUtils
-import dev.zwander.lswinterconnect.peekLogUtils
-import dev.zwander.lswinterconnect.safeApplicationContext
+import dev.zwander.lswinterconnect.*
 import kotlinx.atomicfu.AtomicRef
 import kotlinx.atomicfu.atomic
+import java.util.concurrent.ConcurrentHashMap
 
 val Context.wallpaperUtils: WallpaperUtils
     get() = WallpaperUtils.getInstance(this)
@@ -37,7 +33,7 @@ class WallpaperUtils private constructor(
 
     private val wallpaperServer: AtomicRef<IWallpaperAPI?> = atomic(null)
 
-    private val cachedWallpapers = mutableMapOf<Int, Drawable?>()
+    private val cachedWallpapers = ConcurrentHashMap<Int, Bitmap>()
 
     private val wallpaperListener = object : IWallpaperListener.Stub() {
         override fun onWallpaperChanged() {
@@ -46,7 +42,7 @@ class WallpaperUtils private constructor(
         }
     }
 
-    fun getWallpaperDrawable(flag: Int): Drawable? {
+    fun getWallpaperBitmap(flag: Int): Bitmap? {
         return when {
             cachedWallpapers[flag] != null -> {
                 cachedWallpapers[flag]
@@ -54,12 +50,11 @@ class WallpaperUtils private constructor(
 
             wallpaperServer.value != null -> {
                 wallpaperServer.value?.getWallpaper(flag)
-                    ?.toDrawable(context.resources)
                     ?.also { cachedWallpapers[flag] = it }
             }
 
             Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU -> {
-                context.directWallpaperUtils.getWallpaperDrawable(flag)
+                context.directWallpaperUtils.getWallpaperBitmap(flag)
                     ?.also { cachedWallpapers[flag] = it }
             }
 
