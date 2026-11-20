@@ -76,8 +76,10 @@ fun SelectDisplayDialog(
 
     val defaultDisplay by remember {
         derivedStateOf {
+            // Somewhat redundant-looking `displays` access to guarantee that this
+            // derived state updates when displays change.
             displays.values.firstOrNull { it.displayId == Display.DEFAULT_DISPLAY }
-                ?: displays.values.first()
+                ?: lsDisplayManager.defaultDisplay
         }
     }
 
