@@ -7,6 +7,7 @@ import android.graphics.Point
 import android.hardware.display.DisplayManager
 import android.os.Build
 import android.os.ServiceManager
+import android.util.DisplayMetrics
 import android.view.*
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.dp
@@ -16,7 +17,6 @@ import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 import tk.zwander.lockscreenwidgets.App
 import tk.zwander.lockscreenwidgets.services.Accessibility
-import java.util.*
 import kotlin.math.roundToInt
 
 val Context.lsDisplayManager: LSDisplayManager
@@ -86,24 +86,23 @@ class LSDisplayManager private constructor(context: Context) : ContextWrapper(co
      */
     val defaultDisplay: LSDisplay
         get() {
-            availableDisplays.value.values
-                .firstOrNull { it.display.displayId == Display.DEFAULT_DISPLAY }
-                ?.let { return it }
+            val displays = availableDisplays.value
 
-            availableDisplays.value.values.firstOrNull()?.let { return it }
+            return displays.values.firstOrNull { it.display.displayId == Display.DEFAULT_DISPLAY }
+                ?: displays.values.firstOrNull()
+                ?: fallbackDisplay
+                ?: run {
+                    val display = checkNotNull(displayManager.getDisplay(Display.DEFAULT_DISPLAY)) {
+                        "Unable to find the default display"
+                    }
 
-            return fallbackDisplay ?: run {
-                val display = checkNotNull(displayManager.getDisplay(Display.DEFAULT_DISPLAY)) {
-                    "Unable to find the default display"
+                    LSDisplay(
+                        display = display,
+                        density = Density(createDisplayContextCompat(display)),
+                    ).also {
+                        fallbackDisplay = it
+                    }
                 }
-
-                LSDisplay(
-                    display = display,
-                    density = Density(createDisplayContextCompat(display)),
-                ).also {
-                    fallbackDisplay = it
-                }
-            }
         }
 
     fun onCreate() {
@@ -150,6 +149,12 @@ class LSDisplayManager private constructor(context: Context) : ContextWrapper(co
         if (!multiDisplaySupported && displayId != Display.DEFAULT_DISPLAY) {
             logUtils.debugLog("Multi-display isn't supported and display $displayId isn't default display", null)
             removeDisplay(displayId)
+            return
+        }
+
+        val existing = availableDisplays.value[displayId]
+        if (existing != null && existing.hasSameGeometry(display)) {
+            updateDisplayStates()
             return
         }
 
@@ -256,15 +261,21 @@ class LSDisplayManager private constructor(context: Context) : ContextWrapper(co
         accessibility: Accessibility,
     ) {
         availableDisplays.collect { displays ->
-            // Not super efficient since any time the available displays change
-            // every cached display will be wiped and recreated, but there
-            // isn't a great way to check for stale Display objects.
-            displayAndWmCache.value = displays.values.associate { display ->
-                val displayContext = accessibility.createDisplayContextCompat(display.display)
-                val windowManager =
-                    displayContext.getSystemService(WINDOW_SERVICE) as WindowManager
+            val previous = displayAndWmCache.value
 
-                display.uniqueIdCompat to DisplayAndWindowManager(display, windowManager)
+            displayAndWmCache.value = displays.values.associate { display ->
+                val id = display.uniqueIdCompat
+                val cached = previous[id]
+
+                id to if (cached?.display == display) {
+                    cached
+                } else {
+                    val displayContext = accessibility.createDisplayContextCompat(display.display)
+                    DisplayAndWindowManager(
+                        display = display,
+                        windowManager = displayContext.getSystemService(WINDOW_SERVICE) as WindowManager,
+                    )
+                }
             }
         }
     }
@@ -282,11 +293,9 @@ data class LSDisplay(
     // This makes availableDisplays (and therefore displayFlow) emit on rotation.
     private val rotationAtCreation: Int = this@LSDisplay.display.rotation
 
-    val realSize: Point by lazy {
-        val size = rotatedRealSize
-        val currentRotation = this@LSDisplay.display.rotation
-
-        if (currentRotation == Surface.ROTATION_270 || currentRotation == Surface.ROTATION_90) {
+    val realSize: Point = rotatedRealSize.let { size ->
+        val rotation = display.rotation
+        if (rotation == Surface.ROTATION_90 || rotation == Surface.ROTATION_270) {
             Point(size.y, size.x)
         } else {
             size
@@ -360,6 +369,23 @@ data class LSDisplay(
         }
     }
 
+    fun hasSameGeometry(display: Display): Boolean {
+        if (display.rotation != rotationAtCreation) return false
+
+        val metrics = DisplayMetrics()
+        @Suppress("DEPRECATION")
+        display.getRealMetrics(metrics)
+
+        val isLandscape = rotationAtCreation == Surface.ROTATION_90 ||
+                rotationAtCreation == Surface.ROTATION_270
+        val width = if (isLandscape) metrics.heightPixels else metrics.widthPixels
+        val height = if (isLandscape) metrics.widthPixels else metrics.heightPixels
+
+        return width == realSize.x &&
+                height == realSize.y &&
+                metrics.density == density.density
+    }
+
     override fun equals(other: Any?): Boolean {
         return other is LSDisplay &&
                 other.displayId == displayId &&
@@ -370,13 +396,12 @@ data class LSDisplay(
     }
 
     override fun hashCode(): Int {
-        return Objects.hash(
-            displayId,
-            uniqueIdCompat,
-            density.density,
-            realSize,
-            rotationAtCreation,
-        )
+        var result = displayId
+        result = 31 * result + uniqueIdCompat.hashCode()
+        result = 31 * result + density.density.hashCode()
+        result = 31 * result + realSize.hashCode()
+        result = 31 * result + rotationAtCreation
+        return result
     }
 }
 

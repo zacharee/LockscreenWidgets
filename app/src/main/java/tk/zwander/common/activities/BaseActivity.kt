@@ -22,6 +22,8 @@ abstract class BaseActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
 
-        lsDisplayManager.fetchDisplays()
+        if (lsDisplayManager.availableDisplays.value.isEmpty()) {
+            lsDisplayManager.fetchDisplays()
+        }
     }
 }
