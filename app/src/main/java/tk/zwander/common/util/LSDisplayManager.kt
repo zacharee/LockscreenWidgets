@@ -168,10 +168,9 @@ class LSDisplayManager private constructor(context: Context) : ContextWrapper(co
 
         if (existingDisplay != display) {
             existingDisplay?.onDestroy(windowManager)
+            availableDisplays[display.displayId] = display
+            display.onCreate(windowManager)
         }
-
-        availableDisplays[display.displayId] = display
-        display.onCreate(windowManager)
 
         updateDisplayStates()
     }
@@ -218,15 +217,16 @@ class LSDisplayManager private constructor(context: Context) : ContextWrapper(co
                     val displays = (builtInDisplays + allIncludingDisabled + allDisplays + samsung)
                         .associateBy { it.displayId }
                         .values
-                        .filter { display ->
-                            display.isBuiltIn(isLikelyRazr) &&
-                                    (multiDisplaySupported || display.displayId == Display.DEFAULT_DISPLAY)
-                        }
-                        .map { display ->
-                            LSDisplay(
-                                display = display,
-                                density = Density(createDisplayContextCompat(display)),
-                            )
+                        .mapNotNull { display ->
+                            if (display.isBuiltIn(isLikelyRazr) &&
+                                (multiDisplaySupported || display.displayId == Display.DEFAULT_DISPLAY)) {
+                                LSDisplay(
+                                    display = display,
+                                    density = Density(createDisplayContextCompat(display)),
+                                )
+                            } else {
+                                null
+                            }
                         }
 
                     withContext(Dispatchers.Main.immediate) {
