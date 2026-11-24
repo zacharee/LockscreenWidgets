@@ -32,6 +32,7 @@ import dev.zwander.composeintroslider.SimpleIntroPage
 import tk.zwander.common.activities.OnboardingActivity
 import tk.zwander.common.compose.AppTheme
 import tk.zwander.common.util.LifecycleEffect
+import tk.zwander.common.util.WallpaperClient
 import tk.zwander.common.util.canReadWallpaper
 import tk.zwander.common.util.isAccessibilityEnabled
 import tk.zwander.common.util.launchAutostartActivity
@@ -383,7 +384,7 @@ fun rememberIntroSlides(
 
         if (startReason == OnboardingActivity.RetroMode.NONE &&
             Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
-            !context.wallpaperClient.isServerInstalled
+            !WallpaperClient.isServerInstalled
         ) {
             slides.add(
                 SimpleIntroPage(
@@ -395,11 +396,11 @@ fun rememberIntroSlides(
                     contentColor = { MaterialTheme.colorScheme.onBackground },
                     extraContent = {
                         var isInstalled by remember {
-                            mutableStateOf(context.wallpaperClient.isServerInstalled)
+                            mutableStateOf(WallpaperClient.isServerInstalled)
                         }
 
                         LifecycleEffect(Lifecycle.State.RESUMED) {
-                            isInstalled = context.wallpaperClient.isServerInstalled
+                            isInstalled = WallpaperClient.isServerInstalled
                         }
 
                         OutlinedButton(

@@ -15,6 +15,8 @@ class WallpaperServerService : Service() {
         private const val CHANNEL_ID = "service_notif"
     }
 
+    private val server by lazy { WallpaperServer(applicationContext) }
+
     @SuppressLint("InlinedApi")
     override fun onCreate() {
         super.onCreate()
@@ -49,7 +51,7 @@ class WallpaperServerService : Service() {
 
     override fun onBind(intent: Intent): IBinder {
         logUtils.debugLog("Binding $intent", null)
-        return WallpaperServer(applicationContext)
+        return server
     }
 
     override fun onDestroy() {
@@ -58,5 +60,6 @@ class WallpaperServerService : Service() {
         logUtils.debugLog("Stopping wallpaper server service", null)
 
         ServiceCompat.stopForeground(this, ServiceCompat.STOP_FOREGROUND_REMOVE)
+        server.onDestroy()
     }
 }

@@ -8,6 +8,7 @@ import androidx.core.content.ContextCompat
 import dev.zwander.lswinterconnect.IWallpaperAPI
 import dev.zwander.lswinterconnect.peekLogUtils
 import dev.zwander.lswinterconnect.safeApplicationContext
+import tk.zwander.lockscreenwidgets.App
 
 val Context.wallpaperClient: WallpaperClient
     get() = WallpaperClient.getInstance(this)
@@ -19,11 +20,19 @@ class WallpaperClient private constructor(private val context: Context) {
         @SuppressLint("StaticFieldLeak")
         private var instance: WallpaperClient? = null
 
+        @Synchronized
         fun getInstance(context: Context): WallpaperClient {
             return instance ?: WallpaperClient(context.safeApplicationContext).also {
                 instance = it
             }
         }
+
+        val isServerInstalled: Boolean
+            get() = try {
+                App.instance.packageManager.getPackageInfo(COMPANION_PKG, 0) != null
+            } catch (_: PackageManager.NameNotFoundException) {
+                false
+            }
     }
 
     private val serviceIntent = Intent().apply {
@@ -37,9 +46,13 @@ class WallpaperClient private constructor(private val context: Context) {
             service: IBinder?,
         ) {
             peekLogUtils?.debugLog("Got service", null)
-            context.wallpaperUtils.wallpaperServerConnected(
-                IWallpaperAPI.Stub.asInterface(service),
-            )
+            val binder = IWallpaperAPI.Stub.asInterface(service)
+
+            if (binder == null) {
+                context.logUtils.debugLog("Wallpaper server binder was null", null)
+                return
+            }
+            context.wallpaperUtils.wallpaperServerConnected(binder)
         }
 
         override fun onServiceDisconnected(name: ComponentName?) {
@@ -57,13 +70,6 @@ class WallpaperClient private constructor(private val context: Context) {
         }
     }
 
-    val isServerInstalled: Boolean
-        get() = try {
-            context.packageManager.getPackageInfo(COMPANION_PKG, 0) != null
-        } catch (_: PackageManager.NameNotFoundException) {
-            false
-        }
-
     init {
         tryBindService()
 
@@ -79,6 +85,7 @@ class WallpaperClient private constructor(private val context: Context) {
                     Intent.ACTION_PACKAGE_UNSTOPPED,
                     Intent.ACTION_PACKAGE_UNSUSPENDED_MANUALLY,
                     Intent.ACTION_PACKAGE_RESTARTED,
+                    Intent.ACTION_PACKAGE_REMOVED,
                 ].forEach { addAction(it) }
             },
             ContextCompat.RECEIVER_EXPORTED,

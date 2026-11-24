@@ -50,15 +50,22 @@ class DirectWallpaperUtils private constructor(private val context: Context) {
         override fun onWallpaperChanged() {
             peekLogUtils?.debugLog("Wallpaper changed, clearing cache.", null)
             cachedWallpapers.clear()
-            wallpaperChangedListeners.forEach { it.onWallpaperChanged() }
+            clearPfdCache()
+            synchronized(wallpaperChangedListeners) {
+                wallpaperChangedListeners.forEach { it.onWallpaperChanged() }
+            }
         }
     }
     private val handler = Handler(Looper.getMainLooper())
-    private val wallpaperChangedListeners = Collections.synchronizedList(
-        mutableListOf<WallpaperChangedListener>(),
+    private val wallpaperChangedListeners = Collections.synchronizedSet(
+        mutableSetOf<WallpaperChangedListener>(),
     )
 
-    private var cachedWallpapers: MutableMap<Int, Bitmap?> = Collections.synchronizedMap(
+    private val cachedWallpapers: MutableMap<Int, Bitmap?> = Collections.synchronizedMap(
+        mutableMapOf(),
+    )
+
+    private val cachedPfds: MutableMap<Int, ParcelFileDescriptor?> = Collections.synchronizedMap(
         mutableMapOf(),
     )
 
@@ -67,7 +74,10 @@ class DirectWallpaperUtils private constructor(private val context: Context) {
             wallpaper.addOnColorsChangedListener(
                 { _, _ ->
                     cachedWallpapers.clear()
-                    wallpaperChangedListeners.forEach { it.onWallpaperChanged() }
+                    clearPfdCache()
+                    synchronized(wallpaperChangedListeners) {
+                        wallpaperChangedListeners.forEach { it.onWallpaperChanged() }
+                    }
                 },
                 handler,
             )
@@ -91,19 +101,31 @@ class DirectWallpaperUtils private constructor(private val context: Context) {
         return getWallpaperBitmap(flag)?.toDrawable(context.resources)
     }
 
+    fun peekWallpaperPfd(flag: Int): ParcelFileDescriptor? {
+        return cachedPfds[flag]
+    }
+
+    fun getWallpaperPfd(flag: Int): ParcelFileDescriptor? {
+        peekWallpaperPfd(flag)?.let { return it }
+
+        peekLogUtils?.debugLog("Retrieving new wallpaper PFD.", null)
+        val lockWallpaper = getWallpaper(flag)
+        return (lockWallpaper ?: getWallpaper(WallpaperManager.FLAG_SYSTEM)).also {
+            cachedPfds[flag]?.close()
+            cachedPfds[flag] = it
+        }
+    }
+
     @SuppressLint("InlinedApi")
     fun peekWallpaperBitmap(flag: Int): Bitmap? {
         return if (cachedWallpapers[flag] != null && cachedWallpapers[flag]?.isRecycled == false) {
-            peekLogUtils?.debugLog("Using cached wallpaper.")
+            peekLogUtils?.debugLog("Using cached wallpaper.", null)
             cachedWallpapers[flag]
         } else {
-            peekLogUtils?.debugLog("Retrieving new wallpaper; isRecycled: ${cachedWallpapers[flag]?.isRecycled}.")
-            val lockWallpaper = getWallpaper(flag)
-            val systemWallpaper = getWallpaper(WallpaperManager.FLAG_SYSTEM)
-            val desc = lockWallpaper ?: systemWallpaper
+            val desc = getWallpaperPfd(flag)
 
-            try {
-                desc?.let { pfd ->
+            synchronized(cachedPfds) {
+                desc?.dup()?.use { pfd ->
                     pfd.fileDescriptor?.let { fd ->
                         BitmapFactory.decodeFileDescriptor(fd)?.also { bmp ->
                             peekLogUtils?.debugLog("Caching new wallpaper $bmp.", null)
@@ -111,9 +133,6 @@ class DirectWallpaperUtils private constructor(private val context: Context) {
                         }
                     }
                 }
-            } finally {
-                lockWallpaper?.close()
-                systemWallpaper?.close()
             }
         }
     }
@@ -172,7 +191,7 @@ class DirectWallpaperUtils private constructor(private val context: Context) {
                         flag, bundle, context.userId,
                     ) as? ParcelFileDescriptor
                 }
-            } catch (e: NoSuchMethodError) {
+            } catch (e: NoSuchMethodException) {
                 peekLogUtils?.debugLog("Missing getWallpaperWithFeature, using getWallpaper instead.", e)
                 old()
             }
@@ -193,6 +212,22 @@ class DirectWallpaperUtils private constructor(private val context: Context) {
         } catch (e: NoSuchMethodError) {
             peekLogUtils?.debugLog("Error retrieving wallpaper", e)
             null
+        }
+    }
+
+    fun onDestroy() {
+        cachedWallpapers.clear()
+        clearPfdCache()
+    }
+
+    private fun clearPfdCache() {
+        synchronized(cachedPfds) {
+            cachedPfds.forEach { [_, pfd] ->
+                try {
+                    pfd?.close()
+                } catch (_: Throwable) {}
+            }
+            cachedPfds.clear()
         }
     }
 

@@ -3,10 +3,14 @@ package tk.zwander.common.util
 import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.os.Build
+import android.os.SystemClock
 import dev.zwander.lswinterconnect.*
 import kotlinx.atomicfu.AtomicRef
 import kotlinx.atomicfu.atomic
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import java.util.concurrent.ConcurrentHashMap
 
 val Context.wallpaperUtils: WallpaperUtils
@@ -33,7 +37,31 @@ class WallpaperUtils private constructor(
 
     private val wallpaperServer: AtomicRef<IWallpaperAPI?> = atomic(null)
 
-    private val cachedWallpapers = ConcurrentHashMap<Int, Bitmap>()
+    /**
+     * Wraps a possibly-null bitmap so that a failed fetch can be cached too.
+     * A plain [ConcurrentHashMap] can't store null values.
+     *
+     * Failed fetches carry a timestamp so they can expire; successful fetches
+     * are only invalidated by an actual wallpaper change.
+     */
+    private class CachedWallpaper(
+        val bitmap: Bitmap?,
+        val timestamp: Long = SystemClock.elapsedRealtime(),
+    ) {
+        fun isExpired(now: Long): Boolean {
+            return bitmap == null && now - timestamp >= NEGATIVE_CACHE_TTL_MS
+        }
+
+        companion object {
+            private const val NEGATIVE_CACHE_TTL_MS = 30_000L
+        }
+    }
+
+    private val cachedWallpapers = ConcurrentHashMap<Int, CachedWallpaper>()
+
+    private val fetchMutexes = ConcurrentHashMap<Int, Mutex>()
+
+    private val directListenerRegistered = atomic(false)
 
     private val wallpaperListener = object : IWallpaperListener.Stub() {
         override fun onWallpaperChanged() {
@@ -42,35 +70,78 @@ class WallpaperUtils private constructor(
         }
     }
 
-    fun getWallpaperBitmap(flag: Int): Bitmap? {
-        return when {
-            cachedWallpapers[flag] != null -> {
-                cachedWallpapers[flag]
+    suspend fun getWallpaperBitmap(flag: Int): Bitmap? {
+        return fetchMutexes.getOrPut(flag) { Mutex() }.withLock {
+            val now = SystemClock.elapsedRealtime()
+            cachedWallpapers[flag]
+                ?.takeUnless { it.isExpired(now) }
+                ?.let { return@withLock it.bitmap }
+
+            val bitmap = when {
+                wallpaperServer.value != null -> {
+                    try {
+                        runCatching {
+                            wallpaperServer.value?.getWallpaperPfd(flag)
+                                ?.use { pfd ->
+                                    pfd.fileDescriptor?.let { fd ->
+                                        BitmapFactory.decodeFileDescriptor(fd)
+                                    }
+                                }
+                        }.getOrNull() ?: wallpaperServer.value?.getWallpaper(flag)
+                    } catch (e: Throwable) {
+                        context.logUtils.debugLog("Unable to retrieve wallpaper from server", e)
+                        null
+                    }
+                }
+
+                Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU -> {
+                    ensureDirectListenerRegistered()
+                    context.directWallpaperUtils.getWallpaperBitmap(flag)
+                }
+
+                else -> {
+                    context.logUtils.debugLog("Unable to retrieve wallpaper", null)
+                    null
+                }
             }
 
-            wallpaperServer.value != null -> {
-                wallpaperServer.value?.getWallpaper(flag)
-                    ?.also { cachedWallpapers[flag] = it }
+            if (bitmap != null) {
+                peekLogUtils?.debugLog("Caching new wallpaper $bitmap.", null)
+            } else {
+                peekLogUtils?.debugLog("Caching missing wallpaper for flag $flag.", null)
             }
 
-            Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU -> {
-                context.directWallpaperUtils.getWallpaperBitmap(flag)
-                    ?.also { cachedWallpapers[flag] = it }
-            }
+            cachedWallpapers[flag] = CachedWallpaper(bitmap)
+            bitmap
+        }
+    }
 
-            else -> {
-                context.logUtils.debugLog("Unable to retrieve wallpaper", null)
-                null
+    /**
+     * Clear our cache whenever the direct wallpaper API sees a change,
+     * but only if we've actually fallen back to it.
+     */
+    private fun ensureDirectListenerRegistered() {
+        if (directListenerRegistered.compareAndSet(expect = false, update = true)) {
+            context.directWallpaperUtils.registerChangeListener {
+                peekLogUtils?.debugLog("Wallpaper changed, clearing cache.", null)
+                cachedWallpapers.clear()
             }
         }
     }
 
     fun wallpaperServerConnected(server: IWallpaperAPI) {
-        wallpaperServer.value = server
-        server.registerWallpaperListener(wallpaperListener)
+        try {
+            wallpaperServer.value = server
+            // A failed fetch may have been cached while no server was available.
+            cachedWallpapers.clear()
+            server.registerWallpaperListener(wallpaperListener)
+        } catch (e: Throwable) {
+            context.logUtils.debugLog("Unable to bind wallpaper server", e)
+        }
     }
 
     fun wallpaperServerDisconnected() {
         wallpaperServer.value = null
+        cachedWallpapers.clear()
     }
 }

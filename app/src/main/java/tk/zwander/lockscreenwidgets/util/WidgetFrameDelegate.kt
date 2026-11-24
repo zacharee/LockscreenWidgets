@@ -215,7 +215,9 @@ open class WidgetFrameDelegate protected constructor(
                 modifier = Modifier.fillMaxSize(),
                 removeWidgetConfirmed = ::removeWidget,
                 frameMoveFinished = {
-                    updateWallpaperLayerIfNeeded()
+                    viewModelScope.launch {
+                        updateWallpaperLayerIfNeeded()
+                    }
                 },
                 frameIntercept = {
                     lifecycleScope.launch {
@@ -651,7 +653,9 @@ open class WidgetFrameDelegate protected constructor(
 
         try {
             if (attached) {
-                updateWallpaperLayerIfNeeded()
+                viewModel.viewModelScope.launch {
+                    updateWallpaperLayerIfNeeded()
+                }
             }
         } catch (e: NullPointerException) {
             //The stupid "Attempt to read from field 'com.android.server.appwidget.AppWidgetServiceImpl$ProviderId
@@ -867,7 +871,7 @@ open class WidgetFrameDelegate protected constructor(
      *
      * TODO: You can only specifically retrieve the lock screen wallpaper on Nougat and up.
      */
-    private fun updateWallpaperLayerIfNeeded() {
+    private suspend fun updateWallpaperLayerIfNeeded() {
         val display = this@WidgetFrameDelegate.display ?: run {
             logUtils.debugLog("Couldn't find display for $targetDisplayId to update wallpaper", null)
             return
@@ -881,7 +885,9 @@ open class WidgetFrameDelegate protected constructor(
             logUtils.debugLog("Trying to retrieve wallpaper", null)
 
             try {
-                val drawable = wallpaperUtils.getWallpaperBitmap(WallpaperManager.FLAG_LOCK)
+                val drawable = withContext(Dispatchers.IO) {
+                    wallpaperUtils.getWallpaperBitmap(WallpaperManager.FLAG_LOCK)
+                }
 
                 logUtils.debugLog("Retrieved wallpaper: $drawable", null)
 
@@ -908,6 +914,9 @@ open class WidgetFrameDelegate protected constructor(
                     )
                 }
             } catch (e: Exception) {
+                if (e is CancellationException) {
+                    currentCoroutineContext().ensureActive()
+                }
                 logUtils.normalLog("Error setting wallpaper", e)
                 null
             }

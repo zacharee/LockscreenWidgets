@@ -1,5 +1,5 @@
 package dev.zwander.lswinterconnect;
 
-interface IWallpaperListener {
+oneway interface IWallpaperListener {
     void onWallpaperChanged() = 1;
 }
