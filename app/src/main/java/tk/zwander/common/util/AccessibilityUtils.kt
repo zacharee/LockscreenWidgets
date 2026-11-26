@@ -219,6 +219,28 @@ object AccessibilityUtils {
         )
     }
 
+    /**
+     * Materializes a debug string immediately, while the accessibility objects it reads are still
+     * valid, instead of letting LogUtils evaluate it later on its own dispatcher.
+     *
+     * [AccessibilityNodeInfo], [AccessibilityWindowInfo], and [AccessibilityEvent] instances are
+     * pooled and recycled (by the system and by this class after a pass), so reading them after
+     * the pass has finished can throw (for example a ConcurrentModificationException while a node
+     * is being recycled) or return stale data. Returns null when debug logging is disabled.
+     */
+    private fun debugSnapshot(enabled: Boolean, block: () -> String): String? {
+        if (!enabled) {
+            return null
+        }
+
+        return try {
+            block()
+        } catch (e: Exception) {
+            peekLogUtils?.debugLog(message = "Unable to build debug snapshot", throwable = e)
+            null
+        }
+    }
+
     private fun Context.processNode(
         nodeState: NodeState,
         node: AccessibilityNodeInfo,
@@ -437,9 +459,13 @@ object AccessibilityUtils {
                         // The package name check is because Samsung's One Handed Mode+ gesture window also reports an unknown type.
                         safeRoot?.packageName == "com.google.android.googlequicksearchbox" && window.window.type == -1))
             ) {
+                val appWindowMessage =
+                    "Found app window ${window.index} ${safeRoot?.packageName} (type ${window.window.type})"
+                val appWindowDebug = debugSnapshot(isDebug) { "Found app window $window" }
+
                 logUtils.debugLog(
-                    message = { "Found app window ${window.index} ${safeRoot?.packageName} (type ${window.window.type})" },
-                    debugMessage = { "Found app window $window" },
+                    message = { appWindowMessage },
+                    debugMessage = appWindowDebug?.let { { it } },
                 )
                 topAppWindowIndex = index
                 topAppWindowPackageName = safeRoot?.packageName?.toString()
@@ -718,18 +744,24 @@ object AccessibilityUtils {
             val walkRequirements = buildWalkRequirements(frameDelegates, drawerDelegate)
 
             getWindows()?.forEach { displayId, windows ->
+                var windowInfoDebug: String? = null
+
                 val windowInfo = withContext(windowProcessingDispatcher) {
-                    processWindows(windows, walkRequirements)
-                }.also { windowInfo ->
-                    logUtils.debugLog(
-                        message = {
-                            "Got windows for display $displayId: ${windowInfo.windows.size} windows, " +
-                                    "${windowInfo.sysUiWindowNodes.size} nodes, " +
-                                    "${windowInfo.sysUiWindowViewIds.size} IDs"
-                        },
-                        debugMessage = { "Got windows for display $displayId: $windowInfo" },
-                    )
+                    processWindows(windows, walkRequirements).also { windowInfo ->
+                        windowInfoDebug = debugSnapshot(isDebug) {
+                            "Got windows for display $displayId: $windowInfo"
+                        }
+                    }
                 }
+
+                logUtils.debugLog(
+                    message = {
+                        "Got windows for display $displayId: ${windowInfo.windows.size} windows, " +
+                                "${windowInfo.sysUiWindowNodes.size} nodes, " +
+                                "${windowInfo.sysUiWindowViewIds.size} IDs"
+                    },
+                    debugMessage = windowInfoDebug?.let { { it } },
+                )
 
                 val relevantFrameDelegates =
                     frameDelegates.filter { (val frame = value) -> frame.display?.displayId == displayId }
@@ -953,6 +985,13 @@ object AccessibilityUtils {
             val screenOn = lsDisplayManager.isAnyDisplayOn
             val wasOnKeyguard = globalState.wasOnKeyguard.value
 
+            val eventDebug = debugSnapshot(isDebug) {
+                "Accessibility event: $event, " +
+                        "isScreenOn: $screenOn, " +
+                        "wasOnKeyguard: $wasOnKeyguard, " +
+                        "${drawerDelegate.state}"
+            }
+
             logUtils.debugLog(
                 message = {
                     "Accessibility event: $eventTypeName, " +
@@ -960,12 +999,7 @@ object AccessibilityUtils {
                             "isScreenOn: $screenOn, " +
                             "wasOnKeyguard: $wasOnKeyguard"
                 },
-                debugMessage = {
-                    "Accessibility event: $event, " +
-                            "isScreenOn: $screenOn, " +
-                            "wasOnKeyguard: $wasOnKeyguard, " +
-                            "${drawerDelegate.state}"
-                },
+                debugMessage = eventDebug?.let { { it } },
             )
 
             if (prefManager.widgetFrameEnabled) {
