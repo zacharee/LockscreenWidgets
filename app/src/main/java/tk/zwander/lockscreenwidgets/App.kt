@@ -37,18 +37,12 @@ import tk.zwander.common.util.shizuku.shizukuManager
 import tk.zwander.lockscreenwidgets.appwidget.WidgetStackProvider
 import tk.zwander.lockscreenwidgets.util.FramePrefs
 
-/**
- * The main application.
- * Not much is happening here, but it's still important.
- * As soon as the app starts, we disable Android's
- * hidden API blacklist, since Lockscreen Widgets
- * uses quite a few of them. We also need to
- * set the component state of the "show in NC"
- * QS tile depending on whether the user is
- * running One UI or not.
- */
+
 class App : Application(), CoroutineScope by scope {
     companion object {
+        private const val DEAD_WIDGET_CHECK_COUNT = 3
+        private const val DEAD_WIDGET_CHECK_DELAY_MS = 1000L
+
         @SuppressLint("StaticFieldLeak")
         lateinit var instance: App
             private set
@@ -367,30 +361,68 @@ class App : Application(), CoroutineScope by scope {
         return this
     }
 
+    /**
+     * Returns the subset of [ids] whose provider info is missing, but only if it stays missing
+     * across several checks. [android.appwidget.AppWidgetManager.getAppWidgetInfo] can return
+     * null transiently (the widget service not being ready right after boot or process start,
+     * OEM quirks), and acting on a single null permanently deletes the user's stacks.
+     * A check that throws is treated as "unknown", never as dead.
+     */
+    private fun confirmDeadWidgetIds(ids: Collection<Int>): Set<Int> {
+        var candidates = ids.toSet()
+
+        repeat(DEAD_WIDGET_CHECK_COUNT) { attempt ->
+            if (candidates.isEmpty()) {
+                return emptySet()
+            }
+
+            if (attempt > 0) {
+                Thread.sleep(DEAD_WIDGET_CHECK_DELAY_MS)
+            }
+
+            candidates = candidates.filterTo(mutableSetOf()) { id ->
+                try {
+                    appWidgetManager.getAppWidgetInfo(id) == null
+                } catch (_: Throwable) {
+                    false
+                }
+            }
+        }
+
+        return candidates
+    }
+
     fun cleanUpDeadWidgets() {
         val widgetsToDelete = mutableSetOf<Int>()
-        prefManager.widgetStackWidgets = HashMap(
-            prefManager.widgetStackWidgets.mapNotNull { [stackId, widgets] ->
-                val hasStackInfo = appWidgetManager.getAppWidgetInfo(stackId) != null
+        val currentStacks = prefManager.widgetStackWidgets
+        val deadIds = confirmDeadWidgetIds(
+            currentStacks.flatMap { [stackId, widgets] ->
+                listOf(stackId) + widgets.map { it.id }
+            },
+        )
 
-                if (!hasStackInfo) {
-                    logUtils.debugLog("Found invalid widget stack $stackId", null)
-                    widgetsToDelete.add(stackId)
-                    null
-                } else {
-                    widgets.removeAll { widget ->
-                        (appWidgetManager.getAppWidgetInfo(widget.id) == null).also {
-                            if (it) {
-                                logUtils.debugLog("Found invalid widget ${widget.id} in stack $stackId", null)
-                                widgetsToDelete.add(widget.id)
+        if (deadIds.isNotEmpty()) {
+            prefManager.widgetStackWidgets = HashMap(
+                currentStacks.mapNotNull { [stackId, widgets] ->
+                    if (stackId in deadIds) {
+                        logUtils.debugLog("Found invalid widget stack $stackId", null)
+                        widgetsToDelete.add(stackId)
+                        null
+                    } else {
+                        widgets.removeAll { widget ->
+                            (widget.id in deadIds).also {
+                                if (it) {
+                                    logUtils.debugLog("Found invalid widget ${widget.id} in stack $stackId", null)
+                                    widgetsToDelete.add(widget.id)
+                                }
                             }
                         }
-                    }
 
-                    stackId to widgets
-                }
-            }.toMap(),
-        )
+                        stackId to widgets
+                    }
+                }.toMap(),
+            )
+        }
 
         val idManager = idManager
         val currentIds = idManager.collectAllIds()
