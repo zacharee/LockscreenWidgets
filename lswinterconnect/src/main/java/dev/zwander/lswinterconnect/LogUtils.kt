@@ -1,5 +1,6 @@
 package dev.zwander.lswinterconnect
 
+import android.annotation.RequiresApi
 import android.annotation.SuppressLint
 import android.app.ActivityManager
 import android.app.ApplicationExitInfo
@@ -18,6 +19,7 @@ import java.io.BufferedWriter
 import java.io.File
 import java.io.FileOutputStream
 import java.io.OutputStream
+import java.security.MessageDigest
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -269,7 +271,7 @@ class LogUtils private constructor(
                                     "trace" to trace,
                                 ),
                             )
-                            it.groupingHash = "reason:${info.reason}"
+                            it.groupingHash = anrGroupingHash(info)
                             true
                         }
                     }
@@ -286,6 +288,30 @@ class LogUtils private constructor(
                 )
             }
         }
+    }
+
+    /**
+     * Builds a Bugsnag grouping key from the ANR's actual cause.
+     *
+     * OEMs append per-occurrence details to some descriptions (input-dispatch wait-queue
+     * statistics, broadcast intent extras), which would make every ANR its own group, so keep only
+     * the stable prefix. The full description is still attached as event metadata.
+     */
+    @RequiresApi(Build.VERSION_CODES.R)
+    private fun anrGroupingHash(info: ApplicationExitInfo): String {
+        val description = info.description?.trim().orEmpty()
+        val cause = description
+            .substringBefore(" (")
+            .substringBefore("{")
+            .trim()
+            .ifEmpty { description.ifEmpty { "unknown" } }
+
+        val digest = MessageDigest.getInstance("SHA-256")
+            .digest("${info.processName}:$cause".toByteArray(Charsets.UTF_8))
+
+        return "anr:" + digest
+            .joinToString("") { "%02x".format(it.toInt() and 0xff) }
+            .take(32)
     }
 
     private fun exitReasonName(reason: Int): String {
