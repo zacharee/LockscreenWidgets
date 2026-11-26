@@ -344,7 +344,7 @@ fun Content(
 
                         stackSize.height.takeIf { it != 0f }?.let { height ->
                             stackSize.width / height
-                        }?.takeIf { !it.isNaN() && it > 0 }
+                        }?.takeIf { it.isFinite() && it > 0 }
                             ?: (16 / 9f)
                     }
                 }
