@@ -13,11 +13,7 @@ import android.view.animation.DecelerateInterpolator
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.layout.BoxWithConstraints
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.add
-import androidx.compose.foundation.layout.asPaddingValues
-import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -123,6 +119,7 @@ class DrawerDelegate private constructor(context: Context, displayId: String) :
 
     private var previousNonZeroCutout by mutableIntStateOf(0)
     private val windowUpdateRequests = Channel<Unit>(Channel.CONFLATED)
+    private val handleUpdateRequests = Channel<Unit>(Channel.CONFLATED)
 
     override val rootView by lazy {
         viewModel.createComposeViewHolder {
@@ -187,7 +184,7 @@ class DrawerDelegate private constructor(context: Context, displayId: String) :
                 params = handleParams,
                 displayId = displayId,
                 updateWindow = {
-                    windowUpdateRequests.trySend(Unit)
+                    handleUpdateRequests.trySend(Unit)
                 },
                 scrollOpenFinish = { from ->
                     viewModel.drawerScrollInAnimator.getAndUpdate { null }?.cancel()
@@ -400,15 +397,20 @@ class DrawerDelegate private constructor(context: Context, displayId: String) :
         viewModel.viewModelScope.launch(Dispatchers.Main) {
             state.collect {
                 windowUpdateRequests.trySend(Unit)
+                handleUpdateRequests.trySend(Unit)
             }
         }
 
         viewModel.viewModelScope.launch(Dispatchers.Main) {
-            for (request in windowUpdateRequests) {
+            for (unused in windowUpdateRequests) {
                 if (rootView.isAttachedToWindow) {
                     updateOverlay()
                 }
+            }
+        }
 
+        viewModel.viewModelScope.launch(Dispatchers.Main) {
+            for (unused in handleUpdateRequests) {
                 if (handle.isAttachedToWindow) {
                     wm?.safeUpdateViewLayout(handle, handleParams)
                 }
@@ -539,6 +541,7 @@ class DrawerDelegate private constructor(context: Context, displayId: String) :
             }
 
             windowUpdateRequests.trySend(Unit)
+            handleUpdateRequests.trySend(Unit)
         }
     }
 
