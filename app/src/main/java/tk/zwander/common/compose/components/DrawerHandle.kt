@@ -50,6 +50,8 @@ fun DrawerDelegate.DrawerViewModel.DrawerHandle(
     updateWindow: () -> Unit,
     scrollOpenFinish: (from: Int) -> Unit,
     scrollInDrawer: (from: Int, dist: Float, initial: Boolean, velocity: Float) -> Unit,
+    prewarmDrawer: (from: Int) -> Unit,
+    cancelPrewarmDrawer: () -> Unit,
     showDrawer: suspend () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -160,10 +162,16 @@ fun DrawerDelegate.DrawerViewModel.DrawerHandle(
             )
             .motionEventSpy { event ->
                 when (event.action) {
+                    MotionEvent.ACTION_DOWN -> {
+                        prewarmDrawer(updatedSide)
+                    }
+
                     MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
                         if (updatedScrollingOpen) {
                             scrollOpenFinish(updatedSide)
                         }
+
+                        cancelPrewarmDrawer()
 
                         isScrollingOpen = false
                         isMoving = false

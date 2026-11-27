@@ -24,15 +24,12 @@ import androidx.core.view.ViewCompat
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.viewModelScope
 import com.joaomgcd.taskerpluginlibrary.extensions.requestQuery
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.NonCancellable
+import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import tk.zwander.common.activities.DismissOrUnlockActivity
 import tk.zwander.common.activities.SelectIconPackActivity
 import tk.zwander.common.compose.WidgetGrid
@@ -51,12 +48,17 @@ import tk.zwander.widgetdrawer.activities.add.ReconfigureDrawerWidgetActivity
 import tk.zwander.widgetdrawer.compose.DrawerLayout
 import kotlin.math.absoluteValue
 import kotlin.math.sign
+import kotlin.time.Duration.Companion.milliseconds
 
 class DrawerDelegate private constructor(context: Context, displayId: String) :
     BaseDelegate<DrawerDelegate.State>(context = context, targetDisplayId = MutableStateFlow(displayId)),
     IDrawerProvider {
     companion object {
         const val ID = -2
+
+        // Long enough to cover the double-tap timeout, so the second tap of a double-tap can
+        // reuse a pre-warmed drawer instead of it being torn down and re-added in between.
+        private const val PREWARM_TEARDOWN_DELAY_MS = 400L
 
         @SuppressLint("StaticFieldLeak")
         private val instance = MutableStateFlow<DrawerDelegate?>(null)
@@ -120,6 +122,9 @@ class DrawerDelegate private constructor(context: Context, displayId: String) :
     private var previousNonZeroCutout by mutableIntStateOf(0)
     private val windowUpdateRequests = Channel<Unit>(Channel.CONFLATED)
     private val handleUpdateRequests = Channel<Unit>(Channel.CONFLATED)
+
+    private var drawerPrewarmed = false
+    private var prewarmTeardownJob: Job? = null
 
     override val rootView by lazy {
         viewModel.createComposeViewHolder {
@@ -237,6 +242,8 @@ class DrawerDelegate private constructor(context: Context, displayId: String) :
                     animator.start()
                 },
                 scrollInDrawer = ::scrollInDrawer,
+                prewarmDrawer = ::prewarmDrawer,
+                cancelPrewarmDrawer = ::schedulePrewarmTeardown,
                 showDrawer = {
                     viewModel.drawerScrollInAnimator.getAndUpdate { null }?.cancel()
 
@@ -498,8 +505,87 @@ class DrawerDelegate private constructor(context: Context, displayId: String) :
         }
     }
 
+    /**
+     * Avoids first-open hitching when dragging the drawer onscreen by pre-attaching the window,
+     * allowing it to lay out the views beforehand. Currently called when the user first starts
+     * touching the handle, even if the touch doesn't turn into a drag.
+     */
+    @SuppressLint("RtlHardcoded")
+    private fun prewarmDrawer(from: Int) {
+        prewarmTeardownJob?.cancel()
+        prewarmTeardownJob = null
+
+        if (drawerPrewarmed ||
+            rootView.isAttachedToWindow ||
+            viewModel.drawerAnimationState.value != AnimationState.IDLE ||
+            !prefManager.drawerEnabled ||
+            params.width <= 0
+        ) {
+            return
+        }
+
+        logUtils.debugLog("Pre-warming drawer", null)
+
+        rootView.alpha = 0f
+        params.gravity = from
+        params.x = -params.width
+
+        if (wm?.safeAddView(rootView, params) == true) {
+            drawerPrewarmed = true
+        } else {
+            params.x = 0
+        }
+    }
+
+    private fun schedulePrewarmTeardown() {
+        if (!drawerPrewarmed) {
+            return
+        }
+
+        prewarmTeardownJob?.cancel()
+        prewarmTeardownJob = viewModel.viewModelScope.launch(Dispatchers.Main) {
+            delay(PREWARM_TEARDOWN_DELAY_MS.milliseconds)
+            tearDownPrewarm()
+        }
+    }
+
+    /**
+     * Removes a prewarmed drawer from the screen if it hasn't been actually shown yet.
+    **/
+    private fun tearDownPrewarm() {
+        prewarmTeardownJob = null
+
+        if (!drawerPrewarmed) {
+            return
+        }
+
+        logUtils.debugLog("Tearing down unused pre-warmed drawer", null)
+
+        drawerPrewarmed = false
+        params.x = 0
+
+        if (rootView.isAttachedToWindow) {
+            wm?.safeRemoveView(rootView)
+        }
+    }
+
     private suspend fun showDrawer(hideHandle: Boolean = true) {
         logUtils.debugLog("Trying to show drawer", null)
+
+        if (drawerPrewarmed && rootView.isAttachedToWindow) {
+            prewarmTeardownJob?.cancel()
+            prewarmTeardownJob = null
+            drawerPrewarmed = false
+
+            viewModel.drawerAnimationState.value = AnimationState.ADDING
+            windowUpdateRequests.trySend(Unit)
+            if (hideHandle) {
+                hideHandle()
+            }
+            onDrawerAttachmentStateChanged(true)
+            return
+        }
+
         if (!rootView.isAttachedToWindow && viewModel.drawerAnimationState.value != AnimationState.ADDING) {
             viewModel.drawerAnimationState.value = AnimationState.ADDING
             rootView.alpha = 0f
@@ -521,6 +607,12 @@ class DrawerDelegate private constructor(context: Context, displayId: String) :
                     width = displaySize.x
                     height = displaySize.y
                 }
+            }
+
+            if (drawerPrewarmed) {
+                // Make sure the prewarmed drawer stays offscreen in case of
+                // display size changes or anything else that could shift it.
+                params.x = -params.width
             }
 
             if (rootView.isAttachedToWindow) {
@@ -548,6 +640,10 @@ class DrawerDelegate private constructor(context: Context, displayId: String) :
     private suspend fun hideDrawer(callListener: Boolean = true) {
         withContext(Dispatchers.Main + NonCancellable) {
             logUtils.debugLog("Trying to hide drawer, $callListener", null)
+            prewarmTeardownJob?.cancel()
+            prewarmTeardownJob = null
+            drawerPrewarmed = false
+
             if (rootView.isAttachedToWindow && viewModel.drawerAnimationState.value != AnimationState.REMOVING) {
                 viewModel.drawerAnimationState.value = AnimationState.REMOVING
                 globalState.handlingClick.remove(ID)
